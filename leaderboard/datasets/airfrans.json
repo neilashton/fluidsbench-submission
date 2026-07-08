@@ -1,0 +1,28 @@
+[
+  {
+    "submission_id": "dummy-airfrans-airfoiloperator-v1",
+    "model": "AirfoilOperator",
+    "model_type": "GNN",
+    "dataset": "AirfRANS",
+    "split": "Full",
+    "parameter_count": 4.9,
+    "surface_pressure_l2": 5.1,
+    "surface_pressure_l1": 3.62,
+    "surface_tau_l2": 6.32,
+    "surface_tau_l1": 4.29,
+    "volume_velocity_l2": 3.44,
+    "volume_velocity_l1": 2.41,
+    "volume_pressure_l2": 3.82,
+    "volume_pressure_l1": 2.64,
+    "r2_cd": 0.968,
+    "r2_cl": 0.992,
+    "velocity_profile_r2": 0.948,
+    "cp_cut_r2": 0.944,
+    "submitter_name": "Example Airfoil ML",
+    "institution": "Example Flow Institute",
+    "paper_url": "https://example.com/airfoiloperator",
+    "code_url": "https://github.com/example/airfoiloperator",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy approved AirfRANS submission used for integration testing."
+  }
+]

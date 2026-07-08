@@ -1,0 +1,28 @@
+[
+  {
+    "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
+    "model": "SurfaceGNN CFD",
+    "model_type": "GNN",
+    "dataset": "DrivAerNet++",
+    "split": "Default",
+    "parameter_count": 9.6,
+    "surface_pressure_l2": 3.35,
+    "surface_pressure_l1": 2.36,
+    "surface_tau_l2": 4.7,
+    "surface_tau_l1": 3.2,
+    "volume_velocity_l2": 2.22,
+    "volume_velocity_l1": 1.55,
+    "volume_pressure_l2": 2.55,
+    "volume_pressure_l1": 1.76,
+    "r2_cd": 0.987,
+    "r2_cl": 0.979,
+    "velocity_profile_r2": 0.972,
+    "cp_cut_r2": 0.968,
+    "submitter_name": "Example CarBench Team",
+    "institution": "Example Motors Research",
+    "paper_url": "https://example.com/surfacegnn-cfd",
+    "code_url": "https://github.com/example/surfacegnn-cfd",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy approved DrivAerNet++ submission used for integration testing."
+  }
+]

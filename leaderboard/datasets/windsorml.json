@@ -1,0 +1,28 @@
+[
+  {
+    "submission_id": "dummy-windsorml-wakenet-v1",
+    "model": "WakeNet Windsor",
+    "model_type": "Transformer",
+    "dataset": "WindsorML",
+    "split": "Default",
+    "parameter_count": 7.8,
+    "surface_pressure_l2": 3.92,
+    "surface_pressure_l1": 2.78,
+    "surface_tau_l2": 5.08,
+    "surface_tau_l1": 3.46,
+    "volume_velocity_l2": 2.66,
+    "volume_velocity_l1": 1.87,
+    "volume_pressure_l2": 3.04,
+    "volume_pressure_l1": 2.1,
+    "r2_cd": 0.982,
+    "r2_cl": 0.971,
+    "velocity_profile_r2": 0.964,
+    "cp_cut_r2": 0.959,
+    "submitter_name": "Example Wind Tunnel AI",
+    "institution": "Example Aerodynamics Group",
+    "paper_url": "https://example.com/wakenet-windsor",
+    "code_url": "https://github.com/example/wakenet-windsor",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy approved WindsorML submission used for integration testing."
+  }
+]

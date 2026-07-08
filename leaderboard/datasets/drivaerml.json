@@ -1,0 +1,28 @@
+[
+  {
+    "submission_id": "dummy-drivaerml-meshoperator-v1",
+    "model": "MeshOperator Plus",
+    "model_type": "Neural operator",
+    "dataset": "DrivAerML",
+    "split": "Default",
+    "parameter_count": 18.7,
+    "surface_pressure_l2": 3.08,
+    "surface_pressure_l1": 2.15,
+    "surface_tau_l2": 4.18,
+    "surface_tau_l1": 2.84,
+    "volume_velocity_l2": 2.04,
+    "volume_velocity_l1": 1.43,
+    "volume_pressure_l2": 2.42,
+    "volume_pressure_l1": 1.67,
+    "r2_cd": 0.991,
+    "r2_cl": 0.982,
+    "velocity_profile_r2": 0.978,
+    "cp_cut_r2": 0.973,
+    "submitter_name": "AeroAI Benchmarks",
+    "institution": "AeroAI Ltd",
+    "paper_url": "https://example.com/meshoperator-plus",
+    "code_url": "https://github.com/example/meshoperator-plus",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy approved DrivAerML submission used for integration testing."
+  }
+]

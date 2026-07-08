@@ -1,0 +1,28 @@
+[
+  {
+    "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
+    "model": "LiftOperator AoA",
+    "model_type": "Neural operator",
+    "dataset": "HiLiftAeroML",
+    "split": "Full",
+    "parameter_count": 16.3,
+    "surface_pressure_l2": 4.42,
+    "surface_pressure_l1": 3.18,
+    "surface_tau_l2": 5.92,
+    "surface_tau_l1": 4.02,
+    "volume_velocity_l2": 3.12,
+    "volume_velocity_l1": 2.18,
+    "volume_pressure_l2": 3.54,
+    "volume_pressure_l1": 2.45,
+    "r2_cd": 0.975,
+    "r2_cl": 0.986,
+    "velocity_profile_r2": 0.955,
+    "cp_cut_r2": 0.951,
+    "submitter_name": "Example High-Lift Lab",
+    "institution": "Example Aerospace Institute",
+    "paper_url": "https://example.com/liftoperator-aoa",
+    "code_url": "https://github.com/example/liftoperator-aoa",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy approved HiLiftAeroML submission used for integration testing."
+  }
+]
