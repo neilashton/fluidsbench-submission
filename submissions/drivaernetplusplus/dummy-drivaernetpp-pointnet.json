@@ -1,0 +1,316 @@
+{
+  "submission_id": "drivaernetpp-pointnet",
+  "model": "PointNet",
+  "model_type": "Point cloud",
+  "dataset": "DrivAerNet++",
+  "split": "Default",
+  "parameter_count": 1.67,
+  "surface_pressure_l2": 38.03,
+  "surface_pressure_l1": 27.382,
+  "surface_tau_l2": 47.54,
+  "surface_tau_l1": 32.327,
+  "volume_velocity_l2": 43.73,
+  "volume_velocity_l1": 30.611,
+  "volume_pressure_l2": 39.93,
+  "volume_pressure_l1": 27.552,
+  "r2_cd": 0.764,
+  "r2_cl": 0.764,
+  "velocity_profile_r2": 0.734,
+  "cp_cut_r2": 0.764,
+  "submitter_name": "FluidsBench prototype baseline",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2025-11-25",
+  "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "drivaernetpp-pointnet_dummy_case_001",
+        "cut_id": "prototype_cp_cut",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 1.0116
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5508
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3268
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1345
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2479
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.6397
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.4727
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5549
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0775
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1101
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2977
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0853
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "drivaernetpp-pointnet_dummy_case_001",
+        "station_id": "prototype_0_25l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.2504
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.2334
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.5029
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.5509
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.8553
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.8185
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 1.0151
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 0.9924
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.0901
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 1.0074
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-pointnet_dummy_case_001",
+        "station_id": "prototype_0_50l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.3904
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.3434
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.5829
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.6109
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.8953
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.8385
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 1.0251
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 1.0024
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.0901
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 1.0074
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-pointnet_dummy_case_001",
+        "station_id": "prototype_1_00l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.5504
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.4934
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.7029
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.6909
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.9453
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.8785
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 1.0451
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 1.0124
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.1001
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 1.0174
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,316 @@
+{
+  "submission_id": "drivaerml-gino",
+  "model": "GINO",
+  "model_type": "Neural operator",
+  "dataset": "DrivAerML",
+  "split": "Default",
+  "parameter_count": 15.6,
+  "surface_pressure_l2": 13.03,
+  "surface_pressure_l1": 9.382,
+  "surface_tau_l2": 21.71,
+  "surface_tau_l1": 14.763,
+  "volume_velocity_l2": 40.58,
+  "volume_velocity_l1": 28.406,
+  "volume_pressure_l2": 44.9,
+  "volume_pressure_l1": 30.981,
+  "r2_cd": 0.82,
+  "r2_cl": 0.78,
+  "velocity_profile_r2": 0.65,
+  "cp_cut_r2": 0.67,
+  "submitter_name": "FluidsBench prototype baseline",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2025-06-13",
+  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "drivaerml-gino_dummy_case_001",
+        "cut_id": "prototype_cp_cut",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.9809
+          },
+          {
+            "x": 0.06,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5116
+          },
+          {
+            "x": 0.12,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2759
+          },
+          {
+            "x": 0.2,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1634
+          },
+          {
+            "x": 0.31,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2291
+          },
+          {
+            "x": 0.43,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5784
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0,
+            "cp": -0.414
+          },
+          {
+            "x": 0.68,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5235
+          },
+          {
+            "x": 0.79,
+            "y": 0,
+            "z": 0,
+            "cp": -0.079
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1185
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.276
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0935
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "drivaerml-gino_dummy_case_001",
+        "station_id": "prototype_0_25l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.2698
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.2441
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.5121
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.5618
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.8544
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.8095
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 1.0047
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 0.9829
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.0796
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 0.9979
+          }
+        ]
+      },
+      {
+        "case_id": "drivaerml-gino_dummy_case_001",
+        "station_id": "prototype_0_50l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.4098
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.3541
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.5921
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.6118
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.8844
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.8295
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 1.0147
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 0.9929
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.0896
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 1.0079
+          }
+        ]
+      },
+      {
+        "case_id": "drivaerml-gino_dummy_case_001",
+        "station_id": "prototype_1_00l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.5698
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.5041
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.7021
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.6918
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.9444
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.8695
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 1.0347
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 1.0029
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.0896
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 1.0079
+          }
+        ]
+      }
+    ]
+  }
+}

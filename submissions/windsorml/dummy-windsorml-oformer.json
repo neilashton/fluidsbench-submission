@@ -1,0 +1,316 @@
+{
+  "submission_id": "windsorml-oformer",
+  "model": "OFormer",
+  "model_type": "Transformer",
+  "dataset": "WindsorML",
+  "split": "Default",
+  "parameter_count": 6.1,
+  "surface_pressure_l2": 4.75,
+  "surface_pressure_l1": 3.42,
+  "surface_tau_l2": 7.7,
+  "surface_tau_l1": 5.236,
+  "volume_velocity_l2": 5.04,
+  "volume_velocity_l1": 3.528,
+  "volume_pressure_l2": 5.36,
+  "volume_pressure_l1": 3.698,
+  "r2_cd": 0.97,
+  "r2_cl": 0.953,
+  "velocity_profile_r2": 0.933,
+  "cp_cut_r2": 0.931,
+  "submitter_name": "FluidsBench prototype baseline",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2024-07-27",
+  "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "windsorml-oformer_dummy_case_001",
+        "cut_id": "prototype_cp_cut",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.8409
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.4565
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.166
+          },
+          {
+            "x": 0.19,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0886
+          },
+          {
+            "x": 0.3,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2088
+          },
+          {
+            "x": 0.42,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3938
+          },
+          {
+            "x": 0.54,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3937
+          },
+          {
+            "x": 0.66,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3789
+          },
+          {
+            "x": 0.78,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1185
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0141
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2267
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0308
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "windsorml-oformer_dummy_case_001",
+        "station_id": "prototype_0_25l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.2971
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.3208
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.5013
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.6266
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.8255
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.8824
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 0.9919
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 1.0173
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.0636
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 1.0356
+          }
+        ]
+      },
+      {
+        "case_id": "windsorml-oformer_dummy_case_001",
+        "station_id": "prototype_0_50l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.4171
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.4308
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.5813
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.6766
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.8555
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.9024
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 1.0019
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 1.0273
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.0636
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 1.0356
+          }
+        ]
+      },
+      {
+        "case_id": "windsorml-oformer_dummy_case_001",
+        "station_id": "prototype_1_00l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.5671
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.1,
+            "u_over_u_inf": 0.5708
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.22,
+            "u_over_u_inf": 0.6913
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.34,
+            "u_over_u_inf": 0.7566
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.46,
+            "u_over_u_inf": 0.9055
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.58,
+            "u_over_u_inf": 0.9324
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.72,
+            "u_over_u_inf": 1.0219
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.9,
+            "u_over_u_inf": 1.0273
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.1,
+            "u_over_u_inf": 1.0636
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.32,
+            "u_over_u_inf": 1.0356
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,316 @@
+{
+  "submission_id": "ab-upt",
+  "model": "AB-UPT",
+  "model_type": "Transformer",
+  "dataset": "AhmedML",
+  "split": "Default",
+  "parameter_count": 8.75,
+  "surface_pressure_l2": 3,
+  "surface_pressure_l1": 2.16,
+  "surface_tau_l2": 3.88,
+  "surface_tau_l1": 2.638,
+  "volume_velocity_l2": 1.88,
+  "volume_velocity_l1": 1.316,
+  "volume_pressure_l2": 1.98,
+  "volume_pressure_l1": 1.366,
+  "r2_cd": 0.993,
+  "r2_cl": 0.987,
+  "velocity_profile_r2": 0.982,
+  "cp_cut_r2": 0.976,
+  "submitter_name": "FluidsBench prototype baseline",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2025-06-13",
+  "note": "Reported AhmedML L2 metrics from AB-UPT v2; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "ab-upt_dummy_case_001",
+        "cut_id": "prototype_cp_cut",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7893
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.4096
+          },
+          {
+            "x": 0.1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0915
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1127
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2062
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.315
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3239
+          },
+          {
+            "x": 0.64,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3273
+          },
+          {
+            "x": 0.76,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2016
+          },
+          {
+            "x": 0.86,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0696
+          },
+          {
+            "x": 0.94,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1807
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0018
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "ab-upt_dummy_case_001",
+        "station_id": "prototype_0_25l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.3276
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.12,
+            "u_over_u_inf": 0.3715
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.24,
+            "u_over_u_inf": 0.4894
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.36,
+            "u_over_u_inf": 0.6096
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.48,
+            "u_over_u_inf": 0.7713
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.6,
+            "u_over_u_inf": 0.8677
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.78,
+            "u_over_u_inf": 0.9653
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.96,
+            "u_over_u_inf": 1.0143
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.16,
+            "u_over_u_inf": 1.046
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.36,
+            "u_over_u_inf": 1.0336
+          }
+        ]
+      },
+      {
+        "case_id": "ab-upt_dummy_case_001",
+        "station_id": "prototype_0_50l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.4276
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.12,
+            "u_over_u_inf": 0.4515
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.24,
+            "u_over_u_inf": 0.5594
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.36,
+            "u_over_u_inf": 0.6696
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.48,
+            "u_over_u_inf": 0.8113
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.6,
+            "u_over_u_inf": 0.8877
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.78,
+            "u_over_u_inf": 0.9853
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.96,
+            "u_over_u_inf": 1.0243
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.16,
+            "u_over_u_inf": 1.056
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.36,
+            "u_over_u_inf": 1.0436
+          }
+        ]
+      },
+      {
+        "case_id": "ab-upt_dummy_case_001",
+        "station_id": "prototype_1_00l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.5876
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.12,
+            "u_over_u_inf": 0.5915
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.24,
+            "u_over_u_inf": 0.6694
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.36,
+            "u_over_u_inf": 0.7496
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.48,
+            "u_over_u_inf": 0.8713
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.6,
+            "u_over_u_inf": 0.9277
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.78,
+            "u_over_u_inf": 1.0053
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.96,
+            "u_over_u_inf": 1.0343
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.16,
+            "u_over_u_inf": 1.056
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 1.36,
+            "u_over_u_inf": 1.0436
+          }
+        ]
+      }
+    ]
+  }
+}

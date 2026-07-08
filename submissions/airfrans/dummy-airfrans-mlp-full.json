@@ -1,0 +1,298 @@
+{
+  "submission_id": "airfrans-mlp-full",
+  "model": "MLP",
+  "model_type": "MLP",
+  "dataset": "AirfRANS",
+  "split": "Full",
+  "parameter_count": 0.02,
+  "surface_pressure_l2": 33.62,
+  "surface_pressure_l1": 24.206,
+  "surface_tau_l2": 4.29,
+  "surface_tau_l1": 2.917,
+  "volume_velocity_l2": 9.82,
+  "volume_velocity_l1": 6.874,
+  "volume_pressure_l2": 8.6,
+  "volume_pressure_l1": 5.934,
+  "r2_cd": 0.957,
+  "r2_cl": 0.992,
+  "velocity_profile_r2": 0.902,
+  "cp_cut_r2": 0.913,
+  "submitter_name": "FluidsBench prototype baseline",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2023-06-01",
+  "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error diagnostics until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "airfrans-mlp-full_dummy_case_001",
+        "cut_id": "prototype_cp_cut",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1578
+          },
+          {
+            "x": 0.01,
+            "y": 0,
+            "z": 0,
+            "cp": -1.4625
+          },
+          {
+            "x": 0.025,
+            "y": 0,
+            "z": 0,
+            "cp": -1.1328
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": -0.9118
+          },
+          {
+            "x": 0.09,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5635
+          },
+          {
+            "x": 0.15,
+            "y": 0,
+            "z": 0,
+            "cp": -0.4912
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2041
+          },
+          {
+            "x": 0.38,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2205
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0152
+          },
+          {
+            "x": 0.68,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0699
+          },
+          {
+            "x": 0.84,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1545
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0108
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "airfrans-mlp-full_dummy_case_001",
+        "station_id": "prototype_0_25l",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.031
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.002,
+            "u_over_u_inf": 0.1452
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.005,
+            "u_over_u_inf": 0.3986
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.01,
+            "u_over_u_inf": 0.5076
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.018,
+            "u_over_u_inf": 0.7662
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.03,
+            "u_over_u_inf": 0.8099
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.045,
+            "u_over_u_inf": 0.9716
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.065,
+            "u_over_u_inf": 0.9769
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.09,
+            "u_over_u_inf": 1.0546
+          }
+        ]
+      },
+      {
+        "case_id": "airfrans-mlp-full_dummy_case_001",
+        "station_id": "prototype_0_50l",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.031
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.002,
+            "u_over_u_inf": 0.1052
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.005,
+            "u_over_u_inf": 0.3486
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.01,
+            "u_over_u_inf": 0.4576
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.018,
+            "u_over_u_inf": 0.7262
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.03,
+            "u_over_u_inf": 0.7799
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.045,
+            "u_over_u_inf": 0.9616
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.065,
+            "u_over_u_inf": 0.9869
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.09,
+            "u_over_u_inf": 1.0646
+          }
+        ]
+      },
+      {
+        "case_id": "airfrans-mlp-full_dummy_case_001",
+        "station_id": "prototype_1_00l",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.031
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.002,
+            "u_over_u_inf": 0.0652
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.005,
+            "u_over_u_inf": 0.2786
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.01,
+            "u_over_u_inf": 0.3776
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.018,
+            "u_over_u_inf": 0.6562
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.03,
+            "u_over_u_inf": 0.7299
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.045,
+            "u_over_u_inf": 0.9316
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.065,
+            "u_over_u_inf": 0.9669
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.09,
+            "u_over_u_inf": 1.0646
+          }
+        ]
+      }
+    ]
+  }
+}

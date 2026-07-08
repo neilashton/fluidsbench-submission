@@ -1,0 +1,298 @@
+{
+  "submission_id": "hiliftaeroml-geot-aoa22",
+  "model": "GeoTransolver (AoA 22)",
+  "model_type": "Transformer",
+  "dataset": "HiLiftAeroML",
+  "split": "AoA 22",
+  "parameter_count": 9.05,
+  "surface_pressure_l2": 15.46,
+  "surface_pressure_l1": 11.131,
+  "surface_tau_l2": 20.32,
+  "surface_tau_l1": 13.818,
+  "volume_velocity_l2": 16.91,
+  "volume_velocity_l1": 11.837,
+  "volume_pressure_l2": 14.19,
+  "volume_pressure_l1": 9.791,
+  "r2_cd": 0.94,
+  "r2_cl": 0.872,
+  "velocity_profile_r2": 0.812,
+  "cp_cut_r2": 0.82,
+  "submitter_name": "FluidsBench prototype baseline",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2026-06-25",
+  "note": "HiLiftAeroML AoA = 22 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "hiliftaeroml-geot-aoa22_dummy_case_001",
+        "cut_id": "prototype_cp_cut",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2943
+          },
+          {
+            "x": 0.01,
+            "y": 0,
+            "z": 0,
+            "cp": -2.2626
+          },
+          {
+            "x": 0.02,
+            "y": 0,
+            "z": 0,
+            "cp": -1.6506
+          },
+          {
+            "x": 0.04,
+            "y": 0,
+            "z": 0,
+            "cp": -1.2563
+          },
+          {
+            "x": 0.07,
+            "y": 0,
+            "z": 0,
+            "cp": -0.7368
+          },
+          {
+            "x": 0.12,
+            "y": 0,
+            "z": 0,
+            "cp": -0.6301
+          },
+          {
+            "x": 0.2,
+            "y": 0,
+            "z": 0,
+            "cp": -0.223
+          },
+          {
+            "x": 0.32,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2838
+          },
+          {
+            "x": 0.48,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0307
+          },
+          {
+            "x": 0.66,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1176
+          },
+          {
+            "x": 0.84,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1945
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0213
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "hiliftaeroml-geot-aoa22_dummy_case_001",
+        "station_id": "prototype_0_25l",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.6656
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.006,
+            "u_over_u_inf": 0.6488
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.012,
+            "u_over_u_inf": 0.8368
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.018,
+            "u_over_u_inf": 0.7976
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.024,
+            "u_over_u_inf": 1.0081
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.032,
+            "u_over_u_inf": 0.9263
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.04,
+            "u_over_u_inf": 1.0717
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.05,
+            "u_over_u_inf": 1.036
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.06,
+            "u_over_u_inf": 1.1162
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-aoa22_dummy_case_001",
+        "station_id": "prototype_0_50l",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.7656
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.006,
+            "u_over_u_inf": 0.7288
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.012,
+            "u_over_u_inf": 0.8968
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.018,
+            "u_over_u_inf": 0.8376
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.024,
+            "u_over_u_inf": 1.0281
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.032,
+            "u_over_u_inf": 0.9463
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.04,
+            "u_over_u_inf": 1.0917
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.05,
+            "u_over_u_inf": 1.056
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.06,
+            "u_over_u_inf": 1.1462
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-aoa22_dummy_case_001",
+        "station_id": "prototype_1_00l",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.2256
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.006,
+            "u_over_u_inf": 0.2188
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.012,
+            "u_over_u_inf": 0.4468
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.018,
+            "u_over_u_inf": 0.4576
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.024,
+            "u_over_u_inf": 0.7181
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.032,
+            "u_over_u_inf": 0.7063
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.04,
+            "u_over_u_inf": 0.9117
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.05,
+            "u_over_u_inf": 0.926
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.06,
+            "u_over_u_inf": 1.0462
+          }
+        ]
+      }
+    ]
+  }
+}

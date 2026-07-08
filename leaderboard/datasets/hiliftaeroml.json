@@ -1,5 +1,1197 @@
 [
   {
+    "submission_id": "hiliftaeroml-geot-aoa12",
+    "model": "GeoTransolver (AoA 12)",
+    "model_type": "Transformer",
+    "dataset": "HiLiftAeroML",
+    "split": "AoA 12",
+    "parameter_count": 9.05,
+    "surface_pressure_l2": 4.6,
+    "surface_pressure_l1": 3.312,
+    "surface_tau_l2": 11.35,
+    "surface_tau_l1": 7.718,
+    "volume_velocity_l2": 9.17,
+    "volume_velocity_l1": 6.419,
+    "volume_pressure_l2": 4.9,
+    "volume_pressure_l1": 3.381,
+    "r2_cd": 0.99,
+    "r2_cl": 0.992,
+    "velocity_profile_r2": 0.934,
+    "cp_cut_r2": 0.958,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-06-25",
+    "note": "HiLiftAeroML AoA = 12 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml-geot-aoa12_dummy_case_001",
+          "cut_id": "prototype_cp_cut",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": -0.3236
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": -2.2296
+            },
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0,
+              "cp": -1.6871
+            },
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0,
+              "cp": -1.2161
+            },
+            {
+              "x": 0.07,
+              "y": 0,
+              "z": 0,
+              "cp": -0.7806
+            },
+            {
+              "x": 0.12,
+              "y": 0,
+              "z": 0,
+              "cp": -0.5827
+            },
+            {
+              "x": 0.2,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2741
+            },
+            {
+              "x": 0.32,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2292
+            },
+            {
+              "x": 0.48,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0276
+            },
+            {
+              "x": 0.66,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0557
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1289
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.0478
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml-geot-aoa12_dummy_case_001",
+          "station_id": "prototype_0_25l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.6416
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.6758
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8069
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.8304
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.9722
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9651
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.055
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0539
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.0972
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-geot-aoa12_dummy_case_001",
+          "station_id": "prototype_0_50l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.7416
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.7558
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8669
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.8704
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.9922
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9851
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.075
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0739
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1272
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-geot-aoa12_dummy_case_001",
+          "station_id": "prototype_1_00l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.2016
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.2458
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.4169
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.4904
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.6822
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.7451
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 0.895
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.9439
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.0272
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "hiliftaeroml-geot-aoa22",
+    "model": "GeoTransolver (AoA 22)",
+    "model_type": "Transformer",
+    "dataset": "HiLiftAeroML",
+    "split": "AoA 22",
+    "parameter_count": 9.05,
+    "surface_pressure_l2": 15.46,
+    "surface_pressure_l1": 11.131,
+    "surface_tau_l2": 20.32,
+    "surface_tau_l1": 13.818,
+    "volume_velocity_l2": 16.91,
+    "volume_velocity_l1": 11.837,
+    "volume_pressure_l2": 14.19,
+    "volume_pressure_l1": 9.791,
+    "r2_cd": 0.94,
+    "r2_cl": 0.872,
+    "velocity_profile_r2": 0.812,
+    "cp_cut_r2": 0.82,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-06-25",
+    "note": "HiLiftAeroML AoA = 22 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml-geot-aoa22_dummy_case_001",
+          "cut_id": "prototype_cp_cut",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2943
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": -2.2626
+            },
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0,
+              "cp": -1.6506
+            },
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0,
+              "cp": -1.2563
+            },
+            {
+              "x": 0.07,
+              "y": 0,
+              "z": 0,
+              "cp": -0.7368
+            },
+            {
+              "x": 0.12,
+              "y": 0,
+              "z": 0,
+              "cp": -0.6301
+            },
+            {
+              "x": 0.2,
+              "y": 0,
+              "z": 0,
+              "cp": -0.223
+            },
+            {
+              "x": 0.32,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2838
+            },
+            {
+              "x": 0.48,
+              "y": 0,
+              "z": 0,
+              "cp": 0.0307
+            },
+            {
+              "x": 0.66,
+              "y": 0,
+              "z": 0,
+              "cp": -0.1176
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1945
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0213
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml-geot-aoa22_dummy_case_001",
+          "station_id": "prototype_0_25l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.6656
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.6488
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8368
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.7976
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 1.0081
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9263
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0717
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.036
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1162
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-geot-aoa22_dummy_case_001",
+          "station_id": "prototype_0_50l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.7656
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.7288
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8968
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.8376
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 1.0281
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9463
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0917
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.056
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1462
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-geot-aoa22_dummy_case_001",
+          "station_id": "prototype_1_00l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.2256
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.2188
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.4468
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.4576
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.7181
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.7063
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 0.9117
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.926
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.0462
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "hiliftaeroml-geot-aoa4",
+    "model": "GeoTransolver (AoA 4)",
+    "model_type": "Transformer",
+    "dataset": "HiLiftAeroML",
+    "split": "AoA 4",
+    "parameter_count": 9.05,
+    "surface_pressure_l2": 6.18,
+    "surface_pressure_l1": 4.45,
+    "surface_tau_l2": 12.72,
+    "surface_tau_l1": 8.65,
+    "volume_velocity_l2": 6.68,
+    "volume_velocity_l1": 4.676,
+    "volume_pressure_l2": 5.02,
+    "volume_pressure_l1": 3.464,
+    "r2_cd": 0.997,
+    "r2_cl": 0.998,
+    "velocity_profile_r2": 0.956,
+    "cp_cut_r2": 0.972,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-06-25",
+    "note": "HiLiftAeroML AoA = 4 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml-geot-aoa4_dummy_case_001",
+          "cut_id": "prototype_cp_cut",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": -0.325
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": -2.2281
+            },
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0,
+              "cp": -1.6888
+            },
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0,
+              "cp": -1.2142
+            },
+            {
+              "x": 0.07,
+              "y": 0,
+              "z": 0,
+              "cp": -0.7827
+            },
+            {
+              "x": 0.12,
+              "y": 0,
+              "z": 0,
+              "cp": -0.5804
+            },
+            {
+              "x": 0.2,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2765
+            },
+            {
+              "x": 0.32,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2266
+            },
+            {
+              "x": 0.48,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0303
+            },
+            {
+              "x": 0.66,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0528
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1258
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.0511
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml-geot-aoa4_dummy_case_001",
+          "station_id": "prototype_0_25l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.6404
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.677
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8055
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.832
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.9705
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9669
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0542
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0548
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.0963
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-geot-aoa4_dummy_case_001",
+          "station_id": "prototype_0_50l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.7404
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.757
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8655
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.872
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.9905
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9869
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0742
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0748
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1263
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-geot-aoa4_dummy_case_001",
+          "station_id": "prototype_1_00l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.2004
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.247
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.4155
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.492
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.6805
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.7469
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 0.8942
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.9448
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.0263
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "hiliftaeroml-geot-full",
+    "model": "GeoTransolver (full split)",
+    "model_type": "Transformer",
+    "dataset": "HiLiftAeroML",
+    "split": "Full",
+    "parameter_count": 9.05,
+    "surface_pressure_l2": 8.84,
+    "surface_pressure_l1": 6.365,
+    "surface_tau_l2": 11.09,
+    "surface_tau_l1": 7.541,
+    "volume_velocity_l2": 8.78,
+    "volume_velocity_l1": 6.146,
+    "volume_pressure_l2": 8.06,
+    "volume_pressure_l1": 5.561,
+    "r2_cd": 0.995,
+    "r2_cl": 0.992,
+    "velocity_profile_r2": 0.94,
+    "cp_cut_r2": 0.952,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-06-25",
+    "note": "HiLiftAeroML full-split GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+          "cut_id": "prototype_cp_cut",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": -0.3181
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": -2.2359
+            },
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0,
+              "cp": -1.6802
+            },
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0,
+              "cp": -1.2238
+            },
+            {
+              "x": 0.07,
+              "y": 0,
+              "z": 0,
+              "cp": -0.7723
+            },
+            {
+              "x": 0.12,
+              "y": 0,
+              "z": 0,
+              "cp": -0.5917
+            },
+            {
+              "x": 0.2,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2644
+            },
+            {
+              "x": 0.32,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2396
+            },
+            {
+              "x": 0.48,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0165
+            },
+            {
+              "x": 0.66,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0674
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1414
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.0347
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+          "station_id": "prototype_0_25l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.6461
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.6706
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8126
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.8242
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.979
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9577
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0582
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0505
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1008
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+          "station_id": "prototype_0_50l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.7461
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.7506
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8726
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.8642
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.999
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9777
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0782
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0705
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1308
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+          "station_id": "prototype_1_00l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.2061
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.2406
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.4226
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.4842
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.689
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.7377
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 0.8982
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.9405
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.0308
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
     "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
     "model": "LiftOperator AoA",
     "model_type": "Neural operator",
@@ -89,6 +1281,900 @@
               "y": 0,
               "z": 0.4,
               "u_over_u_inf": 1.03
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "hiliftaeroml-transolver-aoa12",
+    "model": "Transolver (AoA 12)",
+    "model_type": "Transformer",
+    "dataset": "HiLiftAeroML",
+    "split": "AoA 12",
+    "parameter_count": 6.02,
+    "surface_pressure_l2": 5.94,
+    "surface_pressure_l1": 4.277,
+    "surface_tau_l2": 12.94,
+    "surface_tau_l1": 8.799,
+    "volume_velocity_l2": 11.39,
+    "volume_velocity_l1": 7.973,
+    "volume_pressure_l2": 8.43,
+    "volume_pressure_l1": 5.817,
+    "r2_cd": 0.992,
+    "r2_cl": 0.993,
+    "velocity_profile_r2": 0.92,
+    "cp_cut_r2": 0.944,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-06-25",
+    "note": "HiLiftAeroML AoA = 12 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml-transolver-aoa12_dummy_case_001",
+          "cut_id": "prototype_cp_cut",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": -0.3161
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": -2.2381
+            },
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0,
+              "cp": -1.6778
+            },
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0,
+              "cp": -1.2264
+            },
+            {
+              "x": 0.07,
+              "y": 0,
+              "z": 0,
+              "cp": -0.7694
+            },
+            {
+              "x": 0.12,
+              "y": 0,
+              "z": 0,
+              "cp": -0.5948
+            },
+            {
+              "x": 0.2,
+              "y": 0,
+              "z": 0,
+              "cp": -0.261
+            },
+            {
+              "x": 0.32,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2432
+            },
+            {
+              "x": 0.48,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0127
+            },
+            {
+              "x": 0.66,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0715
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1457
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.0301
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml-transolver-aoa12_dummy_case_001",
+          "station_id": "prototype_0_25l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.6477
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.6689
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8146
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.822
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.9814
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9552
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0593
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0493
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.102
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-transolver-aoa12_dummy_case_001",
+          "station_id": "prototype_0_50l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.7477
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.7489
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8746
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.862
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 1.0014
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9752
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0793
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0693
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.132
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-transolver-aoa12_dummy_case_001",
+          "station_id": "prototype_1_00l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.2077
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.2389
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.4246
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.482
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.6914
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.7352
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 0.8993
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.9393
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.032
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "hiliftaeroml-transolver-aoa22",
+    "model": "Transolver (AoA 22)",
+    "model_type": "Transformer",
+    "dataset": "HiLiftAeroML",
+    "split": "AoA 22",
+    "parameter_count": 6.02,
+    "surface_pressure_l2": 16.59,
+    "surface_pressure_l1": 11.945,
+    "surface_tau_l2": 20.23,
+    "surface_tau_l1": 13.756,
+    "volume_velocity_l2": 19.12,
+    "volume_velocity_l1": 13.384,
+    "volume_pressure_l2": 15.63,
+    "volume_pressure_l1": 10.785,
+    "r2_cd": 0.939,
+    "r2_cl": 0.886,
+    "velocity_profile_r2": 0.798,
+    "cp_cut_r2": 0.807,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-06-25",
+    "note": "HiLiftAeroML AoA = 22 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml-transolver-aoa22_dummy_case_001",
+          "cut_id": "prototype_cp_cut",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2936
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": -2.2634
+            },
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0,
+              "cp": -1.6496
+            },
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0,
+              "cp": -1.2574
+            },
+            {
+              "x": 0.07,
+              "y": 0,
+              "z": 0,
+              "cp": -0.7357
+            },
+            {
+              "x": 0.12,
+              "y": 0,
+              "z": 0,
+              "cp": -0.6313
+            },
+            {
+              "x": 0.2,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2217
+            },
+            {
+              "x": 0.32,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2852
+            },
+            {
+              "x": 0.48,
+              "y": 0,
+              "z": 0,
+              "cp": 0.0322
+            },
+            {
+              "x": 0.66,
+              "y": 0,
+              "z": 0,
+              "cp": -0.1192
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1961
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0231
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml-transolver-aoa22_dummy_case_001",
+          "station_id": "prototype_0_25l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.6662
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.6481
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8376
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.7967
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 1.009
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9253
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0722
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0356
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1167
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-transolver-aoa22_dummy_case_001",
+          "station_id": "prototype_0_50l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.7662
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.7281
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.8976
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.8367
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 1.029
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9453
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.0922
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0556
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1467
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-transolver-aoa22_dummy_case_001",
+          "station_id": "prototype_1_00l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.2262
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.2181
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.4476
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.4567
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.719
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.7053
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 0.9122
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.9256
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.0467
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "hiliftaeroml-transolver-aoa4",
+    "model": "Transolver (AoA 4)",
+    "model_type": "Transformer",
+    "dataset": "HiLiftAeroML",
+    "split": "AoA 4",
+    "parameter_count": 6.02,
+    "surface_pressure_l2": 7.77,
+    "surface_pressure_l1": 5.594,
+    "surface_tau_l2": 13.98,
+    "surface_tau_l1": 9.506,
+    "volume_velocity_l2": 9.82,
+    "volume_velocity_l1": 6.874,
+    "volume_pressure_l2": 7.23,
+    "volume_pressure_l1": 4.989,
+    "r2_cd": 0.992,
+    "r2_cl": 0.994,
+    "velocity_profile_r2": 0.928,
+    "cp_cut_r2": 0.946,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-06-25",
+    "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+          "cut_id": "prototype_cp_cut",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": -0.3167
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": -2.2374
+            },
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0,
+              "cp": -1.6785
+            },
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0,
+              "cp": -1.2257
+            },
+            {
+              "x": 0.07,
+              "y": 0,
+              "z": 0,
+              "cp": -0.7702
+            },
+            {
+              "x": 0.12,
+              "y": 0,
+              "z": 0,
+              "cp": -0.5939
+            },
+            {
+              "x": 0.2,
+              "y": 0,
+              "z": 0,
+              "cp": -0.262
+            },
+            {
+              "x": 0.32,
+              "y": 0,
+              "z": 0,
+              "cp": -0.2421
+            },
+            {
+              "x": 0.48,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0138
+            },
+            {
+              "x": 0.66,
+              "y": 0,
+              "z": 0,
+              "cp": -0.0703
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1445
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.0314
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+          "station_id": "prototype_0_25l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.6473
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.6694
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.814
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.8226
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.9807
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9559
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.059
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0497
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1017
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+          "station_id": "prototype_0_50l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.7473
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.7494
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.874
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.8626
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 1.0007
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.9759
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 1.079
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 1.0697
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.1317
+            }
+          ]
+        },
+        {
+          "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+          "station_id": "prototype_1_00l",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.2073
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.006,
+              "u_over_u_inf": 0.2394
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.012,
+              "u_over_u_inf": 0.424
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.018,
+              "u_over_u_inf": 0.4826
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.024,
+              "u_over_u_inf": 0.6907
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.032,
+              "u_over_u_inf": 0.7359
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.04,
+              "u_over_u_inf": 0.899
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.9397
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.06,
+              "u_over_u_inf": 1.0317
             }
           ]
         }
