@@ -1,0 +1,96 @@
+{
+  "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
+  "model": "LiftOperator AoA",
+  "model_type": "Neural operator",
+  "dataset": "HiLiftAeroML",
+  "split": "Full",
+  "parameter_count": 16.3,
+  "surface_pressure_l2": 4.42,
+  "surface_pressure_l1": 3.18,
+  "surface_tau_l2": 5.92,
+  "surface_tau_l1": 4.02,
+  "volume_velocity_l2": 3.12,
+  "volume_velocity_l1": 2.18,
+  "volume_pressure_l2": 3.54,
+  "volume_pressure_l1": 2.45,
+  "r2_cd": 0.975,
+  "r2_cl": 0.986,
+  "velocity_profile_r2": 0.955,
+  "cp_cut_r2": 0.951,
+  "submitter_name": "Example High-Lift Lab",
+  "institution": "Example Aerospace Institute",
+  "paper_url": "https://example.com/liftoperator-aoa",
+  "code_url": "https://github.com/example/liftoperator-aoa",
+  "submitted_at": "2026-07-08",
+  "note": "Dummy HiLiftAeroML submission with compact diagnostic curves.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "hiliftaeroml_dummy_case_001",
+        "cut_id": "main_element_upper",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.02,
+            "y": 0,
+            "z": 0.08,
+            "cp": -1.18
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0.1,
+            "cp": -0.72
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0.08,
+            "cp": -0.38
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.02,
+            "cp": -0.05
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "hiliftaeroml_dummy_case_001",
+        "station_id": "wake_x_1_25c",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 1.25,
+            "y": 0,
+            "z": -0.2,
+            "u_over_u_inf": 0.72
+          },
+          {
+            "x": 1.25,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.58
+          },
+          {
+            "x": 1.25,
+            "y": 0,
+            "z": 0.2,
+            "u_over_u_inf": 0.82
+          },
+          {
+            "x": 1.25,
+            "y": 0,
+            "z": 0.4,
+            "u_over_u_inf": 1.03
+          }
+        ]
+      }
+    ]
+  }
+}

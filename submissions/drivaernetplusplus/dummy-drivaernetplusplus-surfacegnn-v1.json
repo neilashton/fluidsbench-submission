@@ -1,0 +1,96 @@
+{
+  "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
+  "model": "SurfaceGNN CFD",
+  "model_type": "GNN",
+  "dataset": "DrivAerNet++",
+  "split": "Default",
+  "parameter_count": 9.6,
+  "surface_pressure_l2": 3.35,
+  "surface_pressure_l1": 2.36,
+  "surface_tau_l2": 4.7,
+  "surface_tau_l1": 3.2,
+  "volume_velocity_l2": 2.22,
+  "volume_velocity_l1": 1.55,
+  "volume_pressure_l2": 2.55,
+  "volume_pressure_l1": 1.76,
+  "r2_cd": 0.987,
+  "r2_cl": 0.979,
+  "velocity_profile_r2": 0.972,
+  "cp_cut_r2": 0.968,
+  "submitter_name": "Example CarBench Team",
+  "institution": "Example Motors Research",
+  "paper_url": "https://example.com/surfacegnn-cfd",
+  "code_url": "https://github.com/example/surfacegnn-cfd",
+  "submitted_at": "2026-07-08",
+  "note": "Dummy DrivAerNet++ submission with compact diagnostic curves.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "drivaernetplusplus_dummy_case_001",
+        "cut_id": "centreline_roof",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0.5,
+            "cp": 0.58
+          },
+          {
+            "x": 0.32,
+            "y": 0,
+            "z": 0.56,
+            "cp": -0.05
+          },
+          {
+            "x": 0.6,
+            "y": 0,
+            "z": 0.52,
+            "cp": -0.25
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.38,
+            "cp": -0.1
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "drivaernetplusplus_dummy_case_001",
+        "station_id": "wake_x_0_75l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.75,
+            "y": 0,
+            "z": 0.05,
+            "u_over_u_inf": 0.47
+          },
+          {
+            "x": 0.75,
+            "y": 0,
+            "z": 0.25,
+            "u_over_u_inf": 0.65
+          },
+          {
+            "x": 0.75,
+            "y": 0,
+            "z": 0.5,
+            "u_over_u_inf": 0.86
+          },
+          {
+            "x": 0.75,
+            "y": 0,
+            "z": 0.75,
+            "u_over_u_inf": 1
+          }
+        ]
+      }
+    ]
+  }
+}

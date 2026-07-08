@@ -1,0 +1,96 @@
+{
+  "submission_id": "dummy-drivaerml-meshoperator-v1",
+  "model": "MeshOperator Plus",
+  "model_type": "Neural operator",
+  "dataset": "DrivAerML",
+  "split": "Default",
+  "parameter_count": 18.7,
+  "surface_pressure_l2": 3.08,
+  "surface_pressure_l1": 2.15,
+  "surface_tau_l2": 4.18,
+  "surface_tau_l1": 2.84,
+  "volume_velocity_l2": 2.04,
+  "volume_velocity_l1": 1.43,
+  "volume_pressure_l2": 2.42,
+  "volume_pressure_l1": 1.67,
+  "r2_cd": 0.991,
+  "r2_cl": 0.982,
+  "velocity_profile_r2": 0.978,
+  "cp_cut_r2": 0.973,
+  "submitter_name": "AeroAI Benchmarks",
+  "institution": "AeroAI Ltd",
+  "paper_url": "https://example.com/meshoperator-plus",
+  "code_url": "https://github.com/example/meshoperator-plus",
+  "submitted_at": "2026-07-08",
+  "note": "Dummy DrivAerML submission with compact diagnostic curves.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "drivaerml_dummy_case_001",
+        "cut_id": "body_symmetry_line",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0.52,
+            "cp": 0.64
+          },
+          {
+            "x": 0.3,
+            "y": 0,
+            "z": 0.58,
+            "cp": -0.08
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0.53,
+            "cp": -0.29
+          },
+          {
+            "x": 0.85,
+            "y": 0,
+            "z": 0.41,
+            "cp": -0.12
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "drivaerml_dummy_case_001",
+        "station_id": "wake_x_1_00l",
+        "coordinate_frame": "body_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0.05,
+            "u_over_u_inf": 0.5
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0.25,
+            "u_over_u_inf": 0.68
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0.5,
+            "u_over_u_inf": 0.88
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0.75,
+            "u_over_u_inf": 1.01
+          }
+        ]
+      }
+    ]
+  }
+}

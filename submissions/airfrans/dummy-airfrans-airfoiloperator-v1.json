@@ -1,0 +1,96 @@
+{
+  "submission_id": "dummy-airfrans-airfoiloperator-v1",
+  "model": "AirfoilOperator",
+  "model_type": "GNN",
+  "dataset": "AirfRANS",
+  "split": "Full",
+  "parameter_count": 4.9,
+  "surface_pressure_l2": 5.1,
+  "surface_pressure_l1": 3.62,
+  "surface_tau_l2": 6.32,
+  "surface_tau_l1": 4.29,
+  "volume_velocity_l2": 3.44,
+  "volume_velocity_l1": 2.41,
+  "volume_pressure_l2": 3.82,
+  "volume_pressure_l1": 2.64,
+  "r2_cd": 0.968,
+  "r2_cl": 0.992,
+  "velocity_profile_r2": 0.948,
+  "cp_cut_r2": 0.944,
+  "submitter_name": "Example Airfoil ML",
+  "institution": "Example Flow Institute",
+  "paper_url": "https://example.com/airfoiloperator",
+  "code_url": "https://github.com/example/airfoiloperator",
+  "submitted_at": "2026-07-08",
+  "note": "Dummy AirfRANS submission with compact diagnostic curves.",
+  "diagnostics": {
+    "cp_cuts": [
+      {
+        "case_id": "airfrans_dummy_case_001",
+        "cut_id": "airfoil_upper_surface",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.02,
+            "y": 0,
+            "z": 0.03,
+            "cp": -0.92
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0.06,
+            "cp": -0.54
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0.05,
+            "cp": -0.2
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.01,
+            "cp": 0.04
+          }
+        ]
+      }
+    ],
+    "velocity_profiles": [
+      {
+        "case_id": "airfrans_dummy_case_001",
+        "station_id": "wake_x_1_50c",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 1.5,
+            "y": 0,
+            "z": -0.2,
+            "u_over_u_inf": 0.82
+          },
+          {
+            "x": 1.5,
+            "y": 0,
+            "z": 0,
+            "u_over_u_inf": 0.74
+          },
+          {
+            "x": 1.5,
+            "y": 0,
+            "z": 0.2,
+            "u_over_u_inf": 0.91
+          },
+          {
+            "x": 1.5,
+            "y": 0,
+            "z": 0.4,
+            "u_over_u_inf": 1.02
+          }
+        ]
+      }
+    ]
+  }
+}
