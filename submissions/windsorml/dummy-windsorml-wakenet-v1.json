@@ -2,6 +2,9 @@
   "submission_id": "dummy-windsorml-wakenet-v1",
   "model": "WakeNet Windsor",
   "model_type": "Transformer",
+  "model_types": [
+    "Transformer"
+  ],
   "dataset": "WindsorML",
   "split": "Default",
   "parameter_count": 7.8,

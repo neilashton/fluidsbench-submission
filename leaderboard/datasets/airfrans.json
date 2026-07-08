@@ -3,6 +3,9 @@
     "submission_id": "dummy-airfrans-airfoiloperator-v1",
     "model": "AirfoilOperator",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 4.9,
@@ -99,6 +102,9 @@
     "submission_id": "airfrans-graph-u-net-full",
     "model": "Graph U-Net",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 0.07,
@@ -397,6 +403,9 @@
     "submission_id": "airfrans-graphsage-full",
     "model": "GraphSAGE",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 0.03,
@@ -695,6 +704,9 @@
     "submission_id": "airfrans-mlp-full",
     "model": "MLP",
     "model_type": "MLP",
+    "model_types": [
+      "MLP"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 0.02,
@@ -993,6 +1005,9 @@
     "submission_id": "airfrans-pointnet-full",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 0.08,

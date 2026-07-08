@@ -2,6 +2,9 @@
   "submission_id": "airfrans-graph-u-net-full",
   "model": "Graph U-Net",
   "model_type": "GNN",
+  "model_types": [
+    "GNN"
+  ],
   "dataset": "AirfRANS",
   "split": "Full",
   "parameter_count": 0.07,

@@ -3,6 +3,9 @@
     "submission_id": "ab-upt",
     "model": "AB-UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 8.75,
@@ -319,6 +322,10 @@
     "submission_id": "dummy-ahmedml-flowformer-v1",
     "model": "FlowFormer CFD",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer",
+      "Neural operator"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 12.4,
@@ -415,6 +422,9 @@
     "submission_id": "gino",
     "model": "GINO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 15.6,
@@ -731,6 +741,9 @@
     "submission_id": "graph-u-net",
     "model": "Graph U-Net",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 14.11,
@@ -1047,6 +1060,9 @@
     "submission_id": "lno",
     "model": "LNO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 6.3,
@@ -1363,6 +1379,9 @@
     "submission_id": "oformer",
     "model": "OFormer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 6.1,
@@ -1679,6 +1698,9 @@
     "submission_id": "pointnet",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 3.6,
@@ -1995,6 +2017,9 @@
     "submission_id": "transformer",
     "model": "Transformer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -2311,6 +2336,9 @@
     "submission_id": "transolver",
     "model": "Transolver",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -2627,6 +2655,9 @@
     "submission_id": "upt",
     "model": "UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 10.98,

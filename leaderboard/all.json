@@ -3,6 +3,9 @@
     "submission_id": "ab-upt",
     "model": "AB-UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 8.75,
@@ -319,6 +322,10 @@
     "submission_id": "dummy-ahmedml-flowformer-v1",
     "model": "FlowFormer CFD",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer",
+      "Neural operator"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 12.4,
@@ -415,6 +422,9 @@
     "submission_id": "gino",
     "model": "GINO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 15.6,
@@ -731,6 +741,9 @@
     "submission_id": "graph-u-net",
     "model": "Graph U-Net",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 14.11,
@@ -1047,6 +1060,9 @@
     "submission_id": "lno",
     "model": "LNO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 6.3,
@@ -1363,6 +1379,9 @@
     "submission_id": "oformer",
     "model": "OFormer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 6.1,
@@ -1679,6 +1698,9 @@
     "submission_id": "pointnet",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 3.6,
@@ -1995,6 +2017,9 @@
     "submission_id": "transformer",
     "model": "Transformer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -2311,6 +2336,9 @@
     "submission_id": "transolver",
     "model": "Transolver",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -2627,6 +2655,9 @@
     "submission_id": "upt",
     "model": "UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 10.98,
@@ -2943,6 +2974,9 @@
     "submission_id": "dummy-airfrans-airfoiloperator-v1",
     "model": "AirfoilOperator",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 4.9,
@@ -3039,6 +3073,9 @@
     "submission_id": "airfrans-graph-u-net-full",
     "model": "Graph U-Net",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 0.07,
@@ -3337,6 +3374,9 @@
     "submission_id": "airfrans-graphsage-full",
     "model": "GraphSAGE",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 0.03,
@@ -3635,6 +3675,9 @@
     "submission_id": "airfrans-mlp-full",
     "model": "MLP",
     "model_type": "MLP",
+    "model_types": [
+      "MLP"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 0.02,
@@ -3933,6 +3976,9 @@
     "submission_id": "airfrans-pointnet-full",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "AirfRANS",
     "split": "Full",
     "parameter_count": 0.08,
@@ -4231,6 +4277,9 @@
     "submission_id": "drivaerml-ab-upt",
     "model": "AB-UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 8.75,
@@ -4547,6 +4596,9 @@
     "submission_id": "drivaerml-gino",
     "model": "GINO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 15.6,
@@ -4863,6 +4915,9 @@
     "submission_id": "drivaerml-graph-u-net",
     "model": "Graph U-Net",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 14.11,
@@ -5179,6 +5234,9 @@
     "submission_id": "drivaerml-lno",
     "model": "LNO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 6.3,
@@ -5495,6 +5553,10 @@
     "submission_id": "dummy-drivaerml-meshoperator-v1",
     "model": "MeshOperator Plus",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 18.7,
@@ -5591,6 +5653,9 @@
     "submission_id": "drivaerml-oformer",
     "model": "OFormer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 6.1,
@@ -5907,6 +5972,9 @@
     "submission_id": "drivaerml-pointnet",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 3.6,
@@ -6223,6 +6291,9 @@
     "submission_id": "drivaerml-transformer",
     "model": "Transformer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -6539,6 +6610,9 @@
     "submission_id": "drivaerml-transolver",
     "model": "Transolver",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -6855,6 +6929,9 @@
     "submission_id": "drivaerml-upt",
     "model": "UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerML",
     "split": "Default",
     "parameter_count": 10.98,
@@ -7171,6 +7248,9 @@
     "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
     "model": "SurfaceGNN CFD",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 9.6,
@@ -7267,6 +7347,9 @@
     "submission_id": "drivaernetpp-ab-upt",
     "model": "AB-UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 6.01,
@@ -7583,6 +7666,9 @@
     "submission_id": "drivaernetpp-neuraloperator",
     "model": "NeuralOperator",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 2.1,
@@ -7899,6 +7985,9 @@
     "submission_id": "drivaernetpp-pointmae",
     "model": "PointMAE",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 1.67,
@@ -8215,6 +8304,9 @@
     "submission_id": "drivaernetpp-pointnet-large",
     "model": "PointNetLarge",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 32.58,
@@ -8531,6 +8623,9 @@
     "submission_id": "drivaernetpp-pointnet",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 1.67,
@@ -8847,6 +8942,9 @@
     "submission_id": "drivaernetpp-pointtransformer",
     "model": "PointTransformer",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 3.05,
@@ -9163,6 +9261,9 @@
     "submission_id": "drivaernetpp-regdgcnn",
     "model": "RegDGCNN",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 1.44,
@@ -9479,6 +9580,9 @@
     "submission_id": "drivaernetpp-transolver-large",
     "model": "TransolverLarge",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 7.58,
@@ -9795,6 +9899,9 @@
     "submission_id": "drivaernetpp-transolver-plus-plus",
     "model": "Transolver++",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 1.81,
@@ -10111,6 +10218,9 @@
     "submission_id": "drivaernetpp-transolver",
     "model": "Transolver",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 2.47,
@@ -10427,6 +10537,9 @@
     "submission_id": "drivaernetpp-tripnet",
     "model": "TripNet",
     "model_type": "Implicit field",
+    "model_types": [
+      "Implicit field"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 24.1,
@@ -10743,6 +10856,9 @@
     "submission_id": "hiliftaeroml-geot-aoa12",
     "model": "GeoTransolver (AoA 12)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 12",
     "parameter_count": 9.05,
@@ -11041,6 +11157,9 @@
     "submission_id": "hiliftaeroml-geot-aoa22",
     "model": "GeoTransolver (AoA 22)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 22",
     "parameter_count": 9.05,
@@ -11339,6 +11458,9 @@
     "submission_id": "hiliftaeroml-geot-aoa4",
     "model": "GeoTransolver (AoA 4)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 4",
     "parameter_count": 9.05,
@@ -11637,6 +11759,9 @@
     "submission_id": "hiliftaeroml-geot-full",
     "model": "GeoTransolver (full split)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "Full",
     "parameter_count": 9.05,
@@ -11935,6 +12060,9 @@
     "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
     "model": "LiftOperator AoA",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "Full",
     "parameter_count": 16.3,
@@ -12031,6 +12159,9 @@
     "submission_id": "hiliftaeroml-transolver-aoa12",
     "model": "Transolver (AoA 12)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 12",
     "parameter_count": 6.02,
@@ -12329,6 +12460,9 @@
     "submission_id": "hiliftaeroml-transolver-aoa22",
     "model": "Transolver (AoA 22)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 22",
     "parameter_count": 6.02,
@@ -12627,6 +12761,9 @@
     "submission_id": "hiliftaeroml-transolver-aoa4",
     "model": "Transolver (AoA 4)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 4",
     "parameter_count": 6.02,
@@ -12925,6 +13062,9 @@
     "submission_id": "windsorml-ab-upt",
     "model": "AB-UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 8.75,
@@ -13241,6 +13381,9 @@
     "submission_id": "windsorml-gino",
     "model": "GINO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 15.6,
@@ -13557,6 +13700,9 @@
     "submission_id": "windsorml-graph-u-net",
     "model": "Graph U-Net",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 14.11,
@@ -13873,6 +14019,9 @@
     "submission_id": "windsorml-lno",
     "model": "LNO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 6.3,
@@ -14189,6 +14338,9 @@
     "submission_id": "windsorml-oformer",
     "model": "OFormer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 6.1,
@@ -14505,6 +14657,9 @@
     "submission_id": "windsorml-pointnet",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 3.6,
@@ -14821,6 +14976,9 @@
     "submission_id": "windsorml-transformer",
     "model": "Transformer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -15137,6 +15295,9 @@
     "submission_id": "windsorml-transolver",
     "model": "Transolver",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -15453,6 +15614,9 @@
     "submission_id": "windsorml-upt",
     "model": "UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 10.98,
@@ -15769,6 +15933,9 @@
     "submission_id": "dummy-windsorml-wakenet-v1",
     "model": "WakeNet Windsor",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 7.8,

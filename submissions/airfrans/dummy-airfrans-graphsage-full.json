@@ -2,6 +2,9 @@
   "submission_id": "airfrans-graphsage-full",
   "model": "GraphSAGE",
   "model_type": "GNN",
+  "model_types": [
+    "GNN"
+  ],
   "dataset": "AirfRANS",
   "split": "Full",
   "parameter_count": 0.03,

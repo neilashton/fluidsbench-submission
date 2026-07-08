@@ -3,6 +3,9 @@
     "submission_id": "windsorml-ab-upt",
     "model": "AB-UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 8.75,
@@ -319,6 +322,9 @@
     "submission_id": "windsorml-gino",
     "model": "GINO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 15.6,
@@ -635,6 +641,9 @@
     "submission_id": "windsorml-graph-u-net",
     "model": "Graph U-Net",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 14.11,
@@ -951,6 +960,9 @@
     "submission_id": "windsorml-lno",
     "model": "LNO",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 6.3,
@@ -1267,6 +1279,9 @@
     "submission_id": "windsorml-oformer",
     "model": "OFormer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 6.1,
@@ -1583,6 +1598,9 @@
     "submission_id": "windsorml-pointnet",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 3.6,
@@ -1899,6 +1917,9 @@
     "submission_id": "windsorml-transformer",
     "model": "Transformer",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -2215,6 +2236,9 @@
     "submission_id": "windsorml-transolver",
     "model": "Transolver",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -2531,6 +2555,9 @@
     "submission_id": "windsorml-upt",
     "model": "UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 10.98,
@@ -2847,6 +2874,9 @@
     "submission_id": "dummy-windsorml-wakenet-v1",
     "model": "WakeNet Windsor",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "WindsorML",
     "split": "Default",
     "parameter_count": 7.8,

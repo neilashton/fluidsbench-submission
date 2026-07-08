@@ -2,6 +2,9 @@
   "submission_id": "hiliftaeroml-geot-full",
   "model": "GeoTransolver (full split)",
   "model_type": "Transformer",
+  "model_types": [
+    "Transformer"
+  ],
   "dataset": "HiLiftAeroML",
   "split": "Full",
   "parameter_count": 9.05,

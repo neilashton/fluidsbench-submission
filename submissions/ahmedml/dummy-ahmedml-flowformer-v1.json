@@ -2,6 +2,10 @@
   "submission_id": "dummy-ahmedml-flowformer-v1",
   "model": "FlowFormer CFD",
   "model_type": "Transformer",
+  "model_types": [
+    "Transformer",
+    "Neural operator"
+  ],
   "dataset": "AhmedML",
   "split": "Default",
   "parameter_count": 12.4,

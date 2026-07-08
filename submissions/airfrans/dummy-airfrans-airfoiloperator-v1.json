@@ -2,6 +2,9 @@
   "submission_id": "dummy-airfrans-airfoiloperator-v1",
   "model": "AirfoilOperator",
   "model_type": "GNN",
+  "model_types": [
+    "GNN"
+  ],
   "dataset": "AirfRANS",
   "split": "Full",
   "parameter_count": 4.9,

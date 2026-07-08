@@ -2,6 +2,9 @@
   "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
   "model": "LiftOperator AoA",
   "model_type": "Neural operator",
+  "model_types": [
+    "Neural operator"
+  ],
   "dataset": "HiLiftAeroML",
   "split": "Full",
   "parameter_count": 16.3,

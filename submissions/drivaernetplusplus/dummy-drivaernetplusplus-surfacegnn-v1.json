@@ -2,6 +2,9 @@
   "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
   "model": "SurfaceGNN CFD",
   "model_type": "GNN",
+  "model_types": [
+    "GNN"
+  ],
   "dataset": "DrivAerNet++",
   "split": "Default",
   "parameter_count": 9.6,

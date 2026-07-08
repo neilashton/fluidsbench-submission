@@ -2,6 +2,9 @@
   "submission_id": "drivaernetpp-pointnet",
   "model": "PointNet",
   "model_type": "Point cloud",
+  "model_types": [
+    "Point cloud"
+  ],
   "dataset": "DrivAerNet++",
   "split": "Default",
   "parameter_count": 1.67,

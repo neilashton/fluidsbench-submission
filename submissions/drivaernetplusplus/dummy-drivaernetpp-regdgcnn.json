@@ -2,6 +2,9 @@
   "submission_id": "drivaernetpp-regdgcnn",
   "model": "RegDGCNN",
   "model_type": "GNN",
+  "model_types": [
+    "GNN"
+  ],
   "dataset": "DrivAerNet++",
   "split": "Default",
   "parameter_count": 1.44,

@@ -3,6 +3,9 @@
     "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
     "model": "SurfaceGNN CFD",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 9.6,
@@ -99,6 +102,9 @@
     "submission_id": "drivaernetpp-ab-upt",
     "model": "AB-UPT",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 6.01,
@@ -415,6 +421,9 @@
     "submission_id": "drivaernetpp-neuraloperator",
     "model": "NeuralOperator",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 2.1,
@@ -731,6 +740,9 @@
     "submission_id": "drivaernetpp-pointmae",
     "model": "PointMAE",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 1.67,
@@ -1047,6 +1059,9 @@
     "submission_id": "drivaernetpp-pointnet-large",
     "model": "PointNetLarge",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 32.58,
@@ -1363,6 +1378,9 @@
     "submission_id": "drivaernetpp-pointnet",
     "model": "PointNet",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 1.67,
@@ -1679,6 +1697,9 @@
     "submission_id": "drivaernetpp-pointtransformer",
     "model": "PointTransformer",
     "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 3.05,
@@ -1995,6 +2016,9 @@
     "submission_id": "drivaernetpp-regdgcnn",
     "model": "RegDGCNN",
     "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 1.44,
@@ -2311,6 +2335,9 @@
     "submission_id": "drivaernetpp-transolver-large",
     "model": "TransolverLarge",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 7.58,
@@ -2627,6 +2654,9 @@
     "submission_id": "drivaernetpp-transolver-plus-plus",
     "model": "Transolver++",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 1.81,
@@ -2943,6 +2973,9 @@
     "submission_id": "drivaernetpp-transolver",
     "model": "Transolver",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 2.47,
@@ -3259,6 +3292,9 @@
     "submission_id": "drivaernetpp-tripnet",
     "model": "TripNet",
     "model_type": "Implicit field",
+    "model_types": [
+      "Implicit field"
+    ],
     "dataset": "DrivAerNet++",
     "split": "Default",
     "parameter_count": 24.1,

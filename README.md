@@ -12,7 +12,7 @@ preparing a submission.
 
 A submission is a JSON file containing:
 
-- submission metadata, such as model name, model type, submitter name, institution, paper URL, and code URL
+- submission metadata, such as model name, one or more model types, submitter name, institution, paper URL, and code URL
 - the dataset and split being evaluated
 - scalar leaderboard metrics, such as L1/L2 field errors, force R2 values, velocity-profile R2, and Cp-cut R2
 - compact diagnostic curve data for selected Cp cuts and velocity profiles
@@ -72,11 +72,15 @@ The current dummy examples show the intended shape:
 
 At minimum, each submission should include:
 
+Use `model_types` for the model category list. `model_type` is kept as the primary category for backwards compatibility
+with older tooling; it should usually match the first entry in `model_types`.
+
 ```json
 {
   "submission_id": "todo-unique-submission-id",
   "model": "TODO model name",
-  "model_type": "TODO model type",
+  "model_type": "TODO primary model type",
+  "model_types": ["TODO primary model type", "TODO optional second model type"],
   "dataset": "TODO dataset name",
   "split": "TODO split name",
   "submitter_name": "TODO person, lab, or company",

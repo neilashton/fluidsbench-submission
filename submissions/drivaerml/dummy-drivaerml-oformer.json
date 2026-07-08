@@ -2,6 +2,9 @@
   "submission_id": "drivaerml-oformer",
   "model": "OFormer",
   "model_type": "Transformer",
+  "model_types": [
+    "Transformer"
+  ],
   "dataset": "DrivAerML",
   "split": "Default",
   "parameter_count": 6.1,

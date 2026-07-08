@@ -3,6 +3,9 @@
     "submission_id": "hiliftaeroml-geot-aoa12",
     "model": "GeoTransolver (AoA 12)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 12",
     "parameter_count": 9.05,
@@ -301,6 +304,9 @@
     "submission_id": "hiliftaeroml-geot-aoa22",
     "model": "GeoTransolver (AoA 22)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 22",
     "parameter_count": 9.05,
@@ -599,6 +605,9 @@
     "submission_id": "hiliftaeroml-geot-aoa4",
     "model": "GeoTransolver (AoA 4)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 4",
     "parameter_count": 9.05,
@@ -897,6 +906,9 @@
     "submission_id": "hiliftaeroml-geot-full",
     "model": "GeoTransolver (full split)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "Full",
     "parameter_count": 9.05,
@@ -1195,6 +1207,9 @@
     "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
     "model": "LiftOperator AoA",
     "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "Full",
     "parameter_count": 16.3,
@@ -1291,6 +1306,9 @@
     "submission_id": "hiliftaeroml-transolver-aoa12",
     "model": "Transolver (AoA 12)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 12",
     "parameter_count": 6.02,
@@ -1589,6 +1607,9 @@
     "submission_id": "hiliftaeroml-transolver-aoa22",
     "model": "Transolver (AoA 22)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 22",
     "parameter_count": 6.02,
@@ -1887,6 +1908,9 @@
     "submission_id": "hiliftaeroml-transolver-aoa4",
     "model": "Transolver (AoA 4)",
     "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
     "dataset": "HiLiftAeroML",
     "split": "AoA 4",
     "parameter_count": 6.02,
