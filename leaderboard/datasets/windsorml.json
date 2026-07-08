@@ -23,6 +23,76 @@
     "paper_url": "https://example.com/wakenet-windsor",
     "code_url": "https://github.com/example/wakenet-windsor",
     "submitted_at": "2026-07-08",
-    "note": "Dummy approved WindsorML submission used for integration testing."
+    "note": "Dummy WindsorML submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "windsorml_dummy_case_001",
+          "cut_id": "roof_centreline",
+          "coordinate_frame": "body_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0.48,
+              "cp": 0.52
+            },
+            {
+              "x": 0.28,
+              "y": 0,
+              "z": 0.53,
+              "cp": -0.03
+            },
+            {
+              "x": 0.58,
+              "y": 0,
+              "z": 0.49,
+              "cp": -0.21
+            },
+            {
+              "x": 0.88,
+              "y": 0,
+              "z": 0.35,
+              "cp": -0.08
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "windsorml_dummy_case_001",
+          "station_id": "wake_x_0_80l",
+          "coordinate_frame": "body_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0.8,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.49
+            },
+            {
+              "x": 0.8,
+              "y": 0,
+              "z": 0.25,
+              "u_over_u_inf": 0.67
+            },
+            {
+              "x": 0.8,
+              "y": 0,
+              "z": 0.5,
+              "u_over_u_inf": 0.87
+            },
+            {
+              "x": 0.8,
+              "y": 0,
+              "z": 0.75,
+              "u_over_u_inf": 1
+            }
+          ]
+        }
+      ]
+    }
   }
 ]

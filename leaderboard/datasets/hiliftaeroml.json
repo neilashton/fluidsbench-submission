@@ -23,6 +23,76 @@
     "paper_url": "https://example.com/liftoperator-aoa",
     "code_url": "https://github.com/example/liftoperator-aoa",
     "submitted_at": "2026-07-08",
-    "note": "Dummy approved HiLiftAeroML submission used for integration testing."
+    "note": "Dummy HiLiftAeroML submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml_dummy_case_001",
+          "cut_id": "main_element_upper",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0.08,
+              "cp": -1.18
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0.1,
+              "cp": -0.72
+            },
+            {
+              "x": 0.55,
+              "y": 0,
+              "z": 0.08,
+              "cp": -0.38
+            },
+            {
+              "x": 0.9,
+              "y": 0,
+              "z": 0.02,
+              "cp": -0.05
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml_dummy_case_001",
+          "station_id": "wake_x_1_25c",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 1.25,
+              "y": 0,
+              "z": -0.2,
+              "u_over_u_inf": 0.72
+            },
+            {
+              "x": 1.25,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.58
+            },
+            {
+              "x": 1.25,
+              "y": 0,
+              "z": 0.2,
+              "u_over_u_inf": 0.82
+            },
+            {
+              "x": 1.25,
+              "y": 0,
+              "z": 0.4,
+              "u_over_u_inf": 1.03
+            }
+          ]
+        }
+      ]
+    }
   }
 ]

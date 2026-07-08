@@ -23,111 +23,77 @@
     "paper_url": "https://example.com/fluidsbench-flowformer",
     "code_url": "https://github.com/example/fluidsbench-flowformer",
     "submitted_at": "2026-07-08",
-    "note": "Dummy approved AhmedML submission used for integration testing."
-  },
-  {
-    "submission_id": "dummy-drivaerml-meshoperator-v1",
-    "model": "MeshOperator Plus",
-    "model_type": "Neural operator",
-    "dataset": "DrivAerML",
-    "split": "Default",
-    "parameter_count": 18.7,
-    "surface_pressure_l2": 3.08,
-    "surface_pressure_l1": 2.15,
-    "surface_tau_l2": 4.18,
-    "surface_tau_l1": 2.84,
-    "volume_velocity_l2": 2.04,
-    "volume_velocity_l1": 1.43,
-    "volume_pressure_l2": 2.42,
-    "volume_pressure_l1": 1.67,
-    "r2_cd": 0.991,
-    "r2_cl": 0.982,
-    "velocity_profile_r2": 0.978,
-    "cp_cut_r2": 0.973,
-    "submitter_name": "AeroAI Benchmarks",
-    "institution": "AeroAI Ltd",
-    "paper_url": "https://example.com/meshoperator-plus",
-    "code_url": "https://github.com/example/meshoperator-plus",
-    "submitted_at": "2026-07-08",
-    "note": "Dummy approved DrivAerML submission used for integration testing."
-  },
-  {
-    "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
-    "model": "SurfaceGNN CFD",
-    "model_type": "GNN",
-    "dataset": "DrivAerNet++",
-    "split": "Default",
-    "parameter_count": 9.6,
-    "surface_pressure_l2": 3.35,
-    "surface_pressure_l1": 2.36,
-    "surface_tau_l2": 4.7,
-    "surface_tau_l1": 3.2,
-    "volume_velocity_l2": 2.22,
-    "volume_velocity_l1": 1.55,
-    "volume_pressure_l2": 2.55,
-    "volume_pressure_l1": 1.76,
-    "r2_cd": 0.987,
-    "r2_cl": 0.979,
-    "velocity_profile_r2": 0.972,
-    "cp_cut_r2": 0.968,
-    "submitter_name": "Example CarBench Team",
-    "institution": "Example Motors Research",
-    "paper_url": "https://example.com/surfacegnn-cfd",
-    "code_url": "https://github.com/example/surfacegnn-cfd",
-    "submitted_at": "2026-07-08",
-    "note": "Dummy approved DrivAerNet++ submission used for integration testing."
-  },
-  {
-    "submission_id": "dummy-windsorml-wakenet-v1",
-    "model": "WakeNet Windsor",
-    "model_type": "Transformer",
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 7.8,
-    "surface_pressure_l2": 3.92,
-    "surface_pressure_l1": 2.78,
-    "surface_tau_l2": 5.08,
-    "surface_tau_l1": 3.46,
-    "volume_velocity_l2": 2.66,
-    "volume_velocity_l1": 1.87,
-    "volume_pressure_l2": 3.04,
-    "volume_pressure_l1": 2.1,
-    "r2_cd": 0.982,
-    "r2_cl": 0.971,
-    "velocity_profile_r2": 0.964,
-    "cp_cut_r2": 0.959,
-    "submitter_name": "Example Wind Tunnel AI",
-    "institution": "Example Aerodynamics Group",
-    "paper_url": "https://example.com/wakenet-windsor",
-    "code_url": "https://github.com/example/wakenet-windsor",
-    "submitted_at": "2026-07-08",
-    "note": "Dummy approved WindsorML submission used for integration testing."
-  },
-  {
-    "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
-    "model": "LiftOperator AoA",
-    "model_type": "Neural operator",
-    "dataset": "HiLiftAeroML",
-    "split": "Full",
-    "parameter_count": 16.3,
-    "surface_pressure_l2": 4.42,
-    "surface_pressure_l1": 3.18,
-    "surface_tau_l2": 5.92,
-    "surface_tau_l1": 4.02,
-    "volume_velocity_l2": 3.12,
-    "volume_velocity_l1": 2.18,
-    "volume_pressure_l2": 3.54,
-    "volume_pressure_l1": 2.45,
-    "r2_cd": 0.975,
-    "r2_cl": 0.986,
-    "velocity_profile_r2": 0.955,
-    "cp_cut_r2": 0.951,
-    "submitter_name": "Example High-Lift Lab",
-    "institution": "Example Aerospace Institute",
-    "paper_url": "https://example.com/liftoperator-aoa",
-    "code_url": "https://github.com/example/liftoperator-aoa",
-    "submitted_at": "2026-07-08",
-    "note": "Dummy approved HiLiftAeroML submission used for integration testing."
+    "note": "Dummy AhmedML submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "ahmedml_dummy_case_001",
+          "cut_id": "centreline_top",
+          "coordinate_frame": "body_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0.42,
+              "cp": 0.78
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0.42,
+              "cp": -0.15
+            },
+            {
+              "x": 0.5,
+              "y": 0,
+              "z": 0.42,
+              "cp": -0.34
+            },
+            {
+              "x": 0.75,
+              "y": 0,
+              "z": 0.42,
+              "cp": -0.2
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "ahmedml_dummy_case_001",
+          "station_id": "wake_x_0_50l",
+          "coordinate_frame": "body_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0.5,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.42
+            },
+            {
+              "x": 0.5,
+              "y": 0,
+              "z": 0.25,
+              "u_over_u_inf": 0.61
+            },
+            {
+              "x": 0.5,
+              "y": 0,
+              "z": 0.5,
+              "u_over_u_inf": 0.82
+            },
+            {
+              "x": 0.5,
+              "y": 0,
+              "z": 0.75,
+              "u_over_u_inf": 0.98
+            }
+          ]
+        }
+      ]
+    }
   },
   {
     "submission_id": "dummy-airfrans-airfoiloperator-v1",
@@ -153,6 +119,460 @@
     "paper_url": "https://example.com/airfoiloperator",
     "code_url": "https://github.com/example/airfoiloperator",
     "submitted_at": "2026-07-08",
-    "note": "Dummy approved AirfRANS submission used for integration testing."
+    "note": "Dummy AirfRANS submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "airfrans_dummy_case_001",
+          "cut_id": "airfoil_upper_surface",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0.03,
+              "cp": -0.92
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0.06,
+              "cp": -0.54
+            },
+            {
+              "x": 0.55,
+              "y": 0,
+              "z": 0.05,
+              "cp": -0.2
+            },
+            {
+              "x": 0.9,
+              "y": 0,
+              "z": 0.01,
+              "cp": 0.04
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "airfrans_dummy_case_001",
+          "station_id": "wake_x_1_50c",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 1.5,
+              "y": 0,
+              "z": -0.2,
+              "u_over_u_inf": 0.82
+            },
+            {
+              "x": 1.5,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.74
+            },
+            {
+              "x": 1.5,
+              "y": 0,
+              "z": 0.2,
+              "u_over_u_inf": 0.91
+            },
+            {
+              "x": 1.5,
+              "y": 0,
+              "z": 0.4,
+              "u_over_u_inf": 1.02
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "dummy-drivaerml-meshoperator-v1",
+    "model": "MeshOperator Plus",
+    "model_type": "Neural operator",
+    "dataset": "DrivAerML",
+    "split": "Default",
+    "parameter_count": 18.7,
+    "surface_pressure_l2": 3.08,
+    "surface_pressure_l1": 2.15,
+    "surface_tau_l2": 4.18,
+    "surface_tau_l1": 2.84,
+    "volume_velocity_l2": 2.04,
+    "volume_velocity_l1": 1.43,
+    "volume_pressure_l2": 2.42,
+    "volume_pressure_l1": 1.67,
+    "r2_cd": 0.991,
+    "r2_cl": 0.982,
+    "velocity_profile_r2": 0.978,
+    "cp_cut_r2": 0.973,
+    "submitter_name": "AeroAI Benchmarks",
+    "institution": "AeroAI Ltd",
+    "paper_url": "https://example.com/meshoperator-plus",
+    "code_url": "https://github.com/example/meshoperator-plus",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy DrivAerML submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "drivaerml_dummy_case_001",
+          "cut_id": "body_symmetry_line",
+          "coordinate_frame": "body_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.05,
+              "y": 0,
+              "z": 0.52,
+              "cp": 0.64
+            },
+            {
+              "x": 0.3,
+              "y": 0,
+              "z": 0.58,
+              "cp": -0.08
+            },
+            {
+              "x": 0.55,
+              "y": 0,
+              "z": 0.53,
+              "cp": -0.29
+            },
+            {
+              "x": 0.85,
+              "y": 0,
+              "z": 0.41,
+              "cp": -0.12
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "drivaerml_dummy_case_001",
+          "station_id": "wake_x_1_00l",
+          "coordinate_frame": "body_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.5
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0.25,
+              "u_over_u_inf": 0.68
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0.5,
+              "u_over_u_inf": 0.88
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0.75,
+              "u_over_u_inf": 1.01
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
+    "model": "SurfaceGNN CFD",
+    "model_type": "GNN",
+    "dataset": "DrivAerNet++",
+    "split": "Default",
+    "parameter_count": 9.6,
+    "surface_pressure_l2": 3.35,
+    "surface_pressure_l1": 2.36,
+    "surface_tau_l2": 4.7,
+    "surface_tau_l1": 3.2,
+    "volume_velocity_l2": 2.22,
+    "volume_velocity_l1": 1.55,
+    "volume_pressure_l2": 2.55,
+    "volume_pressure_l1": 1.76,
+    "r2_cd": 0.987,
+    "r2_cl": 0.979,
+    "velocity_profile_r2": 0.972,
+    "cp_cut_r2": 0.968,
+    "submitter_name": "Example CarBench Team",
+    "institution": "Example Motors Research",
+    "paper_url": "https://example.com/surfacegnn-cfd",
+    "code_url": "https://github.com/example/surfacegnn-cfd",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy DrivAerNet++ submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "drivaernetplusplus_dummy_case_001",
+          "cut_id": "centreline_roof",
+          "coordinate_frame": "body_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.05,
+              "y": 0,
+              "z": 0.5,
+              "cp": 0.58
+            },
+            {
+              "x": 0.32,
+              "y": 0,
+              "z": 0.56,
+              "cp": -0.05
+            },
+            {
+              "x": 0.6,
+              "y": 0,
+              "z": 0.52,
+              "cp": -0.25
+            },
+            {
+              "x": 0.9,
+              "y": 0,
+              "z": 0.38,
+              "cp": -0.1
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "drivaernetplusplus_dummy_case_001",
+          "station_id": "wake_x_0_75l",
+          "coordinate_frame": "body_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0.75,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.47
+            },
+            {
+              "x": 0.75,
+              "y": 0,
+              "z": 0.25,
+              "u_over_u_inf": 0.65
+            },
+            {
+              "x": 0.75,
+              "y": 0,
+              "z": 0.5,
+              "u_over_u_inf": 0.86
+            },
+            {
+              "x": 0.75,
+              "y": 0,
+              "z": 0.75,
+              "u_over_u_inf": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
+    "model": "LiftOperator AoA",
+    "model_type": "Neural operator",
+    "dataset": "HiLiftAeroML",
+    "split": "Full",
+    "parameter_count": 16.3,
+    "surface_pressure_l2": 4.42,
+    "surface_pressure_l1": 3.18,
+    "surface_tau_l2": 5.92,
+    "surface_tau_l1": 4.02,
+    "volume_velocity_l2": 3.12,
+    "volume_velocity_l1": 2.18,
+    "volume_pressure_l2": 3.54,
+    "volume_pressure_l1": 2.45,
+    "r2_cd": 0.975,
+    "r2_cl": 0.986,
+    "velocity_profile_r2": 0.955,
+    "cp_cut_r2": 0.951,
+    "submitter_name": "Example High-Lift Lab",
+    "institution": "Example Aerospace Institute",
+    "paper_url": "https://example.com/liftoperator-aoa",
+    "code_url": "https://github.com/example/liftoperator-aoa",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy HiLiftAeroML submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "hiliftaeroml_dummy_case_001",
+          "cut_id": "main_element_upper",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0.08,
+              "cp": -1.18
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0.1,
+              "cp": -0.72
+            },
+            {
+              "x": 0.55,
+              "y": 0,
+              "z": 0.08,
+              "cp": -0.38
+            },
+            {
+              "x": 0.9,
+              "y": 0,
+              "z": 0.02,
+              "cp": -0.05
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "hiliftaeroml_dummy_case_001",
+          "station_id": "wake_x_1_25c",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 1.25,
+              "y": 0,
+              "z": -0.2,
+              "u_over_u_inf": 0.72
+            },
+            {
+              "x": 1.25,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.58
+            },
+            {
+              "x": 1.25,
+              "y": 0,
+              "z": 0.2,
+              "u_over_u_inf": 0.82
+            },
+            {
+              "x": 1.25,
+              "y": 0,
+              "z": 0.4,
+              "u_over_u_inf": 1.03
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "dummy-windsorml-wakenet-v1",
+    "model": "WakeNet Windsor",
+    "model_type": "Transformer",
+    "dataset": "WindsorML",
+    "split": "Default",
+    "parameter_count": 7.8,
+    "surface_pressure_l2": 3.92,
+    "surface_pressure_l1": 2.78,
+    "surface_tau_l2": 5.08,
+    "surface_tau_l1": 3.46,
+    "volume_velocity_l2": 2.66,
+    "volume_velocity_l1": 1.87,
+    "volume_pressure_l2": 3.04,
+    "volume_pressure_l1": 2.1,
+    "r2_cd": 0.982,
+    "r2_cl": 0.971,
+    "velocity_profile_r2": 0.964,
+    "cp_cut_r2": 0.959,
+    "submitter_name": "Example Wind Tunnel AI",
+    "institution": "Example Aerodynamics Group",
+    "paper_url": "https://example.com/wakenet-windsor",
+    "code_url": "https://github.com/example/wakenet-windsor",
+    "submitted_at": "2026-07-08",
+    "note": "Dummy WindsorML submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "windsorml_dummy_case_001",
+          "cut_id": "roof_centreline",
+          "coordinate_frame": "body_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.04,
+              "y": 0,
+              "z": 0.48,
+              "cp": 0.52
+            },
+            {
+              "x": 0.28,
+              "y": 0,
+              "z": 0.53,
+              "cp": -0.03
+            },
+            {
+              "x": 0.58,
+              "y": 0,
+              "z": 0.49,
+              "cp": -0.21
+            },
+            {
+              "x": 0.88,
+              "y": 0,
+              "z": 0.35,
+              "cp": -0.08
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "windsorml_dummy_case_001",
+          "station_id": "wake_x_0_80l",
+          "coordinate_frame": "body_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 0.8,
+              "y": 0,
+              "z": 0.05,
+              "u_over_u_inf": 0.49
+            },
+            {
+              "x": 0.8,
+              "y": 0,
+              "z": 0.25,
+              "u_over_u_inf": 0.67
+            },
+            {
+              "x": 0.8,
+              "y": 0,
+              "z": 0.5,
+              "u_over_u_inf": 0.87
+            },
+            {
+              "x": 0.8,
+              "y": 0,
+              "z": 0.75,
+              "u_over_u_inf": 1
+            }
+          ]
+        }
+      ]
+    }
   }
 ]

@@ -23,6 +23,76 @@
     "paper_url": "https://example.com/airfoiloperator",
     "code_url": "https://github.com/example/airfoiloperator",
     "submitted_at": "2026-07-08",
-    "note": "Dummy approved AirfRANS submission used for integration testing."
+    "note": "Dummy AirfRANS submission with compact diagnostic curves.",
+    "diagnostics": {
+      "cp_cuts": [
+        {
+          "case_id": "airfrans_dummy_case_001",
+          "cut_id": "airfoil_upper_surface",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0.03,
+              "cp": -0.92
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0.06,
+              "cp": -0.54
+            },
+            {
+              "x": 0.55,
+              "y": 0,
+              "z": 0.05,
+              "cp": -0.2
+            },
+            {
+              "x": 0.9,
+              "y": 0,
+              "z": 0.01,
+              "cp": 0.04
+            }
+          ]
+        }
+      ],
+      "velocity_profiles": [
+        {
+          "case_id": "airfrans_dummy_case_001",
+          "station_id": "wake_x_1_50c",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "u_over_u_inf",
+          "values": [
+            {
+              "x": 1.5,
+              "y": 0,
+              "z": -0.2,
+              "u_over_u_inf": 0.82
+            },
+            {
+              "x": 1.5,
+              "y": 0,
+              "z": 0,
+              "u_over_u_inf": 0.74
+            },
+            {
+              "x": 1.5,
+              "y": 0,
+              "z": 0.2,
+              "u_over_u_inf": 0.91
+            },
+            {
+              "x": 1.5,
+              "y": 0,
+              "z": 0.4,
+              "u_over_u_inf": 1.02
+            }
+          ]
+        }
+      ]
+    }
   }
 ]
