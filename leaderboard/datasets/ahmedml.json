@@ -6,6 +6,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 8.75,
@@ -326,6 +330,18 @@
       "Transformer",
       "Neural operator"
     ],
+    "training_regime": "pretrained_zero_shot",
+    "target_data_used": "none",
+    "external_pretraining": true,
+    "pretraining_data": [
+      {
+        "name": "Example external CFD pretraining corpus",
+        "type": "CFD simulations",
+        "public": false,
+        "samples": "TODO",
+        "notes": "Dummy metadata showing a zero-shot submission with no target dataset training data."
+      }
+    ],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 12.4,
@@ -425,6 +441,10 @@
     "model_types": [
       "Neural operator"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 15.6,
@@ -744,6 +764,10 @@
     "model_types": [
       "GNN"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 14.11,
@@ -1063,6 +1087,10 @@
     "model_types": [
       "Neural operator"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 6.3,
@@ -1382,6 +1410,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 6.1,
@@ -1701,6 +1733,10 @@
     "model_types": [
       "Point cloud"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 3.6,
@@ -2020,6 +2056,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -2339,6 +2379,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 5.49,
@@ -2658,6 +2702,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "AhmedML",
     "split": "Default",
     "parameter_count": 10.98,

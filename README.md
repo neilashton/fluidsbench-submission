@@ -12,7 +12,7 @@ preparing a submission.
 
 A submission is a JSON file containing:
 
-- submission metadata, such as model name, one or more model types, submitter name, institution, paper URL, and code URL
+- submission metadata, such as model name, one or more model types, training regime, submitter name, institution, paper URL, and code URL
 - the dataset and split being evaluated
 - scalar leaderboard metrics, such as L1/L2 field errors, force R2 values, velocity-profile R2, and Cp-cut R2
 - compact diagnostic curve data for selected Cp cuts and velocity profiles
@@ -75,12 +75,27 @@ At minimum, each submission should include:
 Use `model_types` for the model category list. `model_type` is kept as the primary category for backwards compatibility
 with older tooling; it should usually match the first entry in `model_types`.
 
+Use `training_regime` to describe whether the submission was trained only on the official dataset training split or used
+external pretraining. Allowed values are:
+
+- `from_scratch`: trained without external pretraining
+- `pretrained_zero_shot`: pretrained externally and evaluated without target dataset training data
+- `pretrained_official_train`: pretrained externally and then used the official benchmark training split
+- `other`: anything that does not fit the above categories
+
+Use `target_data_used` to clarify the target benchmark data used by the submission. Current values are `official_train`,
+`none`, and `other`.
+
 ```json
 {
   "submission_id": "todo-unique-submission-id",
   "model": "TODO model name",
   "model_type": "TODO primary model type",
   "model_types": ["TODO primary model type", "TODO optional second model type"],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
   "dataset": "TODO dataset name",
   "split": "TODO split name",
   "submitter_name": "TODO person, lab, or company",

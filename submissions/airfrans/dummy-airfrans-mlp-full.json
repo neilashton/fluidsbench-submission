@@ -5,6 +5,10 @@
   "model_types": [
     "MLP"
   ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
   "dataset": "AirfRANS",
   "split": "Full",
   "parameter_count": 0.02,

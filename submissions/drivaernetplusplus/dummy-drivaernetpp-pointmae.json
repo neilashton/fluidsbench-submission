@@ -5,6 +5,10 @@
   "model_types": [
     "Point cloud"
   ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
   "dataset": "DrivAerNet++",
   "split": "Default",
   "parameter_count": 1.67,

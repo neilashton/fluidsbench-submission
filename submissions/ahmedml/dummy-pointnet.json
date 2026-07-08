@@ -5,6 +5,10 @@
   "model_types": [
     "Point cloud"
   ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
   "dataset": "AhmedML",
   "split": "Default",
   "parameter_count": 3.6,

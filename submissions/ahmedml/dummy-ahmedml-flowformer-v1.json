@@ -6,6 +6,18 @@
     "Transformer",
     "Neural operator"
   ],
+  "training_regime": "pretrained_zero_shot",
+  "target_data_used": "none",
+  "external_pretraining": true,
+  "pretraining_data": [
+    {
+      "name": "Example external CFD pretraining corpus",
+      "type": "CFD simulations",
+      "public": false,
+      "samples": "TODO",
+      "notes": "Dummy metadata showing a zero-shot submission with no target dataset training data."
+    }
+  ],
   "dataset": "AhmedML",
   "split": "Default",
   "parameter_count": 12.4,

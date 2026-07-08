@@ -6,6 +6,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "HiLiftAeroML",
     "split": "AoA 12",
     "parameter_count": 9.05,
@@ -307,6 +311,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "HiLiftAeroML",
     "split": "AoA 22",
     "parameter_count": 9.05,
@@ -608,6 +616,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "HiLiftAeroML",
     "split": "AoA 4",
     "parameter_count": 9.05,
@@ -909,6 +921,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "HiLiftAeroML",
     "split": "Full",
     "parameter_count": 9.05,
@@ -1210,6 +1226,10 @@
     "model_types": [
       "Neural operator"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "HiLiftAeroML",
     "split": "Full",
     "parameter_count": 16.3,
@@ -1309,6 +1329,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "HiLiftAeroML",
     "split": "AoA 12",
     "parameter_count": 6.02,
@@ -1610,6 +1634,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "HiLiftAeroML",
     "split": "AoA 22",
     "parameter_count": 6.02,
@@ -1911,6 +1939,10 @@
     "model_types": [
       "Transformer"
     ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
     "dataset": "HiLiftAeroML",
     "split": "AoA 4",
     "parameter_count": 6.02,
