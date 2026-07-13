@@ -8,7 +8,73 @@
       "slug": "ahmedml",
       "file": "leaderboard/datasets/ahmedml.json",
       "submission_count": 10,
-      "updated_at": "2026-07-08"
+      "updated_at": "2026-07-08",
+      "splits": [
+        {
+          "id": "full",
+          "name": "Full",
+          "train_count": 400,
+          "validation_count": 50,
+          "test_count": 50,
+          "description": "Seed-42 random public baseline split."
+        },
+        {
+          "id": "medium",
+          "name": "Medium",
+          "train_count": 133,
+          "validation_count": 50,
+          "test_count": 50,
+          "description": "Nested data-efficiency subset with fixed validation and test cases."
+        },
+        {
+          "id": "scarce",
+          "name": "Scarce",
+          "train_count": 67,
+          "validation_count": 50,
+          "test_count": 50,
+          "description": "Smaller nested data-efficiency subset with fixed validation and test cases."
+        },
+        {
+          "id": "super_scarce",
+          "name": "Super scarce",
+          "train_count": 11,
+          "validation_count": 50,
+          "test_count": 50,
+          "description": "Minimum-data nested training subset with fixed validation and test cases."
+        },
+        {
+          "id": "geometry",
+          "name": "Geometry",
+          "train_count": 350,
+          "validation_count": 50,
+          "test_count": 100,
+          "description": "STL-Chamfer geometry out-of-distribution split."
+        },
+        {
+          "id": "high_drag",
+          "name": "High drag",
+          "train_count": 350,
+          "validation_count": 50,
+          "test_count": 100,
+          "description": "High-drag force-regime out-of-distribution split."
+        },
+        {
+          "id": "low_drag",
+          "name": "Low drag",
+          "train_count": 350,
+          "validation_count": 50,
+          "test_count": 100,
+          "description": "Low-drag force-regime out-of-distribution split."
+        },
+        {
+          "id": "image_wake",
+          "name": "Image wake",
+          "train_count": 350,
+          "validation_count": 50,
+          "test_count": 100,
+          "description": "Image-derived UxMean wake out-of-distribution split."
+        }
+      ]
     },
     {
       "name": "AirfRANS",
@@ -22,7 +88,73 @@
       "slug": "drivaerml",
       "file": "leaderboard/datasets/drivaerml.json",
       "submission_count": 10,
-      "updated_at": "2026-07-08"
+      "updated_at": "2026-07-08",
+      "splits": [
+        {
+          "id": "full",
+          "name": "Full",
+          "train_count": 400,
+          "validation_count": 34,
+          "test_count": 50,
+          "description": "Seed-42 random public baseline split."
+        },
+        {
+          "id": "medium",
+          "name": "Medium",
+          "train_count": 133,
+          "validation_count": 34,
+          "test_count": 50,
+          "description": "Nested data-efficiency subset with fixed validation and test cases."
+        },
+        {
+          "id": "scarce",
+          "name": "Scarce",
+          "train_count": 67,
+          "validation_count": 34,
+          "test_count": 50,
+          "description": "Smaller nested data-efficiency subset with fixed validation and test cases."
+        },
+        {
+          "id": "super_scarce",
+          "name": "Super scarce",
+          "train_count": 11,
+          "validation_count": 34,
+          "test_count": 50,
+          "description": "Minimum-data nested training subset with fixed validation and test cases."
+        },
+        {
+          "id": "geometry",
+          "name": "Geometry",
+          "train_count": 339,
+          "validation_count": 48,
+          "test_count": 97,
+          "description": "STL-surface Chamfer geometry out-of-distribution split."
+        },
+        {
+          "id": "high_drag",
+          "name": "High drag",
+          "train_count": 339,
+          "validation_count": 48,
+          "test_count": 97,
+          "description": "High-drag force-regime out-of-distribution split."
+        },
+        {
+          "id": "low_drag",
+          "name": "Low drag",
+          "train_count": 339,
+          "validation_count": 48,
+          "test_count": 97,
+          "description": "Low-drag force-regime out-of-distribution split."
+        },
+        {
+          "id": "rear_separation",
+          "name": "Rear separation",
+          "train_count": 339,
+          "validation_count": 48,
+          "test_count": 97,
+          "description": "Image-derived low-speed wake and rear-separation out-of-distribution split."
+        }
+      ]
     },
     {
       "name": "DrivAerNet++",

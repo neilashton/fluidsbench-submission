@@ -75,6 +75,31 @@ At minimum, each submission should include:
 Use `model_types` for the model category list. `model_type` is kept as the primary category for backwards compatibility
 with older tooling; it should usually match the first entry in `model_types`.
 
+Use `split` to identify the benchmark split that was evaluated. The leaderboard displays the human-readable split names
+below, and `leaderboard/manifest.json` stores the same split names with canonical IDs and train/validation/test counts.
+
+Current AhmedML split values:
+
+- `Full`
+- `Medium`
+- `Scarce`
+- `Super scarce`
+- `Geometry`
+- `High drag`
+- `Low drag`
+- `Image wake`
+
+Current DrivAerML split values:
+
+- `Full`
+- `Medium`
+- `Scarce`
+- `Super scarce`
+- `Geometry`
+- `High drag`
+- `Low drag`
+- `Rear separation`
+
 Use `training_regime` to describe whether the submission was trained only on the official dataset training split or used
 external pretraining. Allowed values are:
 
