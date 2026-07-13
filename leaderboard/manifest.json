@@ -168,7 +168,135 @@
       "slug": "hiliftaeroml",
       "file": "leaderboard/datasets/hiliftaeroml.json",
       "submission_count": 8,
-      "updated_at": "2026-07-08"
+      "updated_at": "2026-07-08",
+      "splits": [
+        {
+          "id": "full",
+          "name": "Full",
+          "type": "in_distribution",
+          "train_count": 1260,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Random case-level baseline split."
+        },
+        {
+          "id": "medium",
+          "name": "Medium",
+          "type": "in_distribution",
+          "train_count": 510,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Intermediate data-efficiency split between Full and Scarce."
+        },
+        {
+          "id": "scarce",
+          "name": "Scarce",
+          "type": "in_distribution",
+          "train_count": 210,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Data-efficiency split using one sixth of the Full training data."
+        },
+        {
+          "id": "super_scarce",
+          "name": "Super scarce",
+          "type": "in_distribution",
+          "train_count": 35,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Extreme data-efficiency split using one thirty-sixth of the Full training data."
+        },
+        {
+          "id": "geometry",
+          "name": "Geometry",
+          "type": "in_distribution",
+          "train_count": 1260,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Generalization to unseen geometries, with all 10 AoAs per selected geometry."
+        },
+        {
+          "id": "geometry_medium",
+          "name": "Geometry medium",
+          "type": "in_distribution",
+          "train_count": 510,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Unseen-geometry generalization from 51 training geometries."
+        },
+        {
+          "id": "geometry_scarce",
+          "name": "Geometry scarce",
+          "type": "in_distribution",
+          "train_count": 210,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Unseen-geometry generalization from 21 training geometries."
+        },
+        {
+          "id": "geometry_super_scarce",
+          "name": "Geometry super scarce",
+          "type": "in_distribution",
+          "train_count": 40,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Unseen-geometry generalization from 4 training geometries."
+        },
+        {
+          "id": "single_aoa_4",
+          "name": "AoA 4",
+          "type": "in_distribution",
+          "train_count": 126,
+          "validation_count": 18,
+          "test_count": 36,
+          "description": "Single-AoA geometry generalization at 4 degrees."
+        },
+        {
+          "id": "single_aoa_12",
+          "name": "AoA 12",
+          "type": "in_distribution",
+          "train_count": 126,
+          "validation_count": 18,
+          "test_count": 36,
+          "description": "Single-AoA geometry generalization at 12 degrees."
+        },
+        {
+          "id": "single_aoa_22",
+          "name": "AoA 22",
+          "type": "in_distribution",
+          "train_count": 126,
+          "validation_count": 18,
+          "test_count": 36,
+          "description": "Single-AoA geometry generalization at 22 degrees."
+        },
+        {
+          "id": "aoa",
+          "name": "AoA extrapolation",
+          "type": "ood",
+          "train_count": 788,
+          "validation_count": 112,
+          "test_count": 900,
+          "description": "Train and validate on AoA <= 12 degrees, then test on AoA >= 14 degrees."
+        },
+        {
+          "id": "deflection",
+          "name": "Deflection",
+          "type": "ood",
+          "train_count": 1260,
+          "validation_count": 180,
+          "test_count": 360,
+          "description": "Geometry extrapolation from low mean deflection to high deflection settings."
+        },
+        {
+          "id": "stall",
+          "name": "Stall",
+          "type": "ood",
+          "train_count": 942,
+          "validation_count": 135,
+          "test_count": 723,
+          "description": "Flow-regime extrapolation from pre-stall training cases to post-stall test cases."
+        }
+      ]
     },
     {
       "name": "WindsorML",

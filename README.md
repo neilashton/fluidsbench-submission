@@ -100,6 +100,23 @@ Current DrivAerML split values:
 - `Low drag`
 - `Rear separation`
 
+Current HiLiftAeroML split values:
+
+- `Full`
+- `Medium`
+- `Scarce`
+- `Super scarce`
+- `Geometry`
+- `Geometry medium`
+- `Geometry scarce`
+- `Geometry super scarce`
+- `AoA 4`
+- `AoA 12`
+- `AoA 22`
+- `AoA extrapolation`
+- `Deflection`
+- `Stall`
+
 Use `training_regime` to describe whether the submission was trained only on the official dataset training split or used
 external pretraining. Allowed values are:
 
