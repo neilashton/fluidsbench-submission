@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.2.0",
+  "schema_version": "0.3.0",
   "generated_at": "2026-07-08T00:00:00Z",
   "all_file": "leaderboard/all.json",
   "metric_catalog": {
@@ -157,7 +157,35 @@
           "test_count": 100,
           "description": "Image-derived UxMean wake out-of-distribution split."
         }
-      ]
+      ],
+      "diagnostics": {
+        "cp_stations": [
+          {
+            "id": "upper_body_centerline",
+            "label": "Upper-body centreline",
+            "x_label": "x/L along upper-body centreline",
+            "description": "FluidsBench symmetry-plane trace over the roof and rear slant.",
+            "basis": "fluidsbench_benchmark_trace",
+            "source_url": "https://arxiv.org/abs/2407.20801"
+          },
+          {
+            "id": "underbody_centerline",
+            "label": "Underbody centreline",
+            "x_label": "x/L along underbody centreline",
+            "description": "FluidsBench symmetry-plane trace along the Ahmed body underfloor.",
+            "basis": "fluidsbench_benchmark_trace",
+            "source_url": "https://arxiv.org/abs/2407.20801"
+          },
+          {
+            "id": "rear_slant_centerline",
+            "label": "Rear-slant centreline",
+            "x_label": "s/L along rear-slant centreline",
+            "description": "FluidsBench centreline trace across the pressure-sensitive rear slant.",
+            "basis": "fluidsbench_benchmark_trace",
+            "source_url": "https://arxiv.org/abs/2407.20801"
+          }
+        ]
+      }
     },
     {
       "name": "AirfRANS",
@@ -198,7 +226,27 @@
           "name": "AoA extrapolation",
           "description": "Out-of-distribution split for angle-of-attack extrapolation."
         }
-      ]
+      ],
+      "diagnostics": {
+        "cp_stations": [
+          {
+            "id": "upper_surface",
+            "label": "Upper surface (extrados)",
+            "x_label": "x/c along upper airfoil surface",
+            "description": "Upper-surface pressure-coefficient trace used by the AirfRANS validation and benchmark plots.",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2212.07564"
+          },
+          {
+            "id": "lower_surface",
+            "label": "Lower surface (intrados)",
+            "x_label": "x/c along lower airfoil surface",
+            "description": "Lower-surface pressure-coefficient trace used by the AirfRANS validation and benchmark plots.",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2212.07564"
+          }
+        ]
+      }
     },
     {
       "name": "DrivAerML",
@@ -283,7 +331,43 @@
           "test_count": 97,
           "description": "Image-derived low-speed wake and rear-separation out-of-distribution split."
         }
-      ]
+      ],
+      "diagnostics": {
+        "cp_stations": [
+          {
+            "id": "upperbody_centerline",
+            "label": "Upper-body centreline (y = 0 m)",
+            "x_label": "x/L along upper-body centreline",
+            "description": "Upper-body pressure-probe trace used in the DrivAerML validation study (Figure 17a).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2408.11969"
+          },
+          {
+            "id": "underbody_centerline",
+            "label": "Underbody centreline (y = 0 m)",
+            "x_label": "x/L along underbody centreline",
+            "description": "Underbody pressure-probe trace used in the DrivAerML validation study (Figure 17b).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2408.11969"
+          },
+          {
+            "id": "sidewall_z_0_15",
+            "label": "Sidewall (z = 0.15 m)",
+            "x_label": "x/L along sidewall trace",
+            "description": "Sidewall pressure-probe trace used in the DrivAerML supplementary validation (Figure 22a).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2408.11969"
+          },
+          {
+            "id": "front_left_wheelhouse_y_neg_0_6",
+            "label": "Front-left wheelhouse (y = -0.6 m)",
+            "x_label": "s/L along wheelhouse trace",
+            "description": "Front-left wheelhouse pressure-probe trace used in the DrivAerML supplementary validation (Figure 22b).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2408.11969"
+          }
+        ]
+      }
     },
     {
       "name": "DrivAerNet++",
@@ -301,6 +385,42 @@
         "coefficient_errors": [
           "c_drag",
           "c_lift"
+        ]
+      },
+      "diagnostics": {
+        "cp_stations": [
+          {
+            "id": "upper_body_centerline",
+            "label": "Upper-body centreline",
+            "x_label": "x/L along upper-body centreline",
+            "description": "FluidsBench trace through the annotated upper-body components.",
+            "basis": "fluidsbench_benchmark_trace",
+            "source_url": "https://arxiv.org/abs/2406.09624"
+          },
+          {
+            "id": "underbody_centerline",
+            "label": "Underbody centreline",
+            "x_label": "x/L along underbody centreline",
+            "description": "FluidsBench trace through the smooth or detailed underbody configuration.",
+            "basis": "fluidsbench_benchmark_trace",
+            "source_url": "https://arxiv.org/abs/2406.09624"
+          },
+          {
+            "id": "front_wheelhouse",
+            "label": "Front wheelhouse",
+            "x_label": "s/L along front-wheelhouse trace",
+            "description": "FluidsBench trace through the annotated front-wheel region.",
+            "basis": "fluidsbench_benchmark_trace",
+            "source_url": "https://arxiv.org/abs/2406.09624"
+          },
+          {
+            "id": "rear_body_centerline",
+            "label": "Rear-body centreline",
+            "x_label": "s/L along rear-body centreline",
+            "description": "FluidsBench trace through the fastback, notchback, or estateback rear surface.",
+            "basis": "fluidsbench_benchmark_trace",
+            "source_url": "https://arxiv.org/abs/2406.09624"
+          }
         ]
       }
     },
@@ -450,7 +570,43 @@
           "test_count": 723,
           "description": "Flow-regime extrapolation from pre-stall training cases to post-stall test cases."
         }
-      ]
+      ],
+      "diagnostics": {
+        "cp_stations": [
+          {
+            "id": "pressure_belt_a",
+            "label": "Pressure belt A",
+            "x_label": "x/c along pressure belt A",
+            "description": "Published CRM-HL inboard surface-pressure belt used in the HiLiftAeroML validation (Figure 15).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2605.19565"
+          },
+          {
+            "id": "pressure_belt_d",
+            "label": "Pressure belt D",
+            "x_label": "x/c along pressure belt D",
+            "description": "Published CRM-HL surface-pressure belt D used in the HiLiftAeroML validation (Figure 15).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2605.19565"
+          },
+          {
+            "id": "pressure_belt_g",
+            "label": "Pressure belt G",
+            "x_label": "x/c along pressure belt G",
+            "description": "Published CRM-HL surface-pressure belt G used in the HiLiftAeroML validation (Figure 15).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2605.19565"
+          },
+          {
+            "id": "pressure_belt_i",
+            "label": "Pressure belt I",
+            "x_label": "x/c along pressure belt I",
+            "description": "Published CRM-HL outboard surface-pressure belt used in the HiLiftAeroML validation (Figure 15).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2605.19565"
+          }
+        ]
+      }
     },
     {
       "name": "WindsorML",
@@ -468,6 +624,26 @@
         "coefficient_errors": [
           "c_drag",
           "c_lift"
+        ]
+      },
+      "diagnostics": {
+        "cp_stations": [
+          {
+            "id": "symmetry_plane_z_0",
+            "label": "Symmetry-plane trace (z = 0 m)",
+            "x_label": "x/L along z = 0 m surface trace",
+            "description": "Mean surface-pressure cut used in the WindsorML supplementary validation (Figure 18).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2407.19320"
+          },
+          {
+            "id": "horizontal_cut_y_0_2595",
+            "label": "Horizontal trace (y = 0.2595 m)",
+            "x_label": "x/L along y = 0.2595 m surface trace",
+            "description": "Mean surface-pressure cut used in the WindsorML supplementary validation (Figure 19).",
+            "basis": "published_validation_trace",
+            "source_url": "https://arxiv.org/abs/2407.19320"
+          }
         ]
       }
     }

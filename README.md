@@ -175,7 +175,19 @@ Use `target_data_used` to clarify the target benchmark data used by the submissi
     "c_lift": 0.0
   },
   "diagnostics": {
-    "cp_cuts": [],
+    "cp_cuts": [
+      {
+        "case_id": "TODO evaluator case ID",
+        "cut_id": "TODO unique cut ID",
+        "station_id": "TODO manifest Cp station ID",
+        "coordinate_frame": "TODO dataset coordinate frame",
+        "quantity": "cp",
+        "values": [
+          {"x": 0.0, "cp": 0.0},
+          {"x": 1.0, "cp": 0.0}
+        ]
+      }
+    ],
     "velocity_profiles": []
   }
 }
@@ -184,6 +196,11 @@ Use `target_data_used` to clarify the target benchmark data used by the submissi
 The enabled dimensional fields and coefficient errors are dataset-specific. `leaderboard/manifest.json` is authoritative:
 its `metric_catalog` defines labels, SI display units, precision, and weighting, while each dataset's `metrics` object
 lists the IDs that must be present. HiLiftAeroML currently also requires `absolute_coefficient_errors.c_pitch`.
+
+Each dataset also defines `diagnostics.cp_stations` in the manifest. Every submitted Cp series must include the matching
+`station_id`, and one series is required for every station defined for that dataset. The manifest supplies the display label,
+x-axis label, definition basis, description, and official source URL. Published validation traces are used where the dataset
+paper defines them; otherwise the entry is explicitly marked as a `fluidsbench_benchmark_trace`.
 
 The evaluator must compute dimensional metrics after undoing model normalization and converting predictions and targets
 to the SI unit declared in the manifest. Submitted values must be evaluator outputs; they must not be inferred from the
@@ -230,7 +247,8 @@ The validator checks:
 - dataset names, dataset folders, and manifest-defined splits
 - finite numeric values and allowed metric ranges
 - every dataset-required dimensional field MAE/RMSE and coefficient MAE
-- the presence of Cp-cut and velocity-profile diagnostic arrays
+- complete dataset-defined Cp station coverage with finite `x` and `cp` points
+- the presence of the velocity-profile diagnostic array
 
 ## Review process
 

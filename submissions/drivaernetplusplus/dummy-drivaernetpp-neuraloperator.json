@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "drivaernetpp-neuraloperator_dummy_case_001",
-        "cut_id": "prototype_cp_cut",
+        "cut_id": "prototype_upper_body_centerline",
+        "station_id": "upper_body_centerline",
+        "station_label": "Upper-body centreline",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -109,6 +111,252 @@
             "y": 0,
             "z": 0,
             "cp": -0.0753
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-neuraloperator_dummy_case_001",
+        "cut_id": "prototype_underbody_centerline",
+        "station_id": "underbody_centerline",
+        "station_label": "Underbody centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.9458
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.6103
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.4458
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1095
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0157
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3013
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2214
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3111
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0384
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0435
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3678
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1013
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-neuraloperator_dummy_case_001",
+        "cut_id": "prototype_front_wheelhouse",
+        "station_id": "front_wheelhouse",
+        "station_label": "Front wheelhouse",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 1.0284
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5632
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3412
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1575
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3569
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.906
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.7754
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": -0.7607
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1271
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1357
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2585
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2058
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-neuraloperator_dummy_case_001",
+        "cut_id": "prototype_rear_body_centerline",
+        "station_id": "rear_body_centerline",
+        "station_label": "Rear-body centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.9147
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7225
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.6378
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3148
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0465
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2919
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0038
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0769
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1739
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0406
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3575
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2218
           }
         ]
       }
@@ -334,7 +582,7 @@
       "rmse": 14.57
     },
     "volume_pressure": {
-      "mae": 153.0,
+      "mae": 153,
       "rmse": 221.7
     }
   },

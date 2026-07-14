@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "drivaerml-transolver_dummy_case_001",
-        "cut_id": "prototype_cp_cut",
+        "cut_id": "prototype_upperbody_centerline",
+        "station_id": "upperbody_centerline",
+        "station_label": "Upper-body centreline (y = 0 m)",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -109,6 +111,252 @@
             "y": 0,
             "z": 0,
             "cp": -0.0094
+          }
+        ]
+      },
+      {
+        "case_id": "drivaerml-transolver_dummy_case_001",
+        "cut_id": "prototype_underbody_centerline",
+        "station_id": "underbody_centerline",
+        "station_label": "Underbody centreline (y = 0 m)",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.8973
+          },
+          {
+            "x": 0.06,
+            "y": 0,
+            "z": 0,
+            "cp": 0.6106
+          },
+          {
+            "x": 0.12,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3781
+          },
+          {
+            "x": 0.2,
+            "y": 0,
+            "z": 0,
+            "cp": 0.123
+          },
+          {
+            "x": 0.31,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0091
+          },
+          {
+            "x": 0.43,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2228
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2284
+          },
+          {
+            "x": 0.68,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2462
+          },
+          {
+            "x": 0.79,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0102
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0887
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2961
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1527
+          }
+        ]
+      },
+      {
+        "case_id": "drivaerml-transolver_dummy_case_001",
+        "cut_id": "prototype_sidewall_z_0_15",
+        "station_id": "sidewall_z_0_15",
+        "station_label": "Sidewall (z = 0.15 m)",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.9575
+          },
+          {
+            "x": 0.06,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5679
+          },
+          {
+            "x": 0.12,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2433
+          },
+          {
+            "x": 0.2,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1459
+          },
+          {
+            "x": 0.31,
+            "y": 0,
+            "z": 0,
+            "cp": -0.4178
+          },
+          {
+            "x": 0.43,
+            "y": 0,
+            "z": 0,
+            "cp": -0.8006
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0,
+            "cp": -0.7608
+          },
+          {
+            "x": 0.68,
+            "y": 0,
+            "z": 0,
+            "cp": -0.6272
+          },
+          {
+            "x": 0.79,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1899
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0697
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1537
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1307
+          }
+        ]
+      },
+      {
+        "case_id": "drivaerml-transolver_dummy_case_001",
+        "cut_id": "prototype_front_left_wheelhouse_y_neg_0_6",
+        "station_id": "front_left_wheelhouse_y_neg_0_6",
+        "station_label": "Front-left wheelhouse (y = -0.6 m)",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.8749
+          },
+          {
+            "x": 0.06,
+            "y": 0,
+            "z": 0,
+            "cp": 0.736
+          },
+          {
+            "x": 0.12,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5828
+          },
+          {
+            "x": 0.2,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2937
+          },
+          {
+            "x": 0.31,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0236
+          },
+          {
+            "x": 0.43,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1904
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0623
+          },
+          {
+            "x": 0.68,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1047
+          },
+          {
+            "x": 0.79,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0946
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0777
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2986
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.264
           }
         ]
       }

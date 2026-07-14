@@ -43,7 +43,9 @@
     "cp_cuts": [
       {
         "case_id": "ahmedml_dummy_case_001",
-        "cut_id": "centreline_top",
+        "cut_id": "prototype_upper_body_centerline",
+        "station_id": "upper_body_centerline",
+        "station_label": "Upper-body centreline",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -70,6 +72,74 @@
             "y": 0,
             "z": 0.42,
             "cp": -0.2
+          }
+        ]
+      },
+      {
+        "case_id": "ahmedml_dummy_case_001",
+        "cut_id": "prototype_underbody_centerline",
+        "station_id": "underbody_centerline",
+        "station_label": "Underbody centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.42,
+            "cp": 0.7684
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0.42,
+            "cp": 0.098
+          },
+          {
+            "x": 0.5,
+            "y": 0,
+            "z": 0.42,
+            "cp": -0.1052
+          },
+          {
+            "x": 0.75,
+            "y": 0,
+            "z": 0.42,
+            "cp": -0.051
+          }
+        ]
+      },
+      {
+        "case_id": "ahmedml_dummy_case_001",
+        "cut_id": "prototype_rear_slant_centerline",
+        "station_id": "rear_slant_centerline",
+        "station_label": "Rear-slant centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0.42,
+            "cp": 0.7692
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0.42,
+            "cp": -0.2132
+          },
+          {
+            "x": 0.5,
+            "y": 0,
+            "z": 0.42,
+            "cp": -0.6176
+          },
+          {
+            "x": 0.75,
+            "y": 0,
+            "z": 0.42,
+            "cp": -0.2702
           }
         ]
       }

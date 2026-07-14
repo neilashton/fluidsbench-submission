@@ -35,7 +35,9 @@
       "cp_cuts": [
         {
           "case_id": "airfrans_dummy_case_001",
-          "cut_id": "airfoil_upper_surface",
+          "cut_id": "prototype_upper_surface",
+          "station_id": "upper_surface",
+          "station_label": "Upper surface (extrados)",
           "coordinate_frame": "chord_normalized",
           "quantity": "cp",
           "values": [
@@ -62,6 +64,40 @@
               "y": 0,
               "z": 0.01,
               "cp": 0.04
+            }
+          ]
+        },
+        {
+          "case_id": "airfrans_dummy_case_001",
+          "cut_id": "prototype_lower_surface",
+          "station_id": "lower_surface",
+          "station_label": "Lower surface (intrados)",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0.02,
+              "y": 0,
+              "z": 0.03,
+              "cp": 0.5686
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0.06,
+              "cp": 0.4315
+            },
+            {
+              "x": 0.55,
+              "y": 0,
+              "z": 0.05,
+              "cp": 0.2986
+            },
+            {
+              "x": 0.9,
+              "y": 0,
+              "z": 0.01,
+              "cp": 0.174
             }
           ]
         }
@@ -160,7 +196,9 @@
       "cp_cuts": [
         {
           "case_id": "airfrans-graph-u-net-full_dummy_case_001",
-          "cut_id": "prototype_cp_cut",
+          "cut_id": "prototype_upper_surface",
+          "station_id": "upper_surface",
+          "station_label": "Upper surface (extrados)",
           "coordinate_frame": "chord_normalized",
           "quantity": "cp",
           "values": [
@@ -235,6 +273,88 @@
               "y": 0,
               "z": 0,
               "cp": -0.004
+            }
+          ]
+        },
+        {
+          "case_id": "airfrans-graph-u-net-full_dummy_case_001",
+          "cut_id": "prototype_lower_surface",
+          "station_id": "lower_surface",
+          "station_label": "Lower surface (intrados)",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1111
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": 0.7983
+            },
+            {
+              "x": 0.025,
+              "y": 0,
+              "z": 0,
+              "cp": 0.6552
+            },
+            {
+              "x": 0.05,
+              "y": 0,
+              "z": 0,
+              "cp": 0.572
+            },
+            {
+              "x": 0.09,
+              "y": 0,
+              "z": 0,
+              "cp": 0.4225
+            },
+            {
+              "x": 0.15,
+              "y": 0,
+              "z": 0,
+              "cp": 0.4064
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2859
+            },
+            {
+              "x": 0.38,
+              "y": 0,
+              "z": 0,
+              "cp": 0.3101
+            },
+            {
+              "x": 0.52,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2033
+            },
+            {
+              "x": 0.68,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2445
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1261
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1817
             }
           ]
         }
@@ -487,7 +607,9 @@
       "cp_cuts": [
         {
           "case_id": "airfrans-graphsage-full_dummy_case_001",
-          "cut_id": "prototype_cp_cut",
+          "cut_id": "prototype_upper_surface",
+          "station_id": "upper_surface",
+          "station_label": "Upper surface (extrados)",
           "coordinate_frame": "chord_normalized",
           "quantity": "cp",
           "values": [
@@ -562,6 +684,88 @@
               "y": 0,
               "z": 0,
               "cp": 0.0141
+            }
+          ]
+        },
+        {
+          "case_id": "airfrans-graphsage-full_dummy_case_001",
+          "cut_id": "prototype_lower_surface",
+          "station_id": "lower_surface",
+          "station_label": "Lower surface (intrados)",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1143
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": 0.7947
+            },
+            {
+              "x": 0.025,
+              "y": 0,
+              "z": 0,
+              "cp": 0.6593
+            },
+            {
+              "x": 0.05,
+              "y": 0,
+              "z": 0,
+              "cp": 0.5676
+            },
+            {
+              "x": 0.09,
+              "y": 0,
+              "z": 0,
+              "cp": 0.4273
+            },
+            {
+              "x": 0.15,
+              "y": 0,
+              "z": 0,
+              "cp": 0.4012
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2915
+            },
+            {
+              "x": 0.38,
+              "y": 0,
+              "z": 0,
+              "cp": 0.3041
+            },
+            {
+              "x": 0.52,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2097
+            },
+            {
+              "x": 0.68,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2376
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1333
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1741
             }
           ]
         }
@@ -814,7 +1018,9 @@
       "cp_cuts": [
         {
           "case_id": "airfrans-mlp-full_dummy_case_001",
-          "cut_id": "prototype_cp_cut",
+          "cut_id": "prototype_upper_surface",
+          "station_id": "upper_surface",
+          "station_label": "Upper surface (extrados)",
           "coordinate_frame": "chord_normalized",
           "quantity": "cp",
           "values": [
@@ -889,6 +1095,88 @@
               "y": 0,
               "z": 0,
               "cp": 0.0108
+            }
+          ]
+        },
+        {
+          "case_id": "airfrans-mlp-full_dummy_case_001",
+          "cut_id": "prototype_lower_surface",
+          "station_id": "lower_surface",
+          "station_label": "Lower surface (intrados)",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1137
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": 0.7953
+            },
+            {
+              "x": 0.025,
+              "y": 0,
+              "z": 0,
+              "cp": 0.6585
+            },
+            {
+              "x": 0.05,
+              "y": 0,
+              "z": 0,
+              "cp": 0.5684
+            },
+            {
+              "x": 0.09,
+              "y": 0,
+              "z": 0,
+              "cp": 0.4264
+            },
+            {
+              "x": 0.15,
+              "y": 0,
+              "z": 0,
+              "cp": 0.4022
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2905
+            },
+            {
+              "x": 0.38,
+              "y": 0,
+              "z": 0,
+              "cp": 0.3052
+            },
+            {
+              "x": 0.52,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2085
+            },
+            {
+              "x": 0.68,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2389
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.132
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1755
             }
           ]
         }
@@ -1141,7 +1429,9 @@
       "cp_cuts": [
         {
           "case_id": "airfrans-pointnet-full_dummy_case_001",
-          "cut_id": "prototype_cp_cut",
+          "cut_id": "prototype_upper_surface",
+          "station_id": "upper_surface",
+          "station_label": "Upper surface (extrados)",
           "coordinate_frame": "chord_normalized",
           "quantity": "cp",
           "values": [
@@ -1216,6 +1506,88 @@
               "y": 0,
               "z": 0,
               "cp": -0.0171
+            }
+          ]
+        },
+        {
+          "case_id": "airfrans-pointnet-full_dummy_case_001",
+          "cut_id": "prototype_lower_surface",
+          "station_id": "lower_surface",
+          "station_label": "Lower surface (intrados)",
+          "coordinate_frame": "chord_normalized",
+          "quantity": "cp",
+          "values": [
+            {
+              "x": 0,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1087
+            },
+            {
+              "x": 0.01,
+              "y": 0,
+              "z": 0,
+              "cp": 0.8009
+            },
+            {
+              "x": 0.025,
+              "y": 0,
+              "z": 0,
+              "cp": 0.6523
+            },
+            {
+              "x": 0.05,
+              "y": 0,
+              "z": 0,
+              "cp": 0.5753
+            },
+            {
+              "x": 0.09,
+              "y": 0,
+              "z": 0,
+              "cp": 0.419
+            },
+            {
+              "x": 0.15,
+              "y": 0,
+              "z": 0,
+              "cp": 0.4102
+            },
+            {
+              "x": 0.25,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2818
+            },
+            {
+              "x": 0.38,
+              "y": 0,
+              "z": 0,
+              "cp": 0.3144
+            },
+            {
+              "x": 0.52,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1987
+            },
+            {
+              "x": 0.68,
+              "y": 0,
+              "z": 0,
+              "cp": 0.2494
+            },
+            {
+              "x": 0.84,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1208
+            },
+            {
+              "x": 1,
+              "y": 0,
+              "z": 0,
+              "cp": 0.1872
             }
           ]
         }

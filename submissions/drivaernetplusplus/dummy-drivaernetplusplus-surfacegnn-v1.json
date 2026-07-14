@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "drivaernetplusplus_dummy_case_001",
-        "cut_id": "centreline_roof",
+        "cut_id": "prototype_upper_body_centerline",
+        "station_id": "upper_body_centerline",
+        "station_label": "Upper-body centreline",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -61,6 +63,108 @@
             "y": 0,
             "z": 0.38,
             "cp": -0.1
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetplusplus_dummy_case_001",
+        "cut_id": "prototype_underbody_centerline",
+        "station_id": "underbody_centerline",
+        "station_label": "Underbody centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0.5,
+            "cp": 0.6294
+          },
+          {
+            "x": 0.32,
+            "y": 0,
+            "z": 0.56,
+            "cp": 0.1708
+          },
+          {
+            "x": 0.6,
+            "y": 0,
+            "z": 0.52,
+            "cp": -0.0673
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.38,
+            "cp": 0.0497
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetplusplus_dummy_case_001",
+        "cut_id": "prototype_front_wheelhouse",
+        "station_id": "front_wheelhouse",
+        "station_label": "Front wheelhouse",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0.5,
+            "cp": 0.5911
+          },
+          {
+            "x": 0.32,
+            "y": 0,
+            "z": 0.56,
+            "cp": -0.1632
+          },
+          {
+            "x": 0.6,
+            "y": 0,
+            "z": 0.52,
+            "cp": -0.4697
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.38,
+            "cp": -0.145
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetplusplus_dummy_case_001",
+        "cut_id": "prototype_rear_body_centerline",
+        "station_id": "rear_body_centerline",
+        "station_label": "Rear-body centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0.5,
+            "cp": 0.7382
+          },
+          {
+            "x": 0.32,
+            "y": 0,
+            "z": 0.56,
+            "cp": 0.1109
+          },
+          {
+            "x": 0.6,
+            "y": 0,
+            "z": 0.52,
+            "cp": 0.2669
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.38,
+            "cp": 0.0491
           }
         ]
       }

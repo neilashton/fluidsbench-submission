@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "oformer_dummy_case_001",
-        "cut_id": "prototype_cp_cut",
+        "cut_id": "prototype_upper_body_centerline",
+        "station_id": "upper_body_centerline",
+        "station_label": "Upper-body centreline",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -109,6 +111,170 @@
             "y": 0,
             "z": 0,
             "cp": -0.0073
+          }
+        ]
+      },
+      {
+        "case_id": "oformer_dummy_case_001",
+        "cut_id": "prototype_underbody_centerline",
+        "station_id": "underbody_centerline",
+        "station_label": "Underbody centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7774
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.4945
+          },
+          {
+            "x": 0.1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.266
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1194
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0559
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0563
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0964
+          },
+          {
+            "x": 0.64,
+            "y": 0,
+            "z": 0,
+            "cp": -0.141
+          },
+          {
+            "x": 0.76,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0486
+          },
+          {
+            "x": 0.86,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0596
+          },
+          {
+            "x": 0.94,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2847
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1543
+          }
+        ]
+      },
+      {
+        "case_id": "oformer_dummy_case_001",
+        "cut_id": "prototype_rear_slant_centerline",
+        "station_id": "rear_slant_centerline",
+        "station_label": "Rear-slant centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7824
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3939
+          },
+          {
+            "x": 0.1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0766
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1429
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2981
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.548
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5927
+          },
+          {
+            "x": 0.64,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5254
+          },
+          {
+            "x": 0.76,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2598
+          },
+          {
+            "x": 0.86,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0983
+          },
+          {
+            "x": 0.94,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1508
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1283
           }
         ]
       }

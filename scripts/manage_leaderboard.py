@@ -105,6 +105,24 @@ def validate_manifest(manifest: dict[str, Any]) -> list[str]:
             except ValueError as error:
                 errors.append(str(error))
 
+        diagnostics = entry.get("diagnostics")
+        if not isinstance(diagnostics, dict):
+            errors.append(f"{name} diagnostics must be an object")
+            continue
+        stations = diagnostics.get("cp_stations")
+        if not isinstance(stations, list) or not stations:
+            errors.append(f"{name} diagnostics.cp_stations must be a non-empty array")
+            continue
+        station_ids = [station.get("id") for station in stations]
+        if any(not station_id for station_id in station_ids) or len(station_ids) != len(set(station_ids)):
+            errors.append(f"{name} Cp station IDs must be present and unique")
+        for station in stations:
+            for key in ("label", "x_label", "description", "basis", "source_url"):
+                if not isinstance(station.get(key), str) or not station[key].strip():
+                    errors.append(f"{name} Cp station {station.get('id')!r} requires {key}")
+            if station.get("basis") not in {"published_validation_trace", "fluidsbench_benchmark_trace"}:
+                errors.append(f"{name} Cp station {station.get('id')!r} has an unsupported basis")
+
     return errors
 
 
@@ -183,6 +201,49 @@ def validate_submission(
         for key in ("cp_cuts", "velocity_profiles"):
             if not isinstance(diagnostics.get(key), list):
                 add(f"diagnostics.{key} must be an array")
+
+        cp_cuts = diagnostics.get("cp_cuts")
+        if isinstance(cp_cuts, list):
+            required_station_ids = {
+                station["id"] for station in dataset.get("diagnostics", {}).get("cp_stations", [])
+            }
+            provided_station_ids = [
+                cut.get("station_id") for cut in cp_cuts if isinstance(cut, dict)
+            ]
+            duplicate_station_ids = {
+                station_id
+                for station_id in provided_station_ids
+                if station_id and provided_station_ids.count(station_id) > 1
+            }
+            valid_provided_station_ids = {
+                station_id for station_id in provided_station_ids if isinstance(station_id, str) and station_id
+            }
+            missing_station_ids = required_station_ids - valid_provided_station_ids
+            unknown_station_ids = valid_provided_station_ids - required_station_ids
+            if missing_station_ids:
+                add(f"diagnostics.cp_cuts is missing stations: {', '.join(sorted(missing_station_ids))}")
+            if unknown_station_ids:
+                add(f"diagnostics.cp_cuts has unknown stations: {', '.join(sorted(unknown_station_ids))}")
+            if duplicate_station_ids:
+                add(f"diagnostics.cp_cuts has duplicate stations: {', '.join(sorted(duplicate_station_ids))}")
+
+            for index, cut in enumerate(cp_cuts):
+                if not isinstance(cut, dict):
+                    add(f"diagnostics.cp_cuts[{index}] must be an object")
+                    continue
+                for key in ("case_id", "cut_id", "station_id"):
+                    if not isinstance(cut.get(key), str) or not cut[key].strip():
+                        add(f"diagnostics.cp_cuts[{index}].{key} must be a non-empty string")
+                values = cut.get("values")
+                if not isinstance(values, list) or not values:
+                    add(f"diagnostics.cp_cuts[{index}].values must be a non-empty array")
+                    continue
+                for point_index, point in enumerate(values):
+                    if not isinstance(point, dict) or not is_number(point.get("x")) or not is_number(point.get("cp")):
+                        add(
+                            f"diagnostics.cp_cuts[{index}].values[{point_index}] "
+                            "must contain finite numeric x and cp values"
+                        )
 
     return errors
 

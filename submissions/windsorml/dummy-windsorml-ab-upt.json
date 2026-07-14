@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "windsorml-ab-upt_dummy_case_001",
-        "cut_id": "prototype_cp_cut",
+        "cut_id": "prototype_symmetry_plane_z_0",
+        "station_id": "symmetry_plane_z_0",
+        "station_label": "Symmetry-plane trace (z = 0 m)",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -109,6 +111,88 @@
             "y": 0,
             "z": 0,
             "cp": 0.0394
+          }
+        ]
+      },
+      {
+        "case_id": "windsorml-ab-upt_dummy_case_001",
+        "cut_id": "prototype_horizontal_cut_y_0_2595",
+        "station_id": "horizontal_cut_y_0_2595",
+        "station_label": "Horizontal trace (y = 0.2595 m)",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.813
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5363
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.321
+          },
+          {
+            "x": 0.19,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1459
+          },
+          {
+            "x": 0.3,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0452
+          },
+          {
+            "x": 0.42,
+            "y": 0,
+            "z": 0,
+            "cp": -0.116
+          },
+          {
+            "x": 0.54,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1658
+          },
+          {
+            "x": 0.66,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1767
+          },
+          {
+            "x": 0.78,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0079
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1174
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3134
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1907
           }
         ]
       }

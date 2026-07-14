@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "upt_dummy_case_001",
-        "cut_id": "prototype_cp_cut",
+        "cut_id": "prototype_upper_body_centerline",
+        "station_id": "upper_body_centerline",
+        "station_label": "Upper-body centreline",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -109,6 +111,170 @@
             "y": 0,
             "z": 0,
             "cp": -0.0138
+          }
+        ]
+      },
+      {
+        "case_id": "upt_dummy_case_001",
+        "cut_id": "prototype_underbody_centerline",
+        "station_id": "underbody_centerline",
+        "station_label": "Underbody centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7796
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.492
+          },
+          {
+            "x": 0.1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2687
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1164
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0591
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0598
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0926
+          },
+          {
+            "x": 0.64,
+            "y": 0,
+            "z": 0,
+            "cp": -0.145
+          },
+          {
+            "x": 0.76,
+            "y": 0,
+            "z": 0,
+            "cp": -0.0443
+          },
+          {
+            "x": 0.86,
+            "y": 0,
+            "z": 0,
+            "cp": 0.055
+          },
+          {
+            "x": 0.94,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2895
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1492
+          }
+        ]
+      },
+      {
+        "case_id": "upt_dummy_case_001",
+        "cut_id": "prototype_rear_slant_centerline",
+        "station_id": "rear_slant_centerline",
+        "station_label": "Rear-slant centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7855
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3904
+          },
+          {
+            "x": 0.1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0806
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1473
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2934
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5531
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5872
+          },
+          {
+            "x": 0.64,
+            "y": 0,
+            "z": 0,
+            "cp": -0.5312
+          },
+          {
+            "x": 0.76,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2536
+          },
+          {
+            "x": 0.86,
+            "y": 0,
+            "z": 0,
+            "cp": -0.105
+          },
+          {
+            "x": 0.94,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1578
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1357
           }
         ]
       }

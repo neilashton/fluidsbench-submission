@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "airfrans-graphsage-full_dummy_case_001",
-        "cut_id": "prototype_cp_cut",
+        "cut_id": "prototype_upper_surface",
+        "station_id": "upper_surface",
+        "station_label": "Upper surface (extrados)",
         "coordinate_frame": "chord_normalized",
         "quantity": "cp",
         "values": [
@@ -109,6 +111,88 @@
             "y": 0,
             "z": 0,
             "cp": 0.0141
+          }
+        ]
+      },
+      {
+        "case_id": "airfrans-graphsage-full_dummy_case_001",
+        "cut_id": "prototype_lower_surface",
+        "station_id": "lower_surface",
+        "station_label": "Lower surface (intrados)",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1143
+          },
+          {
+            "x": 0.01,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7947
+          },
+          {
+            "x": 0.025,
+            "y": 0,
+            "z": 0,
+            "cp": 0.6593
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5676
+          },
+          {
+            "x": 0.09,
+            "y": 0,
+            "z": 0,
+            "cp": 0.4273
+          },
+          {
+            "x": 0.15,
+            "y": 0,
+            "z": 0,
+            "cp": 0.4012
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2915
+          },
+          {
+            "x": 0.38,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3041
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2097
+          },
+          {
+            "x": 0.68,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2376
+          },
+          {
+            "x": 0.84,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1333
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1741
           }
         ]
       }

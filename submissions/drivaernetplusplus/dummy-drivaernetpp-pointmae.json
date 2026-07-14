@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "drivaernetpp-pointmae_dummy_case_001",
-        "cut_id": "prototype_cp_cut",
+        "cut_id": "prototype_upper_body_centerline",
+        "station_id": "upper_body_centerline",
+        "station_label": "Upper-body centreline",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -109,6 +111,252 @@
             "y": 0,
             "z": 0,
             "cp": -0.0719
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-pointmae_dummy_case_001",
+        "cut_id": "prototype_underbody_centerline",
+        "station_id": "underbody_centerline",
+        "station_label": "Underbody centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.9446
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.6116
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.4444
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1109
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": 0.014
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2995
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2233
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": -0.309
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0362
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0458
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3653
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1039
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-pointmae_dummy_case_001",
+        "cut_id": "prototype_front_wheelhouse",
+        "station_id": "front_wheelhouse",
+        "station_label": "Front wheelhouse",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 1.0267
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5651
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3391
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1553
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3593
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.9034
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.7782
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": -0.7577
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1303
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1323
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2548
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.202
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-pointmae_dummy_case_001",
+        "cut_id": "prototype_rear_body_centerline",
+        "station_id": "rear_body_centerline",
+        "station_label": "Rear-body centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.9138
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7236
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.6367
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": 0.316
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0452
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2904
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0022
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0786
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1721
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0425
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3554
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.224
           }
         ]
       }
@@ -323,7 +571,7 @@
   "dimensional_field_errors": {
     "surface_pressure": {
       "mae": 156.3,
-      "rmse": 217.0
+      "rmse": 217
     },
     "surface_wall_shear": {
       "mae": 3.23,

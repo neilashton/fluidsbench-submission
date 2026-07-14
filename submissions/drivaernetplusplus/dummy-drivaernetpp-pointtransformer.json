@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "drivaernetpp-pointtransformer_dummy_case_001",
-        "cut_id": "prototype_cp_cut",
+        "cut_id": "prototype_upper_body_centerline",
+        "station_id": "upper_body_centerline",
+        "station_label": "Upper-body centreline",
         "coordinate_frame": "body_normalized",
         "quantity": "cp",
         "values": [
@@ -109,6 +111,252 @@
             "y": 0,
             "z": 0,
             "cp": -0.0652
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-pointtransformer_dummy_case_001",
+        "cut_id": "prototype_underbody_centerline",
+        "station_id": "underbody_centerline",
+        "station_label": "Underbody centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.9424
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.614
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.4417
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": 0.114
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0107
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2959
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2271
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3049
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0318
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0505
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3604
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1091
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-pointtransformer_dummy_case_001",
+        "cut_id": "prototype_front_wheelhouse",
+        "station_id": "front_wheelhouse",
+        "station_label": "Front wheelhouse",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 1.0235
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.5687
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3351
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1509
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": -0.3642
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.8982
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.7838
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": -0.7517
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1366
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1255
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2477
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": -0.1943
+          }
+        ]
+      },
+      {
+        "case_id": "drivaernetpp-pointtransformer_dummy_case_001",
+        "cut_id": "prototype_rear_body_centerline",
+        "station_id": "rear_body_centerline",
+        "station_label": "Rear-body centreline",
+        "coordinate_frame": "body_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "cp": 0.912
+          },
+          {
+            "x": 0.05,
+            "y": 0,
+            "z": 0,
+            "cp": 0.7256
+          },
+          {
+            "x": 0.11,
+            "y": 0,
+            "z": 0,
+            "cp": 0.6344
+          },
+          {
+            "x": 0.18,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3185
+          },
+          {
+            "x": 0.28,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0424
+          },
+          {
+            "x": 0.4,
+            "y": 0,
+            "z": 0,
+            "cp": -0.2875
+          },
+          {
+            "x": 0.52,
+            "y": 0,
+            "z": 0,
+            "cp": -0.001
+          },
+          {
+            "x": 0.65,
+            "y": 0,
+            "z": 0,
+            "cp": 0.082
+          },
+          {
+            "x": 0.77,
+            "y": 0,
+            "z": 0,
+            "cp": 0.1686
+          },
+          {
+            "x": 0.88,
+            "y": 0,
+            "z": 0,
+            "cp": 0.0464
+          },
+          {
+            "x": 0.95,
+            "y": 0,
+            "z": 0,
+            "cp": 0.3514
+          },
+          {
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "cp": 0.2283
           }
         ]
       }
@@ -322,7 +570,7 @@
   },
   "dimensional_field_errors": {
     "surface_pressure": {
-      "mae": 110.0,
+      "mae": 110,
       "rmse": 152.7
     },
     "surface_wall_shear": {

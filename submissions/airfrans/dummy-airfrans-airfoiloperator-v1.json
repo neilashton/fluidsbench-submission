@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "airfrans_dummy_case_001",
-        "cut_id": "airfoil_upper_surface",
+        "cut_id": "prototype_upper_surface",
+        "station_id": "upper_surface",
+        "station_label": "Upper surface (extrados)",
         "coordinate_frame": "chord_normalized",
         "quantity": "cp",
         "values": [
@@ -61,6 +63,40 @@
             "y": 0,
             "z": 0.01,
             "cp": 0.04
+          }
+        ]
+      },
+      {
+        "case_id": "airfrans_dummy_case_001",
+        "cut_id": "prototype_lower_surface",
+        "station_id": "lower_surface",
+        "station_label": "Lower surface (intrados)",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.02,
+            "y": 0,
+            "z": 0.03,
+            "cp": 0.5686
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0.06,
+            "cp": 0.4315
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0.05,
+            "cp": 0.2986
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.01,
+            "cp": 0.174
           }
         ]
       }

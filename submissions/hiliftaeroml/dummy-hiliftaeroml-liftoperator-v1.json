@@ -34,7 +34,9 @@
     "cp_cuts": [
       {
         "case_id": "hiliftaeroml_dummy_case_001",
-        "cut_id": "main_element_upper",
+        "cut_id": "prototype_pressure_belt_a",
+        "station_id": "pressure_belt_a",
+        "station_label": "Pressure belt A",
         "coordinate_frame": "chord_normalized",
         "quantity": "cp",
         "values": [
@@ -61,6 +63,108 @@
             "y": 0,
             "z": 0.02,
             "cp": -0.05
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml_dummy_case_001",
+        "cut_id": "prototype_pressure_belt_d",
+        "station_id": "pressure_belt_d",
+        "station_label": "Pressure belt D",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.02,
+            "y": 0,
+            "z": 0.08,
+            "cp": -0.7535
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0.1,
+            "cp": -0.3466
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0.08,
+            "cp": -0.1534
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.02,
+            "cp": 0.0887
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml_dummy_case_001",
+        "cut_id": "prototype_pressure_belt_g",
+        "station_id": "pressure_belt_g",
+        "station_label": "Pressure belt G",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.02,
+            "y": 0,
+            "z": 0.08,
+            "cp": -1.4446
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0.1,
+            "cp": -0.863
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0.08,
+            "cp": -0.6512
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.02,
+            "cp": -0.088
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml_dummy_case_001",
+        "cut_id": "prototype_pressure_belt_i",
+        "station_id": "pressure_belt_i",
+        "station_label": "Pressure belt I",
+        "coordinate_frame": "chord_normalized",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 0.02,
+            "y": 0,
+            "z": 0.08,
+            "cp": -0.4442
+          },
+          {
+            "x": 0.25,
+            "y": 0,
+            "z": 0.1,
+            "cp": -0.1908
+          },
+          {
+            "x": 0.55,
+            "y": 0,
+            "z": 0.08,
+            "cp": 0.1238
+          },
+          {
+            "x": 0.9,
+            "y": 0,
+            "z": 0.02,
+            "cp": 0.0811
           }
         ]
       }
