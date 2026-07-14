@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-pointnet",
-  "model": "PointNet",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Point cloud",
   "model_types": [
     "Point cloud"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 93.7,
+      "rmse": 130.2
+    },
+    "surface_wall_shear": {
+      "mae": 2.62,
+      "rmse": 3.86
+    },
+    "volume_velocity": {
+      "mae": 6.1,
+      "rmse": 8.71
+    },
+    "volume_pressure": {
+      "mae": 113.1,
+      "rmse": 163.9
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0228,
+    "c_lift": 0.0418
   }
 }

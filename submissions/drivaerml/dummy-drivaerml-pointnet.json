@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaerml-pointnet",
-  "model": "PointNet",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Point cloud",
   "model_types": [
     "Point cloud"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "DrivAerML",
-  "split": "Full",
+  "split": "Low drag",
   "parameter_count": 3.6,
   "surface_pressure_l2": 23.63,
   "surface_pressure_l1": 17.014,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 144.6,
+      "rmse": 200.9
+    },
+    "surface_wall_shear": {
+      "mae": 4.27,
+      "rmse": 6.28
+    },
+    "volume_velocity": {
+      "mae": 8.86,
+      "rmse": 12.65
+    },
+    "volume_pressure": {
+      "mae": 161.6,
+      "rmse": 234.2
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0207,
+    "c_lift": 0.038
   }
 }

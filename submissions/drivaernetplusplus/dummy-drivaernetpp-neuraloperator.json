@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaernetpp-neuraloperator",
-  "model": "NeuralOperator",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Neural operator",
   "model_types": [
     "Neural operator"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 173.7,
+      "rmse": 241.3
+    },
+    "surface_wall_shear": {
+      "mae": 3.59,
+      "rmse": 5.28
+    },
+    "volume_velocity": {
+      "mae": 10.2,
+      "rmse": 14.57
+    },
+    "volume_pressure": {
+      "mae": 153.0,
+      "rmse": 221.7
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0185,
+    "c_lift": 0.0275
   }
 }

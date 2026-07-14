@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-graph-u-net",
-  "model": "Graph U-Net",
+  "model": "FluidsBench prototype baseline",
   "model_type": "GNN",
   "model_types": [
     "GNN"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 63.9,
+      "rmse": 88.8
+    },
+    "surface_wall_shear": {
+      "mae": 1.65,
+      "rmse": 2.42
+    },
+    "volume_velocity": {
+      "mae": 3.8,
+      "rmse": 5.42
+    },
+    "volume_pressure": {
+      "mae": 69.8,
+      "rmse": 101.2
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0156,
+    "c_lift": 0.0293
   }
 }

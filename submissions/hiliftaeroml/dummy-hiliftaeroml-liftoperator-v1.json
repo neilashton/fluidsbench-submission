@@ -1,6 +1,6 @@
 {
   "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
-  "model": "LiftOperator AoA",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Neural operator",
   "model_types": [
     "Neural operator"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "HiLiftAeroML",
-  "split": "Full",
+  "split": "Medium",
   "parameter_count": 16.3,
   "surface_pressure_l2": 4.42,
   "surface_pressure_l1": 3.18,
@@ -29,7 +29,7 @@
   "paper_url": "https://example.com/liftoperator-aoa",
   "code_url": "https://github.com/example/liftoperator-aoa",
   "submitted_at": "2026-07-08",
-  "note": "Dummy HiLiftAeroML submission with compact diagnostic curves.",
+  "note": "Dummy HiLiftAeroML submission with compact diagnostic curves. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -99,5 +99,28 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 572.4,
+      "rmse": 795.6
+    },
+    "surface_wall_shear": {
+      "mae": 8.84,
+      "rmse": 13.02
+    },
+    "volume_velocity": {
+      "mae": 1.85,
+      "rmse": 2.65
+    },
+    "volume_pressure": {
+      "mae": 392,
+      "rmse": 566.4
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0035,
+    "c_lift": 0.0029,
+    "c_pitch": 0.0027
   }
 }

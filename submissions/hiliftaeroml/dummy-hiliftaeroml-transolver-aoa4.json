@@ -1,6 +1,6 @@
 {
   "submission_id": "hiliftaeroml-transolver-aoa4",
-  "model": "Transolver (AoA 4)",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "HiLiftAeroML",
-  "split": "AoA 4",
+  "split": "Stall",
   "parameter_count": 6.02,
   "surface_pressure_l2": 7.77,
   "surface_pressure_l1": 5.594,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2026-06-25",
-  "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -301,5 +301,28 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 1006.9,
+      "rmse": 1398.6
+    },
+    "surface_wall_shear": {
+      "mae": 20.91,
+      "rmse": 30.76
+    },
+    "volume_velocity": {
+      "mae": 5.84,
+      "rmse": 8.35
+    },
+    "volume_pressure": {
+      "mae": 798.2,
+      "rmse": 1156.8
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0017,
+    "c_lift": 0.0022,
+    "c_pitch": 0.0012
   }
 }

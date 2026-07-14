@@ -1,7 +1,7 @@
 [
   {
     "submission_id": "windsorml-ab-upt",
-    "model": "AB-UPT",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -320,11 +320,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 17.7,
+        "rmse": 24.6
+      },
+      "surface_wall_shear": {
+        "mae": 0.47,
+        "rmse": 0.69
+      },
+      "volume_velocity": {
+        "mae": 1.07,
+        "rmse": 1.52
+      },
+      "volume_pressure": {
+        "mae": 18.2,
+        "rmse": 26.4
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0014,
+      "c_lift": 0.0043
     }
   },
   {
     "submission_id": "windsorml-gino",
-    "model": "GINO",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Neural operator",
     "model_types": [
       "Neural operator"
@@ -643,11 +665,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 54.9,
+        "rmse": 76.2
+      },
+      "surface_wall_shear": {
+        "mae": 1.42,
+        "rmse": 2.09
+      },
+      "volume_velocity": {
+        "mae": 8.21,
+        "rmse": 11.72
+      },
+      "volume_pressure": {
+        "mae": 137.4,
+        "rmse": 199.1
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.024,
+      "c_lift": 0.0425
     }
   },
   {
     "submission_id": "windsorml-graph-u-net",
-    "model": "Graph U-Net",
+    "model": "FluidsBench prototype baseline",
     "model_type": "GNN",
     "model_types": [
       "GNN"
@@ -966,11 +1010,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 63.9,
+        "rmse": 88.8
+      },
+      "surface_wall_shear": {
+        "mae": 1.65,
+        "rmse": 2.42
+      },
+      "volume_velocity": {
+        "mae": 3.8,
+        "rmse": 5.42
+      },
+      "volume_pressure": {
+        "mae": 69.8,
+        "rmse": 101.2
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0156,
+      "c_lift": 0.0293
     }
   },
   {
     "submission_id": "windsorml-lno",
-    "model": "LNO",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Neural operator",
     "model_types": [
       "Neural operator"
@@ -1289,11 +1355,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 79.1,
+        "rmse": 109.8
+      },
+      "surface_wall_shear": {
+        "mae": 2.2,
+        "rmse": 3.24
+      },
+      "volume_velocity": {
+        "mae": 5.34,
+        "rmse": 7.63
+      },
+      "volume_pressure": {
+        "mae": 97.2,
+        "rmse": 140.8
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0202,
+      "c_lift": 0.0367
     }
   },
   {
     "submission_id": "windsorml-oformer",
-    "model": "OFormer",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -1612,11 +1700,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 20.5,
+        "rmse": 28.5
+      },
+      "surface_wall_shear": {
+        "mae": 0.52,
+        "rmse": 0.77
+      },
+      "volume_velocity": {
+        "mae": 1.23,
+        "rmse": 1.76
+      },
+      "volume_pressure": {
+        "mae": 20.3,
+        "rmse": 29.5
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0044,
+      "c_lift": 0.0087
     }
   },
   {
     "submission_id": "windsorml-pointnet",
-    "model": "PointNet",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Point cloud",
     "model_types": [
       "Point cloud"
@@ -1935,11 +2045,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 93.7,
+        "rmse": 130.2
+      },
+      "surface_wall_shear": {
+        "mae": 2.62,
+        "rmse": 3.86
+      },
+      "volume_velocity": {
+        "mae": 6.1,
+        "rmse": 8.71
+      },
+      "volume_pressure": {
+        "mae": 113.1,
+        "rmse": 163.9
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0228,
+      "c_lift": 0.0418
     }
   },
   {
     "submission_id": "windsorml-transformer",
-    "model": "Transformer",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -2258,11 +2390,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 20.0,
+        "rmse": 27.7
+      },
+      "surface_wall_shear": {
+        "mae": 0.51,
+        "rmse": 0.74
+      },
+      "volume_velocity": {
+        "mae": 1.21,
+        "rmse": 1.72
+      },
+      "volume_pressure": {
+        "mae": 19.7,
+        "rmse": 28.5
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.004,
+      "c_lift": 0.0086
     }
   },
   {
     "submission_id": "windsorml-transolver",
-    "model": "Transolver",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -2581,11 +2735,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 21.1,
+        "rmse": 29.3
+      },
+      "surface_wall_shear": {
+        "mae": 0.53,
+        "rmse": 0.78
+      },
+      "volume_velocity": {
+        "mae": 1.25,
+        "rmse": 1.78
+      },
+      "volume_pressure": {
+        "mae": 20.6,
+        "rmse": 29.8
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0042,
+      "c_lift": 0.0092
     }
   },
   {
     "submission_id": "windsorml-upt",
-    "model": "UPT",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -2904,11 +3080,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 31.1,
+        "rmse": 43.2
+      },
+      "surface_wall_shear": {
+        "mae": 0.78,
+        "rmse": 1.14
+      },
+      "volume_velocity": {
+        "mae": 1.79,
+        "rmse": 2.56
+      },
+      "volume_pressure": {
+        "mae": 30.9,
+        "rmse": 44.8
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0063,
+      "c_lift": 0.0142
     }
   },
   {
     "submission_id": "dummy-windsorml-wakenet-v1",
-    "model": "WakeNet Windsor",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -3007,6 +3205,28 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 16.7,
+        "rmse": 23.5
+      },
+      "surface_wall_shear": {
+        "mae": 0.35,
+        "rmse": 0.51
+      },
+      "volume_velocity": {
+        "mae": 0.65,
+        "rmse": 0.93
+      },
+      "volume_pressure": {
+        "mae": 11.6,
+        "rmse": 16.7
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0024,
+      "c_lift": 0.0057
     }
   }
 ]

@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-lno",
-  "model": "LNO",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Neural operator",
   "model_types": [
     "Neural operator"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 79.1,
+      "rmse": 109.8
+    },
+    "surface_wall_shear": {
+      "mae": 2.2,
+      "rmse": 3.24
+    },
+    "volume_velocity": {
+      "mae": 5.34,
+      "rmse": 7.63
+    },
+    "volume_pressure": {
+      "mae": 97.2,
+      "rmse": 140.8
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0202,
+    "c_lift": 0.0367
   }
 }

@@ -1,6 +1,6 @@
 {
   "submission_id": "hiliftaeroml-geot-aoa4",
-  "model": "GeoTransolver (AoA 4)",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2026-06-25",
-  "note": "HiLiftAeroML AoA = 4 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "HiLiftAeroML AoA = 4 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -301,5 +301,28 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 801,
+      "rmse": 1112.4
+    },
+    "surface_wall_shear": {
+      "mae": 19.03,
+      "rmse": 27.98
+    },
+    "volume_velocity": {
+      "mae": 3.97,
+      "rmse": 5.68
+    },
+    "volume_pressure": {
+      "mae": 554.2,
+      "rmse": 803.2
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0008,
+    "c_lift": 0.0011,
+    "c_pitch": 0.001
   }
 }

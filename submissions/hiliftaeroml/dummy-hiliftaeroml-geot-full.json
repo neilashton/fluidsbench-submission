@@ -1,6 +1,6 @@
 {
   "submission_id": "hiliftaeroml-geot-full",
-  "model": "GeoTransolver (full split)",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2026-06-25",
-  "note": "HiLiftAeroML full-split GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "HiLiftAeroML full-split GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -301,5 +301,28 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 1145.7,
+      "rmse": 1591.2
+    },
+    "surface_wall_shear": {
+      "mae": 16.59,
+      "rmse": 24.4
+    },
+    "volume_velocity": {
+      "mae": 5.22,
+      "rmse": 7.46
+    },
+    "volume_pressure": {
+      "mae": 889.8,
+      "rmse": 1289.6
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0008,
+    "c_lift": 0.0025,
+    "c_pitch": 0.0013
   }
 }

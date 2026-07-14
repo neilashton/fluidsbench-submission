@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaerml-gino",
-  "model": "GINO",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Neural operator",
   "model_types": [
     "Neural operator"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "DrivAerML",
-  "split": "Full",
+  "split": "Medium",
   "parameter_count": 15.6,
   "surface_pressure_l2": 13.03,
   "surface_pressure_l1": 9.382,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 79.7,
+      "rmse": 110.8
+    },
+    "surface_wall_shear": {
+      "mae": 2.21,
+      "rmse": 3.26
+    },
+    "volume_velocity": {
+      "mae": 12.78,
+      "rmse": 18.26
+    },
+    "volume_pressure": {
+      "mae": 232.4,
+      "rmse": 336.8
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0223,
+    "c_lift": 0.0403
   }
 }

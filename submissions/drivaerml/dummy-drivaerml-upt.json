@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaerml-upt",
-  "model": "UPT",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "DrivAerML",
-  "split": "Full",
+  "split": "Medium",
   "parameter_count": 10.98,
   "surface_pressure_l2": 7.85,
   "surface_pressure_l1": 5.652,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 48,
+      "rmse": 66.7
+    },
+    "surface_wall_shear": {
+      "mae": 1.3,
+      "rmse": 1.91
+    },
+    "volume_velocity": {
+      "mae": 2.84,
+      "rmse": 4.06
+    },
+    "volume_pressure": {
+      "mae": 54.5,
+      "rmse": 79
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0062,
+    "c_lift": 0.0128
   }
 }

@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-gino",
-  "model": "GINO",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Neural operator",
   "model_types": [
     "Neural operator"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 54.9,
+      "rmse": 76.2
+    },
+    "surface_wall_shear": {
+      "mae": 1.42,
+      "rmse": 2.09
+    },
+    "volume_velocity": {
+      "mae": 8.21,
+      "rmse": 11.72
+    },
+    "volume_pressure": {
+      "mae": 137.4,
+      "rmse": 199.1
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.024,
+    "c_lift": 0.0425
   }
 }

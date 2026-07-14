@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaerml-ab-upt",
-  "model": "AB-UPT",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Reported DrivAerML L2 metrics from AB-UPT v2 Table 7; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Reported DrivAerML L2 metrics from AB-UPT v2 Table 7; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 23.4,
+      "rmse": 32.5
+    },
+    "surface_wall_shear": {
+      "mae": 0.74,
+      "rmse": 1.09
+    },
+    "volume_velocity": {
+      "mae": 1.87,
+      "rmse": 2.67
+    },
+    "volume_pressure": {
+      "mae": 31.5,
+      "rmse": 45.6
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0012,
+    "c_lift": 0.0037
   }
 }

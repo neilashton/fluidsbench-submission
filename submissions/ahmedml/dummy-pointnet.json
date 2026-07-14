@@ -1,6 +1,6 @@
 {
   "submission_id": "pointnet",
-  "model": "PointNet",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Point cloud",
   "model_types": [
     "Point cloud"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "AhmedML",
-  "split": "Full",
+  "split": "Low drag",
   "parameter_count": 3.6,
   "surface_pressure_l2": 8.51,
   "surface_pressure_l1": 6.127,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 42.9,
+      "rmse": 59.6
+    },
+    "surface_wall_shear": {
+      "mae": 0.82,
+      "rmse": 1.21
+    },
+    "volume_velocity": {
+      "mae": 1.52,
+      "rmse": 2.17
+    },
+    "volume_pressure": {
+      "mae": 25.3,
+      "rmse": 36.7
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0135,
+    "c_lift": 0.0273
   }
 }

@@ -1,6 +1,6 @@
 {
   "submission_id": "airfrans-mlp-full",
-  "model": "MLP",
+  "model": "FluidsBench prototype baseline",
   "model_type": "MLP",
   "model_types": [
     "MLP"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "AirfRANS",
-  "split": "Full",
+  "split": "AoA extrapolation",
   "parameter_count": 0.02,
   "surface_pressure_l2": 33.62,
   "surface_pressure_l1": 24.206,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2023-06-01",
-  "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error diagnostics until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error diagnostics until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -301,5 +301,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 157.3,
+      "rmse": 218.5
+    },
+    "surface_wall_shear": {
+      "mae": 0.53,
+      "rmse": 0.77
+    },
+    "volume_velocity": {
+      "mae": 2.2,
+      "rmse": 3.14
+    },
+    "volume_pressure": {
+      "mae": 32.6,
+      "rmse": 47.3
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0058,
+    "c_lift": 0.0017
   }
 }

@@ -1,7 +1,78 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "generated_at": "2026-07-08T00:00:00Z",
   "all_file": "leaderboard/all.json",
+  "metric_catalog": {
+    "dimensional_fields": [
+      {
+        "id": "surface_pressure",
+        "label": "Surface pressure",
+        "unit": "Pa",
+        "digits": 1,
+        "statistics": [
+          "mae",
+          "rmse"
+        ],
+        "weighting": "face_area"
+      },
+      {
+        "id": "surface_wall_shear",
+        "label": "Surface wall shear",
+        "unit": "Pa",
+        "digits": 2,
+        "statistics": [
+          "mae",
+          "rmse"
+        ],
+        "weighting": "face_area"
+      },
+      {
+        "id": "volume_velocity",
+        "label": "Volume velocity",
+        "unit": "m/s",
+        "digits": 2,
+        "statistics": [
+          "mae",
+          "rmse"
+        ],
+        "weighting": "cell_volume"
+      },
+      {
+        "id": "volume_pressure",
+        "label": "Volume pressure",
+        "unit": "Pa",
+        "digits": 1,
+        "statistics": [
+          "mae",
+          "rmse"
+        ],
+        "weighting": "cell_volume"
+      }
+    ],
+    "coefficient_errors": [
+      {
+        "id": "c_drag",
+        "label": "C_D",
+        "unit": "",
+        "digits": 4,
+        "statistic": "mae"
+      },
+      {
+        "id": "c_lift",
+        "label": "C_L",
+        "unit": "",
+        "digits": 4,
+        "statistic": "mae"
+      },
+      {
+        "id": "c_pitch",
+        "label": "C_M pitch",
+        "unit": "",
+        "digits": 4,
+        "statistic": "mae"
+      }
+    ]
+  },
   "datasets": [
     {
       "name": "AhmedML",
@@ -9,6 +80,18 @@
       "file": "leaderboard/datasets/ahmedml.json",
       "submission_count": 10,
       "updated_at": "2026-07-08",
+      "metrics": {
+        "dimensional_fields": [
+          "surface_pressure",
+          "surface_wall_shear",
+          "volume_velocity",
+          "volume_pressure"
+        ],
+        "coefficient_errors": [
+          "c_drag",
+          "c_lift"
+        ]
+      },
       "splits": [
         {
           "id": "full",
@@ -81,7 +164,41 @@
       "slug": "airfrans",
       "file": "leaderboard/datasets/airfrans.json",
       "submission_count": 5,
-      "updated_at": "2026-07-08"
+      "updated_at": "2026-07-08",
+      "metrics": {
+        "dimensional_fields": [
+          "surface_pressure",
+          "surface_wall_shear",
+          "volume_velocity",
+          "volume_pressure"
+        ],
+        "coefficient_errors": [
+          "c_drag",
+          "c_lift"
+        ]
+      },
+      "splits": [
+        {
+          "id": "full",
+          "name": "Full",
+          "description": "Standard AirfRANS training and test split."
+        },
+        {
+          "id": "scarce",
+          "name": "Scarce",
+          "description": "Reduced-data AirfRANS benchmark split."
+        },
+        {
+          "id": "reynolds_extrapolation",
+          "name": "Reynolds extrapolation",
+          "description": "Out-of-distribution split for Reynolds-number extrapolation."
+        },
+        {
+          "id": "aoa_extrapolation",
+          "name": "AoA extrapolation",
+          "description": "Out-of-distribution split for angle-of-attack extrapolation."
+        }
+      ]
     },
     {
       "name": "DrivAerML",
@@ -89,6 +206,18 @@
       "file": "leaderboard/datasets/drivaerml.json",
       "submission_count": 10,
       "updated_at": "2026-07-08",
+      "metrics": {
+        "dimensional_fields": [
+          "surface_pressure",
+          "surface_wall_shear",
+          "volume_velocity",
+          "volume_pressure"
+        ],
+        "coefficient_errors": [
+          "c_drag",
+          "c_lift"
+        ]
+      },
       "splits": [
         {
           "id": "full",
@@ -161,7 +290,19 @@
       "slug": "drivaernetplusplus",
       "file": "leaderboard/datasets/drivaernetplusplus.json",
       "submission_count": 12,
-      "updated_at": "2026-07-08"
+      "updated_at": "2026-07-08",
+      "metrics": {
+        "dimensional_fields": [
+          "surface_pressure",
+          "surface_wall_shear",
+          "volume_velocity",
+          "volume_pressure"
+        ],
+        "coefficient_errors": [
+          "c_drag",
+          "c_lift"
+        ]
+      }
     },
     {
       "name": "HiLiftAeroML",
@@ -169,6 +310,19 @@
       "file": "leaderboard/datasets/hiliftaeroml.json",
       "submission_count": 8,
       "updated_at": "2026-07-08",
+      "metrics": {
+        "dimensional_fields": [
+          "surface_pressure",
+          "surface_wall_shear",
+          "volume_velocity",
+          "volume_pressure"
+        ],
+        "coefficient_errors": [
+          "c_drag",
+          "c_lift",
+          "c_pitch"
+        ]
+      },
       "splits": [
         {
           "id": "full",
@@ -303,7 +457,19 @@
       "slug": "windsorml",
       "file": "leaderboard/datasets/windsorml.json",
       "submission_count": 10,
-      "updated_at": "2026-07-08"
+      "updated_at": "2026-07-08",
+      "metrics": {
+        "dimensional_fields": [
+          "surface_pressure",
+          "surface_wall_shear",
+          "volume_velocity",
+          "volume_pressure"
+        ],
+        "coefficient_errors": [
+          "c_drag",
+          "c_lift"
+        ]
+      }
     }
   ]
 }

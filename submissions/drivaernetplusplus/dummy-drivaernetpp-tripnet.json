@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaernetpp-tripnet",
-  "model": "TripNet",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Implicit field",
   "model_types": [
     "Implicit field"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 92.6,
+      "rmse": 128.6
+    },
+    "surface_wall_shear": {
+      "mae": 1.91,
+      "rmse": 2.81
+    },
+    "volume_velocity": {
+      "mae": 5.44,
+      "rmse": 7.77
+    },
+    "volume_pressure": {
+      "mae": 81.5,
+      "rmse": 118.2
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0053,
+    "c_lift": 0.0081
   }
 }

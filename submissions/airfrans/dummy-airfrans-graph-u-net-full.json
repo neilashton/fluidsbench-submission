@@ -1,6 +1,6 @@
 {
   "submission_id": "airfrans-graph-u-net-full",
-  "model": "Graph U-Net",
+  "model": "FluidsBench prototype baseline",
   "model_type": "GNN",
   "model_types": [
     "GNN"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "AirfRANS",
-  "split": "Full",
+  "split": "Scarce",
   "parameter_count": 0.07,
   "surface_pressure_l2": 19.75,
   "surface_pressure_l1": 14.22,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2023-06-01",
-  "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error diagnostics until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error diagnostics until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -301,5 +301,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 92.4,
+      "rmse": 128.4
+    },
+    "surface_wall_shear": {
+      "mae": 1.27,
+      "rmse": 1.87
+    },
+    "volume_velocity": {
+      "mae": 2.98,
+      "rmse": 4.26
+    },
+    "volume_pressure": {
+      "mae": 30.8,
+      "rmse": 44.7
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0131,
+    "c_lift": 0.0016
   }
 }

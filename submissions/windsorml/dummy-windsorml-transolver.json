@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-transolver",
-  "model": "Transolver",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 21.1,
+      "rmse": 29.3
+    },
+    "surface_wall_shear": {
+      "mae": 0.53,
+      "rmse": 0.78
+    },
+    "volume_velocity": {
+      "mae": 1.25,
+      "rmse": 1.78
+    },
+    "volume_pressure": {
+      "mae": 20.6,
+      "rmse": 29.8
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0042,
+    "c_lift": 0.0092
   }
 }

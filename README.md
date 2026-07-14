@@ -14,7 +14,8 @@ A submission is a JSON file containing:
 
 - submission metadata, such as model name, one or more model types, training regime, submitter name, institution, paper URL, and code URL
 - the dataset and split being evaluated
-- scalar leaderboard metrics, such as L1/L2 field errors, force R2 values, velocity-profile R2, and Cp-cut R2
+- scalar leaderboard metrics, including relative field errors, dimensional field MAE/RMSE, absolute force or moment
+  coefficient errors, force R2 values, velocity-profile R2, and Cp-cut R2
 - compact diagnostic curve data for selected Cp cuts and velocity profiles
 
 Each dataset has its own folder under `submissions/`:
@@ -100,6 +101,13 @@ Current DrivAerML split values:
 - `Low drag`
 - `Rear separation`
 
+Current AirfRANS split values:
+
+- `Full`
+- `Scarce`
+- `Reynolds extrapolation`
+- `AoA extrapolation`
+
 Current HiLiftAeroML split values:
 
 - `Full`
@@ -156,6 +164,16 @@ Use `target_data_used` to clarify the target benchmark data used by the submissi
   "r2_cl": 0.0,
   "velocity_profile_r2": 0.0,
   "cp_cut_r2": 0.0,
+  "dimensional_field_errors": {
+    "surface_pressure": {"mae": 0.0, "rmse": 0.0},
+    "surface_wall_shear": {"mae": 0.0, "rmse": 0.0},
+    "volume_velocity": {"mae": 0.0, "rmse": 0.0},
+    "volume_pressure": {"mae": 0.0, "rmse": 0.0}
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0,
+    "c_lift": 0.0
+  },
   "diagnostics": {
     "cp_cuts": [],
     "velocity_profiles": []
@@ -163,19 +181,56 @@ Use `target_data_used` to clarify the target benchmark data used by the submissi
 }
 ```
 
-TODO: replace this with the final JSON schema once the validator is fixed.
+The enabled dimensional fields and coefficient errors are dataset-specific. `leaderboard/manifest.json` is authoritative:
+its `metric_catalog` defines labels, SI display units, precision, and weighting, while each dataset's `metrics` object
+lists the IDs that must be present. HiLiftAeroML currently also requires `absolute_coefficient_errors.c_pitch`.
+
+The evaluator must compute dimensional metrics after undoing model normalization and converting predictions and targets
+to the SI unit declared in the manifest. Submitted values must be evaluator outputs; they must not be inferred from the
+relative errors.
+
+For coefficient value `C` across `N` evaluated cases, the reported absolute error is mean absolute error:
+
+```text
+MAE(C) = (1 / N) sum_i |C_pred,i - C_true,i|
+```
+
+For field `q`, `w_ij` is face area for surface quantities or cell volume for volume quantities. Scalar fields use the
+absolute point error; vector fields use the Euclidean magnitude of the error vector. Cases are weighted equally:
+
+```text
+MAE(q)  = (1 / N) sum_i [sum_j w_ij ||q_pred,ij - q_true,ij|| / sum_j w_ij]
+RMSE(q) = sqrt((1 / N) sum_i [sum_j w_ij ||q_pred,ij - q_true,ij||^2 / sum_j w_ij])
+```
 
 ## Validation
 
-TODO: add the final validator command.
+Validate all source submissions and confirm the generated feeds are synchronized:
 
-Expected validator responsibilities:
+```bash
+python3 scripts/manage_leaderboard.py check
+```
 
-- check that required fields are present
-- check that the dataset and split are valid
-- check that metric values are numeric and within expected ranges
-- check that Cp and velocity diagnostic arrays use the required case IDs, cut IDs, station IDs, coordinates, and units
-- check that no large binary files are committed to this repository
+Validate one proposed submission before opening a PR:
+
+```bash
+python3 scripts/manage_leaderboard.py validate submissions/<dataset-slug>/<submission>.json
+```
+
+Maintainers regenerate all dataset feeds, `leaderboard/all.json`, the compatibility `leaderboard.json`, counts, and
+timestamps with:
+
+```bash
+python3 scripts/manage_leaderboard.py build
+```
+
+The validator checks:
+
+- required metadata and scalar metrics
+- dataset names, dataset folders, and manifest-defined splits
+- finite numeric values and allowed metric ranges
+- every dataset-required dimensional field MAE/RMSE and coefficient MAE
+- the presence of Cp-cut and velocity-profile diagnostic arrays
 
 ## Review process
 

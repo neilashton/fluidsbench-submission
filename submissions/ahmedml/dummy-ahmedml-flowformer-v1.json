@@ -1,6 +1,6 @@
 {
   "submission_id": "dummy-ahmedml-flowformer-v1",
-  "model": "FlowFormer CFD",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer",
@@ -19,7 +19,7 @@
     }
   ],
   "dataset": "AhmedML",
-  "split": "Full",
+  "split": "Medium",
   "parameter_count": 12.4,
   "surface_pressure_l2": 2.72,
   "surface_pressure_l1": 1.96,
@@ -38,7 +38,7 @@
   "paper_url": "https://example.com/fluidsbench-flowformer",
   "code_url": "https://github.com/example/fluidsbench-flowformer",
   "submitted_at": "2026-07-08",
-  "note": "Dummy AhmedML submission with compact diagnostic curves.",
+  "note": "Dummy AhmedML submission with compact diagnostic curves. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -108,5 +108,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 13.7,
+      "rmse": 19
+    },
+    "surface_wall_shear": {
+      "mae": 0.3,
+      "rmse": 0.44
+    },
+    "volume_velocity": {
+      "mae": 0.49,
+      "rmse": 0.7
+    },
+    "volume_pressure": {
+      "mae": 7.8,
+      "rmse": 11.3
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0013,
+    "c_lift": 0.003
   }
 }

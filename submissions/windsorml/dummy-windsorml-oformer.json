@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-oformer",
-  "model": "OFormer",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 20.5,
+      "rmse": 28.5
+    },
+    "surface_wall_shear": {
+      "mae": 0.52,
+      "rmse": 0.77
+    },
+    "volume_velocity": {
+      "mae": 1.23,
+      "rmse": 1.76
+    },
+    "volume_pressure": {
+      "mae": 20.3,
+      "rmse": 29.5
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0044,
+    "c_lift": 0.0087
   }
 }

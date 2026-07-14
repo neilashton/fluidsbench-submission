@@ -1,6 +1,6 @@
 {
   "submission_id": "dummy-airfrans-airfoiloperator-v1",
-  "model": "AirfoilOperator",
+  "model": "FluidsBench prototype baseline",
   "model_type": "GNN",
   "model_types": [
     "GNN"
@@ -29,7 +29,7 @@
   "paper_url": "https://example.com/airfoiloperator",
   "code_url": "https://github.com/example/airfoiloperator",
   "submitted_at": "2026-07-08",
-  "note": "Dummy AirfRANS submission with compact diagnostic curves.",
+  "note": "Dummy AirfRANS submission with compact diagnostic curves. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -99,5 +99,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 23.5,
+      "rmse": 33.1
+    },
+    "surface_wall_shear": {
+      "mae": 0.77,
+      "rmse": 1.14
+    },
+    "volume_velocity": {
+      "mae": 0.77,
+      "rmse": 1.1
+    },
+    "volume_pressure": {
+      "mae": 14.5,
+      "rmse": 21
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.004,
+    "c_lift": 0.0024
   }
 }

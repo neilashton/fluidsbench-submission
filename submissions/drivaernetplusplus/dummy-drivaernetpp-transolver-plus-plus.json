@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaernetpp-transolver-plus-plus",
-  "model": "Transolver++",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 90.6,
+      "rmse": 125.8
+    },
+    "surface_wall_shear": {
+      "mae": 1.87,
+      "rmse": 2.75
+    },
+    "volume_velocity": {
+      "mae": 5.32,
+      "rmse": 7.6
+    },
+    "volume_pressure": {
+      "mae": 79.8,
+      "rmse": 115.6
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0057,
+    "c_lift": 0.0087
   }
 }

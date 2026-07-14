@@ -1,6 +1,6 @@
 {
   "submission_id": "transolver",
-  "model": "Transolver",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 18.4,
+      "rmse": 25.6
+    },
+    "surface_wall_shear": {
+      "mae": 0.33,
+      "rmse": 0.48
+    },
+    "volume_velocity": {
+      "mae": 0.61,
+      "rmse": 0.88
+    },
+    "volume_pressure": {
+      "mae": 8.9,
+      "rmse": 13
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0029,
+    "c_lift": 0.0065
   }
 }

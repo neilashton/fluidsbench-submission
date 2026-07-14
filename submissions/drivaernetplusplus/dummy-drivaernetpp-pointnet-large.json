@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaernetpp-pointnet-large",
-  "model": "PointNetLarge",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Point cloud",
   "model_types": [
     "Point cloud"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 140.3,
+      "rmse": 194.9
+    },
+    "surface_wall_shear": {
+      "mae": 2.9,
+      "rmse": 4.26
+    },
+    "volume_velocity": {
+      "mae": 8.23,
+      "rmse": 11.76
+    },
+    "volume_pressure": {
+      "mae": 123.5,
+      "rmse": 179.1
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0119,
+    "c_lift": 0.0177
   }
 }

@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-upt",
-  "model": "UPT",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 31.1,
+      "rmse": 43.2
+    },
+    "surface_wall_shear": {
+      "mae": 0.78,
+      "rmse": 1.14
+    },
+    "volume_velocity": {
+      "mae": 1.79,
+      "rmse": 2.56
+    },
+    "volume_pressure": {
+      "mae": 30.9,
+      "rmse": 44.8
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0063,
+    "c_lift": 0.0142
   }
 }

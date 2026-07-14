@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaernetpp-ab-upt",
-  "model": "AB-UPT",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 78.2,
+      "rmse": 108.6
+    },
+    "surface_wall_shear": {
+      "mae": 1.62,
+      "rmse": 2.38
+    },
+    "volume_velocity": {
+      "mae": 4.59,
+      "rmse": 6.56
+    },
+    "volume_pressure": {
+      "mae": 68.9,
+      "rmse": 99.8
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0041,
+    "c_lift": 0.0061
   }
 }

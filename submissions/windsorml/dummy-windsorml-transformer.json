@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-transformer",
-  "model": "Transformer",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 20.0,
+      "rmse": 27.7
+    },
+    "surface_wall_shear": {
+      "mae": 0.51,
+      "rmse": 0.74
+    },
+    "volume_velocity": {
+      "mae": 1.21,
+      "rmse": 1.72
+    },
+    "volume_pressure": {
+      "mae": 19.7,
+      "rmse": 28.5
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.004,
+    "c_lift": 0.0086
   }
 }

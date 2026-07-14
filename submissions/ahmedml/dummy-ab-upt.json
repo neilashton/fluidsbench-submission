@@ -1,6 +1,6 @@
 {
   "submission_id": "ab-upt",
-  "model": "AB-UPT",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Reported AhmedML L2 metrics from AB-UPT v2; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Reported AhmedML L2 metrics from AB-UPT v2; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 15.1,
+      "rmse": 21
+    },
+    "surface_wall_shear": {
+      "mae": 0.32,
+      "rmse": 0.47
+    },
+    "volume_velocity": {
+      "mae": 0.53,
+      "rmse": 0.75
+    },
+    "volume_pressure": {
+      "mae": 8.2,
+      "rmse": 11.9
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0016,
+    "c_lift": 0.0032
   }
 }

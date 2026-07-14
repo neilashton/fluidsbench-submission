@@ -1,6 +1,6 @@
 {
   "submission_id": "gino",
-  "model": "GINO",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Neural operator",
   "model_types": [
     "Neural operator"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "AhmedML",
-  "split": "Full",
+  "split": "Scarce",
   "parameter_count": 15.6,
   "surface_pressure_l2": 7.9,
   "surface_pressure_l1": 5.688,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 39.8,
+      "rmse": 55.3
+    },
+    "surface_wall_shear": {
+      "mae": 0.67,
+      "rmse": 0.98
+    },
+    "volume_velocity": {
+      "mae": 1.74,
+      "rmse": 2.49
+    },
+    "volume_pressure": {
+      "mae": 33.5,
+      "rmse": 48.6
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0153,
+    "c_lift": 0.0296
   }
 }

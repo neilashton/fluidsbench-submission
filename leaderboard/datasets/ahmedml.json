@@ -1,7 +1,7 @@
 [
   {
     "submission_id": "ab-upt",
-    "model": "AB-UPT",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -30,7 +30,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Reported AhmedML L2 metrics from AB-UPT v2; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Reported AhmedML L2 metrics from AB-UPT v2; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -320,11 +320,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 15.1,
+        "rmse": 21
+      },
+      "surface_wall_shear": {
+        "mae": 0.32,
+        "rmse": 0.47
+      },
+      "volume_velocity": {
+        "mae": 0.53,
+        "rmse": 0.75
+      },
+      "volume_pressure": {
+        "mae": 8.2,
+        "rmse": 11.9
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0016,
+      "c_lift": 0.0032
     }
   },
   {
     "submission_id": "dummy-ahmedml-flowformer-v1",
-    "model": "FlowFormer CFD",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer",
@@ -343,7 +365,7 @@
       }
     ],
     "dataset": "AhmedML",
-    "split": "Full",
+    "split": "Medium",
     "parameter_count": 12.4,
     "surface_pressure_l2": 2.72,
     "surface_pressure_l1": 1.96,
@@ -362,7 +384,7 @@
     "paper_url": "https://example.com/fluidsbench-flowformer",
     "code_url": "https://github.com/example/fluidsbench-flowformer",
     "submitted_at": "2026-07-08",
-    "note": "Dummy AhmedML submission with compact diagnostic curves.",
+    "note": "Dummy AhmedML submission with compact diagnostic curves. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -432,11 +454,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 13.7,
+        "rmse": 19
+      },
+      "surface_wall_shear": {
+        "mae": 0.3,
+        "rmse": 0.44
+      },
+      "volume_velocity": {
+        "mae": 0.49,
+        "rmse": 0.7
+      },
+      "volume_pressure": {
+        "mae": 7.8,
+        "rmse": 11.3
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0013,
+      "c_lift": 0.003
     }
   },
   {
     "submission_id": "gino",
-    "model": "GINO",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Neural operator",
     "model_types": [
       "Neural operator"
@@ -446,7 +490,7 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "dataset": "AhmedML",
-    "split": "Full",
+    "split": "Scarce",
     "parameter_count": 15.6,
     "surface_pressure_l2": 7.9,
     "surface_pressure_l1": 5.688,
@@ -465,7 +509,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -755,11 +799,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 39.8,
+        "rmse": 55.3
+      },
+      "surface_wall_shear": {
+        "mae": 0.67,
+        "rmse": 0.98
+      },
+      "volume_velocity": {
+        "mae": 1.74,
+        "rmse": 2.49
+      },
+      "volume_pressure": {
+        "mae": 33.5,
+        "rmse": 48.6
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0153,
+      "c_lift": 0.0296
     }
   },
   {
     "submission_id": "graph-u-net",
-    "model": "Graph U-Net",
+    "model": "FluidsBench prototype baseline",
     "model_type": "GNN",
     "model_types": [
       "GNN"
@@ -769,7 +835,7 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "dataset": "AhmedML",
-    "split": "Full",
+    "split": "Super scarce",
     "parameter_count": 14.11,
     "surface_pressure_l2": 6.42,
     "surface_pressure_l1": 4.622,
@@ -788,7 +854,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -1078,11 +1144,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 32.4,
+        "rmse": 44.9
+      },
+      "surface_wall_shear": {
+        "mae": 0.59,
+        "rmse": 0.87
+      },
+      "volume_velocity": {
+        "mae": 1.16,
+        "rmse": 1.66
+      },
+      "volume_pressure": {
+        "mae": 21.4,
+        "rmse": 31
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.009,
+      "c_lift": 0.0182
     }
   },
   {
     "submission_id": "lno",
-    "model": "LNO",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Neural operator",
     "model_types": [
       "Neural operator"
@@ -1092,7 +1180,7 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "dataset": "AhmedML",
-    "split": "Full",
+    "split": "Geometry",
     "parameter_count": 6.3,
     "surface_pressure_l2": 12.91,
     "surface_pressure_l1": 9.295,
@@ -1111,7 +1199,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -1401,11 +1489,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 65.1,
+        "rmse": 90.4
+      },
+      "surface_wall_shear": {
+        "mae": 0.93,
+        "rmse": 1.37
+      },
+      "volume_velocity": {
+        "mae": 2.12,
+        "rmse": 3.02
+      },
+      "volume_pressure": {
+        "mae": 35.1,
+        "rmse": 50.8
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0212,
+      "c_lift": 0.0377
     }
   },
   {
     "submission_id": "oformer",
-    "model": "OFormer",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -1415,7 +1525,7 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "dataset": "AhmedML",
-    "split": "Full",
+    "split": "High drag",
     "parameter_count": 6.1,
     "surface_pressure_l2": 3.55,
     "surface_pressure_l1": 2.556,
@@ -1434,7 +1544,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -1724,11 +1834,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 17.9,
+        "rmse": 24.9
+      },
+      "surface_wall_shear": {
+        "mae": 0.33,
+        "rmse": 0.49
+      },
+      "volume_velocity": {
+        "mae": 0.62,
+        "rmse": 0.88
+      },
+      "volume_pressure": {
+        "mae": 9.4,
+        "rmse": 13.6
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0028,
+      "c_lift": 0.0077
     }
   },
   {
     "submission_id": "pointnet",
-    "model": "PointNet",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Point cloud",
     "model_types": [
       "Point cloud"
@@ -1738,7 +1870,7 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "dataset": "AhmedML",
-    "split": "Full",
+    "split": "Low drag",
     "parameter_count": 3.6,
     "surface_pressure_l2": 8.51,
     "surface_pressure_l1": 6.127,
@@ -1757,7 +1889,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -2047,11 +2179,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 42.9,
+        "rmse": 59.6
+      },
+      "surface_wall_shear": {
+        "mae": 0.82,
+        "rmse": 1.21
+      },
+      "volume_velocity": {
+        "mae": 1.52,
+        "rmse": 2.17
+      },
+      "volume_pressure": {
+        "mae": 25.3,
+        "rmse": 36.7
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0135,
+      "c_lift": 0.0273
     }
   },
   {
     "submission_id": "transformer",
-    "model": "Transformer",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -2061,7 +2215,7 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "dataset": "AhmedML",
-    "split": "Full",
+    "split": "Image wake",
     "parameter_count": 5.49,
     "surface_pressure_l2": 3.41,
     "surface_pressure_l1": 2.455,
@@ -2080,7 +2234,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -2370,11 +2524,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 17.2,
+        "rmse": 23.9
+      },
+      "surface_wall_shear": {
+        "mae": 0.33,
+        "rmse": 0.48
+      },
+      "volume_velocity": {
+        "mae": 0.59,
+        "rmse": 0.84
+      },
+      "volume_pressure": {
+        "mae": 8.9,
+        "rmse": 13
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.002,
+      "c_lift": 0.0054
     }
   },
   {
     "submission_id": "transolver",
-    "model": "Transolver",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -2403,7 +2579,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -2693,11 +2869,33 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 18.4,
+        "rmse": 25.6
+      },
+      "surface_wall_shear": {
+        "mae": 0.33,
+        "rmse": 0.48
+      },
+      "volume_velocity": {
+        "mae": 0.61,
+        "rmse": 0.88
+      },
+      "volume_pressure": {
+        "mae": 8.9,
+        "rmse": 13
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0029,
+      "c_lift": 0.0065
     }
   },
   {
     "submission_id": "upt",
-    "model": "UPT",
+    "model": "FluidsBench prototype baseline",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -2707,7 +2905,7 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "dataset": "AhmedML",
-    "split": "Full",
+    "split": "Medium",
     "parameter_count": 10.98,
     "surface_pressure_l2": 3.9,
     "surface_pressure_l1": 2.808,
@@ -2726,7 +2924,7 @@
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2025-06-13",
-    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -3016,6 +3214,28 @@
           ]
         }
       ]
+    },
+    "dimensional_field_errors": {
+      "surface_pressure": {
+        "mae": 19.7,
+        "rmse": 27.3
+      },
+      "surface_wall_shear": {
+        "mae": 0.45,
+        "rmse": 0.66
+      },
+      "volume_velocity": {
+        "mae": 0.73,
+        "rmse": 1.05
+      },
+      "volume_pressure": {
+        "mae": 12.5,
+        "rmse": 18.1
+      }
+    },
+    "absolute_coefficient_errors": {
+      "c_drag": 0.0041,
+      "c_lift": 0.0104
     }
   }
 ]

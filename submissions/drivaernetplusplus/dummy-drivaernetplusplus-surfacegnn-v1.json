@@ -1,6 +1,6 @@
 {
   "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
-  "model": "SurfaceGNN CFD",
+  "model": "FluidsBench prototype baseline",
   "model_type": "GNN",
   "model_types": [
     "GNN"
@@ -99,5 +99,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 18.9,
+      "rmse": 26.8
+    },
+    "surface_wall_shear": {
+      "mae": 0.45,
+      "rmse": 0.66
+    },
+    "volume_velocity": {
+      "mae": 0.65,
+      "rmse": 0.93
+    },
+    "volume_pressure": {
+      "mae": 12.3,
+      "rmse": 17.8
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0022,
+    "c_lift": 0.0041
   }
 }

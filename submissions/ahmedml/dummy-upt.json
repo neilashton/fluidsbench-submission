@@ -1,6 +1,6 @@
 {
   "submission_id": "upt",
-  "model": "UPT",
+  "model": "FluidsBench prototype baseline",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -10,7 +10,7 @@
   "external_pretraining": false,
   "pretraining_data": [],
   "dataset": "AhmedML",
-  "split": "Full",
+  "split": "Medium",
   "parameter_count": 10.98,
   "surface_pressure_l2": 3.9,
   "surface_pressure_l1": 2.808,
@@ -29,7 +29,7 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {
@@ -319,5 +319,27 @@
         ]
       }
     ]
+  },
+  "dimensional_field_errors": {
+    "surface_pressure": {
+      "mae": 19.7,
+      "rmse": 27.3
+    },
+    "surface_wall_shear": {
+      "mae": 0.45,
+      "rmse": 0.66
+    },
+    "volume_velocity": {
+      "mae": 0.73,
+      "rmse": 1.05
+    },
+    "volume_pressure": {
+      "mae": 12.5,
+      "rmse": 18.1
+    }
+  },
+  "absolute_coefficient_errors": {
+    "c_drag": 0.0041,
+    "c_lift": 0.0104
   }
 }
