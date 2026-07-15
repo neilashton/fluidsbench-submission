@@ -1,6 +1,6 @@
 {
-  "schema_version": "0.3.0",
-  "generated_at": "2026-07-08T00:00:00Z",
+  "schema_version": "0.4.0",
+  "generated_at": "2026-07-15T00:00:00Z",
   "all_file": "leaderboard/all.json",
   "metric_catalog": {
     "dimensional_fields": [
@@ -158,34 +158,150 @@
           "description": "Image-derived UxMean wake out-of-distribution split."
         }
       ],
-      "diagnostics": {
-        "cp_stations": [
-          {
-            "id": "upper_body_centerline",
-            "label": "Upper-body centreline",
-            "x_label": "x/L along upper-body centreline",
-            "description": "FluidsBench symmetry-plane trace over the roof and rear slant.",
-            "basis": "fluidsbench_benchmark_trace",
-            "source_url": "https://arxiv.org/abs/2407.20801"
-          },
-          {
-            "id": "underbody_centerline",
-            "label": "Underbody centreline",
-            "x_label": "x/L along underbody centreline",
-            "description": "FluidsBench symmetry-plane trace along the Ahmed body underfloor.",
-            "basis": "fluidsbench_benchmark_trace",
-            "source_url": "https://arxiv.org/abs/2407.20801"
-          },
-          {
-            "id": "rear_slant_centerline",
-            "label": "Rear-slant centreline",
-            "x_label": "s/L along rear-slant centreline",
-            "description": "FluidsBench centreline trace across the pressure-sensitive rear slant.",
-            "basis": "fluidsbench_benchmark_trace",
-            "source_url": "https://arxiv.org/abs/2407.20801"
-          }
-        ]
-      }
+      "submission_format": "legacy_external_aero",
+      "metric_ids": [
+        "overall_score",
+        "field_score",
+        "force_score",
+        "diagnostic_score",
+        "surface_pressure_rel_l2",
+        "surface_wall_shear_rel_l2",
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "surface_pressure_rel_l1",
+        "surface_wall_shear_rel_l1",
+        "volume_velocity_rel_l1",
+        "volume_pressure_rel_l1",
+        "velocity_profile_r2",
+        "cp_cut_r2",
+        "surface_pressure_mae",
+        "surface_wall_shear_mae",
+        "volume_velocity_mae",
+        "volume_pressure_mae",
+        "surface_pressure_rmse",
+        "surface_wall_shear_rmse",
+        "volume_velocity_rmse",
+        "volume_pressure_rmse",
+        "cd_r2",
+        "cl_r2",
+        "c_drag_mae",
+        "c_lift_mae"
+      ],
+      "ranking": {
+        "metric_id": "overall_score",
+        "direction": "higher"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "pressure_profiles",
+          "title": "Pressure-coefficient profiles",
+          "description": "Reference and submitted pressure-coefficient traces at the selected station.",
+          "data_key": "cp_cuts",
+          "x_keys": [
+            "x",
+            "x_over_c",
+            "x_over_l"
+          ],
+          "quantities": [
+            {
+              "id": "cp",
+              "label": "Cp",
+              "y_label": "Pressure coefficient, Cp",
+              "y_keys": [
+                "cp"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "upper_body_centerline",
+              "label": "Upper-body centreline",
+              "x_label": "x/L along upper-body centreline",
+              "description": "FluidsBench symmetry-plane trace over the roof and rear slant.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://arxiv.org/abs/2407.20801"
+            },
+            {
+              "id": "underbody_centerline",
+              "label": "Underbody centreline",
+              "x_label": "x/L along underbody centreline",
+              "description": "FluidsBench symmetry-plane trace along the Ahmed body underfloor.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://arxiv.org/abs/2407.20801"
+            },
+            {
+              "id": "rear_slant_centerline",
+              "label": "Rear-slant centreline",
+              "x_label": "s/L along rear-slant centreline",
+              "description": "FluidsBench centreline trace across the pressure-sensitive rear slant.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://arxiv.org/abs/2407.20801"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ],
+          "reverse_y": true
+        },
+        {
+          "id": "velocity_profiles",
+          "title": "Velocity profiles",
+          "description": "Reference and submitted normalized velocity traces at the selected station.",
+          "data_key": "velocity_profiles",
+          "x_keys": [
+            "x",
+            "offset",
+            "distance"
+          ],
+          "quantities": [
+            {
+              "id": "velocity_ratio",
+              "label": "Velocity",
+              "y_label": "Normalized velocity",
+              "y_keys": [
+                "u_over_u_inf",
+                "velocity_ratio"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "prototype_0_25l",
+              "label": "0.25L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.25 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_0_50l",
+              "label": "0.50L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.50 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_1_00l",
+              "label": "1.00L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 1.00 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            }
+          ],
+          "required": false,
+          "allow_unlisted_stations": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        }
+      ]
     },
     {
       "name": "AirfRANS",
@@ -227,26 +343,142 @@
           "description": "Out-of-distribution split for angle-of-attack extrapolation."
         }
       ],
-      "diagnostics": {
-        "cp_stations": [
-          {
-            "id": "upper_surface",
-            "label": "Upper surface (extrados)",
-            "x_label": "x/c along upper airfoil surface",
-            "description": "Upper-surface pressure-coefficient trace used by the AirfRANS validation and benchmark plots.",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2212.07564"
-          },
-          {
-            "id": "lower_surface",
-            "label": "Lower surface (intrados)",
-            "x_label": "x/c along lower airfoil surface",
-            "description": "Lower-surface pressure-coefficient trace used by the AirfRANS validation and benchmark plots.",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2212.07564"
-          }
-        ]
-      }
+      "submission_format": "legacy_external_aero",
+      "metric_ids": [
+        "overall_score",
+        "field_score",
+        "force_score",
+        "diagnostic_score",
+        "surface_pressure_rel_l2",
+        "surface_wall_shear_rel_l2",
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "surface_pressure_rel_l1",
+        "surface_wall_shear_rel_l1",
+        "volume_velocity_rel_l1",
+        "volume_pressure_rel_l1",
+        "velocity_profile_r2",
+        "cp_cut_r2",
+        "surface_pressure_mae",
+        "surface_wall_shear_mae",
+        "volume_velocity_mae",
+        "volume_pressure_mae",
+        "surface_pressure_rmse",
+        "surface_wall_shear_rmse",
+        "volume_velocity_rmse",
+        "volume_pressure_rmse",
+        "cd_r2",
+        "cl_r2",
+        "c_drag_mae",
+        "c_lift_mae"
+      ],
+      "ranking": {
+        "metric_id": "overall_score",
+        "direction": "higher"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "pressure_profiles",
+          "title": "Pressure-coefficient profiles",
+          "description": "Reference and submitted pressure-coefficient traces at the selected station.",
+          "data_key": "cp_cuts",
+          "x_keys": [
+            "x",
+            "x_over_c",
+            "x_over_l"
+          ],
+          "quantities": [
+            {
+              "id": "cp",
+              "label": "Cp",
+              "y_label": "Pressure coefficient, Cp",
+              "y_keys": [
+                "cp"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "upper_surface",
+              "label": "Upper surface (extrados)",
+              "x_label": "x/c along upper airfoil surface",
+              "description": "Upper-surface pressure-coefficient trace used by the AirfRANS validation and benchmark plots.",
+              "basis": "published_validation_trace",
+              "source_url": "https://arxiv.org/abs/2212.07564"
+            },
+            {
+              "id": "lower_surface",
+              "label": "Lower surface (intrados)",
+              "x_label": "x/c along lower airfoil surface",
+              "description": "Lower-surface pressure-coefficient trace used by the AirfRANS validation and benchmark plots.",
+              "basis": "published_validation_trace",
+              "source_url": "https://arxiv.org/abs/2212.07564"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ],
+          "reverse_y": true
+        },
+        {
+          "id": "velocity_profiles",
+          "title": "Velocity profiles",
+          "description": "Reference and submitted normalized velocity traces at the selected station.",
+          "data_key": "velocity_profiles",
+          "x_keys": [
+            "x",
+            "offset",
+            "distance"
+          ],
+          "quantities": [
+            {
+              "id": "velocity_ratio",
+              "label": "Velocity",
+              "y_label": "Normalized velocity",
+              "y_keys": [
+                "u_over_u_inf",
+                "velocity_ratio"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "prototype_0_25l",
+              "label": "0.25L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.25 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_0_50l",
+              "label": "0.50L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.50 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_1_00l",
+              "label": "1.00L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 1.00 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            }
+          ],
+          "required": false,
+          "allow_unlisted_stations": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        }
+      ]
     },
     {
       "name": "DrivAerML",
@@ -332,42 +564,158 @@
           "description": "Image-derived low-speed wake and rear-separation out-of-distribution split."
         }
       ],
-      "diagnostics": {
-        "cp_stations": [
-          {
-            "id": "upperbody_centerline",
-            "label": "Upper-body centreline (y = 0 m)",
-            "x_label": "x/L along upper-body centreline",
-            "description": "Upper-body pressure-probe trace used in the DrivAerML validation study (Figure 17a).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2408.11969"
-          },
-          {
-            "id": "underbody_centerline",
-            "label": "Underbody centreline (y = 0 m)",
-            "x_label": "x/L along underbody centreline",
-            "description": "Underbody pressure-probe trace used in the DrivAerML validation study (Figure 17b).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2408.11969"
-          },
-          {
-            "id": "sidewall_z_0_15",
-            "label": "Sidewall (z = 0.15 m)",
-            "x_label": "x/L along sidewall trace",
-            "description": "Sidewall pressure-probe trace used in the DrivAerML supplementary validation (Figure 22a).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2408.11969"
-          },
-          {
-            "id": "front_left_wheelhouse_y_neg_0_6",
-            "label": "Front-left wheelhouse (y = -0.6 m)",
-            "x_label": "s/L along wheelhouse trace",
-            "description": "Front-left wheelhouse pressure-probe trace used in the DrivAerML supplementary validation (Figure 22b).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2408.11969"
-          }
-        ]
-      }
+      "submission_format": "legacy_external_aero",
+      "metric_ids": [
+        "overall_score",
+        "field_score",
+        "force_score",
+        "diagnostic_score",
+        "surface_pressure_rel_l2",
+        "surface_wall_shear_rel_l2",
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "surface_pressure_rel_l1",
+        "surface_wall_shear_rel_l1",
+        "volume_velocity_rel_l1",
+        "volume_pressure_rel_l1",
+        "velocity_profile_r2",
+        "cp_cut_r2",
+        "surface_pressure_mae",
+        "surface_wall_shear_mae",
+        "volume_velocity_mae",
+        "volume_pressure_mae",
+        "surface_pressure_rmse",
+        "surface_wall_shear_rmse",
+        "volume_velocity_rmse",
+        "volume_pressure_rmse",
+        "cd_r2",
+        "cl_r2",
+        "c_drag_mae",
+        "c_lift_mae"
+      ],
+      "ranking": {
+        "metric_id": "overall_score",
+        "direction": "higher"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "pressure_profiles",
+          "title": "Pressure-coefficient profiles",
+          "description": "Reference and submitted pressure-coefficient traces at the selected station.",
+          "data_key": "cp_cuts",
+          "x_keys": [
+            "x",
+            "x_over_c",
+            "x_over_l"
+          ],
+          "quantities": [
+            {
+              "id": "cp",
+              "label": "Cp",
+              "y_label": "Pressure coefficient, Cp",
+              "y_keys": [
+                "cp"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "upperbody_centerline",
+              "label": "Upper-body centreline (y = 0 m)",
+              "x_label": "x/L along upper-body centreline",
+              "description": "Upper-body pressure-probe trace used in the DrivAerML validation study (Figure 17a).",
+              "basis": "published_validation_trace",
+              "source_url": "https://arxiv.org/abs/2408.11969"
+            },
+            {
+              "id": "underbody_centerline",
+              "label": "Underbody centreline (y = 0 m)",
+              "x_label": "x/L along underbody centreline",
+              "description": "Underbody pressure-probe trace used in the DrivAerML validation study (Figure 17b).",
+              "basis": "published_validation_trace",
+              "source_url": "https://arxiv.org/abs/2408.11969"
+            },
+            {
+              "id": "sidewall_z_0_15",
+              "label": "Sidewall (z = 0.15 m)",
+              "x_label": "x/L along sidewall trace",
+              "description": "Sidewall pressure-probe trace used in the DrivAerML supplementary validation (Figure 22a).",
+              "basis": "published_validation_trace",
+              "source_url": "https://arxiv.org/abs/2408.11969"
+            },
+            {
+              "id": "front_left_wheelhouse_y_neg_0_6",
+              "label": "Front-left wheelhouse (y = -0.6 m)",
+              "x_label": "s/L along wheelhouse trace",
+              "description": "Front-left wheelhouse pressure-probe trace used in the DrivAerML supplementary validation (Figure 22b).",
+              "basis": "published_validation_trace",
+              "source_url": "https://arxiv.org/abs/2408.11969"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ],
+          "reverse_y": true
+        },
+        {
+          "id": "velocity_profiles",
+          "title": "Velocity profiles",
+          "description": "Reference and submitted normalized velocity traces at the selected station.",
+          "data_key": "velocity_profiles",
+          "x_keys": [
+            "x",
+            "offset",
+            "distance"
+          ],
+          "quantities": [
+            {
+              "id": "velocity_ratio",
+              "label": "Velocity",
+              "y_label": "Normalized velocity",
+              "y_keys": [
+                "u_over_u_inf",
+                "velocity_ratio"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "prototype_0_25l",
+              "label": "0.25L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.25 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_0_50l",
+              "label": "0.50L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.50 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_1_00l",
+              "label": "1.00L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 1.00 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            }
+          ],
+          "required": false,
+          "allow_unlisted_stations": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        }
+      ]
     },
     {
       "name": "DrivAerNet++",
@@ -387,42 +735,165 @@
           "c_lift"
         ]
       },
-      "diagnostics": {
-        "cp_stations": [
-          {
-            "id": "upper_body_centerline",
-            "label": "Upper-body centreline",
-            "x_label": "x/L along upper-body centreline",
-            "description": "FluidsBench trace through the annotated upper-body components.",
-            "basis": "fluidsbench_benchmark_trace",
-            "source_url": "https://arxiv.org/abs/2406.09624"
-          },
-          {
-            "id": "underbody_centerline",
-            "label": "Underbody centreline",
-            "x_label": "x/L along underbody centreline",
-            "description": "FluidsBench trace through the smooth or detailed underbody configuration.",
-            "basis": "fluidsbench_benchmark_trace",
-            "source_url": "https://arxiv.org/abs/2406.09624"
-          },
-          {
-            "id": "front_wheelhouse",
-            "label": "Front wheelhouse",
-            "x_label": "s/L along front-wheelhouse trace",
-            "description": "FluidsBench trace through the annotated front-wheel region.",
-            "basis": "fluidsbench_benchmark_trace",
-            "source_url": "https://arxiv.org/abs/2406.09624"
-          },
-          {
-            "id": "rear_body_centerline",
-            "label": "Rear-body centreline",
-            "x_label": "s/L along rear-body centreline",
-            "description": "FluidsBench trace through the fastback, notchback, or estateback rear surface.",
-            "basis": "fluidsbench_benchmark_trace",
-            "source_url": "https://arxiv.org/abs/2406.09624"
-          }
-        ]
-      }
+      "splits": [
+        {
+          "id": "default",
+          "name": "Default",
+          "description": "Default prototype benchmark split."
+        }
+      ],
+      "submission_format": "legacy_external_aero",
+      "metric_ids": [
+        "overall_score",
+        "field_score",
+        "force_score",
+        "diagnostic_score",
+        "surface_pressure_rel_l2",
+        "surface_wall_shear_rel_l2",
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "surface_pressure_rel_l1",
+        "surface_wall_shear_rel_l1",
+        "volume_velocity_rel_l1",
+        "volume_pressure_rel_l1",
+        "velocity_profile_r2",
+        "cp_cut_r2",
+        "surface_pressure_mae",
+        "surface_wall_shear_mae",
+        "volume_velocity_mae",
+        "volume_pressure_mae",
+        "surface_pressure_rmse",
+        "surface_wall_shear_rmse",
+        "volume_velocity_rmse",
+        "volume_pressure_rmse",
+        "cd_r2",
+        "cl_r2",
+        "c_drag_mae",
+        "c_lift_mae"
+      ],
+      "ranking": {
+        "metric_id": "overall_score",
+        "direction": "higher"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "pressure_profiles",
+          "title": "Pressure-coefficient profiles",
+          "description": "Reference and submitted pressure-coefficient traces at the selected station.",
+          "data_key": "cp_cuts",
+          "x_keys": [
+            "x",
+            "x_over_c",
+            "x_over_l"
+          ],
+          "quantities": [
+            {
+              "id": "cp",
+              "label": "Cp",
+              "y_label": "Pressure coefficient, Cp",
+              "y_keys": [
+                "cp"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "upper_body_centerline",
+              "label": "Upper-body centreline",
+              "x_label": "x/L along upper-body centreline",
+              "description": "FluidsBench trace through the annotated upper-body components.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://arxiv.org/abs/2406.09624"
+            },
+            {
+              "id": "underbody_centerline",
+              "label": "Underbody centreline",
+              "x_label": "x/L along underbody centreline",
+              "description": "FluidsBench trace through the smooth or detailed underbody configuration.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://arxiv.org/abs/2406.09624"
+            },
+            {
+              "id": "front_wheelhouse",
+              "label": "Front wheelhouse",
+              "x_label": "s/L along front-wheelhouse trace",
+              "description": "FluidsBench trace through the annotated front-wheel region.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://arxiv.org/abs/2406.09624"
+            },
+            {
+              "id": "rear_body_centerline",
+              "label": "Rear-body centreline",
+              "x_label": "s/L along rear-body centreline",
+              "description": "FluidsBench trace through the fastback, notchback, or estateback rear surface.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://arxiv.org/abs/2406.09624"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ],
+          "reverse_y": true
+        },
+        {
+          "id": "velocity_profiles",
+          "title": "Velocity profiles",
+          "description": "Reference and submitted normalized velocity traces at the selected station.",
+          "data_key": "velocity_profiles",
+          "x_keys": [
+            "x",
+            "offset",
+            "distance"
+          ],
+          "quantities": [
+            {
+              "id": "velocity_ratio",
+              "label": "Velocity",
+              "y_label": "Normalized velocity",
+              "y_keys": [
+                "u_over_u_inf",
+                "velocity_ratio"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "prototype_0_25l",
+              "label": "0.25L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.25 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_0_50l",
+              "label": "0.50L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.50 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_1_00l",
+              "label": "1.00L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 1.00 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            }
+          ],
+          "required": false,
+          "allow_unlisted_stations": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        }
+      ]
     },
     {
       "name": "HiLiftAeroML",
@@ -571,42 +1042,415 @@
           "description": "Flow-regime extrapolation from pre-stall training cases to post-stall test cases."
         }
       ],
-      "diagnostics": {
-        "cp_stations": [
-          {
-            "id": "pressure_belt_a",
-            "label": "Pressure belt A",
-            "x_label": "x/c along pressure belt A",
-            "description": "Published CRM-HL inboard surface-pressure belt used in the HiLiftAeroML validation (Figure 15).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2605.19565"
-          },
-          {
-            "id": "pressure_belt_d",
-            "label": "Pressure belt D",
-            "x_label": "x/c along pressure belt D",
-            "description": "Published CRM-HL surface-pressure belt D used in the HiLiftAeroML validation (Figure 15).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2605.19565"
-          },
-          {
-            "id": "pressure_belt_g",
-            "label": "Pressure belt G",
-            "x_label": "x/c along pressure belt G",
-            "description": "Published CRM-HL surface-pressure belt G used in the HiLiftAeroML validation (Figure 15).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2605.19565"
-          },
-          {
-            "id": "pressure_belt_i",
-            "label": "Pressure belt I",
-            "x_label": "x/c along pressure belt I",
-            "description": "Published CRM-HL outboard surface-pressure belt used in the HiLiftAeroML validation (Figure 15).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2605.19565"
-          }
-        ]
-      }
+      "submission_format": "legacy_external_aero",
+      "metric_ids": [
+        "overall_score",
+        "field_score",
+        "force_score",
+        "diagnostic_score",
+        "surface_pressure_rel_l2",
+        "surface_wall_shear_rel_l2",
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "surface_pressure_rel_l1",
+        "surface_wall_shear_rel_l1",
+        "volume_velocity_rel_l1",
+        "volume_pressure_rel_l1",
+        "velocity_profile_r2",
+        "cp_cut_r2",
+        "surface_pressure_mae",
+        "surface_wall_shear_mae",
+        "volume_velocity_mae",
+        "volume_pressure_mae",
+        "surface_pressure_rmse",
+        "surface_wall_shear_rmse",
+        "volume_velocity_rmse",
+        "volume_pressure_rmse",
+        "cd_r2",
+        "cl_r2",
+        "c_drag_mae",
+        "c_lift_mae",
+        "c_pitch_mae"
+      ],
+      "ranking": {
+        "metric_id": "overall_score",
+        "direction": "higher"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "pressure_profiles",
+          "title": "Pressure-coefficient profiles",
+          "description": "Reference and submitted pressure-coefficient traces at the selected station.",
+          "data_key": "cp_cuts",
+          "x_keys": [
+            "x",
+            "x_over_c",
+            "x_over_l"
+          ],
+          "quantities": [
+            {
+              "id": "cp",
+              "label": "Cp",
+              "y_label": "Pressure coefficient, Cp",
+              "y_keys": [
+                "cp"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "pressure_belt_a",
+              "label": "HLPW-5 pressure row A",
+              "x_label": "x (full-scale in) along HLPW-5 row A",
+              "dog_leg_x_in": 1126.61,
+              "elements": [
+                "slat",
+                "main_wing",
+                "flap"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row A. It is one of the four belts plotted in Figure 15 of the HiLiftAeroML paper.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_b",
+              "label": "HLPW-5 pressure row B",
+              "x_label": "x (full-scale in) along HLPW-5 row B",
+              "dog_leg_x_in": 1199.86,
+              "elements": [
+                "slat",
+                "main_wing",
+                "flap"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row B.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_c",
+              "label": "HLPW-5 pressure row C",
+              "x_label": "x (full-scale in) along HLPW-5 row C",
+              "dog_leg_x_in": 1266.16,
+              "elements": [
+                "main_wing",
+                "flap"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row C. Row C has no deployed-slat cut in HLPW-5 Case 2.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_d",
+              "label": "HLPW-5 pressure row D",
+              "x_label": "x (full-scale in) along HLPW-5 row D",
+              "dog_leg_x_in": 1332.41,
+              "elements": [
+                "slat",
+                "main_wing",
+                "flap"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row D. It is one of the four belts plotted in Figure 15 of the HiLiftAeroML paper.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_e",
+              "label": "HLPW-5 pressure row E",
+              "x_label": "x (full-scale in) along HLPW-5 row E",
+              "dog_leg_x_in": 1402.17,
+              "elements": [
+                "slat",
+                "main_wing",
+                "flap"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row E.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_f",
+              "label": "HLPW-5 pressure row F",
+              "x_label": "x (full-scale in) along HLPW-5 row F",
+              "dog_leg_x_in": 1478.9,
+              "elements": [
+                "slat",
+                "main_wing",
+                "flap"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row F.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_g",
+              "label": "HLPW-5 pressure row G",
+              "x_label": "x (full-scale in) along HLPW-5 row G",
+              "dog_leg_x_in": 1555.64,
+              "elements": [
+                "slat",
+                "main_wing",
+                "flap"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row G. It is one of the four belts plotted in Figure 15 of the HiLiftAeroML paper.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_h",
+              "label": "HLPW-5 pressure row H",
+              "x_label": "x (full-scale in) along HLPW-5 row H",
+              "dog_leg_x_in": 1621.91,
+              "elements": [
+                "slat",
+                "main_wing"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row H.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_i",
+              "label": "HLPW-5 pressure row I",
+              "x_label": "x (full-scale in) along HLPW-5 row I",
+              "dog_leg_x_in": 1709.11,
+              "elements": [
+                "slat",
+                "main_wing"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row I. It is one of the four belts plotted in Figure 15 of the HiLiftAeroML paper.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "pressure_belt_j",
+              "label": "HLPW-5 pressure row J",
+              "x_label": "x (full-scale in) along HLPW-5 row J",
+              "dog_leg_x_in": 1778.87,
+              "elements": [
+                "slat",
+                "main_wing"
+              ],
+              "description": "Official HLPW-5 CRM-HL wing pressure row J.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ],
+          "reverse_y": true
+        },
+        {
+          "id": "velocity_profiles",
+          "title": "Velocity profiles",
+          "description": "Reference and submitted normalized velocity traces at the selected station.",
+          "data_key": "velocity_profiles",
+          "x_keys": [
+            "x",
+            "offset",
+            "distance"
+          ],
+          "quantities": [
+            {
+              "id": "velocity_ratio",
+              "label": "Velocity",
+              "y_label": "Normalized velocity",
+              "y_keys": [
+                "u_over_u_inf",
+                "velocity_ratio"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "hlpw5_a_1",
+              "label": "HLPW-5 A.1",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1034.95,
+              "y_in": 137.9135,
+              "surface_z_in": 191.75,
+              "description": "HLPW-5 velocity-profile station A.1 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_a_2",
+              "label": "HLPW-5 A.2",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1071.2212,
+              "y_in": 160.9808,
+              "surface_z_in": 195.4808,
+              "description": "HLPW-5 velocity-profile station A.2 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_a_3",
+              "label": "HLPW-5 A.3",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1365.5096,
+              "y_in": 227.1058,
+              "surface_z_in": 183.1173,
+              "description": "HLPW-5 velocity-profile station A.3 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_a_4",
+              "label": "HLPW-5 A.4",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1385.4231,
+              "y_in": 128.3423,
+              "surface_z_in": 156.9615,
+              "description": "HLPW-5 velocity-profile station A.4 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_a_5",
+              "label": "HLPW-5 A.5",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1421.5757,
+              "y_in": 129.1298,
+              "surface_z_in": 148.0621,
+              "description": "HLPW-5 velocity-profile station A.5 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_a_6",
+              "label": "HLPW-5 A.6",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1444.4584,
+              "y_in": 225.9062,
+              "surface_z_in": 167.196,
+              "description": "HLPW-5 velocity-profile station A.6 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_b_1",
+              "label": "HLPW-5 B.1",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1163.5769,
+              "y_in": 379.9615,
+              "surface_z_in": 190.8654,
+              "description": "HLPW-5 velocity-profile station B.1 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_b_2",
+              "label": "HLPW-5 B.2",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1203.7442,
+              "y_in": 374.8077,
+              "surface_z_in": 208.4231,
+              "description": "HLPW-5 velocity-profile station B.2 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_b_3",
+              "label": "HLPW-5 B.3",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1398.1731,
+              "y_in": 360.8769,
+              "surface_z_in": 205.5577,
+              "description": "HLPW-5 velocity-profile station B.3 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_b_4",
+              "label": "HLPW-5 B.4",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1493.6878,
+              "y_in": 361.0165,
+              "surface_z_in": 173.5348,
+              "description": "HLPW-5 velocity-profile station B.4 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_c_1",
+              "label": "HLPW-5 C.1",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1699.5212,
+              "y_in": 964.3962,
+              "surface_z_in": 258.4827,
+              "description": "HLPW-5 velocity-profile station C.1 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_c_2",
+              "label": "HLPW-5 C.2",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1730.9519,
+              "y_in": 956.0558,
+              "surface_z_in": 258.5019,
+              "description": "HLPW-5 velocity-profile station C.2 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_c_3",
+              "label": "HLPW-5 C.3",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1762.35,
+              "y_in": 949.1462,
+              "surface_z_in": 255.5058,
+              "description": "HLPW-5 velocity-profile station C.3 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_d_1",
+              "label": "HLPW-5 D.1",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1799.3942,
+              "y_in": 1152.4692,
+              "surface_z_in": 268.0192,
+              "description": "HLPW-5 velocity-profile station D.1 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_d_2",
+              "label": "HLPW-5 D.2",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1821.0673,
+              "y_in": 1152.2827,
+              "surface_z_in": 270.1462,
+              "description": "HLPW-5 velocity-profile station D.2 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            },
+            {
+              "id": "hlpw5_d_3",
+              "label": "HLPW-5 D.3",
+              "x_label": "z - z_surface (in)",
+              "x_in": 1842.7404,
+              "y_in": 1152.2058,
+              "surface_z_in": 271.0212,
+              "description": "HLPW-5 velocity-profile station D.3 at the published full-scale x/y location.",
+              "basis": "published_validation_trace",
+              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
+            }
+          ],
+          "required": true,
+          "allow_unlisted_stations": false,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        }
+      ]
     },
     {
       "name": "WindsorML",
@@ -626,26 +1470,2662 @@
           "c_lift"
         ]
       },
-      "diagnostics": {
-        "cp_stations": [
-          {
-            "id": "symmetry_plane_z_0",
-            "label": "Symmetry-plane trace (z = 0 m)",
-            "x_label": "x/L along z = 0 m surface trace",
-            "description": "Mean surface-pressure cut used in the WindsorML supplementary validation (Figure 18).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2407.19320"
-          },
-          {
-            "id": "horizontal_cut_y_0_2595",
-            "label": "Horizontal trace (y = 0.2595 m)",
-            "x_label": "x/L along y = 0.2595 m surface trace",
-            "description": "Mean surface-pressure cut used in the WindsorML supplementary validation (Figure 19).",
-            "basis": "published_validation_trace",
-            "source_url": "https://arxiv.org/abs/2407.19320"
-          }
+      "splits": [
+        {
+          "id": "default",
+          "name": "Default",
+          "description": "Default prototype benchmark split."
+        }
+      ],
+      "submission_format": "legacy_external_aero",
+      "metric_ids": [
+        "overall_score",
+        "field_score",
+        "force_score",
+        "diagnostic_score",
+        "surface_pressure_rel_l2",
+        "surface_wall_shear_rel_l2",
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "surface_pressure_rel_l1",
+        "surface_wall_shear_rel_l1",
+        "volume_velocity_rel_l1",
+        "volume_pressure_rel_l1",
+        "velocity_profile_r2",
+        "cp_cut_r2",
+        "surface_pressure_mae",
+        "surface_wall_shear_mae",
+        "volume_velocity_mae",
+        "volume_pressure_mae",
+        "surface_pressure_rmse",
+        "surface_wall_shear_rmse",
+        "volume_velocity_rmse",
+        "volume_pressure_rmse",
+        "cd_r2",
+        "cl_r2",
+        "c_drag_mae",
+        "c_lift_mae"
+      ],
+      "ranking": {
+        "metric_id": "overall_score",
+        "direction": "higher"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "pressure_profiles",
+          "title": "Pressure-coefficient profiles",
+          "description": "Reference and submitted pressure-coefficient traces at the selected station.",
+          "data_key": "cp_cuts",
+          "x_keys": [
+            "x",
+            "x_over_c",
+            "x_over_l"
+          ],
+          "quantities": [
+            {
+              "id": "cp",
+              "label": "Cp",
+              "y_label": "Pressure coefficient, Cp",
+              "y_keys": [
+                "cp"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "symmetry_plane_z_0",
+              "label": "Symmetry-plane trace (z = 0 m)",
+              "x_label": "x/L along z = 0 m surface trace",
+              "description": "Mean surface-pressure cut used in the WindsorML supplementary validation (Figure 18).",
+              "basis": "published_validation_trace",
+              "source_url": "https://arxiv.org/abs/2407.19320"
+            },
+            {
+              "id": "horizontal_cut_y_0_2595",
+              "label": "Horizontal trace (y = 0.2595 m)",
+              "x_label": "x/L along y = 0.2595 m surface trace",
+              "description": "Mean surface-pressure cut used in the WindsorML supplementary validation (Figure 19).",
+              "basis": "published_validation_trace",
+              "source_url": "https://arxiv.org/abs/2407.19320"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ],
+          "reverse_y": true
+        },
+        {
+          "id": "velocity_profiles",
+          "title": "Velocity profiles",
+          "description": "Reference and submitted normalized velocity traces at the selected station.",
+          "data_key": "velocity_profiles",
+          "x_keys": [
+            "x",
+            "offset",
+            "distance"
+          ],
+          "quantities": [
+            {
+              "id": "velocity_ratio",
+              "label": "Velocity",
+              "y_label": "Normalized velocity",
+              "y_keys": [
+                "u_over_u_inf",
+                "velocity_ratio"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "prototype_0_25l",
+              "label": "0.25L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.25 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_0_50l",
+              "label": "0.50L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 0.50 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "prototype_1_00l",
+              "label": "1.00L",
+              "x_label": "Diagnostic coordinate",
+              "description": "Prototype velocity profile at 1.00 reference lengths.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.github.io/"
+            }
+          ],
+          "required": false,
+          "allow_unlisted_stations": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "VKI-LS59",
+      "slug": "vki-ls59",
+      "file": "leaderboard/datasets/vki-ls59.json",
+      "description": "Two-dimensional LS59 turbine-cascade simulations spanning incidence and outlet Mach number.",
+      "source_url": "https://huggingface.co/datasets/PLAID-datasets/VKI-LS59",
+      "submission_format": "metric_values",
+      "column_group_labels": {
+        "integral": "Global quantities"
+      },
+      "splits": [
+        {
+          "id": "train",
+          "name": "train",
+          "train_count": 671,
+          "test_count": 168,
+          "description": "Official PLAID split; reduced training sets use the first N published training indices."
+        },
+        {
+          "id": "train_500",
+          "name": "train_500",
+          "train_count": 500,
+          "test_count": 168,
+          "description": "Official PLAID split; reduced training sets use the first N published training indices."
+        },
+        {
+          "id": "train_250",
+          "name": "train_250",
+          "train_count": 250,
+          "test_count": 168,
+          "description": "Official PLAID split; reduced training sets use the first N published training indices."
+        },
+        {
+          "id": "train_125",
+          "name": "train_125",
+          "train_count": 125,
+          "test_count": 168,
+          "description": "Official PLAID split; reduced training sets use the first N published training indices."
+        },
+        {
+          "id": "train_64",
+          "name": "train_64",
+          "train_count": 64,
+          "test_count": 168,
+          "description": "Official PLAID split; reduced training sets use the first N published training indices."
+        },
+        {
+          "id": "train_32",
+          "name": "train_32",
+          "train_count": 32,
+          "test_count": 168,
+          "description": "Official PLAID split; reduced training sets use the first N published training indices."
+        },
+        {
+          "id": "train_16",
+          "name": "train_16",
+          "train_count": 16,
+          "test_count": 168,
+          "description": "Official PLAID split; reduced training sets use the first N published training indices."
+        },
+        {
+          "id": "train_8",
+          "name": "train_8",
+          "train_count": 8,
+          "test_count": 168,
+          "description": "Official PLAID split; reduced training sets use the first N published training indices."
+        }
+      ],
+      "inputs": [
+        "angle_in",
+        "mach_out",
+        "geometry",
+        "sdf"
+      ],
+      "outputs": {
+        "fields": [
+          "ro",
+          "rou",
+          "rov",
+          "roe",
+          "nut",
+          "mach",
+          "M_iso"
+        ],
+        "scalars": [
+          "Q",
+          "power",
+          "Pr",
+          "Tr",
+          "eth_is",
+          "angle_out"
         ]
+      },
+      "metric_ids": [
+        "total_error",
+        "vki_mach_rrmse",
+        "vki_nut_rrmse",
+        "vki_mach_rel_l2",
+        "vki_nut_rel_l2",
+        "vki_mach_rel_l1",
+        "vki_nut_rel_l1",
+        "vki_mach_r2",
+        "vki_nut_r2",
+        "vki_q_rrmse",
+        "vki_power_rrmse",
+        "vki_pr_rrmse",
+        "vki_tr_rrmse",
+        "vki_eth_is_rrmse",
+        "vki_angle_out_rrmse",
+        "vki_q_rel_l2",
+        "vki_power_rel_l2",
+        "vki_pr_rel_l2",
+        "vki_tr_rel_l2",
+        "vki_eth_is_rel_l2",
+        "vki_angle_out_rel_l2",
+        "vki_q_rel_l1",
+        "vki_power_rel_l1",
+        "vki_pr_rel_l1",
+        "vki_tr_rel_l1",
+        "vki_eth_is_rel_l1",
+        "vki_angle_out_rel_l1",
+        "vki_q_r2",
+        "vki_power_r2",
+        "vki_pr_r2",
+        "vki_tr_r2",
+        "vki_eth_is_r2",
+        "vki_angle_out_r2"
+      ],
+      "ranking": {
+        "metric_id": "total_error",
+        "direction": "lower"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "surface_mach",
+          "title": "Blade-surface isentropic Mach",
+          "description": "Isentropic Mach-number traces on the blade pressure and suction surfaces.",
+          "data_key": "surface_profiles",
+          "x_keys": [
+            "x_over_c",
+            "x"
+          ],
+          "quantities": [
+            {
+              "id": "m_iso",
+              "label": "Isentropic Mach",
+              "y_label": "Isentropic Mach number, M_iso",
+              "y_keys": [
+                "m_iso",
+                "M_iso"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "pressure_side",
+              "label": "Pressure side",
+              "x_label": "Normalized chord, x/c",
+              "description": "Blade pressure-side trace.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://huggingface.co/datasets/PLAID-datasets/VKI-LS59"
+            },
+            {
+              "id": "suction_side",
+              "label": "Suction side",
+              "x_label": "Normalized chord, x/c",
+              "description": "Blade suction-side trace.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://huggingface.co/datasets/PLAID-datasets/VKI-LS59"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        },
+        {
+          "id": "downstream_velocity",
+          "title": "Downstream velocity profile",
+          "description": "Normalized downstream velocity derived from the conservative flow variables.",
+          "data_key": "flow_profiles",
+          "x_keys": [
+            "pitch_fraction",
+            "x"
+          ],
+          "quantities": [
+            {
+              "id": "velocity_ratio",
+              "label": "Velocity ratio",
+              "y_label": "Normalized velocity",
+              "y_keys": [
+                "velocity_ratio",
+                "u_over_u_ref"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "outlet_plane_2",
+              "label": "Outlet plane 2",
+              "x_label": "Pitch fraction",
+              "description": "FluidsBench benchmark trace associated with the LS59 downstream outlet plane at x/c = 2.842.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://doi.org/10.1115/1.2929119"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        }
+      ],
+      "submission_count": 8,
+      "updated_at": "2026-07-15",
+      "metric_aggregate": {
+        "metric_id": "total_error",
+        "operation": "mean",
+        "source_metric_ids": [
+          "vki_mach_rrmse",
+          "vki_nut_rrmse",
+          "vki_q_rrmse",
+          "vki_power_rrmse",
+          "vki_pr_rrmse",
+          "vki_tr_rrmse",
+          "vki_eth_is_rrmse",
+          "vki_angle_out_rrmse"
+        ],
+        "tolerance": 1e-05
       }
+    },
+    {
+      "name": "Rotor37",
+      "slug": "rotor37",
+      "file": "leaderboard/datasets/rotor37.json",
+      "description": "Three-dimensional NASA Rotor 37 compressor simulations across blade geometry, rotational speed, and outlet pressure.",
+      "source_url": "https://huggingface.co/datasets/PLAID-datasets/Rotor37",
+      "submission_format": "metric_values",
+      "column_group_labels": {
+        "integral": "Global quantities"
+      },
+      "splits": [
+        {
+          "id": "train_1000",
+          "name": "train_1000",
+          "train_count": 1000,
+          "test_count": 200,
+          "description": "Official PLAID split. Reduced sets retain the published non-contiguous index selection."
+        },
+        {
+          "id": "train_500",
+          "name": "train_500",
+          "train_count": 500,
+          "test_count": 200,
+          "description": "Official PLAID split. Reduced sets retain the published non-contiguous index selection."
+        },
+        {
+          "id": "train_250",
+          "name": "train_250",
+          "train_count": 250,
+          "test_count": 200,
+          "description": "Official PLAID split. Reduced sets retain the published non-contiguous index selection."
+        },
+        {
+          "id": "train_125",
+          "name": "train_125",
+          "train_count": 125,
+          "test_count": 200,
+          "description": "Official PLAID split. Reduced sets retain the published non-contiguous index selection."
+        },
+        {
+          "id": "train_64",
+          "name": "train_64",
+          "train_count": 64,
+          "test_count": 200,
+          "description": "Official PLAID split. Reduced sets retain the published non-contiguous index selection."
+        },
+        {
+          "id": "train_32",
+          "name": "train_32",
+          "train_count": 32,
+          "test_count": 200,
+          "description": "Official PLAID split. Reduced sets retain the published non-contiguous index selection."
+        },
+        {
+          "id": "train_16",
+          "name": "train_16",
+          "train_count": 16,
+          "test_count": 200,
+          "description": "Official PLAID split. Reduced sets retain the published non-contiguous index selection."
+        },
+        {
+          "id": "train_8",
+          "name": "train_8",
+          "train_count": 8,
+          "test_count": 200,
+          "description": "Official PLAID split. Reduced sets retain the published non-contiguous index selection."
+        }
+      ],
+      "inputs": [
+        "geometry",
+        "surface normals",
+        "Omega",
+        "P"
+      ],
+      "outputs": {
+        "fields": [
+          "Density",
+          "Pressure",
+          "Temperature"
+        ],
+        "scalars": [
+          "Massflow",
+          "Compression_ratio",
+          "Efficiency"
+        ]
+      },
+      "metric_ids": [
+        "total_error",
+        "rotor_density_rrmse",
+        "rotor_pressure_rrmse",
+        "rotor_temperature_rrmse",
+        "rotor_density_rel_l2",
+        "rotor_pressure_rel_l2",
+        "rotor_temperature_rel_l2",
+        "rotor_density_rel_l1",
+        "rotor_pressure_rel_l1",
+        "rotor_temperature_rel_l1",
+        "rotor_density_r2",
+        "rotor_pressure_r2",
+        "rotor_temperature_r2",
+        "rotor_density_mae",
+        "rotor_pressure_mae",
+        "rotor_temperature_mae",
+        "rotor_density_rmse",
+        "rotor_pressure_rmse",
+        "rotor_temperature_rmse",
+        "rotor_massflow_rrmse",
+        "rotor_compression_ratio_rrmse",
+        "rotor_efficiency_rrmse",
+        "rotor_massflow_rel_l2",
+        "rotor_compression_ratio_rel_l2",
+        "rotor_efficiency_rel_l2",
+        "rotor_massflow_rel_l1",
+        "rotor_compression_ratio_rel_l1",
+        "rotor_efficiency_rel_l1",
+        "rotor_massflow_r2",
+        "rotor_compression_ratio_r2",
+        "rotor_efficiency_r2",
+        "rotor_massflow_mae",
+        "rotor_compression_ratio_mae",
+        "rotor_efficiency_mae",
+        "rotor_massflow_rmse",
+        "rotor_compression_ratio_rmse",
+        "rotor_efficiency_rmse"
+      ],
+      "ranking": {
+        "metric_id": "total_error",
+        "direction": "lower"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "blade_pressure_ratio",
+          "title": "Blade pressure-ratio profiles",
+          "description": "Static pressure normalized by the case inlet-pressure input at selected spans.",
+          "data_key": "blade_profiles",
+          "x_keys": [
+            "x_over_c",
+            "x"
+          ],
+          "quantities": [
+            {
+              "id": "pressure_ratio",
+              "label": "Pressure ratio",
+              "y_label": "Pressure ratio, p/P",
+              "y_keys": [
+                "pressure_ratio",
+                "p_over_p_in"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "span_10",
+              "label": "10% span",
+              "x_label": "Normalized chord, x/c",
+              "description": "Blade-to-blade trace at 10% span.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://huggingface.co/datasets/PLAID-datasets/Rotor37"
+            },
+            {
+              "id": "span_50",
+              "label": "50% span",
+              "x_label": "Normalized chord, x/c",
+              "description": "Blade-to-blade trace at 50% span.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://huggingface.co/datasets/PLAID-datasets/Rotor37"
+            },
+            {
+              "id": "span_90",
+              "label": "90% span",
+              "x_label": "Normalized chord, x/c",
+              "description": "Blade-to-blade trace at 90% span.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://huggingface.co/datasets/PLAID-datasets/Rotor37"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        },
+        {
+          "id": "blade_thermodynamics",
+          "title": "Blade thermodynamic profiles",
+          "description": "Normalized temperature and density profiles at the same span stations. Rotor37 has no submitted velocity-profile diagnostic.",
+          "data_key": "blade_thermo_profiles",
+          "x_keys": [
+            "x_over_c",
+            "x"
+          ],
+          "quantities": [
+            {
+              "id": "temperature_ratio",
+              "label": "Temperature ratio",
+              "y_label": "Temperature ratio, T/T_ref",
+              "y_keys": [
+                "temperature_ratio",
+                "t_over_t_ref"
+              ],
+              "unit": ""
+            },
+            {
+              "id": "density_ratio",
+              "label": "Density ratio",
+              "y_label": "Density ratio, rho/rho_ref",
+              "y_keys": [
+                "density_ratio",
+                "rho_over_rho_ref"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "span_10",
+              "label": "10% span",
+              "x_label": "Normalized chord, x/c",
+              "description": "Blade-to-blade trace at 10% span.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://huggingface.co/datasets/PLAID-datasets/Rotor37"
+            },
+            {
+              "id": "span_50",
+              "label": "50% span",
+              "x_label": "Normalized chord, x/c",
+              "description": "Blade-to-blade trace at 50% span.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://huggingface.co/datasets/PLAID-datasets/Rotor37"
+            },
+            {
+              "id": "span_90",
+              "label": "90% span",
+              "x_label": "Normalized chord, x/c",
+              "description": "Blade-to-blade trace at 90% span.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://huggingface.co/datasets/PLAID-datasets/Rotor37"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id"
+          ]
+        }
+      ],
+      "submission_count": 8,
+      "updated_at": "2026-07-15",
+      "metric_aggregate": {
+        "metric_id": "total_error",
+        "operation": "mean",
+        "source_metric_ids": [
+          "rotor_density_rrmse",
+          "rotor_pressure_rrmse",
+          "rotor_temperature_rrmse",
+          "rotor_massflow_rrmse",
+          "rotor_compression_ratio_rrmse",
+          "rotor_efficiency_rrmse"
+        ],
+        "tolerance": 1e-05
+      }
+    },
+    {
+      "name": "BlendedNet",
+      "slug": "blendednet",
+      "file": "leaderboard/datasets/blendednet.json",
+      "description": "High-fidelity RANS surface aerodynamics for parametrically generated blended-wing-body aircraft across geometry and flight conditions.",
+      "source_url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VJT9EP",
+      "submission_format": "metric_values",
+      "splits": [
+        {
+          "id": "geometry_holdout",
+          "name": "geometry_holdout",
+          "train_count": 8830,
+          "test_count": 870,
+          "description": "Published geometry-disjoint release: train/validation cases are drawn from 999 geometries and the fixed test set contains 870 cases from 100 entirely distinct geometries."
+        }
+      ],
+      "inputs": [
+        "surface coordinates",
+        "surface normals",
+        "nine geometry parameters",
+        "altitude",
+        "Reynolds number",
+        "Mach number",
+        "angle of attack",
+        "sideslip angle"
+      ],
+      "outputs": {
+        "fields": [
+          "Cp",
+          "Cfx",
+          "Cfz"
+        ],
+        "scalars": [
+          "CD",
+          "CL",
+          "CMy"
+        ]
+      },
+      "metric_ids": [
+        "blended_surface_rel_l2",
+        "blended_cp_mse",
+        "blended_cp_mae",
+        "blended_cfx_mse",
+        "blended_cfx_mae",
+        "blended_cfz_mse",
+        "blended_cfz_mae",
+        "blended_cp_rel_l1",
+        "blended_cp_rel_l2",
+        "blended_cp_r2",
+        "blended_cfx_rel_l1",
+        "blended_cfx_rel_l2",
+        "blended_cfx_r2",
+        "blended_cfz_rel_l1",
+        "blended_cfz_rel_l2",
+        "blended_cfz_r2",
+        "c_drag_mae",
+        "c_lift_mae",
+        "c_pitch_mae",
+        "cd_r2",
+        "cl_r2",
+        "c_pitch_r2"
+      ],
+      "ranking": {
+        "metric_id": "blended_surface_rel_l2",
+        "direction": "lower"
+      },
+      "diagnostic_panels": [
+        {
+          "id": "surface_pressure",
+          "title": "Surface pressure-coefficient cuts",
+          "description": "Illustrative benchmark traces of pressure coefficient along selected blended-wing-body surface cuts.",
+          "data_key": "cp_cuts",
+          "x_keys": [
+            "x_over_c1",
+            "x"
+          ],
+          "quantities": [
+            {
+              "id": "cp",
+              "label": "Cp",
+              "y_label": "Pressure coefficient, Cp",
+              "y_keys": [
+                "cp",
+                "Cp"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "prototype_centerline",
+              "label": "Centreline",
+              "x_label": "Streamwise position, x/C1",
+              "description": "Illustrative FluidsBench centreline cut; the canonical evaluator extraction tolerance is TODO.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VJT9EP"
+            },
+            {
+              "id": "prototype_midspan",
+              "label": "Mid-span",
+              "x_label": "Streamwise position, x/C1",
+              "description": "Illustrative FluidsBench surface cut near 45% semispan; the canonical evaluator extraction tolerance is TODO.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VJT9EP"
+            },
+            {
+              "id": "prototype_outer_wing",
+              "label": "Outer wing",
+              "x_label": "Streamwise position, x/C1",
+              "description": "Illustrative FluidsBench surface cut near 80% semispan; the canonical evaluator extraction tolerance is TODO.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VJT9EP"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id",
+            "quantity_id"
+          ],
+          "reverse_y": true
+        },
+        {
+          "id": "surface_skin_friction",
+          "title": "Surface skin-friction cuts",
+          "description": "Illustrative benchmark traces of streamwise and vertical skin-friction coefficients along the same surface cuts.",
+          "data_key": "skin_friction_profiles",
+          "x_keys": [
+            "x_over_c1",
+            "x"
+          ],
+          "quantities": [
+            {
+              "id": "cfx",
+              "label": "Cfx",
+              "y_label": "Streamwise skin-friction coefficient, Cfx",
+              "y_keys": [
+                "cfx",
+                "Cfx"
+              ],
+              "unit": ""
+            },
+            {
+              "id": "cfz",
+              "label": "Cfz",
+              "y_label": "Vertical skin-friction coefficient, Cfz",
+              "y_keys": [
+                "cfz",
+                "Cfz"
+              ],
+              "unit": ""
+            }
+          ],
+          "stations": [
+            {
+              "id": "prototype_centerline",
+              "label": "Centreline",
+              "x_label": "Streamwise position, x/C1",
+              "description": "Illustrative FluidsBench centreline cut; the canonical evaluator extraction tolerance is TODO.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VJT9EP"
+            },
+            {
+              "id": "prototype_midspan",
+              "label": "Mid-span",
+              "x_label": "Streamwise position, x/C1",
+              "description": "Illustrative FluidsBench surface cut near 45% semispan; the canonical evaluator extraction tolerance is TODO.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VJT9EP"
+            },
+            {
+              "id": "prototype_outer_wing",
+              "label": "Outer wing",
+              "x_label": "Streamwise position, x/C1",
+              "description": "Illustrative FluidsBench surface cut near 80% semispan; the canonical evaluator extraction tolerance is TODO.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VJT9EP"
+            }
+          ],
+          "required": true,
+          "required_series_fields": [
+            "case_id",
+            "station_id",
+            "quantity_id"
+          ]
+        }
+      ],
+      "submission_count": 1,
+      "updated_at": "2026-07-15",
+      "metric_aggregate": {
+        "metric_id": "blended_surface_rel_l2",
+        "operation": "mean",
+        "source_metric_ids": [
+          "blended_cp_rel_l2",
+          "blended_cfx_rel_l2",
+          "blended_cfz_rel_l2"
+        ],
+        "tolerance": 1e-05
+      }
+    }
+  ],
+  "metric_definitions": [
+    {
+      "id": "overall_score",
+      "label": "Overall score",
+      "description": "Weighted overall benchmark score out of 100.",
+      "group": "scores",
+      "group_label": "Scores",
+      "column_group": "scores",
+      "unit": "",
+      "digits": 1,
+      "direction": "higher",
+      "kind": "score",
+      "equation": "0.50 S_field + 0.25 S_force + 0.25 S_diagnostic",
+      "comparison_group": "summary",
+      "comparison_group_label": "Summary scores",
+      "column_group_label": "Scores"
+    },
+    {
+      "id": "field_score",
+      "label": "Field score",
+      "description": "Score out of 100 derived from the official field-error metrics.",
+      "group": "scores",
+      "group_label": "Scores",
+      "column_group": "scores",
+      "unit": "",
+      "digits": 1,
+      "direction": "higher",
+      "kind": "score",
+      "equation": "2 sum_j w_j max(0, 100(1-e_j/c_j))",
+      "comparison_group": "summary",
+      "comparison_group_label": "Summary scores",
+      "column_group_label": "Scores"
+    },
+    {
+      "id": "force_score",
+      "label": "Force score",
+      "description": "Score out of 100 derived from the official integral force and moment metrics.",
+      "group": "scores",
+      "group_label": "Scores",
+      "column_group": "scores",
+      "unit": "",
+      "digits": 1,
+      "direction": "higher",
+      "kind": "score",
+      "equation": "(0.15 S_CD + 0.10 S_CL)/0.25",
+      "comparison_group": "summary",
+      "comparison_group_label": "Summary scores",
+      "column_group_label": "Scores"
+    },
+    {
+      "id": "diagnostic_score",
+      "label": "Diagnostic score",
+      "description": "Score out of 100 derived from the official profile and cut diagnostics.",
+      "group": "scores",
+      "group_label": "Scores",
+      "column_group": "scores",
+      "unit": "",
+      "digits": 1,
+      "direction": "higher",
+      "kind": "score",
+      "equation": "(0.15 S_velocity + 0.10 S_Cp)/0.25",
+      "comparison_group": "summary",
+      "comparison_group_label": "Summary scores",
+      "column_group_label": "Scores"
+    },
+    {
+      "id": "surface_pressure_rel_l2",
+      "label": "Surface pressure rel. L2",
+      "description": "Face-area weighted relative L2 error for surface pressure. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "surface_pressure_rel_l1",
+      "label": "Surface pressure rel. L1",
+      "description": "Face-area weighted relative L1 error for surface pressure. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "surface_pressure_mae",
+      "label": "Surface pressure MAE",
+      "description": "Face-area weighted mean absolute error for surface pressure. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "Pa",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "surface_pressure_rmse",
+      "label": "Surface pressure RMSE",
+      "description": "Face-area weighted root-mean-square error for surface pressure. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "Pa",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "surface_wall_shear_rel_l2",
+      "label": "Surface wall shear rel. L2",
+      "description": "Face-area weighted relative L2 error for surface wall shear. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "surface_wall_shear_rel_l1",
+      "label": "Surface wall shear rel. L1",
+      "description": "Face-area weighted relative L1 error for surface wall shear. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "surface_wall_shear_mae",
+      "label": "Surface wall shear MAE",
+      "description": "Face-area weighted mean absolute error for surface wall shear. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "Pa",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "surface_wall_shear_rmse",
+      "label": "Surface wall shear RMSE",
+      "description": "Face-area weighted root-mean-square error for surface wall shear. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "Pa",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "volume_velocity_rel_l2",
+      "label": "Volume velocity rel. L2",
+      "description": "Cell-volume weighted relative L2 error for volume velocity. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "volume_velocity_rel_l1",
+      "label": "Volume velocity rel. L1",
+      "description": "Cell-volume weighted relative L1 error for volume velocity. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "volume_velocity_mae",
+      "label": "Volume velocity MAE",
+      "description": "Cell-volume weighted mean absolute error for volume velocity. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m/s",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "volume_velocity_rmse",
+      "label": "Volume velocity RMSE",
+      "description": "Cell-volume weighted root-mean-square error for volume velocity. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m/s",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "volume_pressure_rel_l2",
+      "label": "Volume pressure rel. L2",
+      "description": "Cell-volume weighted relative L2 error for volume pressure. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "volume_pressure_rel_l1",
+      "label": "Volume pressure rel. L1",
+      "description": "Cell-volume weighted relative L1 error for volume pressure. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "volume_pressure_mae",
+      "label": "Volume pressure MAE",
+      "description": "Cell-volume weighted mean absolute error for volume pressure. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "Pa",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "volume_pressure_rmse",
+      "label": "Volume pressure RMSE",
+      "description": "Cell-volume weighted root-mean-square error for volume pressure. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "Pa",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "c_drag_mae",
+      "label": "C_D MAE",
+      "description": "Mean absolute error for drag coefficient. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 4,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Integral forces / moments",
+      "plain_label": "Drag coefficient MAE"
+    },
+    {
+      "id": "c_lift_mae",
+      "label": "C_L MAE",
+      "description": "Mean absolute error for lift coefficient. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 4,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Integral forces / moments",
+      "plain_label": "Lift coefficient MAE"
+    },
+    {
+      "id": "c_pitch_mae",
+      "label": "C_M pitch MAE",
+      "description": "Mean absolute error for pitching-moment coefficient. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 4,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Integral forces / moments",
+      "plain_label": "Pitching-moment coefficient MAE"
+    },
+    {
+      "id": "cd_r2",
+      "label": "C_D R2",
+      "description": "Coefficient of determination for drag coefficient. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments",
+      "plain_label": "Drag coefficient R2"
+    },
+    {
+      "id": "cl_r2",
+      "label": "C_L R2",
+      "description": "Coefficient of determination for lift coefficient. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments",
+      "plain_label": "Lift coefficient R2"
+    },
+    {
+      "id": "velocity_profile_r2",
+      "label": "Velocity profiles R2",
+      "description": "Coefficient of determination for required velocity profiles. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "cp_cut_r2",
+      "label": "Cp cuts R2",
+      "description": "Coefficient of determination for required pressure-coefficient cuts. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "total_error",
+      "label": "Total error",
+      "description": "Arithmetic mean of the official per-quantity PLAID RRMSE values. Lower is better.",
+      "group": "scores",
+      "group_label": "Scores",
+      "column_group": "scores",
+      "unit": "",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{m}\\sum_{j=1}^{m}\\operatorname{RRMSE}_j",
+      "comparison_group": "summary",
+      "comparison_group_label": "Summary",
+      "column_group_label": "Scores"
+    },
+    {
+      "id": "vki_mach_rrmse",
+      "label": "Mach RRMSE",
+      "description": "PLAID relative root-mean-square error for Mach-number field. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_mach_rel_l2",
+      "label": "Mach rel. L2",
+      "description": "Weighted relative L2 error for Mach-number field. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_mach_rel_l1",
+      "label": "Mach rel. L1",
+      "description": "Weighted relative L1 error for Mach-number field. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_mach_r2",
+      "label": "Mach R2",
+      "description": "Coefficient of determination for Mach-number field. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_nut_rrmse",
+      "label": "Turbulent kinematic viscosity RRMSE",
+      "description": "PLAID relative root-mean-square error for the turbulent kinematic-viscosity field. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_nut_rel_l2",
+      "label": "Turbulent kinematic viscosity rel. L2",
+      "description": "Weighted relative L2 error for the turbulent kinematic-viscosity field. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_nut_rel_l1",
+      "label": "Turbulent kinematic viscosity rel. L1",
+      "description": "Weighted relative L1 error for the turbulent kinematic-viscosity field. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_nut_r2",
+      "label": "Turbulent kinematic viscosity R2",
+      "description": "Coefficient of determination for the turbulent kinematic-viscosity field. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_q_rrmse",
+      "label": "Q scalar RRMSE",
+      "description": "PLAID relative root-mean-square error for the VKI-LS59 output published as Q; the source dataset does not provide an expanded name. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_q_rel_l2",
+      "label": "Q scalar rel. L2",
+      "description": "Weighted relative L2 error for the VKI-LS59 output published as Q; the source dataset does not provide an expanded name. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_q_rel_l1",
+      "label": "Q scalar rel. L1",
+      "description": "Weighted relative L1 error for the VKI-LS59 output published as Q; the source dataset does not provide an expanded name. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_q_r2",
+      "label": "Q scalar R2",
+      "description": "Coefficient of determination for the VKI-LS59 output published as Q; the source dataset does not provide an expanded name. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_power_rrmse",
+      "label": "Power RRMSE",
+      "description": "PLAID relative root-mean-square error for VKI-LS59 power scalar. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_power_rel_l2",
+      "label": "Power rel. L2",
+      "description": "Weighted relative L2 error for VKI-LS59 power scalar. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_power_rel_l1",
+      "label": "Power rel. L1",
+      "description": "Weighted relative L1 error for VKI-LS59 power scalar. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_power_r2",
+      "label": "Power R2",
+      "description": "Coefficient of determination for VKI-LS59 power scalar. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_pr_rrmse",
+      "label": "Pressure ratio RRMSE",
+      "description": "PLAID relative root-mean-square error for VKI-LS59 pressure-ratio scalar. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_pr_rel_l2",
+      "label": "Pressure ratio rel. L2",
+      "description": "Weighted relative L2 error for VKI-LS59 pressure-ratio scalar. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_pr_rel_l1",
+      "label": "Pressure ratio rel. L1",
+      "description": "Weighted relative L1 error for VKI-LS59 pressure-ratio scalar. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_pr_r2",
+      "label": "Pressure ratio R2",
+      "description": "Coefficient of determination for VKI-LS59 pressure-ratio scalar. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_tr_rrmse",
+      "label": "Temperature ratio RRMSE",
+      "description": "PLAID relative root-mean-square error for VKI-LS59 temperature-ratio scalar. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_tr_rel_l2",
+      "label": "Temperature ratio rel. L2",
+      "description": "Weighted relative L2 error for VKI-LS59 temperature-ratio scalar. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_tr_rel_l1",
+      "label": "Temperature ratio rel. L1",
+      "description": "Weighted relative L1 error for VKI-LS59 temperature-ratio scalar. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_tr_r2",
+      "label": "Temperature ratio R2",
+      "description": "Coefficient of determination for VKI-LS59 temperature-ratio scalar. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_eth_is_rrmse",
+      "label": "Isentropic efficiency RRMSE",
+      "description": "PLAID relative root-mean-square error for the isentropic-efficiency scalar. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_eth_is_rel_l2",
+      "label": "Isentropic efficiency rel. L2",
+      "description": "Weighted relative L2 error for the isentropic-efficiency scalar. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_eth_is_rel_l1",
+      "label": "Isentropic efficiency rel. L1",
+      "description": "Weighted relative L1 error for the isentropic-efficiency scalar. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_eth_is_r2",
+      "label": "Isentropic efficiency R2",
+      "description": "Coefficient of determination for the isentropic-efficiency scalar. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_angle_out_rrmse",
+      "label": "Outlet angle RRMSE",
+      "description": "PLAID relative root-mean-square error for outlet-flow-angle scalar. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_angle_out_rel_l2",
+      "label": "Outlet angle rel. L2",
+      "description": "Weighted relative L2 error for outlet-flow-angle scalar. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_angle_out_rel_l1",
+      "label": "Outlet angle rel. L1",
+      "description": "Weighted relative L1 error for outlet-flow-angle scalar. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "vki_angle_out_r2",
+      "label": "Outlet angle R2",
+      "description": "Coefficient of determination for outlet-flow-angle scalar. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_density_rrmse",
+      "label": "Density RRMSE",
+      "description": "PLAID relative root-mean-square error for density field. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_density_rel_l2",
+      "label": "Density rel. L2",
+      "description": "Weighted relative L2 error for density field. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_density_rel_l1",
+      "label": "Density rel. L1",
+      "description": "Weighted relative L1 error for density field. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_density_r2",
+      "label": "Density R2",
+      "description": "Coefficient of determination for density field. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_density_mae",
+      "label": "Density MAE",
+      "description": "Mean absolute error for density field in physical units. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "kg/m^3",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "rotor_density_rmse",
+      "label": "Density RMSE",
+      "description": "Root-mean-square error for density field in physical units. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "kg/m^3",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "rotor_pressure_rrmse",
+      "label": "Pressure RRMSE",
+      "description": "PLAID relative root-mean-square error for pressure field. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_pressure_rel_l2",
+      "label": "Pressure rel. L2",
+      "description": "Weighted relative L2 error for pressure field. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_pressure_rel_l1",
+      "label": "Pressure rel. L1",
+      "description": "Weighted relative L1 error for pressure field. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_pressure_r2",
+      "label": "Pressure R2",
+      "description": "Coefficient of determination for pressure field. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_pressure_mae",
+      "label": "Pressure MAE",
+      "description": "Mean absolute error for pressure field in physical units. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "Pa",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "rotor_pressure_rmse",
+      "label": "Pressure RMSE",
+      "description": "Root-mean-square error for pressure field in physical units. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "Pa",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "rotor_temperature_rrmse",
+      "label": "Temperature RRMSE",
+      "description": "PLAID relative root-mean-square error for temperature field. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_temperature_rel_l2",
+      "label": "Temperature rel. L2",
+      "description": "Weighted relative L2 error for temperature field. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_temperature_rel_l1",
+      "label": "Temperature rel. L1",
+      "description": "Weighted relative L1 error for temperature field. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_temperature_r2",
+      "label": "Temperature R2",
+      "description": "Coefficient of determination for temperature field. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_temperature_mae",
+      "label": "Temperature MAE",
+      "description": "Mean absolute error for temperature field in physical units. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "K",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "rotor_temperature_rmse",
+      "label": "Temperature RMSE",
+      "description": "Root-mean-square error for temperature field in physical units. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "K",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "rotor_massflow_rrmse",
+      "label": "Mass flow RRMSE",
+      "description": "PLAID relative root-mean-square error for mass-flow scalar. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_massflow_rel_l2",
+      "label": "Mass flow rel. L2",
+      "description": "Weighted relative L2 error for mass-flow scalar. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_massflow_rel_l1",
+      "label": "Mass flow rel. L1",
+      "description": "Weighted relative L1 error for mass-flow scalar. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_massflow_r2",
+      "label": "Mass flow R2",
+      "description": "Coefficient of determination for mass-flow scalar. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_massflow_mae",
+      "label": "Mass flow MAE",
+      "description": "Mean absolute error for mass-flow scalar in physical units. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "integral",
+      "unit": "kg/s",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_massflow_rmse",
+      "label": "Mass flow RMSE",
+      "description": "Root-mean-square error for mass-flow scalar in physical units. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "integral",
+      "unit": "kg/s",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_compression_ratio_rrmse",
+      "label": "Compression ratio RRMSE",
+      "description": "PLAID relative root-mean-square error for compression-ratio scalar. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_compression_ratio_rel_l2",
+      "label": "Compression ratio rel. L2",
+      "description": "Weighted relative L2 error for compression-ratio scalar. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_compression_ratio_rel_l1",
+      "label": "Compression ratio rel. L1",
+      "description": "Weighted relative L1 error for compression-ratio scalar. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_compression_ratio_r2",
+      "label": "Compression ratio R2",
+      "description": "Coefficient of determination for compression-ratio scalar. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_compression_ratio_mae",
+      "label": "Compression ratio MAE",
+      "description": "Mean absolute error for compression-ratio scalar in physical units. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_compression_ratio_rmse",
+      "label": "Compression ratio RMSE",
+      "description": "Root-mean-square error for compression-ratio scalar in physical units. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_efficiency_rrmse",
+      "label": "Efficiency RRMSE",
+      "description": "PLAID relative root-mean-square error for efficiency scalar. Lower is better.",
+      "group": "rrmse",
+      "group_label": "RRMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "comparison_group": "rrmse",
+      "comparison_group_label": "RRMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_efficiency_rel_l2",
+      "label": "Efficiency rel. L2",
+      "description": "Weighted relative L2 error for efficiency scalar. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_efficiency_rel_l1",
+      "label": "Efficiency rel. L1",
+      "description": "Weighted relative L1 error for efficiency scalar. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "integral",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_efficiency_r2",
+      "label": "Efficiency R2",
+      "description": "Coefficient of determination for efficiency scalar. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_efficiency_mae",
+      "label": "Efficiency MAE",
+      "description": "Mean absolute error for efficiency scalar in physical units. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "rotor_efficiency_rmse",
+      "label": "Efficiency RMSE",
+      "description": "Root-mean-square error for efficiency scalar in physical units. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "blended_surface_rel_l2",
+      "label": "Surface mean rel. L2",
+      "description": "Arithmetic mean of the relative L2 errors for Cp, Cfx, and Cfz. Lower is better.",
+      "group": "scores",
+      "group_label": "Scores",
+      "column_group": "scores",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{3}(L_{2,\\mathrm{rel}}^{C_p}+L_{2,\\mathrm{rel}}^{C_{fx}}+L_{2,\\mathrm{rel}}^{C_{fz}})",
+      "comparison_group": "summary",
+      "comparison_group_label": "Summary",
+      "column_group_label": "Scores"
+    },
+    {
+      "id": "blended_cp_mse",
+      "label": "Cp MSE",
+      "description": "Mean squared error for the surface pressure coefficient. Lower is better.",
+      "group": "absolute-mse",
+      "group_label": "Absolute MSE",
+      "column_group": "absolute",
+      "unit": "",
+      "digits": 6,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2",
+      "comparison_group": "absolute-mse",
+      "comparison_group_label": "Absolute MSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "blended_cp_mae",
+      "label": "Cp MAE",
+      "description": "Mean absolute error for the surface pressure coefficient. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "blended_cp_rel_l1",
+      "label": "Cp rel. L1",
+      "description": "Relative L1 error for the surface pressure coefficient. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cp_rel_l2",
+      "label": "Cp rel. L2",
+      "description": "Relative L2 error for the surface pressure coefficient. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cp_r2",
+      "label": "Cp R2",
+      "description": "Coefficient of determination for the surface pressure coefficient. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfx_mse",
+      "label": "Cfx MSE",
+      "description": "Mean squared error for the streamwise skin-friction coefficient. Lower is better.",
+      "group": "absolute-mse",
+      "group_label": "Absolute MSE",
+      "column_group": "absolute",
+      "unit": "",
+      "digits": 6,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2",
+      "comparison_group": "absolute-mse",
+      "comparison_group_label": "Absolute MSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "blended_cfx_mae",
+      "label": "Cfx MAE",
+      "description": "Mean absolute error for the streamwise skin-friction coefficient. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "blended_cfx_rel_l1",
+      "label": "Cfx rel. L1",
+      "description": "Relative L1 error for the streamwise skin-friction coefficient. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfx_rel_l2",
+      "label": "Cfx rel. L2",
+      "description": "Relative L2 error for the streamwise skin-friction coefficient. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfx_r2",
+      "label": "Cfx R2",
+      "description": "Coefficient of determination for the streamwise skin-friction coefficient. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfz_mse",
+      "label": "Cfz MSE",
+      "description": "Mean squared error for the vertical skin-friction coefficient. Lower is better.",
+      "group": "absolute-mse",
+      "group_label": "Absolute MSE",
+      "column_group": "absolute",
+      "unit": "",
+      "digits": 6,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2",
+      "comparison_group": "absolute-mse",
+      "comparison_group_label": "Absolute MSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "blended_cfz_mae",
+      "label": "Cfz MAE",
+      "description": "Mean absolute error for the vertical skin-friction coefficient. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "blended_cfz_rel_l1",
+      "label": "Cfz rel. L1",
+      "description": "Relative L1 error for the vertical skin-friction coefficient. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfz_rel_l2",
+      "label": "Cfz rel. L2",
+      "description": "Relative L2 error for the vertical skin-friction coefficient. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfz_r2",
+      "label": "Cfz R2",
+      "description": "Coefficient of determination for the vertical skin-friction coefficient. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "c_pitch_r2",
+      "label": "C_M pitch R2",
+      "description": "Coefficient of determination for pitching-moment coefficient. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Integral forces / moments",
+      "plain_label": "Pitching-moment coefficient R2"
     }
   ]
 }

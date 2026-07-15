@@ -508,6 +508,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.0016,
       "c_lift": 0.0032
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 3.0,
+      "surface_pressure_rel_l1": 2.16,
+      "surface_wall_shear_rel_l2": 3.88,
+      "surface_wall_shear_rel_l1": 2.638,
+      "volume_velocity_rel_l2": 1.88,
+      "volume_velocity_rel_l1": 1.316,
+      "volume_pressure_rel_l2": 1.98,
+      "volume_pressure_rel_l1": 1.366,
+      "cd_r2": 0.993,
+      "cl_r2": 0.987,
+      "velocity_profile_r2": 0.982,
+      "cp_cut_r2": 0.976,
+      "surface_pressure_mae": 15.1,
+      "surface_pressure_rmse": 21.0,
+      "surface_wall_shear_mae": 0.32,
+      "surface_wall_shear_rmse": 0.47,
+      "volume_velocity_mae": 0.53,
+      "volume_velocity_rmse": 0.75,
+      "volume_pressure_mae": 8.2,
+      "volume_pressure_rmse": 11.9,
+      "c_drag_mae": 0.0016,
+      "c_lift_mae": 0.0032,
+      "field_score": 82.78,
+      "force_score": 99.06,
+      "diagnostic_score": 97.96,
+      "overall_score": 90.645
     }
   },
   {
@@ -712,6 +740,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.0013,
       "c_lift": 0.003
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 2.72,
+      "surface_pressure_rel_l1": 1.96,
+      "surface_wall_shear_rel_l2": 3.64,
+      "surface_wall_shear_rel_l1": 2.48,
+      "volume_velocity_rel_l2": 1.74,
+      "volume_velocity_rel_l1": 1.22,
+      "volume_pressure_rel_l2": 1.88,
+      "volume_pressure_rel_l1": 1.3,
+      "cd_r2": 0.996,
+      "cl_r2": 0.989,
+      "velocity_profile_r2": 0.986,
+      "cp_cut_r2": 0.981,
+      "surface_pressure_mae": 13.7,
+      "surface_pressure_rmse": 19.0,
+      "surface_wall_shear_mae": 0.3,
+      "surface_wall_shear_rmse": 0.44,
+      "volume_velocity_mae": 0.49,
+      "volume_velocity_rmse": 0.7,
+      "volume_pressure_mae": 7.8,
+      "volume_pressure_rmse": 11.3,
+      "c_drag_mae": 0.0013,
+      "c_lift_mae": 0.003,
+      "field_score": 84.06333333333333,
+      "force_score": 99.32000000000001,
+      "diagnostic_score": 98.4,
+      "overall_score": 91.46166666666667
     }
   },
   {
@@ -1223,6 +1279,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.0153,
       "c_lift": 0.0296
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 7.9,
+      "surface_pressure_rel_l1": 5.688,
+      "surface_wall_shear_rel_l2": 8.18,
+      "surface_wall_shear_rel_l1": 5.562,
+      "volume_velocity_rel_l2": 6.23,
+      "volume_velocity_rel_l1": 4.361,
+      "volume_pressure_rel_l2": 8.1,
+      "volume_pressure_rel_l1": 5.589,
+      "cd_r2": 0.874,
+      "cl_r2": 0.841,
+      "velocity_profile_r2": 0.812,
+      "cp_cut_r2": 0.825,
+      "surface_pressure_mae": 39.8,
+      "surface_pressure_rmse": 55.3,
+      "surface_wall_shear_mae": 0.67,
+      "surface_wall_shear_rmse": 0.98,
+      "volume_velocity_mae": 1.74,
+      "volume_velocity_rmse": 2.49,
+      "volume_pressure_mae": 33.5,
+      "volume_pressure_rmse": 48.6,
+      "c_drag_mae": 0.0153,
+      "c_lift_mae": 0.0296,
+      "field_score": 49.644999999999996,
+      "force_score": 86.08,
+      "diagnostic_score": 81.72,
+      "overall_score": 66.77250000000001
     }
   },
   {
@@ -1734,6 +1818,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.009,
       "c_lift": 0.0182
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 6.42,
+      "surface_pressure_rel_l1": 4.622,
+      "surface_wall_shear_rel_l2": 7.21,
+      "surface_wall_shear_rel_l1": 4.903,
+      "volume_velocity_rel_l2": 4.14,
+      "volume_velocity_rel_l1": 2.898,
+      "volume_pressure_rel_l2": 5.17,
+      "volume_pressure_rel_l1": 3.567,
+      "cd_r2": 0.93,
+      "cl_r2": 0.902,
+      "velocity_profile_r2": 0.884,
+      "cp_cut_r2": 0.891,
+      "surface_pressure_mae": 32.4,
+      "surface_pressure_rmse": 44.9,
+      "surface_wall_shear_mae": 0.59,
+      "surface_wall_shear_rmse": 0.87,
+      "volume_velocity_mae": 1.16,
+      "volume_velocity_rmse": 1.66,
+      "volume_pressure_mae": 21.4,
+      "volume_pressure_rmse": 31.0,
+      "c_drag_mae": 0.009,
+      "c_lift_mae": 0.0182,
+      "field_score": 62.70666666666666,
+      "force_score": 91.88,
+      "diagnostic_score": 88.68,
+      "overall_score": 76.49333333333334
     }
   },
   {
@@ -2245,6 +2357,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.0212,
       "c_lift": 0.0377
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 12.91,
+      "surface_pressure_rel_l1": 9.295,
+      "surface_wall_shear_rel_l2": 11.44,
+      "surface_wall_shear_rel_l1": 7.779,
+      "volume_velocity_rel_l2": 7.56,
+      "volume_velocity_rel_l1": 5.292,
+      "volume_pressure_rel_l2": 8.47,
+      "volume_pressure_rel_l1": 5.844,
+      "cd_r2": 0.829,
+      "cl_r2": 0.792,
+      "velocity_profile_r2": 0.778,
+      "cp_cut_r2": 0.764,
+      "surface_pressure_mae": 65.1,
+      "surface_pressure_rmse": 90.4,
+      "surface_wall_shear_mae": 0.93,
+      "surface_wall_shear_rmse": 1.37,
+      "volume_velocity_mae": 2.12,
+      "volume_velocity_rmse": 3.02,
+      "volume_pressure_mae": 35.1,
+      "volume_pressure_rmse": 50.8,
+      "c_drag_mae": 0.0212,
+      "c_lift_mae": 0.0377,
+      "field_score": 32.54666666666666,
+      "force_score": 81.42,
+      "diagnostic_score": 77.24000000000001,
+      "overall_score": 55.93833333333333
     }
   },
   {
@@ -2756,6 +2896,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.0028,
       "c_lift": 0.0077
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 3.55,
+      "surface_pressure_rel_l1": 2.556,
+      "surface_wall_shear_rel_l2": 4.1,
+      "surface_wall_shear_rel_l1": 2.788,
+      "volume_velocity_rel_l2": 2.21,
+      "volume_velocity_rel_l1": 1.547,
+      "volume_pressure_rel_l2": 2.27,
+      "volume_pressure_rel_l1": 1.566,
+      "cd_r2": 0.979,
+      "cl_r2": 0.962,
+      "velocity_profile_r2": 0.958,
+      "cp_cut_r2": 0.952,
+      "surface_pressure_mae": 17.9,
+      "surface_pressure_rmse": 24.9,
+      "surface_wall_shear_mae": 0.33,
+      "surface_wall_shear_rmse": 0.49,
+      "volume_velocity_mae": 0.62,
+      "volume_velocity_rmse": 0.88,
+      "volume_pressure_mae": 9.4,
+      "volume_pressure_rmse": 13.6,
+      "c_drag_mae": 0.0028,
+      "c_lift_mae": 0.0077,
+      "field_score": 80.24833333333333,
+      "force_score": 97.22,
+      "diagnostic_score": 95.56,
+      "overall_score": 88.31916666666667
     }
   },
   {
@@ -3267,6 +3435,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.0135,
       "c_lift": 0.0273
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 8.51,
+      "surface_pressure_rel_l1": 6.127,
+      "surface_wall_shear_rel_l2": 10.07,
+      "surface_wall_shear_rel_l1": 6.848,
+      "volume_velocity_rel_l2": 5.43,
+      "volume_velocity_rel_l1": 3.801,
+      "volume_pressure_rel_l2": 6.12,
+      "volume_pressure_rel_l1": 4.223,
+      "cd_r2": 0.889,
+      "cl_r2": 0.852,
+      "velocity_profile_r2": 0.831,
+      "cp_cut_r2": 0.846,
+      "surface_pressure_mae": 42.9,
+      "surface_pressure_rmse": 59.6,
+      "surface_wall_shear_mae": 0.82,
+      "surface_wall_shear_rmse": 1.21,
+      "volume_velocity_mae": 1.52,
+      "volume_velocity_rmse": 2.17,
+      "volume_pressure_mae": 25.3,
+      "volume_pressure_rmse": 36.7,
+      "c_drag_mae": 0.0135,
+      "c_lift_mae": 0.0273,
+      "field_score": 51.175,
+      "force_score": 87.41999999999999,
+      "diagnostic_score": 83.69999999999999,
+      "overall_score": 68.36749999999999
     }
   },
   {
@@ -3778,6 +3974,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.002,
       "c_lift": 0.0054
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 3.41,
+      "surface_pressure_rel_l1": 2.455,
+      "surface_wall_shear_rel_l2": 4.03,
+      "surface_wall_shear_rel_l1": 2.74,
+      "volume_velocity_rel_l2": 2.09,
+      "volume_velocity_rel_l1": 1.463,
+      "volume_pressure_rel_l2": 2.16,
+      "volume_pressure_rel_l1": 1.49,
+      "cd_r2": 0.985,
+      "cl_r2": 0.971,
+      "velocity_profile_r2": 0.969,
+      "cp_cut_r2": 0.961,
+      "surface_pressure_mae": 17.2,
+      "surface_pressure_rmse": 23.9,
+      "surface_wall_shear_mae": 0.33,
+      "surface_wall_shear_rmse": 0.48,
+      "volume_velocity_mae": 0.59,
+      "volume_velocity_rmse": 0.84,
+      "volume_pressure_mae": 8.9,
+      "volume_pressure_rmse": 13.0,
+      "c_drag_mae": 0.002,
+      "c_lift_mae": 0.0054,
+      "field_score": 81.045,
+      "force_score": 97.94,
+      "diagnostic_score": 96.58,
+      "overall_score": 89.15249999999999
     }
   },
   {
@@ -4289,6 +4513,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.0029,
       "c_lift": 0.0065
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 3.66,
+      "surface_pressure_rel_l1": 2.635,
+      "surface_wall_shear_rel_l2": 4.0,
+      "surface_wall_shear_rel_l1": 2.72,
+      "volume_velocity_rel_l2": 2.19,
+      "volume_velocity_rel_l1": 1.533,
+      "volume_pressure_rel_l2": 2.16,
+      "volume_pressure_rel_l1": 1.49,
+      "cd_r2": 0.981,
+      "cl_r2": 0.965,
+      "velocity_profile_r2": 0.963,
+      "cp_cut_r2": 0.954,
+      "surface_pressure_mae": 18.4,
+      "surface_pressure_rmse": 25.6,
+      "surface_wall_shear_mae": 0.33,
+      "surface_wall_shear_rmse": 0.48,
+      "volume_velocity_mae": 0.61,
+      "volume_velocity_rmse": 0.88,
+      "volume_pressure_mae": 8.9,
+      "volume_pressure_rmse": 13.0,
+      "c_drag_mae": 0.0029,
+      "c_lift_mae": 0.0065,
+      "field_score": 80.32499999999999,
+      "force_score": 97.46000000000001,
+      "diagnostic_score": 95.94,
+      "overall_score": 88.5125
     }
   },
   {
@@ -4800,6 +5052,34 @@
     "absolute_coefficient_errors": {
       "c_drag": 0.0041,
       "c_lift": 0.0104
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 3.9,
+      "surface_pressure_rel_l1": 2.808,
+      "surface_wall_shear_rel_l2": 5.52,
+      "surface_wall_shear_rel_l1": 3.754,
+      "volume_velocity_rel_l2": 2.62,
+      "volume_velocity_rel_l1": 1.834,
+      "volume_pressure_rel_l2": 3.01,
+      "volume_pressure_rel_l1": 2.077,
+      "cd_r2": 0.968,
+      "cl_r2": 0.948,
+      "velocity_profile_r2": 0.941,
+      "cp_cut_r2": 0.934,
+      "surface_pressure_mae": 19.7,
+      "surface_pressure_rmse": 27.3,
+      "surface_wall_shear_mae": 0.45,
+      "surface_wall_shear_rmse": 0.66,
+      "volume_velocity_mae": 0.73,
+      "volume_velocity_rmse": 1.05,
+      "volume_pressure_mae": 12.5,
+      "volume_pressure_rmse": 18.1,
+      "c_drag_mae": 0.0041,
+      "c_lift_mae": 0.0104,
+      "field_score": 76.11666666666666,
+      "force_score": 96.0,
+      "diagnostic_score": 93.82000000000001,
+      "overall_score": 85.51333333333334
     }
   }
 ]

@@ -1,0 +1,1986 @@
+[
+  {
+    "submission_id": "vkils59-prototype-train",
+    "model": "FluidsBench prototype baseline",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "VKI-LS59",
+    "split": "train",
+    "parameter_count": 6.8,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-07-15",
+    "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+    "metric_values": {
+      "vki_mach_rrmse": 0.01476,
+      "vki_mach_rel_l2": 1.553,
+      "vki_mach_rel_l1": 1.091,
+      "vki_mach_r2": 0.9912,
+      "vki_nut_rrmse": 0.0315,
+      "vki_nut_rel_l2": 3.359,
+      "vki_nut_rel_l1": 2.406,
+      "vki_nut_r2": 0.9756,
+      "vki_q_rrmse": 0.01692,
+      "vki_q_rel_l2": 1.784,
+      "vki_q_rel_l1": 1.256,
+      "vki_q_r2": 0.9894,
+      "vki_power_rrmse": 0.01944,
+      "vki_power_rel_l2": 2.053,
+      "vki_power_rel_l1": 1.45,
+      "vki_power_r2": 0.9873,
+      "vki_pr_rrmse": 0.01278,
+      "vki_pr_rel_l2": 1.343,
+      "vki_pr_rel_l1": 0.941,
+      "vki_pr_r2": 0.9928,
+      "vki_tr_rrmse": 0.01224,
+      "vki_tr_rel_l2": 1.285,
+      "vki_tr_rel_l1": 0.9,
+      "vki_tr_r2": 0.9932,
+      "vki_eth_is_rrmse": 0.01584,
+      "vki_eth_is_rel_l2": 1.668,
+      "vki_eth_is_rel_l1": 1.173,
+      "vki_eth_is_r2": 0.9903,
+      "vki_angle_out_rrmse": 0.01836,
+      "vki_angle_out_rel_l2": 1.938,
+      "vki_angle_out_rel_l1": 1.367,
+      "vki_angle_out_r2": 0.9882,
+      "total_error": 0.01773
+    },
+    "diagnostics": {
+      "surface_profiles": [
+        {
+          "case_id": "vkils59-prototype-train",
+          "station_id": "pressure_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.62288
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.68692
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 0.74955
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 0.80945
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 0.8655
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 0.91682
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 0.96288
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.00349
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.03883
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.06945
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.09621
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.12025
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 1.14288
+            }
+          ]
+        },
+        {
+          "case_id": "vkils59-prototype-train",
+          "station_id": "suction_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.48288
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.8602
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 1.09629
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 1.27809
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 1.41275
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 1.50113
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 1.54288
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.53779
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.48608
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.38809
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.24296
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.04354
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 0.70288
+            }
+          ]
+        }
+      ],
+      "flow_profiles": [
+        {
+          "case_id": "vkils59-prototype-train",
+          "station_id": "outlet_plane_2",
+          "quantity_id": "velocity_ratio",
+          "values": [
+            {
+              "pitch_fraction": 0.0,
+              "velocity_ratio": 1.01101
+            },
+            {
+              "pitch_fraction": 0.07143,
+              "velocity_ratio": 1.01101
+            },
+            {
+              "pitch_fraction": 0.14286,
+              "velocity_ratio": 1.011
+            },
+            {
+              "pitch_fraction": 0.21429,
+              "velocity_ratio": 1.01086
+            },
+            {
+              "pitch_fraction": 0.28571,
+              "velocity_ratio": 1.00805
+            },
+            {
+              "pitch_fraction": 0.35714,
+              "velocity_ratio": 0.98281
+            },
+            {
+              "pitch_fraction": 0.42857,
+              "velocity_ratio": 0.88698
+            },
+            {
+              "pitch_fraction": 0.5,
+              "velocity_ratio": 0.75877
+            },
+            {
+              "pitch_fraction": 0.57143,
+              "velocity_ratio": 0.77387
+            },
+            {
+              "pitch_fraction": 0.64286,
+              "velocity_ratio": 0.90794
+            },
+            {
+              "pitch_fraction": 0.71429,
+              "velocity_ratio": 0.9903
+            },
+            {
+              "pitch_fraction": 0.78571,
+              "velocity_ratio": 1.00908
+            },
+            {
+              "pitch_fraction": 0.85714,
+              "velocity_ratio": 1.01093
+            },
+            {
+              "pitch_fraction": 0.92857,
+              "velocity_ratio": 1.01101
+            },
+            {
+              "pitch_fraction": 1.0,
+              "velocity_ratio": 1.01101
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "vkils59-prototype-train-125",
+    "model": "FluidsBench prototype baseline",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "VKI-LS59",
+    "split": "train_125",
+    "parameter_count": 7.85,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-07-15",
+    "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+    "metric_values": {
+      "vki_mach_rrmse": 0.03813,
+      "vki_mach_rel_l2": 4.012,
+      "vki_mach_rel_l1": 2.818,
+      "vki_mach_r2": 0.9684,
+      "vki_nut_rrmse": 0.08138,
+      "vki_nut_rel_l2": 8.677,
+      "vki_nut_rel_l1": 6.215,
+      "vki_nut_r2": 0.9121,
+      "vki_q_rrmse": 0.04371,
+      "vki_q_rel_l2": 4.607,
+      "vki_q_rel_l1": 3.244,
+      "vki_q_r2": 0.962,
+      "vki_power_rrmse": 0.05022,
+      "vki_power_rel_l2": 5.304,
+      "vki_power_rel_l1": 3.746,
+      "vki_power_r2": 0.9542,
+      "vki_pr_rrmse": 0.03301,
+      "vki_pr_rel_l2": 3.469,
+      "vki_pr_rel_l1": 2.43,
+      "vki_pr_r2": 0.974,
+      "vki_tr_rrmse": 0.03162,
+      "vki_tr_rel_l2": 3.321,
+      "vki_tr_rel_l1": 2.325,
+      "vki_tr_r2": 0.9755,
+      "vki_eth_is_rrmse": 0.04092,
+      "vki_eth_is_rel_l2": 4.31,
+      "vki_eth_is_rel_l1": 3.031,
+      "vki_eth_is_r2": 0.9652,
+      "vki_angle_out_rrmse": 0.04743,
+      "vki_angle_out_rel_l2": 5.005,
+      "vki_angle_out_rel_l1": 3.53,
+      "vki_angle_out_r2": 0.9576,
+      "total_error": 0.0458
+    },
+    "diagnostics": {
+      "surface_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-125",
+          "station_id": "pressure_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.62744
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.69148
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 0.75411
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 0.81401
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 0.87006
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 0.92138
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 0.96744
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.00805
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.04339
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.07401
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.10077
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.12481
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 1.14744
+            }
+          ]
+        },
+        {
+          "case_id": "vkils59-prototype-train-125",
+          "station_id": "suction_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.48744
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.86476
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 1.10085
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 1.28265
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 1.41731
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 1.50569
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 1.54744
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.54235
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.49064
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.39265
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.24752
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.0481
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 0.70744
+            }
+          ]
+        }
+      ],
+      "flow_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-125",
+          "station_id": "outlet_plane_2",
+          "quantity_id": "velocity_ratio",
+          "values": [
+            {
+              "pitch_fraction": 0.0,
+              "velocity_ratio": 1.0126
+            },
+            {
+              "pitch_fraction": 0.07143,
+              "velocity_ratio": 1.0126
+            },
+            {
+              "pitch_fraction": 0.14286,
+              "velocity_ratio": 1.0126
+            },
+            {
+              "pitch_fraction": 0.21429,
+              "velocity_ratio": 1.01246
+            },
+            {
+              "pitch_fraction": 0.28571,
+              "velocity_ratio": 1.00964
+            },
+            {
+              "pitch_fraction": 0.35714,
+              "velocity_ratio": 0.98441
+            },
+            {
+              "pitch_fraction": 0.42857,
+              "velocity_ratio": 0.88857
+            },
+            {
+              "pitch_fraction": 0.5,
+              "velocity_ratio": 0.76037
+            },
+            {
+              "pitch_fraction": 0.57143,
+              "velocity_ratio": 0.77547
+            },
+            {
+              "pitch_fraction": 0.64286,
+              "velocity_ratio": 0.90954
+            },
+            {
+              "pitch_fraction": 0.71429,
+              "velocity_ratio": 0.9919
+            },
+            {
+              "pitch_fraction": 0.78571,
+              "velocity_ratio": 1.01068
+            },
+            {
+              "pitch_fraction": 0.85714,
+              "velocity_ratio": 1.01252
+            },
+            {
+              "pitch_fraction": 0.92857,
+              "velocity_ratio": 1.0126
+            },
+            {
+              "pitch_fraction": 1.0,
+              "velocity_ratio": 1.0126
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "vkils59-prototype-train-16",
+    "model": "FluidsBench prototype baseline",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "VKI-LS59",
+    "split": "train_16",
+    "parameter_count": 8.9,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-07-15",
+    "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+    "metric_values": {
+      "vki_mach_rrmse": 0.0615,
+      "vki_mach_rel_l2": 6.472,
+      "vki_mach_rel_l1": 4.545,
+      "vki_mach_r2": 0.9398,
+      "vki_nut_rrmse": 0.13125,
+      "vki_nut_rel_l2": 13.995,
+      "vki_nut_rel_l1": 10.024,
+      "vki_nut_r2": 0.8323,
+      "vki_q_rrmse": 0.0705,
+      "vki_q_rel_l2": 7.431,
+      "vki_q_rel_l1": 5.232,
+      "vki_q_r2": 0.9276,
+      "vki_power_rrmse": 0.081,
+      "vki_power_rel_l2": 8.555,
+      "vki_power_rel_l1": 6.042,
+      "vki_power_r2": 0.9126,
+      "vki_pr_rrmse": 0.05325,
+      "vki_pr_rel_l2": 5.595,
+      "vki_pr_rel_l1": 3.92,
+      "vki_pr_r2": 0.9504,
+      "vki_tr_rrmse": 0.051,
+      "vki_tr_rel_l2": 5.356,
+      "vki_tr_rel_l1": 3.75,
+      "vki_tr_r2": 0.9532,
+      "vki_eth_is_rrmse": 0.066,
+      "vki_eth_is_rel_l2": 6.951,
+      "vki_eth_is_rel_l1": 4.888,
+      "vki_eth_is_r2": 0.9337,
+      "vki_angle_out_rrmse": 0.0765,
+      "vki_angle_out_rel_l2": 8.073,
+      "vki_angle_out_rel_l1": 5.694,
+      "vki_angle_out_r2": 0.9191,
+      "total_error": 0.07387
+    },
+    "diagnostics": {
+      "surface_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-16",
+          "station_id": "pressure_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.632
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.69604
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 0.75867
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 0.81857
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 0.87462
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 0.92594
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 0.972
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.01261
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.04795
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.07857
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.10533
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.12937
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 1.152
+            }
+          ]
+        },
+        {
+          "case_id": "vkils59-prototype-train-16",
+          "station_id": "suction_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.492
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.86932
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 1.10541
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 1.28721
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 1.42187
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 1.51025
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 1.552
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.54691
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.4952
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.39721
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.25208
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.05266
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 0.712
+            }
+          ]
+        }
+      ],
+      "flow_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-16",
+          "station_id": "outlet_plane_2",
+          "quantity_id": "velocity_ratio",
+          "values": [
+            {
+              "pitch_fraction": 0.0,
+              "velocity_ratio": 1.0142
+            },
+            {
+              "pitch_fraction": 0.07143,
+              "velocity_ratio": 1.0142
+            },
+            {
+              "pitch_fraction": 0.14286,
+              "velocity_ratio": 1.0142
+            },
+            {
+              "pitch_fraction": 0.21429,
+              "velocity_ratio": 1.01406
+            },
+            {
+              "pitch_fraction": 0.28571,
+              "velocity_ratio": 1.01124
+            },
+            {
+              "pitch_fraction": 0.35714,
+              "velocity_ratio": 0.98601
+            },
+            {
+              "pitch_fraction": 0.42857,
+              "velocity_ratio": 0.89017
+            },
+            {
+              "pitch_fraction": 0.5,
+              "velocity_ratio": 0.76196
+            },
+            {
+              "pitch_fraction": 0.57143,
+              "velocity_ratio": 0.77706
+            },
+            {
+              "pitch_fraction": 0.64286,
+              "velocity_ratio": 0.91114
+            },
+            {
+              "pitch_fraction": 0.71429,
+              "velocity_ratio": 0.99349
+            },
+            {
+              "pitch_fraction": 0.78571,
+              "velocity_ratio": 1.01228
+            },
+            {
+              "pitch_fraction": 0.85714,
+              "velocity_ratio": 1.01412
+            },
+            {
+              "pitch_fraction": 0.92857,
+              "velocity_ratio": 1.0142
+            },
+            {
+              "pitch_fraction": 1.0,
+              "velocity_ratio": 1.0142
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "vkils59-prototype-train-250",
+    "model": "FluidsBench prototype baseline",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "VKI-LS59",
+    "split": "train_250",
+    "parameter_count": 7.5,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-07-15",
+    "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+    "metric_values": {
+      "vki_mach_rrmse": 0.03034,
+      "vki_mach_rel_l2": 3.193,
+      "vki_mach_rel_l1": 2.242,
+      "vki_mach_r2": 0.9768,
+      "vki_nut_rrmse": 0.06475,
+      "vki_nut_rel_l2": 6.904,
+      "vki_nut_rel_l1": 4.945,
+      "vki_nut_r2": 0.9354,
+      "vki_q_rrmse": 0.03478,
+      "vki_q_rel_l2": 3.666,
+      "vki_q_rel_l1": 2.581,
+      "vki_q_r2": 0.9721,
+      "vki_power_rrmse": 0.03996,
+      "vki_power_rel_l2": 4.221,
+      "vki_power_rel_l1": 2.981,
+      "vki_power_r2": 0.9663,
+      "vki_pr_rrmse": 0.02627,
+      "vki_pr_rel_l2": 2.76,
+      "vki_pr_rel_l1": 1.934,
+      "vki_pr_r2": 0.9809,
+      "vki_tr_rrmse": 0.02516,
+      "vki_tr_rel_l2": 2.642,
+      "vki_tr_rel_l1": 1.85,
+      "vki_tr_r2": 0.982,
+      "vki_eth_is_rrmse": 0.03256,
+      "vki_eth_is_rel_l2": 3.429,
+      "vki_eth_is_rel_l1": 2.411,
+      "vki_eth_is_r2": 0.9745,
+      "vki_angle_out_rrmse": 0.03774,
+      "vki_angle_out_rel_l2": 3.983,
+      "vki_angle_out_rel_l1": 2.809,
+      "vki_angle_out_r2": 0.9688,
+      "total_error": 0.03644
+    },
+    "diagnostics": {
+      "surface_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-250",
+          "station_id": "pressure_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.62592
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.68996
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 0.75259
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 0.81249
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 0.86854
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 0.91986
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 0.96592
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.00653
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.04187
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.07249
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.09925
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.12329
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 1.14592
+            }
+          ]
+        },
+        {
+          "case_id": "vkils59-prototype-train-250",
+          "station_id": "suction_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.48592
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.86324
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 1.09933
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 1.28113
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 1.41579
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 1.50417
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 1.54592
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.54083
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.48912
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.39113
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.246
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.04658
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 0.70592
+            }
+          ]
+        }
+      ],
+      "flow_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-250",
+          "station_id": "outlet_plane_2",
+          "quantity_id": "velocity_ratio",
+          "values": [
+            {
+              "pitch_fraction": 0.0,
+              "velocity_ratio": 1.01207
+            },
+            {
+              "pitch_fraction": 0.07143,
+              "velocity_ratio": 1.01207
+            },
+            {
+              "pitch_fraction": 0.14286,
+              "velocity_ratio": 1.01207
+            },
+            {
+              "pitch_fraction": 0.21429,
+              "velocity_ratio": 1.01193
+            },
+            {
+              "pitch_fraction": 0.28571,
+              "velocity_ratio": 1.00911
+            },
+            {
+              "pitch_fraction": 0.35714,
+              "velocity_ratio": 0.98388
+            },
+            {
+              "pitch_fraction": 0.42857,
+              "velocity_ratio": 0.88804
+            },
+            {
+              "pitch_fraction": 0.5,
+              "velocity_ratio": 0.75984
+            },
+            {
+              "pitch_fraction": 0.57143,
+              "velocity_ratio": 0.77493
+            },
+            {
+              "pitch_fraction": 0.64286,
+              "velocity_ratio": 0.90901
+            },
+            {
+              "pitch_fraction": 0.71429,
+              "velocity_ratio": 0.99137
+            },
+            {
+              "pitch_fraction": 0.78571,
+              "velocity_ratio": 1.01015
+            },
+            {
+              "pitch_fraction": 0.85714,
+              "velocity_ratio": 1.01199
+            },
+            {
+              "pitch_fraction": 0.92857,
+              "velocity_ratio": 1.01207
+            },
+            {
+              "pitch_fraction": 1.0,
+              "velocity_ratio": 1.01207
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "vkils59-prototype-train-32",
+    "model": "FluidsBench prototype baseline",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "VKI-LS59",
+    "split": "train_32",
+    "parameter_count": 8.55,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-07-15",
+    "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+    "metric_values": {
+      "vki_mach_rrmse": 0.05371,
+      "vki_mach_rel_l2": 5.652,
+      "vki_mach_rel_l1": 3.969,
+      "vki_mach_r2": 0.9498,
+      "vki_nut_rrmse": 0.11463,
+      "vki_nut_rel_l2": 12.222,
+      "vki_nut_rel_l1": 8.754,
+      "vki_nut_r2": 0.8604,
+      "vki_q_rrmse": 0.06157,
+      "vki_q_rel_l2": 6.49,
+      "vki_q_rel_l1": 4.57,
+      "vki_q_r2": 0.9397,
+      "vki_power_rrmse": 0.07074,
+      "vki_power_rel_l2": 7.472,
+      "vki_power_rel_l1": 5.276,
+      "vki_power_r2": 0.9272,
+      "vki_pr_rrmse": 0.0465,
+      "vki_pr_rel_l2": 4.886,
+      "vki_pr_rel_l1": 3.423,
+      "vki_pr_r2": 0.9587,
+      "vki_tr_rrmse": 0.04454,
+      "vki_tr_rel_l2": 4.678,
+      "vki_tr_rel_l1": 3.275,
+      "vki_tr_r2": 0.961,
+      "vki_eth_is_rrmse": 0.05764,
+      "vki_eth_is_rel_l2": 6.071,
+      "vki_eth_is_rel_l1": 4.269,
+      "vki_eth_is_r2": 0.9448,
+      "vki_angle_out_rrmse": 0.06681,
+      "vki_angle_out_rel_l2": 7.05,
+      "vki_angle_out_rel_l1": 4.973,
+      "vki_angle_out_r2": 0.9326,
+      "total_error": 0.06452
+    },
+    "diagnostics": {
+      "surface_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-32",
+          "station_id": "pressure_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.63048
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.69452
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 0.75715
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 0.81705
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 0.8731
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 0.92442
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 0.97048
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.01109
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.04643
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.07705
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.10381
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.12785
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 1.15048
+            }
+          ]
+        },
+        {
+          "case_id": "vkils59-prototype-train-32",
+          "station_id": "suction_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.49048
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.8678
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 1.10389
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 1.28569
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 1.42035
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 1.50873
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 1.55048
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.54539
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.49368
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.39569
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.25056
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.05114
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 0.71048
+            }
+          ]
+        }
+      ],
+      "flow_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-32",
+          "station_id": "outlet_plane_2",
+          "quantity_id": "velocity_ratio",
+          "values": [
+            {
+              "pitch_fraction": 0.0,
+              "velocity_ratio": 1.01367
+            },
+            {
+              "pitch_fraction": 0.07143,
+              "velocity_ratio": 1.01367
+            },
+            {
+              "pitch_fraction": 0.14286,
+              "velocity_ratio": 1.01366
+            },
+            {
+              "pitch_fraction": 0.21429,
+              "velocity_ratio": 1.01352
+            },
+            {
+              "pitch_fraction": 0.28571,
+              "velocity_ratio": 1.01071
+            },
+            {
+              "pitch_fraction": 0.35714,
+              "velocity_ratio": 0.98547
+            },
+            {
+              "pitch_fraction": 0.42857,
+              "velocity_ratio": 0.88964
+            },
+            {
+              "pitch_fraction": 0.5,
+              "velocity_ratio": 0.76143
+            },
+            {
+              "pitch_fraction": 0.57143,
+              "velocity_ratio": 0.77653
+            },
+            {
+              "pitch_fraction": 0.64286,
+              "velocity_ratio": 0.9106
+            },
+            {
+              "pitch_fraction": 0.71429,
+              "velocity_ratio": 0.99296
+            },
+            {
+              "pitch_fraction": 0.78571,
+              "velocity_ratio": 1.01174
+            },
+            {
+              "pitch_fraction": 0.85714,
+              "velocity_ratio": 1.01359
+            },
+            {
+              "pitch_fraction": 0.92857,
+              "velocity_ratio": 1.01367
+            },
+            {
+              "pitch_fraction": 1.0,
+              "velocity_ratio": 1.01367
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "vkils59-prototype-train-500",
+    "model": "FluidsBench prototype baseline",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "VKI-LS59",
+    "split": "train_500",
+    "parameter_count": 7.15,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-07-15",
+    "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+    "metric_values": {
+      "vki_mach_rrmse": 0.02255,
+      "vki_mach_rel_l2": 2.373,
+      "vki_mach_rel_l1": 1.667,
+      "vki_mach_r2": 0.9845,
+      "vki_nut_rrmse": 0.04812,
+      "vki_nut_rel_l2": 5.131,
+      "vki_nut_rel_l1": 3.675,
+      "vki_nut_r2": 0.9567,
+      "vki_q_rrmse": 0.02585,
+      "vki_q_rel_l2": 2.725,
+      "vki_q_rel_l1": 1.919,
+      "vki_q_r2": 0.9813,
+      "vki_power_rrmse": 0.0297,
+      "vki_power_rel_l2": 3.137,
+      "vki_power_rel_l1": 2.215,
+      "vki_power_r2": 0.9774,
+      "vki_pr_rrmse": 0.01952,
+      "vki_pr_rel_l2": 2.051,
+      "vki_pr_rel_l1": 1.437,
+      "vki_pr_r2": 0.9872,
+      "vki_tr_rrmse": 0.0187,
+      "vki_tr_rel_l2": 1.964,
+      "vki_tr_rel_l1": 1.375,
+      "vki_tr_r2": 0.9879,
+      "vki_eth_is_rrmse": 0.0242,
+      "vki_eth_is_rel_l2": 2.549,
+      "vki_eth_is_rel_l1": 1.792,
+      "vki_eth_is_r2": 0.9829,
+      "vki_angle_out_rrmse": 0.02805,
+      "vki_angle_out_rel_l2": 2.96,
+      "vki_angle_out_rel_l1": 2.088,
+      "vki_angle_out_r2": 0.9791,
+      "total_error": 0.02709
+    },
+    "diagnostics": {
+      "surface_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-500",
+          "station_id": "pressure_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.6244
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.68844
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 0.75107
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 0.81097
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 0.86702
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 0.91834
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 0.9644
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.00501
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.04035
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.07097
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.09773
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.12177
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 1.1444
+            }
+          ]
+        },
+        {
+          "case_id": "vkils59-prototype-train-500",
+          "station_id": "suction_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.4844
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.86172
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 1.09781
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 1.27961
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 1.41427
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 1.50265
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 1.5444
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.53931
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.4876
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.38961
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.24448
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.04506
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 0.7044
+            }
+          ]
+        }
+      ],
+      "flow_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-500",
+          "station_id": "outlet_plane_2",
+          "quantity_id": "velocity_ratio",
+          "values": [
+            {
+              "pitch_fraction": 0.0,
+              "velocity_ratio": 1.01154
+            },
+            {
+              "pitch_fraction": 0.07143,
+              "velocity_ratio": 1.01154
+            },
+            {
+              "pitch_fraction": 0.14286,
+              "velocity_ratio": 1.01154
+            },
+            {
+              "pitch_fraction": 0.21429,
+              "velocity_ratio": 1.0114
+            },
+            {
+              "pitch_fraction": 0.28571,
+              "velocity_ratio": 1.00858
+            },
+            {
+              "pitch_fraction": 0.35714,
+              "velocity_ratio": 0.98335
+            },
+            {
+              "pitch_fraction": 0.42857,
+              "velocity_ratio": 0.88751
+            },
+            {
+              "pitch_fraction": 0.5,
+              "velocity_ratio": 0.7593
+            },
+            {
+              "pitch_fraction": 0.57143,
+              "velocity_ratio": 0.7744
+            },
+            {
+              "pitch_fraction": 0.64286,
+              "velocity_ratio": 0.90848
+            },
+            {
+              "pitch_fraction": 0.71429,
+              "velocity_ratio": 0.99083
+            },
+            {
+              "pitch_fraction": 0.78571,
+              "velocity_ratio": 1.00962
+            },
+            {
+              "pitch_fraction": 0.85714,
+              "velocity_ratio": 1.01146
+            },
+            {
+              "pitch_fraction": 0.92857,
+              "velocity_ratio": 1.01154
+            },
+            {
+              "pitch_fraction": 1.0,
+              "velocity_ratio": 1.01154
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "vkils59-prototype-train-64",
+    "model": "FluidsBench prototype baseline",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "VKI-LS59",
+    "split": "train_64",
+    "parameter_count": 8.2,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-07-15",
+    "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+    "metric_values": {
+      "vki_mach_rrmse": 0.04592,
+      "vki_mach_rel_l2": 4.832,
+      "vki_mach_rel_l1": 3.394,
+      "vki_mach_r2": 0.9594,
+      "vki_nut_rrmse": 0.098,
+      "vki_nut_rel_l2": 10.449,
+      "vki_nut_rel_l1": 7.484,
+      "vki_nut_r2": 0.887,
+      "vki_q_rrmse": 0.05264,
+      "vki_q_rel_l2": 5.549,
+      "vki_q_rel_l1": 3.907,
+      "vki_q_r2": 0.9512,
+      "vki_power_rrmse": 0.06048,
+      "vki_power_rel_l2": 6.388,
+      "vki_power_rel_l1": 4.511,
+      "vki_power_r2": 0.9411,
+      "vki_pr_rrmse": 0.03976,
+      "vki_pr_rel_l2": 4.177,
+      "vki_pr_rel_l1": 2.927,
+      "vki_pr_r2": 0.9666,
+      "vki_tr_rrmse": 0.03808,
+      "vki_tr_rel_l2": 3.999,
+      "vki_tr_rel_l1": 2.8,
+      "vki_tr_r2": 0.9685,
+      "vki_eth_is_rrmse": 0.04928,
+      "vki_eth_is_rel_l2": 5.19,
+      "vki_eth_is_rel_l1": 3.65,
+      "vki_eth_is_r2": 0.9553,
+      "vki_angle_out_rrmse": 0.05712,
+      "vki_angle_out_rel_l2": 6.028,
+      "vki_angle_out_rel_l1": 4.251,
+      "vki_angle_out_r2": 0.9455,
+      "total_error": 0.05516
+    },
+    "diagnostics": {
+      "surface_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-64",
+          "station_id": "pressure_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.62896
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.693
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 0.75563
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 0.81553
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 0.87158
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 0.9229
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 0.96896
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.00957
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.04491
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.07553
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.10229
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.12633
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 1.14896
+            }
+          ]
+        },
+        {
+          "case_id": "vkils59-prototype-train-64",
+          "station_id": "suction_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.48896
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.86628
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 1.10237
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 1.28417
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 1.41883
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 1.50721
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 1.54896
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.54387
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.49216
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.39417
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.24904
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.04962
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 0.70896
+            }
+          ]
+        }
+      ],
+      "flow_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-64",
+          "station_id": "outlet_plane_2",
+          "quantity_id": "velocity_ratio",
+          "values": [
+            {
+              "pitch_fraction": 0.0,
+              "velocity_ratio": 1.01314
+            },
+            {
+              "pitch_fraction": 0.07143,
+              "velocity_ratio": 1.01314
+            },
+            {
+              "pitch_fraction": 0.14286,
+              "velocity_ratio": 1.01313
+            },
+            {
+              "pitch_fraction": 0.21429,
+              "velocity_ratio": 1.01299
+            },
+            {
+              "pitch_fraction": 0.28571,
+              "velocity_ratio": 1.01017
+            },
+            {
+              "pitch_fraction": 0.35714,
+              "velocity_ratio": 0.98494
+            },
+            {
+              "pitch_fraction": 0.42857,
+              "velocity_ratio": 0.88911
+            },
+            {
+              "pitch_fraction": 0.5,
+              "velocity_ratio": 0.7609
+            },
+            {
+              "pitch_fraction": 0.57143,
+              "velocity_ratio": 0.776
+            },
+            {
+              "pitch_fraction": 0.64286,
+              "velocity_ratio": 0.91007
+            },
+            {
+              "pitch_fraction": 0.71429,
+              "velocity_ratio": 0.99243
+            },
+            {
+              "pitch_fraction": 0.78571,
+              "velocity_ratio": 1.01121
+            },
+            {
+              "pitch_fraction": 0.85714,
+              "velocity_ratio": 1.01305
+            },
+            {
+              "pitch_fraction": 0.92857,
+              "velocity_ratio": 1.01313
+            },
+            {
+              "pitch_fraction": 1.0,
+              "velocity_ratio": 1.01314
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "submission_id": "vkils59-prototype-train-8",
+    "model": "FluidsBench prototype baseline",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator",
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "VKI-LS59",
+    "split": "train_8",
+    "parameter_count": 9.25,
+    "submitter_name": "FluidsBench prototype baseline",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2026-07-15",
+    "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+    "metric_values": {
+      "vki_mach_rrmse": 0.06929,
+      "vki_mach_rel_l2": 7.291,
+      "vki_mach_rel_l1": 5.121,
+      "vki_mach_r2": 0.9292,
+      "vki_nut_rrmse": 0.14788,
+      "vki_nut_rel_l2": 15.767,
+      "vki_nut_rel_l1": 11.293,
+      "vki_nut_r2": 0.8031,
+      "vki_q_rrmse": 0.07943,
+      "vki_q_rel_l2": 8.373,
+      "vki_q_rel_l1": 5.895,
+      "vki_q_r2": 0.9149,
+      "vki_power_rrmse": 0.09126,
+      "vki_power_rel_l2": 9.639,
+      "vki_power_rel_l1": 6.807,
+      "vki_power_r2": 0.8974,
+      "vki_pr_rrmse": 0.05999,
+      "vki_pr_rel_l2": 6.303,
+      "vki_pr_rel_l1": 4.416,
+      "vki_pr_r2": 0.9417,
+      "vki_tr_rrmse": 0.05746,
+      "vki_tr_rel_l2": 6.034,
+      "vki_tr_rel_l1": 4.225,
+      "vki_tr_r2": 0.945,
+      "vki_eth_is_rrmse": 0.07436,
+      "vki_eth_is_rel_l2": 7.832,
+      "vki_eth_is_rel_l1": 5.507,
+      "vki_eth_is_r2": 0.9221,
+      "vki_angle_out_rrmse": 0.08619,
+      "vki_angle_out_rel_l2": 9.096,
+      "vki_angle_out_rel_l1": 6.415,
+      "vki_angle_out_r2": 0.905,
+      "total_error": 0.08323
+    },
+    "diagnostics": {
+      "surface_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-8",
+          "station_id": "pressure_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.63352
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.69756
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 0.76019
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 0.82009
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 0.87614
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 0.92746
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 0.97352
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.01413
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.04947
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.08009
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.10685
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.13089
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 1.15352
+            }
+          ]
+        },
+        {
+          "case_id": "vkils59-prototype-train-8",
+          "station_id": "suction_side",
+          "quantity_id": "m_iso",
+          "values": [
+            {
+              "x_over_c": 0.0,
+              "m_iso": 0.49352
+            },
+            {
+              "x_over_c": 0.08333,
+              "m_iso": 0.87084
+            },
+            {
+              "x_over_c": 0.16667,
+              "m_iso": 1.10693
+            },
+            {
+              "x_over_c": 0.25,
+              "m_iso": 1.28873
+            },
+            {
+              "x_over_c": 0.33333,
+              "m_iso": 1.42339
+            },
+            {
+              "x_over_c": 0.41667,
+              "m_iso": 1.51177
+            },
+            {
+              "x_over_c": 0.5,
+              "m_iso": 1.55352
+            },
+            {
+              "x_over_c": 0.58333,
+              "m_iso": 1.54843
+            },
+            {
+              "x_over_c": 0.66667,
+              "m_iso": 1.49672
+            },
+            {
+              "x_over_c": 0.75,
+              "m_iso": 1.39873
+            },
+            {
+              "x_over_c": 0.83333,
+              "m_iso": 1.2536
+            },
+            {
+              "x_over_c": 0.91667,
+              "m_iso": 1.05418
+            },
+            {
+              "x_over_c": 1.0,
+              "m_iso": 0.71352
+            }
+          ]
+        }
+      ],
+      "flow_profiles": [
+        {
+          "case_id": "vkils59-prototype-train-8",
+          "station_id": "outlet_plane_2",
+          "quantity_id": "velocity_ratio",
+          "values": [
+            {
+              "pitch_fraction": 0.0,
+              "velocity_ratio": 1.01473
+            },
+            {
+              "pitch_fraction": 0.07143,
+              "velocity_ratio": 1.01473
+            },
+            {
+              "pitch_fraction": 0.14286,
+              "velocity_ratio": 1.01473
+            },
+            {
+              "pitch_fraction": 0.21429,
+              "velocity_ratio": 1.01459
+            },
+            {
+              "pitch_fraction": 0.28571,
+              "velocity_ratio": 1.01177
+            },
+            {
+              "pitch_fraction": 0.35714,
+              "velocity_ratio": 0.98654
+            },
+            {
+              "pitch_fraction": 0.42857,
+              "velocity_ratio": 0.8907
+            },
+            {
+              "pitch_fraction": 0.5,
+              "velocity_ratio": 0.7625
+            },
+            {
+              "pitch_fraction": 0.57143,
+              "velocity_ratio": 0.77759
+            },
+            {
+              "pitch_fraction": 0.64286,
+              "velocity_ratio": 0.91167
+            },
+            {
+              "pitch_fraction": 0.71429,
+              "velocity_ratio": 0.99403
+            },
+            {
+              "pitch_fraction": 0.78571,
+              "velocity_ratio": 1.01281
+            },
+            {
+              "pitch_fraction": 0.85714,
+              "velocity_ratio": 1.01465
+            },
+            {
+              "pitch_fraction": 0.92857,
+              "velocity_ratio": 1.01473
+            },
+            {
+              "pitch_fraction": 1.0,
+              "velocity_ratio": 1.01473
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

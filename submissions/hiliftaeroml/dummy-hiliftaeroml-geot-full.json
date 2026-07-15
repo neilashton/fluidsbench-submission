@@ -29,334 +29,452 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2026-06-25",
-  "note": "HiLiftAeroML full-split GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+  "note": "HiLiftAeroML full-split GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
   "diagnostics": {
     "cp_cuts": [
       {
         "case_id": "hiliftaeroml-geot-full_dummy_case_001",
-        "cut_id": "prototype_pressure_belt_a",
+        "cut_id": "hlpw5_pressure_row_a",
         "station_id": "pressure_belt_a",
-        "station_label": "Pressure belt A",
-        "coordinate_frame": "chord_normalized",
+        "station_label": "HLPW-5 pressure row A",
+        "x_label": "x (full-scale in) along HLPW-5 row A",
+        "dog_leg_x_in": 1126.61,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "cp",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "cp": -0.3181
+            "x": 1096.61,
+            "cp": -2.0494
           },
           {
-            "x": 0.01,
-            "y": 0,
-            "z": 0,
-            "cp": -2.2359
+            "x": 1127.81,
+            "cp": -2.4282
           },
           {
-            "x": 0.02,
-            "y": 0,
-            "z": 0,
-            "cp": -1.6802
+            "x": 1174.61,
+            "cp": -1.631
           },
           {
-            "x": 0.04,
-            "y": 0,
-            "z": 0,
-            "cp": -1.2238
+            "x": 1252.61,
+            "cp": -0.947
           },
           {
-            "x": 0.07,
-            "y": 0,
-            "z": 0,
-            "cp": -0.7723
+            "x": 1330.61,
+            "cp": -0.6009
           },
           {
-            "x": 0.12,
-            "y": 0,
-            "z": 0,
-            "cp": -0.5917
+            "x": 1408.61,
+            "cp": -0.2881
           },
           {
-            "x": 0.2,
-            "y": 0,
-            "z": 0,
-            "cp": -0.2644
-          },
-          {
-            "x": 0.32,
-            "y": 0,
-            "z": 0,
-            "cp": -0.2396
-          },
-          {
-            "x": 0.48,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0165
-          },
-          {
-            "x": 0.66,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0674
-          },
-          {
-            "x": 0.84,
-            "y": 0,
-            "z": 0,
-            "cp": 0.1414
-          },
-          {
-            "x": 1,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0347
+            "x": 1486.61,
+            "cp": -0.0394
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-geot-full_dummy_case_001",
-        "cut_id": "prototype_pressure_belt_d",
+        "cut_id": "hlpw5_pressure_row_b",
+        "station_id": "pressure_belt_b",
+        "station_label": "HLPW-5 pressure row B",
+        "x_label": "x (full-scale in) along HLPW-5 row B",
+        "dog_leg_x_in": 1199.86,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1167.86,
+            "cp": -2.1077
+          },
+          {
+            "x": 1196.02,
+            "cp": -2.4781
+          },
+          {
+            "x": 1238.26,
+            "cp": -1.6526
+          },
+          {
+            "x": 1308.66,
+            "cp": -0.9472
+          },
+          {
+            "x": 1379.06,
+            "cp": -0.608
+          },
+          {
+            "x": 1449.46,
+            "cp": -0.3147
+          },
+          {
+            "x": 1519.86,
+            "cp": -0.0603
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_c",
+        "station_id": "pressure_belt_c",
+        "station_label": "HLPW-5 pressure row C",
+        "x_label": "x (full-scale in) along HLPW-5 row C",
+        "dog_leg_x_in": 1266.16,
+        "elements": [
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1232.16,
+            "cp": -2.1447
+          },
+          {
+            "x": 1257.68,
+            "cp": -2.5347
+          },
+          {
+            "x": 1295.96,
+            "cp": -1.7035
+          },
+          {
+            "x": 1359.76,
+            "cp": -0.9732
+          },
+          {
+            "x": 1423.56,
+            "cp": -0.6035
+          },
+          {
+            "x": 1487.36,
+            "cp": -0.2931
+          },
+          {
+            "x": 1551.16,
+            "cp": -0.0514
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_d",
         "station_id": "pressure_belt_d",
-        "station_label": "Pressure belt D",
-        "coordinate_frame": "chord_normalized",
+        "station_label": "HLPW-5 pressure row D",
+        "x_label": "x (full-scale in) along HLPW-5 row D",
+        "dog_leg_x_in": 1332.41,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "cp",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0881
+            "x": 1296.41,
+            "cp": -2.1803
           },
           {
-            "x": 0.01,
-            "y": 0,
-            "z": 0,
-            "cp": -1.5805
+            "x": 1318.89,
+            "cp": -2.5631
           },
           {
-            "x": 0.02,
-            "y": 0,
-            "z": 0,
-            "cp": -1.1437
+            "x": 1352.61,
+            "cp": -1.7346
           },
           {
-            "x": 0.04,
-            "y": 0,
-            "z": 0,
-            "cp": -0.7809
+            "x": 1408.81,
+            "cp": -1.0052
           },
           {
-            "x": 0.07,
-            "y": 0,
-            "z": 0,
-            "cp": -0.419
+            "x": 1465.01,
+            "cp": -0.6354
           },
           {
-            "x": 0.12,
-            "y": 0,
-            "z": 0,
-            "cp": -0.2639
+            "x": 1521.21,
+            "cp": -0.3147
           },
           {
-            "x": 0.2,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0061
-          },
-          {
-            "x": 0.32,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0229
-          },
-          {
-            "x": 0.48,
-            "y": 0,
-            "z": 0,
-            "cp": 0.154
-          },
-          {
-            "x": 0.66,
-            "y": 0,
-            "z": 0,
-            "cp": 0.061
-          },
-          {
-            "x": 0.84,
-            "y": 0,
-            "z": 0,
-            "cp": 0.2239
-          },
-          {
-            "x": 1,
-            "y": 0,
-            "z": 0,
-            "cp": 0.1871
+            "x": 1577.41,
+            "cp": -0.0421
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-geot-full_dummy_case_001",
-        "cut_id": "prototype_pressure_belt_g",
+        "cut_id": "hlpw5_pressure_row_e",
+        "station_id": "pressure_belt_e",
+        "station_label": "HLPW-5 pressure row E",
+        "x_label": "x (full-scale in) along HLPW-5 row E",
+        "dog_leg_x_in": 1402.17,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1364.17,
+            "cp": -2.2421
+          },
+          {
+            "x": 1382.41,
+            "cp": -2.6147
+          },
+          {
+            "x": 1409.77,
+            "cp": -1.7653
+          },
+          {
+            "x": 1455.37,
+            "cp": -1.0035
+          },
+          {
+            "x": 1500.97,
+            "cp": -0.6312
+          },
+          {
+            "x": 1546.57,
+            "cp": -0.3311
+          },
+          {
+            "x": 1592.17,
+            "cp": -0.0631
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_f",
+        "station_id": "pressure_belt_f",
+        "station_label": "HLPW-5 pressure row F",
+        "x_label": "x (full-scale in) along HLPW-5 row F",
+        "dog_leg_x_in": 1478.9,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1438.9,
+            "cp": -2.278
+          },
+          {
+            "x": 1455.3,
+            "cp": -2.6711
+          },
+          {
+            "x": 1479.9,
+            "cp": -1.8264
+          },
+          {
+            "x": 1520.9,
+            "cp": -1.0398
+          },
+          {
+            "x": 1561.9,
+            "cp": -0.6479
+          },
+          {
+            "x": 1602.9,
+            "cp": -0.3111
+          },
+          {
+            "x": 1643.9,
+            "cp": -0.0549
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_g",
         "station_id": "pressure_belt_g",
-        "station_label": "Pressure belt G",
-        "coordinate_frame": "chord_normalized",
+        "station_label": "HLPW-5 pressure row G",
+        "x_label": "x (full-scale in) along HLPW-5 row G",
+        "dog_leg_x_in": 1555.64,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "cp",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "cp": -0.4826
+            "x": 1519.64,
+            "cp": -2.3146
           },
           {
-            "x": 0.01,
-            "y": 0,
-            "z": 0,
-            "cp": -2.6586
+            "x": 1533.72,
+            "cp": -2.6911
           },
           {
-            "x": 0.02,
-            "y": 0,
-            "z": 0,
-            "cp": -2.0148
+            "x": 1554.84,
+            "cp": -1.8381
           },
           {
-            "x": 0.04,
-            "y": 0,
-            "z": 0,
-            "cp": -1.4746
+            "x": 1590.04,
+            "cp": -1.0601
           },
           {
-            "x": 0.07,
-            "y": 0,
-            "z": 0,
-            "cp": -0.933
+            "x": 1625.24,
+            "cp": -0.6764
           },
           {
-            "x": 0.12,
-            "y": 0,
-            "z": 0,
-            "cp": -0.695
+            "x": 1660.44,
+            "cp": -0.3408
           },
           {
-            "x": 0.2,
-            "y": 0,
-            "z": 0,
-            "cp": -0.3168
-          },
-          {
-            "x": 0.32,
-            "y": 0,
-            "z": 0,
-            "cp": -0.3794
-          },
-          {
-            "x": 0.48,
-            "y": 0,
-            "z": 0,
-            "cp": -0.2469
-          },
-          {
-            "x": 0.66,
-            "y": 0,
-            "z": 0,
-            "cp": -0.2037
-          },
-          {
-            "x": 0.84,
-            "y": 0,
-            "z": 0,
-            "cp": 0.151
-          },
-          {
-            "x": 1,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0804
+            "x": 1695.64,
+            "cp": -0.0577
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-geot-full_dummy_case_001",
-        "cut_id": "prototype_pressure_belt_i",
-        "station_id": "pressure_belt_i",
-        "station_label": "Pressure belt I",
-        "coordinate_frame": "chord_normalized",
+        "cut_id": "hlpw5_pressure_row_h",
+        "station_id": "pressure_belt_h",
+        "station_label": "HLPW-5 pressure row H",
+        "x_label": "x (full-scale in) along HLPW-5 row H",
+        "dog_leg_x_in": 1621.91,
+        "elements": [
+          "slat",
+          "main_wing"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "cp",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0664
+            "x": 1591.91,
+            "cp": -2.3932
           },
           {
-            "x": 0.01,
-            "y": 0,
-            "z": 0,
-            "cp": -1.1403
+            "x": 1603.91,
+            "cp": -2.7708
           },
           {
-            "x": 0.02,
-            "y": 0,
-            "z": 0,
-            "cp": -0.7643
+            "x": 1621.91,
+            "cp": -1.8809
           },
           {
-            "x": 0.04,
-            "y": 0,
-            "z": 0,
-            "cp": -0.4337
+            "x": 1651.91,
+            "cp": -1.0634
           },
           {
-            "x": 0.07,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0971
+            "x": 1681.91,
+            "cp": -0.6756
           },
           {
-            "x": 0.12,
-            "y": 0,
-            "z": 0,
-            "cp": 0.056
+            "x": 1711.91,
+            "cp": -0.345
           },
           {
-            "x": 0.2,
-            "y": 0,
-            "z": 0,
-            "cp": 0.1978
+            "x": 1741.91,
+            "cp": -0.0722
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_i",
+        "station_id": "pressure_belt_i",
+        "station_label": "HLPW-5 pressure row I",
+        "x_label": "x (full-scale in) along HLPW-5 row I",
+        "dog_leg_x_in": 1709.11,
+        "elements": [
+          "slat",
+          "main_wing"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1685.11,
+            "cp": -2.4323
           },
           {
-            "x": 0.32,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0105
+            "x": 1695.43,
+            "cp": -2.815
           },
           {
-            "x": 0.48,
-            "y": 0,
-            "z": 0,
-            "cp": 0.2184
+            "x": 1710.91,
+            "cp": -1.9255
           },
           {
-            "x": 0.66,
-            "y": 0,
-            "z": 0,
-            "cp": 0.3762
+            "x": 1736.71,
+            "cp": -1.105
           },
           {
-            "x": 0.84,
-            "y": 0,
-            "z": 0,
-            "cp": 0.2112
+            "x": 1762.51,
+            "cp": -0.6943
           },
           {
-            "x": 1,
-            "y": 0,
-            "z": 0,
-            "cp": 0.2922
+            "x": 1788.31,
+            "cp": -0.3429
+          },
+          {
+            "x": 1814.11,
+            "cp": -0.0504
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_j",
+        "station_id": "pressure_belt_j",
+        "station_label": "HLPW-5 pressure row J",
+        "x_label": "x (full-scale in) along HLPW-5 row J",
+        "dog_leg_x_in": 1778.87,
+        "elements": [
+          "slat",
+          "main_wing"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1758.87,
+            "cp": -2.501
+          },
+          {
+            "x": 1767.67,
+            "cp": -2.8629
+          },
+          {
+            "x": 1780.87,
+            "cp": -1.9437
+          },
+          {
+            "x": 1802.87,
+            "cp": -1.1135
+          },
+          {
+            "x": 1824.87,
+            "cp": -0.7137
+          },
+          {
+            "x": 1846.87,
+            "cp": -0.3746
+          },
+          {
+            "x": 1868.87,
+            "cp": -0.0644
           }
         ]
       }
@@ -364,187 +482,785 @@
     "velocity_profiles": [
       {
         "case_id": "hiliftaeroml-geot-full_dummy_case_001",
-        "station_id": "prototype_0_25l",
-        "coordinate_frame": "chord_normalized",
+        "station_id": "hlpw5_a_1",
+        "station_label": "HLPW-5 A.1",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1034.95,
+        "station_y_in": 137.9135,
+        "surface_z_in": 191.75,
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "u_over_u_inf",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "u_over_u_inf": 0.6461
+            "x": 0.0,
+            "u_over_u_inf": 0.099
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.006,
-            "u_over_u_inf": 0.6706
+            "x": 0.25,
+            "u_over_u_inf": 0.217
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.012,
-            "u_over_u_inf": 0.8126
+            "x": 0.5,
+            "u_over_u_inf": 0.3335
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.018,
-            "u_over_u_inf": 0.8242
+            "x": 1.0,
+            "u_over_u_inf": 0.502
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.024,
-            "u_over_u_inf": 0.979
+            "x": 2.0,
+            "u_over_u_inf": 0.6942
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.032,
-            "u_over_u_inf": 0.9577
+            "x": 4.0,
+            "u_over_u_inf": 0.8684
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.04,
-            "u_over_u_inf": 1.0582
+            "x": 8.0,
+            "u_over_u_inf": 0.981
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.05,
-            "u_over_u_inf": 1.0505
+            "x": 16.0,
+            "u_over_u_inf": 1.02
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.06,
-            "u_over_u_inf": 1.1008
+            "x": 24.0,
+            "u_over_u_inf": 1.0166
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-geot-full_dummy_case_001",
-        "station_id": "prototype_0_50l",
-        "coordinate_frame": "chord_normalized",
+        "station_id": "hlpw5_a_2",
+        "station_label": "HLPW-5 A.2",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1071.2212,
+        "station_y_in": 160.9808,
+        "surface_z_in": 195.4808,
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "u_over_u_inf",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "u_over_u_inf": 0.7461
+            "x": 0.0,
+            "u_over_u_inf": 0.0729
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.006,
-            "u_over_u_inf": 0.7506
+            "x": 0.25,
+            "u_over_u_inf": 0.187
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.012,
-            "u_over_u_inf": 0.8726
+            "x": 0.5,
+            "u_over_u_inf": 0.3096
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.018,
-            "u_over_u_inf": 0.8642
+            "x": 1.0,
+            "u_over_u_inf": 0.4786
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.024,
-            "u_over_u_inf": 0.999
+            "x": 2.0,
+            "u_over_u_inf": 0.6752
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.032,
-            "u_over_u_inf": 0.9777
+            "x": 4.0,
+            "u_over_u_inf": 0.8429
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.04,
-            "u_over_u_inf": 1.0782
+            "x": 8.0,
+            "u_over_u_inf": 0.9641
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.05,
-            "u_over_u_inf": 1.0705
+            "x": 16.0,
+            "u_over_u_inf": 1.008
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.06,
-            "u_over_u_inf": 1.1308
+            "x": 24.0,
+            "u_over_u_inf": 1.0214
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-geot-full_dummy_case_001",
-        "station_id": "prototype_1_00l",
-        "coordinate_frame": "chord_normalized",
+        "station_id": "hlpw5_a_3",
+        "station_label": "HLPW-5 A.3",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1365.5096,
+        "station_y_in": 227.1058,
+        "surface_z_in": 183.1173,
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "u_over_u_inf",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "u_over_u_inf": 0.2061
+            "x": 0.0,
+            "u_over_u_inf": 0.0438
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.006,
-            "u_over_u_inf": 0.2406
+            "x": 0.25,
+            "u_over_u_inf": 0.1315
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.012,
-            "u_over_u_inf": 0.4226
+            "x": 0.5,
+            "u_over_u_inf": 0.2327
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.018,
-            "u_over_u_inf": 0.4842
+            "x": 1.0,
+            "u_over_u_inf": 0.3866
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.024,
-            "u_over_u_inf": 0.689
+            "x": 2.0,
+            "u_over_u_inf": 0.58
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.032,
-            "u_over_u_inf": 0.7377
+            "x": 4.0,
+            "u_over_u_inf": 0.7801
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.04,
-            "u_over_u_inf": 0.8982
+            "x": 8.0,
+            "u_over_u_inf": 0.927
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.05,
-            "u_over_u_inf": 0.9405
+            "x": 16.0,
+            "u_over_u_inf": 0.994
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.06,
-            "u_over_u_inf": 1.0308
+            "x": 24.0,
+            "u_over_u_inf": 1.0041
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_a_4",
+        "station_label": "HLPW-5 A.4",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1385.4231,
+        "station_y_in": 128.3423,
+        "surface_z_in": 156.9615,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0387
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1087
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1957
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3326
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5228
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7362
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9101
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9912
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0088
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_a_5",
+        "station_label": "HLPW-5 A.5",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1421.5757,
+        "station_y_in": 129.1298,
+        "surface_z_in": 148.0621,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0214
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.0848
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1687
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.2899
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.4675
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.6841
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.8631
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9758
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_a_6",
+        "station_label": "HLPW-5 A.6",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1444.4584,
+        "station_y_in": 225.9062,
+        "surface_z_in": 167.196,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0461
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1127
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2117
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3644
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5686
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7807
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9292
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9957
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0038
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_b_1",
+        "station_label": "HLPW-5 B.1",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1163.5769,
+        "station_y_in": 379.9615,
+        "surface_z_in": 190.8654,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0872
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1993
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.3178
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.4843
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.6724
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.8441
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9682
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0113
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0207
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_b_2",
+        "station_label": "HLPW-5 B.2",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1203.7442,
+        "station_y_in": 374.8077,
+        "surface_z_in": 208.4231,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.061
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1628
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2769
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.4399
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.6394
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.8161
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9434
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9941
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0078
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_b_3",
+        "station_label": "HLPW-5 B.3",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1398.1731,
+        "station_y_in": 360.8769,
+        "surface_z_in": 205.5577,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.038
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1147
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.202
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3427
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5364
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7501
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9107
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9879
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0047
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_b_4",
+        "station_label": "HLPW-5 B.4",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1493.6878,
+        "station_y_in": 361.0165,
+        "surface_z_in": 173.5348,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0251
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.0887
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1593
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.2765
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.4533
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.6729
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.856
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9801
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0017
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_c_1",
+        "station_label": "HLPW-5 C.1",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1699.5212,
+        "station_y_in": 964.3962,
+        "surface_z_in": 258.4827,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0719
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1715
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2846
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.4487
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.6403
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.8183
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9448
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9934
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0057
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_c_2",
+        "station_label": "HLPW-5 C.2",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1730.9519,
+        "station_y_in": 956.0558,
+        "surface_z_in": 258.5019,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0489
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1269
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2235
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.362
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5543
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7585
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.921
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.99
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0065
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_c_3",
+        "station_label": "HLPW-5 C.3",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1762.35,
+        "station_y_in": 949.1462,
+        "surface_z_in": 255.5058,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0129
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.0671
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1397
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.2486
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.4152
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.6229
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.8241
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9581
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0014
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_d_1",
+        "station_label": "HLPW-5 D.1",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1799.3942,
+        "station_y_in": 1152.4692,
+        "surface_z_in": 268.0192,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0638
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1515
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2527
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.4067
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.6001
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.79
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.927
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.984
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0042
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_d_2",
+        "station_label": "HLPW-5 D.2",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1821.0673,
+        "station_y_in": 1152.2827,
+        "surface_z_in": 270.1462,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0387
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1087
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1856
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3126
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.4928
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7063
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.8802
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9712
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 0.9988
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-geot-full_dummy_case_001",
+        "station_id": "hlpw5_d_3",
+        "station_label": "HLPW-5 D.3",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1842.7404,
+        "station_y_in": 1152.2058,
+        "surface_z_in": 271.0212,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0114
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.0649
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1288
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.2298
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.3874
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.584
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.7931
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9359
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 0.99
           }
         ]
       }

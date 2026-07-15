@@ -29,334 +29,452 @@
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2026-06-25",
-  "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+  "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
   "diagnostics": {
     "cp_cuts": [
       {
         "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
-        "cut_id": "prototype_pressure_belt_a",
+        "cut_id": "hlpw5_pressure_row_a",
         "station_id": "pressure_belt_a",
-        "station_label": "Pressure belt A",
-        "coordinate_frame": "chord_normalized",
+        "station_label": "HLPW-5 pressure row A",
+        "x_label": "x (full-scale in) along HLPW-5 row A",
+        "dog_leg_x_in": 1126.61,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "cp",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "cp": -0.3167
+            "x": 1096.61,
+            "cp": -1.9785
           },
           {
-            "x": 0.01,
-            "y": 0,
-            "z": 0,
-            "cp": -2.2374
+            "x": 1127.81,
+            "cp": -2.344
           },
           {
-            "x": 0.02,
-            "y": 0,
-            "z": 0,
-            "cp": -1.6785
+            "x": 1174.61,
+            "cp": -1.5224
           },
           {
-            "x": 0.04,
-            "y": 0,
-            "z": 0,
-            "cp": -1.2257
+            "x": 1252.61,
+            "cp": -0.8182
           },
           {
-            "x": 0.07,
-            "y": 0,
-            "z": 0,
-            "cp": -0.7702
+            "x": 1330.61,
+            "cp": -0.4724
           },
           {
-            "x": 0.12,
-            "y": 0,
-            "z": 0,
-            "cp": -0.5939
+            "x": 1408.61,
+            "cp": -0.1825
           },
           {
-            "x": 0.2,
-            "y": 0,
-            "z": 0,
-            "cp": -0.262
-          },
-          {
-            "x": 0.32,
-            "y": 0,
-            "z": 0,
-            "cp": -0.2421
-          },
-          {
-            "x": 0.48,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0138
-          },
-          {
-            "x": 0.66,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0703
-          },
-          {
-            "x": 0.84,
-            "y": 0,
-            "z": 0,
-            "cp": 0.1445
-          },
-          {
-            "x": 1,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0314
+            "x": 1486.61,
+            "cp": 0.0349
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
-        "cut_id": "prototype_pressure_belt_d",
+        "cut_id": "hlpw5_pressure_row_b",
+        "station_id": "pressure_belt_b",
+        "station_label": "HLPW-5 pressure row B",
+        "x_label": "x (full-scale in) along HLPW-5 row B",
+        "dog_leg_x_in": 1199.86,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1167.86,
+            "cp": -2.0259
+          },
+          {
+            "x": 1196.02,
+            "cp": -2.3841
+          },
+          {
+            "x": 1238.26,
+            "cp": -1.5442
+          },
+          {
+            "x": 1308.66,
+            "cp": -0.8285
+          },
+          {
+            "x": 1379.06,
+            "cp": -0.4901
+          },
+          {
+            "x": 1449.46,
+            "cp": -0.2105
+          },
+          {
+            "x": 1519.86,
+            "cp": 0.0231
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_c",
+        "station_id": "pressure_belt_c",
+        "station_label": "HLPW-5 pressure row C",
+        "x_label": "x (full-scale in) along HLPW-5 row C",
+        "dog_leg_x_in": 1266.16,
+        "elements": [
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1232.16,
+            "cp": -2.0484
+          },
+          {
+            "x": 1257.68,
+            "cp": -2.4105
+          },
+          {
+            "x": 1295.96,
+            "cp": -1.577
+          },
+          {
+            "x": 1359.76,
+            "cp": -0.8651
+          },
+          {
+            "x": 1423.56,
+            "cp": -0.5153
+          },
+          {
+            "x": 1487.36,
+            "cp": -0.2102
+          },
+          {
+            "x": 1551.16,
+            "cp": 0.0386
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_d",
         "station_id": "pressure_belt_d",
-        "station_label": "Pressure belt D",
-        "coordinate_frame": "chord_normalized",
+        "station_label": "HLPW-5 pressure row D",
+        "x_label": "x (full-scale in) along HLPW-5 row D",
+        "dog_leg_x_in": 1332.41,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "cp",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "cp": -0.087
+            "x": 1296.41,
+            "cp": -2.0961
           },
           {
-            "x": 0.01,
-            "y": 0,
-            "z": 0,
-            "cp": -1.5817
+            "x": 1318.89,
+            "cp": -2.4744
           },
           {
-            "x": 0.02,
-            "y": 0,
-            "z": 0,
-            "cp": -1.1423
+            "x": 1352.61,
+            "cp": -1.6343
           },
           {
-            "x": 0.04,
-            "y": 0,
-            "z": 0,
-            "cp": -0.7824
+            "x": 1408.81,
+            "cp": -0.89
           },
           {
-            "x": 0.07,
-            "y": 0,
-            "z": 0,
-            "cp": -0.4173
+            "x": 1465.01,
+            "cp": -0.5131
           },
           {
-            "x": 0.12,
-            "y": 0,
-            "z": 0,
-            "cp": -0.2656
+            "x": 1521.21,
+            "cp": -0.2023
           },
           {
-            "x": 0.2,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0079
-          },
-          {
-            "x": 0.32,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0209
-          },
-          {
-            "x": 0.48,
-            "y": 0,
-            "z": 0,
-            "cp": 0.1561
-          },
-          {
-            "x": 0.66,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0587
-          },
-          {
-            "x": 0.84,
-            "y": 0,
-            "z": 0,
-            "cp": 0.2263
-          },
-          {
-            "x": 1,
-            "y": 0,
-            "z": 0,
-            "cp": 0.1845
+            "x": 1577.41,
+            "cp": 0.0458
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
-        "cut_id": "prototype_pressure_belt_g",
+        "cut_id": "hlpw5_pressure_row_e",
+        "station_id": "pressure_belt_e",
+        "station_label": "HLPW-5 pressure row E",
+        "x_label": "x (full-scale in) along HLPW-5 row E",
+        "dog_leg_x_in": 1402.17,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1364.17,
+            "cp": -2.1542
+          },
+          {
+            "x": 1382.41,
+            "cp": -2.5239
+          },
+          {
+            "x": 1409.77,
+            "cp": -1.6665
+          },
+          {
+            "x": 1455.37,
+            "cp": -0.892
+          },
+          {
+            "x": 1500.97,
+            "cp": -0.5115
+          },
+          {
+            "x": 1546.57,
+            "cp": -0.2177
+          },
+          {
+            "x": 1592.17,
+            "cp": 0.0283
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_f",
+        "station_id": "pressure_belt_f",
+        "station_label": "HLPW-5 pressure row F",
+        "x_label": "x (full-scale in) along HLPW-5 row F",
+        "dog_leg_x_in": 1478.9,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1438.9,
+            "cp": -2.2013
+          },
+          {
+            "x": 1455.3,
+            "cp": -2.5573
+          },
+          {
+            "x": 1479.9,
+            "cp": -1.6914
+          },
+          {
+            "x": 1520.9,
+            "cp": -0.9124
+          },
+          {
+            "x": 1561.9,
+            "cp": -0.547
+          },
+          {
+            "x": 1602.9,
+            "cp": -0.2341
+          },
+          {
+            "x": 1643.9,
+            "cp": 0.0161
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_g",
         "station_id": "pressure_belt_g",
-        "station_label": "Pressure belt G",
-        "coordinate_frame": "chord_normalized",
+        "station_label": "HLPW-5 pressure row G",
+        "x_label": "x (full-scale in) along HLPW-5 row G",
+        "dog_leg_x_in": 1555.64,
+        "elements": [
+          "slat",
+          "main_wing",
+          "flap"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "cp",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "cp": -0.481
+            "x": 1519.64,
+            "cp": -2.224
           },
           {
-            "x": 0.01,
-            "y": 0,
-            "z": 0,
-            "cp": -2.6603
+            "x": 1533.72,
+            "cp": -2.5926
           },
           {
-            "x": 0.02,
-            "y": 0,
-            "z": 0,
-            "cp": -2.0129
+            "x": 1554.84,
+            "cp": -1.7337
           },
           {
-            "x": 0.04,
-            "y": 0,
-            "z": 0,
-            "cp": -1.4768
+            "x": 1590.04,
+            "cp": -0.9503
           },
           {
-            "x": 0.07,
-            "y": 0,
-            "z": 0,
-            "cp": -0.9306
+            "x": 1625.24,
+            "cp": -0.5641
           },
           {
-            "x": 0.12,
-            "y": 0,
-            "z": 0,
-            "cp": -0.6975
+            "x": 1660.44,
+            "cp": -0.2339
           },
           {
-            "x": 0.2,
-            "y": 0,
-            "z": 0,
-            "cp": -0.3141
-          },
-          {
-            "x": 0.32,
-            "y": 0,
-            "z": 0,
-            "cp": -0.3822
-          },
-          {
-            "x": 0.48,
-            "y": 0,
-            "z": 0,
-            "cp": -0.2438
-          },
-          {
-            "x": 0.66,
-            "y": 0,
-            "z": 0,
-            "cp": -0.207
-          },
-          {
-            "x": 0.84,
-            "y": 0,
-            "z": 0,
-            "cp": 0.1545
-          },
-          {
-            "x": 1,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0842
+            "x": 1695.64,
+            "cp": 0.0343
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
-        "cut_id": "prototype_pressure_belt_i",
-        "station_id": "pressure_belt_i",
-        "station_label": "Pressure belt I",
-        "coordinate_frame": "chord_normalized",
+        "cut_id": "hlpw5_pressure_row_h",
+        "station_id": "pressure_belt_h",
+        "station_label": "HLPW-5 pressure row H",
+        "x_label": "x (full-scale in) along HLPW-5 row H",
+        "dog_leg_x_in": 1621.91,
+        "elements": [
+          "slat",
+          "main_wing"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "cp",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0673
+            "x": 1591.91,
+            "cp": -2.292
           },
           {
-            "x": 0.01,
-            "y": 0,
-            "z": 0,
-            "cp": -1.1413
+            "x": 1603.91,
+            "cp": -2.6706
           },
           {
-            "x": 0.02,
-            "y": 0,
-            "z": 0,
-            "cp": -0.7632
+            "x": 1621.91,
+            "cp": -1.7852
           },
           {
-            "x": 0.04,
-            "y": 0,
-            "z": 0,
-            "cp": -0.435
+            "x": 1651.91,
+            "cp": -0.9647
           },
           {
-            "x": 0.07,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0958
+            "x": 1681.91,
+            "cp": -0.5666
           },
           {
-            "x": 0.12,
-            "y": 0,
-            "z": 0,
-            "cp": 0.0546
+            "x": 1711.91,
+            "cp": -0.2305
           },
           {
-            "x": 0.2,
-            "y": 0,
-            "z": 0,
-            "cp": 0.1993
+            "x": 1741.91,
+            "cp": 0.0312
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_i",
+        "station_id": "pressure_belt_i",
+        "station_label": "HLPW-5 pressure row I",
+        "x_label": "x (full-scale in) along HLPW-5 row I",
+        "dog_leg_x_in": 1709.11,
+        "elements": [
+          "slat",
+          "main_wing"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1685.11,
+            "cp": -2.3669
           },
           {
-            "x": 0.32,
-            "y": 0,
-            "z": 0,
-            "cp": -0.0121
+            "x": 1695.43,
+            "cp": -2.7201
           },
           {
-            "x": 0.48,
-            "y": 0,
-            "z": 0,
-            "cp": 0.2201
+            "x": 1710.91,
+            "cp": -1.7996
           },
           {
-            "x": 0.66,
-            "y": 0,
-            "z": 0,
-            "cp": 0.3743
+            "x": 1736.71,
+            "cp": -0.9684
           },
           {
-            "x": 0.84,
-            "y": 0,
-            "z": 0,
-            "cp": 0.2132
+            "x": 1762.51,
+            "cp": -0.5746
           },
           {
-            "x": 1,
-            "y": 0,
-            "z": 0,
-            "cp": 0.2901
+            "x": 1788.31,
+            "cp": -0.2546
+          },
+          {
+            "x": 1814.11,
+            "cp": 0.0139
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "cut_id": "hlpw5_pressure_row_j",
+        "station_id": "pressure_belt_j",
+        "station_label": "HLPW-5 pressure row J",
+        "x_label": "x (full-scale in) along HLPW-5 row J",
+        "dog_leg_x_in": 1778.87,
+        "elements": [
+          "slat",
+          "main_wing"
+        ],
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "cp",
+        "values": [
+          {
+            "x": 1758.87,
+            "cp": -2.4146
+          },
+          {
+            "x": 1767.67,
+            "cp": -2.7622
+          },
+          {
+            "x": 1780.87,
+            "cp": -1.8326
+          },
+          {
+            "x": 1802.87,
+            "cp": -0.9987
+          },
+          {
+            "x": 1824.87,
+            "cp": -0.6027
+          },
+          {
+            "x": 1846.87,
+            "cp": -0.2739
+          },
+          {
+            "x": 1868.87,
+            "cp": 0.0221
           }
         ]
       }
@@ -364,187 +482,785 @@
     "velocity_profiles": [
       {
         "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
-        "station_id": "prototype_0_25l",
-        "coordinate_frame": "chord_normalized",
+        "station_id": "hlpw5_a_1",
+        "station_label": "HLPW-5 A.1",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1034.95,
+        "station_y_in": 137.9135,
+        "surface_z_in": 191.75,
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "u_over_u_inf",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "u_over_u_inf": 0.6473
+            "x": 0.0,
+            "u_over_u_inf": 0.1258
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.006,
-            "u_over_u_inf": 0.6694
+            "x": 0.25,
+            "u_over_u_inf": 0.2413
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.012,
-            "u_over_u_inf": 0.814
+            "x": 0.5,
+            "u_over_u_inf": 0.3603
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.018,
-            "u_over_u_inf": 0.8226
+            "x": 1.0,
+            "u_over_u_inf": 0.532
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.024,
-            "u_over_u_inf": 0.9807
+            "x": 2.0,
+            "u_over_u_inf": 0.7232
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.032,
-            "u_over_u_inf": 0.9559
+            "x": 4.0,
+            "u_over_u_inf": 0.8911
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.04,
-            "u_over_u_inf": 1.059
+            "x": 8.0,
+            "u_over_u_inf": 0.9958
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.05,
-            "u_over_u_inf": 1.0497
+            "x": 16.0,
+            "u_over_u_inf": 1.0306
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.06,
-            "u_over_u_inf": 1.1017
+            "x": 24.0,
+            "u_over_u_inf": 1.0285
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
-        "station_id": "prototype_0_50l",
-        "coordinate_frame": "chord_normalized",
+        "station_id": "hlpw5_a_2",
+        "station_label": "HLPW-5 A.2",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1071.2212,
+        "station_y_in": 160.9808,
+        "surface_z_in": 195.4808,
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "u_over_u_inf",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "u_over_u_inf": 0.7473
+            "x": 0.0,
+            "u_over_u_inf": 0.1034
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.006,
-            "u_over_u_inf": 0.7494
+            "x": 0.25,
+            "u_over_u_inf": 0.2146
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.012,
-            "u_over_u_inf": 0.874
+            "x": 0.5,
+            "u_over_u_inf": 0.3363
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.018,
-            "u_over_u_inf": 0.8626
+            "x": 1.0,
+            "u_over_u_inf": 0.5053
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.024,
+            "x": 2.0,
+            "u_over_u_inf": 0.7007
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.8651
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9819
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0224
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0344
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_a_3",
+        "station_label": "HLPW-5 A.3",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1365.5096,
+        "station_y_in": 227.1058,
+        "surface_z_in": 183.1173,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0792
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1691
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2654
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.4097
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5956
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7951
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.947
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0179
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0251
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_a_4",
+        "station_label": "HLPW-5 A.4",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1385.4231,
+        "station_y_in": 128.3423,
+        "surface_z_in": 156.9615,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.07
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1345
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2196
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3581
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5496
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7611
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9295
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0045
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0191
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_a_5",
+        "station_label": "HLPW-5 A.5",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1421.5757,
+        "station_y_in": 129.1298,
+        "surface_z_in": 148.0621,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0539
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1113
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1922
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3141
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.4935
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7093
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.8836
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.99
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0101
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_a_6",
+        "station_label": "HLPW-5 A.6",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1444.4584,
+        "station_y_in": 225.9062,
+        "surface_z_in": 167.196,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0749
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1469
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2473
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.394
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5884
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7939
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9429
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0147
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0258
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_b_1",
+        "station_label": "HLPW-5 B.1",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1163.5769,
+        "station_y_in": 379.9615,
+        "surface_z_in": 190.8654,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.1207
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.2285
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.3432
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.508
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.696
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.8673
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.989
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0278
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0332
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_b_2",
+        "station_label": "HLPW-5 B.2",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1203.7442,
+        "station_y_in": 374.8077,
+        "surface_z_in": 208.4231,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.098
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1924
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2993
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.4599
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.6618
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.8417
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9679
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0122
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0182
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_b_3",
+        "station_label": "HLPW-5 B.3",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1398.1731,
+        "station_y_in": 360.8769,
+        "surface_z_in": 205.5577,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.063
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1426
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2345
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3753
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5625
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.767
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9222
+          },
+          {
+            "x": 16.0,
             "u_over_u_inf": 1.0007
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.032,
-            "u_over_u_inf": 0.9759
-          },
-          {
-            "x": 0,
-            "y": 0,
-            "z": 0.04,
-            "u_over_u_inf": 1.079
-          },
-          {
-            "x": 0,
-            "y": 0,
-            "z": 0.05,
-            "u_over_u_inf": 1.0697
-          },
-          {
-            "x": 0,
-            "y": 0,
-            "z": 0.06,
-            "u_over_u_inf": 1.1317
+            "x": 24.0,
+            "u_over_u_inf": 1.0223
           }
         ]
       },
       {
         "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
-        "station_id": "prototype_1_00l",
-        "coordinate_frame": "chord_normalized",
+        "station_id": "hlpw5_b_4",
+        "station_label": "HLPW-5 B.4",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1493.6878,
+        "station_y_in": 361.0165,
+        "surface_z_in": 173.5348,
+        "coordinate_frame": "hlpw5_full_scale_inches",
         "quantity": "u_over_u_inf",
         "values": [
           {
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "u_over_u_inf": 0.2073
+            "x": 0.0,
+            "u_over_u_inf": 0.0571
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.006,
-            "u_over_u_inf": 0.2394
+            "x": 0.25,
+            "u_over_u_inf": 0.1186
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.012,
-            "u_over_u_inf": 0.424
+            "x": 0.5,
+            "u_over_u_inf": 0.1869
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.018,
-            "u_over_u_inf": 0.4826
+            "x": 1.0,
+            "u_over_u_inf": 0.3019
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.024,
-            "u_over_u_inf": 0.6907
+            "x": 2.0,
+            "u_over_u_inf": 0.4765
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.032,
-            "u_over_u_inf": 0.7359
+            "x": 4.0,
+            "u_over_u_inf": 0.6939
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.04,
-            "u_over_u_inf": 0.899
+            "x": 8.0,
+            "u_over_u_inf": 0.8749
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.05,
-            "u_over_u_inf": 0.9397
+            "x": 16.0,
+            "u_over_u_inf": 0.9967
           },
           {
-            "x": 0,
-            "y": 0,
-            "z": 0.06,
-            "u_over_u_inf": 1.0317
+            "x": 24.0,
+            "u_over_u_inf": 1.0161
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_c_1",
+        "station_label": "HLPW-5 C.1",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1699.5212,
+        "station_y_in": 964.3962,
+        "surface_z_in": 258.4827,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.1109
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.2067
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.311
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.4674
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.6575
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.8395
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9698
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0165
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0209
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_c_2",
+        "station_label": "HLPW-5 C.2",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1730.9519,
+        "station_y_in": 956.0558,
+        "surface_z_in": 258.5019,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0757
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1513
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2504
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3922
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5833
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.781
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9357
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0005
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0186
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_c_3",
+        "station_label": "HLPW-5 C.3",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1762.35,
+        "station_y_in": 949.1462,
+        "surface_z_in": 255.5058,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0434
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.0948
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1664
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.2752
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.4405
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.645
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.8419
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9725
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0145
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_d_1",
+        "station_label": "HLPW-5 D.1",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1799.3942,
+        "station_y_in": 1152.4692,
+        "surface_z_in": 268.0192,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0993
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1891
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2853
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.4296
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.6156
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.8053
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.9472
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 1.0079
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.025
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_d_2",
+        "station_label": "HLPW-5 D.2",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1821.0673,
+        "station_y_in": 1152.2827,
+        "surface_z_in": 270.1462,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0699
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.1344
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.2096
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.3382
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.5198
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.7312
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.8994
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.9844
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.009
+          }
+        ]
+      },
+      {
+        "case_id": "hiliftaeroml-transolver-aoa4_dummy_case_001",
+        "station_id": "hlpw5_d_3",
+        "station_label": "HLPW-5 D.3",
+        "x_label": "z - z_surface (in)",
+        "station_x_in": 1842.7404,
+        "station_y_in": 1152.2058,
+        "surface_z_in": 271.0212,
+        "coordinate_frame": "hlpw5_full_scale_inches",
+        "quantity": "u_over_u_inf",
+        "values": [
+          {
+            "x": 0.0,
+            "u_over_u_inf": 0.0438
+          },
+          {
+            "x": 0.25,
+            "u_over_u_inf": 0.0914
+          },
+          {
+            "x": 0.5,
+            "u_over_u_inf": 0.1524
+          },
+          {
+            "x": 1.0,
+            "u_over_u_inf": 0.2542
+          },
+          {
+            "x": 2.0,
+            "u_over_u_inf": 0.4135
+          },
+          {
+            "x": 4.0,
+            "u_over_u_inf": 0.6092
+          },
+          {
+            "x": 8.0,
+            "u_over_u_inf": 0.8135
+          },
+          {
+            "x": 16.0,
+            "u_over_u_inf": 0.95
+          },
+          {
+            "x": 24.0,
+            "u_over_u_inf": 1.0002
           }
         ]
       }

@@ -1,0 +1,598 @@
+{
+  "submission_id": "rotor37-prototype-train-500",
+  "model": "FluidsBench prototype baseline",
+  "model_type": "Neural operator",
+  "model_types": [
+    "Neural operator",
+    "Transformer"
+  ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
+  "dataset": "Rotor37",
+  "split": "train_500",
+  "parameter_count": 7.15,
+  "submitter_name": "FluidsBench prototype baseline",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2026-07-15",
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
+  "metric_values": {
+    "rotor_density_rrmse": 0.02412,
+    "rotor_density_rel_l2": 2.541,
+    "rotor_density_rel_l1": 1.788,
+    "rotor_density_r2": 0.983,
+    "rotor_density_mae": 0.0111,
+    "rotor_density_rmse": 0.0154,
+    "rotor_pressure_rrmse": 0.02968,
+    "rotor_pressure_rel_l2": 3.137,
+    "rotor_pressure_rel_l1": 2.217,
+    "rotor_pressure_r2": 0.9775,
+    "rotor_pressure_mae": 1113.0,
+    "rotor_pressure_rmse": 1616.5,
+    "rotor_temperature_rrmse": 0.02067,
+    "rotor_temperature_rel_l2": 2.174,
+    "rotor_temperature_rel_l1": 1.525,
+    "rotor_temperature_r2": 0.9862,
+    "rotor_temperature_mae": 1.696,
+    "rotor_temperature_rmse": 2.4115,
+    "rotor_massflow_rrmse": 0.01908,
+    "rotor_massflow_rel_l2": 2.005,
+    "rotor_massflow_rel_l1": 1.405,
+    "rotor_massflow_r2": 0.9876,
+    "rotor_massflow_mae": 0.2173,
+    "rotor_massflow_rmse": 0.3021,
+    "rotor_compression_ratio_rrmse": 0.022,
+    "rotor_compression_ratio_rel_l2": 2.315,
+    "rotor_compression_ratio_rel_l1": 1.626,
+    "rotor_compression_ratio_r2": 0.985,
+    "rotor_compression_ratio_mae": 0.0082,
+    "rotor_compression_ratio_rmse": 0.0117,
+    "rotor_efficiency_rrmse": 0.02544,
+    "rotor_efficiency_rel_l2": 2.682,
+    "rotor_efficiency_rel_l1": 1.889,
+    "rotor_efficiency_r2": 0.9817,
+    "rotor_efficiency_mae": 0.005,
+    "rotor_efficiency_rmse": 0.0072,
+    "total_error": 0.0235
+  },
+  "diagnostics": {
+    "blade_profiles": [
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_10",
+        "quantity_id": "pressure_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "pressure_ratio": 0.88345
+          },
+          {
+            "x_over_c": 0.08333,
+            "pressure_ratio": 0.91809
+          },
+          {
+            "x_over_c": 0.16667,
+            "pressure_ratio": 0.95752
+          },
+          {
+            "x_over_c": 0.25,
+            "pressure_ratio": 1.00035
+          },
+          {
+            "x_over_c": 0.33333,
+            "pressure_ratio": 1.04573
+          },
+          {
+            "x_over_c": 0.41667,
+            "pressure_ratio": 1.09302
+          },
+          {
+            "x_over_c": 0.5,
+            "pressure_ratio": 1.14183
+          },
+          {
+            "x_over_c": 0.58333,
+            "pressure_ratio": 1.19192
+          },
+          {
+            "x_over_c": 0.66667,
+            "pressure_ratio": 1.24327
+          },
+          {
+            "x_over_c": 0.75,
+            "pressure_ratio": 1.29602
+          },
+          {
+            "x_over_c": 0.83333,
+            "pressure_ratio": 1.35047
+          },
+          {
+            "x_over_c": 0.91667,
+            "pressure_ratio": 1.40704
+          },
+          {
+            "x_over_c": 1.0,
+            "pressure_ratio": 1.46625
+          }
+        ]
+      },
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_50",
+        "quantity_id": "pressure_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "pressure_ratio": 0.88345
+          },
+          {
+            "x_over_c": 0.08333,
+            "pressure_ratio": 0.91972
+          },
+          {
+            "x_over_c": 0.16667,
+            "pressure_ratio": 0.96113
+          },
+          {
+            "x_over_c": 0.25,
+            "pressure_ratio": 1.00623
+          },
+          {
+            "x_over_c": 0.33333,
+            "pressure_ratio": 1.05415
+          },
+          {
+            "x_over_c": 0.41667,
+            "pressure_ratio": 1.10424
+          },
+          {
+            "x_over_c": 0.5,
+            "pressure_ratio": 1.15608
+          },
+          {
+            "x_over_c": 0.58333,
+            "pressure_ratio": 1.20945
+          },
+          {
+            "x_over_c": 0.66667,
+            "pressure_ratio": 1.2643
+          },
+          {
+            "x_over_c": 0.75,
+            "pressure_ratio": 1.32077
+          },
+          {
+            "x_over_c": 0.83333,
+            "pressure_ratio": 1.37916
+          },
+          {
+            "x_over_c": 0.91667,
+            "pressure_ratio": 1.43988
+          },
+          {
+            "x_over_c": 1.0,
+            "pressure_ratio": 1.50344
+          }
+        ]
+      },
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_90",
+        "quantity_id": "pressure_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "pressure_ratio": 0.88345
+          },
+          {
+            "x_over_c": 0.08333,
+            "pressure_ratio": 0.92135
+          },
+          {
+            "x_over_c": 0.16667,
+            "pressure_ratio": 0.96474
+          },
+          {
+            "x_over_c": 0.25,
+            "pressure_ratio": 1.01212
+          },
+          {
+            "x_over_c": 0.33333,
+            "pressure_ratio": 1.06257
+          },
+          {
+            "x_over_c": 0.41667,
+            "pressure_ratio": 1.11546
+          },
+          {
+            "x_over_c": 0.5,
+            "pressure_ratio": 1.17034
+          },
+          {
+            "x_over_c": 0.58333,
+            "pressure_ratio": 1.22698
+          },
+          {
+            "x_over_c": 0.66667,
+            "pressure_ratio": 1.28533
+          },
+          {
+            "x_over_c": 0.75,
+            "pressure_ratio": 1.34552
+          },
+          {
+            "x_over_c": 0.83333,
+            "pressure_ratio": 1.40785
+          },
+          {
+            "x_over_c": 0.91667,
+            "pressure_ratio": 1.47272
+          },
+          {
+            "x_over_c": 1.0,
+            "pressure_ratio": 1.54065
+          }
+        ]
+      }
+    ],
+    "blade_thermo_profiles": [
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_10",
+        "quantity_id": "temperature_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "temperature_ratio": 0.99062
+          },
+          {
+            "x_over_c": 0.08333,
+            "temperature_ratio": 0.99651
+          },
+          {
+            "x_over_c": 0.16667,
+            "temperature_ratio": 1.00671
+          },
+          {
+            "x_over_c": 0.25,
+            "temperature_ratio": 1.01958
+          },
+          {
+            "x_over_c": 0.33333,
+            "temperature_ratio": 1.03458
+          },
+          {
+            "x_over_c": 0.41667,
+            "temperature_ratio": 1.05137
+          },
+          {
+            "x_over_c": 0.5,
+            "temperature_ratio": 1.06975
+          },
+          {
+            "x_over_c": 0.58333,
+            "temperature_ratio": 1.08957
+          },
+          {
+            "x_over_c": 0.66667,
+            "temperature_ratio": 1.11071
+          },
+          {
+            "x_over_c": 0.75,
+            "temperature_ratio": 1.13308
+          },
+          {
+            "x_over_c": 0.83333,
+            "temperature_ratio": 1.1566
+          },
+          {
+            "x_over_c": 0.91667,
+            "temperature_ratio": 1.18119
+          },
+          {
+            "x_over_c": 1.0,
+            "temperature_ratio": 1.20682
+          }
+        ]
+      },
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_10",
+        "quantity_id": "density_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "density_ratio": 0.96041
+          },
+          {
+            "x_over_c": 0.08333,
+            "density_ratio": 0.96841
+          },
+          {
+            "x_over_c": 0.16667,
+            "density_ratio": 0.97943
+          },
+          {
+            "x_over_c": 0.25,
+            "density_ratio": 0.99199
+          },
+          {
+            "x_over_c": 0.33333,
+            "density_ratio": 1.00565
+          },
+          {
+            "x_over_c": 0.41667,
+            "density_ratio": 1.0202
+          },
+          {
+            "x_over_c": 0.5,
+            "density_ratio": 1.03551
+          },
+          {
+            "x_over_c": 0.58333,
+            "density_ratio": 1.05146
+          },
+          {
+            "x_over_c": 0.66667,
+            "density_ratio": 1.068
+          },
+          {
+            "x_over_c": 0.75,
+            "density_ratio": 1.08507
+          },
+          {
+            "x_over_c": 0.83333,
+            "density_ratio": 1.10262
+          },
+          {
+            "x_over_c": 0.91667,
+            "density_ratio": 1.12061
+          },
+          {
+            "x_over_c": 1.0,
+            "density_ratio": 1.13901
+          }
+        ]
+      },
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_50",
+        "quantity_id": "temperature_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "temperature_ratio": 0.99062
+          },
+          {
+            "x_over_c": 0.08333,
+            "temperature_ratio": 0.99689
+          },
+          {
+            "x_over_c": 0.16667,
+            "temperature_ratio": 1.00774
+          },
+          {
+            "x_over_c": 0.25,
+            "temperature_ratio": 1.02143
+          },
+          {
+            "x_over_c": 0.33333,
+            "temperature_ratio": 1.03738
+          },
+          {
+            "x_over_c": 0.41667,
+            "temperature_ratio": 1.05525
+          },
+          {
+            "x_over_c": 0.5,
+            "temperature_ratio": 1.07481
+          },
+          {
+            "x_over_c": 0.58333,
+            "temperature_ratio": 1.09589
+          },
+          {
+            "x_over_c": 0.66667,
+            "temperature_ratio": 1.11838
+          },
+          {
+            "x_over_c": 0.75,
+            "temperature_ratio": 1.14217
+          },
+          {
+            "x_over_c": 0.83333,
+            "temperature_ratio": 1.16719
+          },
+          {
+            "x_over_c": 0.91667,
+            "temperature_ratio": 1.19336
+          },
+          {
+            "x_over_c": 1.0,
+            "temperature_ratio": 1.22062
+          }
+        ]
+      },
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_50",
+        "quantity_id": "density_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "density_ratio": 0.96041
+          },
+          {
+            "x_over_c": 0.08333,
+            "density_ratio": 0.96892
+          },
+          {
+            "x_over_c": 0.16667,
+            "density_ratio": 0.98065
+          },
+          {
+            "x_over_c": 0.25,
+            "density_ratio": 0.994
+          },
+          {
+            "x_over_c": 0.33333,
+            "density_ratio": 1.00854
+          },
+          {
+            "x_over_c": 0.41667,
+            "density_ratio": 1.02402
+          },
+          {
+            "x_over_c": 0.5,
+            "density_ratio": 1.0403
+          },
+          {
+            "x_over_c": 0.58333,
+            "density_ratio": 1.05727
+          },
+          {
+            "x_over_c": 0.66667,
+            "density_ratio": 1.07487
+          },
+          {
+            "x_over_c": 0.75,
+            "density_ratio": 1.09302
+          },
+          {
+            "x_over_c": 0.83333,
+            "density_ratio": 1.11169
+          },
+          {
+            "x_over_c": 0.91667,
+            "density_ratio": 1.13083
+          },
+          {
+            "x_over_c": 1.0,
+            "density_ratio": 1.15041
+          }
+        ]
+      },
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_90",
+        "quantity_id": "temperature_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "temperature_ratio": 0.99062
+          },
+          {
+            "x_over_c": 0.08333,
+            "temperature_ratio": 0.99726
+          },
+          {
+            "x_over_c": 0.16667,
+            "temperature_ratio": 1.00876
+          },
+          {
+            "x_over_c": 0.25,
+            "temperature_ratio": 1.02328
+          },
+          {
+            "x_over_c": 0.33333,
+            "temperature_ratio": 1.04019
+          },
+          {
+            "x_over_c": 0.41667,
+            "temperature_ratio": 1.05913
+          },
+          {
+            "x_over_c": 0.5,
+            "temperature_ratio": 1.07986
+          },
+          {
+            "x_over_c": 0.58333,
+            "temperature_ratio": 1.10221
+          },
+          {
+            "x_over_c": 0.66667,
+            "temperature_ratio": 1.12605
+          },
+          {
+            "x_over_c": 0.75,
+            "temperature_ratio": 1.15127
+          },
+          {
+            "x_over_c": 0.83333,
+            "temperature_ratio": 1.17778
+          },
+          {
+            "x_over_c": 0.91667,
+            "temperature_ratio": 1.20552
+          },
+          {
+            "x_over_c": 1.0,
+            "temperature_ratio": 1.23442
+          }
+        ]
+      },
+      {
+        "case_id": "rotor37-prototype-train-500",
+        "station_id": "span_90",
+        "quantity_id": "density_ratio",
+        "values": [
+          {
+            "x_over_c": 0.0,
+            "density_ratio": 0.96041
+          },
+          {
+            "x_over_c": 0.08333,
+            "density_ratio": 0.96943
+          },
+          {
+            "x_over_c": 0.16667,
+            "density_ratio": 0.98186
+          },
+          {
+            "x_over_c": 0.25,
+            "density_ratio": 0.99602
+          },
+          {
+            "x_over_c": 0.33333,
+            "density_ratio": 1.01142
+          },
+          {
+            "x_over_c": 0.41667,
+            "density_ratio": 1.02783
+          },
+          {
+            "x_over_c": 0.5,
+            "density_ratio": 1.04509
+          },
+          {
+            "x_over_c": 0.58333,
+            "density_ratio": 1.06309
+          },
+          {
+            "x_over_c": 0.66667,
+            "density_ratio": 1.08174
+          },
+          {
+            "x_over_c": 0.75,
+            "density_ratio": 1.10098
+          },
+          {
+            "x_over_c": 0.83333,
+            "density_ratio": 1.12077
+          },
+          {
+            "x_over_c": 0.91667,
+            "density_ratio": 1.14106
+          },
+          {
+            "x_over_c": 1.0,
+            "density_ratio": 1.16181
+          }
+        ]
+      }
+    ]
+  }
+}
