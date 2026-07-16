@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "submission_id": "airfrans-graphsage-full",
+  "dataset_id": "airfrans",
+  "split_id": "reynolds_extrapolation",
+  "case_set_id": "reynolds_extrapolation",
+  "case_count": 1,
+  "case_id_status": "prototype_generated",
+  "chunks": [
+    {
+      "file": "chunk-000.json",
+      "case_ids": [
+        "airfrans_reynolds_extrapolation_test_0001"
+      ],
+      "sha256": "29892033413442e2399c5643ecb761c1e8ad5fac6222b5bd9fe3672bbaf1471a"
+    }
+  ]
+}

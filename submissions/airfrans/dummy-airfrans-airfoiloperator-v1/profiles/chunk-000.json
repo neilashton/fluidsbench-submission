@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {
+      "case_id": "airfrans_standard_test_0001",
+      "series": [
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "upper_surface",
+          "quantity_id": "cp",
+          "coordinate": [
+            0.02,
+            0.25,
+            0.55,
+            0.9
+          ],
+          "prediction": [
+            -0.9161546,
+            -0.5375872,
+            -0.198869,
+            0.0405278
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "lower_surface",
+          "quantity_id": "cp",
+          "coordinate": [
+            0.02,
+            0.25,
+            0.55,
+            0.9
+          ],
+          "prediction": [
+            0.5675169,
+            0.430639,
+            0.2979543,
+            0.1735561
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "wake_x_1_50c",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            -0.2,
+            0,
+            0.2,
+            0.4
+          ],
+          "prediction": [
+            0.819218,
+            0.739286,
+            0.9091415,
+            1.019048
+          ]
+        }
+      ]
+    }
+  ]
+}

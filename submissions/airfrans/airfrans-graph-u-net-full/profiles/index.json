@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "submission_id": "airfrans-graph-u-net-full",
+  "dataset_id": "airfrans",
+  "split_id": "scarce",
+  "case_set_id": "standard",
+  "case_count": 1,
+  "case_id_status": "prototype_generated",
+  "chunks": [
+    {
+      "file": "chunk-000.json",
+      "case_ids": [
+        "airfrans_standard_test_0001"
+      ],
+      "sha256": "9edf1fc8906d06aa6ae33cae205c1dcf9766a1b62d3e9752b469f3f4540bada7"
+    }
+  ]
+}

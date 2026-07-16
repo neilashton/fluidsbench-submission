@@ -1,0 +1,450 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "rotor37",
+  "dataset_name": "Rotor37",
+  "dataset_version": "prototype-1",
+  "status": "prototype_dummy_data",
+  "default_field_reduction": "per_geometry_then_macro_average",
+  "metrics": [
+    {
+      "id": "total_error",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{m}\\sum_{j=1}^{m}\\operatorname{RRMSE}_j",
+      "aggregation": "derived_arithmetic_mean",
+      "weighting": "source_metrics_equal"
+    },
+    {
+      "id": "rotor_density_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "aggregation": "benchmark_field_rrmse_across_cases",
+      "weighting": "equation_normalized"
+    },
+    {
+      "id": "rotor_pressure_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "aggregation": "benchmark_field_rrmse_across_cases",
+      "weighting": "equation_normalized"
+    },
+    {
+      "id": "rotor_temperature_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "aggregation": "benchmark_field_rrmse_across_cases",
+      "weighting": "equation_normalized"
+    },
+    {
+      "id": "rotor_density_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_pressure_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_temperature_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_density_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_pressure_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_temperature_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_density_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "flatten_all_aligned_field_values",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_pressure_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "flatten_all_aligned_field_values",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_temperature_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "flatten_all_aligned_field_values",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_density_mae",
+      "unit": "kg/m^3",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_pressure_mae",
+      "unit": "Pa",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_temperature_mae",
+      "unit": "K",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_density_rmse",
+      "unit": "kg/m^3",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_pressure_rmse",
+      "unit": "Pa",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_temperature_rmse",
+      "unit": "K",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "rotor_massflow_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_compression_ratio_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_efficiency_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_massflow_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_compression_ratio_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_efficiency_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_massflow_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_compression_ratio_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_efficiency_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_massflow_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_compression_ratio_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_efficiency_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_massflow_mae",
+      "unit": "kg/s",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_compression_ratio_mae",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_efficiency_mae",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_massflow_rmse",
+      "unit": "kg/s",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_compression_ratio_rmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "rotor_efficiency_rmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    }
+  ],
+  "profile_panels": [
+    {
+      "id": "blade_pressure_ratio",
+      "required": true,
+      "allow_unlisted_stations": false,
+      "minimum_points": 2,
+      "coordinate_order": "strictly_increasing",
+      "station_ids": [
+        "span_10",
+        "span_50",
+        "span_90"
+      ],
+      "quantity_ids": [
+        "pressure_ratio"
+      ]
+    },
+    {
+      "id": "blade_thermodynamics",
+      "required": true,
+      "allow_unlisted_stations": false,
+      "minimum_points": 2,
+      "coordinate_order": "strictly_increasing",
+      "station_ids": [
+        "span_10",
+        "span_50",
+        "span_90"
+      ],
+      "quantity_ids": [
+        "temperature_ratio",
+        "density_ratio"
+      ]
+    }
+  ],
+  "splits": [
+    {
+      "id": "train_1000",
+      "label": "train_1000",
+      "index_file": "splits/train_1000.json",
+      "case_count": 200,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "b802cedef6a86bfbd54e56e8a4762fb1038ad678add9e23ba6522d86e79373d6"
+    },
+    {
+      "id": "train_500",
+      "label": "train_500",
+      "index_file": "splits/train_500.json",
+      "case_count": 200,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "65ae45180fefb4607530d03bf06872b739da8752071f88d0acd302c87b1794e1"
+    },
+    {
+      "id": "train_250",
+      "label": "train_250",
+      "index_file": "splits/train_250.json",
+      "case_count": 200,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "052fe4a190fccff32a946f1fb4c5603054f482e4b44f7bc7fcd7210e784d50f1"
+    },
+    {
+      "id": "train_125",
+      "label": "train_125",
+      "index_file": "splits/train_125.json",
+      "case_count": 200,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "d2b64cc04e9c074339e2bbf84ef571f0be056f9385277a21cb666ab11579d4c0"
+    },
+    {
+      "id": "train_64",
+      "label": "train_64",
+      "index_file": "splits/train_64.json",
+      "case_count": 200,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "ddac1498ec22bb5b0d4ec233f66e42f3ba2ee30f1047a0c6ada753e3f8b3726b"
+    },
+    {
+      "id": "train_32",
+      "label": "train_32",
+      "index_file": "splits/train_32.json",
+      "case_count": 200,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "c5daff825aa91923764cd7ce4792653ed946dba03dac0404b7c9fe5b8978be88"
+    },
+    {
+      "id": "train_16",
+      "label": "train_16",
+      "index_file": "splits/train_16.json",
+      "case_count": 200,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "a5568127f676c93511918643517de4ee6867aaa340447059673f246f2a2730f7"
+    },
+    {
+      "id": "train_8",
+      "label": "train_8",
+      "index_file": "splits/train_8.json",
+      "case_count": 200,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "36b05a39ada159d28632f3dae7f97674d4a18694ddd2622d021620cc8897741a"
+    }
+  ]
+}

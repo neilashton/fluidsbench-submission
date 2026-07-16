@@ -1,0 +1,73 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/v1/submission.schema.json",
+  "schema_version": "1.0",
+  "submission_id": "airfrans-mlp-full",
+  "model": "MLP",
+  "model_type": "MLP",
+  "model_types": [
+    "MLP"
+  ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
+  "dataset": "AirfRANS",
+  "dataset_id": "airfrans",
+  "dataset_version": "prototype-1",
+  "split": "AoA extrapolation",
+  "split_id": "aoa_extrapolation",
+  "case_set_id": "aoa_extrapolation",
+  "split_sha256": "0f6e770b351bb1b0ba8de60bca2484892f467c0436177eac921a77461b3c72ff",
+  "parameter_count_millions": 0.02,
+  "submitter_name": "Neil Ashton",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2023-06-01",
+  "evaluation": {
+    "reference_version": "prototype-1",
+    "code_revision": "prototype-dummy-data",
+    "command": "not-applicable (illustrative dummy data)",
+    "evidence_file": "evaluation-evidence.json",
+    "evidence_sha256": "c531bf91c514e5e3bcf3f7f81b5cb450c0e1fece4bfab0cb57a84dea01dce416"
+  },
+  "approval": {
+    "status": "prototype",
+    "note": "Illustrative dummy data; not scientifically reviewed or approved."
+  },
+  "metric_values": {
+    "surface_pressure_rel_l2": 33.62,
+    "surface_pressure_rel_l1": 24.206,
+    "surface_wall_shear_rel_l2": 4.29,
+    "surface_wall_shear_rel_l1": 2.917,
+    "volume_velocity_rel_l2": 9.82,
+    "volume_velocity_rel_l1": 6.874,
+    "volume_pressure_rel_l2": 8.6,
+    "volume_pressure_rel_l1": 5.934,
+    "cd_r2": 0.957,
+    "cl_r2": 0.992,
+    "velocity_profile_r2": 0.902,
+    "cp_cut_r2": 0.913,
+    "surface_pressure_mae": 157.3,
+    "surface_pressure_rmse": 218.5,
+    "surface_wall_shear_mae": 0.53,
+    "surface_wall_shear_rmse": 0.77,
+    "volume_velocity_mae": 2.2,
+    "volume_velocity_rmse": 3.14,
+    "volume_pressure_mae": 32.6,
+    "volume_pressure_rmse": 47.3,
+    "c_drag_mae": 0.0058,
+    "c_lift_mae": 0.0017,
+    "field_score": 29.693333333333335,
+    "force_score": 97.1,
+    "diagnostic_score": 90.64000000000001,
+    "overall_score": 61.78166666666667
+  },
+  "profile_data": {
+    "format": "fluidsbench-profile-chunks-v1",
+    "index_file": "profiles/index.json",
+    "case_count": 1,
+    "case_set_id": "aoa_extrapolation"
+  },
+  "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error comparisons until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data."
+}

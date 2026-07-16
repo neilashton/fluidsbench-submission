@@ -1,0 +1,433 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "hiliftaeroml",
+  "dataset_name": "HiLiftAeroML",
+  "dataset_version": "prototype-1",
+  "status": "prototype_dummy_data",
+  "default_field_reduction": "per_geometry_then_macro_average",
+  "metrics": [
+    {
+      "id": "overall_score",
+      "unit": "",
+      "direction": "higher",
+      "kind": "score",
+      "equation": "0.50 S_field + 0.25 S_force + 0.25 S_profile",
+      "aggregation": "derived_score_equation",
+      "weighting": "equation_weights"
+    },
+    {
+      "id": "field_score",
+      "unit": "",
+      "direction": "higher",
+      "kind": "score",
+      "equation": "2 sum_j w_j max(0, 100(1-e_j/c_j))",
+      "aggregation": "derived_score_equation",
+      "weighting": "equation_weights"
+    },
+    {
+      "id": "force_score",
+      "unit": "",
+      "direction": "higher",
+      "kind": "score",
+      "equation": "(0.15 S_CD + 0.10 S_CL)/0.25",
+      "aggregation": "derived_score_equation",
+      "weighting": "equation_weights"
+    },
+    {
+      "id": "diagnostic_score",
+      "unit": "",
+      "direction": "higher",
+      "kind": "score",
+      "equation": "(0.15 S_velocity + 0.10 S_Cp)/0.25",
+      "aggregation": "derived_score_equation",
+      "weighting": "equation_weights"
+    },
+    {
+      "id": "surface_pressure_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_face_area"
+    },
+    {
+      "id": "surface_wall_shear_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_face_area"
+    },
+    {
+      "id": "volume_velocity_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "cell_volume"
+    },
+    {
+      "id": "volume_pressure_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "cell_volume"
+    },
+    {
+      "id": "surface_pressure_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_face_area"
+    },
+    {
+      "id": "surface_wall_shear_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_face_area"
+    },
+    {
+      "id": "volume_velocity_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "cell_volume"
+    },
+    {
+      "id": "volume_pressure_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "cell_volume"
+    },
+    {
+      "id": "velocity_profile_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "flatten_all_required_profile_samples",
+      "weighting": "samples_equal"
+    },
+    {
+      "id": "cp_cut_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "flatten_all_required_profile_samples",
+      "weighting": "samples_equal"
+    },
+    {
+      "id": "surface_pressure_mae",
+      "unit": "Pa",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_face_area"
+    },
+    {
+      "id": "surface_wall_shear_mae",
+      "unit": "Pa",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_face_area"
+    },
+    {
+      "id": "volume_velocity_mae",
+      "unit": "m/s",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "cell_volume"
+    },
+    {
+      "id": "volume_pressure_mae",
+      "unit": "Pa",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "cell_volume"
+    },
+    {
+      "id": "surface_pressure_rmse",
+      "unit": "Pa",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_face_area"
+    },
+    {
+      "id": "surface_wall_shear_rmse",
+      "unit": "Pa",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_face_area"
+    },
+    {
+      "id": "volume_velocity_rmse",
+      "unit": "m/s",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "cell_volume"
+    },
+    {
+      "id": "volume_pressure_rmse",
+      "unit": "Pa",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "cell_volume"
+    },
+    {
+      "id": "cd_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "cl_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "c_drag_mae",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "c_lift_mae",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "c_pitch_mae",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    }
+  ],
+  "profile_panels": [
+    {
+      "id": "pressure_profiles",
+      "required": true,
+      "allow_unlisted_stations": false,
+      "minimum_points": 2,
+      "coordinate_order": "strictly_increasing",
+      "station_ids": [
+        "pressure_belt_a",
+        "pressure_belt_b",
+        "pressure_belt_c",
+        "pressure_belt_d",
+        "pressure_belt_e",
+        "pressure_belt_f",
+        "pressure_belt_g",
+        "pressure_belt_h",
+        "pressure_belt_i",
+        "pressure_belt_j"
+      ],
+      "quantity_ids": [
+        "cp"
+      ]
+    },
+    {
+      "id": "velocity_profiles",
+      "required": true,
+      "allow_unlisted_stations": false,
+      "minimum_points": 2,
+      "coordinate_order": "strictly_increasing",
+      "station_ids": [
+        "hlpw5_a_1",
+        "hlpw5_a_2",
+        "hlpw5_a_3",
+        "hlpw5_a_4",
+        "hlpw5_a_5",
+        "hlpw5_a_6",
+        "hlpw5_b_1",
+        "hlpw5_b_2",
+        "hlpw5_b_3",
+        "hlpw5_b_4",
+        "hlpw5_c_1",
+        "hlpw5_c_2",
+        "hlpw5_c_3",
+        "hlpw5_d_1",
+        "hlpw5_d_2",
+        "hlpw5_d_3"
+      ],
+      "quantity_ids": [
+        "velocity_ratio"
+      ]
+    }
+  ],
+  "splits": [
+    {
+      "id": "full",
+      "label": "Full",
+      "index_file": "splits/full.json",
+      "case_count": 360,
+      "case_set_id": "standard",
+      "case_id_status": "prototype_generated",
+      "sha256": "8001e19b8f18c0dcc348172eb88a7300283ee40ff5ecdc81e7c6be2718814062"
+    },
+    {
+      "id": "medium",
+      "label": "Medium",
+      "index_file": "splits/medium.json",
+      "case_count": 360,
+      "case_set_id": "standard",
+      "case_id_status": "prototype_generated",
+      "sha256": "ad0eb263b2d350b95c33dd9e45fd30947982167e937df6c9385d749abdc50a06"
+    },
+    {
+      "id": "scarce",
+      "label": "Scarce",
+      "index_file": "splits/scarce.json",
+      "case_count": 360,
+      "case_set_id": "standard",
+      "case_id_status": "prototype_generated",
+      "sha256": "205c4d1e034fa136ababca492584608c90444503d3d72ed8541a2bb13df9d7b0"
+    },
+    {
+      "id": "super_scarce",
+      "label": "Super scarce",
+      "index_file": "splits/super_scarce.json",
+      "case_count": 360,
+      "case_set_id": "standard",
+      "case_id_status": "prototype_generated",
+      "sha256": "7485ddcb0d93bc6213a9ebdc1dbf218851af3756aa43ff6737aaa91cb91a9228"
+    },
+    {
+      "id": "geometry",
+      "label": "Geometry",
+      "index_file": "splits/geometry.json",
+      "case_count": 360,
+      "case_set_id": "geometry",
+      "case_id_status": "prototype_generated",
+      "sha256": "de59675471905b74b94e2f5a6c761286036f3622b1f93cef6c4a5ea253864fa0"
+    },
+    {
+      "id": "geometry_medium",
+      "label": "Geometry medium",
+      "index_file": "splits/geometry_medium.json",
+      "case_count": 360,
+      "case_set_id": "geometry",
+      "case_id_status": "prototype_generated",
+      "sha256": "f54d7f0561cb7f022b80e8e93ce953a4eae6c5dc185ee74b2394477997ab305e"
+    },
+    {
+      "id": "geometry_scarce",
+      "label": "Geometry scarce",
+      "index_file": "splits/geometry_scarce.json",
+      "case_count": 360,
+      "case_set_id": "geometry",
+      "case_id_status": "prototype_generated",
+      "sha256": "8214f2fe7a6955692507e8ea8dc94ab1bc247ce72eed98ec6518d44493570e53"
+    },
+    {
+      "id": "geometry_super_scarce",
+      "label": "Geometry super scarce",
+      "index_file": "splits/geometry_super_scarce.json",
+      "case_count": 360,
+      "case_set_id": "geometry",
+      "case_id_status": "prototype_generated",
+      "sha256": "c332bea58a20f43203acc637c0e621b316e7cd70687dbc31ea68f983ca1f132e"
+    },
+    {
+      "id": "single_aoa_4",
+      "label": "AoA 4",
+      "index_file": "splits/single_aoa_4.json",
+      "case_count": 36,
+      "case_set_id": "single_aoa_4",
+      "case_id_status": "prototype_generated",
+      "sha256": "c7511c4a5dbd2dc7af8397574a0f5c93bb361f4d132d3c00682eb9d51a48c944"
+    },
+    {
+      "id": "single_aoa_12",
+      "label": "AoA 12",
+      "index_file": "splits/single_aoa_12.json",
+      "case_count": 36,
+      "case_set_id": "single_aoa_12",
+      "case_id_status": "prototype_generated",
+      "sha256": "39b083bb3157581fc905860585014a6624d7a80d90a002fd97633ff9028888a4"
+    },
+    {
+      "id": "single_aoa_22",
+      "label": "AoA 22",
+      "index_file": "splits/single_aoa_22.json",
+      "case_count": 36,
+      "case_set_id": "single_aoa_22",
+      "case_id_status": "prototype_generated",
+      "sha256": "ce98186a0e579de51ba7d70fdf01efb229448a931b929bc4dad60bc776eefb46"
+    },
+    {
+      "id": "aoa",
+      "label": "AoA extrapolation",
+      "index_file": "splits/aoa.json",
+      "case_count": 900,
+      "case_set_id": "aoa",
+      "case_id_status": "prototype_generated",
+      "sha256": "14c004526cb7fe881f04e5fb13f17ca2765be763b5b7c53896e7e735469c1369"
+    },
+    {
+      "id": "deflection",
+      "label": "Deflection",
+      "index_file": "splits/deflection.json",
+      "case_count": 360,
+      "case_set_id": "deflection",
+      "case_id_status": "prototype_generated",
+      "sha256": "cae0c6a572e5853c2c7a59f940cf4874b4e6724365b1e7d079e7d22478df5096"
+    },
+    {
+      "id": "stall",
+      "label": "Stall",
+      "index_file": "splits/stall.json",
+      "case_count": 723,
+      "case_set_id": "stall",
+      "case_id_status": "prototype_generated",
+      "sha256": "d997da7307a5e2125cc4ec02fdeccf54e833643a5f11816e9e41545e81b2a76b"
+    }
+  ]
+}

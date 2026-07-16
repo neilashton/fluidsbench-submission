@@ -1,293 +1,178 @@
 # fluidsbench-submission
 
-Submission repository and approved-data feed for the [FluidsBench leaderboard](https://neilashton.github.io/fluidsbench/).
+Submission repository and approved-data feed for the [FluidsBench leaderboard](https://fluidsbench.org/leaderboard/).
 
-Read the [dataset pages](https://neilashton.github.io/fluidsbench/datasets/) before preparing a result. They define the
-evaluation files, split rules, metrics, units, and profile stations for each dataset.
+> FluidsBench is currently a work in progress. The `dev` branch, split indexes, submissions, metrics, and profile curves are
+> prototype dummy data and are not approved benchmark results.
 
-## What gets submitted
+## Responsibilities
 
-One JSON file is submitted under the matching dataset folder:
+The submission process deliberately separates three responsibilities:
+
+1. Participants calculate metrics from their own predictions and ground truth. FluidsBench publishes exact equations and
+   array-level NumPy references under [`reference/`](reference/), but does not prescribe a model output format or data loader.
+2. Participants create `submission.json` and the required profile chunks using their own code. FluidsBench publishes schemas,
+   dataset specifications, directions, and examples; there is no mandatory packaging tool.
+3. Participants must run the FluidsBench validator before opening a pull request. GitHub Actions runs the same validator again.
+
+The validator proves that a package is complete, internally consistent, and correctly formatted. Because full prediction fields
+are not submitted, it cannot independently prove that a participant's base metric values were calculated from those predictions.
+
+## Submission directory
+
+Create one directory under the matching dataset:
 
 ```text
-submissions/
-  ahmedml/
-  airfrans/
-  blendednet/
-  drivaerml/
-  drivaernetplusplus/
-  hiliftaeroml/
-  rotor37/
-  vki-ls59/
-  windsorml/
+submissions/<dataset-id>/<submission-id>/
+  submission.json
+  evaluation-evidence.json
+  profiles/
+    index.json
+    chunk-000.json
+    chunk-001.json
 ```
 
-Every file includes:
+Use lowercase letters, numbers, and hyphens for the globally unique `submission-id`. Do not edit generated files under
+`leaderboard/` directly.
 
-- model, submitter, training, dataset, split, parameter-count, paper, and code metadata
-- evaluator-produced metric values required by that dataset
-- the compact profile arrays required by that dataset's `diagnostic_panels`
+A complete prototype example is available at
+[`submissions/ahmedml/transolver/`](submissions/ahmedml/transolver/). A short annotated example is under [`examples/`](examples/).
 
-The manifest is authoritative. For each dataset, it declares:
+## 1. Calculate metrics
 
-- `splits`: exact accepted split names and case counts
-- `metric_ids`: ordered metrics displayed in the table and charts
-- `ranking`: the primary metric and whether higher or lower is better
-- `diagnostic_panels`: submitted array keys, quantities, coordinates, stations, and required coverage
-- `submission_format`: either the existing external-aerodynamics shape or direct `metric_values`
+Read the selected dataset's page on the [FluidsBench website](https://fluidsbench.org/datasets/) and its machine-readable
+specification under [`benchmark-specs/`](benchmark-specs/). The specification lists accepted splits, required metric IDs, units,
+directions, profile panels, stations, and quantities.
 
-## How to submit
+The equations, edge cases, and NumPy reference implementations are documented in
+[`reference/README.md`](reference/README.md). Participants can call those functions with aligned arrays or reproduce the same
+equations in another language. They remain responsible for loading data, restoring dimensional values, aligning predictions with
+ground truth, applying dataset masks, and extracting profiles.
 
-1. Read the relevant [FluidsBench dataset specification](https://neilashton.github.io/fluidsbench/datasets/).
-2. Run the official dataset evaluator and its validator script.
-3. Create one JSON file under `submissions/<dataset-slug>/`.
-4. Give it a globally unique `submission_id`, such as `my-lab-rotor37-model-v1`.
-5. Run the repository validator.
-6. Open a pull request with the source submission file and the evaluator evidence requested by the dataset page.
-7. A maintainer reviews reproducibility, metadata, metrics, and profile coverage.
-8. After approval, a maintainer rebuilds the generated feeds and merges the PR. The website then reads the approved
-   dataset feed through `leaderboard/manifest.json`.
+```python
+from reference.metrics import relative_l2
 
-TODO: confirm whether external PRs should target `main` directly or a staging branch first.
+pressure_l2_percent = relative_l2(
+    ground_truth_pressure,
+    predicted_pressure,
+    weights=surface_face_areas,
+)
+```
 
-## Common metadata
+Run the executable reference example with:
+
+```bash
+python3 -m reference.example_calculation
+```
+
+## 2. Prepare metadata and profiles
+
+`submission.json` contains model, submitter, training, dataset, split, aggregate metric, profile-index, and evaluation metadata. It must match
+[`schemas/v1/submission.schema.json`](schemas/v1/submission.schema.json).
+
+The required `evaluation` object records the FluidsBench reference version, the contributor's evaluation-code revision, the exact
+command used, and the SHA-256 checksum of `evaluation-evidence.json`. The evidence file repeats the command and submitted metric
+values and records the profile-index checksum, creating a tamper-evident link between the evaluation provenance, reported scalars,
+and profile package. It is not a
+replacement for scientific review and does not contain full surface or volume fields.
+
+Contributors should leave `approval` absent. During review, maintainers add `approval.status=approved`, the reviewer, approval date,
+and pull-request URL. Prototype packages use `approval.status=prototype`; the feed builder publishes only those two statuses, so a
+merged but unapproved source package cannot appear on the leaderboard.
+
+Profile data is kept out of the scalar leaderboard feed. Each chunk contains a manageable group of test geometries using compact
+parallel arrays:
 
 ```json
 {
-  "submission_id": "todo-unique-id",
-  "model": "TODO model name",
-  "model_type": "Neural operator",
-  "model_types": ["Neural operator", "Transformer"],
-  "training_regime": "from_scratch",
-  "target_data_used": "official_train",
-  "external_pretraining": false,
-  "pretraining_data": [],
-  "dataset": "TODO exact manifest dataset name",
-  "split": "TODO exact manifest split name",
-  "parameter_count": 0.0,
-  "submitter_name": "TODO person, lab, or company",
-  "institution": "TODO institution",
-  "paper_url": "",
-  "code_url": "",
-  "submitted_at": "YYYY-MM-DD"
-}
-```
-
-`model_types` can contain more than one architecture category. `model_type` remains the primary category for compatibility
-and should normally equal the first `model_types` value.
-
-Allowed `training_regime` values are:
-
-- `from_scratch`: initialized without external pretraining and trained only on the official split's training data
-- `pretrained_zero_shot`: externally pretrained and evaluated without target-dataset training or fine-tuning
-- `pretrained_official_train`: externally pretrained, then trained or fine-tuned only on the official target training split
-- `other`: a different protocol that must be explained in the submission metadata
-
-The deliberately excluded categories are `pretrained_finetuned` and `pretrained_linear_probe`. Use
-`pretrained_official_train` when a pretrained model is trained with the official benchmark training split.
-
-## Dataset splits
-
-The exact accepted values are in `leaderboard/manifest.json`. In particular:
-
-VKI-LS59:
-
-```text
-train, train_500, train_250, train_125, train_64, train_32, train_16, train_8
-```
-
-VKI reduced sets use the first N entries of the published training index sequence and share the 168-case test set.
-
-Rotor37:
-
-```text
-train_1000, train_500, train_250, train_125, train_64, train_32, train_16, train_8
-```
-
-Rotor37 reduced sets use the official non-contiguous index selections and share the 200-case test set. Do not replace
-those selections with the first N cases.
-
-BlendedNet:
-
-```text
-geometry_holdout
-```
-
-The published release groups cases by geometry. Its train/validation pool contains 8,830 cases from 999 geometries; the
-fixed 870-case test set uses 100 entirely distinct geometries.
-
-## Metric formats
-
-### Dataset-driven `metric_values`
-
-VKI-LS59, Rotor37, and BlendedNet use a direct metric map:
-
-```json
-{
-  "metric_values": {
-    "total_error": 0.025,
-    "rotor_pressure_rrmse": 0.031,
-    "rotor_pressure_rel_l2": 3.2,
-    "rotor_pressure_rel_l1": 2.3,
-    "rotor_pressure_r2": 0.98,
-    "rotor_pressure_mae": 1200.0,
-    "rotor_pressure_rmse": 1700.0
-  }
-}
-```
-
-The object must contain every ID listed in that dataset's `metric_ids`. The dummy examples show the complete shape:
-
-- [`submissions/vki-ls59/dummy-vki-ls59-train.json`](submissions/vki-ls59/dummy-vki-ls59-train.json)
-- [`submissions/rotor37/dummy-rotor37-train_1000.json`](submissions/rotor37/dummy-rotor37-train_1000.json)
-- [`submissions/blendednet/dummy-blendednet-geometry-holdout.json`](submissions/blendednet/dummy-blendednet-geometry-holdout.json)
-
-The primary PLAID quantities are:
-
-```text
-RRMSE_field = sqrt((1/n) sum_i [((1/N_i) ||f_pred,i-f_ref,i||_2^2) / ||f_ref,i||_inf^2])
-RRMSE_scalar = sqrt((1/n) sum_i [|s_pred,i-s_ref,i|^2 / |s_ref,i|^2])
-total_error = (1/m) sum_j RRMSE_j
-```
-
-Additional common metrics are:
-
-```text
-L1_rel(%) = 100 sum_i w_i |y_pred,i-y_ref,i| / sum_i w_i |y_ref,i|
-L2_rel(%) = 100 sqrt(sum_i w_i (y_pred,i-y_ref,i)^2) / sqrt(sum_i w_i y_ref,i^2)
-R2 = 1 - sum_i (y_ref,i-y_pred,i)^2 / sum_i (y_ref,i-mean(y_ref))^2
-MAE_weighted = sum_i w_i |y_pred,i-y_ref,i| / sum_i w_i
-RMSE_weighted = sqrt(sum_i w_i (y_pred,i-y_ref,i)^2 / sum_i w_i)
-MAE_unweighted = (1/N) sum_i |y_pred,i-y_ref,i|
-RMSE_unweighted = sqrt((1/N) sum_i (y_pred,i-y_ref,i)^2)
-```
-
-For external-aerodynamics field metrics, `w_i` is face area for surface quantities and cell volume for volume quantities.
-Metrics explicitly described as unweighted use the corresponding `1/N` equation.
-
-Rotor37 dimensional errors use `kg/m^3`, `Pa`, `K`, and `kg/s` where applicable. Compression ratio and efficiency are
-dimensionless. VKI-LS59 dimensional MAE/RMSE are not accepted until a canonical public denormalization and unit convention
-has been fixed.
-
-BlendedNet ranks the arithmetic mean of the relative L2 errors for `Cp`, `Cfx`, and `Cfz`. It also reports MSE, MAE,
-relative L1, relative L2, and R2 for those surface coefficients, plus MAE and R2 for integrated `CD`, `CL`, and `CMy`.
-These native aerodynamic coefficients are dimensionless; the benchmark does not relabel them as dimensional fields.
-
-### Existing external-aerodynamics format
-
-AhmedML, AirfRANS, DrivAerML, DrivAerNet++, HiLiftAeroML, and WindsorML retain their existing scalar fields,
-`dimensional_field_errors`, and `absolute_coefficient_errors`. During feed generation, the build script converts these to
-the same public `metric_values` map consumed by the frontend.
-
-See an existing complete example:
-
-- [`submissions/ahmedml/dummy-ahmedml-flowformer-v1.json`](submissions/ahmedml/dummy-ahmedml-flowformer-v1.json)
-- [`submissions/hiliftaeroml/dummy-hiliftaeroml-liftoperator-v1.json`](submissions/hiliftaeroml/dummy-hiliftaeroml-liftoperator-v1.json)
-
-## Profile arrays
-
-Profile comparisons are dataset-driven. Each manifest panel defines:
-
-- `data_key`: the array name under `diagnostics`
-- `x_keys`: accepted coordinate keys
-- `quantities`: quantity IDs and accepted value keys
-- `stations`: exact required station IDs
-
-Each submitted series has this generic form:
-
-```json
-{
-  "case_id": "evaluator-case-id",
-  "station_id": "manifest-station-id",
-  "quantity_id": "manifest-quantity-id",
-  "values": [
-    {"x_over_c": 0.0, "pressure_ratio": 0.98},
-    {"x_over_c": 1.0, "pressure_ratio": 1.42}
+  "case_id": "ahmedml_geometry_test_0001",
+  "series": [
+    {
+      "panel_id": "pressure_profiles",
+      "station_id": "upper_body_centerline",
+      "quantity_id": "cp",
+      "coordinate": [0.0, 0.5, 1.0],
+      "prediction": [0.72, -0.31, 0.04]
+    }
   ]
 }
 ```
 
-VKI-LS59 uses `surface_profiles` for `M_iso` on `pressure_side` and `suction_side`, and `flow_profiles` for normalized
-velocity at `outlet_plane_2`.
+Use roughly 20-30 geometries per chunk. Coordinates must be finite, unique, and strictly increasing. Every required case,
+panel, station, and quantity is declared by the dataset specification and split index. The profile schemas are:
 
-Rotor37 uses `blade_profiles` for pressure ratio at `span_10`, `span_50`, and `span_90`. It uses
-`blade_thermo_profiles` for temperature and density ratios at the same stations. Rotor37 has no submitted velocity-profile
-comparison.
+- [`schemas/v1/profile-index.schema.json`](schemas/v1/profile-index.schema.json)
+- [`schemas/v1/profile-chunk.schema.json`](schemas/v1/profile-chunk.schema.json)
 
-BlendedNet uses `cp_cuts` and `skin_friction_profiles` at three `prototype_*` surface cuts. They are required for
-interface and pipeline testing, but remain explicitly illustrative until the evaluator fixes canonical extraction
-locations and tolerances. BlendedNet does not publish volume velocity fields, so no velocity-profile comparison is
-invented.
+The profile index records the SHA-256 checksum and case IDs for each chunk. Normal JSON is used so pull requests remain readable;
+hosting can compress it during delivery.
 
-The reference or ground-truth curves are not submitted here. They are owned by the FluidsBench website repository under
-`assets/data/diagnostic-ground-truth/`.
+## 3. Validate and submit
 
-## Validation
-
-Validate one proposed file:
+Create a Python environment and install the two validation/reference dependencies:
 
 ```bash
-python3 scripts/manage_leaderboard.py validate submissions/<dataset-slug>/<submission>.json
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install -r requirements.txt
 ```
 
-Validate every source submission and verify generated feeds:
+Validate one directory:
+
+```bash
+python3 scripts/validate_submission.py submissions/ahmedml/my-model-v1
+```
+
+Validate every source submission and verify that generated feeds are synchronized:
 
 ```bash
 python3 scripts/manage_leaderboard.py check
 ```
 
-Maintainers regenerate the manifest counts, dataset feeds, combined feed, and compatibility feed with:
+The validator checks JSON schemas, exact split case coverage, metric IDs and ranges, training metadata consistency, evaluation
+evidence identity and checksums, profile coverage, coordinate ordering, array lengths, finite values, split hashes, chunk hashes,
+and derived score arithmetic.
 
-```bash
-python3 scripts/manage_leaderboard.py build
-```
+After validation:
 
-The validator checks required metadata, dataset folder, split name, complete metric IDs, numeric ranges, and every required
-profile station/quantity pair.
+1. Commit only your submission directory.
+2. Open a pull request against `main` once FluidsBench announces that the dataset is accepting real submissions.
+3. Complete the pull request checklist and resolve all automated validation failures.
+4. Maintainers review the scientific provenance, metadata, metrics, profile definitions, and retained calculation evidence.
+5. A maintainer records the approval metadata, rebuilds the compact feeds, and merges the pull request.
 
-## Generated feeds
+## Generated leaderboard feeds
+
+Approved source submissions are converted into compact scalar feeds:
 
 ```text
 leaderboard/
   manifest.json
+  datasets/<dataset-id>.json
   all.json
-  datasets/
-    ahmedml.json
-    ...
-    blendednet.json
-    rotor37.json
-    vki-ls59.json
 leaderboard.json
 ```
 
-The website loads the selected dataset feed lazily through `leaderboard/manifest.json`. Generated public rows always include
-`metric_values`, so the website contains no dataset-specific score-row mapping. The root `leaderboard.json` remains only for
-backwards compatibility.
+The website loads the selected scalar dataset lazily. Profile arrays are not copied into these feeds; each row contains a relative
+profile index path, and the browser fetches only the selected geometry's chunk.
 
-## Review process
+`leaderboard/manifest.json` also publishes the data-release identifier, generation time, source reference, and SHA-256 digest of
+the complete scalar feed. Official releases should replace the moving preview reference with an immutable source commit or tag.
 
-Maintainers should verify that:
+Maintainers rebuild and verify feeds with:
 
-- the official dataset split and evaluator were used
-- metrics are reproducible from submitted evaluator evidence
-- every manifest metric is present with the declared unit and direction
-- every required profile station/quantity series is complete
-- model, pretraining, submitter, paper, and code metadata are suitable for publication
+```bash
+python3 scripts/manage_leaderboard.py build
+python3 scripts/manage_leaderboard.py check
+```
 
-After approval, run `build`, run `check`, and merge the source and generated feed changes together.
+## Prototype split indexes
 
-TODO: add dataset evaluator packages and exact maintainer evidence checklists.
-
-## Related links
-
-- [FluidsBench leaderboard](https://neilashton.github.io/fluidsbench/)
-- [FluidsBench dataset pages](https://neilashton.github.io/fluidsbench/datasets/)
-- [VKI-LS59 dataset page](https://neilashton.github.io/fluidsbench/datasets/vki-ls59/)
-- [Rotor37 dataset page](https://neilashton.github.io/fluidsbench/datasets/rotor37/)
-- [BlendedNet dataset page](https://neilashton.github.io/fluidsbench/datasets/blendednet/)
+Current split indexes are marked `prototype_generated`. They preserve the dummy leaderboard's declared test counts but are not
+official dataset case lists. Dataset owners must replace them with approved immutable case IDs and change the status to `official`
+before real submissions are accepted. A submission records the exact split-index SHA-256 so later split changes are detectable.
 
 ## License
 
-TODO: confirm whether all submitted metadata and profile data are covered by the repository license.
-
-See [LICENSE](LICENSE).
+Repository code and published submission metadata are covered by the [Apache License 2.0](LICENSE). Submitters must have the right
+to publish the metadata and profile values included in their pull request. Dataset and model artifacts retain their own licenses.

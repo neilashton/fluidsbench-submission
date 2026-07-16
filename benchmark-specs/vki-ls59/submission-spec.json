@@ -1,0 +1,410 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "vki-ls59",
+  "dataset_name": "VKI-LS59",
+  "dataset_version": "prototype-1",
+  "status": "prototype_dummy_data",
+  "default_field_reduction": "per_geometry_then_macro_average",
+  "metrics": [
+    {
+      "id": "total_error",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{m}\\sum_{j=1}^{m}\\operatorname{RRMSE}_j",
+      "aggregation": "derived_arithmetic_mean",
+      "weighting": "source_metrics_equal"
+    },
+    {
+      "id": "vki_mach_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "aggregation": "benchmark_field_rrmse_across_cases",
+      "weighting": "equation_normalized"
+    },
+    {
+      "id": "vki_nut_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lVert \\hat{y}_i-y_i\\rVert_2^2/N_i}{\\lVert y_i\\rVert_\\infty^2}}",
+      "aggregation": "benchmark_field_rrmse_across_cases",
+      "weighting": "equation_normalized"
+    },
+    {
+      "id": "vki_mach_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "vki_nut_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "vki_mach_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "vki_nut_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "points_equal_within_case_cases_equal"
+    },
+    {
+      "id": "vki_mach_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "flatten_all_aligned_field_values",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_nut_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "flatten_all_aligned_field_values",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_q_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_power_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_pr_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_tr_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_eth_is_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_angle_out_rrmse",
+      "unit": "",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{n}\\sum_{i=1}^{n}\\frac{\\lvert \\hat{s}_i-s_i\\rvert^2}{\\lvert s_i\\rvert^2}}",
+      "aggregation": "benchmark_scalar_rrmse_across_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_q_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_power_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_pr_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_tr_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_eth_is_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_angle_out_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_q_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_power_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_pr_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_tr_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_eth_is_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_angle_out_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_q_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_power_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_pr_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_tr_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_eth_is_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "vki_angle_out_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    }
+  ],
+  "profile_panels": [
+    {
+      "id": "surface_mach",
+      "required": true,
+      "allow_unlisted_stations": false,
+      "minimum_points": 2,
+      "coordinate_order": "strictly_increasing",
+      "station_ids": [
+        "pressure_side",
+        "suction_side"
+      ],
+      "quantity_ids": [
+        "m_iso"
+      ]
+    },
+    {
+      "id": "downstream_velocity",
+      "required": true,
+      "allow_unlisted_stations": false,
+      "minimum_points": 2,
+      "coordinate_order": "strictly_increasing",
+      "station_ids": [
+        "outlet_plane_2"
+      ],
+      "quantity_ids": [
+        "velocity_ratio"
+      ]
+    }
+  ],
+  "splits": [
+    {
+      "id": "train",
+      "label": "train",
+      "index_file": "splits/train.json",
+      "case_count": 168,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "0fc9d971cd0c51002c3b3c5c59b2dd02d0a05f21374f2598c1d0adff7ad0b1e0"
+    },
+    {
+      "id": "train_500",
+      "label": "train_500",
+      "index_file": "splits/train_500.json",
+      "case_count": 168,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "47f1c9d8ccedd929c61c79d040fe8c047fd767debca3457743e39ecbe502a94d"
+    },
+    {
+      "id": "train_250",
+      "label": "train_250",
+      "index_file": "splits/train_250.json",
+      "case_count": 168,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "373373fd18af62dd2b9e90b2d53ccc72ebbf6751149c887a6c84b52988bbe016"
+    },
+    {
+      "id": "train_125",
+      "label": "train_125",
+      "index_file": "splits/train_125.json",
+      "case_count": 168,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "dbb306e16042fdf9f3d34628cb66f8f2c3d77c2bcbd2beead13e71b5f4de6372"
+    },
+    {
+      "id": "train_64",
+      "label": "train_64",
+      "index_file": "splits/train_64.json",
+      "case_count": 168,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "8dafe3a007cdc65b2fb974236e8e720b4b22d77d7d192147e21f3492900fcbd6"
+    },
+    {
+      "id": "train_32",
+      "label": "train_32",
+      "index_file": "splits/train_32.json",
+      "case_count": 168,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "33cb7c5832589d3a93d36b619483b94ec60b8694a9ae1ea33f8c0de7af4a716e"
+    },
+    {
+      "id": "train_16",
+      "label": "train_16",
+      "index_file": "splits/train_16.json",
+      "case_count": 168,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "79d11e6be17c0f813aca3932b545c3e8d39751a383ced7f58274d427467c6aa8"
+    },
+    {
+      "id": "train_8",
+      "label": "train_8",
+      "index_file": "splits/train_8.json",
+      "case_count": 168,
+      "case_set_id": "official_test",
+      "case_id_status": "prototype_generated",
+      "sha256": "09c1218e67f86fc9efebb912fdff305eff3083e9444acb596dc9f7fec130202b"
+    }
+  ]
+}

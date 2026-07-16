@@ -1,6 +1,22 @@
 {
   "schema_version": "0.5.0",
-  "generated_at": "2026-07-15T00:00:00Z",
+  "generated_at": "2026-07-16T11:54:18Z",
+  "data_release": {
+    "id": "prototype-dev-2026-07-15-fec68cc4679f",
+    "status": "prototype_dummy_data",
+    "generated_at": "2026-07-16T11:54:18Z",
+    "source_repository": "https://github.com/neilashton/fluidsbench-submission",
+    "source_ref": "dev",
+    "source_commit": null,
+    "feed_sha256": "fec68cc4679fb94a7e85471a834744c1557a5eb66b48c146bf94474be1289032",
+    "canonical_url": "https://fluidsbench.org/",
+    "citation": {
+      "title": "FluidsBench Leaderboard",
+      "author": "FluidsBench contributors",
+      "publisher": "FluidsBench",
+      "year": 2026
+    }
+  },
   "all_file": "leaderboard/all.json",
   "training_regimes": [
     {
@@ -314,6 +330,14 @@
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "wake_x_0_50l",
+              "label": "Wake at 0.50L",
+              "x_label": "Profile coordinate",
+              "description": "Profile in the wake at x/L = 0.50.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.org/datasets/"
             }
           ],
           "required": false,
@@ -491,6 +515,14 @@
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "wake_x_1_50c",
+              "label": "Wake at 1.50c",
+              "x_label": "Profile coordinate",
+              "description": "Airfoil wake profile at x/c = 1.50.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.org/datasets/"
             }
           ],
           "required": false,
@@ -728,6 +760,14 @@
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "wake_x_1_00l",
+              "label": "Wake at 1.00L",
+              "x_label": "Profile coordinate",
+              "description": "Vehicle wake profile at x/L = 1.00.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.org/datasets/"
             }
           ],
           "required": false,
@@ -906,6 +946,14 @@
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "wake_x_0_75l",
+              "label": "Wake at 0.75L",
+              "x_label": "Profile coordinate",
+              "description": "Vehicle wake profile at x/L = 0.75.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.org/datasets/"
             }
           ],
           "required": false,
@@ -1625,6 +1673,14 @@
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
+            },
+            {
+              "id": "wake_x_0_80l",
+              "label": "Wake at 0.80L",
+              "x_label": "Profile coordinate",
+              "description": "Windsor body wake profile at x/L = 0.80.",
+              "basis": "fluidsbench_benchmark_trace",
+              "source_url": "https://fluidsbench.org/datasets/"
             }
           ],
           "required": false,
@@ -4149,5 +4205,6 @@
       "column_group_label": "Integral forces / moments",
       "plain_label": "Pitching-moment coefficient R2"
     }
-  ]
+  ],
+  "submission_schema_version": "1.0"
 }

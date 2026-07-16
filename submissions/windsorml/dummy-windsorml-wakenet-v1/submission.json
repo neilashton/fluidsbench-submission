@@ -1,0 +1,73 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/v1/submission.schema.json",
+  "schema_version": "1.0",
+  "submission_id": "dummy-windsorml-wakenet-v1",
+  "model": "MeshGraphNets",
+  "model_type": "GNN",
+  "model_types": [
+    "GNN"
+  ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
+  "dataset": "WindsorML",
+  "dataset_id": "windsorml",
+  "dataset_version": "prototype-1",
+  "split": "Default",
+  "split_id": "default",
+  "case_set_id": "default",
+  "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+  "parameter_count_millions": 7.8,
+  "submitter_name": "Neil Ashton",
+  "institution": "Example Aerodynamics Group",
+  "paper_url": "https://example.com/wakenet-windsor",
+  "code_url": "https://github.com/example/wakenet-windsor",
+  "submitted_at": "2026-07-08",
+  "evaluation": {
+    "reference_version": "prototype-1",
+    "code_revision": "prototype-dummy-data",
+    "command": "not-applicable (illustrative dummy data)",
+    "evidence_file": "evaluation-evidence.json",
+    "evidence_sha256": "adc7a6b24f41097e2fbf5bdfee198bf4c7ff3aa3d1fe60f836d7018f96732a57"
+  },
+  "approval": {
+    "status": "prototype",
+    "note": "Illustrative dummy data; not scientifically reviewed or approved."
+  },
+  "metric_values": {
+    "surface_pressure_rel_l2": 3.92,
+    "surface_pressure_rel_l1": 2.78,
+    "surface_wall_shear_rel_l2": 5.08,
+    "surface_wall_shear_rel_l1": 3.46,
+    "volume_velocity_rel_l2": 2.66,
+    "volume_velocity_rel_l1": 1.87,
+    "volume_pressure_rel_l2": 3.04,
+    "volume_pressure_rel_l1": 2.1,
+    "cd_r2": 0.982,
+    "cl_r2": 0.971,
+    "velocity_profile_r2": 0.964,
+    "cp_cut_r2": 0.959,
+    "surface_pressure_mae": 16.7,
+    "surface_pressure_rmse": 23.5,
+    "surface_wall_shear_mae": 0.35,
+    "surface_wall_shear_rmse": 0.51,
+    "volume_velocity_mae": 0.65,
+    "volume_velocity_rmse": 0.93,
+    "volume_pressure_mae": 11.6,
+    "volume_pressure_rmse": 16.7,
+    "c_drag_mae": 0.0024,
+    "c_lift_mae": 0.0057,
+    "field_score": 76.37666666666667,
+    "force_score": 97.75999999999999,
+    "diagnostic_score": 96.19999999999999,
+    "overall_score": 86.67833333333333
+  },
+  "profile_data": {
+    "format": "fluidsbench-profile-chunks-v1",
+    "index_file": "profiles/index.json",
+    "case_count": 1,
+    "case_set_id": "default"
+  },
+  "note": "Dummy WindsorML submission with compact profile curves."
+}

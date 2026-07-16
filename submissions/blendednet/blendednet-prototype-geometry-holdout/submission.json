@@ -1,0 +1,69 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/v1/submission.schema.json",
+  "schema_version": "1.0",
+  "submission_id": "blendednet-prototype-geometry-holdout",
+  "model": "UPT",
+  "model_type": "Transformer",
+  "model_types": [
+    "Transformer"
+  ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
+  "dataset": "BlendedNet",
+  "dataset_id": "blendednet",
+  "dataset_version": "prototype-1",
+  "split": "geometry_holdout",
+  "split_id": "geometry_holdout",
+  "case_set_id": "geometry_holdout",
+  "split_sha256": "f35f6f9ad6b1053169b885d846e8a77d74645abc80a093e8ecd39a14da76f041",
+  "parameter_count_millions": 5.42,
+  "submitter_name": "Neil Ashton",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2026-07-15",
+  "evaluation": {
+    "reference_version": "prototype-1",
+    "code_revision": "prototype-dummy-data",
+    "command": "not-applicable (illustrative dummy data)",
+    "evidence_file": "evaluation-evidence.json",
+    "evidence_sha256": "4279bcb823daee9989fab2e44e7cbc7b94502577b726bd2597e3b101ce24a0bc"
+  },
+  "approval": {
+    "status": "prototype",
+    "note": "Illustrative dummy data; not scientifically reviewed or approved."
+  },
+  "metric_values": {
+    "blended_surface_rel_l2": 10.3,
+    "blended_cp_mse": 0.0084,
+    "blended_cp_mae": 0.0385,
+    "blended_cp_rel_l1": 13.9,
+    "blended_cp_rel_l2": 3.4,
+    "blended_cp_r2": 0.978,
+    "blended_cfx_mse": 3.2e-05,
+    "blended_cfx_mae": 0.00142,
+    "blended_cfx_rel_l1": 22.7,
+    "blended_cfx_rel_l2": 8.2,
+    "blended_cfx_r2": 0.941,
+    "blended_cfz_mse": 1.8e-05,
+    "blended_cfz_mae": 0.00084,
+    "blended_cfz_rel_l1": 30.8,
+    "blended_cfz_rel_l2": 19.3,
+    "blended_cfz_r2": 0.887,
+    "c_drag_mae": 0.0018,
+    "c_lift_mae": 0.0095,
+    "c_pitch_mae": 0.0048,
+    "cd_r2": 0.982,
+    "cl_r2": 0.975,
+    "c_pitch_r2": 0.964
+  },
+  "profile_data": {
+    "format": "fluidsbench-profile-chunks-v1",
+    "index_file": "profiles/index.json",
+    "case_count": 870,
+    "case_set_id": "geometry_holdout"
+  },
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+}

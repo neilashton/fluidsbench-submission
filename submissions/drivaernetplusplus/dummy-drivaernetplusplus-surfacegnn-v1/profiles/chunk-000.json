@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {
+      "case_id": "drivaernetplusplus_default_test_0001",
+      "series": [
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "upper_body_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            0.05,
+            0.32,
+            0.6,
+            0.9
+          ],
+          "prediction": [
+            0.582788,
+            -0.049385,
+            -0.248565,
+            -0.09918
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "underbody_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            0.05,
+            0.32,
+            0.6,
+            0.9
+          ],
+          "prediction": [
+            0.6248923,
+            0.1691265,
+            -0.0683339,
+            0.0487749
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse",
+          "quantity_id": "cp",
+          "coordinate": [
+            0.05,
+            0.32,
+            0.6,
+            0.9
+          ],
+          "prediction": [
+            0.5974719,
+            -0.1607733,
+            -0.4644474,
+            -0.1427411
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rear_body_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            0.05,
+            0.32,
+            0.6,
+            0.9
+          ],
+          "prediction": [
+            0.7390214,
+            0.1111067,
+            0.2672596,
+            0.0492461
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "wake_x_0_75l",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.05,
+            0.25,
+            0.5,
+            0.75
+          ],
+          "prediction": [
+            0.4685123,
+            0.6480425,
+            0.8574944,
+            0.997129
+          ]
+        }
+      ]
+    }
+  ]
+}

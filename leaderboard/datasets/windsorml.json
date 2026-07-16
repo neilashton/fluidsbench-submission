@@ -1,4118 +1,6 @@
 [
   {
-    "submission_id": "windsorml-ab-upt",
-    "model": "AB-UPT",
-    "model_type": "Transformer",
-    "model_types": [
-      "Transformer"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 8.75,
-    "surface_pressure_l2": 4.1,
-    "surface_pressure_l1": 2.952,
-    "surface_tau_l2": 6.85,
-    "surface_tau_l1": 4.658,
-    "volume_velocity_l2": 4.35,
-    "volume_velocity_l1": 3.045,
-    "volume_pressure_l2": 4.8,
-    "volume_pressure_l1": 3.312,
-    "r2_cd": 0.989,
-    "r2_cl": 0.982,
-    "velocity_profile_r2": 0.966,
-    "cp_cut_r2": 0.964,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-ab-upt_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8372
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4607
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1615
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0836
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.2143
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3878
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.4001
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3721
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1258
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0063
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.2184
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0394
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-ab-upt_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.813
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.5363
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.321
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1459
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0452
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.116
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1658
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1767
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0079
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1174
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3134
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1907
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-ab-upt_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.2941
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3242
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.4976
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6307
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.821
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8872
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 0.9898
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0195
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0612
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0381
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-ab-upt_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4141
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.4342
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5776
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6807
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.851
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9072
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 0.9998
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0295
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0612
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0381
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-ab-upt_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.5641
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5742
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.6876
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.7607
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.901
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9372
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0198
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0295
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0612
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0381
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 17.7,
-        "rmse": 24.6
-      },
-      "surface_wall_shear": {
-        "mae": 0.47,
-        "rmse": 0.69
-      },
-      "volume_velocity": {
-        "mae": 1.07,
-        "rmse": 1.52
-      },
-      "volume_pressure": {
-        "mae": 18.2,
-        "rmse": 26.4
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.0014,
-      "c_lift": 0.0043
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 4.1,
-      "surface_pressure_rel_l1": 2.952,
-      "surface_wall_shear_rel_l2": 6.85,
-      "surface_wall_shear_rel_l1": 4.658,
-      "volume_velocity_rel_l2": 4.35,
-      "volume_velocity_rel_l1": 3.045,
-      "volume_pressure_rel_l2": 4.8,
-      "volume_pressure_rel_l1": 3.312,
-      "cd_r2": 0.989,
-      "cl_r2": 0.982,
-      "velocity_profile_r2": 0.966,
-      "cp_cut_r2": 0.964,
-      "surface_pressure_mae": 17.7,
-      "surface_pressure_rmse": 24.6,
-      "surface_wall_shear_mae": 0.47,
-      "surface_wall_shear_rmse": 0.69,
-      "volume_velocity_mae": 1.07,
-      "volume_velocity_rmse": 1.52,
-      "volume_pressure_mae": 18.2,
-      "volume_pressure_rmse": 26.4,
-      "c_drag_mae": 0.0014,
-      "c_lift_mae": 0.0043,
-      "field_score": 67.67500000000001,
-      "force_score": 98.61999999999999,
-      "diagnostic_score": 96.52000000000001,
-      "overall_score": 82.6225
-    }
-  },
-  {
-    "submission_id": "windsorml-gino",
-    "model": "GINO",
-    "model_type": "Neural operator",
-    "model_types": [
-      "Neural operator"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 15.6,
-    "surface_pressure_l2": 12.7,
-    "surface_pressure_l1": 9.144,
-    "surface_tau_l2": 20.9,
-    "surface_tau_l1": 14.212,
-    "volume_velocity_l2": 33.5,
-    "volume_velocity_l1": 23.45,
-    "volume_pressure_l2": 36.2,
-    "volume_pressure_l1": 24.978,
-    "r2_cd": 0.805,
-    "r2_cl": 0.765,
-    "velocity_profile_r2": 0.638,
-    "cp_cut_r2": 0.655,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-gino_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8812
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4112
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.2164
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1439
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1485
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.459
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3234
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.4542
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0383
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0993
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3168
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0644
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-gino_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8473
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4977
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3639
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0989
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0965
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1715
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1059
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.2407
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0761
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0449
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3901
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1098
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-gino_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.3301
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.2837
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5425
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.5813
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8748
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.829
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0149
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 0.9926
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0898
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0077
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-gino_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4501
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3937
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.6225
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6313
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9048
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.849
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0249
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0026
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0898
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0077
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-gino_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.6001
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5337
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.7325
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.7113
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9548
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.879
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0449
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0026
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0898
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0077
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 54.9,
-        "rmse": 76.2
-      },
-      "surface_wall_shear": {
-        "mae": 1.42,
-        "rmse": 2.09
-      },
-      "volume_velocity": {
-        "mae": 8.21,
-        "rmse": 11.72
-      },
-      "volume_pressure": {
-        "mae": 137.4,
-        "rmse": 199.1
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.024,
-      "c_lift": 0.0425
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 12.7,
-      "surface_pressure_rel_l1": 9.144,
-      "surface_wall_shear_rel_l2": 20.9,
-      "surface_wall_shear_rel_l1": 14.212,
-      "volume_velocity_rel_l2": 33.5,
-      "volume_velocity_rel_l1": 23.45,
-      "volume_pressure_rel_l2": 36.2,
-      "volume_pressure_rel_l1": 24.978,
-      "cd_r2": 0.805,
-      "cl_r2": 0.765,
-      "velocity_profile_r2": 0.638,
-      "cp_cut_r2": 0.655,
-      "surface_pressure_mae": 54.9,
-      "surface_pressure_rmse": 76.2,
-      "surface_wall_shear_mae": 1.42,
-      "surface_wall_shear_rmse": 2.09,
-      "volume_velocity_mae": 8.21,
-      "volume_velocity_rmse": 11.72,
-      "volume_pressure_mae": 137.4,
-      "volume_pressure_rmse": 199.1,
-      "c_drag_mae": 0.024,
-      "c_lift_mae": 0.0425,
-      "field_score": 4.600000000000002,
-      "force_score": 78.9,
-      "diagnostic_score": 64.47999999999999,
-      "overall_score": 38.144999999999996
-    }
-  },
-  {
-    "submission_id": "windsorml-graph-u-net",
-    "model": "Graph U-Net",
-    "model_type": "GNN",
-    "model_types": [
-      "GNN"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 14.11,
-    "surface_pressure_l2": 14.8,
-    "surface_pressure_l1": 10.656,
-    "surface_tau_l2": 24.2,
-    "surface_tau_l1": 16.456,
-    "volume_velocity_l2": 15.5,
-    "volume_velocity_l1": 10.85,
-    "volume_pressure_l2": 18.4,
-    "volume_pressure_l1": 12.696,
-    "r2_cd": 0.875,
-    "r2_cl": 0.842,
-    "velocity_profile_r2": 0.772,
-    "cp_cut_r2": 0.786,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-graph-u-net_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8782
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4146
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.2126
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1398
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.153
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.4542
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3286
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.4485
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0443
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0929
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3101
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0573
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-graph-u-net_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.845
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.5004
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3609
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1021
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.093
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1678
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.11
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.2363
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0714
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0499
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3849
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1153
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-graph-u-net_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.3276
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.2865
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5394
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.5847
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8712
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.833
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0132
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 0.9945
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0879
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0098
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-graph-u-net_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4476
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3965
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.6194
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6347
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9012
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.853
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0232
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0045
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0879
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0098
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-graph-u-net_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.5976
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5365
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.7294
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.7147
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9512
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.883
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0432
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0045
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0879
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0098
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 63.9,
-        "rmse": 88.8
-      },
-      "surface_wall_shear": {
-        "mae": 1.65,
-        "rmse": 2.42
-      },
-      "volume_velocity": {
-        "mae": 3.8,
-        "rmse": 5.42
-      },
-      "volume_pressure": {
-        "mae": 69.8,
-        "rmse": 101.2
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.0156,
-      "c_lift": 0.0293
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 14.8,
-      "surface_pressure_rel_l1": 10.656,
-      "surface_wall_shear_rel_l2": 24.2,
-      "surface_wall_shear_rel_l1": 16.456,
-      "volume_velocity_rel_l2": 15.5,
-      "volume_velocity_rel_l1": 10.85,
-      "volume_pressure_rel_l2": 18.4,
-      "volume_pressure_rel_l1": 12.696,
-      "cd_r2": 0.875,
-      "cl_r2": 0.842,
-      "velocity_profile_r2": 0.772,
-      "cp_cut_r2": 0.786,
-      "surface_pressure_mae": 63.9,
-      "surface_pressure_rmse": 88.8,
-      "surface_wall_shear_mae": 1.65,
-      "surface_wall_shear_rmse": 2.42,
-      "volume_velocity_mae": 3.8,
-      "volume_velocity_rmse": 5.42,
-      "volume_pressure_mae": 69.8,
-      "volume_pressure_rmse": 101.2,
-      "c_drag_mae": 0.0156,
-      "c_lift_mae": 0.0293,
-      "field_score": 0.39999999999999925,
-      "force_score": 86.18,
-      "diagnostic_score": 77.76,
-      "overall_score": 41.185
-    }
-  },
-  {
-    "submission_id": "windsorml-lno",
-    "model": "LNO",
-    "model_type": "Neural operator",
-    "model_types": [
-      "Neural operator"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 6.3,
-    "surface_pressure_l2": 18.3,
-    "surface_pressure_l1": 13.176,
-    "surface_tau_l2": 32.4,
-    "surface_tau_l1": 22.032,
-    "volume_velocity_l2": 21.8,
-    "volume_velocity_l1": 15.26,
-    "volume_pressure_l2": 25.6,
-    "volume_pressure_l1": 17.664,
-    "r2_cd": 0.836,
-    "r2_cl": 0.798,
-    "velocity_profile_r2": 0.724,
-    "cp_cut_r2": 0.74,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-lno_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8806
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4119
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.2156
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1431
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1495
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.458
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3245
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.453
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0395
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0979
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3154
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0629
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-lno_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8469
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4983
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3632
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0995
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0957
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1707
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1068
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.2398
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0752
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.046
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.389
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1109
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-lno_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.3296
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.2843
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5418
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.582
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8741
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8298
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0145
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 0.993
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0894
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0081
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-lno_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4496
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3943
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.6218
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.632
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9041
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8498
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0245
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.003
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0894
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0081
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-lno_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.5996
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5343
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.7318
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.712
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9541
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8798
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0445
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.003
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0894
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0081
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 79.1,
-        "rmse": 109.8
-      },
-      "surface_wall_shear": {
-        "mae": 2.2,
-        "rmse": 3.24
-      },
-      "volume_velocity": {
-        "mae": 5.34,
-        "rmse": 7.63
-      },
-      "volume_pressure": {
-        "mae": 97.2,
-        "rmse": 140.8
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.0202,
-      "c_lift": 0.0367
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 18.3,
-      "surface_pressure_rel_l1": 13.176,
-      "surface_wall_shear_rel_l2": 32.4,
-      "surface_wall_shear_rel_l1": 22.032,
-      "volume_velocity_rel_l2": 21.8,
-      "volume_velocity_rel_l1": 15.26,
-      "volume_pressure_rel_l2": 25.6,
-      "volume_pressure_rel_l1": 17.664,
-      "cd_r2": 0.836,
-      "cl_r2": 0.798,
-      "velocity_profile_r2": 0.724,
-      "cp_cut_r2": 0.74,
-      "surface_pressure_mae": 79.1,
-      "surface_pressure_rmse": 109.8,
-      "surface_wall_shear_mae": 2.2,
-      "surface_wall_shear_rmse": 3.24,
-      "volume_velocity_mae": 5.34,
-      "volume_velocity_rmse": 7.63,
-      "volume_pressure_mae": 97.2,
-      "volume_pressure_rmse": 140.8,
-      "c_drag_mae": 0.0202,
-      "c_lift_mae": 0.0367,
-      "field_score": 0.0,
-      "force_score": 82.08,
-      "diagnostic_score": 73.03999999999999,
-      "overall_score": 38.78
-    }
-  },
-  {
-    "submission_id": "windsorml-oformer",
-    "model": "OFormer",
-    "model_type": "Transformer",
-    "model_types": [
-      "Transformer"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 6.1,
-    "surface_pressure_l2": 4.75,
-    "surface_pressure_l1": 3.42,
-    "surface_tau_l2": 7.7,
-    "surface_tau_l1": 5.236,
-    "volume_velocity_l2": 5.04,
-    "volume_velocity_l1": 3.528,
-    "volume_pressure_l2": 5.36,
-    "volume_pressure_l1": 3.698,
-    "r2_cd": 0.97,
-    "r2_cl": 0.953,
-    "velocity_profile_r2": 0.933,
-    "cp_cut_r2": 0.931,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-oformer_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8409
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4565
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.166
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0886
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.2088
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3938
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3937
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3789
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1185
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0141
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.2267
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0308
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-oformer_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8159
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.5331
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3245
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.142
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0494
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1207
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1608
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.182
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0135
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1114
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3198
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.184
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-oformer_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.2971
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3208
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5013
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6266
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8255
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8824
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 0.9919
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0173
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0636
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0356
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-oformer_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4171
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.4308
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5813
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6766
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8555
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9024
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0019
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0273
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0636
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0356
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-oformer_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.5671
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5708
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.6913
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.7566
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9055
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9324
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0219
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0273
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0636
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0356
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 20.5,
-        "rmse": 28.5
-      },
-      "surface_wall_shear": {
-        "mae": 0.52,
-        "rmse": 0.77
-      },
-      "volume_velocity": {
-        "mae": 1.23,
-        "rmse": 1.76
-      },
-      "volume_pressure": {
-        "mae": 20.3,
-        "rmse": 29.5
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.0044,
-      "c_lift": 0.0087
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 4.75,
-      "surface_pressure_rel_l1": 3.42,
-      "surface_wall_shear_rel_l2": 7.7,
-      "surface_wall_shear_rel_l1": 5.236,
-      "volume_velocity_rel_l2": 5.04,
-      "volume_velocity_rel_l1": 3.528,
-      "volume_pressure_rel_l2": 5.36,
-      "volume_pressure_rel_l1": 3.698,
-      "cd_r2": 0.97,
-      "cl_r2": 0.953,
-      "velocity_profile_r2": 0.933,
-      "cp_cut_r2": 0.931,
-      "surface_pressure_mae": 20.5,
-      "surface_pressure_rmse": 28.5,
-      "surface_wall_shear_mae": 0.52,
-      "surface_wall_shear_rmse": 0.77,
-      "volume_velocity_mae": 1.23,
-      "volume_velocity_rmse": 1.76,
-      "volume_pressure_mae": 20.3,
-      "volume_pressure_rmse": 29.5,
-      "c_drag_mae": 0.0044,
-      "c_lift_mae": 0.0087,
-      "field_score": 63.053333333333335,
-      "force_score": 96.32,
-      "diagnostic_score": 93.22,
-      "overall_score": 78.91166666666666
-    }
-  },
-  {
-    "submission_id": "windsorml-pointnet",
-    "model": "PointNet",
-    "model_type": "Point cloud",
-    "model_types": [
-      "Point cloud"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 3.6,
-    "surface_pressure_l2": 21.7,
-    "surface_pressure_l1": 15.624,
-    "surface_tau_l2": 38.6,
-    "surface_tau_l1": 26.248,
-    "volume_velocity_l2": 24.9,
-    "volume_velocity_l1": 17.43,
-    "volume_pressure_l2": 29.8,
-    "volume_pressure_l1": 20.562,
-    "r2_cd": 0.815,
-    "r2_cl": 0.77,
-    "velocity_profile_r2": 0.665,
-    "cp_cut_r2": 0.688,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-pointnet_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8826
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4097
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.218
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1458
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1465
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.4612
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3211
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.4567
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0356
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1021
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3199
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0676
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-pointnet_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8484
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4966
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3651
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0974
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.098
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1732
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1041
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.2427
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0782
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0427
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3925
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1073
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-pointnet_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.3312
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.2825
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5439
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.5798
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8765
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8272
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0157
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 0.9918
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0907
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0068
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-pointnet_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4512
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3925
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.6239
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6298
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9065
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8472
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0257
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0018
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0907
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0068
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-pointnet_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.6012
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5325
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.7339
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.7098
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9565
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8772
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0457
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0018
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0907
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0068
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 93.7,
-        "rmse": 130.2
-      },
-      "surface_wall_shear": {
-        "mae": 2.62,
-        "rmse": 3.86
-      },
-      "volume_velocity": {
-        "mae": 6.1,
-        "rmse": 8.71
-      },
-      "volume_pressure": {
-        "mae": 113.1,
-        "rmse": 163.9
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.0228,
-      "c_lift": 0.0418
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 21.7,
-      "surface_pressure_rel_l1": 15.624,
-      "surface_wall_shear_rel_l2": 38.6,
-      "surface_wall_shear_rel_l1": 26.248,
-      "volume_velocity_rel_l2": 24.9,
-      "volume_velocity_rel_l1": 17.43,
-      "volume_pressure_rel_l2": 29.8,
-      "volume_pressure_rel_l1": 20.562,
-      "cd_r2": 0.815,
-      "cl_r2": 0.77,
-      "velocity_profile_r2": 0.665,
-      "cp_cut_r2": 0.688,
-      "surface_pressure_mae": 93.7,
-      "surface_pressure_rmse": 130.2,
-      "surface_wall_shear_mae": 2.62,
-      "surface_wall_shear_rmse": 3.86,
-      "volume_velocity_mae": 6.1,
-      "volume_velocity_rmse": 8.71,
-      "volume_pressure_mae": 113.1,
-      "volume_pressure_rmse": 163.9,
-      "c_drag_mae": 0.0228,
-      "c_lift_mae": 0.0418,
-      "field_score": 0.0,
-      "force_score": 79.69999999999999,
-      "diagnostic_score": 67.42,
-      "overall_score": 36.78
-    }
-  },
-  {
-    "submission_id": "windsorml-transformer",
-    "model": "GeoTransformer",
-    "model_type": "Transformer",
-    "model_types": [
-      "Transformer"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 5.49,
-    "surface_pressure_l2": 4.62,
-    "surface_pressure_l1": 3.326,
-    "surface_tau_l2": 7.45,
-    "surface_tau_l1": 5.066,
-    "volume_velocity_l2": 4.92,
-    "volume_velocity_l1": 3.444,
-    "volume_pressure_l2": 5.18,
-    "volume_pressure_l1": 3.574,
-    "r2_cd": 0.972,
-    "r2_cl": 0.955,
-    "velocity_profile_r2": 0.936,
-    "cp_cut_r2": 0.934,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-transformer_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8402
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4573
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1652
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0877
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.2098
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3927
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3948
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3777
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1198
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0127
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.2252
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0323
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-transformer_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8154
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.5337
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3239
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1427
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0487
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1198
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1616
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.181
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0125
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1124
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3187
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1852
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-transformer_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.2966
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3214
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5006
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6273
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8247
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8832
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 0.9915
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0177
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0632
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.036
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-transformer_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4166
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.4314
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5806
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6773
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8547
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9032
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0015
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0277
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0632
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.036
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-transformer_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.5666
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5714
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.6906
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.7573
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9047
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9332
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0215
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0277
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0632
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.036
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 20,
-        "rmse": 27.7
-      },
-      "surface_wall_shear": {
-        "mae": 0.51,
-        "rmse": 0.74
-      },
-      "volume_velocity": {
-        "mae": 1.21,
-        "rmse": 1.72
-      },
-      "volume_pressure": {
-        "mae": 19.7,
-        "rmse": 28.5
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.004,
-      "c_lift": 0.0086
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 4.62,
-      "surface_pressure_rel_l1": 3.326,
-      "surface_wall_shear_rel_l2": 7.45,
-      "surface_wall_shear_rel_l1": 5.066,
-      "volume_velocity_rel_l2": 4.92,
-      "volume_velocity_rel_l1": 3.444,
-      "volume_pressure_rel_l2": 5.18,
-      "volume_pressure_rel_l1": 3.574,
-      "cd_r2": 0.972,
-      "cl_r2": 0.955,
-      "velocity_profile_r2": 0.936,
-      "cp_cut_r2": 0.934,
-      "surface_pressure_mae": 20.0,
-      "surface_pressure_rmse": 27.7,
-      "surface_wall_shear_mae": 0.51,
-      "surface_wall_shear_rmse": 0.74,
-      "volume_velocity_mae": 1.21,
-      "volume_velocity_rmse": 1.72,
-      "volume_pressure_mae": 19.7,
-      "volume_pressure_rmse": 28.5,
-      "c_drag_mae": 0.004,
-      "c_lift_mae": 0.0086,
-      "field_score": 64.10333333333332,
-      "force_score": 96.52,
-      "diagnostic_score": 93.52000000000001,
-      "overall_score": 79.56166666666667
-    }
-  },
-  {
-    "submission_id": "windsorml-transolver",
-    "model": "Transolver",
-    "model_type": "Transformer",
-    "model_types": [
-      "Transformer"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 5.49,
-    "surface_pressure_l2": 4.88,
-    "surface_pressure_l1": 3.514,
-    "surface_tau_l2": 7.82,
-    "surface_tau_l1": 5.318,
-    "volume_velocity_l2": 5.1,
-    "volume_velocity_l1": 3.57,
-    "volume_pressure_l2": 5.42,
-    "volume_pressure_l1": 3.74,
-    "r2_cd": 0.969,
-    "r2_cl": 0.951,
-    "velocity_profile_r2": 0.931,
-    "cp_cut_r2": 0.929,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-transolver_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8413
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4561
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1665
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0891
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.2082
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3944
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.393
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3796
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1177
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0149
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.2275
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0299
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-transolver_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8162
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.5328
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3249
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1416
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0499
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1211
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1602
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1825
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0142
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1107
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3205
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1833
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-transolver_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.2974
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3205
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5017
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6262
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.826
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8819
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 0.9921
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.017
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0638
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0353
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-transolver_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4174
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.4305
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5817
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.6762
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.856
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9019
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0021
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.027
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0638
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0353
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-transolver_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.5674
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5705
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.6917
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.7562
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.906
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9319
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0221
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.027
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0638
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0353
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 21.1,
-        "rmse": 29.3
-      },
-      "surface_wall_shear": {
-        "mae": 0.53,
-        "rmse": 0.78
-      },
-      "volume_velocity": {
-        "mae": 1.25,
-        "rmse": 1.78
-      },
-      "volume_pressure": {
-        "mae": 20.6,
-        "rmse": 29.8
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.0042,
-      "c_lift": 0.0092
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 4.88,
-      "surface_pressure_rel_l1": 3.514,
-      "surface_wall_shear_rel_l2": 7.82,
-      "surface_wall_shear_rel_l1": 5.318,
-      "volume_velocity_rel_l2": 5.1,
-      "volume_velocity_rel_l1": 3.57,
-      "volume_pressure_rel_l2": 5.42,
-      "volume_pressure_rel_l1": 3.74,
-      "cd_r2": 0.969,
-      "cl_r2": 0.951,
-      "velocity_profile_r2": 0.931,
-      "cp_cut_r2": 0.929,
-      "surface_pressure_mae": 21.1,
-      "surface_pressure_rmse": 29.3,
-      "surface_wall_shear_mae": 0.53,
-      "surface_wall_shear_rmse": 0.78,
-      "volume_velocity_mae": 1.25,
-      "volume_velocity_rmse": 1.78,
-      "volume_pressure_mae": 20.6,
-      "volume_pressure_rmse": 29.8,
-      "c_drag_mae": 0.0042,
-      "c_lift_mae": 0.0092,
-      "field_score": 62.443333333333335,
-      "force_score": 96.17999999999999,
-      "diagnostic_score": 93.02000000000001,
-      "overall_score": 78.52166666666668
-    }
-  },
-  {
-    "submission_id": "windsorml-upt",
-    "model": "UPT",
-    "model_type": "Transformer",
-    "model_types": [
-      "Transformer"
-    ],
-    "training_regime": "from_scratch",
-    "target_data_used": "official_train",
-    "external_pretraining": false,
-    "pretraining_data": [],
-    "dataset": "WindsorML",
-    "split": "Default",
-    "parameter_count": 10.98,
-    "surface_pressure_l2": 7.2,
-    "surface_pressure_l1": 5.184,
-    "surface_tau_l2": 11.4,
-    "surface_tau_l1": 7.752,
-    "volume_velocity_l2": 7.3,
-    "volume_velocity_l1": 5.11,
-    "volume_pressure_l2": 8.15,
-    "volume_pressure_l1": 5.623,
-    "r2_cd": 0.949,
-    "r2_cl": 0.925,
-    "velocity_profile_r2": 0.898,
-    "cp_cut_r2": 0.895,
-    "submitter_name": "Neil Ashton",
-    "institution": "FluidsBench dummy data",
-    "paper_url": "",
-    "code_url": "",
-    "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml-upt_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8512
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.4449
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.179
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1028
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1933
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.4105
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3756
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.3982
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0979
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": -0.0359
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.2498
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0063
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-upt_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "cp": 0.8239
-            },
-            {
-              "x": 0.05,
-              "y": 0,
-              "z": 0,
-              "cp": 0.524
-            },
-            {
-              "x": 0.11,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3347
-            },
-            {
-              "x": 0.19,
-              "y": 0,
-              "z": 0,
-              "cp": 0.131
-            },
-            {
-              "x": 0.3,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0615
-            },
-            {
-              "x": 0.42,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1337
-            },
-            {
-              "x": 0.54,
-              "y": 0,
-              "z": 0,
-              "cp": -0.1466
-            },
-            {
-              "x": 0.66,
-              "y": 0,
-              "z": 0,
-              "cp": -0.197
-            },
-            {
-              "x": 0.78,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0296
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0,
-              "cp": 0.0943
-            },
-            {
-              "x": 0.95,
-              "y": 0,
-              "z": 0,
-              "cp": 0.3378
-            },
-            {
-              "x": 1,
-              "y": 0,
-              "z": 0,
-              "cp": 0.1649
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml-upt_dummy_case_001",
-          "station_id": "prototype_0_25l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.3056
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.3113
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5119
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.615
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8382
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8687
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 0.9978
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0109
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0703
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0284
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-upt_dummy_case_001",
-          "station_id": "prototype_0_50l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.4256
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.4213
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.5919
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.665
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.8682
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.8887
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0078
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0209
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0703
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0284
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml-upt_dummy_case_001",
-          "station_id": "prototype_1_00l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0,
-              "u_over_u_inf": 0.5756
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.1,
-              "u_over_u_inf": 0.5613
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.22,
-              "u_over_u_inf": 0.7019
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.34,
-              "u_over_u_inf": 0.745
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.46,
-              "u_over_u_inf": 0.9182
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.58,
-              "u_over_u_inf": 0.9187
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.72,
-              "u_over_u_inf": 1.0278
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 0.9,
-              "u_over_u_inf": 1.0209
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.1,
-              "u_over_u_inf": 1.0703
-            },
-            {
-              "x": 0,
-              "y": 0,
-              "z": 1.32,
-              "u_over_u_inf": 1.0284
-            }
-          ]
-        }
-      ]
-    },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 31.1,
-        "rmse": 43.2
-      },
-      "surface_wall_shear": {
-        "mae": 0.78,
-        "rmse": 1.14
-      },
-      "volume_velocity": {
-        "mae": 1.79,
-        "rmse": 2.56
-      },
-      "volume_pressure": {
-        "mae": 30.9,
-        "rmse": 44.8
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.0063,
-      "c_lift": 0.0142
-    },
-    "metric_values": {
-      "surface_pressure_rel_l2": 7.2,
-      "surface_pressure_rel_l1": 5.184,
-      "surface_wall_shear_rel_l2": 11.4,
-      "surface_wall_shear_rel_l1": 7.752,
-      "volume_velocity_rel_l2": 7.3,
-      "volume_velocity_rel_l1": 5.11,
-      "volume_pressure_rel_l2": 8.15,
-      "volume_pressure_rel_l1": 5.623,
-      "cd_r2": 0.949,
-      "cl_r2": 0.925,
-      "velocity_profile_r2": 0.898,
-      "cp_cut_r2": 0.895,
-      "surface_pressure_mae": 31.1,
-      "surface_pressure_rmse": 43.2,
-      "surface_wall_shear_mae": 0.78,
-      "surface_wall_shear_rmse": 1.14,
-      "volume_velocity_mae": 1.79,
-      "volume_velocity_rmse": 2.56,
-      "volume_pressure_mae": 30.9,
-      "volume_pressure_rmse": 44.8,
-      "c_drag_mae": 0.0063,
-      "c_lift_mae": 0.0142,
-      "field_score": 45.083333333333336,
-      "force_score": 93.94,
-      "diagnostic_score": 89.68,
-      "overall_score": 68.44666666666667
-    }
-  },
-  {
+    "schema_version": "1.0",
     "submission_id": "dummy-windsorml-wakenet-v1",
     "model": "MeshGraphNets",
     "model_type": "GNN",
@@ -4124,153 +12,28 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
     "split": "Default",
-    "parameter_count": 7.8,
-    "surface_pressure_l2": 3.92,
-    "surface_pressure_l1": 2.78,
-    "surface_tau_l2": 5.08,
-    "surface_tau_l1": 3.46,
-    "volume_velocity_l2": 2.66,
-    "volume_velocity_l1": 1.87,
-    "volume_pressure_l2": 3.04,
-    "volume_pressure_l1": 2.1,
-    "r2_cd": 0.982,
-    "r2_cl": 0.971,
-    "velocity_profile_r2": 0.964,
-    "cp_cut_r2": 0.959,
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 7.8,
     "submitter_name": "Neil Ashton",
     "institution": "Example Aerodynamics Group",
     "paper_url": "https://example.com/wakenet-windsor",
     "code_url": "https://github.com/example/wakenet-windsor",
     "submitted_at": "2026-07-08",
-    "note": "Dummy WindsorML submission with compact profile curves.",
-    "diagnostics": {
-      "cp_cuts": [
-        {
-          "case_id": "windsorml_dummy_case_001",
-          "cut_id": "prototype_symmetry_plane_z_0",
-          "station_id": "symmetry_plane_z_0",
-          "station_label": "Symmetry-plane trace (z = 0 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0.04,
-              "y": 0,
-              "z": 0.48,
-              "cp": 0.52
-            },
-            {
-              "x": 0.28,
-              "y": 0,
-              "z": 0.53,
-              "cp": -0.03
-            },
-            {
-              "x": 0.58,
-              "y": 0,
-              "z": 0.49,
-              "cp": -0.21
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0.35,
-              "cp": -0.08
-            }
-          ]
-        },
-        {
-          "case_id": "windsorml_dummy_case_001",
-          "cut_id": "prototype_horizontal_cut_y_0_2595",
-          "station_id": "horizontal_cut_y_0_2595",
-          "station_label": "Horizontal trace (y = 0.2595 m)",
-          "coordinate_frame": "body_normalized",
-          "quantity": "cp",
-          "values": [
-            {
-              "x": 0.04,
-              "y": 0,
-              "z": 0.48,
-              "cp": 0.5793
-            },
-            {
-              "x": 0.28,
-              "y": 0,
-              "z": 0.53,
-              "cp": 0.1906
-            },
-            {
-              "x": 0.58,
-              "y": 0,
-              "z": 0.49,
-              "cp": -0.0303
-            },
-            {
-              "x": 0.88,
-              "y": 0,
-              "z": 0.35,
-              "cp": 0.0599
-            }
-          ]
-        }
-      ],
-      "velocity_profiles": [
-        {
-          "case_id": "windsorml_dummy_case_001",
-          "station_id": "wake_x_0_80l",
-          "coordinate_frame": "body_normalized",
-          "quantity": "u_over_u_inf",
-          "values": [
-            {
-              "x": 0.8,
-              "y": 0,
-              "z": 0.05,
-              "u_over_u_inf": 0.49
-            },
-            {
-              "x": 0.8,
-              "y": 0,
-              "z": 0.25,
-              "u_over_u_inf": 0.67
-            },
-            {
-              "x": 0.8,
-              "y": 0,
-              "z": 0.5,
-              "u_over_u_inf": 0.87
-            },
-            {
-              "x": 0.8,
-              "y": 0,
-              "z": 0.75,
-              "u_over_u_inf": 1
-            }
-          ]
-        }
-      ]
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "adc7a6b24f41097e2fbf5bdfee198bf4c7ff3aa3d1fe60f836d7018f96732a57"
     },
-    "dimensional_field_errors": {
-      "surface_pressure": {
-        "mae": 16.7,
-        "rmse": 23.5
-      },
-      "surface_wall_shear": {
-        "mae": 0.35,
-        "rmse": 0.51
-      },
-      "volume_velocity": {
-        "mae": 0.65,
-        "rmse": 0.93
-      },
-      "volume_pressure": {
-        "mae": 11.6,
-        "rmse": 16.7
-      }
-    },
-    "absolute_coefficient_errors": {
-      "c_drag": 0.0024,
-      "c_lift": 0.0057
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
     },
     "metric_values": {
       "surface_pressure_rel_l2": 3.92,
@@ -4299,6 +62,671 @@
       "force_score": 97.75999999999999,
       "diagnostic_score": 96.19999999999999,
       "overall_score": 86.67833333333333
-    }
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/dummy-windsorml-wakenet-v1/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Dummy WindsorML submission with compact profile curves.",
+    "parameter_count": 7.8
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-ab-upt",
+    "model": "AB-UPT",
+    "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 8.75,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "e17658b678000bea8673daa76cecf41ab11b1c5ba771f31b9d0a00d631eb4252"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 4.1,
+      "surface_pressure_rel_l1": 2.952,
+      "surface_wall_shear_rel_l2": 6.85,
+      "surface_wall_shear_rel_l1": 4.658,
+      "volume_velocity_rel_l2": 4.35,
+      "volume_velocity_rel_l1": 3.045,
+      "volume_pressure_rel_l2": 4.8,
+      "volume_pressure_rel_l1": 3.312,
+      "cd_r2": 0.989,
+      "cl_r2": 0.982,
+      "velocity_profile_r2": 0.966,
+      "cp_cut_r2": 0.964,
+      "surface_pressure_mae": 17.7,
+      "surface_pressure_rmse": 24.6,
+      "surface_wall_shear_mae": 0.47,
+      "surface_wall_shear_rmse": 0.69,
+      "volume_velocity_mae": 1.07,
+      "volume_velocity_rmse": 1.52,
+      "volume_pressure_mae": 18.2,
+      "volume_pressure_rmse": 26.4,
+      "c_drag_mae": 0.0014,
+      "c_lift_mae": 0.0043,
+      "field_score": 67.675,
+      "force_score": 98.61999999999999,
+      "diagnostic_score": 96.52000000000001,
+      "overall_score": 82.6225
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-ab-upt/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 8.75
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-gino",
+    "model": "GINO",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 15.6,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "228cb85bdbc632f2a878413ef2b01290825e0bfc5c2b2d3703b22f0aa672d300"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 12.7,
+      "surface_pressure_rel_l1": 9.144,
+      "surface_wall_shear_rel_l2": 20.9,
+      "surface_wall_shear_rel_l1": 14.212,
+      "volume_velocity_rel_l2": 33.5,
+      "volume_velocity_rel_l1": 23.45,
+      "volume_pressure_rel_l2": 36.2,
+      "volume_pressure_rel_l1": 24.978,
+      "cd_r2": 0.805,
+      "cl_r2": 0.765,
+      "velocity_profile_r2": 0.638,
+      "cp_cut_r2": 0.655,
+      "surface_pressure_mae": 54.9,
+      "surface_pressure_rmse": 76.2,
+      "surface_wall_shear_mae": 1.42,
+      "surface_wall_shear_rmse": 2.09,
+      "volume_velocity_mae": 8.21,
+      "volume_velocity_rmse": 11.72,
+      "volume_pressure_mae": 137.4,
+      "volume_pressure_rmse": 199.1,
+      "c_drag_mae": 0.024,
+      "c_lift_mae": 0.0425,
+      "field_score": 4.600000000000002,
+      "force_score": 78.9,
+      "diagnostic_score": 64.47999999999999,
+      "overall_score": 38.144999999999996
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-gino/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 15.6
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-graph-u-net",
+    "model": "Graph U-Net",
+    "model_type": "GNN",
+    "model_types": [
+      "GNN"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 14.11,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "82bdfef668234430d1c9d169df9d986ecea3d4518e0dda941cf23b7c24a59eef"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 14.8,
+      "surface_pressure_rel_l1": 10.656,
+      "surface_wall_shear_rel_l2": 24.2,
+      "surface_wall_shear_rel_l1": 16.456,
+      "volume_velocity_rel_l2": 15.5,
+      "volume_velocity_rel_l1": 10.85,
+      "volume_pressure_rel_l2": 18.4,
+      "volume_pressure_rel_l1": 12.696,
+      "cd_r2": 0.875,
+      "cl_r2": 0.842,
+      "velocity_profile_r2": 0.772,
+      "cp_cut_r2": 0.786,
+      "surface_pressure_mae": 63.9,
+      "surface_pressure_rmse": 88.8,
+      "surface_wall_shear_mae": 1.65,
+      "surface_wall_shear_rmse": 2.42,
+      "volume_velocity_mae": 3.8,
+      "volume_velocity_rmse": 5.42,
+      "volume_pressure_mae": 69.8,
+      "volume_pressure_rmse": 101.2,
+      "c_drag_mae": 0.0156,
+      "c_lift_mae": 0.0293,
+      "field_score": 0.39999999999999925,
+      "force_score": 86.18,
+      "diagnostic_score": 77.76,
+      "overall_score": 41.185
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-graph-u-net/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 14.11
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-lno",
+    "model": "LNO",
+    "model_type": "Neural operator",
+    "model_types": [
+      "Neural operator"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 6.3,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "742b8b2e48dc2ce12cf7d475e7ca1362125f7dda70ee3ab0d9d1dd32a075faae"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 18.3,
+      "surface_pressure_rel_l1": 13.176,
+      "surface_wall_shear_rel_l2": 32.4,
+      "surface_wall_shear_rel_l1": 22.032,
+      "volume_velocity_rel_l2": 21.8,
+      "volume_velocity_rel_l1": 15.26,
+      "volume_pressure_rel_l2": 25.6,
+      "volume_pressure_rel_l1": 17.664,
+      "cd_r2": 0.836,
+      "cl_r2": 0.798,
+      "velocity_profile_r2": 0.724,
+      "cp_cut_r2": 0.74,
+      "surface_pressure_mae": 79.1,
+      "surface_pressure_rmse": 109.8,
+      "surface_wall_shear_mae": 2.2,
+      "surface_wall_shear_rmse": 3.24,
+      "volume_velocity_mae": 5.34,
+      "volume_velocity_rmse": 7.63,
+      "volume_pressure_mae": 97.2,
+      "volume_pressure_rmse": 140.8,
+      "c_drag_mae": 0.0202,
+      "c_lift_mae": 0.0367,
+      "field_score": 0,
+      "force_score": 82.08,
+      "diagnostic_score": 73.03999999999999,
+      "overall_score": 38.78
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-lno/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 6.3
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-oformer",
+    "model": "OFormer",
+    "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 6.1,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "df7222f6b629b8a2e63af211ae172245078cd5684ae38205dd5a9bd22f61ee5d"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 4.75,
+      "surface_pressure_rel_l1": 3.42,
+      "surface_wall_shear_rel_l2": 7.7,
+      "surface_wall_shear_rel_l1": 5.236,
+      "volume_velocity_rel_l2": 5.04,
+      "volume_velocity_rel_l1": 3.528,
+      "volume_pressure_rel_l2": 5.36,
+      "volume_pressure_rel_l1": 3.698,
+      "cd_r2": 0.97,
+      "cl_r2": 0.953,
+      "velocity_profile_r2": 0.933,
+      "cp_cut_r2": 0.931,
+      "surface_pressure_mae": 20.5,
+      "surface_pressure_rmse": 28.5,
+      "surface_wall_shear_mae": 0.52,
+      "surface_wall_shear_rmse": 0.77,
+      "volume_velocity_mae": 1.23,
+      "volume_velocity_rmse": 1.76,
+      "volume_pressure_mae": 20.3,
+      "volume_pressure_rmse": 29.5,
+      "c_drag_mae": 0.0044,
+      "c_lift_mae": 0.0087,
+      "field_score": 63.053333333333335,
+      "force_score": 96.32,
+      "diagnostic_score": 93.22,
+      "overall_score": 78.91166666666666
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-oformer/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 6.1
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-pointnet",
+    "model": "PointNet",
+    "model_type": "Point cloud",
+    "model_types": [
+      "Point cloud"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 3.6,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "eace4be6ea1bd3a79feb27a9b08b3abe4ffe2f574faaa1da0ac397a736e63d7b"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 21.7,
+      "surface_pressure_rel_l1": 15.624,
+      "surface_wall_shear_rel_l2": 38.6,
+      "surface_wall_shear_rel_l1": 26.248,
+      "volume_velocity_rel_l2": 24.9,
+      "volume_velocity_rel_l1": 17.43,
+      "volume_pressure_rel_l2": 29.8,
+      "volume_pressure_rel_l1": 20.562,
+      "cd_r2": 0.815,
+      "cl_r2": 0.77,
+      "velocity_profile_r2": 0.665,
+      "cp_cut_r2": 0.688,
+      "surface_pressure_mae": 93.7,
+      "surface_pressure_rmse": 130.2,
+      "surface_wall_shear_mae": 2.62,
+      "surface_wall_shear_rmse": 3.86,
+      "volume_velocity_mae": 6.1,
+      "volume_velocity_rmse": 8.71,
+      "volume_pressure_mae": 113.1,
+      "volume_pressure_rmse": 163.9,
+      "c_drag_mae": 0.0228,
+      "c_lift_mae": 0.0418,
+      "field_score": 0,
+      "force_score": 79.69999999999999,
+      "diagnostic_score": 67.42,
+      "overall_score": 36.78
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-pointnet/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 3.6
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-transformer",
+    "model": "GeoTransformer",
+    "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 5.49,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "24591d4beadc02afb9a56a6461a2131f5092b7353bd5dbaa4f20df3e53d4d775"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 4.62,
+      "surface_pressure_rel_l1": 3.326,
+      "surface_wall_shear_rel_l2": 7.45,
+      "surface_wall_shear_rel_l1": 5.066,
+      "volume_velocity_rel_l2": 4.92,
+      "volume_velocity_rel_l1": 3.444,
+      "volume_pressure_rel_l2": 5.18,
+      "volume_pressure_rel_l1": 3.574,
+      "cd_r2": 0.972,
+      "cl_r2": 0.955,
+      "velocity_profile_r2": 0.936,
+      "cp_cut_r2": 0.934,
+      "surface_pressure_mae": 20,
+      "surface_pressure_rmse": 27.7,
+      "surface_wall_shear_mae": 0.51,
+      "surface_wall_shear_rmse": 0.74,
+      "volume_velocity_mae": 1.21,
+      "volume_velocity_rmse": 1.72,
+      "volume_pressure_mae": 19.7,
+      "volume_pressure_rmse": 28.5,
+      "c_drag_mae": 0.004,
+      "c_lift_mae": 0.0086,
+      "field_score": 64.10333333333332,
+      "force_score": 96.52,
+      "diagnostic_score": 93.52000000000001,
+      "overall_score": 79.56166666666667
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-transformer/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 5.49
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-transolver",
+    "model": "Transolver",
+    "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 5.49,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "c2dde11f1b83c43c4b53e5cdd93715cea3fbaf3c6ff00727b052ede4f32748c9"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 4.88,
+      "surface_pressure_rel_l1": 3.514,
+      "surface_wall_shear_rel_l2": 7.82,
+      "surface_wall_shear_rel_l1": 5.318,
+      "volume_velocity_rel_l2": 5.1,
+      "volume_velocity_rel_l1": 3.57,
+      "volume_pressure_rel_l2": 5.42,
+      "volume_pressure_rel_l1": 3.74,
+      "cd_r2": 0.969,
+      "cl_r2": 0.951,
+      "velocity_profile_r2": 0.931,
+      "cp_cut_r2": 0.929,
+      "surface_pressure_mae": 21.1,
+      "surface_pressure_rmse": 29.3,
+      "surface_wall_shear_mae": 0.53,
+      "surface_wall_shear_rmse": 0.78,
+      "volume_velocity_mae": 1.25,
+      "volume_velocity_rmse": 1.78,
+      "volume_pressure_mae": 20.6,
+      "volume_pressure_rmse": 29.8,
+      "c_drag_mae": 0.0042,
+      "c_lift_mae": 0.0092,
+      "field_score": 62.44333333333333,
+      "force_score": 96.17999999999999,
+      "diagnostic_score": 93.02000000000001,
+      "overall_score": 78.52166666666668
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-transolver/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 5.49
+  },
+  {
+    "schema_version": "1.0",
+    "submission_id": "windsorml-upt",
+    "model": "UPT",
+    "model_type": "Transformer",
+    "model_types": [
+      "Transformer"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "dataset_version": "prototype-1",
+    "split": "Default",
+    "split_id": "default",
+    "case_set_id": "default",
+    "split_sha256": "cdc35549ce238c4e4f706203a83e602c9d0111b58aab34e8f4cd471346790fea",
+    "parameter_count_millions": 10.98,
+    "submitter_name": "Neil Ashton",
+    "institution": "FluidsBench dummy data",
+    "paper_url": "",
+    "code_url": "",
+    "submitted_at": "2024-07-27",
+    "evaluation": {
+      "reference_version": "prototype-1",
+      "code_revision": "prototype-dummy-data",
+      "command": "not-applicable (illustrative dummy data)",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "8d09fd6db3834364d31710f5a65b95bac7c0e19e9026dd150e2375df8e0331af"
+    },
+    "approval": {
+      "status": "prototype",
+      "note": "Illustrative dummy data; not scientifically reviewed or approved."
+    },
+    "metric_values": {
+      "surface_pressure_rel_l2": 7.2,
+      "surface_pressure_rel_l1": 5.184,
+      "surface_wall_shear_rel_l2": 11.4,
+      "surface_wall_shear_rel_l1": 7.752,
+      "volume_velocity_rel_l2": 7.3,
+      "volume_velocity_rel_l1": 5.11,
+      "volume_pressure_rel_l2": 8.15,
+      "volume_pressure_rel_l1": 5.623,
+      "cd_r2": 0.949,
+      "cl_r2": 0.925,
+      "velocity_profile_r2": 0.898,
+      "cp_cut_r2": 0.895,
+      "surface_pressure_mae": 31.1,
+      "surface_pressure_rmse": 43.2,
+      "surface_wall_shear_mae": 0.78,
+      "surface_wall_shear_rmse": 1.14,
+      "volume_velocity_mae": 1.79,
+      "volume_velocity_rmse": 2.56,
+      "volume_pressure_mae": 30.9,
+      "volume_pressure_rmse": 44.8,
+      "c_drag_mae": 0.0063,
+      "c_lift_mae": 0.0142,
+      "field_score": 45.083333333333336,
+      "force_score": 93.94,
+      "diagnostic_score": 89.68,
+      "overall_score": 68.44666666666667
+    },
+    "profile_data": {
+      "format": "fluidsbench-profile-chunks-v1",
+      "index_file": "submissions/windsorml/windsorml-upt/profiles/index.json",
+      "case_count": 1,
+      "case_set_id": "default"
+    },
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
+    "parameter_count": 10.98
   }
 ]

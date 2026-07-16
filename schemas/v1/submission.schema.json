@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fluidsbench.org/schemas/v1/submission.schema.json",
+  "title": "FluidsBench submission",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "submission_id",
+    "model",
+    "model_type",
+    "model_types",
+    "training_regime",
+    "target_data_used",
+    "external_pretraining",
+    "pretraining_data",
+    "dataset",
+    "dataset_id",
+    "split",
+    "split_id",
+    "case_set_id",
+    "parameter_count_millions",
+    "submitter_name",
+    "institution",
+    "paper_url",
+    "code_url",
+    "submitted_at",
+    "evaluation",
+    "metric_values",
+    "profile_data"
+  ],
+  "properties": {
+    "$schema": {"type": "string", "format": "uri-reference"},
+    "schema_version": {"const": "1.0"},
+    "submission_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,79}$"},
+    "model": {"type": "string", "minLength": 1, "maxLength": 120},
+    "model_type": {"type": "string", "minLength": 1},
+    "model_types": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "training_regime": {"enum": ["from_scratch", "pretrained_zero_shot", "pretrained_official_train", "other"]},
+    "training_regime_explanation": {"type": "string", "minLength": 1},
+    "target_data_used": {"enum": ["none", "official_train", "other"]},
+    "external_pretraining": {"type": "boolean"},
+    "pretraining_data": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "oneOf": [
+          {"type": "string", "minLength": 1},
+          {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["name"],
+            "properties": {"name": {"type": "string", "minLength": 1}}
+          }
+        ]
+      }
+    },
+    "dataset": {"type": "string", "minLength": 1},
+    "dataset_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+    "dataset_version": {"type": "string", "minLength": 1},
+    "split": {"type": "string", "minLength": 1},
+    "split_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$"},
+    "case_set_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$"},
+    "split_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "parameter_count_millions": {"type": ["number", "null"], "minimum": 0},
+    "submitter_name": {"type": "string", "minLength": 1},
+    "institution": {"type": "string", "minLength": 1},
+    "paper_url": {"type": "string", "pattern": "^$|^https?://"},
+    "code_url": {"type": "string", "pattern": "^$|^https?://"},
+    "submitted_at": {"type": "string", "format": "date"},
+    "note": {"type": "string"},
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reference_version", "code_revision", "command", "evidence_file", "evidence_sha256"],
+      "properties": {
+        "reference_version": {"type": "string", "minLength": 1, "maxLength": 80},
+        "code_revision": {"type": "string", "minLength": 1, "maxLength": 160},
+        "command": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "evidence_file": {"const": "evaluation-evidence.json"},
+        "evidence_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["prototype", "approved"]},
+        "approved_by": {"type": "string", "minLength": 1},
+        "approved_at": {"type": "string", "format": "date"},
+        "pull_request_url": {"type": "string", "pattern": "^https://github\\.com/[^/]+/[^/]+/pull/[0-9]+$"},
+        "note": {"type": "string"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "approved"}}, "required": ["status"]},
+          "then": {"required": ["approved_by", "approved_at", "pull_request_url"]}
+        }
+      ]
+    },
+    "metric_values": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "number"}
+    },
+    "profile_data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "index_file", "case_count", "case_set_id"],
+      "properties": {
+        "format": {"const": "fluidsbench-profile-chunks-v1"},
+        "index_file": {"const": "profiles/index.json"},
+        "case_count": {"type": "integer", "minimum": 1},
+        "case_set_id": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

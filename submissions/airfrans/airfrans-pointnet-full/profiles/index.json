@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "submission_id": "airfrans-pointnet-full",
+  "dataset_id": "airfrans",
+  "split_id": "full",
+  "case_set_id": "standard",
+  "case_count": 1,
+  "case_id_status": "prototype_generated",
+  "chunks": [
+    {
+      "file": "chunk-000.json",
+      "case_ids": [
+        "airfrans_standard_test_0001"
+      ],
+      "sha256": "2530ff65e5ae0aabe3417bced5ba8e12d524418612041d11d3036faf53803755"
+    }
+  ]
+}

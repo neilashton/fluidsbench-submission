@@ -1,0 +1,82 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/v1/submission.schema.json",
+  "schema_version": "1.0",
+  "submission_id": "dummy-ahmedml-flowformer-v1",
+  "model": "FlowFormer",
+  "model_type": "Transformer",
+  "model_types": [
+    "Transformer",
+    "Neural operator"
+  ],
+  "training_regime": "pretrained_zero_shot",
+  "target_data_used": "none",
+  "external_pretraining": true,
+  "pretraining_data": [
+    {
+      "name": "Example external CFD pretraining corpus",
+      "type": "CFD simulations",
+      "public": false,
+      "samples": "TODO",
+      "notes": "Dummy metadata showing a zero-shot submission with no target dataset training data."
+    }
+  ],
+  "dataset": "AhmedML",
+  "dataset_id": "ahmedml",
+  "dataset_version": "prototype-1",
+  "split": "Medium",
+  "split_id": "medium",
+  "case_set_id": "standard",
+  "split_sha256": "f6993e6a7f842cd231fc1693da1e296046862806ba2941dc6277233f2f203c19",
+  "parameter_count_millions": 12.4,
+  "submitter_name": "Neil Ashton",
+  "institution": "Example University",
+  "paper_url": "https://example.com/fluidsbench-flowformer",
+  "code_url": "https://github.com/example/fluidsbench-flowformer",
+  "submitted_at": "2026-07-08",
+  "evaluation": {
+    "reference_version": "prototype-1",
+    "code_revision": "prototype-dummy-data",
+    "command": "not-applicable (illustrative dummy data)",
+    "evidence_file": "evaluation-evidence.json",
+    "evidence_sha256": "b162054a37a3ea893b271bd05fe3f229dbcb613ab023a3e7c7d537863cb9907d"
+  },
+  "approval": {
+    "status": "prototype",
+    "note": "Illustrative dummy data; not scientifically reviewed or approved."
+  },
+  "metric_values": {
+    "surface_pressure_rel_l2": 2.72,
+    "surface_pressure_rel_l1": 1.96,
+    "surface_wall_shear_rel_l2": 3.64,
+    "surface_wall_shear_rel_l1": 2.48,
+    "volume_velocity_rel_l2": 1.74,
+    "volume_velocity_rel_l1": 1.22,
+    "volume_pressure_rel_l2": 1.88,
+    "volume_pressure_rel_l1": 1.3,
+    "cd_r2": 0.996,
+    "cl_r2": 0.989,
+    "velocity_profile_r2": 0.986,
+    "cp_cut_r2": 0.981,
+    "surface_pressure_mae": 13.7,
+    "surface_pressure_rmse": 19,
+    "surface_wall_shear_mae": 0.3,
+    "surface_wall_shear_rmse": 0.44,
+    "volume_velocity_mae": 0.49,
+    "volume_velocity_rmse": 0.7,
+    "volume_pressure_mae": 7.8,
+    "volume_pressure_rmse": 11.3,
+    "c_drag_mae": 0.0013,
+    "c_lift_mae": 0.003,
+    "field_score": 84.06333333333333,
+    "force_score": 99.32000000000001,
+    "diagnostic_score": 98.4,
+    "overall_score": 91.46166666666667
+  },
+  "profile_data": {
+    "format": "fluidsbench-profile-chunks-v1",
+    "index_file": "profiles/index.json",
+    "case_count": 50,
+    "case_set_id": "standard"
+  },
+  "note": "Dummy AhmedML submission with compact profile curves. The displayed split assignment is illustrative dummy data."
+}

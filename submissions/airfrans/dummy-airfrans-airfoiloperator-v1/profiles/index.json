@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "submission_id": "dummy-airfrans-airfoiloperator-v1",
+  "dataset_id": "airfrans",
+  "split_id": "full",
+  "case_set_id": "standard",
+  "case_count": 1,
+  "case_id_status": "prototype_generated",
+  "chunks": [
+    {
+      "file": "chunk-000.json",
+      "case_ids": [
+        "airfrans_standard_test_0001"
+      ],
+      "sha256": "2f755cac247e34b4d0cc6c2a8eaa577cfbdfb28c5145efea90a19eeb0fd31005"
+    }
+  ]
+}

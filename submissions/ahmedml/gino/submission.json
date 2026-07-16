@@ -1,0 +1,73 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/v1/submission.schema.json",
+  "schema_version": "1.0",
+  "submission_id": "gino",
+  "model": "GINO",
+  "model_type": "Neural operator",
+  "model_types": [
+    "Neural operator"
+  ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
+  "dataset": "AhmedML",
+  "dataset_id": "ahmedml",
+  "dataset_version": "prototype-1",
+  "split": "Scarce",
+  "split_id": "scarce",
+  "case_set_id": "standard",
+  "split_sha256": "ce95532798ea9a9bf35767815113e47120446c796bc0cfec2c3800c925fe7a28",
+  "parameter_count_millions": 15.6,
+  "submitter_name": "Neil Ashton",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2025-06-13",
+  "evaluation": {
+    "reference_version": "prototype-1",
+    "code_revision": "prototype-dummy-data",
+    "command": "not-applicable (illustrative dummy data)",
+    "evidence_file": "evaluation-evidence.json",
+    "evidence_sha256": "8c7ed628ed053d40c09a74a4bcdf440839dabd5f3e5803d385b348c0e23ff99a"
+  },
+  "approval": {
+    "status": "prototype",
+    "note": "Illustrative dummy data; not scientifically reviewed or approved."
+  },
+  "metric_values": {
+    "surface_pressure_rel_l2": 7.9,
+    "surface_pressure_rel_l1": 5.688,
+    "surface_wall_shear_rel_l2": 8.18,
+    "surface_wall_shear_rel_l1": 5.562,
+    "volume_velocity_rel_l2": 6.23,
+    "volume_velocity_rel_l1": 4.361,
+    "volume_pressure_rel_l2": 8.1,
+    "volume_pressure_rel_l1": 5.589,
+    "cd_r2": 0.874,
+    "cl_r2": 0.841,
+    "velocity_profile_r2": 0.812,
+    "cp_cut_r2": 0.825,
+    "surface_pressure_mae": 39.8,
+    "surface_pressure_rmse": 55.3,
+    "surface_wall_shear_mae": 0.67,
+    "surface_wall_shear_rmse": 0.98,
+    "volume_velocity_mae": 1.74,
+    "volume_velocity_rmse": 2.49,
+    "volume_pressure_mae": 33.5,
+    "volume_pressure_rmse": 48.6,
+    "c_drag_mae": 0.0153,
+    "c_lift_mae": 0.0296,
+    "field_score": 49.644999999999996,
+    "force_score": 86.08,
+    "diagnostic_score": 81.72,
+    "overall_score": 66.77250000000001
+  },
+  "profile_data": {
+    "format": "fluidsbench-profile-chunks-v1",
+    "index_file": "profiles/index.json",
+    "case_count": 50,
+    "case_set_id": "standard"
+  },
+  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data."
+}
