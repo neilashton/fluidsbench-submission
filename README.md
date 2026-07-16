@@ -3,7 +3,7 @@
 Submission repository and approved-data feed for the [FluidsBench leaderboard](https://neilashton.github.io/fluidsbench/).
 
 Read the [dataset pages](https://neilashton.github.io/fluidsbench/datasets/) before preparing a result. They define the
-evaluation files, split rules, metrics, units, and diagnostic stations for each dataset.
+evaluation files, split rules, metrics, units, and profile stations for each dataset.
 
 ## What gets submitted
 
@@ -44,7 +44,7 @@ The manifest is authoritative. For each dataset, it declares:
 4. Give it a globally unique `submission_id`, such as `my-lab-rotor37-model-v1`.
 5. Run the repository validator.
 6. Open a pull request with the source submission file and the evaluator evidence requested by the dataset page.
-7. A maintainer reviews reproducibility, metadata, metrics, and diagnostic coverage.
+7. A maintainer reviews reproducibility, metadata, metrics, and profile coverage.
 8. After approval, a maintainer rebuilds the generated feeds and merges the PR. The website then reads the approved
    dataset feed through `leaderboard/manifest.json`.
 
@@ -78,10 +78,10 @@ and should normally equal the first `model_types` value.
 
 Allowed `training_regime` values are:
 
-- `from_scratch`: no external pretraining
-- `pretrained_zero_shot`: external pretraining, no target-dataset training data
-- `pretrained_official_train`: external pretraining followed by the official target training split
-- `other`: a regime not covered above
+- `from_scratch`: initialized without external pretraining and trained only on the official split's training data
+- `pretrained_zero_shot`: externally pretrained and evaluated without target-dataset training or fine-tuning
+- `pretrained_official_train`: externally pretrained, then trained or fine-tuned only on the official target training split
+- `other`: a different protocol that must be explained in the submission metadata
 
 The deliberately excluded categories are `pretrained_finetuned` and `pretrained_linear_probe`. Use
 `pretrained_official_train` when a pretrained model is trained with the official benchmark training split.
@@ -184,9 +184,9 @@ See an existing complete example:
 - [`submissions/ahmedml/dummy-ahmedml-flowformer-v1.json`](submissions/ahmedml/dummy-ahmedml-flowformer-v1.json)
 - [`submissions/hiliftaeroml/dummy-hiliftaeroml-liftoperator-v1.json`](submissions/hiliftaeroml/dummy-hiliftaeroml-liftoperator-v1.json)
 
-## Diagnostic arrays
+## Profile arrays
 
-Diagnostics are dataset-driven. Each manifest panel defines:
+Profile comparisons are dataset-driven. Each manifest panel defines:
 
 - `data_key`: the array name under `diagnostics`
 - `x_keys`: accepted coordinate keys
@@ -212,11 +212,11 @@ velocity at `outlet_plane_2`.
 
 Rotor37 uses `blade_profiles` for pressure ratio at `span_10`, `span_50`, and `span_90`. It uses
 `blade_thermo_profiles` for temperature and density ratios at the same stations. Rotor37 has no submitted velocity-profile
-diagnostic.
+comparison.
 
 BlendedNet uses `cp_cuts` and `skin_friction_profiles` at three `prototype_*` surface cuts. They are required for
 interface and pipeline testing, but remain explicitly illustrative until the evaluator fixes canonical extraction
-locations and tolerances. BlendedNet does not publish volume velocity fields, so no velocity-profile diagnostic is
+locations and tolerances. BlendedNet does not publish volume velocity fields, so no velocity-profile comparison is
 invented.
 
 The reference or ground-truth curves are not submitted here. They are owned by the FluidsBench website repository under
@@ -243,7 +243,7 @@ python3 scripts/manage_leaderboard.py build
 ```
 
 The validator checks required metadata, dataset folder, split name, complete metric IDs, numeric ranges, and every required
-diagnostic station/quantity pair.
+profile station/quantity pair.
 
 ## Generated feeds
 
@@ -271,7 +271,7 @@ Maintainers should verify that:
 - the official dataset split and evaluator were used
 - metrics are reproducible from submitted evaluator evidence
 - every manifest metric is present with the declared unit and direction
-- every required diagnostic station/quantity series is complete
+- every required profile station/quantity series is complete
 - model, pretraining, submitter, paper, and code metadata are suitable for publication
 
 After approval, run `build`, run `check`, and merge the source and generated feed changes together.
@@ -288,6 +288,6 @@ TODO: add dataset evaluator packages and exact maintainer evidence checklists.
 
 ## License
 
-TODO: confirm whether all submitted metadata and diagnostic data are covered by the repository license.
+TODO: confirm whether all submitted metadata and profile data are covered by the repository license.
 
 See [LICENSE](LICENSE).

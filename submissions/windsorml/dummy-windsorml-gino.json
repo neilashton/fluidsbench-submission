@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-gino",
-  "model": "FluidsBench prototype baseline",
+  "model": "GINO",
   "model_type": "Neural operator",
   "model_types": [
     "Neural operator"
@@ -24,12 +24,12 @@
   "r2_cl": 0.765,
   "velocity_profile_r2": 0.638,
   "cp_cut_r2": 0.655,
-  "submitter_name": "FluidsBench prototype baseline",
+  "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2024-07-27",
-  "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
   "diagnostics": {
     "cp_cuts": [
       {

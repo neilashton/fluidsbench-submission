@@ -1,6 +1,6 @@
 {
   "submission_id": "dummy-airfrans-airfoiloperator-v1",
-  "model": "FluidsBench prototype baseline",
+  "model": "MeshGraphNets",
   "model_type": "GNN",
   "model_types": [
     "GNN"
@@ -24,12 +24,12 @@
   "r2_cl": 0.992,
   "velocity_profile_r2": 0.948,
   "cp_cut_r2": 0.944,
-  "submitter_name": "Example Airfoil ML",
+  "submitter_name": "Neil Ashton",
   "institution": "Example Flow Institute",
   "paper_url": "https://example.com/airfoiloperator",
   "code_url": "https://github.com/example/airfoiloperator",
   "submitted_at": "2026-07-08",
-  "note": "Dummy AirfRANS submission with compact diagnostic curves. The displayed split assignment is illustrative dummy data.",
+  "note": "Dummy AirfRANS submission with compact profile curves. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {

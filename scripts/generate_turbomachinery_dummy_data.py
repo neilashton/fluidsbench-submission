@@ -10,7 +10,11 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL_NAME = "FluidsBench prototype baseline"
+MODEL_METADATA = {
+    "VKI-LS59": ("Transolver", "Transformer", ["Transformer"]),
+    "Rotor37": ("MeshGraphNets", "GNN", ["GNN"]),
+    "BlendedNet": ("UPT", "Transformer", ["Transformer"]),
+}
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -63,11 +67,12 @@ def metric_block(
 
 def common_submission(dataset: str, split: str, index: int) -> dict[str, Any]:
     slug = dataset.lower().replace("-", "")
+    model, model_type, model_types = MODEL_METADATA[dataset]
     return {
         "submission_id": f"{slug}-prototype-{split.replace('_', '-')}",
-        "model": MODEL_NAME,
-        "model_type": "Neural operator",
-        "model_types": ["Neural operator", "Transformer"],
+        "model": model,
+        "model_type": model_type,
+        "model_types": model_types,
         "training_regime": "from_scratch",
         "target_data_used": "official_train",
         "external_pretraining": False,
@@ -75,7 +80,7 @@ def common_submission(dataset: str, split: str, index: int) -> dict[str, Any]:
         "dataset": dataset,
         "split": split,
         "parameter_count": rounded(6.8 + 0.35 * index, 2),
-        "submitter_name": MODEL_NAME,
+        "submitter_name": "Neil Ashton",
         "institution": "FluidsBench dummy data",
         "paper_url": "",
         "code_url": "",
@@ -204,8 +209,6 @@ def generate_rotor() -> None:
 def generate_blendednet() -> None:
     submission = common_submission("BlendedNet", "geometry_holdout", 0)
     submission["submission_id"] = "blendednet-prototype-geometry-holdout"
-    submission["model_type"] = "Point cloud"
-    submission["model_types"] = ["Point cloud", "MLP"]
     submission["parameter_count"] = 5.42
     submission["metric_values"] = {
         "blended_surface_rel_l2": 10.3,

@@ -1,9 +1,10 @@
 {
   "submission_id": "drivaernetpp-pointmae",
-  "model": "FluidsBench prototype baseline",
+  "model": "Point-MAE",
   "model_type": "Point cloud",
   "model_types": [
-    "Point cloud"
+    "Point cloud",
+    "Transformer"
   ],
   "training_regime": "from_scratch",
   "target_data_used": "official_train",
@@ -24,12 +25,12 @@
   "r2_cl": 0.879,
   "velocity_profile_r2": 0.849,
   "cp_cut_r2": 0.879,
-  "submitter_name": "FluidsBench prototype baseline",
+  "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-11-25",
-  "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
   "diagnostics": {
     "cp_cuts": [
       {

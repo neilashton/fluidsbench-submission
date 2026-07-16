@@ -1,6 +1,6 @@
 {
   "submission_id": "windsorml-upt",
-  "model": "FluidsBench prototype baseline",
+  "model": "UPT",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -24,12 +24,12 @@
   "r2_cl": 0.925,
   "velocity_profile_r2": 0.898,
   "cp_cut_r2": 0.895,
-  "submitter_name": "FluidsBench prototype baseline",
+  "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2024-07-27",
-  "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
   "diagnostics": {
     "cp_cuts": [
       {

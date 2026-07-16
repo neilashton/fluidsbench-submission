@@ -1,10 +1,9 @@
 {
   "submission_id": "rotor37-prototype-train-125",
-  "model": "FluidsBench prototype baseline",
-  "model_type": "Neural operator",
+  "model": "MeshGraphNets",
+  "model_type": "GNN",
   "model_types": [
-    "Neural operator",
-    "Transformer"
+    "GNN"
   ],
   "training_regime": "from_scratch",
   "target_data_used": "official_train",
@@ -13,7 +12,7 @@
   "dataset": "Rotor37",
   "split": "train_125",
   "parameter_count": 7.85,
-  "submitter_name": "FluidsBench prototype baseline",
+  "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
   "paper_url": "",
   "code_url": "",

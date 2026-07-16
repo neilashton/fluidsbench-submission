@@ -1,6 +1,6 @@
 {
   "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
-  "model": "FluidsBench prototype baseline",
+  "model": "MeshGraphNets",
   "model_type": "GNN",
   "model_types": [
     "GNN"
@@ -24,12 +24,12 @@
   "r2_cl": 0.979,
   "velocity_profile_r2": 0.972,
   "cp_cut_r2": 0.968,
-  "submitter_name": "Example CarBench Team",
+  "submitter_name": "Neil Ashton",
   "institution": "Example Motors Research",
   "paper_url": "https://example.com/surfacegnn-cfd",
   "code_url": "https://github.com/example/surfacegnn-cfd",
   "submitted_at": "2026-07-08",
-  "note": "Dummy DrivAerNet++ submission with compact diagnostic curves.",
+  "note": "Dummy DrivAerNet++ submission with compact profile curves.",
   "diagnostics": {
     "cp_cuts": [
       {

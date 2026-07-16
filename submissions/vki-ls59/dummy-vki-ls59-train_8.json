@@ -1,9 +1,8 @@
 {
   "submission_id": "vkils59-prototype-train-8",
-  "model": "FluidsBench prototype baseline",
-  "model_type": "Neural operator",
+  "model": "Transolver",
+  "model_type": "Transformer",
   "model_types": [
-    "Neural operator",
     "Transformer"
   ],
   "training_regime": "from_scratch",
@@ -13,7 +12,7 @@
   "dataset": "VKI-LS59",
   "split": "train_8",
   "parameter_count": 9.25,
-  "submitter_name": "FluidsBench prototype baseline",
+  "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
   "paper_url": "",
   "code_url": "",

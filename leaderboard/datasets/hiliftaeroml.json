@@ -1,7 +1,7 @@
 [
   {
     "submission_id": "hiliftaeroml-geot-aoa12",
-    "model": "FluidsBench prototype baseline",
+    "model": "GeoTransformer",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -25,12 +25,12 @@
     "r2_cl": 0.992,
     "velocity_profile_r2": 0.934,
     "cp_cut_r2": 0.958,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2026-06-25",
-    "note": "HiLiftAeroML AoA = 12 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 12 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -1322,7 +1322,7 @@
   },
   {
     "submission_id": "hiliftaeroml-geot-aoa22",
-    "model": "FluidsBench prototype baseline",
+    "model": "GeoTransformer",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -1346,12 +1346,12 @@
     "r2_cl": 0.872,
     "velocity_profile_r2": 0.812,
     "cp_cut_r2": 0.82,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2026-06-25",
-    "note": "HiLiftAeroML AoA = 22 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 22 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -2643,7 +2643,7 @@
   },
   {
     "submission_id": "hiliftaeroml-geot-aoa4",
-    "model": "FluidsBench prototype baseline",
+    "model": "GeoTransformer",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -2667,12 +2667,12 @@
     "r2_cl": 0.998,
     "velocity_profile_r2": 0.956,
     "cp_cut_r2": 0.972,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2026-06-25",
-    "note": "HiLiftAeroML AoA = 4 deg GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 4 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -3964,7 +3964,7 @@
   },
   {
     "submission_id": "hiliftaeroml-geot-full",
-    "model": "FluidsBench prototype baseline",
+    "model": "GeoTransformer",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -3988,12 +3988,12 @@
     "r2_cl": 0.992,
     "velocity_profile_r2": 0.94,
     "cp_cut_r2": 0.952,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2026-06-25",
-    "note": "HiLiftAeroML full-split GeoTransolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML full-split GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -5285,10 +5285,10 @@
   },
   {
     "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -5309,12 +5309,12 @@
     "r2_cl": 0.986,
     "velocity_profile_r2": 0.955,
     "cp_cut_r2": 0.951,
-    "submitter_name": "Example High-Lift Lab",
+    "submitter_name": "Neil Ashton",
     "institution": "Example Aerospace Institute",
     "paper_url": "https://example.com/liftoperator-aoa",
     "code_url": "https://github.com/example/liftoperator-aoa",
     "submitted_at": "2026-07-08",
-    "note": "Dummy HiLiftAeroML submission with compact diagnostic curves. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "Dummy HiLiftAeroML submission with compact profile curves. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -6606,7 +6606,7 @@
   },
   {
     "submission_id": "hiliftaeroml-transolver-aoa12",
-    "model": "FluidsBench prototype baseline",
+    "model": "Transolver",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -6630,12 +6630,12 @@
     "r2_cl": 0.993,
     "velocity_profile_r2": 0.92,
     "cp_cut_r2": 0.944,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2026-06-25",
-    "note": "HiLiftAeroML AoA = 12 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 12 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -7927,7 +7927,7 @@
   },
   {
     "submission_id": "hiliftaeroml-transolver-aoa22",
-    "model": "FluidsBench prototype baseline",
+    "model": "Transolver",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -7951,12 +7951,12 @@
     "r2_cl": 0.886,
     "velocity_profile_r2": 0.798,
     "cp_cut_r2": 0.807,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2026-06-25",
-    "note": "HiLiftAeroML AoA = 22 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 22 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -9248,7 +9248,7 @@
   },
   {
     "submission_id": "hiliftaeroml-transolver-aoa4",
-    "model": "FluidsBench prototype baseline",
+    "model": "Transolver",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -9272,12 +9272,12 @@
     "r2_cl": 0.994,
     "velocity_profile_r2": 0.928,
     "cp_cut_r2": 0.946,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2026-06-25",
-    "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and diagnostic cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
     "diagnostics": {
       "cp_cuts": [
         {

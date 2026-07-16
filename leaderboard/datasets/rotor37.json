@@ -1,11 +1,10 @@
 [
   {
     "submission_id": "rotor37-prototype-train-1000",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator",
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -14,7 +13,7 @@
     "dataset": "Rotor37",
     "split": "train_1000",
     "parameter_count": 6.8,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
@@ -599,11 +598,10 @@
   },
   {
     "submission_id": "rotor37-prototype-train-125",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator",
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -612,7 +610,7 @@
     "dataset": "Rotor37",
     "split": "train_125",
     "parameter_count": 7.85,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
@@ -1197,11 +1195,10 @@
   },
   {
     "submission_id": "rotor37-prototype-train-16",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator",
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -1210,7 +1207,7 @@
     "dataset": "Rotor37",
     "split": "train_16",
     "parameter_count": 8.9,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
@@ -1795,11 +1792,10 @@
   },
   {
     "submission_id": "rotor37-prototype-train-250",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator",
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -1808,7 +1804,7 @@
     "dataset": "Rotor37",
     "split": "train_250",
     "parameter_count": 7.5,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
@@ -2393,11 +2389,10 @@
   },
   {
     "submission_id": "rotor37-prototype-train-32",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator",
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -2406,7 +2401,7 @@
     "dataset": "Rotor37",
     "split": "train_32",
     "parameter_count": 8.55,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
@@ -2991,11 +2986,10 @@
   },
   {
     "submission_id": "rotor37-prototype-train-500",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator",
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -3004,7 +2998,7 @@
     "dataset": "Rotor37",
     "split": "train_500",
     "parameter_count": 7.15,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
@@ -3589,11 +3583,10 @@
   },
   {
     "submission_id": "rotor37-prototype-train-64",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator",
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -3602,7 +3595,7 @@
     "dataset": "Rotor37",
     "split": "train_64",
     "parameter_count": 8.2,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
@@ -4187,11 +4180,10 @@
   },
   {
     "submission_id": "rotor37-prototype-train-8",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Neural operator",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Neural operator",
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -4200,7 +4192,7 @@
     "dataset": "Rotor37",
     "split": "train_8",
     "parameter_count": 9.25,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",

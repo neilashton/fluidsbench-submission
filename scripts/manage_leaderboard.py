@@ -103,6 +103,15 @@ def metric_definitions_by_id(manifest: dict[str, Any]) -> dict[str, dict[str, An
     }
 
 
+def training_regimes_by_id(manifest: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    definitions = manifest.get("training_regimes", [])
+    return {
+        definition["id"]: definition
+        for definition in definitions
+        if isinstance(definition, dict) and definition.get("id")
+    }
+
+
 def dataset_metric_definitions(
     manifest: dict[str, Any], dataset: dict[str, Any]
 ) -> list[dict[str, Any]]:
@@ -155,6 +164,29 @@ def validate_manifest(manifest: dict[str, Any]) -> list[str]:
             errors.append(f"metric definition {definition.get('id')!r} requires non-negative integer digits")
 
     known_metric_ids = set(metric_ids)
+
+    training_regimes = manifest.get("training_regimes")
+    if not isinstance(training_regimes, list) or not training_regimes:
+        errors.append("training_regimes must be a non-empty array")
+        training_regimes = []
+    training_regime_ids = [
+        definition.get("id")
+        for definition in training_regimes
+        if isinstance(definition, dict)
+    ]
+    if any(not regime_id for regime_id in training_regime_ids) or len(
+        training_regime_ids
+    ) != len(set(training_regime_ids)):
+        errors.append("training_regime IDs must be present and unique")
+    for definition in training_regimes:
+        if not isinstance(definition, dict):
+            errors.append("each training regime must be an object")
+            continue
+        for key in ("id", "label", "description"):
+            if not isinstance(definition.get(key), str) or not definition[key].strip():
+                errors.append(
+                    f"training regime {definition.get('id')!r} requires {key}"
+                )
 
     for entry in dataset_entries(manifest):
         name = entry.get("name")
@@ -460,6 +492,10 @@ def validate_submission(
     if split_names and submission.get("split") not in split_names:
         add(f"split {submission.get('split')!r} is not defined for {dataset_name}")
 
+    training_regime = submission.get("training_regime")
+    if training_regime not in training_regimes_by_id(manifest):
+        add(f"training_regime {training_regime!r} is not defined in the manifest")
+
     if dataset.get("submission_format") != "metric_values":
         for key in BASE_METRICS:
             value = submission.get(key)
@@ -646,6 +682,7 @@ def check_generated_feeds(manifest: dict[str, Any]) -> list[str]:
         "generated_at",
         "metric_catalog",
         "metric_definitions",
+        "training_regimes",
         "datasets",
     ):
         if manifest.get(key) != expected_manifest.get(key):

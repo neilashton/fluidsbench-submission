@@ -1,11 +1,10 @@
 [
   {
     "submission_id": "blendednet-prototype-geometry-holdout",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Point cloud",
+    "model": "UPT",
+    "model_type": "Transformer",
     "model_types": [
-      "Point cloud",
-      "MLP"
+      "Transformer"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -14,7 +13,7 @@
     "dataset": "BlendedNet",
     "split": "geometry_holdout",
     "parameter_count": 5.42,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",

@@ -1,7 +1,7 @@
 [
   {
     "submission_id": "windsorml-ab-upt",
-    "model": "FluidsBench prototype baseline",
+    "model": "AB-UPT",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -25,12 +25,12 @@
     "r2_cl": 0.982,
     "velocity_profile_r2": 0.966,
     "cp_cut_r2": 0.964,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -458,7 +458,7 @@
   },
   {
     "submission_id": "windsorml-gino",
-    "model": "FluidsBench prototype baseline",
+    "model": "GINO",
     "model_type": "Neural operator",
     "model_types": [
       "Neural operator"
@@ -482,12 +482,12 @@
     "r2_cl": 0.765,
     "velocity_profile_r2": 0.638,
     "cp_cut_r2": 0.655,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -915,7 +915,7 @@
   },
   {
     "submission_id": "windsorml-graph-u-net",
-    "model": "FluidsBench prototype baseline",
+    "model": "Graph U-Net",
     "model_type": "GNN",
     "model_types": [
       "GNN"
@@ -939,12 +939,12 @@
     "r2_cl": 0.842,
     "velocity_profile_r2": 0.772,
     "cp_cut_r2": 0.786,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -1372,7 +1372,7 @@
   },
   {
     "submission_id": "windsorml-lno",
-    "model": "FluidsBench prototype baseline",
+    "model": "LNO",
     "model_type": "Neural operator",
     "model_types": [
       "Neural operator"
@@ -1396,12 +1396,12 @@
     "r2_cl": 0.798,
     "velocity_profile_r2": 0.724,
     "cp_cut_r2": 0.74,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -1829,7 +1829,7 @@
   },
   {
     "submission_id": "windsorml-oformer",
-    "model": "FluidsBench prototype baseline",
+    "model": "OFormer",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -1853,12 +1853,12 @@
     "r2_cl": 0.953,
     "velocity_profile_r2": 0.933,
     "cp_cut_r2": 0.931,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -2286,7 +2286,7 @@
   },
   {
     "submission_id": "windsorml-pointnet",
-    "model": "FluidsBench prototype baseline",
+    "model": "PointNet",
     "model_type": "Point cloud",
     "model_types": [
       "Point cloud"
@@ -2310,12 +2310,12 @@
     "r2_cl": 0.77,
     "velocity_profile_r2": 0.665,
     "cp_cut_r2": 0.688,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -2743,7 +2743,7 @@
   },
   {
     "submission_id": "windsorml-transformer",
-    "model": "FluidsBench prototype baseline",
+    "model": "GeoTransformer",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -2767,12 +2767,12 @@
     "r2_cl": 0.955,
     "velocity_profile_r2": 0.936,
     "cp_cut_r2": 0.934,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -3200,7 +3200,7 @@
   },
   {
     "submission_id": "windsorml-transolver",
-    "model": "FluidsBench prototype baseline",
+    "model": "Transolver",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -3224,12 +3224,12 @@
     "r2_cl": 0.951,
     "velocity_profile_r2": 0.931,
     "cp_cut_r2": 0.929,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -3657,7 +3657,7 @@
   },
   {
     "submission_id": "windsorml-upt",
-    "model": "FluidsBench prototype baseline",
+    "model": "UPT",
     "model_type": "Transformer",
     "model_types": [
       "Transformer"
@@ -3681,12 +3681,12 @@
     "r2_cl": 0.925,
     "velocity_profile_r2": 0.898,
     "cp_cut_r2": 0.895,
-    "submitter_name": "FluidsBench prototype baseline",
+    "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
     "paper_url": "",
     "code_url": "",
     "submitted_at": "2024-07-27",
-    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+    "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
     "diagnostics": {
       "cp_cuts": [
         {
@@ -4114,10 +4114,10 @@
   },
   {
     "submission_id": "dummy-windsorml-wakenet-v1",
-    "model": "FluidsBench prototype baseline",
-    "model_type": "Transformer",
+    "model": "MeshGraphNets",
+    "model_type": "GNN",
     "model_types": [
-      "Transformer"
+      "GNN"
     ],
     "training_regime": "from_scratch",
     "target_data_used": "official_train",
@@ -4138,12 +4138,12 @@
     "r2_cl": 0.971,
     "velocity_profile_r2": 0.964,
     "cp_cut_r2": 0.959,
-    "submitter_name": "Example Wind Tunnel AI",
+    "submitter_name": "Neil Ashton",
     "institution": "Example Aerodynamics Group",
     "paper_url": "https://example.com/wakenet-windsor",
     "code_url": "https://github.com/example/wakenet-windsor",
     "submitted_at": "2026-07-08",
-    "note": "Dummy WindsorML submission with compact diagnostic curves.",
+    "note": "Dummy WindsorML submission with compact profile curves.",
     "diagnostics": {
       "cp_cuts": [
         {

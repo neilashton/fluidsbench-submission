@@ -1,10 +1,9 @@
 {
   "submission_id": "dummy-drivaerml-meshoperator-v1",
-  "model": "FluidsBench prototype baseline",
-  "model_type": "Neural operator",
+  "model": "MeshGraphNets",
+  "model_type": "GNN",
   "model_types": [
-    "Neural operator",
-    "Transformer"
+    "GNN"
   ],
   "training_regime": "pretrained_official_train",
   "target_data_used": "official_train",
@@ -33,12 +32,12 @@
   "r2_cl": 0.982,
   "velocity_profile_r2": 0.978,
   "cp_cut_r2": 0.973,
-  "submitter_name": "AeroAI Benchmarks",
+  "submitter_name": "Neil Ashton",
   "institution": "AeroAI Ltd",
   "paper_url": "https://example.com/meshoperator-plus",
   "code_url": "https://github.com/example/meshoperator-plus",
   "submitted_at": "2026-07-08",
-  "note": "Dummy DrivAerML submission with compact diagnostic curves. The displayed split assignment is illustrative dummy data.",
+  "note": "Dummy DrivAerML submission with compact profile curves. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {

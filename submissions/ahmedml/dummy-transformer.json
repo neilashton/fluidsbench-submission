@@ -1,6 +1,6 @@
 {
   "submission_id": "transformer",
-  "model": "FluidsBench prototype baseline",
+  "model": "GeoTransformer",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -24,12 +24,12 @@
   "r2_cl": 0.971,
   "velocity_profile_r2": 0.969,
   "cp_cut_r2": 0.961,
-  "submitter_name": "FluidsBench prototype baseline",
+  "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {

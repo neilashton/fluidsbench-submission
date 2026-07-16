@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaernetpp-transolver",
-  "model": "FluidsBench prototype baseline",
+  "model": "Transolver",
   "model_type": "Transformer",
   "model_types": [
     "Transformer"
@@ -24,12 +24,12 @@
   "r2_cl": 0.958,
   "velocity_profile_r2": 0.928,
   "cp_cut_r2": 0.958,
-  "submitter_name": "FluidsBench prototype baseline",
+  "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-11-25",
-  "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed.",
+  "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed.",
   "diagnostics": {
     "cp_cuts": [
       {

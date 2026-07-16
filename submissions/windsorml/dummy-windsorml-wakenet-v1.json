@@ -1,9 +1,9 @@
 {
   "submission_id": "dummy-windsorml-wakenet-v1",
-  "model": "FluidsBench prototype baseline",
-  "model_type": "Transformer",
+  "model": "MeshGraphNets",
+  "model_type": "GNN",
   "model_types": [
-    "Transformer"
+    "GNN"
   ],
   "training_regime": "from_scratch",
   "target_data_used": "official_train",
@@ -24,12 +24,12 @@
   "r2_cl": 0.971,
   "velocity_profile_r2": 0.964,
   "cp_cut_r2": 0.959,
-  "submitter_name": "Example Wind Tunnel AI",
+  "submitter_name": "Neil Ashton",
   "institution": "Example Aerodynamics Group",
   "paper_url": "https://example.com/wakenet-windsor",
   "code_url": "https://github.com/example/wakenet-windsor",
   "submitted_at": "2026-07-08",
-  "note": "Dummy WindsorML submission with compact diagnostic curves.",
+  "note": "Dummy WindsorML submission with compact profile curves.",
   "diagnostics": {
     "cp_cuts": [
       {

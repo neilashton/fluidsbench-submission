@@ -1,6 +1,6 @@
 {
   "submission_id": "drivaerml-pointnet",
-  "model": "FluidsBench prototype baseline",
+  "model": "PointNet",
   "model_type": "Point cloud",
   "model_types": [
     "Point cloud"
@@ -24,12 +24,12 @@
   "r2_cl": 0.79,
   "velocity_profile_r2": 0.69,
   "cp_cut_r2": 0.71,
-  "submitter_name": "FluidsBench prototype baseline",
+  "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
   "paper_url": "",
   "code_url": "",
   "submitted_at": "2025-06-13",
-  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and diagnostic R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder diagnostic curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+  "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
   "diagnostics": {
     "cp_cuts": [
       {

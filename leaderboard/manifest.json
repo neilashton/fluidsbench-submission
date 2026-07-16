@@ -1,7 +1,29 @@
 {
-  "schema_version": "0.4.0",
+  "schema_version": "0.5.0",
   "generated_at": "2026-07-15T00:00:00Z",
   "all_file": "leaderboard/all.json",
+  "training_regimes": [
+    {
+      "id": "from_scratch",
+      "label": "Scratch",
+      "description": "The model is initialized without external pretraining and trained only with the official training data for the selected benchmark split."
+    },
+    {
+      "id": "pretrained_zero_shot",
+      "label": "Zero-shot",
+      "description": "The model uses external pretraining and is evaluated on the benchmark without training or fine-tuning on the target dataset."
+    },
+    {
+      "id": "pretrained_official_train",
+      "label": "Pretrained + official train",
+      "description": "The model starts from externally pretrained weights and is then trained or fine-tuned using only the official training data for the selected benchmark split."
+    },
+    {
+      "id": "other",
+      "label": "Other",
+      "description": "The training protocol does not match the standard categories and must be explained clearly in the submission metadata."
+    }
+  ],
   "metric_catalog": {
     "dimensional_fields": [
       {
@@ -272,7 +294,7 @@
             {
               "id": "prototype_0_25l",
               "label": "0.25L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.25 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -280,7 +302,7 @@
             {
               "id": "prototype_0_50l",
               "label": "0.50L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.50 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -288,7 +310,7 @@
             {
               "id": "prototype_1_00l",
               "label": "1.00L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -449,7 +471,7 @@
             {
               "id": "prototype_0_25l",
               "label": "0.25L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.25 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -457,7 +479,7 @@
             {
               "id": "prototype_0_50l",
               "label": "0.50L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.50 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -465,7 +487,7 @@
             {
               "id": "prototype_1_00l",
               "label": "1.00L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -686,7 +708,7 @@
             {
               "id": "prototype_0_25l",
               "label": "0.25L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.25 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -694,7 +716,7 @@
             {
               "id": "prototype_0_50l",
               "label": "0.50L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.50 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -702,7 +724,7 @@
             {
               "id": "prototype_1_00l",
               "label": "1.00L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -864,7 +886,7 @@
             {
               "id": "prototype_0_25l",
               "label": "0.25L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.25 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -872,7 +894,7 @@
             {
               "id": "prototype_0_50l",
               "label": "0.50L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.50 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -880,7 +902,7 @@
             {
               "id": "prototype_1_00l",
               "label": "1.00L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -1583,7 +1605,7 @@
             {
               "id": "prototype_0_25l",
               "label": "0.25L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.25 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -1591,7 +1613,7 @@
             {
               "id": "prototype_0_50l",
               "label": "0.50L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 0.50 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -1599,7 +1621,7 @@
             {
               "id": "prototype_1_00l",
               "label": "1.00L",
-              "x_label": "Diagnostic coordinate",
+              "x_label": "Profile coordinate",
               "description": "Prototype velocity profile at 1.00 reference lengths.",
               "basis": "fluidsbench_benchmark_trace",
               "source_url": "https://fluidsbench.github.io/"
@@ -2034,7 +2056,7 @@
         {
           "id": "blade_thermodynamics",
           "title": "Blade thermodynamic profiles",
-          "description": "Normalized temperature and density profiles at the same span stations. Rotor37 has no submitted velocity-profile diagnostic.",
+          "description": "Normalized temperature and density profiles at the same span stations. Rotor37 does not require a submitted velocity profile.",
           "data_key": "blade_thermo_profiles",
           "x_keys": [
             "x_over_c",
@@ -2324,7 +2346,7 @@
       "digits": 1,
       "direction": "higher",
       "kind": "score",
-      "equation": "0.50 S_field + 0.25 S_force + 0.25 S_diagnostic",
+      "equation": "0.50 S_field + 0.25 S_force + 0.25 S_profile",
       "comparison_group": "summary",
       "comparison_group_label": "Summary scores",
       "column_group_label": "Scores"
@@ -2363,8 +2385,8 @@
     },
     {
       "id": "diagnostic_score",
-      "label": "Diagnostic score",
-      "description": "Score out of 100 derived from the official profile and cut diagnostics.",
+      "label": "Profile score",
+      "description": "Score out of 100 derived from the official profile and cut comparisons.",
       "group": "scores",
       "group_label": "Scores",
       "column_group": "scores",
