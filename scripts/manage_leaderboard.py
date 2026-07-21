@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from copy import deepcopy
 from datetime import date, datetime, timezone
@@ -13,13 +14,63 @@ from pathlib import Path
 from typing import Any
 
 if __package__:
-    from .validate_submission import load_json, submission_files, validate_many
+    from .validate_submission import load_json, sha256_file, submission_files, validate_many
 else:
-    from validate_submission import load_json, submission_files, validate_many
+    from validate_submission import load_json, sha256_file, submission_files, validate_many
 
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "leaderboard" / "manifest.json"
+
+
+def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
+    """Return release-level provenance errors that must block an official feed."""
+
+    release = manifest.get("data_release", {})
+    errors: list[str] = []
+    if release.get("status") not in {"prototype_dummy_data", "official"}:
+        errors.append("leaderboard/manifest.json data_release.status must be prototype_dummy_data or official")
+    if release.get("reproducibility_contract_version") != "open-reproducibility-1.0":
+        errors.append(
+            "leaderboard/manifest.json data_release.reproducibility_contract_version must be "
+            "open-reproducibility-1.0"
+        )
+    license_metadata = release.get("license")
+    if not isinstance(license_metadata, dict) or any(
+        not isinstance(license_metadata.get(key), str) or not license_metadata[key].strip()
+        for key in ("spdx_id", "name", "url", "scope")
+    ):
+        errors.append("leaderboard/manifest.json data_release.license must define spdx_id, name, url, and scope")
+    archive_url = release.get("archive_url")
+    if release.get("status") != "prototype_dummy_data" and (
+        not isinstance(archive_url, str) or not archive_url.startswith("https://")
+    ):
+        errors.append("an official data release requires an immutable HTTPS data_release.archive_url")
+    source_commit = release.get("source_commit")
+    if release.get("status") == "official" and not (
+        isinstance(source_commit, str) and re.fullmatch(r"(?:[a-f0-9]{40}|[a-f0-9]{64})", source_commit)
+    ):
+        errors.append("an official data release requires a full immutable data_release.source_commit")
+    asset_base_url = release.get("asset_base_url")
+    if not isinstance(asset_base_url, str) or not asset_base_url.startswith("https://"):
+        errors.append("leaderboard/manifest.json data_release.asset_base_url must be an HTTPS URL")
+    elif release.get("status") == "official" and source_commit not in asset_base_url:
+        errors.append("an official data_release.asset_base_url must contain the immutable source_commit")
+    profile_ground_truth = release.get("profile_ground_truth")
+    if not isinstance(profile_ground_truth, dict) or any(
+        not isinstance(profile_ground_truth.get(key), str) or not profile_ground_truth[key].strip()
+        for key in ("release_id", "manifest_url", "manifest_sha256")
+    ):
+        errors.append(
+            "leaderboard/manifest.json data_release.profile_ground_truth must define release_id, manifest_url, and manifest_sha256"
+        )
+    elif not profile_ground_truth["manifest_url"].startswith("https://") or not re.fullmatch(
+        r"[a-f0-9]{64}", profile_ground_truth["manifest_sha256"]
+    ):
+        errors.append("data_release.profile_ground_truth requires an HTTPS manifest_url and lowercase SHA-256 digest")
+    if archive_url is not None and (not isinstance(archive_url, str) or not archive_url.startswith("https://")):
+        errors.append("data_release.archive_url must be null or an HTTPS URL")
+    return errors
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -35,9 +86,11 @@ def json_bytes(value: Any) -> bytes:
 
 def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     rows = {dataset["name"]: [] for dataset in manifest["datasets"]}
+    release_status = manifest.get("data_release", {}).get("status")
+    allowed_approval_status = "prototype" if release_status == "prototype_dummy_data" else "approved"
     for path in submission_files():
         submission = load_json(path)
-        if submission.get("approval", {}).get("status") not in {"approved", "prototype"}:
+        if submission.get("approval", {}).get("status") != allowed_approval_status:
             continue
         row = deepcopy(submission)
         row.pop("$schema", None)
@@ -45,6 +98,27 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
         row["profile_data"]["index_file"] = str(
             (path.parent / row["profile_data"]["index_file"]).relative_to(ROOT)
         )
+        profile_index_path = ROOT / row["profile_data"]["index_file"]
+        if profile_index_path.is_file():
+            row["profile_data"]["index_sha256"] = sha256_file(profile_index_path)
+        if allowed_approval_status == "approved":
+            replay_metadata = submission["approval"]["replay"]
+            replay_path = path.parent / replay_metadata["evidence_file"]
+            replay = load_json(replay_path)
+            row["maintainer_replay"] = {
+                "status": replay["status"],
+                "contract_version": replay["contract_version"],
+                "reference_version": replay["reference_version"],
+                "replayed_by": replay["replayed_by"],
+                "replayed_at": replay["replayed_at"],
+                "metric_abs_tolerance": replay["metric_abs_tolerance"],
+                "reviewed_submission_sha256": replay["reviewed_submission_sha256"],
+                "submitted_profile_index_sha256": replay["submitted_profile_index_sha256"],
+                "replayed_profile_index_sha256": replay["replayed_profile_index_sha256"],
+                "independence": replay["independence"],
+                "evidence_file": str(replay_path.relative_to(ROOT)),
+                "evidence_sha256": replay_metadata["evidence_sha256"],
+            }
         rows[submission["dataset"]].append(row)
     return rows
 
@@ -143,6 +217,9 @@ def main() -> int:
     if errors:
         return print_errors(errors)
     manifest = load_json(MANIFEST_PATH)
+    errors = release_contract_errors(manifest)
+    if errors:
+        return print_errors(errors)
     if args.command == "build":
         build(manifest)
         print(f"Built compact leaderboard feeds from {totals['submissions']} validated submissions.")

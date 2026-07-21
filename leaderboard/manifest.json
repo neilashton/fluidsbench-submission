@@ -1,15 +1,29 @@
 {
   "schema_version": "0.5.0",
-  "generated_at": "2026-07-16T11:54:18Z",
+  "generated_at": "2026-07-20T17:47:35Z",
   "data_release": {
-    "id": "prototype-dev-2026-07-15-fec68cc4679f",
+    "id": "prototype-dev-2026-07-15-a00099436a05",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-07-16T11:54:18Z",
+    "generated_at": "2026-07-20T17:47:35Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "fec68cc4679fb94a7e85471a834744c1557a5eb66b48c146bf94474be1289032",
+    "feed_sha256": "a00099436a05a80e06bb794209b148951b68a9e4a410a304b769a6ecb5174e22",
     "canonical_url": "https://fluidsbench.org/",
+    "archive_url": null,
+    "asset_base_url": "https://raw.githubusercontent.com/neilashton/fluidsbench-submission/dev/",
+    "reproducibility_contract_version": "open-reproducibility-1.0",
+    "profile_ground_truth": {
+      "release_id": "prototype-profile-ground-truth-2026-07-20",
+      "manifest_url": "https://fluidsbench.org/assets/data/profile-ground-truth/manifest.json",
+      "manifest_sha256": "e035ebd4d17f6cbac7ec0f30394ba50513c5ce1c5de65b04a88905759cd72136"
+    },
+    "license": {
+      "spdx_id": "Apache-2.0",
+      "name": "Apache License 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0",
+      "scope": "FluidsBench repository code and published leaderboard metadata. Submitted profile values use the per-result reproducibility.result_data_license_spdx declaration; upstream datasets and model artifacts retain their declared licences."
+    },
     "citation": {
       "title": "FluidsBench Leaderboard",
       "author": "FluidsBench contributors",

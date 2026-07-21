@@ -8,7 +8,8 @@ For a complete directory that passes the validator, inspect the dummy AhmedML
 pressure stations, optional velocity stations, metadata, and scalar metrics.
 
 Participants may generate equivalent JSON with Python, MATLAB, Julia, C++, or another language. The schema and final values matter;
-the code used to produce them does not need to follow the example implementation.
+the code does not need to follow the example implementation, but a real submission must publish its exact code, pinned model,
+locked environment, and replay instructions under the open reproducibility contract.
 
-The validator checks this package after it has been generated. It does not load a model checkpoint or calculate base metrics from
-full fields, so contributors must retain enough evaluation evidence for the maintainers' scientific review.
+Contributor-stage validation checks the generated package but does not approve it. An independent maintainer must load the public
+model artifact and reproduce the result before approval.

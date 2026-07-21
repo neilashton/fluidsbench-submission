@@ -1,22 +1,27 @@
 # fluidsbench-submission
 
-Submission repository and approved-data feed for the [FluidsBench leaderboard](https://fluidsbench.org/leaderboard/).
+Submission repository and approved-data feed for the [FluidsBench leaderboard](https://fluidsbench.org/).
 
 > FluidsBench is currently a work in progress. The `dev` branch, split indexes, submissions, metrics, and profile curves are
 > prototype dummy data and are not approved benchmark results.
 
 ## Responsibilities
 
-The submission process deliberately separates three responsibilities:
+FluidsBench follows the versioned [`open-reproducibility-1.0`](OPEN_REPRODUCIBILITY.md) track. Evaluation ground truth and case
+IDs are public. The submission process deliberately separates four responsibilities:
 
 1. Participants calculate metrics from their own predictions and ground truth. FluidsBench publishes exact equations and
    array-level NumPy references under [`reference/`](reference/), but does not prescribe a model output format or data loader.
-2. Participants create `submission.json` and the required profile chunks using their own code. FluidsBench publishes schemas,
-   dataset specifications, directions, and examples; there is no mandatory packaging tool.
-3. Participants must run the FluidsBench validator before opening a pull request. GitHub Actions runs the same validator again.
+2. Participants publish the exact source code, model artifact, locked environment, and replay instructions, then create
+   `submission.json` and the required profile chunks.
+3. Participants must run the FluidsBench contributor-stage validator before opening a pull request. Their package remains
+   unapproved and is not included in the public feed.
+4. An independent maintainer replays the result from the declared public artifacts. Only after a successful replay can a
+   maintainer add approval metadata and publish the result.
 
-The validator proves that a package is complete, internally consistent, and correctly formatted. Because full prediction fields
-are not submitted, it cannot independently prove that a participant's base metric values were calculated from those predictions.
+Contributor validation proves that a package is complete, internally consistent, and correctly formatted. Because full prediction
+fields are not submitted, that stage alone cannot prove that base metric values came from the declared model. Independent
+maintainer replay supplies that missing verification before approval.
 
 ## Submission directory
 
@@ -26,6 +31,7 @@ Create one directory under the matching dataset:
 submissions/<dataset-id>/<submission-id>/
   submission.json
   evaluation-evidence.json
+  maintainer-replay.json       # added only by maintainers after a successful replay
   profiles/
     index.json
     chunk-000.json
@@ -67,7 +73,7 @@ python3 -m reference.example_calculation
 
 ## 2. Prepare metadata and profiles
 
-`submission.json` contains model, submitter, training, dataset, split, aggregate metric, profile-index, and evaluation metadata. It must match
+`submission.json` contains model, submitter, training, dataset, split, aggregate metric, profile-index, evaluation, and open-artifact metadata. It must match
 [`schemas/v1/submission.schema.json`](schemas/v1/submission.schema.json).
 
 The required `evaluation` object records the FluidsBench reference version, the contributor's evaluation-code revision, the exact
@@ -76,9 +82,15 @@ values and records the profile-index checksum, creating a tamper-evident link be
 and profile package. It is not a
 replacement for scientific review and does not contain full surface or volume fields.
 
-Contributors should leave `approval` absent. During review, maintainers add `approval.status=approved`, the reviewer, approval date,
-and pull-request URL. Prototype packages use `approval.status=prototype`; the feed builder publishes only those two statuses, so a
-merged but unapproved source package cannot appear on the leaderboard.
+Every real package also declares `reproducibility.contract_version=open-reproducibility-1.0`, public evaluation-only data use, an
+HTTPS code repository pinned to a full commit, an HTTPS model artifact pinned by SHA-256, an open licence for code, model, and
+submitted result data, a hashed container or lockfile, and public replay instructions. See
+[`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md) for the complete
+eligibility and replay policy.
+
+Contributors leave `approval` absent and must not add `maintainer-replay.json`. After an independent replay, maintainers add the
+separately hashed replay record and `approval.status=approved`. Prototype packages use `approval.status=prototype`; the feed
+builder publishes only prototype and maintainer-approved rows, so an unapproved source package cannot appear on the leaderboard.
 
 Profile data is kept out of the scalar leaderboard feed. Each chunk contains a manageable group of test geometries using compact
 parallel arrays:
@@ -104,6 +116,9 @@ panel, station, and quantity is declared by the dataset specification and split 
 - [`schemas/v1/profile-index.schema.json`](schemas/v1/profile-index.schema.json)
 - [`schemas/v1/profile-chunk.schema.json`](schemas/v1/profile-chunk.schema.json)
 
+Maintainer replay records must match
+[`schemas/v1/maintainer-replay.schema.json`](schemas/v1/maintainer-replay.schema.json).
+
 The profile index records the SHA-256 checksum and case IDs for each chunk. Normal JSON is used so pull requests remain readable;
 hosting can compress it during delivery.
 
@@ -120,7 +135,7 @@ python3 -m pip install -r requirements.txt
 Validate one directory:
 
 ```bash
-python3 scripts/validate_submission.py submissions/ahmedml/my-model-v1
+python3 scripts/validate_submission.py --contributor-stage submissions/ahmedml/my-model-v1
 ```
 
 Validate every source submission and verify that generated feeds are synchronized:
@@ -129,21 +144,30 @@ Validate every source submission and verify that generated feeds are synchronize
 python3 scripts/manage_leaderboard.py check
 ```
 
-The validator checks JSON schemas, exact split case coverage, metric IDs and ranges, training metadata consistency, evaluation
-evidence identity and checksums, profile coverage, coordinate ordering, array lengths, finite values, split hashes, chunk hashes,
-and derived score arithmetic.
+The validator checks JSON schemas, exact public split case coverage, metric IDs and ranges, training metadata consistency,
+evaluation evidence identity and checksums, profile coverage, coordinate ordering, array lengths, finite values, split hashes,
+chunk hashes, derived score arithmetic, pinned open artifacts, and approval/replay lifecycle rules.
 
 After validation:
 
-1. Commit only your submission directory.
+1. Commit exactly one new submission directory. Do not modify schemas, specifications, validators, workflows, generated feeds, or
+   existing submissions in the same pull request; a new result version uses a new globally unique submission ID.
 2. Open a pull request against `main` once FluidsBench announces that the dataset is accepting real submissions.
 3. Complete the pull request checklist and resolve all automated validation failures.
-4. Maintainers review the scientific provenance, metadata, metrics, profile definitions, and retained calculation evidence.
-5. A maintainer records the approval metadata, rebuilds the compact feeds, and merges the pull request.
+4. Maintainers review scientific provenance, public-test-use eligibility, metadata, metrics, licences, and artifact accessibility,
+   then merge the contributor package while it is still unapproved and absent from public feeds.
+5. An independent maintainer replays the result from the pinned public code, model, and environment.
+6. From a maintainer-owned branch, open a separate pull request that adds `maintainer-replay.json` and approval metadata and
+   rebuilds the compact feeds. Mark it `maintainer-replay` for auditability. The approver and replayer may be different people.
+
+External pull requests are restricted to one entirely new submission directory. Maintainers may deliberately apply the restricted
+`trusted-maintenance` label to allow a reviewed external repository-maintenance contribution; replay/approval changes must still
+come from a maintainer-owned branch.
 
 ## Generated leaderboard feeds
 
-Approved source submissions are converted into compact scalar feeds:
+Source submissions are converted into release-specific compact scalar feeds. Prototype releases contain only explicitly marked
+prototype rows; official releases contain only independently replayed and approved rows:
 
 ```text
 leaderboard/
@@ -156,8 +180,11 @@ leaderboard.json
 The website loads the selected scalar dataset lazily. Profile arrays are not copied into these feeds; each row contains a relative
 profile index path, and the browser fetches only the selected geometry's chunk.
 
-`leaderboard/manifest.json` also publishes the data-release identifier, generation time, source reference, and SHA-256 digest of
-the complete scalar feed. Official releases should replace the moving preview reference with an immutable source commit or tag.
+`leaderboard/manifest.json` also publishes the data-release identifier, generation time, source reference, contract version,
+licence scope, archive URL, immutable asset base, SHA-256 digest of the complete scalar feed, and the expected release ID and
+manifest digest for the public profile ground truth. Every feed row carries the SHA-256 digest of its profile index. Prototype
+releases use `archive_url: null`; an official release must provide an immutable HTTPS archive URL and an asset base pinned to the
+full source commit.
 
 Maintainers rebuild and verify feeds with:
 
@@ -174,5 +201,7 @@ before real submissions are accepted. A submission records the exact split-index
 
 ## License
 
-Repository code and published submission metadata are covered by the [Apache License 2.0](LICENSE). Submitters must have the right
-to publish the metadata and profile values included in their pull request. Dataset and model artifacts retain their own licenses.
+Repository code and published leaderboard metadata are covered by the [Apache License 2.0](LICENSE). Each real submission declares
+an open `reproducibility.result_data_license_spdx` for its contributed profile values and result material; submitters must have the
+right to provide them under that licence. Upstream datasets and model artifacts retain their own declared licences. Official
+submissions must use publicly accessible code and model artifacts under licences accepted as open during maintainer review.

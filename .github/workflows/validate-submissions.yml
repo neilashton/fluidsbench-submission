@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -21,6 +23,36 @@ jobs:
       - run: python -m unittest discover -s tests -v
       - name: Validate source submissions
         run: python scripts/validate_submission.py
-      - name: Verify generated feeds on protected branches
-        if: github.event_name == 'push'
+      - name: Enforce external contributor pull-request scope
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name != github.repository &&
+          !contains(github.event.pull_request.labels.*.name, 'trusted-maintenance')
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mapfile -t changed_files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          mapfile -t changed_submissions < <(
+            printf '%s\n' "${changed_files[@]}" |
+              awk -F/ '$1 == "submissions" && NF >= 4 { print $1 "/" $2 "/" $3 }' |
+              sort -u
+          )
+          if ((${#changed_submissions[@]} != 1)); then
+            echo "External contributor pull requests must add exactly one submission directory." >&2
+            exit 1
+          fi
+          submission_dir="${changed_submissions[0]}"
+          for changed_file in "${changed_files[@]}"; do
+            if [[ "$changed_file" != "$submission_dir/"* ]]; then
+              echo "External contributor pull requests may change only $submission_dir; found $changed_file" >&2
+              exit 1
+            fi
+          done
+          if git cat-file -e "$BASE_SHA:$submission_dir/submission.json" 2>/dev/null; then
+            echo "Contributor pull requests must use a new globally unique submission ID." >&2
+            exit 1
+          fi
+          python scripts/validate_submission.py --contributor-stage "$submission_dir"
+      - name: Verify generated feeds
         run: python scripts/manage_leaderboard.py check

@@ -4,6 +4,14 @@ Each dataset directory contains a machine-readable `submission-spec.json` and on
 The specification lists the required scalar metrics and profile panel, station, and quantity IDs. The validator consumes these
 same files, so the written instructions and automated checks use one contract.
 
+Each official specification pins `evaluation_reference_version` to an immutable FluidsBench evaluator release. Submission and
+maintainer-replay records must identify that exact release.
+
+All official split case IDs and evaluation ground truth are public. The evaluation data may be used only for final evaluation,
+never for fitting, model or checkpoint selection, hyperparameter selection, manual tuning, or preprocessing statistics. Real
+submissions make the machine-readable `public_test_data_use=\"evaluation_only\"` declaration defined by
+[`../OPEN_REPRODUCIBILITY.md`](../OPEN_REPRODUCIBILITY.md).
+
 Split indexes marked `official` contain dataset-owner-approved case IDs. Indexes marked `prototype_generated` preserve the
 current dummy leaderboard's declared test count but are not suitable for real submissions. Dataset owners must replace those IDs,
 set the status to `official`, and review the resulting SHA-256 value before FluidsBench opens that split for submissions.

@@ -16,9 +16,11 @@
     "pretraining_data",
     "dataset",
     "dataset_id",
+    "dataset_version",
     "split",
     "split_id",
     "case_set_id",
+    "split_sha256",
     "parameter_count_millions",
     "submitter_name",
     "institution",
@@ -81,6 +83,57 @@
         "evidence_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
       }
     },
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "access",
+        "public_test_data_use",
+        "result_data_license_spdx",
+        "code",
+        "model_artifact",
+        "environment",
+        "replay_instructions_url"
+      ],
+      "properties": {
+        "contract_version": {"const": "open-reproducibility-1.0"},
+        "access": {"const": "public"},
+        "public_test_data_use": {"const": "evaluation_only"},
+        "result_data_license_spdx": {"type": "string", "minLength": 1, "maxLength": 120},
+        "code": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repository_url", "commit", "license_spdx"],
+          "properties": {
+            "repository_url": {"type": "string", "pattern": "^https://", "format": "uri"},
+            "commit": {"type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"},
+            "license_spdx": {"type": "string", "minLength": 1, "maxLength": 120}
+          }
+        },
+        "model_artifact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url", "sha256", "license_spdx"],
+          "properties": {
+            "url": {"type": "string", "pattern": "^https://", "format": "uri"},
+            "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+            "license_spdx": {"type": "string", "minLength": 1, "maxLength": 120}
+          }
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "url", "sha256"],
+          "properties": {
+            "kind": {"enum": ["container", "lockfile"]},
+            "url": {"type": "string", "pattern": "^https://", "format": "uri"},
+            "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+          }
+        },
+        "replay_instructions_url": {"type": "string", "pattern": "^https://", "format": "uri"}
+      }
+    },
     "approval": {
       "type": "object",
       "additionalProperties": false,
@@ -90,12 +143,21 @@
         "approved_by": {"type": "string", "minLength": 1},
         "approved_at": {"type": "string", "format": "date"},
         "pull_request_url": {"type": "string", "pattern": "^https://github\\.com/[^/]+/[^/]+/pull/[0-9]+$"},
+        "replay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["evidence_file", "evidence_sha256"],
+          "properties": {
+            "evidence_file": {"const": "maintainer-replay.json"},
+            "evidence_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+          }
+        },
         "note": {"type": "string"}
       },
       "allOf": [
         {
           "if": {"properties": {"status": {"const": "approved"}}, "required": ["status"]},
-          "then": {"required": ["approved_by", "approved_at", "pull_request_url"]}
+          "then": {"required": ["approved_by", "approved_at", "pull_request_url", "replay"]}
         }
       ]
     },
@@ -115,5 +177,19 @@
         "case_set_id": {"type": "string", "minLength": 1}
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "approval": {
+            "properties": {"status": {"const": "approved"}},
+            "required": ["status"]
+          }
+        },
+        "required": ["approval"]
+      },
+      "then": {"required": ["reproducibility"]}
+    }
+  ]
 }
