@@ -605,6 +605,8 @@ def validate_submission_file(
     if dataset_spec.get("dataset_id") != submission["dataset_id"]:
         add("benchmark specification dataset_id does not match submission.json")
         return errors, stats
+    if dataset_spec.get("ranking") != dataset.get("ranking"):
+        add("benchmark specification ranking policy does not match the leaderboard manifest")
     spec_split = next((item for item in dataset_spec["splits"] if item["id"] == split["id"]), None)
     if spec_split is None:
         add(f"benchmark specification does not define split {split['id']!r}")

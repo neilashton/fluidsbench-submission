@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/low_drag/drivaerml-pointnet",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-pointnet",
+    "model": "PointNet",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "Low drag",
+    "split_id": "low_drag"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 37.8,
+    "ranked_value": 37.8,
+    "display_value": "37.8",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 20
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-pointnet/submission.json",
+      "sha256": "04d19149ff7f5beb5d124bec126b17c8477251a69a8148e2b18421d79766144c"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-pointnet/evaluation-evidence.json",
+      "sha256": "09dea865abe546f9a93c403ec2f97e20c8d6c53daf524e489e4526c51e35ee52"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-pointnet/profiles/index.json",
+      "sha256": "6e465908362f15b914017c0353e9a57e979cb5ecfc42481154e110fa4e2d0afb"
+    }
+  }
+}

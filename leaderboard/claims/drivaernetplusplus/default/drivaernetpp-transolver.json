@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/drivaernetpp-transolver",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaernetpp-transolver",
+    "model": "Transolver",
+    "dataset": "DrivAerNet++",
+    "dataset_id": "drivaernetplusplus",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 48.055,
+    "ranked_value": 48.1,
+    "display_value": "48.1",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 4,
+    "ranked_result_count": 12,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 32
+    },
+    "source_submission": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-transolver/submission.json",
+      "sha256": "ff12d126fcafb9e0c5376b3143e64f076798d1482a1f0d766d23accb8690a7a6"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-transolver/evaluation-evidence.json",
+      "sha256": "d92b9d17ab3add70cd9bb3dedc0fe4b166c5bcc344c7e8bf142b9c9dbccf3965"
+    },
+    "profile_index": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-transolver/profiles/index.json",
+      "sha256": "14705bb609246d37ef0279f61fbd5f600cd6f7b73af6b0278bd5375d17e83342"
+    }
+  }
+}

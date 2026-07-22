@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/ahmedml/image_wake/transformer",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "transformer",
+    "model": "GeoTransformer",
+    "dataset": "AhmedML",
+    "dataset_id": "ahmedml",
+    "split": "Image wake",
+    "split_id": "image_wake"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 89.15249999999999,
+    "ranked_value": 89.2,
+    "display_value": "89.2",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 7
+    },
+    "source_submission": {
+      "path": "submissions/ahmedml/transformer/submission.json",
+      "sha256": "6554e2748ffbc948bd6d30c198ab60e4c6b24fc3aa89a6dd8427c94f15872c52"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/ahmedml/transformer/evaluation-evidence.json",
+      "sha256": "d16906bc32a64a185949c38b25129003821dbed025d4f654e402241a231930e9"
+    },
+    "profile_index": {
+      "path": "submissions/ahmedml/transformer/profiles/index.json",
+      "sha256": "d39d4249f307d8fce64508e51cbd326b58d47caefbf71fc3cd4d6e4c452429ea"
+    }
+  }
+}

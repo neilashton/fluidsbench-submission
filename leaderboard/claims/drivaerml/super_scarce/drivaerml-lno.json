@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/super_scarce/drivaerml-lno",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-lno",
+    "model": "LNO",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "Super scarce",
+    "split_id": "super_scarce"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 39.5,
+    "ranked_value": 39.5,
+    "display_value": "39.5",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 18
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-lno/submission.json",
+      "sha256": "1cc6e166439a202cdfeef31734aebbcaf7051fc931b5ec9439f8f80b2b260fc5"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-lno/evaluation-evidence.json",
+      "sha256": "502c041d41c1ff4a17bc02ee7526a2c2b1050148cfd9a92d66f108eb310d818f"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-lno/profiles/index.json",
+      "sha256": "2cff340d4438bece12a09a832f98d5e60474d00fc140c191327093d8b34b160f"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/rear_separation/drivaerml-transformer",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-transformer",
+    "model": "GeoTransformer",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "Rear separation",
+    "split_id": "rear_separation"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 77.27250000000001,
+    "ranked_value": 77.3,
+    "display_value": "77.3",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 21
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-transformer/submission.json",
+      "sha256": "8f6072b4811731557ec954e441a16abb752b2d153818a4d0f903dbe3318aad72"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-transformer/evaluation-evidence.json",
+      "sha256": "7aca7d76217dfcebf10ffa0e7e71cb5570950946cd1dfa716f8dccb6a827a2e2"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-transformer/profiles/index.json",
+      "sha256": "f059259fb28fe08bb31c73614ace5d9b3618a31fffdf1a9bc87d6a9548b40068"
+    }
+  }
+}

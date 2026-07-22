@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/rotor37/train_32/rotor37-prototype-train-32",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "rotor37-prototype-train-32",
+    "model": "MeshGraphNets",
+    "dataset": "Rotor37",
+    "dataset_id": "rotor37",
+    "split": "train_32",
+    "split_id": "train_32"
+  },
+  "ranking": {
+    "metric_id": "total_error",
+    "value": 0.06074,
+    "ranked_value": 0.061,
+    "display_value": "0.061",
+    "unit": "",
+    "direction": "lower",
+    "decimal_places": 3,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 67
+    },
+    "source_submission": {
+      "path": "submissions/rotor37/rotor37-prototype-train-32/submission.json",
+      "sha256": "c93172df3e15934db8c297d2241f8abc06b90f315e0a0875ef1ea1db816ef6b1"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/rotor37/rotor37-prototype-train-32/evaluation-evidence.json",
+      "sha256": "44543302bb9969ec54f887f1c137b008d35ce1a6ade7701a24f240dce4f9de1e"
+    },
+    "profile_index": {
+      "path": "submissions/rotor37/rotor37-prototype-train-32/profiles/index.json",
+      "sha256": "7a073af5d7e927694c203c73e0e51c0ff8eb7934eefad83fbbd0ba52a1e6820d"
+    }
+  }
+}

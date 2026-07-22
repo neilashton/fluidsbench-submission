@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/rotor37/train_1000/rotor37-prototype-train-1000",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "rotor37-prototype-train-1000",
+    "model": "MeshGraphNets",
+    "dataset": "Rotor37",
+    "dataset_id": "rotor37",
+    "split": "train_1000",
+    "split_id": "train_1000"
+  },
+  "ranking": {
+    "metric_id": "total_error",
+    "value": 0.01419,
+    "ranked_value": 0.014,
+    "display_value": "0.014",
+    "unit": "",
+    "direction": "lower",
+    "decimal_places": 3,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 63
+    },
+    "source_submission": {
+      "path": "submissions/rotor37/rotor37-prototype-train-1000/submission.json",
+      "sha256": "95fda5848a22ed8c2576eaeb4b336fb4fe7d3841fd2d540972aca5cedd07b70f"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/rotor37/rotor37-prototype-train-1000/evaluation-evidence.json",
+      "sha256": "7da75b396715ee8d4094902538bfe2a20c7fa218301f9f2e51e0fa8e3e19bde6"
+    },
+    "profile_index": {
+      "path": "submissions/rotor37/rotor37-prototype-train-1000/profiles/index.json",
+      "sha256": "b4b5453c8f139583291ac8439e0479599b710db433800b06fe05c8c7a150a2ff"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "airfrans-graphsage-full",
+    "model": "GraphSAGE",
+    "dataset": "AirfRANS",
+    "dataset_id": "airfrans",
+    "split": "Reynolds extrapolation",
+    "split_id": "reynolds_extrapolation"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 63.21166666666667,
+    "ranked_value": 63.2,
+    "display_value": "63.2",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 11
+    },
+    "source_submission": {
+      "path": "submissions/airfrans/airfrans-graphsage-full/submission.json",
+      "sha256": "01da1ca56656dc04a4b64cf20e83383e1b7ab3d24d63ed578ec92cb2bc4681d9"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/airfrans/airfrans-graphsage-full/evaluation-evidence.json",
+      "sha256": "93ed680fab0a509a2389d7eb11ab4ed7ac7ef40464e8bc05b4f0e2054d8eb408"
+    },
+    "profile_index": {
+      "path": "submissions/airfrans/airfrans-graphsage-full/profiles/index.json",
+      "sha256": "c646971d482cdcb2d31ad891b8c7862720f33c2d73a83959c501f605bfb028aa"
+    }
+  }
+}

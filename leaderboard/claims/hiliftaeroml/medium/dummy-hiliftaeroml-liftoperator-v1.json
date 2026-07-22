@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/hiliftaeroml/medium/dummy-hiliftaeroml-liftoperator-v1",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "dummy-hiliftaeroml-liftoperator-v1",
+    "model": "MeshGraphNets",
+    "dataset": "HiLiftAeroML",
+    "dataset_id": "hiliftaeroml",
+    "split": "Medium",
+    "split_id": "medium"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 84.68,
+    "ranked_value": 84.7,
+    "display_value": "84.7",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 37
+    },
+    "source_submission": {
+      "path": "submissions/hiliftaeroml/dummy-hiliftaeroml-liftoperator-v1/submission.json",
+      "sha256": "843372d2d630d33ec8eb2c9bc4b931459cbd1ade343acd426507901480dbf803"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/hiliftaeroml/dummy-hiliftaeroml-liftoperator-v1/evaluation-evidence.json",
+      "sha256": "68663af37d4832767ac79d34974fb313f4fac192ce07f18c5025559f2eac4e0c"
+    },
+    "profile_index": {
+      "path": "submissions/hiliftaeroml/dummy-hiliftaeroml-liftoperator-v1/profiles/index.json",
+      "sha256": "cdaa792e5aa82f87cbf2ad02ffe63f6396c1314d87bd35082c62cdfea3aa7692"
+    }
+  }
+}

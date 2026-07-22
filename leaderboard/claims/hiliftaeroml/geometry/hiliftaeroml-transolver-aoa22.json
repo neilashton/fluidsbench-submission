@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/hiliftaeroml/geometry/hiliftaeroml-transolver-aoa22",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "hiliftaeroml-transolver-aoa22",
+    "model": "Transolver",
+    "dataset": "HiLiftAeroML",
+    "dataset_id": "hiliftaeroml",
+    "split": "Geometry",
+    "split_id": "geometry"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 42.985,
+    "ranked_value": 43.0,
+    "display_value": "43.0",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 43
+    },
+    "source_submission": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa22/submission.json",
+      "sha256": "dd59bd5f725562a4d2d37a023ee08accdfbdc52fe7d418316d02718e9d31506e"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa22/evaluation-evidence.json",
+      "sha256": "0838d3c7a995f52d133d559a6544d53953c9f9d1e223799aa4602aaff1560025"
+    },
+    "profile_index": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa22/profiles/index.json",
+      "sha256": "ced942bb648a4bc7ca0316189f7ed38cf18d1515d7bce527f80a52ad25e56bd1"
+    }
+  }
+}

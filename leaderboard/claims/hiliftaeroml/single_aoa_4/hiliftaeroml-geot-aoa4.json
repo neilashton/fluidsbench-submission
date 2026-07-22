@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/hiliftaeroml/single_aoa_4/hiliftaeroml-geot-aoa4",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "hiliftaeroml-geot-aoa4",
+    "model": "GeoTransformer",
+    "dataset": "HiLiftAeroML",
+    "dataset_id": "hiliftaeroml",
+    "split": "AoA 4",
+    "split_id": "single_aoa_4"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 74.75833333333334,
+    "ranked_value": 74.8,
+    "display_value": "74.8",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 40
+    },
+    "source_submission": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-geot-aoa4/submission.json",
+      "sha256": "defb26d29a32197c2994ddf71c65d05f1fdd55d67d3224f6d940c3c8b9171b76"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-geot-aoa4/evaluation-evidence.json",
+      "sha256": "10ace0b36aefed2b71684365cc13f0b9590ab8fdc811ecd9d16e4b36441b88e9"
+    },
+    "profile_index": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-geot-aoa4/profiles/index.json",
+      "sha256": "635f4391e6817b69b3001f5dc5e0580e1dee1218db27387c4a05d8de1151a9fa"
+    }
+  }
+}

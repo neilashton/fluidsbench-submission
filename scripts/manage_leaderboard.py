@@ -8,19 +8,105 @@ import hashlib
 import json
 import re
 import sys
+from collections import Counter
 from copy import deepcopy
 from datetime import date, datetime, timezone
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote, urlencode, urlsplit, urlunsplit
 
 if __package__:
-    from .validate_submission import load_json, sha256_file, submission_files, validate_many
+    from .validate_submission import (
+        load_json,
+        schema_errors,
+        sha256_file,
+        submission_files,
+        validate_many,
+    )
 else:
-    from validate_submission import load_json, sha256_file, submission_files, validate_many
+    from validate_submission import (
+        load_json,
+        schema_errors,
+        sha256_file,
+        submission_files,
+        validate_many,
+    )
 
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / "leaderboard" / "manifest.json"
+CLAIMS_ROOT = ROOT / "leaderboard" / "claims"
+CLAIMS_INDEX_PATH = CLAIMS_ROOT / "index.json"
+CLAIM_SCHEMA_URL = "https://fluidsbench.org/schemas/releases/result-claim.schema.json"
+CLAIM_INDEX_SCHEMA_URL = "https://fluidsbench.org/schemas/releases/claim-index.schema.json"
+RANKING_METHOD = "competition"
+RANKING_ROUNDING = "decimal_half_up"
+RANKING_SCOPE = ["release_id", "dataset_id", "split_id"]
+RELEASE_ID_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9.-]{0,158}[a-z0-9])?$")
+
+
+def ranking_contract() -> dict[str, Any]:
+    return {
+        "version": "1.0",
+        "scope": RANKING_SCOPE,
+        "method": RANKING_METHOD,
+        "tie_sequence_example": [1, 2, 2, 4],
+        "comparison": "rounded_metric_value",
+        "rounding": RANKING_ROUNDING,
+    }
+
+
+def is_release_id(value: Any) -> bool:
+    return isinstance(value, str) and RELEASE_ID_PATTERN.fullmatch(value) is not None
+
+
+def https_url_parts(value: Any) -> Any | None:
+    if not isinstance(value, str):
+        return None
+    try:
+        parts = urlsplit(value)
+        hostname = parts.hostname
+        parts.port
+    except ValueError:
+        return None
+    if (
+        parts.scheme != "https"
+        or not parts.netloc
+        or not hostname
+        or parts.username is not None
+        or parts.password is not None
+    ):
+        return None
+    return parts
+
+
+def path_has_release_segment(path: str, release_id: str, *, final: bool = False) -> bool:
+    segments = [unquote(segment) for segment in path.split("/") if segment]
+    if final:
+        return bool(segments) and segments[-1] == release_id
+    return release_id in segments
+
+
+def is_clean_https_directory_base(value: Any, *, release_id: str | None = None) -> bool:
+    parts = https_url_parts(value)
+    return (
+        parts is not None
+        and parts.path.endswith("/")
+        and not parts.query
+        and not parts.fragment
+        and (release_id is None or path_has_release_segment(parts.path, release_id, final=True))
+    )
+
+
+def is_valid_published_at(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None
 
 
 def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
@@ -28,6 +114,10 @@ def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
 
     release = manifest.get("data_release", {})
     errors: list[str] = []
+    if manifest.get("schema_version") != "0.6.0":
+        errors.append("leaderboard/manifest.json schema_version must be 0.6.0")
+    if manifest.get("ranking_contract") != ranking_contract():
+        errors.append("leaderboard/manifest.json ranking_contract does not match the published ranking policy")
     if release.get("status") not in {"prototype_dummy_data", "official"}:
         errors.append("leaderboard/manifest.json data_release.status must be prototype_dummy_data or official")
     if release.get("reproducibility_contract_version") != "open-reproducibility-2.0":
@@ -42,20 +132,46 @@ def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
     ):
         errors.append("leaderboard/manifest.json data_release.license must define spdx_id, name, url, and scope")
     archive_url = release.get("archive_url")
-    if release.get("status") != "prototype_dummy_data" and (
-        not isinstance(archive_url, str) or not archive_url.startswith("https://")
-    ):
+    if release.get("status") == "official" and https_url_parts(archive_url) is None:
         errors.append("an official data release requires an immutable HTTPS data_release.archive_url")
     source_commit = release.get("source_commit")
     if release.get("status") == "official" and not (
         isinstance(source_commit, str) and re.fullmatch(r"(?:[a-f0-9]{40}|[a-f0-9]{64})", source_commit)
     ):
         errors.append("an official data release requires a full immutable data_release.source_commit")
+    release_view_url = release.get("release_view_url")
+    release_id = release.get("id")
+    if release.get("status") == "official" and not is_release_id(release_id):
+        errors.append(
+            "an official data_release.id must be a lowercase release slug using only letters, digits, dots, and hyphens"
+        )
+    if release.get("status") == "official" and (
+        not is_release_id(release_id)
+        or not is_clean_https_directory_base(release_view_url, release_id=release_id)
+    ):
+        errors.append(
+            "an official data release requires a clean immutable HTTPS directory data_release.release_view_url "
+            "whose final path segment is the release ID, ending in '/', and having no query or fragment"
+        )
+    if release_view_url is not None and https_url_parts(release_view_url) is None:
+        errors.append("data_release.release_view_url must be null or an HTTPS URL")
     asset_base_url = release.get("asset_base_url")
-    if not isinstance(asset_base_url, str) or not asset_base_url.startswith("https://"):
+    if https_url_parts(asset_base_url) is None:
         errors.append("leaderboard/manifest.json data_release.asset_base_url must be an HTTPS URL")
-    elif release.get("status") == "official" and source_commit not in asset_base_url:
-        errors.append("an official data_release.asset_base_url must contain the immutable source_commit")
+    elif release.get("status") == "official" and (
+        not is_release_id(release_id)
+        or not is_clean_https_directory_base(asset_base_url, release_id=release_id)
+    ):
+        errors.append(
+            "an official data_release.asset_base_url must be a clean HTTPS directory whose final path segment is "
+            "the immutable release ID, ending in '/', and having no query or fragment"
+        )
+    if release.get("status") == "official":
+        published_at = release.get("generated_at")
+        if not is_valid_published_at(published_at):
+            errors.append("an official data release requires an explicit timezone-qualified data_release.generated_at")
+        if manifest.get("generated_at") != published_at:
+            errors.append("official manifest generated_at must equal data_release.generated_at")
     profile_ground_truth = release.get("profile_ground_truth")
     if not isinstance(profile_ground_truth, dict) or any(
         not isinstance(profile_ground_truth.get(key), str) or not profile_ground_truth[key].strip()
@@ -64,12 +180,48 @@ def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
         errors.append(
             "leaderboard/manifest.json data_release.profile_ground_truth must define release_id, manifest_url, and manifest_sha256"
         )
-    elif not profile_ground_truth["manifest_url"].startswith("https://") or not re.fullmatch(
+    elif https_url_parts(profile_ground_truth["manifest_url"]) is None or not re.fullmatch(
         r"[a-f0-9]{64}", profile_ground_truth["manifest_sha256"]
     ):
         errors.append("data_release.profile_ground_truth requires an HTTPS manifest_url and lowercase SHA-256 digest")
-    if archive_url is not None and (not isinstance(archive_url, str) or not archive_url.startswith("https://")):
+    elif release.get("status") == "official":
+        ground_truth_parts = urlsplit(profile_ground_truth["manifest_url"])
+        if (
+            not is_release_id(profile_ground_truth["release_id"])
+            or not path_has_release_segment(ground_truth_parts.path, profile_ground_truth["release_id"])
+            or ground_truth_parts.query
+            or ground_truth_parts.fragment
+        ):
+            errors.append(
+                "an official profile-ground-truth manifest_url must use a safe lowercase release ID appearing as "
+                "an exact path segment, with no query or fragment"
+            )
+    if archive_url is not None and https_url_parts(archive_url) is None:
         errors.append("data_release.archive_url must be null or an HTTPS URL")
+
+    definitions = {definition.get("id"): definition for definition in manifest.get("metric_definitions", [])}
+    for dataset in manifest.get("datasets", []):
+        ranking = dataset.get("ranking")
+        label = dataset.get("slug", dataset.get("name", "unknown dataset"))
+        if not isinstance(ranking, dict):
+            errors.append(f"dataset {label} must define its ranking policy")
+            continue
+        required_ranking = {
+            "method": RANKING_METHOD,
+            "rounding": RANKING_ROUNDING,
+        }
+        if any(ranking.get(key) != value for key, value in required_ranking.items()):
+            errors.append(f"dataset {label} ranking must use competition ranking and decimal_half_up rounding")
+        decimal_places = ranking.get("decimal_places")
+        if not isinstance(decimal_places, int) or isinstance(decimal_places, bool) or not 0 <= decimal_places <= 12:
+            errors.append(f"dataset {label} ranking.decimal_places must be an integer from 0 to 12")
+        definition = definitions.get(ranking.get("metric_id"))
+        if definition is None:
+            errors.append(f"dataset {label} ranking.metric_id is not in metric_definitions")
+        elif ranking.get("direction") != definition.get("direction"):
+            errors.append(f"dataset {label} ranking.direction must match the metric definition")
+        elif decimal_places != definition.get("digits"):
+            errors.append(f"dataset {label} ranking.decimal_places must match the metric display digits")
     return errors
 
 
@@ -128,14 +280,339 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
     return rows
 
 
-def latest_submission_date(rows: list[dict[str, Any]]) -> str:
+def published_metric_value(value: int | float, decimal_places: int) -> tuple[Decimal, float, str]:
+    """Return the exact decimal used for ranking, its JSON number, and its display string."""
+
+    quantum = Decimal(1).scaleb(-decimal_places)
+    rounded = Decimal(str(value)).quantize(quantum, rounding=ROUND_HALF_UP)
+    if rounded.is_zero():
+        rounded = rounded.copy_abs()
+    return rounded, float(rounded), f"{rounded:.{decimal_places}f}"
+
+
+def claim_eligibility(release_status: str, row: dict[str, Any]) -> dict[str, Any]:
+    if release_status == "prototype_dummy_data":
+        return {
+            "academic_citation": False,
+            "promotion": False,
+            "reason_code": "prototype_dummy_data",
+            "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion.",
+        }
+    validation = row.get("maintainer_validation", {})
+    eligible = row.get("approval", {}).get("status") == "approved" and validation.get("status") == "validated"
+    if eligible:
+        return {
+            "academic_citation": True,
+            "promotion": True,
+            "reason_code": "approved_submitted_data_result",
+            "reason": (
+                "Approved submitted-data result in this immutable release. FluidsBench did not execute the model "
+                "or recompute submitted base metrics."
+            ),
+        }
+    return {
+        "academic_citation": False,
+        "promotion": False,
+        "reason_code": "not_approved_and_validated",
+        "reason": "The result is not both approved and covered by a maintainer submitted-data validation record.",
+    }
+
+
+def add_release_rankings(
+    manifest: dict[str, Any], rows_by_dataset: dict[str, list[dict[str, Any]]]
+) -> None:
+    """Add deterministic release-scoped competition ranks to feed rows in place."""
+
+    definitions = {definition["id"]: definition for definition in manifest.get("metric_definitions", [])}
+    release_status = manifest.get("data_release", {}).get("status", "")
+    for dataset in manifest.get("datasets", []):
+        config = dataset.get("ranking")
+        if not isinstance(config, dict):
+            continue
+        metric_id = config["metric_id"]
+        decimal_places = config["decimal_places"]
+        direction = config["direction"]
+        definition = definitions[metric_id]
+        groups: dict[str, list[tuple[dict[str, Any], Decimal, float, str]]] = {}
+        for row in rows_by_dataset.get(dataset["name"], []):
+            raw_value = row["metric_values"][metric_id]
+            rounded, ranked_value, display_value = published_metric_value(raw_value, decimal_places)
+            groups.setdefault(row["split_id"], []).append((row, rounded, ranked_value, display_value))
+
+        for group in groups.values():
+            counts = Counter(rounded for _, rounded, _, _ in group)
+            ordered = sorted(
+                group,
+                key=lambda item: (
+                    -item[1] if direction == "higher" else item[1],
+                    item[0]["submission_id"],
+                ),
+            )
+            previous_value: Decimal | None = None
+            rank = 0
+            for position, (row, rounded, ranked_value, display_value) in enumerate(ordered, start=1):
+                if rounded != previous_value:
+                    rank = position
+                    previous_value = rounded
+                tie_count = counts[rounded]
+                row["ranking"] = {
+                    "metric_id": metric_id,
+                    "value": row["metric_values"][metric_id],
+                    "ranked_value": ranked_value,
+                    "display_value": display_value,
+                    "unit": definition.get("unit", ""),
+                    "direction": direction,
+                    "decimal_places": decimal_places,
+                    "rounding": RANKING_ROUNDING,
+                    "method": RANKING_METHOD,
+                    "rank": rank,
+                    "ranked_result_count": len(group),
+                    "tied": tie_count > 1,
+                    "tie_count": tie_count,
+                }
+                row["claim_eligibility"] = claim_eligibility(release_status, row)
+
+
+def claim_record_path(row: dict[str, Any]) -> str:
+    return f"leaderboard/claims/{row['dataset_id']}/{row['split_id']}/{row['submission_id']}.json"
+
+
+def result_permalink(release: dict[str, Any], row: dict[str, Any]) -> str | None:
+    release_view_url = release.get("release_view_url")
+    if release.get("status") != "official" or not isinstance(release_view_url, str):
+        return None
+    query = urlencode(
+        (
+            ("view", "result"),
+            ("dataset", row["dataset_id"]),
+            ("split", row["split_id"]),
+            ("result", row["submission_id"]),
+        )
+    )
+    return f"{release_view_url}?{query}"
+
+
+def immutable_claim_record_url(release: dict[str, Any], row: dict[str, Any]) -> str | None:
+    asset_base_url = release.get("asset_base_url")
+    if release.get("status") != "official" or not isinstance(asset_base_url, str):
+        return None
+    parts = urlsplit(asset_base_url)
+    claim_path = f"{parts.path.rstrip('/')}/{claim_record_path(row)}"
+    return urlunsplit((parts.scheme, parts.netloc, claim_path, "", ""))
+
+
+def available_file_binding(path: Path) -> dict[str, str] | None:
+    if not path.is_file():
+        return None
+    return {"path": str(path.relative_to(ROOT)), "sha256": sha256_file(path)}
+
+
+def build_claim_record(manifest: dict[str, Any], row: dict[str, Any], row_index: int) -> dict[str, Any]:
+    release = manifest["data_release"]
+
+    source_directory = ROOT / "submissions" / row["dataset_id"] / row["submission_id"]
+    bindings: dict[str, Any] = {
+        "result": {
+            "feed_file": manifest["all_file"],
+            "feed_sha256": release["feed_sha256"],
+            "row_index": row_index,
+        }
+    }
+    required_binding_paths = {
+        "source_submission": source_directory / "submission.json",
+        "evaluation_evidence": source_directory / row["evaluation"]["evidence_file"],
+        "profile_index": ROOT / row["profile_data"]["index_file"],
+    }
+    for binding_name, binding_path in required_binding_paths.items():
+        binding = available_file_binding(binding_path)
+        if binding is None:
+            raise FileNotFoundError(f"missing required claim binding: {binding_path}")
+        bindings[binding_name] = binding
+    validation = row.get("maintainer_validation")
+    if isinstance(validation, dict):
+        validation_path = ROOT / validation["evidence_path"]
+        if validation_path.is_file():
+            bindings["maintainer_validation"] = {
+                "path": validation["evidence_path"],
+                "sha256": sha256_file(validation_path),
+                "status": validation["status"],
+                "validation_scope": validation["validation_scope"],
+                "model_execution": validation["model_execution"],
+                "metric_recomputation": validation["metric_recomputation"],
+            }
+
+    claim_id = "/".join(
+        (release["id"], row["dataset_id"], row["split_id"], row["submission_id"])
+    )
+    return {
+        "$schema": CLAIM_SCHEMA_URL,
+        "schema_version": "1.0",
+        "claim_id": claim_id,
+        "release": {
+            "id": release["id"],
+            "status": release["status"],
+            "published_at": release["generated_at"],
+            "archive_url": release.get("archive_url"),
+            "release_view_url": release.get("release_view_url"),
+        },
+        "result": {
+            "submission_id": row["submission_id"],
+            "model": row["model"],
+            "dataset": row["dataset"],
+            "dataset_id": row["dataset_id"],
+            "split": row["split"],
+            "split_id": row["split_id"],
+        },
+        "ranking": deepcopy(row["ranking"]),
+        "eligibility": deepcopy(row["claim_eligibility"]),
+        "result_permalink": result_permalink(release, row),
+        "claim_record_url": immutable_claim_record_url(release, row),
+        "bindings": bindings,
+    }
+
+
+def expected_claim_artifacts(
+    manifest: dict[str, Any], all_rows: list[dict[str, Any]]
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    records = {
+        claim_record_path(row): build_claim_record(manifest, row, row_index)
+        for row_index, row in enumerate(all_rows)
+        if isinstance(row.get("ranking"), dict)
+    }
+    entries = []
+    for path_value, record in records.items():
+        entries.append(
+            {
+                "claim_id": record["claim_id"],
+                "submission_id": record["result"]["submission_id"],
+                "dataset_id": record["result"]["dataset_id"],
+                "split_id": record["result"]["split_id"],
+                "eligible": record["eligibility"]["academic_citation"]
+                and record["eligibility"]["promotion"],
+                "file": path_value,
+                "sha256": hashlib.sha256(json_bytes(record)).hexdigest(),
+            }
+        )
+    entries.sort(key=lambda entry: (entry["dataset_id"], entry["split_id"], entry["submission_id"]))
+    eligible_count = sum(entry["eligible"] for entry in entries)
+    index = {
+        "$schema": CLAIM_INDEX_SCHEMA_URL,
+        "schema_version": "1.0",
+        "release_id": manifest["data_release"]["id"],
+        "release_status": manifest["data_release"]["status"],
+        "feed_file": manifest["all_file"],
+        "feed_sha256": manifest["data_release"]["feed_sha256"],
+        "ranking_contract": deepcopy(manifest["ranking_contract"]),
+        "record_count": len(entries),
+        "eligible_record_count": eligible_count,
+        "records": entries,
+    }
+    return index, records
+
+
+def claim_index_semantic_errors(index: dict[str, Any]) -> list[str]:
+    records = index.get("records")
+    if not isinstance(records, list):
+        return []  # JSON Schema reports the structural error.
+    errors = []
+    if index.get("record_count") != len(records):
+        errors.append("record_count must equal the number of claim-index records")
+    eligible_count = sum(
+        isinstance(entry, dict) and entry.get("eligible") is True for entry in records
+    )
+    if index.get("eligible_record_count") != eligible_count:
+        errors.append("eligible_record_count must equal the number of eligible claim-index records")
+    return errors
+
+
+def official_release_seal_errors(
+    expected_manifest: dict[str, Any],
+    expected_index: dict[str, Any],
+    expected_records: dict[str, dict[str, Any]],
+) -> list[str]:
+    """Refuse to overwrite a generated official release under the same release ID."""
+
+    release = expected_manifest.get("data_release", {})
+    if release.get("status") != "official" or not CLAIMS_INDEX_PATH.is_file():
+        return []
+    try:
+        existing_index = load_json(CLAIMS_INDEX_PATH)
+    except (OSError, json.JSONDecodeError) as error:
+        return [f"cannot verify the existing official release seal: {error}"]
+    if not isinstance(existing_index, dict):
+        return ["cannot verify the existing official release seal: claim index is not an object"]
+    if existing_index.get("release_id") != release.get("id"):
+        return []  # A different ID is a deliberate new release.
+
+    errors = [f"existing claim index {error}" for error in claim_index_semantic_errors(existing_index)]
+    if existing_index.get("release_status") != "official":
+        errors.append("the existing release ID is not an official sealed release; choose a new official release ID")
+    if existing_index.get("feed_sha256") != expected_index.get("feed_sha256"):
+        errors.append("the computed feed digest changed for an existing official release ID; choose a new release ID")
+    if existing_index.get("ranking_contract") != expected_index.get("ranking_contract"):
+        errors.append("the ranking contract changed for an existing official release ID; choose a new release ID")
+
+    existing_entries = {
+        entry.get("file"): entry
+        for entry in existing_index.get("records", [])
+        if isinstance(entry, dict) and isinstance(entry.get("file"), str)
+    }
+    if set(existing_entries) != set(expected_records):
+        errors.append("the claim-record set changed for an existing official release ID; choose a new release ID")
+
+    for path_value in sorted(set(existing_entries) & set(expected_records)):
+        path = ROOT / path_value
+        if not path.is_file():
+            errors.append(f"sealed claim record {path_value} is missing")
+            continue
+        expected_sha256 = existing_entries[path_value].get("sha256")
+        if sha256_file(path) != expected_sha256:
+            errors.append(f"sealed claim record {path_value} no longer matches its existing index digest")
+            continue
+        try:
+            existing_record = load_json(path)
+        except (OSError, json.JSONDecodeError) as error:
+            errors.append(f"cannot read sealed claim record {path_value}: {error}")
+            continue
+        if not isinstance(existing_record, dict):
+            errors.append(f"sealed claim record {path_value} is not an object")
+            continue
+        expected_record = expected_records[path_value]
+        if existing_record.get("release") != expected_record.get("release"):
+            errors.append(
+                f"published release metadata changed in {path_value} for an existing official release ID; "
+                "choose a new release ID"
+            )
+        elif existing_record != expected_record:
+            errors.append(f"sealed claim record {path_value} changed; choose a new release ID")
+
+    if existing_index != expected_index:
+        errors.append("the generated claim index changed for an existing official release ID; choose a new release ID")
+    return list(dict.fromkeys(errors))
+
+
+def latest_submission_date(rows: list[dict[str, Any]]) -> str | None:
     valid_dates = []
     for row in rows:
         try:
             valid_dates.append(date.fromisoformat(row.get("submitted_at", "")).isoformat())
+        except (TypeError, ValueError):
+            continue
+    return max(valid_dates, default=None)
+
+
+def stable_fallback_date(manifest: dict[str, Any]) -> str:
+    for value in (
+        manifest.get("data_release", {}).get("generated_at"),
+        manifest.get("generated_at"),
+    ):
+        if not isinstance(value, str):
+            continue
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).date().isoformat()
         except ValueError:
             continue
-    return max(valid_dates, default=date.today().isoformat())
+    return "1970-01-01"
 
 
 def expected_outputs(
@@ -145,6 +622,7 @@ def expected_outputs(
 ) -> tuple[dict[str, Any], dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
     updated_manifest = deepcopy(manifest)
     rows_by_dataset = source_rows_by_dataset(updated_manifest)
+    add_release_rankings(updated_manifest, rows_by_dataset)
     all_rows: list[dict[str, Any]] = []
     latest_dates: list[str] = []
     for dataset in updated_manifest["datasets"]:
@@ -152,11 +630,20 @@ def expected_outputs(
         latest = latest_submission_date(rows)
         dataset["submission_count"] = len(rows)
         dataset["updated_at"] = latest
-        latest_dates.append(latest)
+        if latest is not None:
+            latest_dates.append(latest)
         all_rows.extend(rows)
-    latest_global = max(latest_dates, default=date.today().isoformat())
-    updated_manifest["generated_at"] = generated_at or manifest.get("generated_at") or f"{latest_global}T00:00:00Z"
+    latest_global = max(latest_dates, default=stable_fallback_date(manifest))
     release = updated_manifest.setdefault("data_release", {})
+    if release.get("status") == "official":
+        official_generated_at = release.get("generated_at")
+        if not isinstance(official_generated_at, str):
+            raise ValueError("official releases require an explicit data_release.generated_at")
+        updated_manifest["generated_at"] = official_generated_at
+    else:
+        updated_manifest["generated_at"] = (
+            generated_at or manifest.get("generated_at") or f"{latest_global}T00:00:00Z"
+        )
     updated_manifest["submission_schema_version"] = (
         "1.0" if release.get("status") == "prototype_dummy_data" else "2.0"
     )
@@ -165,21 +652,44 @@ def expected_outputs(
     if release.get("status") == "prototype_dummy_data":
         release["id"] = f"prototype-dev-{latest_global}-{feed_sha256[:12]}"
     release["feed_sha256"] = feed_sha256
+    claim_index, _ = expected_claim_artifacts(updated_manifest, all_rows)
+    release["claims"] = {
+        "schema_version": claim_index["schema_version"],
+        "index_file": "leaderboard/claims/index.json",
+        "index_sha256": hashlib.sha256(json_bytes(claim_index)).hexdigest(),
+        "record_count": claim_index["record_count"],
+        "eligible_record_count": claim_index["eligible_record_count"],
+    }
     return updated_manifest, rows_by_dataset, all_rows
 
 
-def build(manifest: dict[str, Any]) -> None:
-    generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+def build(manifest: dict[str, Any]) -> list[str]:
+    generated_at = None
+    if manifest.get("data_release", {}).get("status") != "official":
+        generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     updated_manifest, rows_by_dataset, all_rows = expected_outputs(manifest, generated_at=generated_at)
+    claim_index, claim_records = expected_claim_artifacts(updated_manifest, all_rows)
+    seal_errors = official_release_seal_errors(updated_manifest, claim_index, claim_records)
+    if seal_errors:
+        return seal_errors
     for dataset in updated_manifest["datasets"]:
         write_json(ROOT / dataset["file"], rows_by_dataset[dataset["name"]])
     write_json(ROOT / updated_manifest["all_file"], all_rows)
     write_json(ROOT / "leaderboard.json", all_rows)
+    expected_claim_paths = {ROOT / path_value for path_value in claim_records}
+    for stale_path in CLAIMS_ROOT.glob("*/*/*.json"):
+        if stale_path not in expected_claim_paths:
+            stale_path.unlink()
+    for path_value, record in claim_records.items():
+        write_json(ROOT / path_value, record)
+    write_json(CLAIMS_INDEX_PATH, claim_index)
     write_json(MANIFEST_PATH, updated_manifest)
+    return []
 
 
 def check_generated_feeds(manifest: dict[str, Any]) -> list[str]:
     expected_manifest, rows_by_dataset, all_rows = expected_outputs(manifest)
+    expected_claim_index, expected_claim_records = expected_claim_artifacts(expected_manifest, all_rows)
     errors = []
     for dataset in expected_manifest["datasets"]:
         path = ROOT / dataset["file"]
@@ -189,11 +699,48 @@ def check_generated_feeds(manifest: dict[str, Any]) -> list[str]:
         path = ROOT / path_value
         if not path.exists() or load_json(path) != all_rows:
             errors.append(f"{path.relative_to(ROOT)} is not synchronized with source submissions")
+        elif sha256_file(path) != expected_manifest["data_release"]["feed_sha256"]:
+            errors.append(f"{path.relative_to(ROOT)} bytes do not match data_release.feed_sha256")
+    actual_claim_index = load_json(CLAIMS_INDEX_PATH) if CLAIMS_INDEX_PATH.is_file() else None
+    if actual_claim_index is None or actual_claim_index != expected_claim_index:
+        errors.append("leaderboard/claims/index.json is not synchronized with the ranked scalar feed")
+    elif sha256_file(CLAIMS_INDEX_PATH) != expected_manifest["data_release"]["claims"]["index_sha256"]:
+        errors.append("leaderboard/claims/index.json does not match data_release.claims.index_sha256")
+    if isinstance(actual_claim_index, dict):
+        errors.extend(
+            f"leaderboard/claims/index.json {error}"
+            for error in claim_index_semantic_errors(actual_claim_index)
+        )
+    actual_claim_paths = set(CLAIMS_ROOT.glob("*/*/*.json"))
+    expected_claim_paths = {ROOT / path_value for path_value in expected_claim_records}
+    for missing_path in sorted(expected_claim_paths - actual_claim_paths):
+        errors.append(f"{missing_path.relative_to(ROOT)} is missing")
+    for stale_path in sorted(actual_claim_paths - expected_claim_paths):
+        errors.append(f"{stale_path.relative_to(ROOT)} is not part of the current release")
+    for path_value, expected_record in expected_claim_records.items():
+        path = ROOT / path_value
+        if path.is_file() and load_json(path) != expected_record:
+            errors.append(f"{path_value} is not synchronized with its ranked feed row")
+            continue
+        if path.is_file():
+            expected_sha256 = next(
+                entry["sha256"] for entry in expected_claim_index["records"] if entry["file"] == path_value
+            )
+            if sha256_file(path) != expected_sha256:
+                errors.append(f"{path_value} bytes do not match the claims-index digest")
+            for error in schema_errors(load_json(path), "result-claim.schema.json", schema_version="releases"):
+                errors.append(f"{path_value} {error}")
+    if isinstance(actual_claim_index, dict):
+        for error in schema_errors(
+            actual_claim_index, "claim-index.schema.json", schema_version="releases"
+        ):
+            errors.append(f"leaderboard/claims/index.json {error}")
     for key in (
         "schema_version",
         "submission_schema_version",
         "generated_at",
         "data_release",
+        "ranking_contract",
         "metric_catalog",
         "metric_definitions",
         "training_regimes",
@@ -228,7 +775,9 @@ def main() -> int:
     if errors:
         return print_errors(errors)
     if args.command == "build":
-        build(manifest)
+        errors = build(manifest)
+        if errors:
+            return print_errors(errors)
         print(f"Built compact leaderboard feeds from {totals['submissions']} validated submissions.")
     elif args.command == "check":
         errors = check_generated_feeds(manifest)

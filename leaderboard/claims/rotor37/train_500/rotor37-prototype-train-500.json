@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/rotor37/train_500/rotor37-prototype-train-500",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "rotor37-prototype-train-500",
+    "model": "MeshGraphNets",
+    "dataset": "Rotor37",
+    "dataset_id": "rotor37",
+    "split": "train_500",
+    "split_id": "train_500"
+  },
+  "ranking": {
+    "metric_id": "total_error",
+    "value": 0.0235,
+    "ranked_value": 0.024,
+    "display_value": "0.024",
+    "unit": "",
+    "direction": "lower",
+    "decimal_places": 3,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 68
+    },
+    "source_submission": {
+      "path": "submissions/rotor37/rotor37-prototype-train-500/submission.json",
+      "sha256": "e7bc1b52dd045b82f3e91fd4a1d0603d7a906417dbd1e68727358ae3062dcd34"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/rotor37/rotor37-prototype-train-500/evaluation-evidence.json",
+      "sha256": "c2a722525afc9106ebe480addcfa0a179f44b0686a8bc273e04cdf6ebc787853"
+    },
+    "profile_index": {
+      "path": "submissions/rotor37/rotor37-prototype-train-500/profiles/index.json",
+      "sha256": "3409e40d7bf357c13c740b80e42b8f3fc521a7197a8ab30a07c689230431fb5d"
+    }
+  }
+}

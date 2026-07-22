@@ -67,6 +67,27 @@
       "index_sha256": "126e045845c8e0e4553fa6b00d3558ee4a84176a4d04ddab09570e46d7dbde4d"
     },
     "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result.",
-    "parameter_count": 5.42
+    "parameter_count": 5.42,
+    "ranking": {
+      "metric_id": "blended_surface_rel_l2",
+      "value": 10.3,
+      "ranked_value": 10.3,
+      "display_value": "10.30",
+      "unit": "%",
+      "direction": "lower",
+      "decimal_places": 2,
+      "rounding": "decimal_half_up",
+      "method": "competition",
+      "rank": 1,
+      "ranked_result_count": 1,
+      "tied": false,
+      "tie_count": 1
+    },
+    "claim_eligibility": {
+      "academic_citation": false,
+      "promotion": false,
+      "reason_code": "prototype_dummy_data",
+      "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+    }
   }
 ]

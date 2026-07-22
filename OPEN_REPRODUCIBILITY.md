@@ -129,10 +129,22 @@ An approval is specific to the declared dataset version, public split digest, op
 model digest, environment digest, evaluator/reference version, scalar values, profile bytes, and public ground-truth release.
 Changing any of these requires a new submission ID and a new validation and approval.
 
-The official scalar release is served from an asset base containing its full source commit. Its manifest pins the complete scalar
-feed digest, every submitted profile-index digest, and the release ID and manifest digest of the public profile ground truth. The
+The official scalar release is served from an immutable asset base containing its release ID; its separate full source-commit field
+records repository provenance without a self-referential hash. Its manifest pins the complete scalar feed digest, every submitted
+profile-index digest, and the release ID and manifest digest of the public profile ground truth. The
 ground-truth manifest then pins every case-set index, and each index pins its chunks. Academic exports are enabled only after the
 browser verifies these byte-level links.
+
+The builder preserves an official release's explicit publication timestamp and treats an existing generated claim index as a seal:
+changed feed or claim bytes cannot be rebuilt under the same release ID and URLs. Publishing changed contents requires a new safe
+release ID with matching release-view and asset-base path segments.
+
+For each feed row the release builder also publishes a hash-pinned result-claim record. It preserves the result's competition rank
+within that exact release, dataset, and split, using the displayed metric precision, and binds the claim to the feed row and the
+available submission, evaluation, profile, and maintainer-validation records. `data_release.release_view_url` identifies the
+immutable interactive release snapshot; `data_release.archive_url` separately identifies the DOI or data-archive landing page.
+Later releases may assign a different rank without changing the historical claim. Prototype claim records are explicitly ineligible
+for academic citation and promotion.
 
 ## Contract changes and historical schemas
 

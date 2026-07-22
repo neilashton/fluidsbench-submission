@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/medium/drivaerml-gino",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-gino",
+    "model": "GINO",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "Medium",
+    "split_id": "medium"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 38.52,
+    "ranked_value": 38.5,
+    "display_value": "38.5",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 2,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 16
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-gino/submission.json",
+      "sha256": "ed1450f72023643a6ba2153bd894797b9ca377d6648640d2dc299851199efa75"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-gino/evaluation-evidence.json",
+      "sha256": "97e6243930e35a218bb57a0ae4e6dda5e3ce75ca8db30387fdd29fef740e720d"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-gino/profiles/index.json",
+      "sha256": "c6b678858ab8f34b354bbb102ab0c851bad412797ef08ca0b59a45846d83fbcc"
+    }
+  }
+}

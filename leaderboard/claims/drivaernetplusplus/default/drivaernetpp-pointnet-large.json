@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/drivaernetpp-pointnet-large",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaernetpp-pointnet-large",
+    "model": "PointNet-Large",
+    "dataset": "DrivAerNet++",
+    "dataset_id": "drivaernetplusplus",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 44.7,
+    "ranked_value": 44.7,
+    "display_value": "44.7",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 9,
+    "ranked_result_count": 12,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 29
+    },
+    "source_submission": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-pointnet-large/submission.json",
+      "sha256": "5fce06f4f586a685ba91dc7dffae8662ab4898fb2b92c32117fde26b0ecab0bc"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-pointnet-large/evaluation-evidence.json",
+      "sha256": "a7e025bf253a83b0e71268619ae1ae69b51f0b2fd6662eeb8eebbf9c433e38d5"
+    },
+    "profile_index": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-pointnet-large/profiles/index.json",
+      "sha256": "41b67c909077adb561ebb6f367b0d1665ef8f38ce339b2825f0447d557ff071c"
+    }
+  }
+}

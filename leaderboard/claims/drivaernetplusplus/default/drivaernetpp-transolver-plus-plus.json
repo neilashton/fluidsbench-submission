@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/drivaernetpp-transolver-plus-plus",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaernetpp-transolver-plus-plus",
+    "model": "Transolver++",
+    "dataset": "DrivAerNet++",
+    "dataset_id": "drivaernetplusplus",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 47.419999999999995,
+    "ranked_value": 47.4,
+    "display_value": "47.4",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 6,
+    "ranked_result_count": 12,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 34
+    },
+    "source_submission": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-transolver-plus-plus/submission.json",
+      "sha256": "c14bc6da4ef3cd7f98da15894be7c67332cb01fe2a104183b18e24b33b962cdc"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-transolver-plus-plus/evaluation-evidence.json",
+      "sha256": "19988b63f4c0058824c4edc27576a9c7a79974d3c60f8bc5c2021fd3bcc42da2"
+    },
+    "profile_index": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-transolver-plus-plus/profiles/index.json",
+      "sha256": "f26973f181c48cfbca003d49950358d4c0624ab1a2845ea4b327620189b83276"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/airfrans/full/dummy-airfrans-airfoiloperator-v1",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "dummy-airfrans-airfoiloperator-v1",
+    "model": "MeshGraphNets",
+    "dataset": "AirfRANS",
+    "dataset_id": "airfrans",
+    "split": "Full",
+    "split_id": "full"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 82.99333333333334,
+    "ranked_value": 83.0,
+    "display_value": "83.0",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 14
+    },
+    "source_submission": {
+      "path": "submissions/airfrans/dummy-airfrans-airfoiloperator-v1/submission.json",
+      "sha256": "246f7e4d286a41903b4fdeeff4527f9461cf1dfd45566e92646c6ddc2a8339b2"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/airfrans/dummy-airfrans-airfoiloperator-v1/evaluation-evidence.json",
+      "sha256": "35db7febca09b5f2bd7639a688dbddd20b0af7dc7966208d33891a59810619e3"
+    },
+    "profile_index": {
+      "path": "submissions/airfrans/dummy-airfrans-airfoiloperator-v1/profiles/index.json",
+      "sha256": "7caf046a9ff542dd182f79e6bd40069fde0d77d7f33092aff6cd1fc73f2082ed"
+    }
+  }
+}

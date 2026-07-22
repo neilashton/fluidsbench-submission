@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/rotor37/train_8/rotor37-prototype-train-8",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "rotor37-prototype-train-8",
+    "model": "MeshGraphNets",
+    "dataset": "Rotor37",
+    "dataset_id": "rotor37",
+    "split": "train_8",
+    "split_id": "train_8"
+  },
+  "ranking": {
+    "metric_id": "total_error",
+    "value": 0.07936,
+    "ranked_value": 0.079,
+    "display_value": "0.079",
+    "unit": "",
+    "direction": "lower",
+    "decimal_places": 3,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 70
+    },
+    "source_submission": {
+      "path": "submissions/rotor37/rotor37-prototype-train-8/submission.json",
+      "sha256": "9a3acfa17dd6a172a095079c9c3cd79fc1f1d2e278ee74ce2e64bac0292c7a07"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/rotor37/rotor37-prototype-train-8/evaluation-evidence.json",
+      "sha256": "43e65de1c863b1527d5fc3eb9de90979c5c898007cd2a295c19d6f36f980035f"
+    },
+    "profile_index": {
+      "path": "submissions/rotor37/rotor37-prototype-train-8/profiles/index.json",
+      "sha256": "dd739654b8500a7b8197e4a001e6f4b6ee96f2a27ee6a2c3f0e59d2275a26fc2"
+    }
+  }
+}

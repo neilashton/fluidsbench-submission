@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/full/drivaerml-transolver",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-transolver",
+    "model": "Transolver",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "Full",
+    "split_id": "full"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 74.54,
+    "ranked_value": 74.5,
+    "display_value": "74.5",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 2,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 22
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-transolver/submission.json",
+      "sha256": "3ce2abe8a89d78cb566343658a43b746e7a8fc51a1ff175dc86684e90b59181c"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-transolver/evaluation-evidence.json",
+      "sha256": "6a364544ea1b10bc58da7dadc23fc6341f03dea86a25db2f769befdfdbb564ef"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-transolver/profiles/index.json",
+      "sha256": "fe4aff0a8b18360cd6813a248423a24da5050d1da4d7622844cefd252075d4f3"
+    }
+  }
+}

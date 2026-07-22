@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/hiliftaeroml/stall/hiliftaeroml-transolver-aoa4",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "hiliftaeroml-transolver-aoa4",
+    "model": "Transolver",
+    "dataset": "HiLiftAeroML",
+    "dataset_id": "hiliftaeroml",
+    "split": "Stall",
+    "split_id": "stall"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 66.345,
+    "ranked_value": 66.3,
+    "display_value": "66.3",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 44
+    },
+    "source_submission": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa4/submission.json",
+      "sha256": "4d70fd6d9753ad469b3c93bb87be0c6a8c4f907f9eb14326d93c83ec2166020e"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa4/evaluation-evidence.json",
+      "sha256": "9bbd1abb647900b07a5fd0334f1d420af40aadb85e9250e5056da2c8c9f5ee5f"
+    },
+    "profile_index": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa4/profiles/index.json",
+      "sha256": "b94266b47722e2d323187abb07308ebae4d58ed3e6c671528fac6a5ff02d9a21"
+    }
+  }
+}

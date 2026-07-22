@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/ahmedml/medium/dummy-ahmedml-flowformer-v1",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "dummy-ahmedml-flowformer-v1",
+    "model": "FlowFormer",
+    "dataset": "AhmedML",
+    "dataset_id": "ahmedml",
+    "split": "Medium",
+    "split_id": "medium"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 91.46166666666667,
+    "ranked_value": 91.5,
+    "display_value": "91.5",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 1
+    },
+    "source_submission": {
+      "path": "submissions/ahmedml/dummy-ahmedml-flowformer-v1/submission.json",
+      "sha256": "fe2624dee7a9823f43ecc20bc2510e53d25d83ce443b8e02fa0146d82aafe97a"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/ahmedml/dummy-ahmedml-flowformer-v1/evaluation-evidence.json",
+      "sha256": "b162054a37a3ea893b271bd05fe3f229dbcb613ab023a3e7c7d537863cb9907d"
+    },
+    "profile_index": {
+      "path": "submissions/ahmedml/dummy-ahmedml-flowformer-v1/profiles/index.json",
+      "sha256": "c340e3f8ee5a04c5977811195364fb7bf3d0bc06a7d9f89cae74666928aa05ff"
+    }
+  }
+}

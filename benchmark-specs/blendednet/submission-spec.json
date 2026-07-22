@@ -1,11 +1,18 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "dataset_id": "blendednet",
   "dataset_name": "BlendedNet",
   "dataset_version": "prototype-1",
   "status": "prototype_dummy_data",
   "evaluation_reference_version": "prototype-1",
   "default_field_reduction": "per_geometry_then_macro_average",
+  "ranking": {
+    "metric_id": "blended_surface_rel_l2",
+    "direction": "lower",
+    "decimal_places": 2,
+    "rounding": "decimal_half_up",
+    "method": "competition"
+  },
   "metrics": [
     {
       "id": "blended_surface_rel_l2",

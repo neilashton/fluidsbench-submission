@@ -29,3 +29,9 @@ Each metric's `aggregation` and `weighting` fields make the reduction explicit. 
 test geometry equal influence; `flatten_all_aligned_field_values` evaluates one reduction over all aligned samples;
 `all_test_cases` gives scalar cases equal weight; the two `benchmark_*_rrmse_across_cases` values use the exact RRMSE equations in
 the reference documentation. Derived metrics list either `derived_score_equation` or `derived_arithmetic_mean`.
+
+Each specification also publishes the leaderboard `ranking` contract: metric ID, direction, decimal places, decimal rounding rule,
+and competition-ranking method. The decimal places must equal that metric's display digits in the release manifest. FluidsBench
+rounds the submitter-supplied ranking value with decimal half-up rounding before both display and comparison, and assigns equal
+rounded values the same competition rank (`1, 2, 2, 4`). Rank scope is always one immutable release, dataset, and split; filters or
+later submissions do not rewrite a historical rank.

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
+    "model": "MeshGraphNets",
+    "dataset": "DrivAerNet++",
+    "dataset_id": "drivaernetplusplus",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 88.68,
+    "ranked_value": 88.7,
+    "display_value": "88.7",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 12,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 36
+    },
+    "source_submission": {
+      "path": "submissions/drivaernetplusplus/dummy-drivaernetplusplus-surfacegnn-v1/submission.json",
+      "sha256": "3962909f09955491af5ec7d2c5c67acf0a149e2e5d2b1f91d8810d441e5b3afb"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaernetplusplus/dummy-drivaernetplusplus-surfacegnn-v1/evaluation-evidence.json",
+      "sha256": "2b3009c980aaf63fa74e0edd1b2f52217cf34e1e9d11e16a081b6030ebd3dee6"
+    },
+    "profile_index": {
+      "path": "submissions/drivaernetplusplus/dummy-drivaernetplusplus-surfacegnn-v1/profiles/index.json",
+      "sha256": "4ee486406eda38b734761fca5321f9cfadba8656aa2c626cfe66d05d8913b375"
+    }
+  }
+}

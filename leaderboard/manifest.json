@@ -1,16 +1,34 @@
 {
-  "schema_version": "0.5.0",
-  "generated_at": "2026-07-20T17:47:35Z",
+  "schema_version": "0.6.0",
+  "generated_at": "2026-07-22T13:30:42Z",
+  "ranking_contract": {
+    "version": "1.0",
+    "scope": [
+      "release_id",
+      "dataset_id",
+      "split_id"
+    ],
+    "method": "competition",
+    "tie_sequence_example": [
+      1,
+      2,
+      2,
+      4
+    ],
+    "comparison": "rounded_metric_value",
+    "rounding": "decimal_half_up"
+  },
   "data_release": {
-    "id": "prototype-dev-2026-07-15-a00099436a05",
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-07-20T17:47:35Z",
+    "generated_at": "2026-07-22T13:30:42Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "a00099436a05a80e06bb794209b148951b68a9e4a410a304b769a6ecb5174e22",
+    "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
+    "release_view_url": null,
     "asset_base_url": "https://raw.githubusercontent.com/neilashton/fluidsbench-submission/dev/",
     "reproducibility_contract_version": "open-reproducibility-2.0",
     "profile_ground_truth": {
@@ -29,6 +47,13 @@
       "author": "FluidsBench contributors",
       "publisher": "FluidsBench",
       "year": 2026
+    },
+    "claims": {
+      "schema_version": "1.0",
+      "index_file": "leaderboard/claims/index.json",
+      "index_sha256": "e59adefdf30e6daf06d49630f3fbde7f639670c90fbbda01f5038535b2a030f3",
+      "record_count": 72,
+      "eligible_record_count": 0
     }
   },
   "all_file": "leaderboard/all.json",
@@ -241,7 +266,10 @@
       ],
       "ranking": {
         "metric_id": "overall_score",
-        "direction": "higher"
+        "direction": "higher",
+        "decimal_places": 1,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {
@@ -434,7 +462,10 @@
       ],
       "ranking": {
         "metric_id": "overall_score",
-        "direction": "higher"
+        "direction": "higher",
+        "decimal_places": 1,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {
@@ -663,7 +694,10 @@
       ],
       "ranking": {
         "metric_id": "overall_score",
-        "direction": "higher"
+        "direction": "higher",
+        "decimal_places": 1,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {
@@ -849,7 +883,10 @@
       ],
       "ranking": {
         "metric_id": "overall_score",
-        "direction": "higher"
+        "direction": "higher",
+        "decimal_places": 1,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {
@@ -1158,7 +1195,10 @@
       ],
       "ranking": {
         "metric_id": "overall_score",
-        "direction": "higher"
+        "direction": "higher",
+        "decimal_places": 1,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {
@@ -1592,7 +1632,10 @@
       ],
       "ranking": {
         "metric_id": "overall_score",
-        "direction": "higher"
+        "direction": "higher",
+        "decimal_places": 1,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {
@@ -1836,7 +1879,10 @@
       ],
       "ranking": {
         "metric_id": "total_error",
-        "direction": "lower"
+        "direction": "lower",
+        "decimal_places": 3,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {
@@ -2067,7 +2113,10 @@
       ],
       "ranking": {
         "metric_id": "total_error",
-        "direction": "lower"
+        "direction": "lower",
+        "decimal_places": 3,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {
@@ -2267,7 +2316,10 @@
       ],
       "ranking": {
         "metric_id": "blended_surface_rel_l2",
-        "direction": "lower"
+        "direction": "lower",
+        "decimal_places": 2,
+        "rounding": "decimal_half_up",
+        "method": "competition"
       },
       "diagnostic_panels": [
         {

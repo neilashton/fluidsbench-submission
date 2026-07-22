@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/high_drag/drivaerml-oformer",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-oformer",
+    "model": "OFormer",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "High drag",
+    "split_id": "high_drag"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 75.63166666666666,
+    "ranked_value": 75.6,
+    "display_value": "75.6",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 19
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-oformer/submission.json",
+      "sha256": "4d810653c0f8c8011a919ce8f8fd6d1a32671c0e5259333c10d3500506bec446"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-oformer/evaluation-evidence.json",
+      "sha256": "2cac2e3df28efc34b12a9f52e0e64411cf95acf018a99079bef12a7cc1d7a624"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-oformer/profiles/index.json",
+      "sha256": "914a95302291d5f24885df435397725eb401993a48d80c3205f392b840982952"
+    }
+  }
+}

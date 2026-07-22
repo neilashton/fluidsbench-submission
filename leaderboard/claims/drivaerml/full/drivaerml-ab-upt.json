@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/full/drivaerml-ab-upt",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-ab-upt",
+    "model": "AB-UPT",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "Full",
+    "split_id": "full"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 80.00416666666666,
+    "ranked_value": 80.0,
+    "display_value": "80.0",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 15
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-ab-upt/submission.json",
+      "sha256": "f12af17d572121dc911adef1dd44a1a29dc4ea897138cb47b4cb8d6df03910d5"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-ab-upt/evaluation-evidence.json",
+      "sha256": "598f5f6c6e89cdb9212b50e91ec82ec0145ec38992a3eded31b4d1ad63865624"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-ab-upt/profiles/index.json",
+      "sha256": "a90ee3324feb43af5c606b914821327ea68d171361e232bdc8134a4146b4a51c"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/windsorml/default/windsorml-transolver",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "windsorml-transolver",
+    "model": "Transolver",
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 78.52166666666668,
+    "ranked_value": 78.5,
+    "display_value": "78.5",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 5,
+    "ranked_result_count": 10,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 53
+    },
+    "source_submission": {
+      "path": "submissions/windsorml/windsorml-transolver/submission.json",
+      "sha256": "2d8b676764ed9dfad3d25d19e441bf40b701ab0f43d25969249a0abf6307784d"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/windsorml/windsorml-transolver/evaluation-evidence.json",
+      "sha256": "c2dde11f1b83c43c4b53e5cdd93715cea3fbaf3c6ff00727b052ede4f32748c9"
+    },
+    "profile_index": {
+      "path": "submissions/windsorml/windsorml-transolver/profiles/index.json",
+      "sha256": "3ceb5878deacb34133e97da977e36d6b42a2db4147042e253f9170d44228273e"
+    }
+  }
+}

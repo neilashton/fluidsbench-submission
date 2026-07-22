@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/vki-ls59/train_8/vkils59-prototype-train-8",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "vkils59-prototype-train-8",
+    "model": "Transolver",
+    "dataset": "VKI-LS59",
+    "dataset_id": "vki-ls59",
+    "split": "train_8",
+    "split_id": "train_8"
+  },
+  "ranking": {
+    "metric_id": "total_error",
+    "value": 0.08323,
+    "ranked_value": 0.083,
+    "display_value": "0.083",
+    "unit": "",
+    "direction": "lower",
+    "decimal_places": 3,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 62
+    },
+    "source_submission": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-8/submission.json",
+      "sha256": "db1a96c3a3f5e13a975b78461f8bb425f0a1ba30d3efb376feb2cee5fa11747f"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-8/evaluation-evidence.json",
+      "sha256": "596a4c8480cae872a1bc2f5efc8e22fb521d8c7cb52a7a6112178022f33ba7a7"
+    },
+    "profile_index": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-8/profiles/index.json",
+      "sha256": "6f57192a79ed6baa37216fd2537282a98fcc59473b70eb5fb618c757217917d5"
+    }
+  }
+}

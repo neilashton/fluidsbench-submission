@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/windsorml/default/windsorml-lno",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "windsorml-lno",
+    "model": "LNO",
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 38.78,
+    "ranked_value": 38.8,
+    "display_value": "38.8",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 8,
+    "ranked_result_count": 10,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 49
+    },
+    "source_submission": {
+      "path": "submissions/windsorml/windsorml-lno/submission.json",
+      "sha256": "b8f4d5827afaa47f227403c83718055b1f2e3d2708e5d346ac588764259c6322"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/windsorml/windsorml-lno/evaluation-evidence.json",
+      "sha256": "742b8b2e48dc2ce12cf7d475e7ca1362125f7dda70ee3ab0d9d1dd32a075faae"
+    },
+    "profile_index": {
+      "path": "submissions/windsorml/windsorml-lno/profiles/index.json",
+      "sha256": "15135e04d8feb8d4b810bc03cee211dfab051327afab3f1f0733d8964b80fb82"
+    }
+  }
+}

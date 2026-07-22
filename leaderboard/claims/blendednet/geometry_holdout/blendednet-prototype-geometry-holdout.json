@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "blendednet-prototype-geometry-holdout",
+    "model": "UPT",
+    "dataset": "BlendedNet",
+    "dataset_id": "blendednet",
+    "split": "geometry_holdout",
+    "split_id": "geometry_holdout"
+  },
+  "ranking": {
+    "metric_id": "blended_surface_rel_l2",
+    "value": 10.3,
+    "ranked_value": 10.3,
+    "display_value": "10.30",
+    "unit": "%",
+    "direction": "lower",
+    "decimal_places": 2,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 71
+    },
+    "source_submission": {
+      "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/submission.json",
+      "sha256": "f4761596f02571e51b8dc7f8d0971cfa756e71e39f90abaa6e75960c8e302406"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/evaluation-evidence.json",
+      "sha256": "4279bcb823daee9989fab2e44e7cbc7b94502577b726bd2597e3b101ce24a0bc"
+    },
+    "profile_index": {
+      "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/profiles/index.json",
+      "sha256": "126e045845c8e0e4553fa6b00d3558ee4a84176a4d04ddab09570e46d7dbde4d"
+    }
+  }
+}

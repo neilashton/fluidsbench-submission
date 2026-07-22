@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/windsorml/default/windsorml-pointnet",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "windsorml-pointnet",
+    "model": "PointNet",
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 36.78,
+    "ranked_value": 36.8,
+    "display_value": "36.8",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 10,
+    "ranked_result_count": 10,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 51
+    },
+    "source_submission": {
+      "path": "submissions/windsorml/windsorml-pointnet/submission.json",
+      "sha256": "0d6df85c343d7824868ad83c228f7d57131a72978c4ce54cd648e4d1c548e3ad"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/windsorml/windsorml-pointnet/evaluation-evidence.json",
+      "sha256": "eace4be6ea1bd3a79feb27a9b08b3abe4ffe2f574faaa1da0ac397a736e63d7b"
+    },
+    "profile_index": {
+      "path": "submissions/windsorml/windsorml-pointnet/profiles/index.json",
+      "sha256": "42d6464e5907adc5ebcedfe3bf9e40c64024a861c75798d1082c97ed14189add"
+    }
+  }
+}

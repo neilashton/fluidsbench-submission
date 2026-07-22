@@ -1,11 +1,18 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "dataset_id": "windsorml",
   "dataset_name": "WindsorML",
   "dataset_version": "prototype-1",
   "status": "prototype_dummy_data",
   "evaluation_reference_version": "prototype-1",
   "default_field_reduction": "per_geometry_then_macro_average",
+  "ranking": {
+    "metric_id": "overall_score",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition"
+  },
   "metrics": [
     {
       "id": "overall_score",

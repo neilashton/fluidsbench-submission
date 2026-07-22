@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/windsorml/default/dummy-windsorml-wakenet-v1",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "dummy-windsorml-wakenet-v1",
+    "model": "MeshGraphNets",
+    "dataset": "WindsorML",
+    "dataset_id": "windsorml",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 86.67833333333333,
+    "ranked_value": 86.7,
+    "display_value": "86.7",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 10,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 45
+    },
+    "source_submission": {
+      "path": "submissions/windsorml/dummy-windsorml-wakenet-v1/submission.json",
+      "sha256": "7bcf49f8583d1daa9e0da3621043a3ca8148ccb57ac1177be7021e5fd011b650"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/windsorml/dummy-windsorml-wakenet-v1/evaluation-evidence.json",
+      "sha256": "adc7a6b24f41097e2fbf5bdfee198bf4c7ff3aa3d1fe60f836d7018f96732a57"
+    },
+    "profile_index": {
+      "path": "submissions/windsorml/dummy-windsorml-wakenet-v1/profiles/index.json",
+      "sha256": "fc010a0de7d8697c40fb56c34c7fbe98e9e31d2a71d66c2dabc272cbcb330903"
+    }
+  }
+}

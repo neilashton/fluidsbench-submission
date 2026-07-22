@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/vki-ls59/train_16/vkils59-prototype-train-16",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "vkils59-prototype-train-16",
+    "model": "Transolver",
+    "dataset": "VKI-LS59",
+    "dataset_id": "vki-ls59",
+    "split": "train_16",
+    "split_id": "train_16"
+  },
+  "ranking": {
+    "metric_id": "total_error",
+    "value": 0.07387,
+    "ranked_value": 0.074,
+    "display_value": "0.074",
+    "unit": "",
+    "direction": "lower",
+    "decimal_places": 3,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 57
+    },
+    "source_submission": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-16/submission.json",
+      "sha256": "4c65ea114ee69d0f0c3e529bfa9df39a61a32297b9bfabd31391f654fdee0752"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-16/evaluation-evidence.json",
+      "sha256": "f77f81bcff99f5b9ed55b53556ff98634c00d0bc25f26a756969c744d0462839"
+    },
+    "profile_index": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-16/profiles/index.json",
+      "sha256": "1449527e3718bd0785dc1c04bf1e0f1a2ec8ce113e41799a222bf151101a2a77"
+    }
+  }
+}

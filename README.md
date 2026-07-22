@@ -153,7 +153,7 @@ python3 scripts/manage_leaderboard.py check
 The validator checks JSON schemas, exact public split case coverage, metric IDs and ranges, training metadata consistency,
 evaluation evidence identity and checksums, profile coverage, coordinate ordering, array lengths, finite values, split hashes,
 chunk hashes, derived score arithmetic, pinned open-artifact metadata, and approval/validation lifecycle rules. It does not execute
-the model or independently recompute submitted base metrics.
+the model or recompute submitted base metrics.
 
 After validation:
 
@@ -183,6 +183,9 @@ leaderboard/
   manifest.json
   datasets/<dataset-id>.json
   all.json
+  claims/
+    index.json
+    <dataset-id>/<split-id>/<submission-id>.json
 leaderboard.json
 ```
 
@@ -192,8 +195,43 @@ profile index path, and the browser fetches only the selected geometry's chunk.
 `leaderboard/manifest.json` also publishes the data-release identifier, generation time, source reference, contract version,
 licence scope, archive URL, immutable asset base, SHA-256 digest of the complete scalar feed, and the expected release ID and
 manifest digest for the public profile ground truth. Every feed row carries the SHA-256 digest of its profile index. Prototype
-releases use `archive_url: null`; an official release must provide an immutable HTTPS archive URL and an asset base pinned to the
-full source commit.
+releases use `archive_url: null`; an official release must provide an immutable HTTPS archive URL plus asset-base and interactive
+release-view URLs containing the release ID. The separate full `source_commit` records repository provenance without creating a
+self-referential commit hash.
+
+Official `asset_base_url` and `release_view_url` values are clean HTTPS directory bases: their final path segment is exactly the
+safe lowercase release ID, they end in `/`, and they contain no query or fragment. Official builds preserve the manifest's explicit
+timezone-qualified generation timestamp. If generated claims already exist for that official release ID, the builder refuses any
+changed feed digest, ranking contract, claim set, or published claim metadata; a new release requires a new ID and matching URL
+bases. This makes result permalinks and relative release-asset URLs identical across Python, JavaScript, archives, and CDNs.
+
+Ranks are release records, not live-page claims. They are calculated within exactly one release, dataset, and split using the
+dataset's declared ranking metric and its published decimal precision. Values are rounded in decimal with `decimal_half_up`, then
+competition-ranked (`1, 2, 2, 4`); the rounded value is also the displayed value, so two visibly equal results cannot receive
+different ranks. The feed publishes the raw value, rounded/display value, rank, ranked-result count, and tie count in each row's
+`ranking` object.
+
+Every release also generates one machine-readable result-claim record per feed row. The claims index hashes every record, and the
+release manifest hashes the index. Each record identifies the release, result, ranking scope and policy, feed digest, source
+submission, evaluation evidence, and profile-index bindings; official records additionally bind maintainer validation. For
+official results it also provides an
+immutable result permalink based on `data_release.release_view_url`; `archive_url` remains the separate DOI or data-archive landing
+page. Each claim's exact byte URL is its repository-relative `leaderboard/claims/...` path under the immutable
+`data_release.asset_base_url`. The build chain is deliberately one-way: ranked feed, feed digest, claim records, claims-index
+digest, then manifest pin.
+
+`bindings.result` identifies the exact-byte-hashed complete feed and the row's zero-based array index. A verifier hashes the feed
+bytes, loads that indexed row, and compares its identity, ranking, eligibility, and artifact bindings with the claim. This avoids
+language-dependent JSON number canonicalization while retaining a byte-for-byte release link.
+
+The generated-artifact checker also verifies that `record_count` and `eligible_record_count` equal the claim-index contents; these
+cross-field equalities are semantic checks beyond what the portable JSON Schema expresses.
+
+Prototype claim records remain useful for testing the interface, but explicitly set academic-citation and promotion eligibility to
+false and have no immutable permalink. Official records state that validation covered submitted data only: FluidsBench did not
+execute the model or recompute submitted base metrics. The schemas are
+[`schemas/releases/result-claim.schema.json`](schemas/releases/result-claim.schema.json) and
+[`schemas/releases/claim-index.schema.json`](schemas/releases/claim-index.schema.json).
 
 Maintainers rebuild and verify feeds with:
 

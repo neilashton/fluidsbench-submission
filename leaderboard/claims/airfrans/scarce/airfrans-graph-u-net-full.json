@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/airfrans/scarce/airfrans-graph-u-net-full",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "airfrans-graph-u-net-full",
+    "model": "Graph U-Net",
+    "dataset": "AirfRANS",
+    "dataset_id": "airfrans",
+    "split": "Scarce",
+    "split_id": "scarce"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 55.45666666666666,
+    "ranked_value": 55.5,
+    "display_value": "55.5",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 10
+    },
+    "source_submission": {
+      "path": "submissions/airfrans/airfrans-graph-u-net-full/submission.json",
+      "sha256": "0f80b498e3bf3b1c0906bbe7da4b589c893a63173edf88ada4afbc3609fd05a1"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/airfrans/airfrans-graph-u-net-full/evaluation-evidence.json",
+      "sha256": "288a61a5c87bb2e41a7046d9c17570e7e53eb603f506423242e1e9993375eb7e"
+    },
+    "profile_index": {
+      "path": "submissions/airfrans/airfrans-graph-u-net-full/profiles/index.json",
+      "sha256": "be39e00e37a39d4f8cbd32c5763c11b10f302183fbeb2961733550fd722f7745"
+    }
+  }
+}

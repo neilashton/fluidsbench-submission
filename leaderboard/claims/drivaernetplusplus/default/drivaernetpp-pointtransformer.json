@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/drivaernetpp-pointtransformer",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaernetpp-pointtransformer",
+    "model": "Point Transformer",
+    "dataset": "DrivAerNet++",
+    "dataset_id": "drivaernetplusplus",
+    "split": "Default",
+    "split_id": "default"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 46.35,
+    "ranked_value": 46.4,
+    "display_value": "46.4",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 7,
+    "ranked_result_count": 12,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 30
+    },
+    "source_submission": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-pointtransformer/submission.json",
+      "sha256": "a2943b9eabed2bbf5360444c46f52de16ef2f9b11d274f1993e82c76cce0cf74"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-pointtransformer/evaluation-evidence.json",
+      "sha256": "e2630bec6e196257507c828de93cbde372c974450d48eb43134612edda1ef348"
+    },
+    "profile_index": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-pointtransformer/profiles/index.json",
+      "sha256": "95767a36f08b083a8ee9b286cf32306a45a8795e06c2bc81f46d57ec9b8905f1"
+    }
+  }
+}

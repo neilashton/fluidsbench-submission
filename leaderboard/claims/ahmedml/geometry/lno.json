@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/ahmedml/geometry/lno",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "lno",
+    "model": "LNO",
+    "dataset": "AhmedML",
+    "dataset_id": "ahmedml",
+    "split": "Geometry",
+    "split_id": "geometry"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 55.93833333333333,
+    "ranked_value": 55.9,
+    "display_value": "55.9",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 4
+    },
+    "source_submission": {
+      "path": "submissions/ahmedml/lno/submission.json",
+      "sha256": "054b9cec8a4d5e69af13e097751c1ab13d6a52ceff6b895dca120fe400f2ef61"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/ahmedml/lno/evaluation-evidence.json",
+      "sha256": "a8241ce458f41367daeb6285364878c882647e3c4dc4c8e46df2c2d4f777460d"
+    },
+    "profile_index": {
+      "path": "submissions/ahmedml/lno/profiles/index.json",
+      "sha256": "56753e30374dc103ee3e49dd75dea8d5574ee41f9e84996f847738e3a4d7b014"
+    }
+  }
+}

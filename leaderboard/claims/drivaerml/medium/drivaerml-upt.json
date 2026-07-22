@@ -1,0 +1,62 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/medium/drivaerml-upt",
+  "release": {
+    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-07-22T13:30:42Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-upt",
+    "model": "UPT",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "Medium",
+    "split_id": "medium"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 63.70833333333334,
+    "ranked_value": 63.7,
+    "display_value": "63.7",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "row_index": 23
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-upt/submission.json",
+      "sha256": "95bc114aa57dd1f83bfa1d33e63ecb480a3edb1ce2d5b09e61b30122da73992a"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-upt/evaluation-evidence.json",
+      "sha256": "ee91387920c447496e3fec5c1d105ca9f5206ef68013237d40eedd3d59c61322"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-upt/profiles/index.json",
+      "sha256": "45be9a0a0f38bfb31413a8fe6e2881c77cbc6eed38a1e1ca6534ccc353b900da"
+    }
+  }
+}
