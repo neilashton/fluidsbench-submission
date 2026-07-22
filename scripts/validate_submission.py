@@ -27,8 +27,8 @@ except ImportError:  # pragma: no cover - exercised by the command's dependency 
 
 
 MANIFEST_PATH = ROOT / "leaderboard" / "manifest.json"
-SCHEMA_DIR = ROOT / "schemas" / "v1"
-OPEN_REPRODUCIBILITY_CONTRACT = "open-reproducibility-1.0"
+SCHEMA_ROOT = ROOT / "schemas"
+OPEN_REPRODUCIBILITY_CONTRACT = "open-reproducibility-2.0"
 
 
 def load_json(path: Path) -> Any:
@@ -60,10 +60,10 @@ def json_path(parts: list[Any]) -> str:
     return result
 
 
-def schema_errors(value: Any, schema_name: str) -> list[str]:
+def schema_errors(value: Any, schema_name: str, *, schema_version: str = "v1") -> list[str]:
     if Draft202012Validator is None:
         return ["Python dependency jsonschema is missing; run: python3 -m pip install -r requirements.txt"]
-    schema = load_json(SCHEMA_DIR / schema_name)
+    schema = load_json(SCHEMA_ROOT / schema_version / schema_name)
     validator = Draft202012Validator(schema, format_checker=FormatChecker())
     return [
         f"{json_path(list(error.absolute_path))}: {error.message}"
@@ -204,7 +204,12 @@ def validate_evaluation_evidence(
     except (OSError, json.JSONDecodeError) as error:
         add(f"cannot read evaluation evidence: {error}")
         return None
-    for error in schema_errors(evidence, "evaluation-evidence.schema.json"):
+    evidence_schema_directory = "v2" if submission.get("schema_version") == "2.0" else "v1"
+    for error in schema_errors(
+        evidence,
+        "evaluation-evidence.schema.json",
+        schema_version=evidence_schema_directory,
+    ):
         add(f"evaluation-evidence.json {error}")
 
     identities = {
@@ -218,6 +223,19 @@ def validate_evaluation_evidence(
     for key, expected in identities.items():
         if evidence.get(key) != expected:
             add(f"evaluation-evidence.json {key} must equal {expected!r}")
+    if submission.get("schema_version") == "2.0":
+        v2_identities = {
+            "dataset_version": submission["dataset_version"],
+            "split_sha256": submission["split_sha256"],
+            "case_set_id": submission["case_set_id"],
+            "profile_ground_truth_release_id": submission["profile_data"]["profile_ground_truth_release_id"],
+            "profile_ground_truth_manifest_sha256": submission["profile_data"][
+                "profile_ground_truth_manifest_sha256"
+            ],
+        }
+        for key, expected in v2_identities.items():
+            if evidence.get(key) != expected:
+                add(f"evaluation-evidence.json {key} must equal {expected!r}")
     if evidence.get("metric_values") != submission.get("metric_values"):
         add("evaluation-evidence.json metric_values must exactly match submission.json")
 
@@ -232,12 +250,13 @@ def validate_open_reproducibility(
     directory: Path,
     submission: dict[str, Any],
     evidence: dict[str, Any] | None,
+    manifest: dict[str, Any],
     dataset_spec: dict[str, Any],
     split_spec_entry: dict[str, Any],
     *,
     contributor_stage: bool,
 ) -> None:
-    """Enforce the open-reproducibility lifecycle around contributor and maintainer records."""
+    """Enforce open artifacts and submitted-data validation without executing a model."""
 
     if evidence is None:
         return
@@ -245,20 +264,24 @@ def validate_open_reproducibility(
     approval = submission.get("approval")
     approval_status = approval.get("status") if isinstance(approval, dict) else None
     reproducibility = submission.get("reproducibility")
+    if submission.get("schema_version") == "2.0" and (directory / "maintainer-replay.json").exists():
+        add("maintainer-replay.json is not part of the open-reproducibility-2.0 contract")
 
     if contributor_stage:
         if evidence_status != "submitted_evaluation":
             add("contributor-stage packages require evaluation-evidence.status=submitted_evaluation")
         if approval is not None:
-            add("contributors must leave approval absent; maintainers add it only after replay")
-        if (directory / "maintainer-replay.json").exists():
-            add("contributors must not add maintainer-replay.json")
+            add("contributors must leave approval absent; maintainers add it only after submitted-data validation")
+        if (directory / "maintainer-validation.json").exists():
+            add("contributors must not add maintainer-validation.json")
 
     if evidence_status == "prototype_dummy_data":
         if approval_status != "prototype":
             add("prototype_dummy_data evidence requires approval.status=prototype")
         if reproducibility is not None:
             add("prototype dummy data must not claim the open reproducibility contract")
+        if submission.get("schema_version") != "1.0":
+            add("prototype dummy data must use the historical submission schema_version=1.0")
         return
 
     if evidence_status != "submitted_evaluation":
@@ -266,10 +289,12 @@ def validate_open_reproducibility(
 
     if approval_status == "prototype":
         add("submitted_evaluation evidence cannot use approval.status=prototype")
+    if submission.get("schema_version") != "2.0":
+        add("real submitted data requires submission schema_version=2.0")
     if approval_status not in {None, "approved"}:
-        add("a real contributor submission must remain unapproved until maintainer replay")
+        add("a real contributor submission must remain unapproved until maintainer validation")
     if contributor_stage and approval_status == "approved":
-        add("contributor-stage submissions cannot set approval.status=approved; maintainers add approval after replay")
+        add("contributor-stage submissions cannot set approval.status=approved; maintainers add approval after validation")
 
     if not isinstance(reproducibility, dict):
         add(
@@ -290,6 +315,13 @@ def validate_open_reproducibility(
     if dataset_spec.get("status") != "official":
         add("submitted_evaluation evidence requires an official dataset specification")
 
+    ground_truth = manifest.get("data_release", {}).get("profile_ground_truth", {})
+    submitted_profile_ground_truth = submission.get("profile_data", {})
+    if submitted_profile_ground_truth.get("profile_ground_truth_release_id") != ground_truth.get("release_id"):
+        add("profile_data.profile_ground_truth_release_id must match the leaderboard manifest")
+    if submitted_profile_ground_truth.get("profile_ground_truth_manifest_sha256") != ground_truth.get("manifest_sha256"):
+        add("profile_data.profile_ground_truth_manifest_sha256 must match the leaderboard manifest")
+
     split_path = ROOT / "benchmark-specs" / submission["dataset_id"] / split_spec_entry["index_file"]
     if split_path.is_file():
         split_index = load_json(split_path)
@@ -297,98 +329,76 @@ def validate_open_reproducibility(
             add("submitted_evaluation evidence requires an official public split index")
 
     if approval_status != "approved":
-        if (directory / "maintainer-replay.json").exists():
-            add("maintainer-replay.json is only allowed after a maintainer approves the replay")
+        if (directory / "maintainer-validation.json").exists():
+            add("maintainer-validation.json is only allowed with maintainer approval")
         return
 
-    replay_metadata = approval.get("replay") if isinstance(approval, dict) else None
-    if not isinstance(replay_metadata, dict):
-        add("approval.status=approved requires approval.replay")
+    validation_metadata = approval.get("validation") if isinstance(approval, dict) else None
+    if not isinstance(validation_metadata, dict):
+        add("approval.status=approved requires approval.validation")
         return
-    replay_filename = replay_metadata.get("evidence_file")
-    if replay_filename != "maintainer-replay.json":
-        add("approval.replay.evidence_file must be maintainer-replay.json")
+    validation_filename = validation_metadata.get("evidence_file")
+    if validation_filename != "maintainer-validation.json":
+        add("approval.validation.evidence_file must be maintainer-validation.json")
         return
-    replay_path = directory / replay_filename
-    if not replay_path.is_file():
-        add("approval.status=approved requires maintainer-replay.json")
+    validation_path = directory / validation_filename
+    if not validation_path.is_file():
+        add("approval.status=approved requires maintainer-validation.json")
         return
-    if sha256_file(replay_path) != replay_metadata.get("evidence_sha256"):
-        add("maintainer-replay.json does not match approval.replay.evidence_sha256")
+    if sha256_file(validation_path) != validation_metadata.get("evidence_sha256"):
+        add("maintainer-validation.json does not match approval.validation.evidence_sha256")
     try:
-        replay = load_json(replay_path)
+        validation = load_json(validation_path)
     except (OSError, json.JSONDecodeError) as error:
-        add(f"cannot read maintainer replay evidence: {error}")
+        add(f"cannot read maintainer validation evidence: {error}")
         return
-    for error in schema_errors(replay, "maintainer-replay.schema.json"):
-        add(f"maintainer-replay.json {error}")
+    for error in schema_errors(
+        validation,
+        "maintainer-validation.schema.json",
+        schema_version="v2",
+    ):
+        add(f"maintainer-validation.json {error}")
 
-    for key in ("submission_id", "dataset_id", "split_id"):
-        if replay.get(key) != submission.get(key):
-            add(f"maintainer-replay.json {key} must equal {submission.get(key)!r}")
-    if replay.get("reference_version") != submission.get("evaluation", {}).get("reference_version"):
-        add("maintainer-replay.json reference_version must match evaluation.reference_version")
-    if replay.get("contract_version") != reproducibility.get("contract_version"):
-        add("maintainer-replay.json contract_version must match reproducibility.contract_version")
-    replayed_by = replay.get("replayed_by")
-    submitter_identity = str(submission.get("submitter_name", "")).strip().casefold()
-    if str(replayed_by or "").strip().casefold() == submitter_identity:
-        add("maintainer replay must be performed by someone other than submitter_name")
-    if str(approval.get("approved_by", "")).strip().casefold() == submitter_identity:
-        add("approval must be recorded by someone other than submitter_name")
+    for key in ("submission_id", "dataset_id", "split_id", "case_set_id"):
+        if validation.get(key) != submission.get(key):
+            add(f"maintainer-validation.json {key} must equal {submission.get(key)!r}")
+    if validation.get("reference_version") != submission.get("evaluation", {}).get("reference_version"):
+        add("maintainer-validation.json reference_version must match evaluation.reference_version")
+    if validation.get("contract_version") != reproducibility.get("contract_version"):
+        add("maintainer-validation.json contract_version must match reproducibility.contract_version")
+
+    validation_ground_truth_fields = {
+        "profile_ground_truth_release_id": "release_id",
+        "profile_ground_truth_manifest_sha256": "manifest_sha256",
+    }
+    for validation_key, manifest_key in validation_ground_truth_fields.items():
+        submitted_value = submitted_profile_ground_truth.get(validation_key)
+        if validation.get(validation_key) != submitted_value:
+            add(f"maintainer-validation.json {validation_key} must match submission profile_data")
+        if validation.get(validation_key) != ground_truth.get(manifest_key):
+            add(f"maintainer-validation.json {validation_key} must match the leaderboard manifest")
+
     try:
         submitted_date = date.fromisoformat(submission["submitted_at"])
-        replay_date = datetime.fromisoformat(str(replay["replayed_at"]).replace("Z", "+00:00")).date()
+        validation_date = datetime.fromisoformat(str(validation["validated_at"]).replace("Z", "+00:00")).date()
         approved_date = date.fromisoformat(approval["approved_at"])
-        if not submitted_date <= replay_date <= approved_date:
-            add("submission, maintainer replay, and approval dates must be chronological")
+        if not submitted_date <= validation_date <= approved_date:
+            add("submission, maintainer validation, and approval dates must be chronological")
     except (KeyError, TypeError, ValueError):
         pass  # JSON Schema reports malformed or missing date values.
 
-    expected_replay_artifacts = {
-        "code": {
-            "repository_url": code_repository_url,
-            "commit": code_commit,
-        },
-        "model_artifact": {
-            "url": reproducibility.get("model_artifact", {}).get("url"),
-            "sha256": reproducibility.get("model_artifact", {}).get("sha256"),
-        },
-        "environment": reproducibility.get("environment"),
-    }
-    for key, expected in expected_replay_artifacts.items():
-        if replay.get(key) != expected:
-            add(f"maintainer-replay.json {key} must match the declared reproducibility artifact")
-
-    replay_values = replay.get("metric_values", {})
-    submitted_values = submission.get("metric_values", {})
-    if set(replay_values) != set(submitted_values):
-        add("maintainer-replay.json metric_values must contain exactly the submitted metric IDs")
-    tolerance = replay.get("metric_abs_tolerance")
-    if is_number(tolerance) and tolerance >= 0:
-        for metric_id in sorted(set(replay_values) & set(submitted_values)):
-            replay_value = replay_values[metric_id]
-            submitted_value = submitted_values[metric_id]
-            if is_number(replay_value) and is_number(submitted_value) and not math.isclose(
-                replay_value, submitted_value, rel_tol=0.0, abs_tol=tolerance
-            ):
-                add(
-                    f"maintainer replay metric {metric_id} differs from the submitted value by more than "
-                    f"metric_abs_tolerance={tolerance}"
-                )
-
     reviewed_submission = dict(submission)
     reviewed_submission.pop("approval", None)
-    if replay.get("reviewed_submission_sha256") != canonical_json_sha256(reviewed_submission):
-        add("maintainer-replay.json reviewed_submission_sha256 does not match submission metadata")
+    if validation.get("reviewed_submission_sha256") != canonical_json_sha256(reviewed_submission):
+        add("maintainer-validation.json reviewed_submission_sha256 does not match submission metadata")
+
+    if validation.get("evaluation_evidence_sha256") != submission.get("evaluation", {}).get("evidence_sha256"):
+        add("maintainer-validation.json evaluation_evidence_sha256 does not match submission metadata")
 
     profile_index_path = directory / submission["profile_data"]["index_file"]
     if profile_index_path.is_file():
-        submitted_profile_sha256 = sha256_file(profile_index_path)
-        if replay.get("submitted_profile_index_sha256") != submitted_profile_sha256:
-            add("maintainer-replay.json submitted_profile_index_sha256 does not match the submitted profile index")
-        if replay.get("replayed_profile_index_sha256") != submitted_profile_sha256:
-            add("independently replayed profiles do not exactly match the submitted profile index")
+        if validation.get("profile_index_sha256") != sha256_file(profile_index_path):
+            add("maintainer-validation.json profile_index_sha256 does not match the submitted profile index")
 
 
 def validate_profiles(
@@ -564,7 +574,16 @@ def validate_submission_file(
     except (OSError, json.JSONDecodeError) as error:
         add(f"cannot read submission JSON: {error}")
         return errors, stats
-    for error in schema_errors(submission, "submission.schema.json"):
+    submission_schema_version = submission.get("schema_version")
+    schema_directory = {"1.0": "v1", "2.0": "v2"}.get(submission_schema_version)
+    if schema_directory is None:
+        add("schema_version must be '1.0' for historical prototypes or '2.0' for real submissions")
+        return errors, stats
+    for error in schema_errors(
+        submission,
+        "submission.schema.json",
+        schema_version=schema_directory,
+    ):
         add(error)
     if errors:
         return errors, stats
@@ -605,6 +624,7 @@ def validate_submission_file(
         path.parent,
         submission,
         evidence,
+        manifest,
         dataset_spec,
         spec_split,
         contributor_stage=contributor_stage,
@@ -647,7 +667,7 @@ def main() -> int:
     parser.add_argument(
         "--contributor-stage",
         action="store_true",
-        help="reject maintainer approval/replay metadata in contributor-authored packages",
+        help="reject maintainer approval/validation metadata in contributor-authored packages",
     )
     args = parser.parse_args()
     errors, totals = validate_many(args.paths or None, contributor_stage=args.contributor_stage)

@@ -1,0 +1,41 @@
+# Schema v2 package template
+
+This directory is a complete, schema-valid illustration of the `open-reproducibility-2.0` file set. It demonstrates every v2
+field and the checksum links between `submission.json`, `evaluation-evidence.json`, `profiles/index.json`, and `chunk-000.json`.
+It is not benchmark-valid as checked in: values beginning with `replace-` or `replace_`, the one-case split, example URLs, and dummy
+digests must be replaced with the selected official benchmark specification and the submitter's real data.
+
+The submitter creates:
+
+- `submission.json` using `schemas/v2/submission.schema.json`;
+- `evaluation-evidence.json` using `schemas/v2/evaluation-evidence.schema.json`; and
+- the complete `profiles/` index and chunks using the v1 profile transport schemas.
+
+Copy the directory to `submissions/<dataset-id>/<submission-id>/`, remove `maintainer-validation.json`, and then:
+
+1. replace the dataset, split, case-set, metric, panel, station, and quantity placeholders from the official specification;
+2. replace all scalar values and profile predictions with the submitter-produced results;
+3. copy the exact profile ground-truth release ID and manifest SHA-256 from `leaderboard/manifest.json` into both
+   `submission.json` and `evaluation-evidence.json`;
+4. replace the public code, model, environment, documentation, licence, and digest metadata;
+5. regenerate each chunk SHA-256, then the profile-index SHA-256, then the evaluation-evidence SHA-256; and
+6. run `python3 scripts/validate_submission.py --contributor-stage <submission-directory>`.
+
+The maintainer—not the submitter—later creates `maintainer-validation.json`. Its example shows the exact validation scope and the
+three hashes it binds. Once validated, the maintainer adds this object to `submission.json`:
+
+```json
+"approval": {
+  "status": "approved",
+  "approved_by": "FluidsBench maintainer",
+  "approved_at": "2026-07-21",
+  "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/123",
+  "validation": {
+    "evidence_file": "maintainer-validation.json",
+    "evidence_sha256": "8ac97c5bae79ad668880a9febf6395d28e6b58f013f2c3e7a2359da9cfd6517b"
+  }
+}
+```
+
+Adding `approval` changes the bytes of `submission.json` but not `reviewed_submission_sha256`: that digest is deliberately computed
+from the contributor submission with `approval` omitted.

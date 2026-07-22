@@ -60,27 +60,29 @@ class ManageLeaderboardTests(unittest.TestCase):
             for path in paths
         }
         manifest = {"data_release": {"status": "official"}, "datasets": [{"name": "AhmedML"}]}
-        submissions[paths[0]]["approval"]["replay"] = {
-            "evidence_file": "maintainer-replay.json",
+        submissions[paths[0]]["approval"]["validation"] = {
+            "evidence_file": "maintainer-validation.json",
             "evidence_sha256": "a" * 64,
         }
-        replay = {
-            "status": "reproduced",
-            "contract_version": "open-reproducibility-1.0",
+        validation = {
+            "schema_version": "2.0",
+            "status": "validated",
+            "contract_version": "open-reproducibility-2.0",
             "reference_version": "v1",
-            "replayed_by": "Maintainer",
-            "replayed_at": "2026-07-20T00:00:00Z",
-            "metric_abs_tolerance": 0.0,
+            "case_set_id": "standard",
+            "profile_ground_truth_release_id": "gt-v1",
+            "profile_ground_truth_manifest_sha256": "d" * 64,
+            "validated_by": "Maintainer",
+            "validated_at": "2026-07-20T00:00:00Z",
+            "validation_scope": "submitted_data_only",
+            "model_execution": "not_performed",
+            "metric_recomputation": "not_performed",
             "reviewed_submission_sha256": "b" * 64,
-            "submitted_profile_index_sha256": "c" * 64,
-            "replayed_profile_index_sha256": "c" * 64,
-            "independence": {
-                "independent_of_submitter": True,
-                "conflict_of_interest_disclosure": "No conflict.",
-            },
+            "evaluation_evidence_sha256": "e" * 64,
+            "profile_index_sha256": "c" * 64,
         }
         original_load = lambda path: (
-            replay if Path(path).name == "maintainer-replay.json" else submissions[Path(path)]
+            validation if Path(path).name == "maintainer-validation.json" else submissions[Path(path)]
         )
         with (
             patch.object(manage_leaderboard, "submission_files", return_value=paths),
@@ -88,11 +90,13 @@ class ManageLeaderboardTests(unittest.TestCase):
         ):
             rows = manage_leaderboard.source_rows_by_dataset(manifest)["AhmedML"]
         self.assertEqual([row["submission_id"] for row in rows], ["approved"])
-        self.assertEqual(rows[0]["maintainer_replay"]["status"], "reproduced")
-        self.assertEqual(rows[0]["maintainer_replay"]["reviewed_submission_sha256"], "b" * 64)
-        self.assertEqual(rows[0]["maintainer_replay"]["replayed_profile_index_sha256"], "c" * 64)
-        self.assertTrue(rows[0]["maintainer_replay"]["independence"]["independent_of_submitter"])
-        self.assertTrue(rows[0]["maintainer_replay"]["evidence_file"].endswith("maintainer-replay.json"))
+        self.assertEqual(rows[0]["maintainer_validation"]["schema_version"], "2.0")
+        self.assertEqual(rows[0]["maintainer_validation"]["status"], "validated")
+        self.assertEqual(rows[0]["maintainer_validation"]["reviewed_submission_sha256"], "b" * 64)
+        self.assertEqual(rows[0]["maintainer_validation"]["profile_index_sha256"], "c" * 64)
+        self.assertEqual(rows[0]["maintainer_validation"]["model_execution"], "not_performed")
+        self.assertEqual(rows[0]["maintainer_validation"]["profile_ground_truth_release_id"], "gt-v1")
+        self.assertTrue(rows[0]["maintainer_validation"]["evidence_path"].endswith("maintainer-validation.json"))
 
     def test_prototype_release_id_contains_feed_digest(self) -> None:
         manifest = {
@@ -122,7 +126,7 @@ class ManageLeaderboardTests(unittest.TestCase):
                 "status": "prototype_dummy_data",
                 "archive_url": None,
                 "asset_base_url": "https://raw.githubusercontent.com/neilashton/fluidsbench-submission/dev/",
-                "reproducibility_contract_version": "open-reproducibility-1.0",
+                "reproducibility_contract_version": "open-reproducibility-2.0",
                 "profile_ground_truth": {
                     "release_id": "prototype-profile-ground-truth-1",
                     "manifest_url": "https://fluidsbench.org/assets/data/profile-ground-truth/manifest.json",

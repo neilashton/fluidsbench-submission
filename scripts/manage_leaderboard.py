@@ -30,10 +30,10 @@ def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     if release.get("status") not in {"prototype_dummy_data", "official"}:
         errors.append("leaderboard/manifest.json data_release.status must be prototype_dummy_data or official")
-    if release.get("reproducibility_contract_version") != "open-reproducibility-1.0":
+    if release.get("reproducibility_contract_version") != "open-reproducibility-2.0":
         errors.append(
             "leaderboard/manifest.json data_release.reproducibility_contract_version must be "
-            "open-reproducibility-1.0"
+            "open-reproducibility-2.0"
         )
     license_metadata = release.get("license")
     if not isinstance(license_metadata, dict) or any(
@@ -102,22 +102,27 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
         if profile_index_path.is_file():
             row["profile_data"]["index_sha256"] = sha256_file(profile_index_path)
         if allowed_approval_status == "approved":
-            replay_metadata = submission["approval"]["replay"]
-            replay_path = path.parent / replay_metadata["evidence_file"]
-            replay = load_json(replay_path)
-            row["maintainer_replay"] = {
-                "status": replay["status"],
-                "contract_version": replay["contract_version"],
-                "reference_version": replay["reference_version"],
-                "replayed_by": replay["replayed_by"],
-                "replayed_at": replay["replayed_at"],
-                "metric_abs_tolerance": replay["metric_abs_tolerance"],
-                "reviewed_submission_sha256": replay["reviewed_submission_sha256"],
-                "submitted_profile_index_sha256": replay["submitted_profile_index_sha256"],
-                "replayed_profile_index_sha256": replay["replayed_profile_index_sha256"],
-                "independence": replay["independence"],
-                "evidence_file": str(replay_path.relative_to(ROOT)),
-                "evidence_sha256": replay_metadata["evidence_sha256"],
+            validation_metadata = submission["approval"]["validation"]
+            validation_path = path.parent / validation_metadata["evidence_file"]
+            validation = load_json(validation_path)
+            row["maintainer_validation"] = {
+                "schema_version": validation["schema_version"],
+                "status": validation["status"],
+                "contract_version": validation["contract_version"],
+                "reference_version": validation["reference_version"],
+                "case_set_id": validation["case_set_id"],
+                "profile_ground_truth_release_id": validation["profile_ground_truth_release_id"],
+                "profile_ground_truth_manifest_sha256": validation["profile_ground_truth_manifest_sha256"],
+                "validated_by": validation["validated_by"],
+                "validated_at": validation["validated_at"],
+                "validation_scope": validation["validation_scope"],
+                "model_execution": validation["model_execution"],
+                "metric_recomputation": validation["metric_recomputation"],
+                "reviewed_submission_sha256": validation["reviewed_submission_sha256"],
+                "evaluation_evidence_sha256": validation["evaluation_evidence_sha256"],
+                "profile_index_sha256": validation["profile_index_sha256"],
+                "evidence_path": str(validation_path.relative_to(ROOT)),
+                "evidence_sha256": validation_metadata["evidence_sha256"],
             }
         rows[submission["dataset"]].append(row)
     return rows
@@ -151,8 +156,10 @@ def expected_outputs(
         all_rows.extend(rows)
     latest_global = max(latest_dates, default=date.today().isoformat())
     updated_manifest["generated_at"] = generated_at or manifest.get("generated_at") or f"{latest_global}T00:00:00Z"
-    updated_manifest["submission_schema_version"] = "1.0"
     release = updated_manifest.setdefault("data_release", {})
+    updated_manifest["submission_schema_version"] = (
+        "1.0" if release.get("status") == "prototype_dummy_data" else "2.0"
+    )
     release["generated_at"] = updated_manifest["generated_at"]
     feed_sha256 = hashlib.sha256(json_bytes(all_rows)).hexdigest()
     if release.get("status") == "prototype_dummy_data":

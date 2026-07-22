@@ -4,8 +4,13 @@ Each dataset directory contains a machine-readable `submission-spec.json` and on
 The specification lists the required scalar metrics and profile panel, station, and quantity IDs. The validator consumes these
 same files, so the written instructions and automated checks use one contract.
 
-Each official specification pins `evaluation_reference_version` to an immutable FluidsBench evaluator release. Submission and
-maintainer-replay records must identify that exact release.
+Each official specification pins `evaluation_reference_version` to an immutable FluidsBench reference release. Submission and
+maintainer-validation records must identify that exact release. The reference defines how submitters calculate their values;
+FluidsBench does not rerun the submitted model or recompute base metrics from full prediction fields.
+
+Schema v2 evaluation evidence also repeats the dataset version, split SHA-256, case-set ID, and exact public profile-ground-truth
+release ID and manifest SHA-256 from the submission. This binds the submitted scalar/profile package to its declared evaluation and
+profile comparison basis; it does not claim that profile ground truth covers the full fields used for scalar metrics.
 
 All official split case IDs and evaluation ground truth are public. The evaluation data may be used only for final evaluation,
 never for fitting, model or checkpoint selection, hyperparameter selection, manual tuning, or preprocessing statistics. Real
