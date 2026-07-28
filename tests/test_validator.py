@@ -14,6 +14,8 @@ from scripts.validate_submission import (
     load_json,
     schema_errors,
     sha256_file,
+    validate_evaluation_evidence,
+    validate_open_reproducibility,
     validate_v3_case_metrics,
     validate_v3_discretization,
     validate_v3_prediction_metadata,
@@ -23,6 +25,7 @@ from scripts.validate_submission import (
 
 SOURCE = ROOT / "submissions" / "ahmedml" / "transolver"
 V2_TEMPLATE = ROOT / "examples" / "v2-template"
+V3_TEMPLATE = ROOT / "examples" / "v3-template"
 
 
 def write_json(path: Path, value: object) -> None:
@@ -139,6 +142,45 @@ def without_storage_error(errors: list[str]) -> list[str]:
 
 
 class ValidatorTests(unittest.TestCase):
+    def validate_v3_reproducibility_fragments(
+        self,
+        directory: Path,
+        submission: dict,
+        evidence: dict,
+    ) -> list[str]:
+        evidence_path = directory / submission["evaluation"]["evidence_file"]
+        write_json(evidence_path, evidence)
+        submission["evaluation"]["evidence_sha256"] = sha256_file(evidence_path)
+        errors: list[str] = []
+        loaded_evidence = validate_evaluation_evidence(
+            errors.append,
+            directory,
+            submission,
+        )
+        profile_ground_truth = submission["profile_data"]
+        validate_open_reproducibility(
+            errors.append,
+            directory,
+            submission,
+            loaded_evidence,
+            {
+                "data_release": {
+                    "profile_ground_truth": {
+                        "release_id": profile_ground_truth[
+                            "profile_ground_truth_release_id"
+                        ],
+                        "manifest_sha256": profile_ground_truth[
+                            "profile_ground_truth_manifest_sha256"
+                        ],
+                    }
+                }
+            },
+            {"status": "official"},
+            {"index_file": "does-not-exist.json"},
+            contributor_stage=False,
+        )
+        return errors
+
     def test_v2_template_files_match_their_schemas_and_hashes(self) -> None:
         submission = load_json(V2_TEMPLATE / "submission.json")
         evidence = load_json(V2_TEMPLATE / "evaluation-evidence.json")
@@ -176,6 +218,192 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(validation["profile_index_sha256"], profile_index_sha256)
         self.assertEqual(validation["evaluation_evidence_sha256"], submission["evaluation"]["evidence_sha256"])
         self.assertEqual(validation["reviewed_submission_sha256"], canonical_json_sha256(submission))
+
+    def test_v3_template_validation_record_uses_canonical_submission_hash(self) -> None:
+        submission = load_json(V3_TEMPLATE / "submission.json")
+        validation = load_json(V3_TEMPLATE / "maintainer-validation.json")
+
+        self.assertEqual(
+            validation["reviewed_submission_sha256"],
+            canonical_json_sha256(submission),
+        )
+        self.assertEqual(
+            validation["evaluation_evidence_sha256"],
+            sha256_file(V3_TEMPLATE / "evaluation-evidence.json"),
+        )
+
+    def test_v3_optional_reproducibility_artifacts_may_be_omitted(self) -> None:
+        submission = load_json(V3_TEMPLATE / "submission.json")
+        evidence = load_json(V3_TEMPLATE / "evaluation-evidence.json")
+        submission.pop("code_url")
+        submission["evaluation"].pop("code_revision")
+        evidence.pop("code_revision")
+        for field in (
+            "code",
+            "model_artifact",
+            "environment",
+            "artifact_documentation_url",
+        ):
+            submission["reproducibility"].pop(field)
+
+        self.assertEqual(
+            schema_errors(
+                submission,
+                "submission.schema.json",
+                schema_version="v3",
+            ),
+            [],
+        )
+        self.assertEqual(
+            schema_errors(
+                evidence,
+                "evaluation-evidence.schema.json",
+                schema_version="v3",
+            ),
+            [],
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            self.assertEqual(
+                self.validate_v3_reproducibility_fragments(
+                    Path(temporary),
+                    submission,
+                    evidence,
+                ),
+                [],
+            )
+
+        for required_field in (
+            "contract_version",
+            "access",
+            "public_test_data_use",
+            "result_data_license_spdx",
+        ):
+            with self.subTest(required_field=required_field):
+                malformed = load_json(V3_TEMPLATE / "submission.json")
+                malformed["reproducibility"].pop(required_field)
+                joined = "\n".join(
+                    schema_errors(
+                        malformed,
+                        "submission.schema.json",
+                        schema_version="v3",
+                    )
+                )
+                self.assertIn(
+                    f"'{required_field}' is a required property",
+                    joined,
+                )
+
+    def test_v3_supplied_reproducibility_artifacts_remain_strict(self) -> None:
+        mutations = (
+            (("code", "repository_url"), "http://example.org/code"),
+            (("code", "commit"), "not-a-full-commit"),
+            (("code", "license_spdx"), "PROPRIETARY"),
+            (("model_artifact", "url"), "http://example.org/model"),
+            (("model_artifact", "sha256"), "not-a-sha256"),
+            (("model_artifact", "license_spdx"), "PROPRIETARY"),
+            (("environment", "kind"), "requirements"),
+            (("environment", "url"), "http://example.org/environment"),
+            (("environment", "sha256"), "not-a-sha256"),
+            (
+                ("artifact_documentation_url",),
+                "http://example.org/artifacts",
+            ),
+        )
+        for field_path, malformed_value in mutations:
+            with self.subTest(field_path=".".join(field_path)):
+                submission = load_json(V3_TEMPLATE / "submission.json")
+                target = submission["reproducibility"]
+                for field in field_path[:-1]:
+                    target = target[field]
+                target[field_path[-1]] = malformed_value
+                errors = schema_errors(
+                    submission,
+                    "submission.schema.json",
+                    schema_version="v3",
+                )
+                self.assertTrue(errors)
+                self.assertTrue(
+                    any(
+                        "reproducibility." + ".".join(field_path) in error
+                        for error in errors
+                    ),
+                    "\n".join(errors),
+                )
+
+        evidence = load_json(V3_TEMPLATE / "evaluation-evidence.json")
+        evidence["code_revision"] = "not-a-full-commit"
+        self.assertTrue(
+            any(
+                "code_revision" in error
+                for error in schema_errors(
+                    evidence,
+                    "evaluation-evidence.schema.json",
+                    schema_version="v3",
+                )
+            )
+        )
+        submission = load_json(V3_TEMPLATE / "submission.json")
+        submission["code_url"] = "http://example.org/code"
+        submission["evaluation"]["code_revision"] = "not-a-full-commit"
+        alias_errors = "\n".join(
+            schema_errors(
+                submission,
+                "submission.schema.json",
+                schema_version="v3",
+            )
+        )
+        self.assertIn("code_url", alias_errors)
+        self.assertIn("evaluation.code_revision", alias_errors)
+
+    def test_v3_code_aliases_are_conditional_and_cannot_be_orphaned(self) -> None:
+        submission = load_json(V3_TEMPLATE / "submission.json")
+        evidence = load_json(V3_TEMPLATE / "evaluation-evidence.json")
+        submission["reproducibility"].pop("code")
+        with tempfile.TemporaryDirectory() as temporary:
+            joined = "\n".join(
+                self.validate_v3_reproducibility_fragments(
+                    Path(temporary),
+                    submission,
+                    evidence,
+                )
+            )
+        self.assertIn("code_url requires reproducibility.code", joined)
+        self.assertIn(
+            "evaluation.code_revision requires reproducibility.code",
+            joined,
+        )
+        self.assertIn(
+            "evaluation-evidence.json code_revision requires reproducibility.code",
+            joined,
+        )
+
+        submission = load_json(V3_TEMPLATE / "submission.json")
+        evidence = load_json(V3_TEMPLATE / "evaluation-evidence.json")
+        submission.pop("code_url")
+        submission["evaluation"].pop("code_revision")
+        evidence.pop("code_revision")
+        with tempfile.TemporaryDirectory() as temporary:
+            joined = "\n".join(
+                self.validate_v3_reproducibility_fragments(
+                    Path(temporary),
+                    submission,
+                    evidence,
+                )
+            )
+        self.assertIn(
+            "code_url must equal reproducibility.code.repository_url",
+            joined,
+        )
+        self.assertIn(
+            "evaluation.code_revision must equal the full "
+            "reproducibility.code.commit",
+            joined,
+        )
+        self.assertIn(
+            "evaluation-evidence.json code_revision must equal the full "
+            "reproducibility.code.commit",
+            joined,
+        )
 
     def test_complete_example_is_valid(self) -> None:
         errors, stats = validate_submission_file(SOURCE / "submission.json")

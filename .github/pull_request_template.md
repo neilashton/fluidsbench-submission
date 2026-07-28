@@ -15,11 +15,13 @@
       domains, direct outputs, and mappings to every scoring support.
 - [ ] My profile index contains every required test case, station, and quantity.
 - [ ] `evaluation-evidence.json` was produced by the evaluation run recorded in `submission.json`.
-- [ ] The evaluation reference version, code revision, command, and evidence checksum are accurate.
+- [ ] The evaluation reference version, command, and evidence checksum are accurate; if I supplied code metadata, all matching code
+      revisions are accurate.
 - [ ] The dataset version, split hash, case set, scoring-support release/hash, spatial hash, per-case-metric hash, and profile
       ground-truth release/hash match throughout the package.
 - [ ] I used public evaluation data only for final evaluation, not fitting, selection, tuning, or preprocessing statistics.
-- [ ] My code repository, full commit, model artifact, environment, instructions, digests, and open licences are accurate and public.
+- [ ] If I supplied optional code, model, environment, or documentation artifacts, their revisions, digests, URLs, and licences are
+      accurate and public.
 - [ ] I left `approval` absent and did not add `maintainer-validation.json` or `prediction-artifact-checks.json`.
 - [ ] If I declared optional prediction artifacts, each repository revision, manifest digest, support identity, split, coverage,
       and licence is accurate.
@@ -37,7 +39,7 @@ Disclose any contact with evaluation data before the final evaluation run; such 
 Complete this section only in the separate maintainer-owned validation/approval pull request.
 
 - [ ] Scientific provenance and retained evidence have been reviewed.
-- [ ] Public artifact access, digests, and licences have been reviewed.
+- [ ] The result-data licence and any declared optional artifact access, digests, and licences have been reviewed.
 - [ ] A maintainer validated the submitter-supplied files, hashes, required coverage, and ground-truth comparison basis.
 - [ ] `maintainer-validation.json` records `submitted_data_only`, `model_execution=not_performed`, and
       `metric_recomputation=not_performed`.

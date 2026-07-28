@@ -13,7 +13,7 @@ IDs are public. The submission process deliberately separates four responsibilit
 1. Dataset owners publish an immutable canonical scoring support: the exact public locations, weights, quantities, case set, and
    coverage rules used for comparisons.
 2. Participants run their own model, create predictions, map them to that support, calculate per-case and aggregate metrics, and
-   create the required profiles and spatial-discretization records. They also publish the exact source code, model artifact, locked
+   create the required profiles and spatial-discretization records. They may optionally link public, versioned source code, model,
    environment, and artifact documentation.
 3. Participants must run the FluidsBench contributor-stage validator before opening a pull request. Their package remains
    unapproved and is not included in the public feed.
@@ -85,22 +85,23 @@ python3 -m reference.example_calculation
 ## 2. Prepare metrics, spatial metadata, and profiles
 
 `submission.json` contains model, submitter, training, dataset, split, aggregate metrics, scoring-support, spatial-discretization,
-case-metric, profile-index, evaluation, and open-artifact metadata. New submissions must match
+case-metric, profile-index, evaluation, and optional open-artifact metadata. New submissions must match
 [`schemas/v3/submission.schema.json`](schemas/v3/submission.schema.json). Historical approved schema-v2 packages remain readable and
 publishable, but the contributor-stage validator rejects new v2 packages because they lack mandatory v3 evidence.
 
-The required `evaluation` object records the FluidsBench reference version, the contributor's evaluation-code revision, the exact
-command used, and the SHA-256 checksum of `evaluation-evidence.json`. The evidence file repeats the command and submitted metric
-values and binds the dataset version, split digest, case set, scoring-support manifest, spatial report, per-case metrics,
-profile-index checksum, and exact public profile-ground-truth release. New submissions use
+The required `evaluation` object records the FluidsBench reference version, exact command, and SHA-256 checksum of
+`evaluation-evidence.json`; when code metadata is shared, it must also record the matching contributor code revision. The evidence
+file repeats the command and submitted metric values and binds the dataset version, split digest, case set, scoring-support
+manifest, spatial report, per-case metrics, profile-index checksum, and exact public profile-ground-truth release. New submissions
+use
 [`schemas/v3/evaluation-evidence.schema.json`](schemas/v3/evaluation-evidence.schema.json). This evidence is not a replacement for
 scientific review and does not contain full surface or volume fields.
 
-Every new package also declares `reproducibility.contract_version=open-reproducibility-3.0`, public evaluation-only data use, an
-HTTPS code repository pinned to a full commit, an HTTPS model artifact pinned by SHA-256, an open licence for code, model, and
-submitted result data, a hashed container or lockfile, and public artifact documentation. See
-[`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md) for the complete
-eligibility and validation policy.
+Every new package also declares `reproducibility.contract_version=open-reproducibility-3.0`, public result-package access, public
+evaluation-only data use, and an open licence for submitted result data. Public code, model weights, environment files, and artifact
+documentation are optional and do not affect approval, rank, citation, or promotion eligibility. When declared, code must be pinned
+to a full commit, model and environment artifacts must be pinned by SHA-256, and code/model licences must use the allowed open SPDX
+identifiers. See [`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md) for the complete eligibility and validation policy.
 
 The required `metrics/cases.json` records every test case, canonical support, support/scored counts, complete count and weight
 coverage, unmapped/extrapolated counts, and per-case metric values. Its aggregate `metric_values` must exactly match
@@ -182,7 +183,7 @@ python3 scripts/manage_leaderboard.py check
 
 The validator checks JSON schemas, exact public split and fixed-support coverage, case-metric aggregation, spatial counts and
 domains, declared mappings, evaluation-evidence identities and checksums, profile coverage, coordinate ordering, array lengths,
-finite values, split/chunk hashes, pinned open-artifact metadata, and approval lifecycle rules. It does not execute the model,
+finite values, split/chunk hashes, any declared open-artifact metadata, and approval lifecycle rules. It does not execute the model,
 download optional remote predictions, or recompute submitted base metrics.
 
 After validation:
@@ -191,8 +192,9 @@ After validation:
    existing submissions in the same pull request; a new result version uses a new globally unique submission ID.
 2. Open a pull request against `main` once FluidsBench announces that the dataset is accepting real submissions.
 3. Complete the pull request checklist and resolve all automated validation failures.
-4. Maintainers review scientific provenance, public-evaluation-use eligibility, metadata, submitted values, licences, and artifact
-   accessibility, then merge the contributor package while it is still unapproved and absent from public feeds.
+4. Maintainers review scientific provenance, public-evaluation-use eligibility, metadata, submitted values, result-data licence,
+   and any declared artifact metadata, then merge the contributor package while it is still unapproved and absent from public
+   feeds.
 5. A maintainer can run the **Maintainer approve and regenerate** workflow with the exact submission path, validator/approver
    identities, validation timestamp, and approval date. It creates the validation record, binds the resulting draft PR URL,
    rebuilds and verifies the compact feeds, and opens the protected-branch PR. The final merge remains manual.
@@ -281,7 +283,7 @@ before real submissions are accepted. A submission records the exact split-index
 
 Repository code and published leaderboard metadata are covered by the [Apache License 2.0](LICENSE). Each real submission declares
 an open `reproducibility.result_data_license_spdx` for its contributed profile values and result material; submitters must have the
-right to provide them under that licence. Upstream datasets and model artifacts retain their own declared licences. Official
-submissions must use publicly accessible code and model artifacts under one of the explicitly allowed open SPDX identifiers in the
-v3 submission schema. See the category-specific lists in [`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md); proprietary and
-unrecognised licence values fail validation.
+right to provide them under that licence. Upstream datasets and model artifacts retain their own declared licences. Code and model
+artifacts are optional. If supplied, they must be publicly accessible and use one of the explicitly allowed open SPDX identifiers
+in the v3 submission schema. See the category-specific lists in
+[`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md); proprietary and unrecognised declared licence values fail validation.

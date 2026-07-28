@@ -26,7 +26,6 @@
     "submitter_name",
     "institution",
     "paper_url",
-    "code_url",
     "submitted_at",
     "evaluation",
     "reproducibility",
@@ -37,77 +36,181 @@
     "profile_data"
   ],
   "properties": {
-    "$schema": { "const": "https://fluidsbench.org/schemas/v3/submission.schema.json" },
-    "schema_version": { "const": "3.0" },
-    "submission_id": { "$ref": "#/$defs/submission_id" },
-    "model": { "type": "string", "minLength": 1, "maxLength": 120 },
-    "model_type": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "$schema": {
+      "const": "https://fluidsbench.org/schemas/v3/submission.schema.json"
+    },
+    "schema_version": {
+      "const": "3.0"
+    },
+    "submission_id": {
+      "$ref": "#/$defs/submission_id"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "model_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
     "model_types": {
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "type": "string", "minLength": 1, "maxLength": 120 }
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      }
     },
     "training_regime": {
       "enum": ["from_scratch", "pretrained_zero_shot", "pretrained_official_train", "other"]
     },
-    "training_regime_explanation": { "type": "string", "minLength": 1, "maxLength": 2000 },
-    "target_data_used": { "enum": ["none", "official_train", "other"] },
-    "external_pretraining": { "type": "boolean" },
+    "training_regime_explanation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "target_data_used": {
+      "enum": ["none", "official_train", "other"]
+    },
+    "external_pretraining": {
+      "type": "boolean"
+    },
     "pretraining_data": {
       "type": "array",
       "uniqueItems": true,
       "items": {
         "oneOf": [
-          { "type": "string", "minLength": 1 },
+          {
+            "type": "string",
+            "minLength": 1
+          },
           {
             "type": "object",
             "additionalProperties": false,
             "required": ["name"],
             "properties": {
-              "name": { "type": "string", "minLength": 1 },
-              "url": { "type": "string", "pattern": "^https?://", "format": "uri" }
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https?://",
+                "format": "uri"
+              }
             }
           }
         ]
       }
     },
-    "dataset": { "type": "string", "minLength": 1, "maxLength": 160 },
-    "dataset_id": { "$ref": "#/$defs/dataset_id" },
-    "dataset_version": { "type": "string", "minLength": 1, "maxLength": 160 },
-    "split": { "type": "string", "minLength": 1, "maxLength": 160 },
-    "split_id": { "$ref": "#/$defs/safe_id" },
-    "case_set_id": { "$ref": "#/$defs/safe_id" },
-    "split_sha256": { "$ref": "#/$defs/sha256" },
-    "parameter_count_millions": { "type": ["number", "null"], "minimum": 0 },
-    "submitter_name": { "type": "string", "minLength": 1, "maxLength": 160 },
-    "institution": { "type": "string", "minLength": 1, "maxLength": 240 },
-    "paper_url": { "type": "string", "pattern": "^$|^https?://" },
-    "code_url": { "type": "string", "pattern": "^https://", "format": "uri" },
-    "submitted_at": { "type": "string", "format": "date" },
-    "note": { "type": "string" },
+    "dataset": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "dataset_id": {
+      "$ref": "#/$defs/dataset_id"
+    },
+    "dataset_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "split": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "split_id": {
+      "$ref": "#/$defs/safe_id"
+    },
+    "case_set_id": {
+      "$ref": "#/$defs/safe_id"
+    },
+    "split_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "parameter_count_millions": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "submitter_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "institution": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "paper_url": {
+      "type": "string",
+      "pattern": "^$|^https?://"
+    },
+    "code_url": {
+      "type": "string",
+      "pattern": "^https://",
+      "format": "uri"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "note": {
+      "type": "string"
+    },
     "evaluation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["reference_version", "code_revision", "command", "evidence_file", "evidence_sha256"],
+      "required": ["reference_version", "command", "evidence_file", "evidence_sha256"],
       "properties": {
-        "reference_version": { "type": "string", "minLength": 1, "maxLength": 160 },
-        "code_revision": { "type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$" },
-        "command": { "type": "string", "minLength": 1, "maxLength": 2000 },
-        "evidence_file": { "const": "evaluation-evidence.json" },
-        "evidence_sha256": { "$ref": "#/$defs/sha256" }
+        "reference_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "code_revision": {
+          "type": "string",
+          "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "evidence_file": {
+          "const": "evaluation-evidence.json"
+        },
+        "evidence_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
-    "reproducibility": { "$ref": "#/$defs/reproducibility" },
-    "scoring_support": { "$ref": "#/$defs/scoring_support" },
+    "reproducibility": {
+      "$ref": "#/$defs/reproducibility"
+    },
+    "scoring_support": {
+      "$ref": "#/$defs/scoring_support"
+    },
     "spatial_discretization": {
       "type": "object",
       "additionalProperties": false,
       "required": ["format", "file", "sha256"],
       "properties": {
-        "format": { "const": "fluidsbench-discretization-v1" },
-        "file": { "const": "discretization.json" },
-        "sha256": { "$ref": "#/$defs/sha256" }
+        "format": {
+          "const": "fluidsbench-discretization-v1"
+        },
+        "file": {
+          "const": "discretization.json"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
     "case_metrics": {
@@ -115,27 +218,47 @@
       "additionalProperties": false,
       "required": ["format", "file", "sha256", "case_count"],
       "properties": {
-        "format": { "const": "fluidsbench-case-metrics-v1" },
-        "file": { "const": "metrics/cases.json" },
-        "sha256": { "$ref": "#/$defs/sha256" },
-        "case_count": { "type": "integer", "minimum": 1 }
+        "format": {
+          "const": "fluidsbench-case-metrics-v1"
+        },
+        "file": {
+          "const": "metrics/cases.json"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "case_count": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "prediction_artifacts": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/prediction_artifact_declaration" }
+      "items": {
+        "$ref": "#/$defs/prediction_artifact_declaration"
+      }
     },
-    "approval": { "$ref": "#/$defs/approval" },
+    "approval": {
+      "$ref": "#/$defs/approval"
+    },
     "metric_values": {
       "type": "object",
       "minProperties": 1,
-      "additionalProperties": { "type": "number" }
+      "additionalProperties": {
+        "type": "number"
+      }
     },
-    "profile_data": { "$ref": "#/$defs/profile_data" }
+    "profile_data": {
+      "$ref": "#/$defs/profile_data"
+    }
   },
   "$defs": {
-    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
     "safe_id": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9._-]{0,159}$"
@@ -144,7 +267,10 @@
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9-]{2,79}$"
     },
-    "dataset_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "dataset_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
     "data_license": {
       "enum": ["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0", "ODC-BY-1.0", "ODbL-1.0"]
     },
@@ -175,29 +301,37 @@
     "reproducibility": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "contract_version",
-        "access",
-        "public_test_data_use",
-        "result_data_license_spdx",
-        "code",
-        "model_artifact",
-        "environment",
-        "artifact_documentation_url"
-      ],
+      "required": ["contract_version", "access", "public_test_data_use", "result_data_license_spdx"],
       "properties": {
-        "contract_version": { "const": "open-reproducibility-3.0" },
-        "access": { "const": "public" },
-        "public_test_data_use": { "const": "evaluation_only" },
-        "result_data_license_spdx": { "$ref": "#/$defs/data_license" },
+        "contract_version": {
+          "const": "open-reproducibility-3.0"
+        },
+        "access": {
+          "const": "public"
+        },
+        "public_test_data_use": {
+          "const": "evaluation_only"
+        },
+        "result_data_license_spdx": {
+          "$ref": "#/$defs/data_license"
+        },
         "code": {
           "type": "object",
           "additionalProperties": false,
           "required": ["repository_url", "commit", "license_spdx"],
           "properties": {
-            "repository_url": { "type": "string", "pattern": "^https://", "format": "uri" },
-            "commit": { "type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$" },
-            "license_spdx": { "$ref": "#/$defs/code_license" }
+            "repository_url": {
+              "type": "string",
+              "pattern": "^https://",
+              "format": "uri"
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+            },
+            "license_spdx": {
+              "$ref": "#/$defs/code_license"
+            }
           }
         },
         "model_artifact": {
@@ -205,9 +339,17 @@
           "additionalProperties": false,
           "required": ["url", "sha256", "license_spdx"],
           "properties": {
-            "url": { "type": "string", "pattern": "^https://", "format": "uri" },
-            "sha256": { "$ref": "#/$defs/sha256" },
-            "license_spdx": { "$ref": "#/$defs/model_license" }
+            "url": {
+              "type": "string",
+              "pattern": "^https://",
+              "format": "uri"
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "license_spdx": {
+              "$ref": "#/$defs/model_license"
+            }
           }
         },
         "environment": {
@@ -215,9 +357,17 @@
           "additionalProperties": false,
           "required": ["kind", "url", "sha256"],
           "properties": {
-            "kind": { "enum": ["container", "lockfile"] },
-            "url": { "type": "string", "pattern": "^https://", "format": "uri" },
-            "sha256": { "$ref": "#/$defs/sha256" }
+            "kind": {
+              "enum": ["container", "lockfile"]
+            },
+            "url": {
+              "type": "string",
+              "pattern": "^https://",
+              "format": "uri"
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            }
           }
         },
         "artifact_documentation_url": {
@@ -232,10 +382,20 @@
       "additionalProperties": false,
       "required": ["status", "release_id", "manifest_url", "manifest_sha256"],
       "properties": {
-        "status": { "const": "official" },
-        "release_id": { "$ref": "#/$defs/safe_id" },
-        "manifest_url": { "type": "string", "pattern": "^https://", "format": "uri" },
-        "manifest_sha256": { "$ref": "#/$defs/sha256" }
+        "status": {
+          "const": "official"
+        },
+        "release_id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "manifest_url": {
+          "type": "string",
+          "pattern": "^https://",
+          "format": "uri"
+        },
+        "manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     },
     "coverage": {
@@ -243,23 +403,41 @@
       "additionalProperties": false,
       "required": ["kind", "case_count", "expected_case_count"],
       "properties": {
-        "kind": { "enum": ["complete_split", "example_cases"] },
-        "case_count": { "type": "integer", "minimum": 1 },
-        "expected_case_count": { "type": "integer", "minimum": 1 },
+        "kind": {
+          "enum": ["complete_split", "example_cases"]
+        },
+        "case_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expected_case_count": {
+          "type": "integer",
+          "minimum": 1
+        },
         "case_ids": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": { "type": "string", "minLength": 1, "maxLength": 240 }
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
         }
       },
       "allOf": [
         {
           "if": {
-            "properties": { "kind": { "const": "example_cases" } },
+            "properties": {
+              "kind": {
+                "const": "example_cases"
+              }
+            },
             "required": ["kind"]
           },
-          "then": { "required": ["case_ids"] }
+          "then": {
+            "required": ["case_ids"]
+          }
         }
       ]
     },
@@ -281,26 +459,47 @@
         "license_spdx"
       ],
       "properties": {
-        "artifact_id": { "$ref": "#/$defs/safe_id" },
-        "kind": { "enum": ["scored_predictions", "direct_model_outputs"] },
+        "artifact_id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "kind": {
+          "enum": ["scored_predictions", "direct_model_outputs"]
+        },
         "repository_url": {
           "type": "string",
           "pattern": "^https://huggingface\\.co/datasets/[A-Za-z0-9._-]+/[A-Za-z0-9._-]+/?$",
           "format": "uri"
         },
-        "revision": { "type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$" },
+        "revision": {
+          "type": "string",
+          "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+        },
         "manifest_file": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$",
           "maxLength": 500
         },
-        "manifest_sha256": { "$ref": "#/$defs/sha256" },
-        "format": { "const": "fluidsbench-prediction-artifact-v1" },
-        "support_release_id": { "$ref": "#/$defs/safe_id" },
-        "support_manifest_sha256": { "$ref": "#/$defs/sha256" },
-        "split_id": { "$ref": "#/$defs/safe_id" },
-        "coverage": { "$ref": "#/$defs/coverage" },
-        "license_spdx": { "$ref": "#/$defs/data_license" }
+        "manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "format": {
+          "const": "fluidsbench-prediction-artifact-v1"
+        },
+        "support_release_id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "support_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "split_id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "coverage": {
+          "$ref": "#/$defs/coverage"
+        },
+        "license_spdx": {
+          "$ref": "#/$defs/data_license"
+        }
       }
     },
     "approval": {
@@ -308,9 +507,18 @@
       "additionalProperties": false,
       "required": ["status", "approved_by", "approved_at", "pull_request_url", "validation"],
       "properties": {
-        "status": { "const": "approved" },
-        "approved_by": { "type": "string", "minLength": 1, "maxLength": 160 },
-        "approved_at": { "type": "string", "format": "date" },
+        "status": {
+          "const": "approved"
+        },
+        "approved_by": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date"
+        },
         "pull_request_url": {
           "type": "string",
           "pattern": "^https://github\\.com/[^/]+/[^/]+/pull/[0-9]+$"
@@ -320,11 +528,17 @@
           "additionalProperties": false,
           "required": ["evidence_file", "evidence_sha256"],
           "properties": {
-            "evidence_file": { "const": "maintainer-validation.json" },
-            "evidence_sha256": { "$ref": "#/$defs/sha256" }
+            "evidence_file": {
+              "const": "maintainer-validation.json"
+            },
+            "evidence_sha256": {
+              "$ref": "#/$defs/sha256"
+            }
           }
         },
-        "note": { "type": "string" }
+        "note": {
+          "type": "string"
+        }
       }
     },
     "profile_data": {
@@ -332,12 +546,25 @@
       "additionalProperties": false,
       "required": ["format", "index_file", "case_count", "case_set_id", "profile_ground_truth_release_id", "profile_ground_truth_manifest_sha256"],
       "properties": {
-        "format": { "const": "fluidsbench-profile-chunks-v1" },
-        "index_file": { "const": "profiles/index.json" },
-        "case_count": { "type": "integer", "minimum": 1 },
-        "case_set_id": { "$ref": "#/$defs/safe_id" },
-        "profile_ground_truth_release_id": { "$ref": "#/$defs/safe_id" },
-        "profile_ground_truth_manifest_sha256": { "$ref": "#/$defs/sha256" }
+        "format": {
+          "const": "fluidsbench-profile-chunks-v1"
+        },
+        "index_file": {
+          "const": "profiles/index.json"
+        },
+        "case_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "case_set_id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "profile_ground_truth_release_id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "profile_ground_truth_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
       }
     }
   }

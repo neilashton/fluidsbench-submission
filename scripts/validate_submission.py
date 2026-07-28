@@ -1724,12 +1724,35 @@ def validate_evaluation_evidence(
         "dataset_id": submission["dataset_id"],
         "split_id": submission["split_id"],
         "reference_version": evaluation["reference_version"],
-        "code_revision": evaluation["code_revision"],
         "command": evaluation["command"],
     }
     for key, expected in identities.items():
         if evidence.get(key) != expected:
             add(f"evaluation-evidence.json {key} must equal {expected!r}")
+    if submission.get("schema_version") == "3.0":
+        reproducibility = submission.get("reproducibility", {})
+        structured_code = (
+            reproducibility.get("code")
+            if isinstance(reproducibility, dict)
+            else None
+        )
+        if isinstance(structured_code, dict):
+            expected_revision = structured_code.get("commit")
+            if evidence.get("code_revision") != expected_revision:
+                add(
+                    "evaluation-evidence.json code_revision must equal the full "
+                    "reproducibility.code.commit"
+                )
+        elif "code_revision" in evidence:
+            add(
+                "evaluation-evidence.json code_revision requires "
+                "reproducibility.code"
+            )
+    elif evidence.get("code_revision") != evaluation["code_revision"]:
+        add(
+            "evaluation-evidence.json code_revision must equal "
+            f"{evaluation['code_revision']!r}"
+        )
     if submission.get("schema_version") in {"2.0", "3.0"}:
         open_track_identities = {
             "dataset_version": submission["dataset_version"],
@@ -1773,7 +1796,7 @@ def validate_open_reproducibility(
     *,
     contributor_stage: bool,
 ) -> None:
-    """Enforce open artifacts and submitted-data validation without executing a model."""
+    """Validate declared open artifacts and submitted data without executing a model."""
 
     if evidence is None:
         return
@@ -1829,13 +1852,36 @@ def validate_open_reproducibility(
 
     if reproducibility.get("contract_version") != expected_contract:
         add(f"reproducibility.contract_version must be {expected_contract!r}")
-    code = reproducibility.get("code", {})
-    code_repository_url = code.get("repository_url") if isinstance(code, dict) else None
-    code_commit = code.get("commit") if isinstance(code, dict) else None
-    if submission.get("code_url") != code_repository_url:
-        add("code_url must equal reproducibility.code.repository_url")
-    if submission.get("evaluation", {}).get("code_revision") != code_commit:
-        add("evaluation.code_revision must equal the full reproducibility.code.commit")
+    code = reproducibility.get("code")
+    evaluation = submission.get("evaluation", {})
+    if submission_schema_version == "3.0":
+        if isinstance(code, dict):
+            if submission.get("code_url") != code.get("repository_url"):
+                add("code_url must equal reproducibility.code.repository_url")
+            if evaluation.get("code_revision") != code.get("commit"):
+                add(
+                    "evaluation.code_revision must equal the full "
+                    "reproducibility.code.commit"
+                )
+        else:
+            if "code_url" in submission:
+                add("code_url requires reproducibility.code")
+            if "code_revision" in evaluation:
+                add("evaluation.code_revision requires reproducibility.code")
+    else:
+        code_repository_url = (
+            code.get("repository_url")
+            if isinstance(code, dict)
+            else None
+        )
+        code_commit = code.get("commit") if isinstance(code, dict) else None
+        if submission.get("code_url") != code_repository_url:
+            add("code_url must equal reproducibility.code.repository_url")
+        if evaluation.get("code_revision") != code_commit:
+            add(
+                "evaluation.code_revision must equal the full "
+                "reproducibility.code.commit"
+            )
     if dataset_spec.get("status") != "official":
         add("submitted_evaluation evidence requires an official dataset specification")
 

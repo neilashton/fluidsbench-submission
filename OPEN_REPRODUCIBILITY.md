@@ -10,6 +10,12 @@ prediction fields. Approval means that the submitted package passed the publishe
 Optional prediction artifacts and optional maintainer checks are recorded separately and do not affect approval, rank, academic
 claim eligibility, or promotion eligibility.
 
+Public code, trained-model, environment, and artifact-documentation links are also optional. Omitting them does not affect
+approval, rank, academic claim eligibility, or promotion eligibility. When a submitter chooses to provide one, its version, digest,
+URL, and licence fields must satisfy the schema so the website does not present a mutable or ambiguous artifact.
+The required `reproducibility.access=public` declaration applies to the submitted result package; it does not assert that any
+optional external artifact was supplied.
+
 Every release manifest records the applicable identifier as `data_release.reproducibility_contract_version`.
 
 ## Public evaluation-data policy
@@ -57,7 +63,8 @@ A new `submitted_evaluation` package uses `schemas/v3/submission.schema.json` an
 - `discretization.json` and `discretization/cases.jsonl`, distinguishing training inputs, training supervision, inference inputs,
   direct model outputs, and mapping to each canonical scoring support;
 - complete required profile chunks and their hash-pinned index; and
-- public, revision-pinned code, model, environment, documentation, licence, and result-data metadata.
+- an open result-data licence, plus any optional public, revision-pinned code, model, environment, and documentation metadata the
+  submitter chooses to share.
 
 The spatial report does not require a method to infer on every native dataset mesh location. A model may use sparse points,
 structured grids, participant meshes, query points, or another declared representation. It must report the actual surface and
@@ -69,13 +76,15 @@ If a native-resolution comparison is reported, every case record carries the cor
 fraction. Validation checks those case records against the summary and verifies the fraction arithmetically. This makes
 downsampling claims inspectable without requiring a method to run on the complete native mesh.
 
-The v3 schema accepts only the open SPDX identifiers listed in `schemas/v3/submission.schema.json`. `PROPRIETARY` and arbitrary
-unrecognised strings are rejected. A missing licence may be proposed in a separate repository-maintenance change; it must not be
-introduced through an individual result package.
+The result-data licence is required. If optional code or model artifacts are declared, the v3 schema accepts only the corresponding
+open SPDX identifiers listed in `schemas/v3/submission.schema.json`; `PROPRIETARY` and arbitrary unrecognised strings are rejected.
+A missing licence identifier may be proposed in a separate repository-maintenance change; it must not be introduced through an
+individual result package.
 
-The code, model, environment, and documentation support openness, inspection, and reuse by the community. Their inclusion does not
-mean FluidsBench ran them. URLs must work without credentials. The package hashes identify the exact submitted and referenced
-bytes.
+Optional code, model, environment, and documentation can support inspection and reuse by the community. Their inclusion does not
+mean FluidsBench ran them, and their omission is not a validation failure. Any declared URLs must work without credentials, and
+declared versions and hashes identify the exact referenced artifacts. Automated contributor validation checks URL syntax and
+declared identifiers; maintainers review public accessibility without executing the code or model.
 
 The contributor leaves `approval` absent and does not add `maintainer-validation.json` or
 `prediction-artifact-checks.json`. Contributor CI is run with:
@@ -108,7 +117,7 @@ Maintainers review the submission and run the repository validator over the subm
 - metric IDs, ranges, case aggregation, and declared derived-score arithmetic;
 - spatial summaries and per-case spatial records;
 - profile structure, finite values, and the hash chain;
-- public artifact metadata, declared licences, and evaluation-data-use eligibility.
+- the required result-data licence, any declared optional artifact metadata, and evaluation-data-use eligibility.
 
 The maintainer records this in `maintainer-validation.json`, using
 `schemas/v3/maintainer-validation.schema.json`. It binds the exact submission, evaluation evidence, scoring-support release,
@@ -120,9 +129,9 @@ request URL, rebuilds the feeds, and opens a draft pull request. The repository 
 submission path and supplied identities and timestamps. Protected branches keep the final merge manual. The validating and
 approving maintainer may be the same person, including when FluidsBench has a sole maintainer.
 
-An approval is specific to the declared dataset and split, scoring-support release, contract version, code commit, model digest,
-environment digest, evaluator version, metric values, spatial and profile bytes, and public ground-truth release. Changing any of
-these requires a new submission ID and new validation and approval.
+An approval is specific to the declared dataset and split, scoring-support release, contract version, evaluator version, metric
+values, spatial and profile bytes, public ground-truth release, and any optional code commit, model digest, or environment digest
+that was declared. Changing any of these requires a new submission ID and new validation and approval.
 
 ## Immutable releases and academic claims
 
@@ -142,6 +151,7 @@ Schema v3 and `open-reproducibility-3.0` are mandatory for new contributor-stage
 packages remain readable and publishable under `open-reproducibility-2.0`; schema-v1 prototype fixtures remain interpretable.
 Neither v1 nor a newly submitted v2 package can become a new official result.
 
-Clarifications that do not change eligibility or required fields may retain the identifier. Any material change to artifacts,
-submitted-data validation, or comparison semantics receives a new contract version. Existing approved records retain the contract
-version under which they were validated.
+Clarifications that do not change eligibility or required fields may retain the identifier. Before a contract version has any
+official record, pre-launch corrections may also retain its identifier. Once an official record exists, any material change to
+artifacts, submitted-data validation, or comparison semantics receives a new contract version. Existing approved records retain the
+contract version under which they were validated.

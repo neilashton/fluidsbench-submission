@@ -37,3 +37,8 @@ python3 -m reference.evaluate_predictions \
 bindings. `prediction-artifact-checks.json` is deliberately maintainer-owned;
 a submitter may declare a pinned public Hugging Face prediction artifact but
 must not declare its own check status.
+
+The synthetic `submission.json` also demonstrates optional public code,
+model, environment, and artifact-documentation metadata. A real v3 submission
+may omit those optional fields without affecting eligibility. If included,
+they remain subject to the schema's version, digest, URL, and licence checks.

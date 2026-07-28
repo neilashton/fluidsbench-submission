@@ -16,9 +16,9 @@ For a historical v1 prototype directory that passes the dummy-data validator, in
 pressure stations, optional velocity stations, metadata, and scalar metrics. Do not use it as a real-submission template.
 
 Participants may generate equivalent JSON with Python, MATLAB, Julia, C++, or another language. The schema and final values matter;
-the code does not need to follow the example implementation, but a real submission must publish its exact code, pinned model,
-locked environment, and artifact documentation under the open reproducibility contract.
+the code does not need to follow the example implementation. Public code, a pinned model, a locked environment, and artifact
+documentation are optional. If supplied, their URLs, versions, hashes, and licences must satisfy the open reproducibility contract.
 
 The submitter supplies all prediction, result, spatial, and profile data. Contributor-stage validation checks the package but does
-not approve it. Maintainers validate the submitted files and hashes before approval; FluidsBench does not execute the public model
+not approve it. Maintainers validate the submitted files and hashes before approval; FluidsBench does not execute any shared model
 artifact as part of required approval.
