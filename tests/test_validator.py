@@ -14,6 +14,9 @@ from scripts.validate_submission import (
     load_json,
     schema_errors,
     sha256_file,
+    validate_v3_case_metrics,
+    validate_v3_discretization,
+    validate_v3_prediction_metadata,
     validate_submission_file,
 )
 
@@ -23,6 +26,7 @@ V2_TEMPLATE = ROOT / "examples" / "v2-template"
 
 
 def write_json(path: Path, value: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
 
 
@@ -281,12 +285,17 @@ class ValidatorTests(unittest.TestCase):
             self.assertIn("requires reproducibility.contract_version", joined)
             self.assertIn("requires submission schema_version=2.0", joined)
 
-    def test_open_package_is_valid_but_remains_unapproved_at_contributor_stage(self) -> None:
+    def test_historical_v2_package_remains_valid_but_cannot_be_a_new_contribution(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             path = make_real_package(Path(temporary) / "transolver")
             with patch("scripts.validate_submission.load_json", side_effect=official_contract_load_json):
-                errors, _ = validate_submission_file(path, contributor_stage=True)
-            self.assertEqual(without_storage_error(errors), [])
+                historical_errors, _ = validate_submission_file(path)
+                contributor_errors, _ = validate_submission_file(path, contributor_stage=True)
+            self.assertEqual(without_storage_error(historical_errors), [])
+            self.assertIn(
+                "new contributor-stage submitted_evaluation packages require submission schema_version=3.0",
+                "\n".join(contributor_errors),
+            )
             self.assertNotIn("approval", load_json(path))
 
     def test_approved_package_requires_and_verifies_submitted_data_validation(self) -> None:
@@ -410,6 +419,433 @@ class ValidatorTests(unittest.TestCase):
             with patch("scripts.validate_submission.load_json", side_effect=official_contract_load_json):
                 errors, _ = validate_submission_file(path)
             self.assertIn("'not_performed' was expected", "\n".join(errors))
+
+    def test_v3_case_metrics_and_discretization_bind_exact_support(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            submission = {
+                "submission_id": "example-model-v3",
+                "dataset_id": "example",
+                "split_id": "full",
+                "case_set_id": "standard",
+                "scoring_support": {
+                    "status": "official",
+                    "release_id": "example-support-v1",
+                    "manifest_url": "https://example.org/releases/example-support-v1/manifest.json",
+                    "manifest_sha256": "a" * 64,
+                },
+                "spatial_discretization": {
+                    "format": "fluidsbench-discretization-v1",
+                    "file": "discretization.json",
+                    "sha256": "0" * 64,
+                },
+                "case_metrics": {
+                    "format": "fluidsbench-case-metrics-v1",
+                    "file": "metrics/cases.json",
+                    "sha256": "0" * 64,
+                    "case_count": 2,
+                },
+                "metric_values": {"surface_pressure_rel_l2": 2.0},
+            }
+            split_case_ids = ["case-001", "case-002"]
+            support_manifest = {
+                "supports": [
+                    {
+                        "id": "surface",
+                        "extrapolation_policy": "forbidden",
+                        "metric_bindings": [
+                            {
+                                "metric_id": "surface_pressure_rel_l2",
+                                "quantity_id": "pressure",
+                                "reduction": "relative_l2_percent",
+                                "weighting": "support_weights",
+                                "dataset_weighting": "surface_face_area",
+                                "aggregation": "per_geometry_then_macro_average",
+                                "case_evidence": "metric_value",
+                            }
+                        ],
+                    }
+                ]
+            }
+            support_case_index = {
+                "_loaded_cases": [
+                    {
+                        "case_id": case_id,
+                        "support_instances": [{"support_id": "surface", "entity_count": 2}],
+                    }
+                    for case_id in split_case_ids
+                ]
+            }
+            case_metrics = {
+                "$schema": "https://fluidsbench.org/schemas/v3/case-metrics.schema.json",
+                "schema_version": "1.0",
+                "submission_id": submission["submission_id"],
+                "dataset_id": submission["dataset_id"],
+                "split_id": submission["split_id"],
+                "case_set_id": submission["case_set_id"],
+                "scoring_support_release_id": submission["scoring_support"]["release_id"],
+                "scoring_support_manifest_sha256": submission["scoring_support"]["manifest_sha256"],
+                "case_count": 2,
+                "cases": [
+                    {
+                        "case_id": case_id,
+                        "supports": [
+                            {
+                                "support_id": "surface",
+                                "support_count": 2,
+                                "scored_count": 2,
+                                "coverage_fraction": 1.0,
+                                "weight_coverage_fraction": 1.0,
+                                "unmapped_count": 0,
+                                "extrapolated_count": 0,
+                                "metric_values": {"surface_pressure_rel_l2": value},
+                            }
+                        ],
+                    }
+                    for case_id, value in zip(split_case_ids, (1.0, 3.0))
+                ],
+                "metric_values": submission["metric_values"],
+            }
+            case_metrics_path = directory / submission["case_metrics"]["file"]
+            write_json(case_metrics_path, case_metrics)
+            submission["case_metrics"]["sha256"] = sha256_file(case_metrics_path)
+
+            representation = {
+                "used": True,
+                "representation": "point_values",
+                "entity_counts": [
+                    {"entity": "points", "count": {"kind": "fixed", "value": 2}}
+                ],
+                "native_comparison": {"status": "not_applicable"},
+                "sampling": {"kind": "none"},
+                "domain": {"kind": "full_dataset_domain"},
+                "connectivity": "none",
+            }
+            case_records = [
+                {
+                    "$schema": "https://fluidsbench.org/schemas/v3/discretization-case.schema.json",
+                    "schema_version": "1.0",
+                    "submission_id": submission["submission_id"],
+                    "dataset_id": submission["dataset_id"],
+                    "split_id": submission["split_id"],
+                    "case_id": case_id,
+                    "inference": {
+                        "inputs": [],
+                        "direct_outputs": [
+                            {
+                                "id": "surface-output",
+                                "entity_counts": [{"entity": "points", "count": 2}],
+                            }
+                        ],
+                        "mappings": [
+                            {
+                                "support_id": "surface",
+                                "source_output_id": "surface-output",
+                                "support_count": 2,
+                                "scored_count": 2,
+                                "unmapped_count": 0,
+                                "extrapolated_count": 0,
+                                "final_coverage_fraction": 1.0,
+                            }
+                        ],
+                    },
+                }
+                for case_id in split_case_ids
+            ]
+            case_records_path = directory / "discretization" / "cases.jsonl"
+            case_records_path.parent.mkdir(parents=True)
+            case_records_path.write_text(
+                "".join(json.dumps(record, separators=(",", ":")) + "\n" for record in case_records),
+                encoding="utf-8",
+            )
+            discretization = {
+                "$schema": "https://fluidsbench.org/schemas/v3/discretization.schema.json",
+                "schema_version": "1.0",
+                "submission_id": submission["submission_id"],
+                "dataset_id": submission["dataset_id"],
+                "split_id": submission["split_id"],
+                "scoring_support_release_id": submission["scoring_support"]["release_id"],
+                "scoring_support_manifest_sha256": submission["scoring_support"]["manifest_sha256"],
+                "training": {
+                    "surface_input": {"used": False},
+                    "surface_supervision": {"used": False},
+                    "volume_input": {"used": False},
+                    "volume_supervision": {"used": False},
+                },
+                "inference": {
+                    "geometry_dependency": "surface_geometry",
+                    "surface_input": {"used": False},
+                    "volume_input": {"used": False},
+                    "direct_outputs": [
+                        {
+                            "id": "surface-output",
+                            "domain": "surface",
+                            "representation": representation,
+                            "queries_per_forward_pass": {"kind": "fixed", "value": 2},
+                        }
+                    ],
+                    "mappings": [
+                        {
+                            "support_id": "surface",
+                            "source_output_id": "surface-output",
+                            "method": {"kind": "identity"},
+                            "implementation": "src/evaluate.py",
+                            "extrapolation_policy": "forbidden",
+                            "unmapped_fraction": 0.0,
+                            "extrapolated_fraction": 0.0,
+                            "final_coverage_fraction": 1.0,
+                        }
+                    ],
+                },
+                "case_manifest": {
+                    "format": "jsonl",
+                    "file": "discretization/cases.jsonl",
+                    "sha256": sha256_file(case_records_path),
+                    "case_count": 2,
+                },
+            }
+            discretization_path = directory / submission["spatial_discretization"]["file"]
+            write_json(discretization_path, discretization)
+            submission["spatial_discretization"]["sha256"] = sha256_file(discretization_path)
+
+            errors: list[str] = []
+            validate_v3_case_metrics(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                support_manifest,
+                support_case_index,
+            )
+            validate_v3_discretization(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                support_manifest,
+                support_case_index,
+            )
+            self.assertEqual(errors, [])
+
+            case_metrics["cases"][0]["supports"][0]["scored_count"] = 1
+            write_json(case_metrics_path, case_metrics)
+            submission["case_metrics"]["sha256"] = sha256_file(case_metrics_path)
+            errors = []
+            validate_v3_case_metrics(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                support_manifest,
+                support_case_index,
+            )
+            self.assertIn("must score every support entity", "\n".join(errors))
+
+            case_metrics["cases"][0]["supports"][0]["scored_count"] = 2
+            for case in case_metrics["cases"]:
+                case["supports"][0]["metric_values"] = {"invented_metric": 2.0}
+            write_json(case_metrics_path, case_metrics)
+            submission["case_metrics"]["sha256"] = sha256_file(case_metrics_path)
+            errors = []
+            validate_v3_case_metrics(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                support_manifest,
+                support_case_index,
+            )
+            self.assertIn(
+                "metric IDs must exactly match the official support bindings",
+                "\n".join(errors),
+            )
+            self.assertIn("must have one value per test case", "\n".join(errors))
+
+            discretization["inference"]["surface_input"] = {
+                **representation,
+                "case_record_id": "surface-input",
+            }
+            for record in case_records:
+                record["inference"]["inputs"] = [
+                    {
+                        "id": "surface-input",
+                        "entity_counts": [{"entity": "points", "count": 999}],
+                    }
+                ]
+            case_records_path.write_text(
+                "".join(
+                    json.dumps(record, separators=(",", ":")) + "\n"
+                    for record in case_records
+                ),
+                encoding="utf-8",
+            )
+            discretization["case_manifest"]["sha256"] = sha256_file(case_records_path)
+            write_json(discretization_path, discretization)
+            submission["spatial_discretization"]["sha256"] = sha256_file(
+                discretization_path
+            )
+            errors = []
+            validate_v3_discretization(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                support_manifest,
+                support_case_index,
+            )
+            self.assertIn(
+                "inference input 'surface-input'/'points' fixed count does not "
+                "match case records",
+                "\n".join(errors),
+            )
+
+            discretization["inference"]["surface_input"]["native_comparison"] = {
+                "status": "reported",
+                "native_entity_counts": [
+                    {"entity": "points", "count": {"kind": "fixed", "value": 4}}
+                ],
+                "fractions": [
+                    {
+                        "entity": "points",
+                        "fraction": {"kind": "fixed", "value": 0.5},
+                    }
+                ],
+            }
+            for record in case_records:
+                record["inference"]["inputs"][0] = {
+                    "id": "surface-input",
+                    "entity_counts": [{"entity": "points", "count": 2}],
+                    "native_entity_counts": [{"entity": "points", "count": 4}],
+                    "native_fractions": [{"entity": "points", "fraction": 0.5}],
+                }
+            case_records[1]["inference"]["inputs"][0]["native_fractions"][0][
+                "fraction"
+            ] = 0.75
+            case_records_path.write_text(
+                "".join(
+                    json.dumps(record, separators=(",", ":")) + "\n"
+                    for record in case_records
+                ),
+                encoding="utf-8",
+            )
+            discretization["case_manifest"]["sha256"] = sha256_file(case_records_path)
+            write_json(discretization_path, discretization)
+            submission["spatial_discretization"]["sha256"] = sha256_file(
+                discretization_path
+            )
+            errors = []
+            validate_v3_discretization(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                support_manifest,
+                support_case_index,
+            )
+            self.assertIn(
+                "native fraction must equal count/native_count",
+                "\n".join(errors),
+            )
+            self.assertIn(
+                "fixed native fraction does not match case records",
+                "\n".join(errors),
+            )
+
+    def test_prediction_artifact_checks_are_optional_and_maintainer_owned(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            split_case_ids = ["case-001", "case-002"]
+            submission = {
+                "submission_id": "example-model-v3",
+                "dataset_id": "example",
+                "split_id": "full",
+                "scoring_support": {
+                    "release_id": "example-support-v1",
+                    "manifest_sha256": "a" * 64,
+                },
+                "prediction_artifacts": [
+                    {
+                        "artifact_id": "example-predictions",
+                        "support_release_id": "example-support-v1",
+                        "support_manifest_sha256": "a" * 64,
+                        "split_id": "full",
+                        "revision": "b" * 40,
+                        "manifest_sha256": "c" * 64,
+                        "coverage": {
+                            "kind": "example_cases",
+                            "case_count": 1,
+                            "expected_case_count": 2,
+                            "case_ids": ["case-001"],
+                        },
+                    }
+                ],
+            }
+            errors: list[str] = []
+            self.assertIsNone(
+                validate_v3_prediction_metadata(
+                    errors.append,
+                    directory,
+                    submission,
+                    split_case_ids,
+                    contributor_stage=False,
+                )
+            )
+            self.assertEqual(errors, [])
+
+            checks = {
+                "$schema": "https://fluidsbench.org/schemas/v3/prediction-artifact-checks.schema.json",
+                "schema_version": "1.0",
+                "submission_id": submission["submission_id"],
+                "checks": [
+                    {
+                        "artifact_id": "example-predictions",
+                        "status": "accessible",
+                        "checked_at": "2026-07-27T12:00:00Z",
+                        "checked_by": "Maintainer",
+                        "repository_revision": "b" * 40,
+                        "manifest_sha256": "c" * 64,
+                        "checked_case_count": 1,
+                        "recomputed_case_count": 0,
+                        "expected_case_count": 2,
+                        "metric_recomputation": "not_performed",
+                    }
+                ],
+            }
+            write_json(directory / "prediction-artifact-checks.json", checks)
+            errors = []
+            validate_v3_prediction_metadata(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                contributor_stage=True,
+            )
+            self.assertIn(
+                "contributors must not add prediction-artifact-checks.json",
+                "\n".join(errors),
+            )
+
+            checks["checks"][0].update(
+                {
+                    "status": "metrics_recomputed",
+                    "checked_case_count": 1,
+                    "recomputed_case_count": 1,
+                    "metric_recomputation": "performed",
+                }
+            )
+            write_json(directory / "prediction-artifact-checks.json", checks)
+            errors = []
+            validate_v3_prediction_metadata(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                contributor_stage=False,
+            )
+            self.assertIn(
+                "performed metric recomputation requires the complete benchmark split",
+                "\n".join(errors),
+            )
 
 
 if __name__ == "__main__":

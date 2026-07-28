@@ -4,6 +4,19 @@
   "dataset_name": "DrivAerNet++",
   "dataset_version": "prototype-1",
   "status": "prototype_dummy_data",
+  "scoring_support": {
+    "status": "owner_review_required",
+    "submissions_open": false,
+    "closed_reason": "Submissions remain closed until the DrivAerNet++ dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+    "owner_decisions_required": [
+      "approve_support_domains_and_location_modes",
+      "approve_entity_associations_masks_and_field_names",
+      "approve_coordinate_frame_units_domain_and_bounding_box",
+      "approve_weight_definitions",
+      "approve_case_coverage_split_bindings_and_stable_support_ids",
+      "approve_artifact_format_loader_and_immutable_release"
+    ]
+  },
   "evaluation_reference_version": "prototype-1",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {

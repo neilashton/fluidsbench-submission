@@ -590,6 +590,262 @@ class ManageLeaderboardTests(unittest.TestCase):
             [],
         )
 
+    def test_v3_claim_requires_all_spatial_bindings_and_records_prediction_status(self) -> None:
+        row = {
+            "schema_version": "3.0",
+            "submission_id": "model-v3",
+            "model": "Model v3",
+            "dataset": "Example",
+            "dataset_id": "example",
+            "split": "Full",
+            "split_id": "full",
+            "evaluation": {"evidence_file": "evaluation-evidence.json"},
+            "profile_data": {"index_file": "submissions/example/model-v3/profiles/index.json"},
+            "scoring_support": {
+                "release_id": "example-support-v1",
+                "manifest_url": "https://example.org/releases/example-support-v1/manifest.json",
+                "manifest_sha256": "a" * 64,
+            },
+            "spatial_discretization": {
+                "file": "submissions/example/model-v3/discretization.json",
+                "summary": {
+                    "case_manifest": {
+                        "file": "submissions/example/model-v3/discretization/cases.jsonl"
+                    }
+                },
+            },
+            "case_metrics": {"file": "submissions/example/model-v3/metrics/cases.json"},
+            "prediction_artifact_status": {
+                "sharing": "declared",
+                "declared_artifact_count": 1,
+                "maintainer_check_status": "not_recorded",
+                "checked_artifact_count": 0,
+            },
+            "ranking": {
+                "metric_id": "score",
+                "value": 9.9,
+                "ranked_value": 9.9,
+                "display_value": "9.9",
+                "unit": "points",
+                "direction": "higher",
+                "decimal_places": 1,
+                "rounding": "decimal_half_up",
+                "method": "competition",
+                "rank": 1,
+                "ranked_result_count": 1,
+                "tied": False,
+                "tie_count": 1,
+            },
+            "claim_eligibility": manage_leaderboard.claim_eligibility(
+                "prototype_dummy_data", {}
+            ),
+        }
+        manifest = {
+            "all_file": "leaderboard/all.json",
+            "ranking_contract": manage_leaderboard.ranking_contract(),
+            "data_release": {
+                "id": "prototype-v3",
+                "status": "prototype_dummy_data",
+                "generated_at": "2026-07-27T00:00:00Z",
+                "feed_sha256": "b" * 64,
+                "archive_url": None,
+                "release_view_url": None,
+                "asset_base_url": "https://example.org/releases/prototype-v3/",
+            },
+        }
+        with (
+            patch.object(
+                manage_leaderboard,
+                "available_file_binding",
+                return_value={"path": "fixtures/file.json", "sha256": "c" * 64},
+            ),
+            patch.object(
+                manage_leaderboard,
+                "scoring_support_file_binding",
+                return_value={"path": "fixtures/support.json", "sha256": "a" * 64},
+            ),
+        ):
+            record = manage_leaderboard.build_claim_record(manifest, row, 0)
+        self.assertEqual(record["result"]["submission_schema_version"], "3.0")
+        self.assertEqual(record["prediction_artifacts"]["sharing"], "declared")
+        self.assertEqual(
+            set(record["bindings"]),
+            {
+                "result",
+                "source_submission",
+                "evaluation_evidence",
+                "profile_index",
+                "scoring_support",
+                "spatial_discretization",
+                "discretization_cases",
+                "case_metrics",
+            },
+        )
+        self.assertEqual(
+            manage_leaderboard.schema_errors(
+                record, "result-claim.schema.json", schema_version="releases"
+            ),
+            [],
+        )
+        record["bindings"].pop("case_metrics")
+        self.assertTrue(
+            any(
+                "'case_metrics' is a required property" in error
+                for error in manage_leaderboard.schema_errors(
+                    record, "result-claim.schema.json", schema_version="releases"
+                )
+            )
+        )
+
+    def test_prediction_status_does_not_change_claim_eligibility(self) -> None:
+        approved_row = {
+            "approval": {"status": "approved"},
+            "maintainer_validation": {"status": "validated"},
+        }
+        without_predictions = deepcopy(approved_row)
+        without_predictions["prediction_artifact_status"] = {
+            "sharing": "not_declared",
+            "maintainer_check_status": "not_recorded",
+        }
+        with_failed_optional_check = deepcopy(approved_row)
+        with_failed_optional_check["prediction_artifact_status"] = {
+            "sharing": "declared",
+            "maintainer_check_status": "recorded",
+            "checks": [{"status": "failed"}],
+        }
+        self.assertEqual(
+            manage_leaderboard.claim_eligibility("official", without_predictions),
+            manage_leaderboard.claim_eligibility("official", with_failed_optional_check),
+        )
+
+    def test_approval_documents_bind_v3_evidence_without_prediction_gating(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            profile_path = directory / "profiles" / "index.json"
+            manage_leaderboard.write_json(profile_path, {"schema_version": "1.0"})
+            submission = {
+                "submission_id": "model-v3",
+                "dataset_id": "example",
+                "split_id": "full",
+                "case_set_id": "standard",
+                "evaluation": {
+                    "reference_version": "reference-v1",
+                    "evidence_sha256": "a" * 64,
+                },
+                "reproducibility": {"contract_version": "open-reproducibility-3.0"},
+                "profile_data": {
+                    "index_file": "profiles/index.json",
+                    "profile_ground_truth_release_id": "profiles-v1",
+                    "profile_ground_truth_manifest_sha256": "b" * 64,
+                },
+                "scoring_support": {
+                    "release_id": "support-v1",
+                    "manifest_sha256": "c" * 64,
+                },
+                "spatial_discretization": {"sha256": "d" * 64},
+                "case_metrics": {"sha256": "e" * 64},
+                "prediction_artifacts": [{"artifact_id": "optional"}],
+            }
+            validation, approved = manage_leaderboard.approval_documents(
+                submission,
+                directory,
+                validated_by="Validator",
+                validated_at="2026-07-27T12:00:00Z",
+                approved_by="Approver",
+                approved_at="2026-07-27",
+                pull_request_url="https://github.com/example/repo/pull/123",
+            )
+            self.assertEqual(
+                validation["$schema"],
+                "https://fluidsbench.org/schemas/v3/maintainer-validation.schema.json",
+            )
+            self.assertEqual(validation["schema_version"], "3.0")
+            self.assertEqual(validation["discretization_sha256"], "d" * 64)
+            self.assertEqual(validation["case_metrics_sha256"], "e" * 64)
+            self.assertNotIn("prediction_artifacts", validation)
+            self.assertEqual(
+                manage_leaderboard.schema_errors(
+                    validation,
+                    "maintainer-validation.schema.json",
+                    schema_version="v3",
+                ),
+                [],
+            )
+            self.assertEqual(
+                approved["approval"]["validation"]["evidence_sha256"],
+                hashlib.sha256(manage_leaderboard.json_bytes(validation)).hexdigest(),
+            )
+
+    def test_approve_submission_writes_validation_and_rebuilds(self) -> None:
+        with TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            directory = root / "submissions" / "example" / "model-v3"
+            profile_path = directory / "profiles" / "index.json"
+            manifest_path = root / "leaderboard" / "manifest.json"
+            manage_leaderboard.write_json(profile_path, {"schema_version": "1.0"})
+            manage_leaderboard.write_json(manifest_path, {"data_release": {}})
+            submission_path = directory / "submission.json"
+            manage_leaderboard.write_json(
+                submission_path,
+                {
+                    "$schema": "https://fluidsbench.org/schemas/v3/submission.schema.json",
+                    "schema_version": "3.0",
+                    "submission_id": "model-v3",
+                    "submitted_at": "2026-07-26",
+                    "dataset_id": "example",
+                    "split_id": "full",
+                    "case_set_id": "standard",
+                    "evaluation": {
+                        "reference_version": "reference-v1",
+                        "evidence_sha256": "a" * 64,
+                    },
+                    "reproducibility": {"contract_version": "open-reproducibility-3.0"},
+                    "profile_data": {
+                        "index_file": "profiles/index.json",
+                        "profile_ground_truth_release_id": "profiles-v1",
+                        "profile_ground_truth_manifest_sha256": "b" * 64,
+                    },
+                    "scoring_support": {
+                        "release_id": "support-v1",
+                        "manifest_sha256": "c" * 64,
+                    },
+                    "spatial_discretization": {"sha256": "d" * 64},
+                    "case_metrics": {"sha256": "e" * 64},
+                },
+            )
+            with (
+                patch.object(manage_leaderboard, "ROOT", root),
+                patch.object(manage_leaderboard, "MANIFEST_PATH", manifest_path),
+                patch.object(
+                    manage_leaderboard,
+                    "validate_submission_file",
+                    side_effect=[([], {}), ([], {})],
+                ),
+                patch.object(manage_leaderboard, "release_contract_errors", return_value=[]),
+                patch.object(manage_leaderboard, "build", return_value=[]) as build_mock,
+            ):
+                errors = manage_leaderboard.approve_submission(
+                    directory,
+                    validated_by="Validator",
+                    validated_at="2026-07-27T12:00:00Z",
+                    approved_by="Approver",
+                    approved_at="2026-07-27",
+                    pull_request_url="https://github.com/example/repo/pull/123",
+                    dry_run=False,
+                    update_existing=False,
+                    rebuild_feeds=True,
+                )
+            self.assertEqual(errors, [])
+            validation = manage_leaderboard.load_json(directory / "maintainer-validation.json")
+            approved = manage_leaderboard.load_json(submission_path)
+            self.assertEqual(validation["status"], "validated")
+            self.assertEqual(approved["approval"]["status"], "approved")
+            self.assertEqual(
+                approved["approval"]["validation"]["evidence_sha256"],
+                manage_leaderboard.sha256_file(directory / "maintainer-validation.json"),
+            )
+            build_mock.assert_called_once()
+
 
 if __name__ == "__main__":
     unittest.main()

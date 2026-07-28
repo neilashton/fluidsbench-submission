@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-07-22T13:30:42Z",
+  "generated_at": "2026-07-27T23:47:30Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -21,7 +21,7 @@
   "data_release": {
     "id": "prototype-dev-2026-07-15-136a5157fb69",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-07-22T13:30:42Z",
+    "generated_at": "2026-07-27T23:47:30Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
@@ -51,7 +51,7 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "e59adefdf30e6daf06d49630f3fbde7f639670c90fbbda01f5038535b2a030f3",
+      "index_sha256": "41b49fc9d623872c9ee676e3dd9005dc703e3c8bf150fda949fb56f47cb0c165",
       "record_count": 72,
       "eligible_record_count": 0
     }
@@ -389,7 +389,36 @@
             "station_id"
           ]
         }
-      ]
+      ],
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the AhmedML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "proposal": {
+          "status": "non_official_for_owner_review",
+          "proposal_notice": "The proposed counts are planning assumptions only. They are not approved scoring locations and must not be represented as an official AhmedML contract.",
+          "proposed_counts_per_case": [
+            {
+              "domain": "surface",
+              "location_count": 500000
+            },
+            {
+              "domain": "volume",
+              "location_count": 500000
+            }
+          ]
+        },
+        "owner_decisions_required": [
+          "approve_surface_full_native_or_fixed_public_sample",
+          "approve_volume_full_native_or_fixed_public_sample",
+          "approve_sampling_method_seed_and_convergence_evidence",
+          "approve_entity_associations_patch_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_surface_and_volume_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
+      }
     },
     {
       "name": "AirfRANS",
@@ -577,7 +606,20 @@
             "station_id"
           ]
         }
-      ]
+      ],
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the AirfRANS dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "owner_decisions_required": [
+          "approve_support_domains_and_location_modes",
+          "approve_entity_associations_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
+      }
     },
     {
       "name": "DrivAerML",
@@ -825,7 +867,20 @@
             "station_id"
           ]
         }
-      ]
+      ],
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the DrivAerML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "owner_decisions_required": [
+          "approve_support_domains_and_location_modes",
+          "approve_entity_associations_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
+      }
     },
     {
       "name": "DrivAerNet++",
@@ -1014,7 +1069,20 @@
             "station_id"
           ]
         }
-      ]
+      ],
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the DrivAerNet++ dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "owner_decisions_required": [
+          "approve_support_domains_and_location_modes",
+          "approve_entity_associations_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
+      }
     },
     {
       "name": "HiLiftAeroML",
@@ -1574,7 +1642,20 @@
             "station_id"
           ]
         }
-      ]
+      ],
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the HiLiftAeroML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "owner_decisions_required": [
+          "approve_support_domains_and_location_modes",
+          "approve_entity_associations_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
+      }
     },
     {
       "name": "WindsorML",
@@ -1747,7 +1828,20 @@
             "station_id"
           ]
         }
-      ]
+      ],
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the WindsorML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "owner_decisions_required": [
+          "approve_support_domains_and_location_modes",
+          "approve_entity_associations_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
+      }
     },
     {
       "name": "VKI-LS59",
@@ -1984,6 +2078,19 @@
           "vki_angle_out_rrmse"
         ],
         "tolerance": 1e-05
+      },
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the VKI-LS59 dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "owner_decisions_required": [
+          "approve_support_domains_and_location_modes",
+          "approve_entity_associations_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
       }
     },
     {
@@ -2250,6 +2357,19 @@
           "rotor_efficiency_rrmse"
         ],
         "tolerance": 1e-05
+      },
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the Rotor37 dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "owner_decisions_required": [
+          "approve_support_domains_and_location_modes",
+          "approve_entity_associations_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
       }
     },
     {
@@ -2453,6 +2573,19 @@
           "blended_cfz_rel_l2"
         ],
         "tolerance": 1e-05
+      },
+      "scoring_support": {
+        "status": "owner_review_required",
+        "submissions_open": false,
+        "closed_reason": "Submissions remain closed until the BlendedNet dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "owner_decisions_required": [
+          "approve_support_domains_and_location_modes",
+          "approve_entity_associations_masks_and_field_names",
+          "approve_coordinate_frame_units_domain_and_bounding_box",
+          "approve_weight_definitions",
+          "approve_case_coverage_split_bindings_and_stable_support_ids",
+          "approve_artifact_format_loader_and_immutable_release"
+        ]
       }
     }
   ],

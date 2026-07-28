@@ -23,6 +23,7 @@ if __package__:
         sha256_file,
         submission_files,
         validate_many,
+        validate_submission_file,
     )
 else:
     from validate_submission import (
@@ -31,6 +32,7 @@ else:
         sha256_file,
         submission_files,
         validate_many,
+        validate_submission_file,
     )
 
 
@@ -120,10 +122,13 @@ def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
         errors.append("leaderboard/manifest.json ranking_contract does not match the published ranking policy")
     if release.get("status") not in {"prototype_dummy_data", "official"}:
         errors.append("leaderboard/manifest.json data_release.status must be prototype_dummy_data or official")
-    if release.get("reproducibility_contract_version") != "open-reproducibility-2.0":
+    if release.get("reproducibility_contract_version") not in {
+        "open-reproducibility-2.0",
+        "open-reproducibility-3.0",
+    }:
         errors.append(
             "leaderboard/manifest.json data_release.reproducibility_contract_version must be "
-            "open-reproducibility-2.0"
+            "open-reproducibility-2.0 or open-reproducibility-3.0"
         )
     license_metadata = release.get("license")
     if not isinstance(license_metadata, dict) or any(
@@ -253,6 +258,51 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
         profile_index_path = ROOT / row["profile_data"]["index_file"]
         if profile_index_path.is_file():
             row["profile_data"]["index_sha256"] = sha256_file(profile_index_path)
+        if submission.get("schema_version") == "3.0":
+            discretization_path = path.parent / submission["spatial_discretization"]["file"]
+            row["spatial_discretization"]["file"] = str(discretization_path.relative_to(ROOT))
+            if discretization_path.is_file():
+                discretization = load_json(discretization_path)
+                row["spatial_discretization"]["summary"] = discretization
+                case_manifest = discretization.get("case_manifest", {})
+                case_file = case_manifest.get("file")
+                if isinstance(case_file, str):
+                    row["spatial_discretization"]["summary"]["case_manifest"]["file"] = str(
+                        (path.parent / case_file).relative_to(ROOT)
+                    )
+            case_metrics_path = path.parent / submission["case_metrics"]["file"]
+            row["case_metrics"]["file"] = str(case_metrics_path.relative_to(ROOT))
+
+            declared_artifacts = submission.get("prediction_artifacts", [])
+            checks_path = path.parent / "prediction-artifact-checks.json"
+            prediction_status: dict[str, Any] = {
+                "sharing": "declared" if declared_artifacts else "not_declared",
+                "declared_artifact_count": len(declared_artifacts),
+                "maintainer_check_status": "not_recorded",
+                "checked_artifact_count": 0,
+            }
+            if checks_path.is_file():
+                checks = load_json(checks_path)
+                successful_statuses = {
+                    "accessible",
+                    "format_checked",
+                    "metrics_recomputed",
+                }
+                prediction_status.update(
+                    {
+                        "maintainer_check_status": "recorded",
+                        "checked_artifact_count": sum(
+                            1
+                            for check in checks.get("checks", [])
+                            if isinstance(check, dict)
+                            and check.get("status") in successful_statuses
+                        ),
+                        "checks": deepcopy(checks.get("checks", [])),
+                        "check_file": str(checks_path.relative_to(ROOT)),
+                        "check_sha256": sha256_file(checks_path),
+                    }
+                )
+            row["prediction_artifact_status"] = prediction_status
         if allowed_approval_status == "approved":
             validation_metadata = submission["approval"]["validation"]
             validation_path = path.parent / validation_metadata["evidence_file"]
@@ -276,6 +326,14 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
                 "evidence_path": str(validation_path.relative_to(ROOT)),
                 "evidence_sha256": validation_metadata["evidence_sha256"],
             }
+            for key in (
+                "scoring_support_release_id",
+                "scoring_support_manifest_sha256",
+                "discretization_sha256",
+                "case_metrics_sha256",
+            ):
+                if key in validation:
+                    row["maintainer_validation"][key] = validation[key]
         rows[submission["dataset"]].append(row)
     return rows
 
@@ -407,6 +465,22 @@ def available_file_binding(path: Path) -> dict[str, str] | None:
     return {"path": str(path.relative_to(ROOT)), "sha256": sha256_file(path)}
 
 
+def scoring_support_file_binding(row: dict[str, Any]) -> dict[str, str] | None:
+    """Find the local benchmark-owned manifest already pinned by the feed row."""
+
+    declaration = row.get("scoring_support")
+    if not isinstance(declaration, dict):
+        return None
+    expected_sha256 = declaration.get("manifest_sha256")
+    if not isinstance(expected_sha256, str):
+        return None
+    directory = ROOT / "benchmark-specs" / row["dataset_id"] / "scoring-support"
+    for path in sorted(directory.glob("**/manifest.json")):
+        if sha256_file(path) == expected_sha256:
+            return {"path": str(path.relative_to(ROOT)), "sha256": expected_sha256}
+    return None
+
+
 def build_claim_record(manifest: dict[str, Any], row: dict[str, Any], row_index: int) -> dict[str, Any]:
     release = manifest["data_release"]
 
@@ -440,11 +514,40 @@ def build_claim_record(manifest: dict[str, Any], row: dict[str, Any], row_index:
                 "model_execution": validation["model_execution"],
                 "metric_recomputation": validation["metric_recomputation"],
             }
+    if row.get("schema_version") == "3.0":
+        v3_binding_paths = {
+            "spatial_discretization": ROOT / row["spatial_discretization"]["file"],
+            "discretization_cases": ROOT
+            / row["spatial_discretization"]["summary"]["case_manifest"]["file"],
+            "case_metrics": ROOT / row["case_metrics"]["file"],
+        }
+        for binding_name, binding_path in v3_binding_paths.items():
+            binding = available_file_binding(binding_path)
+            if binding is None:
+                raise FileNotFoundError(f"missing required schema v3 claim binding: {binding_path}")
+            bindings[binding_name] = binding
+        support_binding = scoring_support_file_binding(row)
+        if support_binding is None:
+            raise FileNotFoundError(
+                f"missing scoring-support manifest for {row['dataset_id']}/{row['submission_id']}"
+            )
+        bindings["scoring_support"] = {
+            "release_id": row["scoring_support"]["release_id"],
+            "manifest_url": row["scoring_support"]["manifest_url"],
+            "manifest_sha256": row["scoring_support"]["manifest_sha256"],
+            "path": support_binding["path"],
+        }
+        prediction_status = row.get("prediction_artifact_status", {})
+        prediction_check_file = prediction_status.get("check_file")
+        if isinstance(prediction_check_file, str):
+            prediction_binding = available_file_binding(ROOT / prediction_check_file)
+            if prediction_binding is not None:
+                bindings["prediction_artifact_checks"] = prediction_binding
 
     claim_id = "/".join(
         (release["id"], row["dataset_id"], row["split_id"], row["submission_id"])
     )
-    return {
+    record = {
         "$schema": CLAIM_SCHEMA_URL,
         "schema_version": "1.0",
         "claim_id": claim_id,
@@ -462,6 +565,7 @@ def build_claim_record(manifest: dict[str, Any], row: dict[str, Any], row_index:
             "dataset_id": row["dataset_id"],
             "split": row["split"],
             "split_id": row["split_id"],
+            "submission_schema_version": row.get("schema_version", "1.0"),
         },
         "ranking": deepcopy(row["ranking"]),
         "eligibility": deepcopy(row["claim_eligibility"]),
@@ -469,6 +573,19 @@ def build_claim_record(manifest: dict[str, Any], row: dict[str, Any], row_index:
         "claim_record_url": immutable_claim_record_url(release, row),
         "bindings": bindings,
     }
+    if row.get("schema_version") == "3.0":
+        record["prediction_artifacts"] = {
+            key: deepcopy(value)
+            for key, value in row.get("prediction_artifact_status", {}).items()
+            if key
+            in {
+                "sharing",
+                "declared_artifact_count",
+                "maintainer_check_status",
+                "checked_artifact_count",
+            }
+        }
+    return record
 
 
 def expected_claim_artifacts(
@@ -621,6 +738,20 @@ def expected_outputs(
     generated_at: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
     updated_manifest = deepcopy(manifest)
+    for dataset in updated_manifest.get("datasets", []):
+        slug = dataset.get("slug")
+        if not isinstance(slug, str):
+            continue
+        spec_path = ROOT / "benchmark-specs" / slug / "submission-spec.json"
+        if not spec_path.is_file():
+            continue
+        scoring_support = load_json(spec_path).get("scoring_support")
+        if isinstance(scoring_support, dict):
+            dataset["scoring_support"] = {
+                key: deepcopy(value)
+                for key, value in scoring_support.items()
+                if key != "manifest_file"
+            }
     rows_by_dataset = source_rows_by_dataset(updated_manifest)
     add_release_rankings(updated_manifest, rows_by_dataset)
     all_rows: list[dict[str, Any]] = []
@@ -644,9 +775,12 @@ def expected_outputs(
         updated_manifest["generated_at"] = (
             generated_at or manifest.get("generated_at") or f"{latest_global}T00:00:00Z"
         )
-    updated_manifest["submission_schema_version"] = (
-        "1.0" if release.get("status") == "prototype_dummy_data" else "2.0"
-    )
+    if release.get("status") == "prototype_dummy_data":
+        updated_manifest["submission_schema_version"] = "1.0"
+    elif release.get("reproducibility_contract_version") == "open-reproducibility-3.0":
+        updated_manifest["submission_schema_version"] = "3.0"
+    else:
+        updated_manifest["submission_schema_version"] = "2.0"
     release["generated_at"] = updated_manifest["generated_at"]
     feed_sha256 = hashlib.sha256(json_bytes(all_rows)).hexdigest()
     if release.get("status") == "prototype_dummy_data":
@@ -751,6 +885,173 @@ def check_generated_feeds(manifest: dict[str, Any]) -> list[str]:
     return errors
 
 
+def approval_documents(
+    submission: dict[str, Any],
+    directory: Path,
+    *,
+    validated_by: str,
+    validated_at: str,
+    approved_by: str,
+    approved_at: str,
+    pull_request_url: str,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build the maintainer-owned v3 validation record and approval metadata."""
+
+    reviewed_submission = deepcopy(submission)
+    reviewed_submission.pop("approval", None)
+    profile_index_path = directory / reviewed_submission["profile_data"]["index_file"]
+    validation = {
+        "$schema": "https://fluidsbench.org/schemas/v3/maintainer-validation.schema.json",
+        "schema_version": "3.0",
+        "contract_version": reviewed_submission["reproducibility"]["contract_version"],
+        "submission_id": reviewed_submission["submission_id"],
+        "dataset_id": reviewed_submission["dataset_id"],
+        "split_id": reviewed_submission["split_id"],
+        "case_set_id": reviewed_submission["case_set_id"],
+        "reference_version": reviewed_submission["evaluation"]["reference_version"],
+        "profile_ground_truth_release_id": reviewed_submission["profile_data"][
+            "profile_ground_truth_release_id"
+        ],
+        "profile_ground_truth_manifest_sha256": reviewed_submission["profile_data"][
+            "profile_ground_truth_manifest_sha256"
+        ],
+        "scoring_support_release_id": reviewed_submission["scoring_support"]["release_id"],
+        "scoring_support_manifest_sha256": reviewed_submission["scoring_support"]["manifest_sha256"],
+        "validated_by": validated_by,
+        "validated_at": validated_at,
+        "status": "validated",
+        "validation_scope": "submitted_data_only",
+        "model_execution": "not_performed",
+        "metric_recomputation": "not_performed",
+        "reviewed_submission_sha256": canonical_submission_sha256(reviewed_submission),
+        "evaluation_evidence_sha256": reviewed_submission["evaluation"]["evidence_sha256"],
+        "profile_index_sha256": sha256_file(profile_index_path),
+        "discretization_sha256": reviewed_submission["spatial_discretization"]["sha256"],
+        "case_metrics_sha256": reviewed_submission["case_metrics"]["sha256"],
+    }
+    validation_path = directory / "maintainer-validation.json"
+    approved_submission = deepcopy(reviewed_submission)
+    approved_submission["approval"] = {
+        "status": "approved",
+        "approved_by": approved_by,
+        "approved_at": approved_at,
+        "pull_request_url": pull_request_url,
+        "validation": {
+            "evidence_file": "maintainer-validation.json",
+            "evidence_sha256": hashlib.sha256(json_bytes(validation)).hexdigest(),
+        },
+    }
+    return validation, approved_submission
+
+
+def canonical_submission_sha256(submission: dict[str, Any]) -> str:
+    """Match validate_submission.canonical_json_sha256 without a circular import."""
+
+    payload = json.dumps(
+        submission,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def approve_submission(
+    path: Path,
+    *,
+    validated_by: str,
+    validated_at: str,
+    approved_by: str,
+    approved_at: str,
+    pull_request_url: str,
+    dry_run: bool,
+    update_existing: bool,
+    rebuild_feeds: bool,
+) -> list[str]:
+    """Create a schema-v3 maintainer approval, validate it, and rebuild compact feeds."""
+
+    path = path.resolve()
+    submissions_root = (ROOT / "submissions").resolve()
+    if path.is_dir():
+        path = path / "submission.json"
+    if not path.is_relative_to(submissions_root) or len(path.relative_to(submissions_root).parts) != 3:
+        return ["approve requires exactly submissions/<dataset-id>/<submission-id>/submission.json"]
+    if not path.is_file():
+        return [f"submission file does not exist: {path}"]
+    try:
+        submission = load_json(path)
+    except (OSError, json.JSONDecodeError) as error:
+        return [f"cannot read submission: {error}"]
+    if submission.get("schema_version") != "3.0":
+        return ["new approvals require submission schema_version=3.0"]
+    existing_approval = submission.get("approval")
+    if existing_approval is not None and not update_existing:
+        return ["submission already has approval metadata; pass --update-existing to update its PR URL"]
+    validation_path = path.parent / "maintainer-validation.json"
+    if validation_path.exists() and not update_existing:
+        return ["maintainer-validation.json already exists; pass --update-existing to replace the same approval"]
+
+    if not validated_by.strip() or not approved_by.strip():
+        return ["validated-by and approved-by must be non-empty"]
+    if not is_valid_published_at(validated_at):
+        return ["validated-at must be an explicit timezone-qualified ISO date-time"]
+    try:
+        approved_date = date.fromisoformat(approved_at)
+        validation_date = datetime.fromisoformat(validated_at.replace("Z", "+00:00")).date()
+        submitted_date = date.fromisoformat(submission["submitted_at"])
+    except (KeyError, TypeError, ValueError):
+        return ["submitted-at, validated-at, and approved-at must be valid ISO dates"]
+    if not submitted_date <= validation_date <= approved_date:
+        return ["submission, validation, and approval dates must be chronological"]
+    if re.fullmatch(r"https://github\.com/[^/]+/[^/]+/pull/[0-9]+", pull_request_url) is None:
+        return ["pull-request-url must be a full GitHub pull request URL"]
+
+    reviewed = deepcopy(submission)
+    reviewed.pop("approval", None)
+    pre_errors, _ = validate_submission_file(path)
+    if pre_errors:
+        return [f"cannot approve an invalid source package: {error}" for error in pre_errors]
+
+    validation, approved_submission = approval_documents(
+        reviewed,
+        path.parent,
+        validated_by=validated_by,
+        validated_at=validated_at,
+        approved_by=approved_by,
+        approved_at=approved_at,
+        pull_request_url=pull_request_url,
+    )
+    if dry_run:
+        print(json.dumps({"maintainer_validation": validation, "submission": approved_submission}, indent=2))
+        return []
+
+    previous_submission_bytes = path.read_bytes()
+    previous_validation_bytes = validation_path.read_bytes() if validation_path.is_file() else None
+    operation_errors: list[str] = []
+    try:
+        write_json(validation_path, validation)
+        write_json(path, approved_submission)
+        errors, _ = validate_submission_file(path)
+        if errors:
+            operation_errors.extend(f"generated approval is invalid: {error}" for error in errors)
+        if not operation_errors and rebuild_feeds:
+            manifest = load_json(MANIFEST_PATH)
+            operation_errors.extend(release_contract_errors(manifest))
+        if not operation_errors and rebuild_feeds:
+            operation_errors.extend(build(manifest))
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        operation_errors.append(f"approval generation failed: {error}")
+    if operation_errors:
+        path.write_bytes(previous_submission_bytes)
+        if previous_validation_bytes is None:
+            if validation_path.is_file():
+                validation_path.unlink()
+        else:
+            validation_path.write_bytes(previous_validation_bytes)
+    return operation_errors
+
+
 def print_errors(errors: list[str]) -> int:
     for error in errors:
         print(f"ERROR: {error}", file=sys.stderr)
@@ -764,7 +1065,50 @@ def main() -> int:
     validate_parser.add_argument("paths", nargs="*", type=Path)
     subparsers.add_parser("build", help="validate and regenerate all leaderboard feeds")
     subparsers.add_parser("check", help="validate submissions and verify generated feeds")
+    approve_parser = subparsers.add_parser(
+        "approve",
+        help="create a maintainer validation/approval record and rebuild feeds",
+    )
+    approve_parser.add_argument("path", type=Path, help="exact schema-v3 submission directory")
+    approve_parser.add_argument("--validated-by", required=True)
+    approve_parser.add_argument("--validated-at", required=True, help="timezone-qualified ISO date-time")
+    approve_parser.add_argument("--approved-by", required=True)
+    approve_parser.add_argument("--approved-at", required=True, help="ISO date in YYYY-MM-DD form")
+    approve_parser.add_argument("--pull-request-url", required=True)
+    approve_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print the proposed records without modifying files or rebuilding feeds",
+    )
+    approve_parser.add_argument(
+        "--update-existing",
+        action="store_true",
+        help="update the same generated approval, normally to replace the workflow's temporary PR URL",
+    )
+    approve_parser.add_argument(
+        "--skip-feed-build",
+        action="store_true",
+        help="write and validate approval files but defer feed regeneration",
+    )
     args = parser.parse_args()
+
+    if args.command == "approve":
+        errors = approve_submission(
+            args.path,
+            validated_by=args.validated_by,
+            validated_at=args.validated_at,
+            approved_by=args.approved_by,
+            approved_at=args.approved_at,
+            pull_request_url=args.pull_request_url,
+            dry_run=args.dry_run,
+            update_existing=args.update_existing,
+            rebuild_feeds=not args.skip_feed_build,
+        )
+        if errors:
+            return print_errors(errors)
+        action = "Prepared" if args.dry_run else "Approved and rebuilt feeds for"
+        print(f"{action} {args.path}.")
+        return 0
 
     paths = getattr(args, "paths", None) or None
     errors, totals = validate_many(paths)
