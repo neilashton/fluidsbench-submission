@@ -48,7 +48,7 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "0.50 S_field + 0.25 S_force + 0.25 S_profile",
+      "equation": "0.50\\,S_{\\mathrm{field}} + 0.25\\,S_{\\mathrm{force}} + 0.25\\,S_{\\mathrm{profile}}",
       "aggregation": "derived_score_equation",
       "weighting": "equation_weights"
     },
@@ -57,7 +57,7 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "2 sum_j w_j max(0, 100(1-e_j/c_j))",
+      "equation": "2\\sum_j w_j\\max\\!\\left(0,\\,100\\left(1-\\frac{e_j}{c_j}\\right)\\right)",
       "aggregation": "derived_score_equation",
       "weighting": "equation_weights"
     },
@@ -66,7 +66,7 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "(0.15 S_CD + 0.10 S_CL)/0.25",
+      "equation": "\\frac{0.15\\,S_{C_D} + 0.10\\,S_{C_L}}{0.25}",
       "aggregation": "derived_score_equation",
       "weighting": "equation_weights"
     },
@@ -75,7 +75,7 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "(0.15 S_velocity + 0.10 S_Cp)/0.25",
+      "equation": "\\frac{0.15\\,S_{\\mathrm{velocity}} + 0.10\\,S_{C_p}}{0.25}",
       "aggregation": "derived_score_equation",
       "weighting": "equation_weights"
     },
