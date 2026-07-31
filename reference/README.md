@@ -9,7 +9,8 @@ prescribe a model's native input or output format.
 ## Fixed scoring support
 
 For a schema-v3 result, the selected dataset specification points to one immutable, owner-approved scoring-support release. Its
-hash chain defines the public case set and, for each support, the exact stable IDs, coordinates, physical weights, quantities,
+hash chain defines the public case set and, for each support, the exact stable IDs, coordinates, area, length, or volume weights,
+quantities,
 components, ground-truth values, and coverage and extrapolation rules used for scoring.
 
 The submitter creates keyed predictions and maps any native model output to those benchmark support IDs. The reference evaluator
@@ -86,7 +87,8 @@ R^2_w = 1-\frac{\sum_i w_i(y_i-\hat y_i)^2}{\sum_i w_i(y_i-\bar y_w)^2},\qquad
 \bar y_w=\frac{\sum_iw_i y_i}{\sum_iw_i}
 \]
 
-An equal-entity metric sets \(w_i=1\). A physically weighted metric uses one authoritative measure per scoring entity. Supported
+An unweighted metric sets \(w_i=1\), so every stored point, face, or cell counts equally. An area-, length-, or volume-weighted
+metric uses the corresponding benchmark-supplied measure represented by each scoring point, face, or cell. Supported
 dataset-weighting tokens are `surface_face_area`, `cell_volume`, `boundary_line_length`, `interior_cell_area`,
 `surface_point_dual_area`, `volume_point_dual_volume`, `boundary_point_dual_length`, and `interior_point_dual_area`. Face- and
 cell-associated values can use their face area, boundary-line length, cell area, or cell volume directly. Point-associated values
@@ -103,7 +105,7 @@ For per-geometry values \(m_k\), the macro-average over \(K\) test geometries is
 \bar m = \frac{1}{K}\sum_{k=1}^{K}m_k
 \]
 
-Vector quantities must include every declared component. Apply the same physical weight to each component and flatten the
+Vector quantities must include every declared component. Apply the same benchmark-supplied spatial weight to each component and flatten the
 component axis before evaluating the norm unless the dataset specification states another reduction.
 
 ### Chunk-safe relative L2

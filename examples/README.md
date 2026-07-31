@@ -7,13 +7,15 @@ selected dataset's official support release and specification when submissions o
 
 A real dataset specification pins its original public field-bearing files and requires one mapped prediction for every official
 entity in every case. It also identifies whether fields are point-, node-, face-, or cell-associated and supplies the authoritative
-physical measures. The guidance distinguishes three-dimensional surfaces and flow domains, two-dimensional flow domains,
+area, length, volume, or cell-area weights. The guidance distinguishes three-dimensional surfaces and flow domains, two-dimensional
+flow domains,
 two-dimensional surface manifolds embedded in three dimensions, and one-dimensional boundary curves.
 
 Methods may perform inference in chunks or on another internal representation. Relative-L2 chunks are combined by adding their
 numerators and denominators, entity counts, and total weights before calculating the complete-case value; chunk-level L2 values are
-never averaged. Surface, two-dimensional surface-manifold, or boundary-curve results report physical weighting as primary and equal-entity weighting as secondary.
-Volume or two-dimensional-domain results report equal-entity weighting as primary and physical weighting as secondary. Complete
+never averaged. Surface, two-dimensional surface-manifold, or boundary-curve results report area or length weighting as primary
+and an unweighted result as secondary.
+Volume or two-dimensional-domain results report an unweighted result as primary and volume or area weighting as secondary. Complete
 case values are macro-averaged across the test set.
 
 [`v2-template/`](v2-template/) is retained to interpret previously approved schema-v2 packages. The contributor-stage validator

@@ -40,9 +40,9 @@ bindings. Each case/support in `metrics/cases.json` also records the additive
 numerator, denominator, spatial entity count, and total weight for its
 relative-L2 metric. Those statistics allow chunked inference to be combined
 without averaging chunk-level L2 values. Real dataset specifications declare
-the required equal-entity and physical relative-L2 pair, its primary metric,
-and whether the physical measure is area, length, volume, or a benchmark-owned
-mass-lumped dual measure. `prediction-artifact-checks.json` is deliberately
+the required unweighted and area-, length-, or volume-weighted relative-L2 pair,
+its primary metric, and the exact benchmark-owned weight associated with each
+scoring point, face, or cell. `prediction-artifact-checks.json` is deliberately
 maintainer-owned; a submitter may declare a pinned public Hugging Face
 prediction artifact but must not declare its own check status.
 

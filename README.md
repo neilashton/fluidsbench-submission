@@ -12,7 +12,7 @@ IDs are public. The submission process deliberately separates four responsibilit
 
 1. Dataset owners pin the original public field-bearing files and publish an immutable canonical scoring support covering every
    required entity in those files. The support declares exact arrays, point/node/face/cell association, stable IDs, authoritative
-   physical measures, case set, and coverage rules.
+   area, length, volume, or cell-area weights, case set, and coverage rules.
 2. Participants run their own model, create predictions for that complete support, calculate per-case and aggregate metrics, and
    create the required profiles and spatial-discretization records. Inference may be chunked and a method may use a different
    internal representation, but its final mapped predictions must cover every official entity. Participants may optionally link
@@ -73,14 +73,14 @@ pipeline, so its error is included in the result.
 
 For relative L2 field errors, the standard paired reporting policy is:
 
-- on a three-dimensional surface, a two-dimensional surface manifold, or a one-dimensional boundary curve, report the physical-measure-weighted result as the
-  primary value and the equal-entity result as a secondary value;
-- in a three-dimensional volume, or the two-dimensional flow domain, report the equal-entity result as the primary value and the
-  physical-measure-weighted result as a secondary value; and
+- on a three-dimensional surface, a two-dimensional surface manifold, or a one-dimensional boundary curve, report the area- or
+  length-weighted result as the primary value and the unweighted result as a secondary value;
+- in a three-dimensional volume, or the two-dimensional flow domain, report the unweighted result as the primary value and the
+  volume- or area-weighted result as a secondary value; and
 - calculate each test case separately, then macro-average the case results so every case has equal influence.
 
-Physical measures are face area, curve length, cell volume, or cell area as appropriate. For point- or node-associated fields,
-FluidsBench supplies the corresponding deterministic mass-lumped dual measure from the exact pinned mesh. Submitters use those
+The weights are face area, curve length, cell volume, or cell area as appropriate. For point- or node-associated fields,
+FluidsBench supplies the corresponding per-point or per-node weight from the exact pinned mesh. Submitters use those
 benchmark-owned values; they do not independently reconstruct weights from a modified mesh. For vector fields, one entity weight
 multiplies the squared vector magnitude, not each component as a separate spatial sample. The selected dataset's machine-readable
 specification remains authoritative if its published source metric requires a documented exception.
@@ -99,8 +99,8 @@ Large cases may be evaluated in chunks. For each case and metric, accumulate
 `numerator = sum(w * ||prediction - ground_truth||^2)` and
 `denominator = sum(w * ||ground_truth||^2)` across all chunks, together with the entity count and total weight. Take
 `100 * sqrt(numerator / denominator)` only after the complete case has been accumulated. Never calculate an L2 value per chunk and
-average those chunk values. Use `w = 1` for the equal-entity variant and the benchmark-supplied physical measure for the physical
-variant.
+average those chunk values. Use `w = 1` for the unweighted variant and the benchmark-supplied area, length, volume, or cell-area
+weight for the weighted variant.
 
 Run the executable reference example with:
 
@@ -131,7 +131,8 @@ identifiers. See [`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md) for the co
 
 The required `metrics/cases.json` records every test case, canonical support, support/scored counts, complete count and weight
 coverage, unmapped/extrapolated counts, per-case metric values, and the additive sufficient statistics required by each relative-L2
-metric. Those statistics include numerator, denominator, entity count, and total weight for the equal-entity and physical variants.
+metric. Those statistics include numerator, denominator, entity count, and total weight for the unweighted and
+area-, length-, or volume-weighted variants.
 Its aggregate `metric_values` must exactly match `submission.json`; macro-averaged spatial metrics are recalculated from its case
 values by the validator. Global R2 and published dataset-reference RRMSE values are explicitly `aggregate_only`: the generic
 evaluator calculates them from complete prediction arrays, while normal package validation checks their identities and rule
@@ -209,8 +210,9 @@ Validate every source submission and verify that generated feeds are synchronize
 python3 scripts/manage_leaderboard.py check
 ```
 
-The validator checks JSON schemas, exact public split and complete original-support coverage, equal-entity and physical
-relative-L2 sufficient statistics, case-metric aggregation, spatial counts and domains, declared mappings, evaluation-evidence
+The validator checks JSON schemas, exact public split and complete original-support coverage, unweighted and area-, length-, or
+volume-weighted relative-L2 sufficient statistics, case-metric aggregation, spatial counts and domains, declared mappings,
+evaluation-evidence
 identities and checksums, profile coverage, coordinate ordering, array lengths, finite values, split/chunk hashes, any declared
 open-artifact metadata, and approval lifecycle rules. It does not execute the model, download optional remote predictions, or
 recompute submitted base metrics.

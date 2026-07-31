@@ -1,7 +1,8 @@
 # Open reproducibility contract
 
 FluidsBench uses the versioned `open-reproducibility-3.0` contract for new leaderboard results. Evaluation case IDs, original
-public field-bearing files, canonical scoring entities, physical weights, and ground truth are public. The submitter runs the model
+public field-bearing files, canonical scoring entities, benchmark-supplied area, length, volume, or cell-area weights, and ground
+truth are public. The submitter runs the model
 and creates every prediction, per-case metric, aggregate metric, profile, and spatial-discretization record. FluidsBench validates
 and publishes those files, plots the submitted values, and compares submitted profiles with the pinned public ground truth.
 
@@ -35,7 +36,7 @@ An official dataset release publishes a hash-pinned scoring-support chain:
 manifest.json
   -> case-set index
      -> case chunks
-        -> coordinates, physical weights, ground truth, and stable support IDs
+        -> coordinates, area, length, or volume weights, ground truth, and stable support IDs
 ```
 
 The dataset specification declares the support status, release ID, manifest URL and repository path, manifest SHA-256, whether
@@ -46,15 +47,16 @@ explicit reason.
 The scoring-support manifest defines each support's domain, original public file, exact arrays, point/node/face/cell association,
 required patches or masks, entity ordering, quantities, components, weights, mapping and extrapolation policy, and metric bindings.
 Its case set must cover exactly the official split, and each case support covers every required entity in the pinned original
-field-bearing file. Each submitter joins predictions to stable benchmark `support_id` values. Coordinates, authoritative physical
-measures, and ground truth come from the benchmark-owned support, not from the prediction artifact. Mapping from a method's native
+field-bearing file. Each submitter joins predictions to stable benchmark `support_id` values. Coordinates, benchmark-supplied area,
+length, volume, or cell-area weights, and ground truth come from the benchmark-owned support, not from the prediction artifact.
+Mapping from a method's native
 output to these entities is part of the submitted evaluation pipeline, so mapping error remains in the reported result.
 
 Three-dimensional specifications describe body surfaces and flow volumes. Lower-dimensional specifications distinguish a
 two-dimensional flow domain, a two-dimensional surface manifold embedded in three dimensions, and a one-dimensional boundary
-curve. The standard relative-L2 policy reports a physical-measure-weighted primary value and equal-entity secondary value on a
-surface, surface manifold, or boundary curve; in a volume or two-dimensional flow domain, it reports an equal-entity
-primary value and physical-measure-weighted secondary value. Face- and cell-associated data use authoritative face area, curve
+curve. The standard relative-L2 policy reports an area- or length-weighted primary value and an unweighted secondary value on a
+surface, surface manifold, or boundary curve; in a volume or two-dimensional flow domain, it reports an unweighted
+primary value and a volume- or area-weighted secondary value. Face- and cell-associated data use authoritative face area, curve
 length, cell volume, or cell area. Point- and node-associated data use deterministic mass-lumped dual measures supplied by
 FluidsBench from the exact pinned mesh. Submitters do not create their own weights from a resampled or modified mesh.
 
@@ -68,7 +70,8 @@ A new `submitted_evaluation` package uses `schemas/v3/submission.schema.json` an
   support, spatial report, per-case metrics, profile index, and public profile-ground-truth release;
 - `metrics/cases.json`, containing every official case and support, the scored and expected counts, count and weight coverage,
   unmapped and extrapolated counts, per-case values, and additive relative-L2 numerator, denominator, entity-count, and total-weight
-  evidence for the equal-entity and physical variants; global and dataset-reference metrics use explicit `aggregate_only` bindings
+  evidence for the unweighted and area-, length-, or volume-weighted variants; global and dataset-reference metrics use explicit
+  `aggregate_only` bindings
   rather than invented per-case surrogates;
 - `discretization.json` and `discretization/cases.jsonl`, distinguishing training inputs, training supervision, inference inputs,
   direct model outputs, and mapping to each canonical scoring support;

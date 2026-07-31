@@ -2,7 +2,8 @@
 
 Each dataset directory contains a machine-readable `submission-spec.json` and one split index per accepted leaderboard split.
 The specification lists the required scalar metrics and profile panel, station, and quantity IDs. It also declares the exact
-original public field-bearing files, required entities, arrays, point/node/face/cell associations, physical measures, canonical
+original public field-bearing files, required entities, arrays, point/node/face/cell associations, area, length, or volume weights,
+canonical
 scoring-support status, and support identity. The validator consumes these same files, so the written instructions and automated
 checks use one contract. Three-dimensional specifications use surface and flow-domain terminology; two-dimensional specifications
 use boundary curve and two-dimensional flow-domain terminology.
@@ -43,7 +44,8 @@ Dataset support is approved independently. A dataset collaborator changes only t
    the split counts and SHA-256 values;
 2. confirm and pin the original public file names, immutable revisions and hashes, field-array names, entity associations, required
    patches or masks, and exact entity ordering for every case;
-3. publish stable support IDs and authoritative physical measures. Face- or cell-associated data use the corresponding face area,
+3. publish stable support IDs and authoritative area, length, volume, or cell-area weights. Face- or cell-associated data use the
+   corresponding face area,
    curve-segment length, cell volume, or cell area. Point- or node-associated data use benchmark-generated deterministic
    mass-lumped dual measures from the exact pinned mesh;
 4. add the dataset's scoring-support manifest, case-set indexes, chunks, and any small local support artifacts. The support must
@@ -65,15 +67,17 @@ request. Other datasets may remain `owner_review_required` and closed. A collabo
 scientific approval record; FluidsBench's protected-branch maintainer still performs the final merge.
 
 Field metrics use the equations and edge-case behaviour in [`../reference/`](../reference/). The standard relative-L2 policy reports
-both mesh-sampling and physical-measure views:
+both unweighted and geometry-weighted views:
 
-- a three-dimensional surface, a two-dimensional surface manifold embedded in three dimensions, or a one-dimensional boundary curve uses physical-measure weighting as the primary value and
-  equal-entity weighting as the secondary value;
-- a three-dimensional volume, or a two-dimensional flow domain, uses equal-entity weighting as the primary value and
-  physical-measure weighting as the secondary value; and
+- a three-dimensional surface, a two-dimensional surface manifold embedded in three dimensions, or a one-dimensional boundary
+  curve uses area or length weighting as the primary value and
+  an unweighted result as the secondary value;
+- a three-dimensional volume, or a two-dimensional flow domain, uses an unweighted result as the primary value and
+  volume or area weighting as the secondary value; and
 - each case is calculated separately, then case values are macro-averaged so every test case has equal influence.
 
-For point- or node-associated arrays, the physical value uses the authoritative mass-lumped dual measure published in the support,
+For point- or node-associated arrays, the weighted value uses the authoritative per-point or per-node area, length, or volume
+published in the support,
 not weights reconstructed by a submitter. One spatial weight multiplies a scalar squared error or the complete squared vector
 magnitude. A dataset specification must explicitly document any additional published source metric or different reduction,
 including the VKI-LS59 and Rotor37 RRMSE reductions.
