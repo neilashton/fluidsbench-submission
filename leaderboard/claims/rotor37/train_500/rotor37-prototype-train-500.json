@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/rotor37/train_500/rotor37-prototype-train-500",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/rotor37/train_500/rotor37-prototype-train-500",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -19,13 +19,13 @@
     "submission_schema_version": "1.0"
   },
   "ranking": {
-    "metric_id": "total_error",
-    "value": 0.0235,
-    "ranked_value": 0.024,
-    "display_value": "0.024",
+    "metric_id": "overall_score",
+    "value": 97.65016666666665,
+    "ranked_value": 97.7,
+    "display_value": "97.7",
     "unit": "",
-    "direction": "lower",
-    "decimal_places": 3,
+    "direction": "higher",
+    "decimal_places": 1,
     "rounding": "decimal_half_up",
     "method": "competition",
     "rank": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 68
     },
     "source_submission": {
       "path": "submissions/rotor37/rotor37-prototype-train-500/submission.json",
-      "sha256": "e7bc1b52dd045b82f3e91fd4a1d0603d7a906417dbd1e68727358ae3062dcd34"
+      "sha256": "c8d74212a36f1486346ee2df6c21d7ac6d539dc11dab8618b9670f962df126ef"
     },
     "evaluation_evidence": {
       "path": "submissions/rotor37/rotor37-prototype-train-500/evaluation-evidence.json",
-      "sha256": "c2a722525afc9106ebe480addcfa0a179f44b0686a8bc273e04cdf6ebc787853"
+      "sha256": "ca994b12a8830b1e4d5ddbce40200652a2791f4f096d2cd14515aedada598fad"
     },
     "profile_index": {
       "path": "submissions/rotor37/rotor37-prototype-train-500/profiles/index.json",
-      "sha256": "3409e40d7bf357c13c740b80e42b8f3fc521a7197a8ab30a07c689230431fb5d"
+      "sha256": "e8793f5cc2b2191be4f68c607233854b65e41886aa61fd02cc00f6084d5e2911"
     }
   }
 }

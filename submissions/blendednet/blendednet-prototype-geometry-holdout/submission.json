@@ -29,14 +29,15 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "4279bcb823daee9989fab2e44e7cbc7b94502577b726bd2597e3b101ce24a0bc"
+    "evidence_sha256": "979eb8ec7bcf0b8182a55818683a2d9bc78269caa39708a4da2b84dbf7e3fd37"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
-    "blended_surface_rel_l2": 10.3,
+    "overall_score": 89.16262125,
+    "blended_surface_rel_l2": 10.837379,
     "blended_cp_mse": 0.0084,
     "blended_cp_mae": 0.0385,
     "blended_cp_rel_l1": 13.9,
@@ -57,7 +58,16 @@
     "c_pitch_mae": 0.0048,
     "cd_r2": 0.982,
     "cl_r2": 0.975,
-    "c_pitch_r2": 0.964
+    "c_pitch_r2": 0.964,
+    "blended_cfy_mse": 2.5e-05,
+    "blended_cfy_mae": 0.00113,
+    "blended_cfy_rel_l1": 26.75,
+    "blended_cfy_rel_l2": 13.75,
+    "blended_cfy_r2": 0.914,
+    "blended_cp_area_rel_l2": 3.300971,
+    "blended_cfx_area_rel_l2": 7.961165,
+    "blended_cfy_area_rel_l2": 13.349515,
+    "blended_cfz_area_rel_l2": 18.737864
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
@@ -65,5 +75,5 @@
     "case_count": 870,
     "case_set_id": "geometry_holdout"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

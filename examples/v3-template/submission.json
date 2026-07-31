@@ -4,7 +4,9 @@
   "submission_id": "synthetic-open-model-v1",
   "model": "Synthetic Open Model",
   "model_type": "Coordinate network",
-  "model_types": ["Coordinate network"],
+  "model_types": [
+    "Coordinate network"
+  ],
   "training_regime": "from_scratch",
   "target_data_used": "official_train",
   "external_pretraining": false,
@@ -27,7 +29,7 @@
     "code_revision": "0123456789abcdef0123456789abcdef01234567",
     "command": "python -m reference.evaluate_predictions --support-manifest support/manifest.json --case-set standard --prediction-manifest predictions/manifest.json --submission-id synthetic-open-model-v1 --split-id default --output metrics/cases.json",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "4f79c641413898f640f622c73ad73a4688422193e615379907531dc7c339286a"
+    "evidence_sha256": "ae897090cefbc82868f2e174b73530d1ab3b111b69cd49ffba971b96ab1a0a4d"
   },
   "reproducibility": {
     "contract_version": "open-reproducibility-3.0",
@@ -55,17 +57,17 @@
     "status": "official",
     "release_id": "synthetic-support-v1",
     "manifest_url": "https://example.org/scoring-support/synthetic-support-v1/manifest.json",
-    "manifest_sha256": "822f106f2816ea9bbd4a5ef72b41d3d36a48da105a27836bd70777fa18310c20"
+    "manifest_sha256": "bec1a78c0bc6d572fda317ddbdb44ce0b6d16c3535ef96a68061f68c36c4d040"
   },
   "spatial_discretization": {
     "format": "fluidsbench-discretization-v1",
     "file": "discretization.json",
-    "sha256": "2db551c7cd98a52311696e0e742737170826637e748449a57631c4e420359677"
+    "sha256": "82a63be09cb81b5afb6e1e79dcaf5459cf2a10f2ee3456ebb9aff91215ab6735"
   },
   "case_metrics": {
     "format": "fluidsbench-case-metrics-v1",
     "file": "metrics/cases.json",
-    "sha256": "aef82a6e242330d4f59df8350e0c40c0bcc0eafd9f89fbae08aedc3020f8a743",
+    "sha256": "2b2fd3695cc40915a0bab9061bdd38c0af97784543db973bc6d1f3628cd373cf",
     "case_count": 2
   },
   "prediction_artifacts": [
@@ -75,10 +77,10 @@
       "repository_url": "https://huggingface.co/datasets/example/synthetic-open-model-predictions",
       "revision": "fedcba9876543210fedcba9876543210fedcba98",
       "manifest_file": "fluidsbench-predictions.json",
-      "manifest_sha256": "dcae8f015ba5e39d4620fbdb2612402f4a4387428bfcdfdaa50ceb1fce34967b",
+      "manifest_sha256": "b93142576dc653ad018e6dc194095bab127710f0495c93a7db8cf41088a535cd",
       "format": "fluidsbench-prediction-artifact-v1",
       "support_release_id": "synthetic-support-v1",
-      "support_manifest_sha256": "822f106f2816ea9bbd4a5ef72b41d3d36a48da105a27836bd70777fa18310c20",
+      "support_manifest_sha256": "bec1a78c0bc6d572fda317ddbdb44ce0b6d16c3535ef96a68061f68c36c4d040",
       "split_id": "default",
       "coverage": {
         "kind": "complete_split",
@@ -90,7 +92,8 @@
   ],
   "metric_values": {
     "pressure_rel_l1": 22.22222222222222,
-    "pressure_rel_l2": 24.692605883433632,
+    "pressure_equal_rel_l2": 24.87944682143987,
+    "pressure_physical_rel_l2": 24.692605883433632,
     "pressure_mae": 0.625,
     "pressure_rmse": 0.7865660924854931
   },

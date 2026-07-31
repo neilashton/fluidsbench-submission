@@ -59,7 +59,16 @@
           "case_evidence": "metric_value"
         },
         {
-          "metric_id": "pressure_rel_l2",
+          "metric_id": "pressure_equal_rel_l2",
+          "quantity_id": "pressure",
+          "reduction": "relative_l2_percent",
+          "weighting": "uniform",
+          "dataset_weighting": "entities_equal",
+          "aggregation": "per_geometry_then_macro_average",
+          "case_evidence": "metric_value"
+        },
+        {
+          "metric_id": "pressure_physical_rel_l2",
           "quantity_id": "pressure",
           "reduction": "relative_l2_percent",
           "weighting": "support_weights",

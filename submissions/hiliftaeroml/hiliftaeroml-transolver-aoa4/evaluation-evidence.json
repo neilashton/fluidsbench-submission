@@ -34,9 +34,13 @@
     "field_score": 36.29,
     "force_score": 99.28,
     "diagnostic_score": 93.52,
-    "overall_score": 66.345
+    "overall_score": 66.345,
+    "surface_pressure_equal_entity_rel_l2": 7.77,
+    "surface_wall_shear_equal_entity_rel_l2": 13.98,
+    "volume_velocity_physical_rel_l2": 9.82,
+    "volume_pressure_physical_rel_l2": 7.23
   },
   "profile_index_sha256": "b94266b47722e2d323187abb07308ebae4d58ed3e6c671528fac6a5ff02d9a21",
-  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record.",
+  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
   "command": "not-applicable (illustrative dummy data)"
 }

@@ -18,7 +18,9 @@ support/manifest.json
 The evaluator joins prediction rows to the benchmark tables by exact
 `support_id`. It rejects missing, duplicate, and unknown IDs. Coordinates,
 weights, and ground truth always come from `support/`; they are never taken
-from, interpolated by, or resampled from the prediction artifact.
+from, interpolated by, or resampled from the prediction artifact. Every entity
+in both synthetic case tables is required. Real dataset specifications apply
+the same complete-coverage rule to their pinned original public files.
 
 Run the synthetic calculation from the repository root:
 
@@ -34,9 +36,15 @@ python3 -m reference.evaluate_predictions \
 
 `submission.json`, `evaluation-evidence.json`, `discretization.json`,
 `metrics/cases.json`, and `maintainer-validation.json` show the required hash
-bindings. `prediction-artifact-checks.json` is deliberately maintainer-owned;
-a submitter may declare a pinned public Hugging Face prediction artifact but
-must not declare its own check status.
+bindings. Each case/support in `metrics/cases.json` also records the additive
+numerator, denominator, spatial entity count, and total weight for its
+relative-L2 metric. Those statistics allow chunked inference to be combined
+without averaging chunk-level L2 values. Real dataset specifications declare
+the required equal-entity and physical relative-L2 pair, its primary metric,
+and whether the physical measure is area, length, volume, or a benchmark-owned
+mass-lumped dual measure. `prediction-artifact-checks.json` is deliberately
+maintainer-owned; a submitter may declare a pinned public Hugging Face
+prediction artifact but must not declare its own check status.
 
 The synthetic `submission.json` also demonstrates optional public code,
 model, environment, and artifact-documentation metadata. A real v3 submission

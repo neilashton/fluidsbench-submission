@@ -52,7 +52,11 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
         manifest["owner_approval"] = approval
         for support in manifest["supports"]:
             for binding in support["metric_bindings"]:
-                binding["dataset_weighting"] = "cell_volume"
+                binding["dataset_weighting"] = (
+                    "entities_equal"
+                    if binding["weighting"] == "uniform"
+                    else "cell_volume"
+                )
         manifest_path.write_text(
             json.dumps(manifest, indent=2) + "\n",
             encoding="utf-8",
@@ -287,29 +291,31 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
                 )
                 self.assertIn(expected_error, "\n".join(errors))
 
-    def test_ahmedml_sampling_counts_are_explicitly_non_official(self) -> None:
+    def test_ahmedml_uses_complete_public_release_entities(self) -> None:
         support = load_json(
             SPEC_ROOT / "ahmedml" / "submission-spec.json"
         )["scoring_support"]
-        proposal = support["proposal"]
-        self.assertEqual(proposal["status"], "non_official_for_owner_review")
-        self.assertIn("not approved", proposal["proposal_notice"].lower())
-        counts = {
-            item["domain"]: item["location_count"]
-            for item in proposal["proposed_counts_per_case"]
-        }
-        self.assertEqual(counts, {"surface": 500000, "volume": 500000})
+        coverage = support["coverage_contract"]
+        self.assertEqual(
+            coverage["rule"],
+            "complete_original_public_release_entities",
+        )
+        self.assertTrue(coverage["inference_may_be_chunked"])
+        self.assertTrue(coverage["complete_case_and_entity_coverage_required"])
+        self.assertFalse(coverage["full_prediction_artifact_required"])
+        supports = {item["id"]: item for item in support["public_supports"]}
+        self.assertEqual(supports["surface-native"]["association"], "CellData")
+        self.assertEqual(
+            supports["flow-domain-native"]["entities"],
+            "all_native_volume_cells",
+        )
         required_decisions = set(support["owner_decisions_required"])
         self.assertIn(
-            "approve_surface_full_native_or_fixed_public_sample",
+            "pin_exact_public_release_files_revisions_and_hashes",
             required_decisions,
         )
         self.assertIn(
-            "approve_volume_full_native_or_fixed_public_sample",
-            required_decisions,
-        )
-        self.assertIn(
-            "approve_sampling_method_seed_and_convergence_evidence",
+            "publish_authoritative_physical_weights_and_stable_entity_ids",
             required_decisions,
         )
 

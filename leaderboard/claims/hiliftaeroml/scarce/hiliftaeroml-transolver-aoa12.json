@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/hiliftaeroml/scarce/hiliftaeroml-transolver-aoa12",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/hiliftaeroml/scarce/hiliftaeroml-transolver-aoa12",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 42
     },
     "source_submission": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12/submission.json",
-      "sha256": "cc52cf00854d91c11677cf55fe97f1598cb9c0b0a6332c13091872ec6b032411"
+      "sha256": "ae4d1c3accf4ec55b8388c668d698b722f0a5cba6a5f374b3bd91662c8c748f7"
     },
     "evaluation_evidence": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12/evaluation-evidence.json",
-      "sha256": "57f33c86a95a4429449020933f21b449c74dd8eddcceb334ab3d288336c4197c"
+      "sha256": "021deb3b2247e295eca8872e80f797cbfb3f4dfc62efe989ca1b384860560337"
     },
     "profile_index": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12/profiles/index.json",

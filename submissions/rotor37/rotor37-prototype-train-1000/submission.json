@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_1000",
   "split_id": "train_1000",
-  "case_set_id": "official_test",
-  "split_sha256": "b802cedef6a86bfbd54e56e8a4762fb1038ad678add9e23ba6522d86e79373d6",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "4cd0b3257dbfc1ea76f85c321162a9d09666b7daf8aff631fa4d7631d1ceada6",
   "parameter_count_millions": 6.8,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "7da75b396715ee8d4094902538bfe2a20c7fa218301f9f2e51e0fa8e3e19bde6"
+    "evidence_sha256": "9236eefb14ff7653928095acdcdc532629445e974d3833b7e611000a55864d49"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 98.58133333333333,
     "rotor_density_rrmse": 0.01456,
     "rotor_density_rel_l2": 1.534,
     "rotor_density_rel_l1": 1.079,
@@ -72,13 +73,16 @@
     "rotor_efficiency_r2": 0.9907,
     "rotor_efficiency_mae": 0.003,
     "rotor_efficiency_rmse": 0.0043,
-    "total_error": 0.01419
+    "total_error": 0.01419,
+    "rotor_density_area_rel_l2": 1.631915,
+    "rotor_pressure_area_rel_l2": 2.014894,
+    "rotor_temperature_area_rel_l2": 1.396809
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 200,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

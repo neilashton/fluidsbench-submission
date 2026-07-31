@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import sys
+from copy import deepcopy
 from datetime import date, datetime
 from pathlib import Path
 from statistics import median
@@ -18,7 +19,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from reference.scores import LEGACY_ERROR_WEIGHTS, legacy_aero_scores
+from reference.scores import composite_overall_score, legacy_aero_scores
+from reference.weightings import evaluator_weighting
 
 try:
     from jsonschema import Draft202012Validator, FormatChecker
@@ -38,6 +40,64 @@ OPEN_REPRODUCIBILITY_CONTRACTS = {
 def load_json(path: Path) -> Any:
     with path.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def manifest_with_benchmark_contract(manifest: dict[str, Any]) -> dict[str, Any]:
+    """Overlay benchmark-owned contract fields onto generated manifest metadata.
+
+    The compact leaderboard manifest is generated output, while each dataset's
+    submission specification is the source of truth for accepted metric IDs,
+    ranking, metric equations, and scoring-support status.  Applying this small
+    overlay before validation prevents a changed specification from being
+    rejected solely because the generated manifest has not yet been rebuilt.
+
+    Presentation-only metric metadata (labels, descriptions, groups, and display
+    precision) remains owned by the leaderboard manifest.  A newly introduced
+    metric therefore still needs a corresponding presentation definition there.
+    """
+
+    updated = deepcopy(manifest)
+    definitions = {
+        definition.get("id"): definition
+        for definition in updated.get("metric_definitions", [])
+        if isinstance(definition, dict) and isinstance(definition.get("id"), str)
+    }
+    for dataset in updated.get("datasets", []):
+        slug = dataset.get("slug")
+        if not isinstance(slug, str):
+            continue
+        spec_path = ROOT / "benchmark-specs" / slug / "submission-spec.json"
+        if not spec_path.is_file():
+            continue
+        specification = load_json(spec_path)
+        metrics = [
+            metric
+            for metric in specification.get("metrics", [])
+            if isinstance(metric, dict) and isinstance(metric.get("id"), str)
+        ]
+        dataset["metric_ids"] = [metric["id"] for metric in metrics]
+        if isinstance(specification.get("ranking"), dict):
+            dataset["ranking"] = deepcopy(specification["ranking"])
+        composite = specification.get("overall_score_composite")
+        if isinstance(composite, dict):
+            dataset["overall_score_composite"] = deepcopy(composite)
+        else:
+            dataset.pop("overall_score_composite", None)
+        scoring_support = specification.get("scoring_support")
+        if isinstance(scoring_support, dict):
+            dataset["scoring_support"] = {
+                key: deepcopy(value)
+                for key, value in scoring_support.items()
+                if key != "manifest_file"
+            }
+        for metric in metrics:
+            definition = definitions.get(metric["id"])
+            if definition is None:
+                continue
+            for key in ("unit", "direction", "kind", "equation"):
+                if key in metric:
+                    definition[key] = deepcopy(metric[key])
+    return updated
 
 
 def sha256_file(path: Path) -> str:
@@ -248,11 +308,52 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
             if not math.isclose(target, expected, rel_tol=0.0, abs_tol=aggregate.get("tolerance", 1e-6)):
                 add(f"metric_values.{aggregate['metric_id']} must equal the declared source-metric mean")
 
+    expected_scores = None
+    composite = dataset.get("overall_score_composite")
+    if isinstance(composite, dict):
+        components = composite.get("components")
+        component_ids = (
+            [component.get("metric_id") for component in components if isinstance(component, dict)]
+            if isinstance(components, list)
+            else []
+        )
+        target_metric_id = composite.get("metric_id")
+        if (
+            composite.get("operation") != "weighted_component_scores"
+            or not isinstance(components, list)
+            or not components
+            or len(component_ids) != len(components)
+            or not isinstance(target_metric_id, str)
+            or target_metric_id not in expected_ids
+            or any(not isinstance(metric_id, str) or metric_id not in expected_ids for metric_id in component_ids)
+        ):
+            add("dataset overall_score_composite does not reference a valid target and component metric set")
+        elif all(
+            isinstance(metric_id, str) and is_number(values.get(metric_id))
+            for metric_id in component_ids
+        ):
+            try:
+                expected = composite_overall_score(values, composite)
+            except (KeyError, TypeError, ValueError) as exc:
+                add(f"dataset overall_score_composite is invalid: {exc}")
+            else:
+                tolerance = composite.get("tolerance", 1e-6)
+                if not is_number(tolerance) or tolerance < 0:
+                    add("dataset overall_score_composite requires a metric_id and non-negative tolerance")
+                elif not is_number(values.get(target_metric_id)) or not math.isclose(
+                    values[target_metric_id], expected, rel_tol=0.0, abs_tol=tolerance
+                ):
+                    add(f"metric_values.{target_metric_id} does not match its declared composite equation")
     if dataset.get("submission_format") == "legacy_external_aero" and all(
         is_number(values.get(metric_id))
-        for metric_id in set(LEGACY_ERROR_WEIGHTS) | {"cd_r2", "cl_r2", "velocity_profile_r2", "cp_cut_r2"}
+        for metric_id in {"cd_r2", "cl_r2", "velocity_profile_r2", "cp_cut_r2"}
     ):
-        for metric_id, expected in legacy_aero_scores(values).items():
+        try:
+            expected_scores = legacy_aero_scores(values)
+        except (KeyError, TypeError, ValueError):
+            pass
+    if expected_scores is not None:
+        for metric_id, expected in expected_scores.items():
             if not is_number(values.get(metric_id)) or not math.isclose(
                 values[metric_id], expected, rel_tol=0.0, abs_tol=1e-6
             ):
@@ -479,11 +580,7 @@ def validate_v3_scoring_support(
                     f"scoring support {support_id!r} metric {metric_id!r} reduction "
                     f"must be {expected!r}"
                 )
-            expected_weighting = (
-                "support_weights"
-                if metric.get("weighting") in {"surface_face_area", "cell_volume"}
-                else "uniform"
-            )
+            expected_weighting = evaluator_weighting(metric.get("weighting"))
             if binding.get("weighting") != expected_weighting:
                 add(
                     f"scoring support {support_id!r} metric {metric_id!r} weighting "
@@ -889,6 +986,100 @@ def validate_v3_case_metrics(
                     "exactly match the official support bindings; "
                     f"missing={missing_metrics}, unexpected={unexpected_metrics}"
                 )
+            expected_statistics_ids = {
+                metric_id
+                for metric_id in expected_metric_ids
+                if bound_metric_bindings.get(metric_id, {}).get("reduction")
+                == "relative_l2_percent"
+            }
+            metric_statistics = support.get("metric_sufficient_statistics", {})
+            observed_statistics_ids = (
+                set(metric_statistics) if isinstance(metric_statistics, dict) else set()
+            )
+            if observed_statistics_ids != expected_statistics_ids:
+                missing_statistics = sorted(
+                    expected_statistics_ids - observed_statistics_ids
+                )
+                unexpected_statistics = sorted(
+                    observed_statistics_ids - expected_statistics_ids
+                )
+                add(
+                    f"{declaration['file']} {case_id}/{support_id} relative-L2 "
+                    "sufficient-statistic IDs must exactly match the official "
+                    f"support bindings; missing={missing_statistics}, "
+                    f"unexpected={unexpected_statistics}"
+                )
+            for metric_id, statistics in (
+                metric_statistics.items() if isinstance(metric_statistics, dict) else []
+            ):
+                if not isinstance(statistics, dict):
+                    continue
+                binding = bound_metric_bindings.get(metric_id, {})
+                expected_identity = {
+                    "reduction": "relative_l2_percent",
+                    "weighting": binding.get("weighting"),
+                    "dataset_weighting": binding.get("dataset_weighting"),
+                }
+                for key, expected in expected_identity.items():
+                    if statistics.get(key) != expected:
+                        add(
+                            f"{declaration['file']} {case_id}/{support_id} "
+                            f"metric_sufficient_statistics.{metric_id}.{key} "
+                            f"must equal {expected!r}"
+                        )
+                entity_count = statistics.get("entity_count")
+                if isinstance(support_count, int) and entity_count != support_count:
+                    add(
+                        f"{declaration['file']} {case_id}/{support_id} "
+                        f"metric_sufficient_statistics.{metric_id}.entity_count "
+                        "must equal support_count"
+                    )
+                total_weight = statistics.get("total_weight")
+                if (
+                    binding.get("weighting") == "uniform"
+                    and isinstance(entity_count, int)
+                    and is_number(total_weight)
+                    and not math.isclose(
+                        float(total_weight),
+                        float(entity_count),
+                        rel_tol=0.0,
+                        abs_tol=1e-12,
+                    )
+                ):
+                    add(
+                        f"{declaration['file']} {case_id}/{support_id} "
+                        f"metric_sufficient_statistics.{metric_id}.total_weight "
+                        "must equal entity_count for uniform weighting"
+                    )
+                numerator = statistics.get("numerator")
+                denominator = statistics.get("denominator")
+                metric_value = (
+                    metric_values.get(metric_id)
+                    if isinstance(metric_values, dict)
+                    else None
+                )
+                if (
+                    is_number(numerator)
+                    and float(numerator) >= 0
+                    and is_number(denominator)
+                    and float(denominator) > 0
+                    and is_number(metric_value)
+                ):
+                    calculated_value = 100.0 * math.sqrt(
+                        float(numerator) / float(denominator)
+                    )
+                    if not math.isclose(
+                        float(metric_value),
+                        calculated_value,
+                        rel_tol=1e-12,
+                        abs_tol=1e-12,
+                    ):
+                        add(
+                            f"{declaration['file']} {case_id}/{support_id} "
+                            f"metric_values.{metric_id} must equal "
+                            "100*sqrt(numerator/denominator) from its sufficient "
+                            "statistics"
+                        )
             for metric_id, value in metric_values.items():
                 expected_support_id = bound_metrics.get(metric_id)
                 if expected_support_id is None:
@@ -2168,7 +2359,8 @@ def validate_submission_file(
     if errors:
         return errors, stats
 
-    manifest = manifest or load_json(MANIFEST_PATH)
+    if manifest is None:
+        manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
     dataset = next((item for item in manifest["datasets"] if item["slug"] == submission["dataset_id"]), None)
     if dataset is None:
         add(f"unknown dataset_id {submission['dataset_id']!r}")
@@ -2263,11 +2455,12 @@ def validate_many(
     paths: list[Path] | None = None,
     *,
     contributor_stage: bool = False,
+    manifest: dict[str, Any] | None = None,
 ) -> tuple[list[str], dict[str, int]]:
     files = submission_files(paths)
     if not files:
         return ["no submission.json files found"], {"submissions": 0, "cases": 0, "series": 0}
-    manifest = load_json(MANIFEST_PATH)
+    manifest = manifest_with_benchmark_contract(manifest or load_json(MANIFEST_PATH))
     errors: list[str] = []
     totals = {"submissions": len(files), "cases": 0, "series": 0}
     seen_ids: dict[str, Path] = {}

@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_8",
   "split_id": "train_8",
-  "case_set_id": "official_test",
-  "split_sha256": "09c1218e67f86fc9efebb912fdff305eff3083e9444acb596dc9f7fec130202b",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "aa001e960a86aab8f80945fcb967f18f1089e64f4ba4af7fe7662080475f6594",
   "parameter_count_millions": 9.25,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "596a4c8480cae872a1bc2f5efc8e22fb521d8c7cb52a7a6112178022f33ba7a7"
+    "evidence_sha256": "7a90543411c8f06c68e1a192404533a6bb450240fd807fc160e6e0ec5b9ea40a"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 91.67675,
     "vki_mach_rrmse": 0.06929,
     "vki_mach_rel_l2": 7.291,
     "vki_mach_rel_l1": 5.121,
@@ -68,13 +69,17 @@
     "vki_angle_out_rel_l2": 9.096,
     "vki_angle_out_rel_l1": 6.415,
     "vki_angle_out_r2": 0.905,
-    "total_error": 0.08323
+    "total_error": 0.08323,
+    "vki_mach_area_rel_l2": 7.078641,
+    "vki_nut_area_rel_l2": 15.307767,
+    "vki_m_iso_equal_rel_l2": 11.529,
+    "vki_m_iso_line_rel_l2": 11.193204
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 168,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

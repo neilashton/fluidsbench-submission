@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-07-27T23:47:30Z",
+  "generated_at": "2026-07-31T18:16:11Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,22 +19,22 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-07-27T23:47:30Z",
+    "generated_at": "2026-07-31T18:16:11Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+    "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
     "asset_base_url": "https://raw.githubusercontent.com/neilashton/fluidsbench-submission/dev/",
     "reproducibility_contract_version": "open-reproducibility-2.0",
     "profile_ground_truth": {
-      "release_id": "prototype-profile-ground-truth-2026-07-20",
+      "release_id": "prototype-profile-ground-truth-2026-07-31",
       "manifest_url": "https://fluidsbench.org/assets/data/profile-ground-truth/manifest.json",
-      "manifest_sha256": "e035ebd4d17f6cbac7ec0f30394ba50513c5ce1c5de65b04a88905759cd72136"
+      "manifest_sha256": "f4fa1a2fdf85c877c6bee16b773c99a41a50922fe9c96e2cc0d91b8eed62ac97"
     },
     "license": {
       "spdx_id": "Apache-2.0",
@@ -51,7 +51,7 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "41b49fc9d623872c9ee676e3dd9005dc703e3c8bf150fda949fb56f47cb0c165",
+      "index_sha256": "ebc61f425e0076162350ed2f1b67c790f83d796cf45a596bc60cd04205ada593",
       "record_count": 72,
       "eligible_record_count": 0
     }
@@ -90,7 +90,7 @@
           "mae",
           "rmse"
         ],
-        "weighting": "face_area"
+        "weighting": "official_surface_or_boundary_measure"
       },
       {
         "id": "surface_wall_shear",
@@ -101,29 +101,29 @@
           "mae",
           "rmse"
         ],
-        "weighting": "face_area"
+        "weighting": "official_surface_or_boundary_measure"
       },
       {
         "id": "volume_velocity",
-        "label": "Volume velocity",
+        "label": "Flow-domain velocity",
         "unit": "m/s",
         "digits": 2,
         "statistics": [
           "mae",
           "rmse"
         ],
-        "weighting": "cell_volume"
+        "weighting": "equal_native_entity"
       },
       {
         "id": "volume_pressure",
-        "label": "Volume pressure",
+        "label": "Flow-domain pressure",
         "unit": "Pa",
         "digits": 1,
         "statistics": [
           "mae",
           "rmse"
         ],
-        "weighting": "cell_volume"
+        "weighting": "equal_native_entity"
       }
     ],
     "coefficient_errors": [
@@ -242,9 +242,13 @@
         "force_score",
         "diagnostic_score",
         "surface_pressure_rel_l2",
+        "surface_pressure_equal_entity_rel_l2",
         "surface_wall_shear_rel_l2",
+        "surface_wall_shear_equal_entity_rel_l2",
         "volume_velocity_rel_l2",
+        "volume_velocity_physical_rel_l2",
         "volume_pressure_rel_l2",
+        "volume_pressure_physical_rel_l2",
         "surface_pressure_rel_l1",
         "surface_wall_shear_rel_l1",
         "volume_velocity_rel_l1",
@@ -393,31 +397,125 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the AhmedML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
-        "proposal": {
-          "status": "non_official_for_owner_review",
-          "proposal_notice": "The proposed counts are planning assumptions only. They are not approved scoring locations and must not be represented as an official AhmedML contract.",
-          "proposed_counts_per_case": [
-            {
-              "domain": "surface",
-              "location_count": 500000
-            },
-            {
-              "domain": "volume",
-              "location_count": 500000
-            }
-          ]
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "3D surface and 3D flow domain",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "Ground-truth fields are in the public dataset release."
+        },
+        "public_supports": [
+          {
+            "id": "surface-native",
+            "public_file": "run_<case>/boundary_<case>.vtp",
+            "format": "VTK PolyData",
+            "domain": "three_dimensional_body_surface",
+            "association": "CellData",
+            "entities": "all_polygons_in_patch_ahmed",
+            "arrays": [
+              "pMean",
+              "static(p)_coeffMean",
+              "wallShearStressMean",
+              "yPlusMean"
+            ],
+            "physical_weight": "polygon_area",
+            "verification": "confirmed_from_public_file"
+          },
+          {
+            "id": "flow-domain-native",
+            "public_file": "run_<case>/volume_<case>.vtu",
+            "format": "VTK UnstructuredGrid",
+            "domain": "three_dimensional_flow_domain",
+            "association": "CellData",
+            "entities": "all_native_volume_cells",
+            "arrays": [
+              "UMean",
+              "pMean"
+            ],
+            "available_cell_arrays": [
+              "nutMean",
+              "pMean",
+              "static(p)_coeffMean",
+              "total(p)_coeffMean",
+              "UMean",
+              "vorticityMean",
+              "UPrime2Mean"
+            ],
+            "physical_weight": "cell_volume",
+            "verification": "confirmed_from_public_file"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
         },
         "owner_decisions_required": [
-          "approve_surface_full_native_or_fixed_public_sample",
-          "approve_volume_full_native_or_fixed_public_sample",
-          "approve_sampling_method_seed_and_convergence_evidence",
-          "approve_entity_associations_patch_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_surface_and_volume_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "surface_pressure_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "surface_wall_shear_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 20.0
+          },
+          {
+            "metric_id": "volume_velocity_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 12.0
+          },
+          {
+            "metric_id": "volume_pressure_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "cd_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cl_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "velocity_profile_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cp_cut_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -467,23 +565,19 @@
         "force_score",
         "diagnostic_score",
         "surface_pressure_rel_l2",
+        "surface_pressure_equal_entity_rel_l2",
         "surface_wall_shear_rel_l2",
-        "volume_velocity_rel_l2",
-        "volume_pressure_rel_l2",
+        "surface_wall_shear_equal_entity_rel_l2",
+        "flow_domain_velocity_rel_l2",
+        "flow_domain_velocity_physical_rel_l2",
+        "flow_domain_pressure_rel_l2",
+        "flow_domain_pressure_physical_rel_l2",
         "surface_pressure_rel_l1",
         "surface_wall_shear_rel_l1",
-        "volume_velocity_rel_l1",
-        "volume_pressure_rel_l1",
+        "flow_domain_velocity_rel_l1",
+        "flow_domain_pressure_rel_l1",
         "velocity_profile_r2",
         "cp_cut_r2",
-        "surface_pressure_mae",
-        "surface_wall_shear_mae",
-        "volume_velocity_mae",
-        "volume_pressure_mae",
-        "surface_pressure_rmse",
-        "surface_wall_shear_rmse",
-        "volume_velocity_rmse",
-        "volume_pressure_rmse",
         "cd_r2",
         "cl_r2",
         "c_drag_mae",
@@ -610,15 +704,118 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the AirfRANS dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "2D flow domain and 1D airfoil curve",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "Ground-truth fields are in the public dataset release."
+        },
+        "public_supports": [
+          {
+            "id": "two-dimensional-domain-native",
+            "public_file": "Dataset/<case>/<case>_internal.vtu",
+            "format": "VTK UnstructuredGrid",
+            "domain": "two_dimensional_flow_domain",
+            "association": "PointData",
+            "entities": "all_nodes_in_the_released_cropped_domain_mesh",
+            "arrays": [
+              "U",
+              "p",
+              "nut"
+            ],
+            "units_note": "p is kinematic pressure in m^2/s^2",
+            "physical_weight": "mass_lumped_dual_cell_area",
+            "verification": "confirmed_by_official_loader"
+          },
+          {
+            "id": "airfoil-curve-native",
+            "public_file": "Dataset/<case>/<case>_aerofoil.vtp",
+            "format": "VTK PolyData line mesh",
+            "domain": "one_dimensional_airfoil_curve",
+            "association": "PointData",
+            "entities": "all_native_airfoil_curve_nodes",
+            "arrays": [
+              "p"
+            ],
+            "derived_quantities": [
+              "wall shear from the submitted velocity field and official evaluator"
+            ],
+            "physical_weight": "mass_lumped_dual_segment_length",
+            "verification": "confirmed_by_official_loader"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+        },
         "owner_decisions_required": [
-          "approve_support_domains_and_location_modes",
-          "approve_entity_associations_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "surface_pressure_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "surface_wall_shear_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 20.0
+          },
+          {
+            "metric_id": "flow_domain_velocity_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 12.0
+          },
+          {
+            "metric_id": "flow_domain_pressure_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "cd_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cl_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "velocity_profile_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cp_cut_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -712,9 +909,13 @@
         "force_score",
         "diagnostic_score",
         "surface_pressure_rel_l2",
+        "surface_pressure_equal_entity_rel_l2",
         "surface_wall_shear_rel_l2",
+        "surface_wall_shear_equal_entity_rel_l2",
         "volume_velocity_rel_l2",
+        "volume_velocity_physical_rel_l2",
         "volume_pressure_rel_l2",
+        "volume_pressure_physical_rel_l2",
         "surface_pressure_rel_l1",
         "surface_wall_shear_rel_l1",
         "volume_velocity_rel_l1",
@@ -871,15 +1072,128 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the DrivAerML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "3D surface and 3D flow domain",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "Ground-truth fields are in the public dataset release."
+        },
+        "public_supports": [
+          {
+            "id": "surface-native",
+            "public_file": "run_<case>/boundary_<case>.vtp",
+            "format": "VTK PolyData",
+            "domain": "three_dimensional_vehicle_surface",
+            "association": "CellData",
+            "entities": "all_native_polygons",
+            "arrays": [
+              "CpMeanTrim",
+              "pMeanTrim",
+              "pPrime2MeanTrim",
+              "wallShearStressMeanTrim"
+            ],
+            "physical_weight": "polygon_area",
+            "verification": "confirmed_from_public_file"
+          },
+          {
+            "id": "flow-domain-native",
+            "public_file": "run_<case>/volume_<case>.vtu reconstructed from .00.part and .01.part",
+            "format": "VTK UnstructuredGrid",
+            "domain": "three_dimensional_flow_domain",
+            "association": "CellData",
+            "entities": "all_native_volume_cells_after_reconstruction",
+            "arrays": [
+              "UMeanTrim",
+              "pMeanTrim"
+            ],
+            "available_cell_arrays": [
+              "CpMeanTrim",
+              "CptMeanTrim",
+              "magUMeanNormTrim",
+              "microDragMeanTrim",
+              "nutMeanTrim",
+              "pMeanTrim",
+              "pPrime2MeanTrim",
+              "UMeanTrim",
+              "UPrime2MeanTrim",
+              "turbulenceProperties:RMeanTrim"
+            ],
+            "physical_weight": "cell_volume",
+            "verification": "confirmed_from_reconstructed_public_file"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+        },
         "owner_decisions_required": [
-          "approve_support_domains_and_location_modes",
-          "approve_entity_associations_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "surface_pressure_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "surface_wall_shear_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 20.0
+          },
+          {
+            "metric_id": "volume_velocity_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 12.0
+          },
+          {
+            "metric_id": "volume_pressure_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "cd_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cl_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "velocity_profile_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cp_cut_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -907,34 +1221,13 @@
           "description": "Default prototype benchmark split."
         }
       ],
-      "submission_format": "legacy_external_aero",
+      "submission_format": "metric_values",
       "metric_ids": [
         "overall_score",
-        "field_score",
-        "force_score",
-        "diagnostic_score",
         "surface_pressure_rel_l2",
-        "surface_wall_shear_rel_l2",
-        "volume_velocity_rel_l2",
-        "volume_pressure_rel_l2",
+        "surface_pressure_equal_entity_rel_l2",
         "surface_pressure_rel_l1",
-        "surface_wall_shear_rel_l1",
-        "volume_velocity_rel_l1",
-        "volume_pressure_rel_l1",
-        "velocity_profile_r2",
-        "cp_cut_r2",
-        "surface_pressure_mae",
-        "surface_wall_shear_mae",
-        "volume_velocity_mae",
-        "volume_pressure_mae",
-        "surface_pressure_rmse",
-        "surface_wall_shear_rmse",
-        "volume_velocity_rmse",
-        "volume_pressure_rmse",
-        "cd_r2",
-        "cl_r2",
-        "c_drag_mae",
-        "c_lift_mae"
+        "surface_pressure_r2"
       ],
       "ranking": {
         "metric_id": "overall_score",
@@ -1073,15 +1366,72 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the DrivAerNet++ dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "3D surface pressure; other supports pending",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "Ground-truth fields are in the public dataset release."
+        },
+        "public_supports": [
+          {
+            "id": "surface-pressure-native",
+            "public_file": "SurfacePressureVTK/<design>.vtk in Dataverse DOI 10.7910/DVN/K7PWNJ",
+            "format": "legacy VTK surface mesh",
+            "domain": "three_dimensional_vehicle_surface",
+            "association": "PointData",
+            "entities": "all_native_surface_points",
+            "arrays": [
+              "p"
+            ],
+            "units_note": "The confirmed public task uses the dataset-native kinematic-pressure array; absolute-unit metrics remain disabled until the release-bound convention is pinned.",
+            "physical_weight": "mass_lumped_dual_surface_area",
+            "verification": "confirmed_by_official_loader"
+          },
+          {
+            "id": "future-wss-and-flow-domain",
+            "public_file": "Dataverse WSS DOI 10.7910/DVN/PCZYL4 and full CFD DOI 10.7910/DVN/EEYHUA",
+            "format": "VTK archives",
+            "domain": "future_surface_and_three_dimensional_flow_domain",
+            "association": "pending_owner_inspection",
+            "entities": "not_active_until_one_official_file_from_each_archive_is_inspected",
+            "physical_weight": "pending_association_confirmation",
+            "verification": "owner_review_required"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+        },
         "owner_decisions_required": [
-          "approve_support_domains_and_location_modes",
-          "approve_entity_associations_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "surface_pressure_rel_l2",
+            "weight": 1.0,
+            "transform": "bounded_error",
+            "cap": 100.0
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -1238,9 +1588,13 @@
         "force_score",
         "diagnostic_score",
         "surface_pressure_rel_l2",
+        "surface_pressure_equal_entity_rel_l2",
         "surface_wall_shear_rel_l2",
+        "surface_wall_shear_equal_entity_rel_l2",
         "volume_velocity_rel_l2",
+        "volume_velocity_physical_rel_l2",
         "volume_pressure_rel_l2",
+        "volume_pressure_physical_rel_l2",
         "surface_pressure_rel_l1",
         "surface_wall_shear_rel_l1",
         "volume_velocity_rel_l1",
@@ -1646,15 +2000,106 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the HiLiftAeroML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "3D surface and 3D flow domain",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "Ground-truth fields are in the public dataset release."
+        },
+        "public_supports": [
+          {
+            "id": "surface-native",
+            "public_file": "geo_LHC<id>_AoA_<angle>/boundary_geo_LHC<id>_AoA_<angle>.vtu.tgz",
+            "format": "tar-gzipped VTK UnstructuredGrid boundary mesh",
+            "domain": "three_dimensional_aircraft_surface",
+            "association": "PointData",
+            "entities": "all_native_boundary_points",
+            "physical_weight": "mass_lumped_dual_surface_area",
+            "verification": "confirmed_in_public_release_documentation"
+          },
+          {
+            "id": "flow-domain-native",
+            "public_file": "geo_LHC<id>_AoA_<angle>/volume_geo_LHC<id>_AoA_<angle>.vtu.tgz",
+            "format": "tar-gzipped VTK UnstructuredGrid",
+            "domain": "three_dimensional_flow_domain",
+            "association": "PointData",
+            "entities": "all_native_volume_points",
+            "physical_weight": "mass_lumped_dual_cell_volume",
+            "verification": "confirmed_in_public_release_documentation"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+        },
         "owner_decisions_required": [
-          "approve_support_domains_and_location_modes",
-          "approve_entity_associations_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "surface_pressure_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "surface_wall_shear_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 20.0
+          },
+          {
+            "metric_id": "volume_velocity_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 12.0
+          },
+          {
+            "metric_id": "volume_pressure_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "cd_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cl_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "velocity_profile_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cp_cut_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -1689,21 +2134,21 @@
         "force_score",
         "diagnostic_score",
         "surface_pressure_rel_l2",
+        "surface_pressure_equal_entity_rel_l2",
         "surface_wall_shear_rel_l2",
+        "surface_wall_shear_equal_entity_rel_l2",
         "volume_velocity_rel_l2",
+        "volume_velocity_physical_rel_l2",
         "volume_pressure_rel_l2",
+        "volume_pressure_physical_rel_l2",
         "surface_pressure_rel_l1",
         "surface_wall_shear_rel_l1",
         "volume_velocity_rel_l1",
         "volume_pressure_rel_l1",
         "velocity_profile_r2",
         "cp_cut_r2",
-        "surface_pressure_mae",
-        "surface_wall_shear_mae",
         "volume_velocity_mae",
         "volume_pressure_mae",
-        "surface_pressure_rmse",
-        "surface_wall_shear_rmse",
         "volume_velocity_rmse",
         "volume_pressure_rmse",
         "cd_r2",
@@ -1832,15 +2277,133 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the WindsorML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "3D surface and 3D flow domain",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "Ground-truth fields are in the public dataset release."
+        },
+        "public_supports": [
+          {
+            "id": "surface-native",
+            "public_file": "run_<case>/boundary_<case>.vtu",
+            "format": "VTK UnstructuredGrid boundary mesh",
+            "domain": "three_dimensional_body_surface",
+            "association": "PointData",
+            "entities": "all_native_boundary_points",
+            "arrays": [
+              "cpavg",
+              "cfxavg",
+              "cfyavg",
+              "cfzavg",
+              "cpvar",
+              "yplusavg"
+            ],
+            "units_note": "cpavg and the cfxavg/cfyavg/cfzavg skin-friction components are dimensionless coefficients",
+            "physical_weight": "mass_lumped_dual_polygon_area",
+            "verification": "confirmed_from_public_file"
+          },
+          {
+            "id": "flow-domain-native",
+            "public_file": "run_<case>/volume_<case>.vtu",
+            "format": "VTK UnstructuredGrid",
+            "domain": "three_dimensional_flow_domain",
+            "association": "CellData",
+            "entities": "all_native_volume_cells",
+            "arrays": [
+              "velocityxavg",
+              "velocityyavg",
+              "velocityzavg",
+              "pressureavg"
+            ],
+            "available_cell_arrays": [
+              "velocityxavg",
+              "velocityyavg",
+              "velocityzavg",
+              "reynoldsstressxx",
+              "reynoldsstressxy",
+              "reynoldsstressxz",
+              "reynoldsstressyy",
+              "reynoldsstressyz",
+              "reynoldsstresszz",
+              "pressureavg"
+            ],
+            "physical_weight": "cell_volume",
+            "verification": "confirmed_from_public_file"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+        },
         "owner_decisions_required": [
-          "approve_support_domains_and_location_modes",
-          "approve_entity_associations_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "surface_pressure_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "surface_wall_shear_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 20.0
+          },
+          {
+            "metric_id": "volume_velocity_rel_l2",
+            "weight": 0.15,
+            "transform": "bounded_error",
+            "cap": 12.0
+          },
+          {
+            "metric_id": "volume_pressure_rel_l2",
+            "weight": 0.1,
+            "transform": "bounded_error",
+            "cap": 15.0
+          },
+          {
+            "metric_id": "cd_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cl_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "velocity_profile_r2",
+            "weight": 0.15,
+            "transform": "bounded_quality"
+          },
+          {
+            "metric_id": "cp_cut_r2",
+            "weight": 0.1,
+            "transform": "bounded_quality"
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -1937,11 +2500,16 @@
         ]
       },
       "metric_ids": [
+        "overall_score",
         "total_error",
         "vki_mach_rrmse",
         "vki_nut_rrmse",
         "vki_mach_rel_l2",
+        "vki_mach_area_rel_l2",
         "vki_nut_rel_l2",
+        "vki_nut_area_rel_l2",
+        "vki_m_iso_line_rel_l2",
+        "vki_m_iso_equal_rel_l2",
         "vki_mach_rel_l1",
         "vki_nut_rel_l1",
         "vki_mach_r2",
@@ -1972,9 +2540,9 @@
         "vki_angle_out_r2"
       ],
       "ranking": {
-        "metric_id": "total_error",
-        "direction": "lower",
-        "decimal_places": 3,
+        "metric_id": "overall_score",
+        "direction": "higher",
+        "decimal_places": 1,
         "rounding": "decimal_half_up",
         "method": "competition"
       },
@@ -2082,15 +2650,121 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the VKI-LS59 dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "2D flow domain and separate 1D blade curve",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "The published PLAID test rows omit targets. An open FluidsBench case set must either use newly public test targets or be frozen from output-complete public rows 0-670; it must not be called the PLAID test split."
+        },
+        "public_supports": [
+          {
+            "id": "two-dimensional-domain-native",
+            "public_file": "PLAID Sample CGNS path /Base_2_2/Zone in the public Parquet release",
+            "format": "PLAID Sample containing a CGNS tree",
+            "domain": "two_dimensional_quad_flow_domain",
+            "association": "CGNS GridLocation Vertex",
+            "entities": "all_native_domain_vertices",
+            "arrays": [
+              "ro",
+              "rou",
+              "rov",
+              "roe",
+              "nut",
+              "mach"
+            ],
+            "physical_weight": "mass_lumped_dual_quad_cell_area",
+            "verification": "confirmed_from_public_samples"
+          },
+          {
+            "id": "blade-curve-native",
+            "public_file": "PLAID Sample CGNS path /Base_1_2/Zone in the public Parquet release",
+            "format": "one-dimensional BAR_2 curve inside the PLAID Sample",
+            "domain": "one_dimensional_blade_curve",
+            "association": "CGNS GridLocation Vertex",
+            "entities": "all_native_curve_vertices",
+            "arrays": [
+              "M_iso"
+            ],
+            "physical_weight": "mass_lumped_dual_segment_length",
+            "verification": "confirmed_from_public_samples"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+        },
         "owner_decisions_required": [
-          "approve_support_domains_and_location_modes",
-          "approve_entity_associations_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "vki_mach_rrmse",
+            "weight": 0.125,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "vki_nut_rrmse",
+            "weight": 0.125,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "vki_q_rrmse",
+            "weight": 0.125,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "vki_power_rrmse",
+            "weight": 0.125,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "vki_pr_rrmse",
+            "weight": 0.125,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "vki_tr_rrmse",
+            "weight": 0.125,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "vki_eth_is_rrmse",
+            "weight": 0.125,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "vki_angle_out_rrmse",
+            "weight": 0.125,
+            "transform": "bounded_error",
+            "cap": 1.0
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -2180,12 +2854,16 @@
         ]
       },
       "metric_ids": [
+        "overall_score",
         "total_error",
         "rotor_density_rrmse",
         "rotor_pressure_rrmse",
         "rotor_temperature_rrmse",
+        "rotor_density_area_rel_l2",
         "rotor_density_rel_l2",
+        "rotor_pressure_area_rel_l2",
         "rotor_pressure_rel_l2",
+        "rotor_temperature_area_rel_l2",
         "rotor_temperature_rel_l2",
         "rotor_density_rel_l1",
         "rotor_pressure_rel_l1",
@@ -2219,9 +2897,9 @@
         "rotor_efficiency_rmse"
       ],
       "ranking": {
-        "metric_id": "total_error",
-        "direction": "lower",
-        "decimal_places": 3,
+        "metric_id": "overall_score",
+        "direction": "higher",
+        "decimal_places": 1,
         "rounding": "decimal_half_up",
         "method": "competition"
       },
@@ -2361,15 +3039,93 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the Rotor37 dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "2D blade-surface manifold embedded in 3D",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "The published PLAID test rows omit targets. An open FluidsBench case set must either use newly public test targets or be frozen from output-complete public rows 0-999; it must not be called the PLAID test split."
+        },
+        "public_supports": [
+          {
+            "id": "blade-surface-native",
+            "public_file": "PLAID Sample CGNS path /Base_2_3/Zone in the public Parquet release",
+            "format": "PLAID Sample containing a CGNS tree",
+            "domain": "two_dimensional_quad_blade_surface_embedded_in_three_dimensions",
+            "association": "CGNS GridLocation Vertex",
+            "entities": "all_native_vertices_once",
+            "arrays": [
+              "Density",
+              "Pressure",
+              "Temperature"
+            ],
+            "physical_weight": "mass_lumped_dual_quad_surface_area",
+            "verification": "confirmed_from_public_samples"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+        },
         "owner_decisions_required": [
-          "approve_support_domains_and_location_modes",
-          "approve_entity_associations_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "rotor_density_rrmse",
+            "weight": 0.16666666666666666,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "rotor_pressure_rrmse",
+            "weight": 0.16666666666666666,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "rotor_temperature_rrmse",
+            "weight": 0.16666666666666666,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "rotor_massflow_rrmse",
+            "weight": 0.16666666666666666,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "rotor_compression_ratio_rrmse",
+            "weight": 0.16666666666666666,
+            "transform": "bounded_error",
+            "cap": 1.0
+          },
+          {
+            "metric_id": "rotor_efficiency_rrmse",
+            "weight": 0.16666666666666666,
+            "transform": "bounded_error",
+            "cap": 1.0
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -2411,6 +3167,7 @@
         ]
       },
       "metric_ids": [
+        "overall_score",
         "blended_surface_rel_l2",
         "blended_cp_mse",
         "blended_cp_mae",
@@ -2420,12 +3177,21 @@
         "blended_cfz_mae",
         "blended_cp_rel_l1",
         "blended_cp_rel_l2",
+        "blended_cp_area_rel_l2",
         "blended_cp_r2",
         "blended_cfx_rel_l1",
         "blended_cfx_rel_l2",
+        "blended_cfx_area_rel_l2",
         "blended_cfx_r2",
+        "blended_cfy_mse",
+        "blended_cfy_mae",
+        "blended_cfy_rel_l1",
+        "blended_cfy_rel_l2",
+        "blended_cfy_r2",
+        "blended_cfy_area_rel_l2",
         "blended_cfz_rel_l1",
         "blended_cfz_rel_l2",
+        "blended_cfz_area_rel_l2",
         "blended_cfz_r2",
         "c_drag_mae",
         "c_lift_mae",
@@ -2435,9 +3201,9 @@
         "c_pitch_r2"
       ],
       "ranking": {
-        "metric_id": "blended_surface_rel_l2",
-        "direction": "lower",
-        "decimal_places": 2,
+        "metric_id": "overall_score",
+        "direction": "higher",
+        "decimal_places": 1,
         "rounding": "decimal_half_up",
         "method": "competition"
       },
@@ -2566,26 +3332,93 @@
       "updated_at": "2026-07-15",
       "metric_aggregate": {
         "metric_id": "blended_surface_rel_l2",
-        "operation": "mean",
         "source_metric_ids": [
-          "blended_cp_rel_l2",
-          "blended_cfx_rel_l2",
-          "blended_cfz_rel_l2"
+          "blended_cp_area_rel_l2",
+          "blended_cfx_area_rel_l2",
+          "blended_cfy_area_rel_l2",
+          "blended_cfz_area_rel_l2"
         ],
-        "tolerance": 1e-05
+        "tolerance": 1e-06
       },
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions remain closed until the BlendedNet dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+        "closed_reason": "Submissions are currently closed.",
+        "coverage_contract": {
+          "dimensionality": "3D surface only; no full flow-domain field is published",
+          "rule": "complete_original_public_release_entities",
+          "inference_may_be_chunked": true,
+          "chunk_metrics_must_use_additive_sufficient_statistics": true,
+          "complete_case_and_entity_coverage_required": true,
+          "full_prediction_artifact_required": false,
+          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+          "public_ground_truth": "Ground-truth fields are in the public dataset release."
+        },
+        "public_supports": [
+          {
+            "id": "surface-native",
+            "public_file": "the per-case legacy VTK POLYDATA file in Dataverse DOI 10.7910/DVN/VJT9EP",
+            "format": "legacy VTK PolyData",
+            "domain": "three_dimensional_aircraft_surface_only",
+            "association": "PointData",
+            "entities": "all_original_surface_vertices",
+            "arrays": [
+              "cp",
+              "cf_x",
+              "cf_y",
+              "cf_z"
+            ],
+            "physical_weight": "mass_lumped_dual_polygon_area",
+            "verification": "confirmed_from_public_file"
+          }
+        ],
+        "relative_l2_policy": {
+          "surface_or_curve_primary": "physical_measure_weighted",
+          "surface_or_curve_secondary": "equal_native_entity",
+          "flow_domain_primary": "equal_native_entity",
+          "flow_domain_secondary": "physical_measure_weighted",
+          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+        },
         "owner_decisions_required": [
-          "approve_support_domains_and_location_modes",
-          "approve_entity_associations_masks_and_field_names",
-          "approve_coordinate_frame_units_domain_and_bounding_box",
-          "approve_weight_definitions",
-          "approve_case_coverage_split_bindings_and_stable_support_ids",
-          "approve_artifact_format_loader_and_immutable_release"
+          "pin_exact_public_release_files_revisions_and_hashes",
+          "confirm_array_names_entity_associations_masks_and_order",
+          "publish_authoritative_physical_weights_and_stable_entity_ids",
+          "approve_public_ground_truth_case_set_and_split_bindings",
+          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
         ]
+      },
+      "overall_score_composite": {
+        "metric_id": "overall_score",
+        "operation": "weighted_component_scores",
+        "components": [
+          {
+            "metric_id": "blended_cp_area_rel_l2",
+            "weight": 0.25,
+            "transform": "bounded_error",
+            "cap": 100.0
+          },
+          {
+            "metric_id": "blended_cfx_area_rel_l2",
+            "weight": 0.25,
+            "transform": "bounded_error",
+            "cap": 100.0
+          },
+          {
+            "metric_id": "blended_cfy_area_rel_l2",
+            "weight": 0.25,
+            "transform": "bounded_error",
+            "cap": 100.0
+          },
+          {
+            "metric_id": "blended_cfz_area_rel_l2",
+            "weight": 0.25,
+            "transform": "bounded_error",
+            "cap": 100.0
+          }
+        ],
+        "tolerance": 1e-06
       }
     }
   ],
@@ -2593,7 +3426,7 @@
     {
       "id": "overall_score",
       "label": "Overall score",
-      "description": "Weighted overall benchmark score out of 100.",
+      "description": "Dataset-defined weighted composite score out of 100; the selected dataset contract declares its components, transformations, caps, and weights.",
       "group": "scores",
       "group_label": "Scores",
       "column_group": "scores",
@@ -2601,7 +3434,7 @@
       "digits": 1,
       "direction": "higher",
       "kind": "score",
-      "equation": "0.50\\,S_{\\mathrm{field}} + 0.25\\,S_{\\mathrm{force}} + 0.25\\,S_{\\mathrm{profile}}",
+      "equation": "\\sum_k \\alpha_k S_k,\\quad \\sum_k \\alpha_k=1",
       "comparison_group": "summary",
       "comparison_group_label": "Summary scores",
       "column_group_label": "Scores"
@@ -2656,8 +3489,8 @@
     },
     {
       "id": "surface_pressure_rel_l2",
-      "label": "Surface pressure rel. L2",
-      "description": "Face-area weighted relative L2 error for surface pressure. Lower is better.",
+      "label": "Surface pressure rel. L2 (physical)",
+      "description": "Relative L2 error for surface pressure, weighted once by the official surface-area or boundary-length measure. For point data, FluidsBench supplies deterministic mass-lumped dual weights. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -2673,7 +3506,7 @@
     {
       "id": "surface_pressure_rel_l1",
       "label": "Surface pressure rel. L1",
-      "description": "Face-area weighted relative L1 error for surface pressure. Lower is better.",
+      "description": "Official physical surface/boundary-measure weighted relative L1 error for surface pressure. Lower is better.",
       "group": "relative-l1",
       "group_label": "Relative L1",
       "column_group": "relative",
@@ -2689,7 +3522,7 @@
     {
       "id": "surface_pressure_mae",
       "label": "Surface pressure MAE",
-      "description": "Face-area weighted mean absolute error for surface pressure. Lower is better.",
+      "description": "Official physical surface/boundary-measure weighted mean absolute error for surface pressure. Lower is better.",
       "group": "absolute-mae",
       "group_label": "Absolute MAE",
       "column_group": "absolute",
@@ -2705,7 +3538,7 @@
     {
       "id": "surface_pressure_rmse",
       "label": "Surface pressure RMSE",
-      "description": "Face-area weighted root-mean-square error for surface pressure. Lower is better.",
+      "description": "Official physical surface/boundary-measure weighted root-mean-square error for surface pressure. Lower is better.",
       "group": "absolute-rmse",
       "group_label": "Absolute RMSE",
       "column_group": "absolute",
@@ -2720,8 +3553,8 @@
     },
     {
       "id": "surface_wall_shear_rel_l2",
-      "label": "Surface wall shear rel. L2",
-      "description": "Face-area weighted relative L2 error for surface wall shear. Lower is better.",
+      "label": "Surface wall shear rel. L2 (physical)",
+      "description": "Relative L2 error for surface wall shear, weighted once by the official surface-area or boundary-length measure. For point data, FluidsBench supplies deterministic mass-lumped dual weights. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -2737,7 +3570,7 @@
     {
       "id": "surface_wall_shear_rel_l1",
       "label": "Surface wall shear rel. L1",
-      "description": "Face-area weighted relative L1 error for surface wall shear. Lower is better.",
+      "description": "Official physical surface/boundary-measure weighted relative L1 error for surface wall shear. Lower is better.",
       "group": "relative-l1",
       "group_label": "Relative L1",
       "column_group": "relative",
@@ -2753,7 +3586,7 @@
     {
       "id": "surface_wall_shear_mae",
       "label": "Surface wall shear MAE",
-      "description": "Face-area weighted mean absolute error for surface wall shear. Lower is better.",
+      "description": "Official physical surface/boundary-measure weighted mean absolute error for surface wall shear. Lower is better.",
       "group": "absolute-mae",
       "group_label": "Absolute MAE",
       "column_group": "absolute",
@@ -2769,7 +3602,7 @@
     {
       "id": "surface_wall_shear_rmse",
       "label": "Surface wall shear RMSE",
-      "description": "Face-area weighted root-mean-square error for surface wall shear. Lower is better.",
+      "description": "Official physical surface/boundary-measure weighted root-mean-square error for surface wall shear. Lower is better.",
       "group": "absolute-rmse",
       "group_label": "Absolute RMSE",
       "column_group": "absolute",
@@ -2784,8 +3617,8 @@
     },
     {
       "id": "volume_velocity_rel_l2",
-      "label": "Volume velocity rel. L2",
-      "description": "Cell-volume weighted relative L2 error for volume velocity. Lower is better.",
+      "label": "Flow-domain velocity rel. L2 (equal entity)",
+      "description": "Equal-native-point or equal-native-cell relative L2 error for flow-domain velocity. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -2793,15 +3626,15 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
       "comparison_group": "relative-l2",
       "comparison_group_label": "Relative L2",
       "column_group_label": "Relative"
     },
     {
       "id": "volume_velocity_rel_l1",
-      "label": "Volume velocity rel. L1",
-      "description": "Cell-volume weighted relative L1 error for volume velocity. Lower is better.",
+      "label": "Flow-domain velocity rel. L1",
+      "description": "Equal-native-entity relative L1 error for volume velocity. Lower is better.",
       "group": "relative-l1",
       "group_label": "Relative L1",
       "column_group": "relative",
@@ -2809,15 +3642,15 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
       "comparison_group": "relative-l1",
       "comparison_group_label": "Relative L1",
       "column_group_label": "Relative"
     },
     {
       "id": "volume_velocity_mae",
-      "label": "Volume velocity MAE",
-      "description": "Cell-volume weighted mean absolute error for volume velocity. Lower is better.",
+      "label": "Flow-domain velocity MAE",
+      "description": "Equal-native-entity mean absolute error for volume velocity. Lower is better.",
       "group": "absolute-mae",
       "group_label": "Absolute MAE",
       "column_group": "absolute",
@@ -2825,15 +3658,15 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
       "comparison_group": "absolute-mae",
       "comparison_group_label": "Absolute MAE",
       "column_group_label": "Absolute"
     },
     {
       "id": "volume_velocity_rmse",
-      "label": "Volume velocity RMSE",
-      "description": "Cell-volume weighted root-mean-square error for volume velocity. Lower is better.",
+      "label": "Flow-domain velocity RMSE",
+      "description": "Equal-native-entity root-mean-square error for volume velocity. Lower is better.",
       "group": "absolute-rmse",
       "group_label": "Absolute RMSE",
       "column_group": "absolute",
@@ -2841,15 +3674,15 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
       "comparison_group": "absolute-rmse",
       "comparison_group_label": "Absolute RMSE",
       "column_group_label": "Absolute"
     },
     {
       "id": "volume_pressure_rel_l2",
-      "label": "Volume pressure rel. L2",
-      "description": "Cell-volume weighted relative L2 error for volume pressure. Lower is better.",
+      "label": "Flow-domain pressure rel. L2 (equal entity)",
+      "description": "Equal-native-point or equal-native-cell relative L2 error for flow-domain pressure. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -2857,15 +3690,15 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
       "comparison_group": "relative-l2",
       "comparison_group_label": "Relative L2",
       "column_group_label": "Relative"
     },
     {
       "id": "volume_pressure_rel_l1",
-      "label": "Volume pressure rel. L1",
-      "description": "Cell-volume weighted relative L1 error for volume pressure. Lower is better.",
+      "label": "Flow-domain pressure rel. L1",
+      "description": "Equal-native-entity relative L1 error for volume pressure. Lower is better.",
       "group": "relative-l1",
       "group_label": "Relative L1",
       "column_group": "relative",
@@ -2873,15 +3706,15 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
       "comparison_group": "relative-l1",
       "comparison_group_label": "Relative L1",
       "column_group_label": "Relative"
     },
     {
       "id": "volume_pressure_mae",
-      "label": "Volume pressure MAE",
-      "description": "Cell-volume weighted mean absolute error for volume pressure. Lower is better.",
+      "label": "Flow-domain pressure MAE",
+      "description": "Equal-native-entity mean absolute error for volume pressure. Lower is better.",
       "group": "absolute-mae",
       "group_label": "Absolute MAE",
       "column_group": "absolute",
@@ -2889,15 +3722,15 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
       "comparison_group": "absolute-mae",
       "comparison_group_label": "Absolute MAE",
       "column_group_label": "Absolute"
     },
     {
       "id": "volume_pressure_rmse",
-      "label": "Volume pressure RMSE",
-      "description": "Cell-volume weighted root-mean-square error for volume pressure. Lower is better.",
+      "label": "Flow-domain pressure RMSE",
+      "description": "Equal-native-entity root-mean-square error for volume pressure. Lower is better.",
       "group": "absolute-rmse",
       "group_label": "Absolute RMSE",
       "column_group": "absolute",
@@ -2905,7 +3738,7 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
       "comparison_group": "absolute-rmse",
       "comparison_group_label": "Absolute RMSE",
       "column_group_label": "Absolute"
@@ -3061,8 +3894,8 @@
     },
     {
       "id": "vki_mach_rel_l2",
-      "label": "Mach rel. L2",
-      "description": "Weighted relative L2 error for Mach-number field. Lower is better.",
+      "label": "Mach rel. L2 (equal vertex, primary)",
+      "description": "Equal-vertex relative L2 error for the two-dimensional Mach-number field. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -3070,7 +3903,7 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
       "comparison_group": "relative-l2",
       "comparison_group_label": "Relative L2",
       "column_group_label": "Relative"
@@ -3125,8 +3958,8 @@
     },
     {
       "id": "vki_nut_rel_l2",
-      "label": "Turbulent kinematic viscosity rel. L2",
-      "description": "Weighted relative L2 error for the turbulent kinematic-viscosity field. Lower is better.",
+      "label": "Turbulent kinematic viscosity rel. L2 (equal vertex, primary)",
+      "description": "Equal-vertex relative L2 error for the two-dimensional turbulent kinematic-viscosity field. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -3134,7 +3967,7 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
       "comparison_group": "relative-l2",
       "comparison_group_label": "Relative L2",
       "column_group_label": "Relative"
@@ -3573,8 +4406,8 @@
     },
     {
       "id": "rotor_density_rel_l2",
-      "label": "Density rel. L2",
-      "description": "Weighted relative L2 error for density field. Lower is better.",
+      "label": "Density rel. L2 (equal vertex, secondary)",
+      "description": "Equal-vertex relative L2 error for the Rotor37 blade-surface density field. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -3582,7 +4415,7 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
       "comparison_group": "relative-l2",
       "comparison_group_label": "Relative L2",
       "column_group_label": "Relative"
@@ -3669,8 +4502,8 @@
     },
     {
       "id": "rotor_pressure_rel_l2",
-      "label": "Pressure rel. L2",
-      "description": "Weighted relative L2 error for pressure field. Lower is better.",
+      "label": "Pressure rel. L2 (equal vertex, secondary)",
+      "description": "Equal-vertex relative L2 error for the Rotor37 blade-surface pressure field. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -3678,7 +4511,7 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
       "comparison_group": "relative-l2",
       "comparison_group_label": "Relative L2",
       "column_group_label": "Relative"
@@ -3765,8 +4598,8 @@
     },
     {
       "id": "rotor_temperature_rel_l2",
-      "label": "Temperature rel. L2",
-      "description": "Weighted relative L2 error for temperature field. Lower is better.",
+      "label": "Temperature rel. L2 (equal vertex, secondary)",
+      "description": "Equal-vertex relative L2 error for the Rotor37 blade-surface temperature field. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -3774,7 +4607,7 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
       "comparison_group": "relative-l2",
       "comparison_group_label": "Relative L2",
       "column_group_label": "Relative"
@@ -4134,7 +4967,7 @@
     {
       "id": "blended_surface_rel_l2",
       "label": "Surface mean rel. L2",
-      "description": "Arithmetic mean of the relative L2 errors for Cp, Cfx, and Cfz. Lower is better.",
+      "description": "Arithmetic mean of the primary area-weighted relative L2 errors for Cp, Cfx, Cfy, and Cfz. Lower is better.",
       "group": "scores",
       "group_label": "Scores",
       "column_group": "scores",
@@ -4142,7 +4975,7 @@
       "digits": 2,
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{1}{3}(L_{2,\\mathrm{rel}}^{C_p}+L_{2,\\mathrm{rel}}^{C_{fx}}+L_{2,\\mathrm{rel}}^{C_{fz}})",
+      "equation": "\\frac{1}{4}(L_{2,A}^{C_p}+L_{2,A}^{C_{fx}}+L_{2,A}^{C_{fy}}+L_{2,A}^{C_{fz}})",
       "comparison_group": "summary",
       "comparison_group_label": "Summary",
       "column_group_label": "Scores"
@@ -4403,6 +5236,438 @@
       "comparison_group_label": "R2",
       "column_group_label": "Integral forces / moments",
       "plain_label": "Pitching-moment coefficient R2"
+    },
+    {
+      "id": "surface_pressure_equal_entity_rel_l2",
+      "label": "Surface pressure rel. L2 (equal entity)",
+      "description": "Equal-native-entity relative L2 error for surface pressure. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "surface_wall_shear_equal_entity_rel_l2",
+      "label": "Surface wall shear rel. L2 (equal entity)",
+      "description": "Equal-native-entity relative L2 error for surface wall shear. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "volume_velocity_physical_rel_l2",
+      "label": "Flow-domain velocity rel. L2 (physical)",
+      "description": "Physical-measure-weighted relative L2 error for flow-domain velocity; cell volume for cell data or deterministic mass-lumped dual volume/area for point data. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "volume_pressure_physical_rel_l2",
+      "label": "Flow-domain pressure rel. L2 (physical)",
+      "description": "Physical-measure-weighted relative L2 error for flow-domain pressure; cell volume for cell data or deterministic mass-lumped dual volume/area for point data. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cp_area_rel_l2",
+      "label": "BlendedNet Cp rel. L2 (area)",
+      "description": "Dual-surface-area-weighted relative L2 error for point-associated Cp. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfx_area_rel_l2",
+      "label": "BlendedNet Cfx rel. L2 (area)",
+      "description": "Dual-surface-area-weighted relative L2 error for point-associated Cfx. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfy_mse",
+      "label": "Cfy MSE",
+      "description": "Mean squared error for the vertical skin-friction coefficient. Lower is better.",
+      "group": "absolute-mse",
+      "group_label": "Absolute MSE",
+      "column_group": "absolute",
+      "unit": "",
+      "digits": 6,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2",
+      "comparison_group": "absolute-mse",
+      "comparison_group_label": "Absolute MSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "blended_cfy_mae",
+      "label": "Cfy MAE",
+      "description": "Mean absolute error for the vertical skin-friction coefficient. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "blended_cfy_rel_l1",
+      "label": "Cfy rel. L1",
+      "description": "Relative L1 error for the vertical skin-friction coefficient. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfy_rel_l2",
+      "label": "Cfy rel. L2",
+      "description": "Relative L2 error for the vertical skin-friction coefficient. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfy_r2",
+      "label": "Cfy R2",
+      "description": "Coefficient of determination for the vertical skin-friction coefficient. Higher is better.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfy_area_rel_l2",
+      "label": "BlendedNet Cfy rel. L2 (area)",
+      "description": "Dual-surface-area-weighted relative L2 error for point-associated Cfy. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "blended_cfz_area_rel_l2",
+      "label": "BlendedNet Cfz rel. L2 (area)",
+      "description": "Dual-surface-area-weighted relative L2 error for point-associated Cfz. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_density_area_rel_l2",
+      "label": "Rotor density rel. L2 (area, primary)",
+      "description": "Primary dual-quad-surface-area-weighted relative L2 error for Rotor37 density. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_pressure_area_rel_l2",
+      "label": "Rotor pressure rel. L2 (area, primary)",
+      "description": "Primary dual-quad-surface-area-weighted relative L2 error for Rotor37 pressure. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "rotor_temperature_area_rel_l2",
+      "label": "Rotor temperature rel. L2 (area, primary)",
+      "description": "Primary dual-quad-surface-area-weighted relative L2 error for Rotor37 temperature. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_mach_area_rel_l2",
+      "label": "VKI Mach rel. L2 (area, secondary)",
+      "description": "Secondary dual-cell-area-weighted relative L2 error for the VKI-LS59 2D-domain Mach field. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_nut_area_rel_l2",
+      "label": "VKI nut rel. L2 (area, secondary)",
+      "description": "Secondary dual-cell-area-weighted relative L2 error for the VKI-LS59 2D-domain nut field. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_m_iso_line_rel_l2",
+      "label": "VKI M_iso rel. L2 (line length)",
+      "description": "Dual-segment-length-weighted relative L2 on the published one-dimensional blade curve. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "vki_m_iso_equal_rel_l2",
+      "label": "VKI M_iso rel. L2 (equal vertex)",
+      "description": "Equal-vertex relative L2 on the published one-dimensional blade curve. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "surface_pressure_r2",
+      "label": "Surface pressure R2",
+      "description": "Coefficient of determination over all aligned native surface-pressure points.",
+      "group": "r2-metrics",
+      "group_label": "R2",
+      "column_group": "relative",
+      "unit": "",
+      "digits": 3,
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "comparison_group": "r2",
+      "comparison_group_label": "R2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "flow_domain_velocity_rel_l2",
+      "label": "Flow-domain velocity rel. L2 (equal entity)",
+      "description": "Equal-interior-node relative L2 error for velocity over the complete two-dimensional flow domain. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "flow_domain_velocity_physical_rel_l2",
+      "label": "Flow-domain velocity rel. L2 (physical)",
+      "description": "Dual-area-weighted relative L2 error for velocity over the complete two-dimensional flow domain. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "flow_domain_pressure_rel_l2",
+      "label": "Flow-domain pressure rel. L2 (equal entity)",
+      "description": "Equal-interior-node relative L2 error for pressure over the complete two-dimensional flow domain. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "flow_domain_pressure_physical_rel_l2",
+      "label": "Flow-domain pressure rel. L2 (physical)",
+      "description": "Dual-area-weighted relative L2 error for pressure over the complete two-dimensional flow domain. Lower is better.",
+      "group": "relative-l2",
+      "group_label": "Relative L2",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "comparison_group": "relative-l2",
+      "comparison_group_label": "Relative L2",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "flow_domain_velocity_rel_l1",
+      "label": "Flow-domain velocity rel. L1",
+      "description": "Equal-interior-node relative L1 error for velocity over the complete two-dimensional flow domain. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
+    },
+    {
+      "id": "flow_domain_pressure_rel_l1",
+      "label": "Flow-domain pressure rel. L1",
+      "description": "Equal-interior-node relative L1 error for pressure over the complete two-dimensional flow domain. Lower is better.",
+      "group": "relative-l1",
+      "group_label": "Relative L1",
+      "column_group": "relative",
+      "unit": "%",
+      "digits": 2,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
+      "comparison_group": "relative-l1",
+      "comparison_group_label": "Relative L1",
+      "column_group_label": "Relative"
     }
   ],
   "submission_schema_version": "1.0"

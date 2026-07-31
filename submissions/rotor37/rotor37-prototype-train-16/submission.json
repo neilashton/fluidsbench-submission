@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_16",
   "split_id": "train_16",
-  "case_set_id": "official_test",
-  "split_sha256": "a5568127f676c93511918643517de4ee6867aaa340447059673f246f2a2730f7",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "337d6e7292c465d0cff226ba131a9747fe3f6658a54a75e4ad654de20dd54c30",
   "parameter_count_millions": 8.9,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "8a31fb8bda5a4c6f5e45704819e8dc0897f3c9bbb8f7a6fe40d7e000ce7689e1"
+    "evidence_sha256": "28b0af9d781782cc910c98950eb0b841a31d7c6ba8f7bf595a92901f53d078c2"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 92.99533333333332,
     "rotor_density_rrmse": 0.07189,
     "rotor_density_rel_l2": 7.575,
     "rotor_density_rel_l1": 5.33,
@@ -72,13 +73,16 @@
     "rotor_efficiency_r2": 0.92,
     "rotor_efficiency_mae": 0.015,
     "rotor_efficiency_rmse": 0.0213,
-    "total_error": 0.07005
+    "total_error": 0.07005,
+    "rotor_density_area_rel_l2": 7.809278,
+    "rotor_pressure_area_rel_l2": 9.640206,
+    "rotor_temperature_area_rel_l2": 6.681443
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 200,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

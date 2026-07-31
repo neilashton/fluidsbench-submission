@@ -10,11 +10,13 @@ Submission repository and approved-data feed for the [FluidsBench leaderboard](h
 FluidsBench follows the versioned [`open-reproducibility-3.0`](OPEN_REPRODUCIBILITY.md) track. Evaluation ground truth and case
 IDs are public. The submission process deliberately separates four responsibilities:
 
-1. Dataset owners publish an immutable canonical scoring support: the exact public locations, weights, quantities, case set, and
-   coverage rules used for comparisons.
-2. Participants run their own model, create predictions, map them to that support, calculate per-case and aggregate metrics, and
-   create the required profiles and spatial-discretization records. They may optionally link public, versioned source code, model,
-   environment, and artifact documentation.
+1. Dataset owners pin the original public field-bearing files and publish an immutable canonical scoring support covering every
+   required entity in those files. The support declares exact arrays, point/node/face/cell association, stable IDs, authoritative
+   physical measures, case set, and coverage rules.
+2. Participants run their own model, create predictions for that complete support, calculate per-case and aggregate metrics, and
+   create the required profiles and spatial-discretization records. Inference may be chunked and a method may use a different
+   internal representation, but its final mapped predictions must cover every official entity. Participants may optionally link
+   public, versioned source code, model, environment, and artifact documentation.
 3. Participants must run the FluidsBench contributor-stage validator before opening a pull request. Their package remains
    unapproved and is not included in the public feed.
 4. A maintainer validates the submitted files, hash chain, exact case/support coverage, and metadata, then approves the package for
@@ -61,10 +63,27 @@ specification under [`benchmark-specs/`](benchmark-specs/). The specification li
 directions, profile panels, stations, and quantities.
 
 The equations, edge cases, fixed-support joins, and NumPy reference implementations are documented in
-[`reference/README.md`](reference/README.md). Participants create keyed predictions using their own inference pipeline. The
-reference evaluator joins those predictions to the benchmark-owned support IDs and fixed public ground truth, checks exact coverage,
-and produces the metric evidence. Mapping or interpolation to the scoring support is part of the submitted evaluation pipeline, so
-its error is included in the result.
+[`reference/README.md`](reference/README.md). Each dataset specification identifies the exact files and field associations. It uses
+surface and flow-domain terminology for three-dimensional datasets. Lower-dimensional files are described by what they actually
+represent: a two-dimensional flow domain, a two-dimensional surface manifold embedded in three dimensions, or a one-dimensional
+boundary curve. Participants create keyed predictions using their own inference pipeline. The reference evaluator
+joins those predictions to every benchmark-owned support ID and the fixed public ground truth, checks complete coverage, and
+produces the metric evidence. Mapping or interpolation to the original public entities is part of the submitted evaluation
+pipeline, so its error is included in the result.
+
+For relative L2 field errors, the standard paired reporting policy is:
+
+- on a three-dimensional surface, a two-dimensional surface manifold, or a one-dimensional boundary curve, report the physical-measure-weighted result as the
+  primary value and the equal-entity result as a secondary value;
+- in a three-dimensional volume, or the two-dimensional flow domain, report the equal-entity result as the primary value and the
+  physical-measure-weighted result as a secondary value; and
+- calculate each test case separately, then macro-average the case results so every case has equal influence.
+
+Physical measures are face area, curve length, cell volume, or cell area as appropriate. For point- or node-associated fields,
+FluidsBench supplies the corresponding deterministic mass-lumped dual measure from the exact pinned mesh. Submitters use those
+benchmark-owned values; they do not independently reconstruct weights from a modified mesh. For vector fields, one entity weight
+multiplies the squared vector magnitude, not each component as a separate spatial sample. The selected dataset's machine-readable
+specification remains authoritative if its published source metric requires a documented exception.
 
 ```python
 from reference.metrics import relative_l2
@@ -75,6 +94,13 @@ pressure_l2_percent = relative_l2(
     weights=surface_face_areas,
 )
 ```
+
+Large cases may be evaluated in chunks. For each case and metric, accumulate
+`numerator = sum(w * ||prediction - ground_truth||^2)` and
+`denominator = sum(w * ||ground_truth||^2)` across all chunks, together with the entity count and total weight. Take
+`100 * sqrt(numerator / denominator)` only after the complete case has been accumulated. Never calculate an L2 value per chunk and
+average those chunk values. Use `w = 1` for the equal-entity variant and the benchmark-supplied physical measure for the physical
+variant.
 
 Run the executable reference example with:
 
@@ -104,17 +130,19 @@ to a full commit, model and environment artifacts must be pinned by SHA-256, and
 identifiers. See [`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md) for the complete eligibility and validation policy.
 
 The required `metrics/cases.json` records every test case, canonical support, support/scored counts, complete count and weight
-coverage, unmapped/extrapolated counts, and per-case metric values. Its aggregate `metric_values` must exactly match
-`submission.json`; macro-averaged spatial metrics are recalculated from its case values by the validator. Global R2 and published
-dataset-reference RRMSE values are explicitly `aggregate_only`: the generic evaluator calculates them from complete prediction
-arrays, while normal package validation checks their identities and rule bindings without pretending to recompute them.
+coverage, unmapped/extrapolated counts, per-case metric values, and the additive sufficient statistics required by each relative-L2
+metric. Those statistics include numerator, denominator, entity count, and total weight for the equal-entity and physical variants.
+Its aggregate `metric_values` must exactly match `submission.json`; macro-averaged spatial metrics are recalculated from its case
+values by the validator. Global R2 and published dataset-reference RRMSE values are explicitly `aggregate_only`: the generic
+evaluator calculates them from complete prediction arrays, while normal package validation checks their identities and rule
+bindings without pretending to recompute them.
 
 The required `discretization.json` distinguishes training input, training supervision, inference input, direct model output, and the
-mapping to each canonical support. `discretization/cases.jsonl` records actual evaluation-case counts and mapping coverage. This lets
-methods use sparse points, grids, participant meshes, or native meshes without requiring inference on every native location, while
-still requiring a prediction at every official scoring location after the declared mapping. When a native-resolution comparison is
-reported, each case supplies its model/native counts and fraction; the validator reconciles those records with the fixed or
-minimum/median/maximum summary and verifies `fraction = model_count / native_count`.
+mapping to each canonical support. `discretization/cases.jsonl` records actual evaluation-case counts and mapping coverage. A method
+may infer in chunks or use sparse points, grids, a participant mesh, or another representation internally. After the declared
+mapping, however, it must provide exactly one prediction for every required entity in the original public field-bearing files.
+When a native-resolution comparison is reported, each case supplies its model/native counts and fraction; the validator reconciles
+those records with the fixed or minimum/median/maximum summary and verifies `fraction = model_count / native_count`.
 
 Contributors leave `approval` absent and must not add `maintainer-validation.json` or
 `prediction-artifact-checks.json`. After submitted-data validation, maintainers add
@@ -181,10 +209,11 @@ Validate every source submission and verify that generated feeds are synchronize
 python3 scripts/manage_leaderboard.py check
 ```
 
-The validator checks JSON schemas, exact public split and fixed-support coverage, case-metric aggregation, spatial counts and
-domains, declared mappings, evaluation-evidence identities and checksums, profile coverage, coordinate ordering, array lengths,
-finite values, split/chunk hashes, any declared open-artifact metadata, and approval lifecycle rules. It does not execute the model,
-download optional remote predictions, or recompute submitted base metrics.
+The validator checks JSON schemas, exact public split and complete original-support coverage, equal-entity and physical
+relative-L2 sufficient statistics, case-metric aggregation, spatial counts and domains, declared mappings, evaluation-evidence
+identities and checksums, profile coverage, coordinate ordering, array lengths, finite values, split/chunk hashes, any declared
+open-artifact metadata, and approval lifecycle rules. It does not execute the model, download optional remote predictions, or
+recompute submitted base metrics.
 
 After validation:
 

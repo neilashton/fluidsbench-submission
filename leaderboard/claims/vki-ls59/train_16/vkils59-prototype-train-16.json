@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/vki-ls59/train_16/vkils59-prototype-train-16",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/vki-ls59/train_16/vkils59-prototype-train-16",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -19,13 +19,13 @@
     "submission_schema_version": "1.0"
   },
   "ranking": {
-    "metric_id": "total_error",
-    "value": 0.07387,
-    "ranked_value": 0.074,
-    "display_value": "0.074",
+    "metric_id": "overall_score",
+    "value": 92.61250000000001,
+    "ranked_value": 92.6,
+    "display_value": "92.6",
     "unit": "",
-    "direction": "lower",
-    "decimal_places": 3,
+    "direction": "higher",
+    "decimal_places": 1,
     "rounding": "decimal_half_up",
     "method": "competition",
     "rank": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 57
     },
     "source_submission": {
       "path": "submissions/vki-ls59/vkils59-prototype-train-16/submission.json",
-      "sha256": "4c65ea114ee69d0f0c3e529bfa9df39a61a32297b9bfabd31391f654fdee0752"
+      "sha256": "4136a7a804030d28c9ad6ecbf145c2d538d3a3be3cd7a2b3409cd2ee4bcf4c4d"
     },
     "evaluation_evidence": {
       "path": "submissions/vki-ls59/vkils59-prototype-train-16/evaluation-evidence.json",
-      "sha256": "f77f81bcff99f5b9ed55b53556ff98634c00d0bc25f26a756969c744d0462839"
+      "sha256": "23b9420f7f5126941e6ecee1ccff07131deb590d3a5ece70bcbb914a50e5c1b9"
     },
     "profile_index": {
       "path": "submissions/vki-ls59/vkils59-prototype-train-16/profiles/index.json",
-      "sha256": "1449527e3718bd0785dc1c04bf1e0f1a2ec8ce113e41799a222bf151101a2a77"
+      "sha256": "04360298b9d1cc846c629673832accff8b68f6c92b31d3e6fa6e918dcc9697f2"
     }
   }
 }

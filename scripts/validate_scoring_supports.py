@@ -27,6 +27,7 @@ from reference.scoring_support import (  # noqa: E402
     load_support_release,
     sha256_file,
 )
+from reference.weightings import evaluator_weighting  # noqa: E402
 
 
 SPEC_ROOT = ROOT / "benchmark-specs"
@@ -313,11 +314,7 @@ def validate_metric_contract(
                     f"{label} support {support_id!r} metric {metric_id!r} "
                     f"reduction must be {expected_reduction!r}"
                 )
-            expected_weighting = (
-                "support_weights"
-                if metric.get("weighting") in {"surface_face_area", "cell_volume"}
-                else "uniform"
-            )
+            expected_weighting = evaluator_weighting(metric.get("weighting"))
             if binding.get("weighting") != expected_weighting:
                 errors.append(
                     f"{label} support {support_id!r} metric {metric_id!r} "

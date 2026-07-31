@@ -8,6 +8,7 @@
   "generated_at": "2026-07-15T00:00:00Z",
   "status": "prototype_dummy_data",
   "metric_values": {
+    "overall_score": 98.58133333333333,
     "rotor_density_rrmse": 0.01456,
     "rotor_density_rel_l2": 1.534,
     "rotor_density_rel_l1": 1.079,
@@ -44,9 +45,12 @@
     "rotor_efficiency_r2": 0.9907,
     "rotor_efficiency_mae": 0.003,
     "rotor_efficiency_rmse": 0.0043,
-    "total_error": 0.01419
+    "total_error": 0.01419,
+    "rotor_density_area_rel_l2": 1.631915,
+    "rotor_pressure_area_rel_l2": 2.014894,
+    "rotor_temperature_area_rel_l2": 1.396809
   },
-  "profile_index_sha256": "b4b5453c8f139583291ac8439e0479599b710db433800b06fe05c8c7a150a2ff",
-  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record.",
+  "profile_index_sha256": "69a44874f713435ad88ba811617470db63e2c11231d75110b1c77d654a735c14",
+  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
   "command": "not-applicable (illustrative dummy data)"
 }

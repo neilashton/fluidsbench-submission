@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_16",
   "split_id": "train_16",
-  "case_set_id": "official_test",
-  "split_sha256": "79d11e6be17c0f813aca3932b545c3e8d39751a383ced7f58274d427467c6aa8",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "4d933f3ae90ef71b3bd06135dcf282fed23caac7f1805d1956102e61ca5cc711",
   "parameter_count_millions": 8.9,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "f77f81bcff99f5b9ed55b53556ff98634c00d0bc25f26a756969c744d0462839"
+    "evidence_sha256": "23b9420f7f5126941e6ecee1ccff07131deb590d3a5ece70bcbb914a50e5c1b9"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 92.61250000000001,
     "vki_mach_rrmse": 0.0615,
     "vki_mach_rel_l2": 6.472,
     "vki_mach_rel_l1": 4.545,
@@ -68,13 +69,17 @@
     "vki_angle_out_rel_l2": 8.073,
     "vki_angle_out_rel_l1": 5.694,
     "vki_angle_out_r2": 0.9191,
-    "total_error": 0.07387
+    "total_error": 0.07387,
+    "vki_mach_area_rel_l2": 6.407921,
+    "vki_nut_area_rel_l2": 13.856436,
+    "vki_m_iso_equal_rel_l2": 10.2335,
+    "vki_m_iso_line_rel_l2": 10.132178
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 168,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_125",
   "split_id": "train_125",
-  "case_set_id": "official_test",
-  "split_sha256": "d2b64cc04e9c074339e2bbf84ef571f0be056f9385277a21cb666ab11579d4c0",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "40457096ccdeb77014dcf997e56fad2a83a333853c2a1e33a1820c62925971bb",
   "parameter_count_millions": 7.85,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "f7a2b9c2363fa6e1a4c2d504b97ba885d7e6bbd7a06a7ba7b550ad6ea8d39169"
+    "evidence_sha256": "2720d3aef8b264b976dbc1555bb0517cf9b0f483874e7ee91d26de84d83e4a32"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 95.78833333333333,
     "rotor_density_rrmse": 0.04322,
     "rotor_density_rel_l2": 4.554,
     "rotor_density_rel_l1": 3.205,
@@ -72,13 +73,16 @@
     "rotor_efficiency_r2": 0.9598,
     "rotor_efficiency_mae": 0.009,
     "rotor_efficiency_rmse": 0.0128,
-    "total_error": 0.04212
+    "total_error": 0.04212,
+    "rotor_density_area_rel_l2": 4.296226,
+    "rotor_pressure_area_rel_l2": 5.303774,
+    "rotor_temperature_area_rel_l2": 3.676415
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 200,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

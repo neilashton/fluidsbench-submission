@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/windsorml/default/windsorml-gino",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/windsorml/default/windsorml-gino",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 47
     },
     "source_submission": {
       "path": "submissions/windsorml/windsorml-gino/submission.json",
-      "sha256": "b202b3d06d6e53a7bbb4ebdd28a998288760a25c48477c461f695e719da1ee5e"
+      "sha256": "0fe87d492d9542515766d725a30ab95580b0a90491bdd4f6a0b7273eaf703276"
     },
     "evaluation_evidence": {
       "path": "submissions/windsorml/windsorml-gino/evaluation-evidence.json",
-      "sha256": "228cb85bdbc632f2a878413ef2b01290825e0bfc5c2b2d3703b22f0aa672d300"
+      "sha256": "e8b816a4cd114eb7d4be56b2e75446d1e8fdb7595641cebbef316ace83e94876"
     },
     "profile_index": {
       "path": "submissions/windsorml/windsorml-gino/profiles/index.json",

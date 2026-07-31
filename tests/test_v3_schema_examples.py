@@ -90,6 +90,31 @@ class V3SchemaExampleTests(unittest.TestCase):
         binding["case_evidence"] = "metric_value"
         self.assertTrue(list(validator.iter_errors(manifest)))
 
+    def test_scoring_support_schema_accepts_two_dimensional_cell_area(self) -> None:
+        schema = json.loads(
+            (
+                ROOT / "schemas/scoring-support/v1/manifest.schema.json"
+            ).read_text(encoding="utf-8")
+        )
+        manifest = json.loads(
+            (TEMPLATE / "support/manifest.json").read_text(encoding="utf-8")
+        )
+        manifest["supports"][0]["location_definition"]["weight_rule"] = {
+            "kind": "geometric",
+            "measure": "cell_area",
+            "rule_id": "vtk-cell-area-v1",
+            "rule_version": "1.0",
+        }
+        self.assertEqual(
+            list(
+                Draft202012Validator(
+                    schema,
+                    format_checker=FormatChecker(),
+                ).iter_errors(manifest)
+            ),
+            [],
+        )
+
     def test_v3_submission_package_examples(self) -> None:
         checks = [
             ("submission.schema.json", "submission.json"),

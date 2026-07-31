@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/windsorml/default/windsorml-graph-u-net",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/windsorml/default/windsorml-graph-u-net",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 48
     },
     "source_submission": {
       "path": "submissions/windsorml/windsorml-graph-u-net/submission.json",
-      "sha256": "cd70fa4b79099971f5efe73a22a2757894d53f66d35b250825631459afcacfb1"
+      "sha256": "a1cbcdcb2da884d93e7d9eb114b8b2d6cb8ce22342acd7c343d57f8acd941630"
     },
     "evaluation_evidence": {
       "path": "submissions/windsorml/windsorml-graph-u-net/evaluation-evidence.json",
-      "sha256": "82bdfef668234430d1c9d169df9d986ecea3d4518e0dda941cf23b7c24a59eef"
+      "sha256": "299b0e3818293b5493fda9c958446cfc8601bf393355ee73bee706d984d9034b"
     },
     "profile_index": {
       "path": "submissions/windsorml/windsorml-graph-u-net/profiles/index.json",

@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaerml/rear_separation/drivaerml-transformer",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/drivaerml/rear_separation/drivaerml-transformer",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 21
     },
     "source_submission": {
       "path": "submissions/drivaerml/drivaerml-transformer/submission.json",
-      "sha256": "8f6072b4811731557ec954e441a16abb752b2d153818a4d0f903dbe3318aad72"
+      "sha256": "73ff2dbcc131b45a9a66e6cfa229ab28452f06c5ab8101fce9a3b8e8d497c294"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaerml/drivaerml-transformer/evaluation-evidence.json",
-      "sha256": "7aca7d76217dfcebf10ffa0e7e71cb5570950946cd1dfa716f8dccb6a827a2e2"
+      "sha256": "5f6ff74c5275f31fad1dcaa757fb72bf0866d71fc9cf4d67d4a9eef4bfb09715"
     },
     "profile_index": {
       "path": "submissions/drivaerml/drivaerml-transformer/profiles/index.json",

@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/ahmedml/geometry/lno",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/ahmedml/geometry/lno",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 4
     },
     "source_submission": {
       "path": "submissions/ahmedml/lno/submission.json",
-      "sha256": "054b9cec8a4d5e69af13e097751c1ab13d6a52ceff6b895dca120fe400f2ef61"
+      "sha256": "33694ca28bf822bb9b42ab45f53d686f11418081c71b2a731b1cafa89508bd5c"
     },
     "evaluation_evidence": {
       "path": "submissions/ahmedml/lno/evaluation-evidence.json",
-      "sha256": "a8241ce458f41367daeb6285364878c882647e3c4dc4c8e46df2c2d4f777460d"
+      "sha256": "ed08e1eef64c09feeb7bfec0f999f9b448677dab6cd341e2943a4f696a230cd7"
     },
     "profile_index": {
       "path": "submissions/ahmedml/lno/profiles/index.json",

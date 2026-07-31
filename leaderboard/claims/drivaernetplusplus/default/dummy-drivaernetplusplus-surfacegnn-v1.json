@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 88.68,
-    "ranked_value": 88.7,
-    "display_value": "88.7",
+    "value": 96.616162,
+    "ranked_value": 96.6,
+    "display_value": "96.6",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 36
     },
     "source_submission": {
       "path": "submissions/drivaernetplusplus/dummy-drivaernetplusplus-surfacegnn-v1/submission.json",
-      "sha256": "3962909f09955491af5ec7d2c5c67acf0a149e2e5d2b1f91d8810d441e5b3afb"
+      "sha256": "a8d21466dce0a7794af46d286ab9425a3037a40ebf340a32af93bbe6915c44cd"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaernetplusplus/dummy-drivaernetplusplus-surfacegnn-v1/evaluation-evidence.json",
-      "sha256": "2b3009c980aaf63fa74e0edd1b2f52217cf34e1e9d11e16a081b6030ebd3dee6"
+      "sha256": "0712938e133f18721bd158a435cc3e2fef4304086c037ba1220331ce1a544ace"
     },
     "profile_index": {
       "path": "submissions/drivaernetplusplus/dummy-drivaernetplusplus-surfacegnn-v1/profiles/index.json",
-      "sha256": "4ee486406eda38b734761fca5321f9cfadba8656aa2c626cfe66d05d8913b375"
+      "sha256": "5895fecdac45c344c823ab774c0c7fc3e8b61b231c8dbcb10ca6bf376361796d"
     }
   }
 }

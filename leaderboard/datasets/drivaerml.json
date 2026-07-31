@@ -29,7 +29,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "598f5f6c6e89cdb9212b50e91ec82ec0145ec38992a3eded31b4d1ad63865624"
+      "evidence_sha256": "4c27cdc591d2c6653de98bbbe8fc615ae97d3c3af65b6407dbf439e2441b6268"
     },
     "approval": {
       "status": "prototype",
@@ -61,7 +61,11 @@
       "field_score": 62.138333333333335,
       "force_score": 98.82,
       "diagnostic_score": 96.91999999999999,
-      "overall_score": 80.00416666666666
+      "overall_score": 80.00416666666666,
+      "surface_pressure_equal_entity_rel_l2": 3.82,
+      "surface_wall_shear_equal_entity_rel_l2": 7.29,
+      "volume_velocity_physical_rel_l2": 5.93,
+      "volume_pressure_physical_rel_l2": 6.08
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -70,7 +74,7 @@
       "case_set_id": "standard",
       "index_sha256": "a90ee3324feb43af5c606b914821327ea68d171361e232bdc8134a4146b4a51c"
     },
-    "note": "Reported DrivAerML L2 metrics from AB-UPT v2 Table 7; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Reported DrivAerML L2 metrics from AB-UPT v2 Table 7; L1, force, and profile R2 values are example placeholders. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 8.75,
     "ranking": {
       "metric_id": "overall_score",
@@ -124,7 +128,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "97e6243930e35a218bb57a0ae4e6dda5e3ce75ca8db30387fdd29fef740e720d"
+      "evidence_sha256": "163a96602454db3da0157b12a13499e33652d08f6a6ef5413e2800c7121b2337"
     },
     "approval": {
       "status": "prototype",
@@ -156,7 +160,11 @@
       "field_score": 3.940000000000002,
       "force_score": 80.4,
       "diagnostic_score": 65.8,
-      "overall_score": 38.52
+      "overall_score": 38.52,
+      "surface_pressure_equal_entity_rel_l2": 13.2906,
+      "surface_wall_shear_equal_entity_rel_l2": 22.1442,
+      "volume_velocity_physical_rel_l2": 39.784314,
+      "volume_pressure_physical_rel_l2": 44.019608
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -165,7 +173,7 @@
       "case_set_id": "standard",
       "index_sha256": "c6b678858ab8f34b354bbb102ab0c851bad412797ef08ca0b59a45846d83fbcc"
     },
-    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 15.6,
     "ranking": {
       "metric_id": "overall_score",
@@ -219,7 +227,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "685107549976ac5fb6b6f2ba2656bdc56c9ee8914690e154f41643570a03c443"
+      "evidence_sha256": "5b79d4b133db1f27b9e3740295883b1c1c4535a2a9a8c6015c6a1c15809d0a5c"
     },
     "approval": {
       "status": "prototype",
@@ -251,7 +259,11 @@
       "field_score": 0,
       "force_score": 87.80000000000001,
       "diagnostic_score": 79.6,
-      "overall_score": 41.85
+      "overall_score": 41.85,
+      "surface_pressure_equal_entity_rel_l2": 16.7752,
+      "surface_wall_shear_equal_entity_rel_l2": 28.964,
+      "volume_velocity_physical_rel_l2": 17.288462,
+      "volume_pressure_physical_rel_l2": 19.730769
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -260,7 +272,7 @@
       "case_set_id": "standard",
       "index_sha256": "ac47262070f01dd239e19bf75d0873de777da1489f4d4b479afcb4615d482a57"
     },
-    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 14.11,
     "ranking": {
       "metric_id": "overall_score",
@@ -314,7 +326,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "502c041d41c1ff4a17bc02ee7526a2c2b1050148cfd9a92d66f108eb310d818f"
+      "evidence_sha256": "82a18f182543a4e06841fb69d055350b02f8fff7f7509831f89bab772507b4d2"
     },
     "approval": {
       "status": "prototype",
@@ -346,7 +358,11 @@
       "field_score": 0,
       "force_score": 83.4,
       "diagnostic_score": 74.6,
-      "overall_score": 39.5
+      "overall_score": 39.5,
+      "surface_pressure_equal_entity_rel_l2": 19.4845,
+      "surface_wall_shear_equal_entity_rel_l2": 34.618,
+      "volume_velocity_physical_rel_l2": 24.494737,
+      "volume_pressure_physical_rel_l2": 28.442105
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -355,7 +371,7 @@
       "case_set_id": "standard",
       "index_sha256": "2cff340d4438bece12a09a832f98d5e60474d00fc140c191327093d8b34b160f"
     },
-    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 6.3,
     "ranking": {
       "metric_id": "overall_score",
@@ -409,7 +425,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "2cac2e3df28efc34b12a9f52e0e64411cf95acf018a99079bef12a7cc1d7a624"
+      "evidence_sha256": "d2515f2467d098c67a9f68577f0322293144f8b0f38f8a57f4f4aa56ab08cf4c"
     },
     "approval": {
       "status": "prototype",
@@ -441,7 +457,11 @@
       "field_score": 56.053333333333335,
       "force_score": 96.69999999999999,
       "diagnostic_score": 93.72,
-      "overall_score": 75.63166666666666
+      "overall_score": 75.63166666666666,
+      "surface_pressure_equal_entity_rel_l2": 4.3456,
+      "surface_wall_shear_equal_entity_rel_l2": 8.6524,
+      "volume_velocity_physical_rel_l2": 6.845361,
+      "volume_pressure_physical_rel_l2": 7.319588
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -450,7 +470,7 @@
       "case_set_id": "high_drag",
       "index_sha256": "914a95302291d5f24885df435397725eb401993a48d80c3205f392b840982952"
     },
-    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 6.1,
     "ranking": {
       "metric_id": "overall_score",
@@ -504,7 +524,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "09dea865abe546f9a93c403ec2f97e20c8d6c53daf524e489e4526c51e35ee52"
+      "evidence_sha256": "646f6b8559358b2095fa127a08c558908500e957b46e0a19a0ab44a24e729eea"
     },
     "approval": {
       "status": "prototype",
@@ -536,7 +556,11 @@
       "field_score": 0,
       "force_score": 81.4,
       "diagnostic_score": 69.8,
-      "overall_score": 37.8
+      "overall_score": 37.8,
+      "surface_pressure_equal_entity_rel_l2": 22.9211,
+      "surface_wall_shear_equal_entity_rel_l2": 40.5945,
+      "volume_velocity_physical_rel_l2": 28.989691,
+      "volume_pressure_physical_rel_l2": 32.195876
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -545,7 +569,7 @@
       "case_set_id": "low_drag",
       "index_sha256": "6e465908362f15b914017c0353e9a57e979cb5ecfc42481154e110fa4e2d0afb"
     },
-    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 3.6,
     "ranking": {
       "metric_id": "overall_score",
@@ -599,7 +623,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "7aca7d76217dfcebf10ffa0e7e71cb5570950946cd1dfa716f8dccb6a827a2e2"
+      "evidence_sha256": "5f6ff74c5275f31fad1dcaa757fb72bf0866d71fc9cf4d67d4a9eef4bfb09715"
     },
     "approval": {
       "status": "prototype",
@@ -631,7 +655,11 @@
       "field_score": 59.155,
       "force_score": 96.86,
       "diagnostic_score": 93.91999999999999,
-      "overall_score": 77.27250000000001
+      "overall_score": 77.27250000000001,
+      "surface_pressure_equal_entity_rel_l2": 4.437,
+      "surface_wall_shear_equal_entity_rel_l2": 8.4252,
+      "volume_velocity_physical_rel_l2": 6.088235,
+      "volume_pressure_physical_rel_l2": 6.147059
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -640,7 +668,7 @@
       "case_set_id": "rear_separation",
       "index_sha256": "f059259fb28fe08bb31c73614ace5d9b3618a31fffdf1a9bc87d6a9548b40068"
     },
-    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 5.49,
     "ranking": {
       "metric_id": "overall_score",
@@ -694,7 +722,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "6a364544ea1b10bc58da7dadc23fc6341f03dea86a25db2f769befdfdbb564ef"
+      "evidence_sha256": "8c27649fbf49b9dfa850eed17a583fde842189ee45cb5e165e752705ada2ad12"
     },
     "approval": {
       "status": "prototype",
@@ -726,7 +754,11 @@
       "field_score": 54.16,
       "force_score": 96.46000000000001,
       "diagnostic_score": 93.38000000000001,
-      "overall_score": 74.54
+      "overall_score": 74.54,
+      "surface_pressure_equal_entity_rel_l2": 5.0024,
+      "surface_wall_shear_equal_entity_rel_l2": 9.308,
+      "volume_velocity_physical_rel_l2": 6.519231,
+      "volume_pressure_physical_rel_l2": 7.442308
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -735,7 +767,7 @@
       "case_set_id": "standard",
       "index_sha256": "fe4aff0a8b18360cd6813a248423a24da5050d1da4d7622844cefd252075d4f3"
     },
-    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 5.49,
     "ranking": {
       "metric_id": "overall_score",
@@ -789,7 +821,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "ee91387920c447496e3fec5c1d105ca9f5206ef68013237d40eedd3d59c61322"
+      "evidence_sha256": "7b6dd81381aa005cb43ce1381e4f872fff0a53a9cd63cb022939a352df81dce7"
     },
     "approval": {
       "status": "prototype",
@@ -821,7 +853,11 @@
       "field_score": 34.99666666666667,
       "force_score": 94.54,
       "diagnostic_score": 90.30000000000001,
-      "overall_score": 63.70833333333334
+      "overall_score": 63.70833333333334,
+      "surface_pressure_equal_entity_rel_l2": 7.536,
+      "surface_wall_shear_equal_entity_rel_l2": 12.192,
+      "volume_velocity_physical_rel_l2": 9.395833,
+      "volume_pressure_physical_rel_l2": 10.979167
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -830,7 +866,7 @@
       "case_set_id": "standard",
       "index_sha256": "45be9a0a0f38bfb31413a8fe6e2881c77cbc6eed38a1e1ca6534ccc353b900da"
     },
-    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data.",
+    "note": "Baseline DrivAerML L2 metrics from AB-UPT v2 Table 7; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 10.98,
     "ranking": {
       "metric_id": "overall_score",
@@ -892,7 +928,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "08e46bffd105c7b08f16d5391fa6d8ab8abb9e1a518f7e0daffb1db51ec08277"
+      "evidence_sha256": "9ce868708fad04ecb3fcf4dbd07d913dbe7d9fa2a8959c759dc416a4611dd4f3"
     },
     "approval": {
       "status": "prototype",
@@ -924,7 +960,11 @@
       "field_score": 81.33333333333334,
       "force_score": 98.74000000000001,
       "diagnostic_score": 97.6,
-      "overall_score": 89.75166666666667
+      "overall_score": 89.75166666666667,
+      "surface_pressure_equal_entity_rel_l2": 2.9876,
+      "surface_wall_shear_equal_entity_rel_l2": 4.0546,
+      "volume_velocity_physical_rel_l2": 2.103093,
+      "volume_pressure_physical_rel_l2": 2.494845
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -933,7 +973,7 @@
       "case_set_id": "geometry",
       "index_sha256": "795f83355d0c82c6608a05b8887237cd3c47e6d3e143765336e8e8b483e627cd"
     },
-    "note": "Dummy DrivAerML submission with compact profile curves. The displayed split assignment is illustrative dummy data.",
+    "note": "Dummy DrivAerML submission with compact profile curves. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 18.7,
     "ranking": {
       "metric_id": "overall_score",

@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/drivaernetpp-transolver",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/drivaernetplusplus/default/drivaernetpp-transolver",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 48.055,
-    "ranked_value": 48.1,
-    "display_value": "48.1",
+    "value": 85.548077,
+    "ranked_value": 85.5,
+    "display_value": "85.5",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 32
     },
     "source_submission": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-transolver/submission.json",
-      "sha256": "ff12d126fcafb9e0c5376b3143e64f076798d1482a1f0d766d23accb8690a7a6"
+      "sha256": "3fce3e78741cc4068cb28081739977d8022e1c0dc63b396c0a403b0f10d4c322"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-transolver/evaluation-evidence.json",
-      "sha256": "d92b9d17ab3add70cd9bb3dedc0fe4b166c5bcc344c7e8bf142b9c9dbccf3965"
+      "sha256": "1b6b74ed4e093d7d35e686905fa42411c02dfc8f4795fd4daa32ba5cb6f19cb2"
     },
     "profile_index": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-transolver/profiles/index.json",
-      "sha256": "14705bb609246d37ef0279f61fbd5f600cd6f7b73af6b0278bd5375d17e83342"
+      "sha256": "1b4b3145a09d0d9eddccdf0bc3071f76d9e6d2bfeb55524e59d6178b12ba600e"
     }
   }
 }

@@ -35,7 +35,7 @@ three hashes it binds. Once validated, the maintainer adds this object to `submi
   "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/123",
   "validation": {
     "evidence_file": "maintainer-validation.json",
-    "evidence_sha256": "8ac97c5bae79ad668880a9febf6395d28e6b58f013f2c3e7a2359da9cfd6517b"
+    "evidence_sha256": "caf117e59d24aae822358afe03c7b7518a92e512bfc65f8170b5f94743f32696"
   }
 }
 ```

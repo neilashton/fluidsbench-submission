@@ -29,7 +29,7 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "eace4be6ea1bd3a79feb27a9b08b3abe4ffe2f574faaa1da0ac397a736e63d7b"
+    "evidence_sha256": "c65310bfae5d3ae7544975ee850ea28087b205091ed63cb367c3877bfb8a356f"
   },
   "approval": {
     "status": "prototype",
@@ -48,10 +48,6 @@
     "cl_r2": 0.77,
     "velocity_profile_r2": 0.665,
     "cp_cut_r2": 0.688,
-    "surface_pressure_mae": 93.7,
-    "surface_pressure_rmse": 130.2,
-    "surface_wall_shear_mae": 2.62,
-    "surface_wall_shear_rmse": 3.86,
     "volume_velocity_mae": 6.1,
     "volume_velocity_rmse": 8.71,
     "volume_pressure_mae": 113.1,
@@ -61,7 +57,11 @@
     "field_score": 0,
     "force_score": 79.69999999999999,
     "diagnostic_score": 67.42,
-    "overall_score": 36.78
+    "overall_score": 36.78,
+    "surface_pressure_equal_entity_rel_l2": 21.266,
+    "surface_wall_shear_equal_entity_rel_l2": 37.828,
+    "volume_velocity_physical_rel_l2": 25.408163,
+    "volume_pressure_physical_rel_l2": 30.408163
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
@@ -69,5 +69,5 @@
     "case_count": 1,
     "case_set_id": "default"
   },
-  "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed."
+  "note": "Illustrative WindsorML prototype row. AB-UPT v2 does not report WindsorML benchmark metrics; replace with evaluator outputs. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

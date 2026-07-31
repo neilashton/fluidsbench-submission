@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_32",
   "split_id": "train_32",
-  "case_set_id": "official_test",
-  "split_sha256": "33cb7c5832589d3a93d36b619483b94ec60b8694a9ae1ea33f8c0de7af4a716e",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "0bae1b656667ba5e83b2b6384f5e0c1012f614e9ae08c3665af20d88b5016634",
   "parameter_count_millions": 8.55,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "c8495902c467b207fc3e8cb27350f5e43bc44725d96bc7f860e9e0222085fca2"
+    "evidence_sha256": "d707b17a53ecc44ee61b61fa28472a0d013cd31744b49196bd5e4fc740578b9c"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 93.54824999999998,
     "vki_mach_rrmse": 0.05371,
     "vki_mach_rel_l2": 5.652,
     "vki_mach_rel_l1": 3.969,
@@ -68,13 +69,17 @@
     "vki_angle_out_rel_l2": 7.05,
     "vki_angle_out_rel_l1": 4.973,
     "vki_angle_out_r2": 0.9326,
-    "total_error": 0.06452
+    "total_error": 0.06452,
+    "vki_mach_area_rel_l2": 5.826804,
+    "vki_nut_area_rel_l2": 12.6,
+    "vki_m_iso_equal_rel_l2": 8.937,
+    "vki_m_iso_line_rel_l2": 9.213402
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 168,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

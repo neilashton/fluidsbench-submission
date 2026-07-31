@@ -5,7 +5,7 @@
   "dataset_id": "synthetic",
   "split_id": "default",
   "scoring_support_release_id": "synthetic-support-v1",
-  "scoring_support_manifest_sha256": "822f106f2816ea9bbd4a5ef72b41d3d36a48da105a27836bd70777fa18310c20",
+  "scoring_support_manifest_sha256": "bec1a78c0bc6d572fda317ddbdb44ce0b6d16c3535ef96a68061f68c36c4d040",
   "training": {
     "surface_input": {
       "used": true,
@@ -14,28 +14,52 @@
       "entity_counts": [
         {
           "entity": "points",
-          "count": {"kind": "fixed", "value": 3}
+          "count": {
+            "kind": "fixed",
+            "value": 3
+          }
         }
       ],
-      "native_comparison": {"status": "not_applicable"},
-      "sampling": {"kind": "fixed", "method": "synthetic fixed selection"},
-      "domain": {"kind": "full_dataset_domain"},
+      "native_comparison": {
+        "status": "not_applicable"
+      },
+      "sampling": {
+        "kind": "fixed",
+        "method": "synthetic fixed selection"
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
       "connectivity": "none"
     },
-    "surface_supervision": {"used": false},
-    "volume_input": {"used": false},
+    "surface_supervision": {
+      "used": false
+    },
+    "volume_input": {
+      "used": false
+    },
     "volume_supervision": {
       "used": true,
       "representation": "synthetic query points",
       "entity_counts": [
         {
           "entity": "points",
-          "count": {"kind": "fixed", "value": 3}
+          "count": {
+            "kind": "fixed",
+            "value": 3
+          }
         }
       ],
-      "native_comparison": {"status": "not_applicable"},
-      "sampling": {"kind": "fixed", "method": "synthetic fixed selection"},
-      "domain": {"kind": "full_dataset_domain"},
+      "native_comparison": {
+        "status": "not_applicable"
+      },
+      "sampling": {
+        "kind": "fixed",
+        "method": "synthetic fixed selection"
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
       "connectivity": "none"
     }
   },
@@ -47,15 +71,27 @@
       "entity_counts": [
         {
           "entity": "points",
-          "count": {"kind": "fixed", "value": 3}
+          "count": {
+            "kind": "fixed",
+            "value": 3
+          }
         }
       ],
-      "native_comparison": {"status": "not_applicable"},
-      "sampling": {"kind": "fixed", "method": "synthetic fixed selection"},
-      "domain": {"kind": "full_dataset_domain"},
+      "native_comparison": {
+        "status": "not_applicable"
+      },
+      "sampling": {
+        "kind": "fixed",
+        "method": "synthetic fixed selection"
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
       "connectivity": "none"
     },
-    "volume_input": {"used": false},
+    "volume_input": {
+      "used": false
+    },
     "direct_outputs": [
       {
         "id": "volume-query-output",
@@ -66,22 +102,37 @@
           "entity_counts": [
             {
               "entity": "points",
-              "count": {"kind": "fixed", "value": 3}
+              "count": {
+                "kind": "fixed",
+                "value": 3
+              }
             }
           ],
-          "native_comparison": {"status": "not_applicable"},
-          "sampling": {"kind": "fixed", "method": "canonical scoring points"},
-          "domain": {"kind": "full_dataset_domain"},
+          "native_comparison": {
+            "status": "not_applicable"
+          },
+          "sampling": {
+            "kind": "fixed",
+            "method": "canonical scoring points"
+          },
+          "domain": {
+            "kind": "full_dataset_domain"
+          },
           "connectivity": "none"
         },
-        "queries_per_forward_pass": {"kind": "fixed", "value": 3}
+        "queries_per_forward_pass": {
+          "kind": "fixed",
+          "value": 3
+        }
       }
     ],
     "mappings": [
       {
         "support_id": "volume-points-v1",
         "source_output_id": "volume-query-output",
-        "method": {"kind": "identity"},
+        "method": {
+          "kind": "identity"
+        },
         "implementation": "reference/evaluate_predictions.py",
         "extrapolation_policy": "forbidden",
         "unmapped_fraction": 0.0,

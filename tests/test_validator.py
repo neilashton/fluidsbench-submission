@@ -12,10 +12,12 @@ from scripts.validate_submission import (
     ROOT,
     canonical_json_sha256,
     load_json,
+    manifest_with_benchmark_contract,
     schema_errors,
     sha256_file,
     validate_evaluation_evidence,
     validate_open_reproducibility,
+    validate_metrics,
     validate_v3_case_metrics,
     validate_v3_discretization,
     validate_v3_prediction_metadata,
@@ -26,6 +28,7 @@ from scripts.validate_submission import (
 SOURCE = ROOT / "submissions" / "ahmedml" / "transolver"
 V2_TEMPLATE = ROOT / "examples" / "v2-template"
 V3_TEMPLATE = ROOT / "examples" / "v3-template"
+AIRFRANS_PROTOTYPE = ROOT / "submissions" / "airfrans" / "dummy-airfrans-airfoiloperator-v1"
 
 
 def write_json(path: Path, value: object) -> None:
@@ -142,6 +145,29 @@ def without_storage_error(errors: list[str]) -> list[str]:
 
 
 class ValidatorTests(unittest.TestCase):
+    def test_benchmark_contract_overlay_allows_manifest_rebuild_after_spec_change(self) -> None:
+        manifest = load_json(ROOT / "leaderboard" / "manifest.json")
+        airfrans = next(dataset for dataset in manifest["datasets"] if dataset["slug"] == "airfrans")
+        airfrans["metric_ids"] = ["stale_generated_metric"]
+        airfrans["ranking"] = {"metric_id": "stale_generated_metric"}
+
+        updated = manifest_with_benchmark_contract(manifest)
+        updated_airfrans = next(
+            dataset for dataset in updated["datasets"] if dataset["slug"] == "airfrans"
+        )
+        specification = load_json(ROOT / "benchmark-specs" / "airfrans" / "submission-spec.json")
+
+        self.assertEqual(
+            updated_airfrans["metric_ids"],
+            [metric["id"] for metric in specification["metrics"]],
+        )
+        self.assertEqual(updated_airfrans["ranking"], specification["ranking"])
+        self.assertEqual(
+            updated_airfrans["overall_score_composite"],
+            specification["overall_score_composite"],
+        )
+        self.assertEqual(airfrans["metric_ids"], ["stale_generated_metric"])
+
     def validate_v3_reproducibility_fragments(
         self,
         directory: Path,
@@ -218,6 +244,37 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(validation["profile_index_sha256"], profile_index_sha256)
         self.assertEqual(validation["evaluation_evidence_sha256"], submission["evaluation"]["evidence_sha256"])
         self.assertEqual(validation["reviewed_submission_sha256"], canonical_json_sha256(submission))
+
+    def test_airfrans_flow_domain_metric_ids_preserve_external_aero_scores(self) -> None:
+        submission = load_json(AIRFRANS_PROTOTYPE / "submission.json")
+        specification = load_json(ROOT / "benchmark-specs" / "airfrans" / "submission-spec.json")
+        errors: list[str] = []
+
+        validate_metrics(
+            errors.append,
+            submission,
+            {
+                "metric_ids": [metric["id"] for metric in specification["metrics"]],
+                "submission_format": "legacy_external_aero",
+                "overall_score_composite": specification["overall_score_composite"],
+            },
+            {"metric_definitions": specification["metrics"]},
+        )
+
+        self.assertEqual(errors, [])
+
+        submission["metric_values"]["overall_score"] += 1.0
+        validate_metrics(
+            errors.append,
+            submission,
+            {
+                "metric_ids": [metric["id"] for metric in specification["metrics"]],
+                "submission_format": "legacy_external_aero",
+                "overall_score_composite": specification["overall_score_composite"],
+            },
+            {"metric_definitions": specification["metrics"]},
+        )
+        self.assertTrue(any("declared composite equation" in error for error in errors))
 
     def test_v3_template_validation_record_uses_canonical_submission_hash(self) -> None:
         submission = load_json(V3_TEMPLATE / "submission.json")
@@ -727,6 +784,17 @@ class ValidatorTests(unittest.TestCase):
                                 "unmapped_count": 0,
                                 "extrapolated_count": 0,
                                 "metric_values": {"surface_pressure_rel_l2": value},
+                                "metric_sufficient_statistics": {
+                                    "surface_pressure_rel_l2": {
+                                        "reduction": "relative_l2_percent",
+                                        "weighting": "support_weights",
+                                        "dataset_weighting": "surface_face_area",
+                                        "numerator": value**2,
+                                        "denominator": 10000.0,
+                                        "entity_count": 2,
+                                        "total_weight": 2.0,
+                                    }
+                                },
                             }
                         ],
                     }

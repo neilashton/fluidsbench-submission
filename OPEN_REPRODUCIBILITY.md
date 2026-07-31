@@ -1,9 +1,9 @@
 # Open reproducibility contract
 
-FluidsBench uses the versioned `open-reproducibility-3.0` contract for new leaderboard results. Evaluation case IDs, canonical
-scoring locations, physical weights, and ground truth are public. The submitter runs the model and creates every prediction,
-per-case metric, aggregate metric, profile, and spatial-discretization record. FluidsBench validates and publishes those files,
-plots the submitted values, and compares submitted profiles with the pinned public ground truth.
+FluidsBench uses the versioned `open-reproducibility-3.0` contract for new leaderboard results. Evaluation case IDs, original
+public field-bearing files, canonical scoring entities, physical weights, and ground truth are public. The submitter runs the model
+and creates every prediction, per-case metric, aggregate metric, profile, and spatial-discretization record. FluidsBench validates
+and publishes those files, plots the submitted values, and compares submitted profiles with the pinned public ground truth.
 
 Required approval does **not** include executing the model, regenerating predictions, or recomputing base metrics from full
 prediction fields. Approval means that the submitted package passed the published submitted-data checks and maintainer review.
@@ -43,11 +43,20 @@ submissions are open, and dataset-owner approval. A v3 result can be submitted o
 owner-approved, and open. `prototype`, `owner_review_required`, and `retired` releases are closed; the specification gives the
 explicit reason.
 
-The scoring-support manifest defines each support's domain, location mode, quantities, components, weights, allowed mapping and
-extrapolation policy, and metric bindings. Its case set must cover exactly the official split. Each submitter joins predictions to
-stable benchmark `support_id` values. Coordinates, weights, and ground truth come from the benchmark-owned support, not from the
-prediction artifact. Mapping from a method's native output to this support is part of the submitted evaluation pipeline, so mapping
-error remains in the reported result.
+The scoring-support manifest defines each support's domain, original public file, exact arrays, point/node/face/cell association,
+required patches or masks, entity ordering, quantities, components, weights, mapping and extrapolation policy, and metric bindings.
+Its case set must cover exactly the official split, and each case support covers every required entity in the pinned original
+field-bearing file. Each submitter joins predictions to stable benchmark `support_id` values. Coordinates, authoritative physical
+measures, and ground truth come from the benchmark-owned support, not from the prediction artifact. Mapping from a method's native
+output to these entities is part of the submitted evaluation pipeline, so mapping error remains in the reported result.
+
+Three-dimensional specifications describe body surfaces and flow volumes. Lower-dimensional specifications distinguish a
+two-dimensional flow domain, a two-dimensional surface manifold embedded in three dimensions, and a one-dimensional boundary
+curve. The standard relative-L2 policy reports a physical-measure-weighted primary value and equal-entity secondary value on a
+surface, surface manifold, or boundary curve; in a volume or two-dimensional flow domain, it reports an equal-entity
+primary value and physical-measure-weighted secondary value. Face- and cell-associated data use authoritative face area, curve
+length, cell volume, or cell area. Point- and node-associated data use deterministic mass-lumped dual measures supplied by
+FluidsBench from the exact pinned mesh. Submitters do not create their own weights from a resampled or modified mesh.
 
 ## Submitter-supplied package
 
@@ -58,23 +67,30 @@ A new `submitted_evaluation` package uses `schemas/v3/submission.schema.json` an
 - `evaluation-evidence.json`, whose checksum binds the evaluation command, aggregate values, dataset and split, case set, scoring
   support, spatial report, per-case metrics, profile index, and public profile-ground-truth release;
 - `metrics/cases.json`, containing every official case and support, the scored and expected counts, count and weight coverage,
-  unmapped and extrapolated counts, per-case values where the metric defines them, and aggregate values; global and
-  dataset-reference metrics use explicit `aggregate_only` bindings rather than invented per-case surrogates;
+  unmapped and extrapolated counts, per-case values, and additive relative-L2 numerator, denominator, entity-count, and total-weight
+  evidence for the equal-entity and physical variants; global and dataset-reference metrics use explicit `aggregate_only` bindings
+  rather than invented per-case surrogates;
 - `discretization.json` and `discretization/cases.jsonl`, distinguishing training inputs, training supervision, inference inputs,
   direct model outputs, and mapping to each canonical scoring support;
 - complete required profile chunks and their hash-pinned index; and
 - an open result-data licence, plus any optional public, revision-pinned code, model, environment, and documentation metadata the
   submitter chooses to share.
 
-The spatial report does not require a method to infer on every native dataset mesh location. A model may use sparse points,
-structured grids, participant meshes, query points, or another declared representation. It must report the actual surface and
-volume counts, sampling, domain or bounding box, native-resolution comparison, connectivity, direct output counts, and mapping
-used. After that mapping, every required canonical scoring location must have exactly one prediction unless an official support
-explicitly publishes another coverage policy.
+The model's direct output does not have to use the public dataset mesh. A model may infer in memory-safe chunks or use sparse
+points, structured grids, participant meshes, query points, or another declared representation. It must report the actual surface,
+boundary-curve, volume, or two-dimensional-domain counts as applicable, together with sampling, domain or bounding box,
+native-resolution comparison, connectivity, direct output counts, and mapping used. After that mapping, every required entity in
+the exact original public support must have exactly one prediction.
 
 If a native-resolution comparison is reported, every case record carries the corresponding model count, native count, and
-fraction. Validation checks those case records against the summary and verifies the fraction arithmetically. This makes
-downsampling claims inspectable without requiring a method to run on the complete native mesh.
+fraction. Validation checks those case records against the summary and verifies the fraction arithmetically. This makes a method's
+internal downsampling inspectable while the mapped evaluation result still covers the complete original public support.
+
+Large supports may be processed in chunks. For each case and relative-L2 variant, the submitter sums the weighted squared-error
+numerator and weighted ground-truth-square denominator across chunks, together with entity count and total weight, and takes one
+square root only after the complete case is accumulated. Chunk-level L2 values must never be averaged. Cases are then
+macro-averaged so each official test case has equal influence. For vector fields, one spatial weight multiplies the complete
+squared vector magnitude.
 
 The result-data licence is required. If optional code or model artifacts are declared, the v3 schema accepts only the corresponding
 open SPDX identifiers listed in `schemas/v3/submission.schema.json`; `PROPRIETARY` and arbitrary unrecognised strings are rejected.
@@ -112,9 +128,9 @@ neither the presence nor outcome of that optional check changes result eligibili
 Maintainers review the submission and run the repository validator over the submitter-supplied files. Required validation covers:
 
 - schemas and identities;
-- exact official split and scoring-support coverage;
+- exact official split and complete original scoring-support coverage;
 - support counts, count and weight coverage, mappings, and extrapolation policy;
-- metric IDs, ranges, case aggregation, and declared derived-score arithmetic;
+- metric IDs, ranges, additive relative-L2 sufficient statistics, case-macro aggregation, and declared derived-score arithmetic;
 - spatial summaries and per-case spatial records;
 - profile structure, finite values, and the hash chain;
 - the required result-data licence, any declared optional artifact metadata, and evaluation-data-use eligibility.

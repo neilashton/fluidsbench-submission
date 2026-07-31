@@ -35,8 +35,9 @@ python3 -m reference.evaluate_predictions \
 The evaluator follows each binding's published aggregation rule. Ordinary L1, L2, MAE, MSE, and RMSE field metrics produce
 per-case evidence and are macro-averaged when the contract says so. Global R2 and the benchmark field/scalar RRMSE rules are
 calculated from the complete cross-case arrays and are marked `aggregate_only`, so no misleading per-case surrogate is emitted.
-The output also contains support counts, count and weight coverage, and unmapped and extrapolated counts. The repository validator
-requires exact official case and support coverage and recalculates macro-averages from submitted per-case evidence. Aggregate-only
+The output also contains support counts, count and weight coverage, unmapped and extrapolated counts, and additive sufficient
+statistics for every relative-L2 binding. The repository validator requires exact official case and support coverage, verifies
+each relative-L2 value against those statistics, and recalculates macro-averages from submitted per-case evidence. Aggregate-only
 values remain submitter-created values bound to the exact rule and support release. Required approval validates the submitted
 package but does not execute the model or regenerate its predictions.
 
@@ -58,7 +59,7 @@ validated case/support counts, reviewer, timestamp, and approving pull request.
 
 ## Common equations
 
-For ground truth \(y_i\), prediction \(\hat y_i\), and non-negative physical weights \(w_i\):
+For ground truth \(y_i\), prediction \(\hat y_i\), and non-negative weights \(w_i\):
 
 \[
 \operatorname{MSE}_w = \frac{\sum_i w_i(\hat y_i-y_i)^2}{\sum_i w_i}
@@ -85,10 +86,16 @@ R^2_w = 1-\frac{\sum_i w_i(y_i-\hat y_i)^2}{\sum_i w_i(y_i-\bar y_w)^2},\qquad
 \bar y_w=\frac{\sum_iw_i y_i}{\sum_iw_i}
 \]
 
-Surface metrics use face-area weights and volume metrics use cell-volume weights when those physical measures are part of the
-dataset contract. Coefficient metrics normally use equal case weights. Dataset specifications state whether a metric is computed
+An equal-entity metric sets \(w_i=1\). A physically weighted metric uses one authoritative measure per scoring entity. Supported
+dataset-weighting tokens are `surface_face_area`, `cell_volume`, `boundary_line_length`, `interior_cell_area`,
+`surface_point_dual_area`, `volume_point_dual_volume`, `boundary_point_dual_length`, and `interior_point_dual_area`. Face- and
+cell-associated values can use their face area, boundary-line length, cell area, or cell volume directly. Point-associated values
+need the corresponding benchmark-published dual area, dual length, or dual volume; a submitter must not derive a competing set of
+weights. The geometric measure appears once in each weighted sum, not squared.
+
+Dataset specifications publish which variant is primary and which is secondary. They also state whether a metric is computed
 globally or per geometry followed by a macro-average. Macro-averaging is the default for field metrics so each test geometry has
-equal influence regardless of mesh resolution.
+equal influence regardless of mesh resolution. Coefficient metrics normally use equal case weights.
 
 For per-geometry values \(m_k\), the macro-average over \(K\) test geometries is:
 
@@ -98,6 +105,32 @@ For per-geometry values \(m_k\), the macro-average over \(K\) test geometries is
 
 Vector quantities must include every declared component. Apply the same physical weight to each component and flatten the
 component axis before evaluating the norm unless the dataset specification states another reduction.
+
+### Chunk-safe relative L2
+
+Inference may be split into any number of chunks, but a chunk-level L2 value is not itself additive. For each case, support, and
+relative-L2 metric, accumulate these four sufficient statistics:
+
+\[
+N=\sum_i w_i\lVert\hat{\mathbf y}_i-\mathbf y_i\rVert_2^2,
+\qquad
+D=\sum_i w_i\lVert\mathbf y_i\rVert_2^2,
+\qquad
+n=\#\{i\},
+\qquad
+W=\sum_iw_i.
+\]
+
+For chunks \(c\), calculate the case value once from the sums:
+
+\[
+L_{2,\mathrm{rel}}(\%)=100\sqrt{\frac{\sum_c N_c}{\sum_c D_c}}.
+\]
+
+Never average chunk L2 values. `entity_count` records \(n\), and `total_weight` records \(W\), both over spatial entities rather
+than flattened vector components. For uniform weighting, `total_weight` must equal `entity_count`. The case-metrics file stores
+these values under each support's `metric_sufficient_statistics`, keyed by metric ID. When the published cross-case rule is
+`per_geometry_then_macro_average`, reconstruct each complete case first and only then average the case metrics.
 
 Inputs must be dimensional where the metric unit is dimensional. The functions reject empty arrays, non-finite numbers, negative
 weights, zero total weight, zero relative-error denominators, and constant-ground-truth R2 rather than silently inventing a value.
@@ -119,8 +152,25 @@ For scalar outputs:
 
 ## Benchmark scores
 
-[`scores.py`](scores.py) implements the prototype external-aerodynamics score and arithmetic aggregate used by the turbine
-datasets and BlendedNet. For the four field errors \(e_j\), caps \(c_j=(15,20,12,15)\), and weights
+[`scores.py`](scores.py) evaluates the dataset-declared composite used as the ranking metric for every dataset. For each error
+component \(e_k\) with published cap \(c_k\), or bounded quality component \(q_k\), the component score is
+
+\[
+S_k^{error}=\operatorname{clip}(100(1-e_k/c_k),0,100),\qquad
+S_k^{quality}=100\operatorname{clip}(q_k,0,1).
+\]
+
+For non-negative declared weights \(\alpha_k\) that sum to one:
+
+\[
+S_{overall}=\sum_k \alpha_k S_k.
+\]
+
+The exact component metric IDs, transforms, caps, and weights live in each dataset's `overall_score_composite` object. The
+validator recalculates the composite from those component values. It also checks the legacy intermediate aggregates where they
+remain part of the published result.
+
+For the prototype external-aerodynamics datasets, the four field errors have caps \(c_j=(15,20,12,15)\) and weights
 \(w_j=(0.15,0.10,0.15,0.10)\):
 
 \[
@@ -141,8 +191,12 @@ S_{profile}=\frac{0.15\,\operatorname{clip}(R^2_{velocity},0,1)100+
 S_{overall}=0.50S_{field}+0.25S_{force}+0.25S_{profile}
 \]
 
-These score caps and weights remain prototype policy until the dataset owners approve them. Dataset-specific aggregate metrics use
-the unweighted arithmetic mean of the exact source metric IDs listed in `submission-spec.json`.
+For the four newly unified rankings, the same generic rule simplifies to `100 - blended_surface_rel_l2` for BlendedNet,
+`100 - surface_pressure_rel_l2` for DrivAerNet++, and `100 * (1 - total_error)` for Rotor37 and VKI-LS59, with the result bounded
+to `[0, 100]`. The composite is calculated from the underlying four, one, six, or eight declared components respectively rather
+than from a rounded display value. These score caps and weights remain prototype policy until the dataset owners approve them.
+Dataset-specific aggregate metrics use the unweighted arithmetic mean of the exact source metric IDs listed in
+`submission-spec.json`.
 
 Run the array-level example from the repository root with:
 

@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_500",
   "split_id": "train_500",
-  "case_set_id": "official_test",
-  "split_sha256": "47f1c9d8ccedd929c61c79d040fe8c047fd767debca3457743e39ecbe502a94d",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "79aafa7d9550b689532e48790d963de19e355348eb02a3efbfa2d2268f82044d",
   "parameter_count_millions": 7.15,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "24cd9a05cc9f171e6ee6225810a4202965226f5e58cc0ada643243ea60fb5242"
+    "evidence_sha256": "415b234465150c27c1ef5159018820b109b685896bd2235ac4545f947ea91f45"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 97.29137499999999,
     "vki_mach_rrmse": 0.02255,
     "vki_mach_rel_l2": 2.373,
     "vki_mach_rel_l1": 1.667,
@@ -68,13 +69,17 @@
     "vki_angle_out_rel_l2": 2.96,
     "vki_angle_out_rel_l1": 2.088,
     "vki_angle_out_r2": 0.9791,
-    "total_error": 0.02709
+    "total_error": 0.02709,
+    "vki_mach_area_rel_l2": 2.326471,
+    "vki_nut_area_rel_l2": 5.030392,
+    "vki_m_iso_equal_rel_l2": 3.752,
+    "vki_m_iso_line_rel_l2": 3.678431
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 168,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

@@ -29,7 +29,7 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "c531bf91c514e5e3bcf3f7f81b5cb450c0e1fece4bfab0cb57a84dea01dce416"
+    "evidence_sha256": "4c1c23288ae4e8c327efabbc481d8c6c68fd829b8bd90c3d2338467d516f6c32"
   },
   "approval": {
     "status": "prototype",
@@ -40,28 +40,24 @@
     "surface_pressure_rel_l1": 24.206,
     "surface_wall_shear_rel_l2": 4.29,
     "surface_wall_shear_rel_l1": 2.917,
-    "volume_velocity_rel_l2": 9.82,
-    "volume_velocity_rel_l1": 6.874,
-    "volume_pressure_rel_l2": 8.6,
-    "volume_pressure_rel_l1": 5.934,
+    "flow_domain_velocity_rel_l2": 9.82,
+    "flow_domain_velocity_rel_l1": 6.874,
+    "flow_domain_pressure_rel_l2": 8.6,
+    "flow_domain_pressure_rel_l1": 5.934,
     "cd_r2": 0.957,
     "cl_r2": 0.992,
     "velocity_profile_r2": 0.902,
     "cp_cut_r2": 0.913,
-    "surface_pressure_mae": 157.3,
-    "surface_pressure_rmse": 218.5,
-    "surface_wall_shear_mae": 0.53,
-    "surface_wall_shear_rmse": 0.77,
-    "volume_velocity_mae": 2.2,
-    "volume_velocity_rmse": 3.14,
-    "volume_pressure_mae": 32.6,
-    "volume_pressure_rmse": 47.3,
     "c_drag_mae": 0.0058,
     "c_lift_mae": 0.0017,
     "field_score": 29.693333333333335,
     "force_score": 97.1,
     "diagnostic_score": 90.64000000000001,
-    "overall_score": 61.78166666666667
+    "overall_score": 61.78166666666667,
+    "surface_pressure_equal_entity_rel_l2": 31.939,
+    "surface_wall_shear_equal_entity_rel_l2": 4.0755,
+    "flow_domain_velocity_physical_rel_l2": 10.336842,
+    "flow_domain_pressure_physical_rel_l2": 9.052632
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
@@ -69,5 +65,5 @@
     "case_count": 1,
     "case_set_id": "aoa_extrapolation"
   },
-  "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error comparisons until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data."
+  "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error comparisons until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

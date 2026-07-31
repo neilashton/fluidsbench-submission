@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/drivaernetpp-neuraloperator",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/drivaernetplusplus/default/drivaernetpp-neuraloperator",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 42.05,
-    "ranked_value": 42.1,
-    "display_value": "42.1",
+    "value": 71.54717,
+    "ranked_value": 71.5,
+    "display_value": "71.5",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 26
     },
     "source_submission": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-neuraloperator/submission.json",
-      "sha256": "624ab92bd65e61a482ee51ef1ad2fd1b762028317cb098fe3c9d6b937d047a95"
+      "sha256": "c949b70773f41b28b913ff710a1d038a10f824644744a46f832eec21ebea6dca"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-neuraloperator/evaluation-evidence.json",
-      "sha256": "9676541cdf56dadbb1b05ecbe6d92dc57becf9b824c3a0c1a63c8e16d5fbdf8e"
+      "sha256": "8005b758d357964238f573dbff37a19bfef48b26a1efa6f632526560778065d8"
     },
     "profile_index": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-neuraloperator/profiles/index.json",
-      "sha256": "a862ccf2c281ca8fac9a3b8b0600ada305edce834b5c481723de51848faeec03"
+      "sha256": "b4d345569856e59bfa0ab14724d0d2ab147b401d9d6aa10f2cf6b93305332f12"
     }
   }
 }

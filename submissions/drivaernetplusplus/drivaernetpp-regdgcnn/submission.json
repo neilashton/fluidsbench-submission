@@ -29,39 +29,18 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "913009e94f9d850277fa95d00a91c7b067cf8b5d809456619962be9ba20b49c3"
+    "evidence_sha256": "51ba54abf9b56376cd7e23c7e6b8968e93a614935ec0c6cd624fcf1edb612185"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
-    "surface_pressure_rel_l2": 20.06,
+    "overall_score": 78.65957399999999,
+    "surface_pressure_rel_l2": 21.340426,
+    "surface_pressure_equal_entity_rel_l2": 20.06,
     "surface_pressure_rel_l1": 14.443,
-    "surface_wall_shear_rel_l2": 25.08,
-    "surface_wall_shear_rel_l1": 17.054,
-    "volume_velocity_rel_l2": 23.07,
-    "volume_velocity_rel_l1": 16.149,
-    "volume_pressure_rel_l2": 21.06,
-    "volume_pressure_rel_l1": 14.531,
-    "cd_r2": 0.933,
-    "cl_r2": 0.933,
-    "velocity_profile_r2": 0.903,
-    "cp_cut_r2": 0.933,
-    "surface_pressure_mae": 115.5,
-    "surface_pressure_rmse": 160.5,
-    "surface_wall_shear_mae": 2.39,
-    "surface_wall_shear_rmse": 3.51,
-    "volume_velocity_mae": 6.78,
-    "volume_velocity_rmse": 9.69,
-    "volume_pressure_mae": 101.7,
-    "volume_pressure_rmse": 147.4,
-    "c_drag_mae": 0.0083,
-    "c_lift_mae": 0.0125,
-    "field_score": 0,
-    "force_score": 93.3,
-    "diagnostic_score": 91.5,
-    "overall_score": 46.2
+    "surface_pressure_r2": 0.933
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
@@ -69,5 +48,5 @@
     "case_count": 1,
     "case_set_id": "default"
   },
-  "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed."
+  "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

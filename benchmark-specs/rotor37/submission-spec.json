@@ -7,26 +7,113 @@
   "scoring_support": {
     "status": "owner_review_required",
     "submissions_open": false,
-    "closed_reason": "Submissions remain closed until the Rotor37 dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+    "closed_reason": "Submissions are currently closed.",
+    "coverage_contract": {
+      "dimensionality": "2D blade-surface manifold embedded in 3D",
+      "rule": "complete_original_public_release_entities",
+      "inference_may_be_chunked": true,
+      "chunk_metrics_must_use_additive_sufficient_statistics": true,
+      "complete_case_and_entity_coverage_required": true,
+      "full_prediction_artifact_required": false,
+      "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+      "public_ground_truth": "The published PLAID test rows omit targets. An open FluidsBench case set must either use newly public test targets or be frozen from output-complete public rows 0-999; it must not be called the PLAID test split."
+    },
+    "public_supports": [
+      {
+        "id": "blade-surface-native",
+        "public_file": "PLAID Sample CGNS path /Base_2_3/Zone in the public Parquet release",
+        "format": "PLAID Sample containing a CGNS tree",
+        "domain": "two_dimensional_quad_blade_surface_embedded_in_three_dimensions",
+        "association": "CGNS GridLocation Vertex",
+        "entities": "all_native_vertices_once",
+        "arrays": [
+          "Density",
+          "Pressure",
+          "Temperature"
+        ],
+        "physical_weight": "mass_lumped_dual_quad_surface_area",
+        "verification": "confirmed_from_public_samples"
+      }
+    ],
+    "relative_l2_policy": {
+      "surface_or_curve_primary": "physical_measure_weighted",
+      "surface_or_curve_secondary": "equal_native_entity",
+      "flow_domain_primary": "equal_native_entity",
+      "flow_domain_secondary": "physical_measure_weighted",
+      "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+      "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+      "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+    },
     "owner_decisions_required": [
-      "approve_support_domains_and_location_modes",
-      "approve_entity_associations_masks_and_field_names",
-      "approve_coordinate_frame_units_domain_and_bounding_box",
-      "approve_weight_definitions",
-      "approve_case_coverage_split_bindings_and_stable_support_ids",
-      "approve_artifact_format_loader_and_immutable_release"
+      "pin_exact_public_release_files_revisions_and_hashes",
+      "confirm_array_names_entity_associations_masks_and_order",
+      "publish_authoritative_physical_weights_and_stable_entity_ids",
+      "approve_public_ground_truth_case_set_and_split_bindings",
+      "approve_loader_evaluator_and_immutable_scoring_support_manifest"
     ]
   },
   "evaluation_reference_version": "prototype-1",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {
-    "metric_id": "total_error",
-    "direction": "lower",
-    "decimal_places": 3,
+    "metric_id": "overall_score",
+    "direction": "higher",
+    "decimal_places": 1,
     "rounding": "decimal_half_up",
     "method": "competition"
   },
+  "overall_score_composite": {
+    "metric_id": "overall_score",
+    "operation": "weighted_component_scores",
+    "components": [
+      {
+        "metric_id": "rotor_density_rrmse",
+        "weight": 0.16666666666666666,
+        "transform": "bounded_error",
+        "cap": 1.0
+      },
+      {
+        "metric_id": "rotor_pressure_rrmse",
+        "weight": 0.16666666666666666,
+        "transform": "bounded_error",
+        "cap": 1.0
+      },
+      {
+        "metric_id": "rotor_temperature_rrmse",
+        "weight": 0.16666666666666666,
+        "transform": "bounded_error",
+        "cap": 1.0
+      },
+      {
+        "metric_id": "rotor_massflow_rrmse",
+        "weight": 0.16666666666666666,
+        "transform": "bounded_error",
+        "cap": 1.0
+      },
+      {
+        "metric_id": "rotor_compression_ratio_rrmse",
+        "weight": 0.16666666666666666,
+        "transform": "bounded_error",
+        "cap": 1.0
+      },
+      {
+        "metric_id": "rotor_efficiency_rrmse",
+        "weight": 0.16666666666666666,
+        "transform": "bounded_error",
+        "cap": 1.0
+      }
+    ],
+    "tolerance": 1e-06
+  },
   "metrics": [
+    {
+      "id": "overall_score",
+      "unit": "",
+      "direction": "higher",
+      "kind": "score",
+      "equation": "\\sum_k \\alpha_k S_k,\\quad \\sum_k \\alpha_k=1",
+      "aggregation": "derived_score_equation",
+      "weighting": "dataset_declared_component_weights"
+    },
     {
       "id": "total_error",
       "unit": "",
@@ -64,31 +151,58 @@
       "weighting": "equation_normalized"
     },
     {
-      "id": "rotor_density_rel_l2",
+      "id": "rotor_density_area_rel_l2",
       "unit": "%",
       "direction": "lower",
       "kind": "error",
       "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "points_equal_within_case_cases_equal"
+      "weighting": "surface_point_dual_area"
+    },
+    {
+      "id": "rotor_density_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "blade_surface_vertices_equal"
+    },
+    {
+      "id": "rotor_pressure_area_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_point_dual_area"
     },
     {
       "id": "rotor_pressure_rel_l2",
       "unit": "%",
       "direction": "lower",
       "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "blade_surface_vertices_equal"
+    },
+    {
+      "id": "rotor_temperature_area_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
       "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "points_equal_within_case_cases_equal"
+      "weighting": "surface_point_dual_area"
     },
     {
       "id": "rotor_temperature_rel_l2",
       "unit": "%",
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "points_equal_within_case_cases_equal"
+      "weighting": "blade_surface_vertices_equal"
     },
     {
       "id": "rotor_density_rel_l1",
@@ -400,72 +514,72 @@
       "label": "train_1000",
       "index_file": "splits/train_1000.json",
       "case_count": 200,
-      "case_set_id": "official_test",
+      "case_set_id": "source_evaluation_prototype",
       "case_id_status": "prototype_generated",
-      "sha256": "b802cedef6a86bfbd54e56e8a4762fb1038ad678add9e23ba6522d86e79373d6"
+      "sha256": "4cd0b3257dbfc1ea76f85c321162a9d09666b7daf8aff631fa4d7631d1ceada6"
     },
     {
       "id": "train_500",
       "label": "train_500",
       "index_file": "splits/train_500.json",
       "case_count": 200,
-      "case_set_id": "official_test",
+      "case_set_id": "source_evaluation_prototype",
       "case_id_status": "prototype_generated",
-      "sha256": "65ae45180fefb4607530d03bf06872b739da8752071f88d0acd302c87b1794e1"
+      "sha256": "8dfae2bb66528f9c2c079eb5396cd3acd18b21ff23f530b67d9f34b6b6432a8d"
     },
     {
       "id": "train_250",
       "label": "train_250",
       "index_file": "splits/train_250.json",
       "case_count": 200,
-      "case_set_id": "official_test",
+      "case_set_id": "source_evaluation_prototype",
       "case_id_status": "prototype_generated",
-      "sha256": "052fe4a190fccff32a946f1fb4c5603054f482e4b44f7bc7fcd7210e784d50f1"
+      "sha256": "bd858fbc7e4c263e0665c299805b44f71ca97340b7585b8ff9507bf908e26fd4"
     },
     {
       "id": "train_125",
       "label": "train_125",
       "index_file": "splits/train_125.json",
       "case_count": 200,
-      "case_set_id": "official_test",
+      "case_set_id": "source_evaluation_prototype",
       "case_id_status": "prototype_generated",
-      "sha256": "d2b64cc04e9c074339e2bbf84ef571f0be056f9385277a21cb666ab11579d4c0"
+      "sha256": "40457096ccdeb77014dcf997e56fad2a83a333853c2a1e33a1820c62925971bb"
     },
     {
       "id": "train_64",
       "label": "train_64",
       "index_file": "splits/train_64.json",
       "case_count": 200,
-      "case_set_id": "official_test",
+      "case_set_id": "source_evaluation_prototype",
       "case_id_status": "prototype_generated",
-      "sha256": "ddac1498ec22bb5b0d4ec233f66e42f3ba2ee30f1047a0c6ada753e3f8b3726b"
+      "sha256": "00907949fd12775cfd3ade06605d3be94efde5a4fb336f1802465b90b741ab35"
     },
     {
       "id": "train_32",
       "label": "train_32",
       "index_file": "splits/train_32.json",
       "case_count": 200,
-      "case_set_id": "official_test",
+      "case_set_id": "source_evaluation_prototype",
       "case_id_status": "prototype_generated",
-      "sha256": "c5daff825aa91923764cd7ce4792653ed946dba03dac0404b7c9fe5b8978be88"
+      "sha256": "22ffe4433e60e404e08b3cd9dbae7f8d0702ebdb1f21420778fef06dbafe282a"
     },
     {
       "id": "train_16",
       "label": "train_16",
       "index_file": "splits/train_16.json",
       "case_count": 200,
-      "case_set_id": "official_test",
+      "case_set_id": "source_evaluation_prototype",
       "case_id_status": "prototype_generated",
-      "sha256": "a5568127f676c93511918643517de4ee6867aaa340447059673f246f2a2730f7"
+      "sha256": "337d6e7292c465d0cff226ba131a9747fe3f6658a54a75e4ad654de20dd54c30"
     },
     {
       "id": "train_8",
       "label": "train_8",
       "index_file": "splits/train_8.json",
       "case_count": 200,
-      "case_set_id": "official_test",
+      "case_set_id": "source_evaluation_prototype",
       "case_id_status": "prototype_generated",
-      "sha256": "36b05a39ada159d28632f3dae7f97674d4a18694ddd2622d021620cc8897741a"
+      "sha256": "b3ef131aa005d6b12e64f68349e31223649297c58e9b3f97cd73ae09b8b5e367"
     }
   ]
 }

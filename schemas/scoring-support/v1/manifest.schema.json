@@ -321,7 +321,9 @@
           "required": ["kind", "measure", "rule_id", "rule_version"],
           "properties": {
             "kind": { "const": "geometric" },
-            "measure": { "enum": ["face_area", "cell_volume", "line_length"] },
+            "measure": {
+              "enum": ["face_area", "cell_area", "cell_volume", "line_length"]
+            },
             "rule_id": { "$ref": "#/$defs/safe_id" },
             "rule_version": {
               "type": "string",

@@ -1,18 +1,53 @@
-"""Minimal example showing how participant-owned arrays use the references."""
+"""Minimal dual-weight and chunk-safe relative-L2 example."""
 
 from __future__ import annotations
 
 import numpy as np
 
-from reference.metrics import relative_l1, relative_l2, weighted_mae, weighted_mse, weighted_rmse
+from reference.evaluate_predictions import (
+    relative_l2_from_sufficient_statistics,
+    relative_l2_sufficient_statistics,
+)
 
 
 ground_truth = np.array([101325.0, 100980.0, 100410.0])
 prediction = np.array([101300.0, 101020.0, 100500.0])
-face_areas = np.array([0.10, 0.15, 0.08])
+benchmark_face_areas = np.array([0.10, 0.15, 0.08])
 
-print(f"Relative L1: {relative_l1(ground_truth, prediction, face_areas):.6f}%")
-print(f"Relative L2: {relative_l2(ground_truth, prediction, face_areas):.6f}%")
-print(f"MAE: {weighted_mae(ground_truth, prediction, face_areas):.6f} Pa")
-print(f"MSE: {weighted_mse(ground_truth, prediction, face_areas):.6f} Pa^2")
-print(f"RMSE: {weighted_rmse(ground_truth, prediction, face_areas):.6f} Pa")
+uniform_statistics = relative_l2_sufficient_statistics(
+    ground_truth[:, None],
+    prediction[:, None],
+    benchmark_face_areas,
+    weighting="uniform",
+)
+area_statistics = relative_l2_sufficient_statistics(
+    ground_truth[:, None],
+    prediction[:, None],
+    benchmark_face_areas,
+    weighting="support_weights",
+)
+
+print(
+    "Equal-face relative L2: "
+    f"{relative_l2_from_sufficient_statistics([uniform_statistics]):.6f}%"
+)
+print(
+    "Face-area-weighted relative L2: "
+    f"{relative_l2_from_sufficient_statistics([area_statistics]):.6f}%"
+)
+
+# Chunks retain additive numerators and denominators; chunk L2 values are not averaged.
+chunk_statistics = [
+    relative_l2_sufficient_statistics(
+        ground_truth[index, None],
+        prediction[index, None],
+        benchmark_face_areas[index],
+        weighting="support_weights",
+    )
+    for index in (slice(0, 2), slice(2, 3))
+]
+print(
+    "Chunked face-area-weighted relative L2: "
+    f"{relative_l2_from_sufficient_statistics(chunk_statistics):.6f}%"
+)
+print(f"Chunk sufficient statistics: {chunk_statistics}")

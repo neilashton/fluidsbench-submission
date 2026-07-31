@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/drivaernetplusplus/default/drivaernetpp-pointnet",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/drivaernetplusplus/default/drivaernetpp-pointnet",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 37.75,
-    "ranked_value": 37.8,
-    "display_value": "37.8",
+    "value": 64.122642,
+    "ranked_value": 64.1,
+    "display_value": "64.1",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 28
     },
     "source_submission": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-pointnet/submission.json",
-      "sha256": "c08d4eeb77aea74339edf8792a73eb10abd5dd3c8f744be704c6949f38aa076c"
+      "sha256": "c191278647bc9818e87a6d4fb65795898f14394b49154e2f0f944323dbd0357b"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-pointnet/evaluation-evidence.json",
-      "sha256": "6c5b92496e93db583e7327728f4aaf142cf2d4567c9be45c0df8fc1ecf973f42"
+      "sha256": "7cdd5da4758ef6fc5779fa0a6a51f74eff98f8bc1cf42091115405388bef5cb9"
     },
     "profile_index": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-pointnet/profiles/index.json",
-      "sha256": "b7261de389a16bd7575196c61a03a7ddf8da7112dec5265c0ec82f552782a952"
+      "sha256": "bda2c08ddba8253365e4af4fbd81db1f2215745b4addadc3c05e567495bf72c5"
     }
   }
 }

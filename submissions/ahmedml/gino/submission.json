@@ -29,7 +29,7 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "8c7ed628ed053d40c09a74a4bcdf440839dabd5f3e5803d385b348c0e23ff99a"
+    "evidence_sha256": "71826c9540b9869a77b7d46794188453d1746e167e9a1ebcdcc23398cc7e5059"
   },
   "approval": {
     "status": "prototype",
@@ -61,7 +61,11 @@
     "field_score": 49.644999999999996,
     "force_score": 86.08,
     "diagnostic_score": 81.72,
-    "overall_score": 66.77250000000001
+    "overall_score": 66.77250000000001,
+    "surface_pressure_equal_entity_rel_l2": 7.821,
+    "surface_wall_shear_equal_entity_rel_l2": 8.0982,
+    "volume_velocity_physical_rel_l2": 6.292929,
+    "volume_pressure_physical_rel_l2": 8.181818
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
@@ -69,5 +73,5 @@
     "case_count": 50,
     "case_set_id": "standard"
   },
-  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data."
+  "note": "Baseline L2 metrics from AB-UPT v2 appendix; L1 and profile R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

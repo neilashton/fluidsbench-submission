@@ -19,6 +19,7 @@ from urllib.parse import unquote, urlencode, urlsplit, urlunsplit
 if __package__:
     from .validate_submission import (
         load_json,
+        manifest_with_benchmark_contract,
         schema_errors,
         sha256_file,
         submission_files,
@@ -28,6 +29,7 @@ if __package__:
 else:
     from validate_submission import (
         load_json,
+        manifest_with_benchmark_contract,
         schema_errors,
         sha256_file,
         submission_files,
@@ -737,21 +739,7 @@ def expected_outputs(
     *,
     generated_at: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
-    updated_manifest = deepcopy(manifest)
-    for dataset in updated_manifest.get("datasets", []):
-        slug = dataset.get("slug")
-        if not isinstance(slug, str):
-            continue
-        spec_path = ROOT / "benchmark-specs" / slug / "submission-spec.json"
-        if not spec_path.is_file():
-            continue
-        scoring_support = load_json(spec_path).get("scoring_support")
-        if isinstance(scoring_support, dict):
-            dataset["scoring_support"] = {
-                key: deepcopy(value)
-                for key, value in scoring_support.items()
-                if key != "manifest_file"
-            }
+    updated_manifest = manifest_with_benchmark_contract(manifest)
     rows_by_dataset = source_rows_by_dataset(updated_manifest)
     add_release_rankings(updated_manifest, rows_by_dataset)
     all_rows: list[dict[str, Any]] = []
@@ -1111,10 +1099,10 @@ def main() -> int:
         return 0
 
     paths = getattr(args, "paths", None) or None
-    errors, totals = validate_many(paths)
+    manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
+    errors, totals = validate_many(paths, manifest=manifest)
     if errors:
         return print_errors(errors)
-    manifest = load_json(MANIFEST_PATH)
     errors = release_contract_errors(manifest)
     if errors:
         return print_errors(errors)

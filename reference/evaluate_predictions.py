@@ -12,7 +12,7 @@ import argparse
 import json
 import math
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 
@@ -27,15 +27,15 @@ from reference.scoring_support import (
 )
 
 
-def field_metric(
+def _prepare_field_metric_inputs(
     truth: np.ndarray,
     prediction: np.ndarray,
     weights: np.ndarray,
     *,
-    reduction: str,
     weighting: str,
-) -> float:
-    """Calculate one case metric after flattening vector components.
+    allow_zero_total_weight: bool = False,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Validate and flatten one field while retaining spatial weights.
 
     Each entity's spatial weight is repeated for every vector component.
     """
@@ -59,24 +59,146 @@ def field_metric(
         spatial_weights = np.ones_like(spatial_weights)
     elif weighting != "support_weights":
         raise ScoringSupportError(f"unknown weighting {weighting!r}")
-    if not float(np.sum(spatial_weights)) > 0:
+    if not allow_zero_total_weight and not float(np.sum(spatial_weights)) > 0:
         raise ScoringSupportError("metric weights must have positive total weight")
 
     repeated_weights = np.repeat(spatial_weights, truth.shape[1])
     flat_truth = truth.reshape(-1)
     flat_prediction = prediction.reshape(-1)
+    return flat_truth, flat_prediction, spatial_weights, repeated_weights
+
+
+def relative_l2_sufficient_statistics(
+    truth: np.ndarray,
+    prediction: np.ndarray,
+    weights: np.ndarray,
+    *,
+    weighting: str,
+) -> dict[str, float | int]:
+    """Return additive statistics for an exact relative-L2 calculation.
+
+    ``entity_count`` and ``total_weight`` count spatial entities, not flattened
+    vector components. The numerator and denominator do include every declared
+    component, with the same spatial weight repeated for each component.
+    """
+
+    flat_truth, flat_prediction, spatial_weights, repeated_weights = (
+        _prepare_field_metric_inputs(
+            truth,
+            prediction,
+            weights,
+            weighting=weighting,
+            allow_zero_total_weight=True,
+        )
+    )
+    error = flat_prediction - flat_truth
+    numerator = float(np.sum(repeated_weights * np.square(error)))
+    denominator = float(np.sum(repeated_weights * np.square(flat_truth)))
+    return {
+        "numerator": numerator,
+        "denominator": denominator,
+        "entity_count": int(len(spatial_weights)),
+        "total_weight": float(np.sum(spatial_weights)),
+    }
+
+
+def relative_l2_from_sufficient_statistics(
+    statistics: Sequence[Mapping[str, float | int]],
+) -> float:
+    """Combine one or more chunks and calculate relative L2 in percent."""
+
+    if not statistics:
+        raise ScoringSupportError("relative L2 statistics must contain at least one chunk")
+    numerator = 0.0
+    denominator = 0.0
+    entity_count = 0
+    total_weight = 0.0
+    for chunk in statistics:
+        chunk_numerator = chunk.get("numerator")
+        chunk_denominator = chunk.get("denominator")
+        chunk_entity_count = chunk.get("entity_count")
+        chunk_total_weight = chunk.get("total_weight")
+        if (
+            not isinstance(chunk_numerator, (int, float))
+            or isinstance(chunk_numerator, bool)
+            or not math.isfinite(chunk_numerator)
+            or chunk_numerator < 0
+        ):
+            raise ScoringSupportError("relative L2 numerator must be finite and non-negative")
+        if (
+            not isinstance(chunk_denominator, (int, float))
+            or isinstance(chunk_denominator, bool)
+            or not math.isfinite(chunk_denominator)
+            or chunk_denominator < 0
+        ):
+            raise ScoringSupportError(
+                "relative L2 chunk denominator must be finite and non-negative"
+            )
+        if (
+            not isinstance(chunk_entity_count, int)
+            or isinstance(chunk_entity_count, bool)
+            or chunk_entity_count < 1
+        ):
+            raise ScoringSupportError("relative L2 entity_count must be a positive integer")
+        if (
+            not isinstance(chunk_total_weight, (int, float))
+            or isinstance(chunk_total_weight, bool)
+            or not math.isfinite(chunk_total_weight)
+            or chunk_total_weight < 0
+        ):
+            raise ScoringSupportError(
+                "relative L2 chunk total_weight must be finite and non-negative"
+            )
+        numerator += float(chunk_numerator)
+        denominator += float(chunk_denominator)
+        entity_count += chunk_entity_count
+        total_weight += float(chunk_total_weight)
+    if entity_count < 1 or not total_weight > 0:
+        raise ScoringSupportError("relative L2 statistics describe an empty support")
+    if not denominator > 0:
+        raise ScoringSupportError("relative L2 ground-truth denominator is zero")
+    value = 100.0 * math.sqrt(numerator / denominator)
+    if not math.isfinite(value):
+        raise ScoringSupportError("metric result is non-finite")
+    return value
+
+
+def field_metric(
+    truth: np.ndarray,
+    prediction: np.ndarray,
+    weights: np.ndarray,
+    *,
+    reduction: str,
+    weighting: str,
+) -> float:
+    """Calculate one case metric after flattening vector components."""
+
+    if reduction == "relative_l2_percent":
+        return relative_l2_from_sufficient_statistics(
+            [
+                relative_l2_sufficient_statistics(
+                    truth,
+                    prediction,
+                    weights,
+                    weighting=weighting,
+                )
+            ]
+        )
+
+    flat_truth, flat_prediction, _spatial_weights, repeated_weights = (
+        _prepare_field_metric_inputs(
+            truth,
+            prediction,
+            weights,
+            weighting=weighting,
+        )
+    )
     error = flat_prediction - flat_truth
     if reduction == "relative_l1_percent":
         denominator = float(np.sum(repeated_weights * np.abs(flat_truth)))
         if not denominator > 0:
             raise ScoringSupportError("relative L1 ground-truth denominator is zero")
         value = 100.0 * float(np.sum(repeated_weights * np.abs(error))) / denominator
-    elif reduction == "relative_l2_percent":
-        denominator = float(np.sum(repeated_weights * np.square(flat_truth)))
-        if not denominator > 0:
-            raise ScoringSupportError("relative L2 ground-truth denominator is zero")
-        numerator = float(np.sum(repeated_weights * np.square(error)))
-        value = 100.0 * math.sqrt(numerator / denominator)
     elif reduction == "mae":
         value = float(np.sum(repeated_weights * np.abs(error))) / float(
             np.sum(repeated_weights)
@@ -113,20 +235,37 @@ def evaluate_support(
     support: ScoringSupport,
     aligned: Mapping[str, np.ndarray],
     definition: Mapping[str, Any],
-) -> dict[str, float]:
+) -> tuple[dict[str, float], dict[str, dict[str, Any]]]:
     values: dict[str, float] = {}
+    sufficient_statistics: dict[str, dict[str, Any]] = {}
     for binding in definition["metric_bindings"]:
         if binding["case_evidence"] != "metric_value":
             continue
         quantity_id = binding["quantity_id"]
-        values[binding["metric_id"]] = field_metric(
-            support.targets[quantity_id],
-            aligned[quantity_id],
-            support.weights,
-            reduction=binding["reduction"],
-            weighting=binding["weighting"],
-        )
-    return values
+        metric_id = binding["metric_id"]
+        if binding["reduction"] == "relative_l2_percent":
+            statistics = relative_l2_sufficient_statistics(
+                support.targets[quantity_id],
+                aligned[quantity_id],
+                support.weights,
+                weighting=binding["weighting"],
+            )
+            values[metric_id] = relative_l2_from_sufficient_statistics([statistics])
+            sufficient_statistics[metric_id] = {
+                "reduction": "relative_l2_percent",
+                "weighting": binding["weighting"],
+                "dataset_weighting": binding["dataset_weighting"],
+                **statistics,
+            }
+        else:
+            values[metric_id] = field_metric(
+                support.targets[quantity_id],
+                aligned[quantity_id],
+                support.weights,
+                reduction=binding["reduction"],
+                weighting=binding["weighting"],
+            )
+    return values, sufficient_statistics
 
 
 def aggregate_metric(
@@ -311,7 +450,7 @@ def evaluate_prediction_artifact(
                     f"{case_id}/{support_name} row_count does not match prediction data"
                 )
             aligned = align_predictions(support, predictions)
-            metric_values = evaluate_support(
+            metric_values, metric_sufficient_statistics = evaluate_support(
                 support, aligned, release.supports[support_name]
             )
             for binding in release.supports[support_name]["metric_bindings"]:
@@ -343,6 +482,7 @@ def evaluate_prediction_artifact(
                     "unmapped_count": 0,
                     "extrapolated_count": 0,
                     "metric_values": metric_values,
+                    "metric_sufficient_statistics": metric_sufficient_statistics,
                 }
             )
         case_records.append({"case_id": case_id, "supports": support_records})

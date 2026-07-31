@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -19,13 +19,13 @@
     "submission_schema_version": "1.0"
   },
   "ranking": {
-    "metric_id": "blended_surface_rel_l2",
-    "value": 10.3,
-    "ranked_value": 10.3,
-    "display_value": "10.30",
-    "unit": "%",
-    "direction": "lower",
-    "decimal_places": 2,
+    "metric_id": "overall_score",
+    "value": 89.16262125,
+    "ranked_value": 89.2,
+    "display_value": "89.2",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
     "rounding": "decimal_half_up",
     "method": "competition",
     "rank": 1,
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 71
     },
     "source_submission": {
       "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/submission.json",
-      "sha256": "f4761596f02571e51b8dc7f8d0971cfa756e71e39f90abaa6e75960c8e302406"
+      "sha256": "0dad281d94106c6d53e5bc3c7268b8fb30cffdcef7c106a8ee14864d522676c7"
     },
     "evaluation_evidence": {
       "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/evaluation-evidence.json",
-      "sha256": "4279bcb823daee9989fab2e44e7cbc7b94502577b726bd2597e3b101ce24a0bc"
+      "sha256": "979eb8ec7bcf0b8182a55818683a2d9bc78269caa39708a4da2b84dbf7e3fd37"
     },
     "profile_index": {
       "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/profiles/index.json",

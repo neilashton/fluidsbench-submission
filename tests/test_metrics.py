@@ -15,7 +15,7 @@ from reference.metrics import (
     weighted_mse,
     weighted_rmse,
 )
-from reference.scores import arithmetic_mean, legacy_aero_scores
+from reference.scores import arithmetic_mean, composite_overall_score, legacy_aero_scores
 
 
 class MetricTests(unittest.TestCase):
@@ -61,7 +61,33 @@ class MetricTests(unittest.TestCase):
         self.assertAlmostEqual(scores["force_score"], 86.0)
         self.assertAlmostEqual(scores["diagnostic_score"], 66.0)
         self.assertAlmostEqual(scores["overall_score"], 63.0)
+        flow_domain_values = dict(values)
+        flow_domain_values["flow_domain_velocity_rel_l2"] = flow_domain_values.pop("volume_velocity_rel_l2")
+        flow_domain_values["flow_domain_pressure_rel_l2"] = flow_domain_values.pop("volume_pressure_rel_l2")
+        self.assertEqual(legacy_aero_scores(flow_domain_values), scores)
         self.assertAlmostEqual(arithmetic_mean({"a": 1.0, "b": 3.0}, ["a", "b"]), 2.0)
+
+    def test_dataset_declared_composite_score(self) -> None:
+        declaration = {
+            "operation": "weighted_component_scores",
+            "components": [
+                {"metric_id": "error", "weight": 0.75, "transform": "bounded_error", "cap": 20.0},
+                {"metric_id": "quality", "weight": 0.25, "transform": "bounded_quality"},
+            ],
+        }
+        self.assertAlmostEqual(
+            composite_overall_score({"error": 10.0, "quality": 0.8}, declaration),
+            57.5,
+        )
+        self.assertAlmostEqual(
+            composite_overall_score({"error": 40.0, "quality": 2.0}, declaration),
+            25.0,
+        )
+
+        invalid = dict(declaration)
+        invalid["components"] = [dict(declaration["components"][0], weight=0.5)]
+        with self.assertRaises(ValueError):
+            composite_overall_score({"error": 10.0}, invalid)
 
     def test_invalid_inputs_raise(self) -> None:
         with self.assertRaises(ValueError):

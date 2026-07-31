@@ -11,10 +11,14 @@ import numpy as np
 from reference.evaluate_predictions import (
     aggregate_metric,
     evaluate_prediction_artifact,
+    evaluate_support,
     field_metric,
+    relative_l2_from_sufficient_statistics,
+    relative_l2_sufficient_statistics,
 )
 from reference.scoring_support import (
     LOCATION_MODES,
+    ScoringSupport,
     ScoringSupportError,
     load_support_release,
     sha256_file,
@@ -67,7 +71,14 @@ class ScoringSupportV3Tests(unittest.TestCase):
             ["case-001", "case-002"],
         )
         self.assertAlmostEqual(result["metric_values"]["pressure_rel_l1"], 22.22222222222222)
-        self.assertAlmostEqual(result["metric_values"]["pressure_rel_l2"], 24.692605883433632)
+        self.assertAlmostEqual(
+            result["metric_values"]["pressure_equal_rel_l2"],
+            24.87944682143987,
+        )
+        self.assertAlmostEqual(
+            result["metric_values"]["pressure_physical_rel_l2"],
+            24.692605883433632,
+        )
         self.assertAlmostEqual(result["metric_values"]["pressure_mae"], 0.625)
         self.assertAlmostEqual(result["metric_values"]["pressure_rmse"], 0.7865660924854931)
         for case in result["cases"]:
@@ -183,6 +194,126 @@ class ScoringSupportV3Tests(unittest.TestCase):
             ),
             1.0,
         )
+
+    def test_relative_l2_statistics_are_chunk_additive(self) -> None:
+        truth = np.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+        prediction = np.asarray([[2.0, 1.0], [3.0, 6.0], [4.0, 8.0]])
+        weights = np.asarray([0.5, 2.0, 1.5])
+        chunks = [
+            relative_l2_sufficient_statistics(
+                truth[index],
+                prediction[index],
+                weights[index],
+                weighting="support_weights",
+            )
+            for index in (slice(0, 2), slice(2, 3))
+        ]
+        self.assertEqual(sum(item["entity_count"] for item in chunks), 3)
+        self.assertAlmostEqual(sum(item["total_weight"] for item in chunks), 4.0)
+        self.assertAlmostEqual(
+            relative_l2_from_sufficient_statistics(chunks),
+            field_metric(
+                truth,
+                prediction,
+                weights,
+                reduction="relative_l2_percent",
+                weighting="support_weights",
+            ),
+        )
+
+        uniform = relative_l2_sufficient_statistics(
+            truth,
+            prediction,
+            weights,
+            weighting="uniform",
+        )
+        self.assertEqual(uniform["entity_count"], 3)
+        self.assertEqual(uniform["total_weight"], 3.0)
+
+        zero_truth_chunk = relative_l2_sufficient_statistics(
+            np.zeros((1, 2)),
+            np.ones((1, 2)),
+            np.ones(1),
+            weighting="uniform",
+        )
+        self.assertEqual(zero_truth_chunk["denominator"], 0.0)
+        with self.assertRaisesRegex(
+            ScoringSupportError,
+            "ground-truth denominator is zero",
+        ):
+            relative_l2_from_sufficient_statistics([zero_truth_chunk])
+
+    def test_case_evidence_emits_relative_l2_sufficient_statistics(self) -> None:
+        result = self.evaluate_fixture()
+        support_statistics = result["cases"][0]["supports"][0][
+            "metric_sufficient_statistics"
+        ]
+        self.assertEqual(
+            support_statistics["pressure_equal_rel_l2"],
+            {
+                "reduction": "relative_l2_percent",
+                "weighting": "uniform",
+                "dataset_weighting": "entities_equal",
+                "numerator": 2.0,
+                "denominator": 21.0,
+                "entity_count": 3,
+                "total_weight": 3.0,
+            },
+        )
+        statistics = support_statistics["pressure_physical_rel_l2"]
+        self.assertEqual(
+            statistics,
+            {
+                "reduction": "relative_l2_percent",
+                "weighting": "support_weights",
+                "dataset_weighting": "synthetic_support_weights",
+                "numerator": 3.0,
+                "denominator": 25.0,
+                "entity_count": 3,
+                "total_weight": 4.0,
+            },
+        )
+
+    def test_one_support_can_emit_equal_entity_and_physical_relative_l2(self) -> None:
+        support = ScoringSupport(
+            case_id="case-001",
+            support_name="surface",
+            support_ids=np.asarray(["s0", "s1"]),
+            coordinates=np.asarray([[0.0, 0.0], [1.0, 0.0]]),
+            weights=np.asarray([1.0, 3.0]),
+            targets={"pressure": np.asarray([[1.0], [2.0]])},
+        )
+        aligned = {"pressure": np.asarray([[2.0], [2.0]])}
+        bindings = [
+            {
+                "metric_id": "pressure_equal_entity_rel_l2",
+                "quantity_id": "pressure",
+                "reduction": "relative_l2_percent",
+                "weighting": "uniform",
+                "dataset_weighting": "points_equal_within_case_cases_equal",
+                "case_evidence": "metric_value",
+            },
+            {
+                "metric_id": "pressure_area_rel_l2",
+                "quantity_id": "pressure",
+                "reduction": "relative_l2_percent",
+                "weighting": "support_weights",
+                "dataset_weighting": "surface_point_dual_area",
+                "case_evidence": "metric_value",
+            },
+        ]
+        values, statistics = evaluate_support(
+            support,
+            aligned,
+            {"metric_bindings": bindings},
+        )
+        self.assertEqual(set(values), {binding["metric_id"] for binding in bindings})
+        self.assertEqual(set(statistics), set(values))
+        self.assertEqual(
+            statistics["pressure_equal_entity_rel_l2"]["total_weight"],
+            2.0,
+        )
+        self.assertEqual(statistics["pressure_area_rel_l2"]["total_weight"], 4.0)
 
     def test_published_cross_case_aggregation_rules(self) -> None:
         ones = np.ones(2)

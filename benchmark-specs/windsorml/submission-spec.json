@@ -7,14 +7,76 @@
   "scoring_support": {
     "status": "owner_review_required",
     "submissions_open": false,
-    "closed_reason": "Submissions remain closed until the WindsorML dataset owner approves canonical scoring locations, ground-truth fields, physical weights, case coverage, artifact format, and an immutable scoring-support manifest.",
+    "closed_reason": "Submissions are currently closed.",
+    "coverage_contract": {
+      "dimensionality": "3D surface and 3D flow domain",
+      "rule": "complete_original_public_release_entities",
+      "inference_may_be_chunked": true,
+      "chunk_metrics_must_use_additive_sufficient_statistics": true,
+      "complete_case_and_entity_coverage_required": true,
+      "full_prediction_artifact_required": false,
+      "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+      "public_ground_truth": "Ground-truth fields are in the public dataset release."
+    },
+    "public_supports": [
+      {
+        "id": "surface-native",
+        "public_file": "run_<case>/boundary_<case>.vtu",
+        "format": "VTK UnstructuredGrid boundary mesh",
+        "domain": "three_dimensional_body_surface",
+        "association": "PointData",
+        "entities": "all_native_boundary_points",
+        "arrays": [
+          "cpavg",
+          "cfxavg",
+          "cfyavg",
+          "cfzavg",
+          "cpvar",
+          "yplusavg"
+        ],
+        "units_note": "cpavg and the cfxavg/cfyavg/cfzavg skin-friction components are dimensionless coefficients",
+        "physical_weight": "mass_lumped_dual_polygon_area",
+        "verification": "confirmed_from_public_file"
+      },
+      {
+        "id": "flow-domain-native",
+        "public_file": "run_<case>/volume_<case>.vtu",
+        "format": "VTK UnstructuredGrid",
+      "domain": "three_dimensional_flow_domain",
+      "association": "CellData",
+      "entities": "all_native_volume_cells",
+      "arrays": ["velocityxavg", "velocityyavg", "velocityzavg", "pressureavg"],
+      "available_cell_arrays": [
+        "velocityxavg",
+        "velocityyavg",
+        "velocityzavg",
+        "reynoldsstressxx",
+        "reynoldsstressxy",
+        "reynoldsstressxz",
+        "reynoldsstressyy",
+        "reynoldsstressyz",
+        "reynoldsstresszz",
+        "pressureavg"
+      ],
+      "physical_weight": "cell_volume",
+      "verification": "confirmed_from_public_file"
+      }
+    ],
+    "relative_l2_policy": {
+      "surface_or_curve_primary": "physical_measure_weighted",
+      "surface_or_curve_secondary": "equal_native_entity",
+      "flow_domain_primary": "equal_native_entity",
+      "flow_domain_secondary": "physical_measure_weighted",
+      "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+      "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+      "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+    },
     "owner_decisions_required": [
-      "approve_support_domains_and_location_modes",
-      "approve_entity_associations_masks_and_field_names",
-      "approve_coordinate_frame_units_domain_and_bounding_box",
-      "approve_weight_definitions",
-      "approve_case_coverage_split_bindings_and_stable_support_ids",
-      "approve_artifact_format_loader_and_immutable_release"
+      "pin_exact_public_release_files_revisions_and_hashes",
+      "confirm_array_names_entity_associations_masks_and_order",
+      "publish_authoritative_physical_weights_and_stable_entity_ids",
+      "approve_public_ground_truth_case_set_and_split_bindings",
+      "approve_loader_evaluator_and_immutable_scoring_support_manifest"
     ]
   },
   "evaluation_reference_version": "prototype-1",
@@ -26,15 +88,30 @@
     "rounding": "decimal_half_up",
     "method": "competition"
   },
+  "overall_score_composite": {
+    "metric_id": "overall_score",
+    "operation": "weighted_component_scores",
+    "components": [
+      { "metric_id": "surface_pressure_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 15.0 },
+      { "metric_id": "surface_wall_shear_rel_l2", "weight": 0.1, "transform": "bounded_error", "cap": 20.0 },
+      { "metric_id": "volume_velocity_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 12.0 },
+      { "metric_id": "volume_pressure_rel_l2", "weight": 0.1, "transform": "bounded_error", "cap": 15.0 },
+      { "metric_id": "cd_r2", "weight": 0.15, "transform": "bounded_quality" },
+      { "metric_id": "cl_r2", "weight": 0.1, "transform": "bounded_quality" },
+      { "metric_id": "velocity_profile_r2", "weight": 0.15, "transform": "bounded_quality" },
+      { "metric_id": "cp_cut_r2", "weight": 0.1, "transform": "bounded_quality" }
+    ],
+    "tolerance": 1e-06
+  },
   "metrics": [
     {
       "id": "overall_score",
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "0.50\\,S_{\\mathrm{field}} + 0.25\\,S_{\\mathrm{force}} + 0.25\\,S_{\\mathrm{profile}}",
+      "equation": "\\sum_k \\alpha_k S_k,\\quad \\sum_k \\alpha_k=1",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "field_score",
@@ -70,7 +147,16 @@
       "kind": "error",
       "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "surface_face_area"
+      "weighting": "surface_point_dual_area"
+    },
+    {
+      "id": "surface_pressure_equal_entity_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_entities_equal"
     },
     {
       "id": "surface_wall_shear_rel_l2",
@@ -79,10 +165,28 @@
       "kind": "error",
       "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "surface_face_area"
+      "weighting": "surface_point_dual_area"
+    },
+    {
+      "id": "surface_wall_shear_equal_entity_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_entities_equal"
     },
     {
       "id": "volume_velocity_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "volume_cells_equal"
+    },
+    {
+      "id": "volume_velocity_physical_rel_l2",
       "unit": "%",
       "direction": "lower",
       "kind": "error",
@@ -92,6 +196,15 @@
     },
     {
       "id": "volume_pressure_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "volume_cells_equal"
+    },
+    {
+      "id": "volume_pressure_physical_rel_l2",
       "unit": "%",
       "direction": "lower",
       "kind": "error",
@@ -106,7 +219,7 @@
       "kind": "error",
       "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "surface_face_area"
+      "weighting": "surface_point_dual_area"
     },
     {
       "id": "surface_wall_shear_rel_l1",
@@ -115,25 +228,25 @@
       "kind": "error",
       "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "surface_face_area"
+      "weighting": "surface_point_dual_area"
     },
     {
       "id": "volume_velocity_rel_l1",
       "unit": "%",
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "cell_volume"
+      "weighting": "volume_cells_equal"
     },
     {
       "id": "volume_pressure_rel_l1",
       "unit": "%",
       "direction": "lower",
       "kind": "error",
-      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "equation": "100\\,\\frac{\\sum_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i\\lvert y_i\\rvert}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "cell_volume"
+      "weighting": "volume_cells_equal"
     },
     {
       "id": "velocity_profile_r2",
@@ -154,76 +267,40 @@
       "weighting": "samples_equal"
     },
     {
-      "id": "surface_pressure_mae",
-      "unit": "Pa",
-      "direction": "lower",
-      "kind": "error",
-      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
-      "aggregation": "per_geometry_then_macro_average",
-      "weighting": "surface_face_area"
-    },
-    {
-      "id": "surface_wall_shear_mae",
-      "unit": "Pa",
-      "direction": "lower",
-      "kind": "error",
-      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
-      "aggregation": "per_geometry_then_macro_average",
-      "weighting": "surface_face_area"
-    },
-    {
       "id": "volume_velocity_mae",
       "unit": "m/s",
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "cell_volume"
+      "weighting": "volume_cells_equal"
     },
     {
       "id": "volume_pressure_mae",
       "unit": "Pa",
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i}",
+      "equation": "\\frac{1}{N}\\sum_i\\lvert\\hat{y}_i-y_i\\rvert",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "cell_volume"
-    },
-    {
-      "id": "surface_pressure_rmse",
-      "unit": "Pa",
-      "direction": "lower",
-      "kind": "error",
-      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
-      "aggregation": "per_geometry_then_macro_average",
-      "weighting": "surface_face_area"
-    },
-    {
-      "id": "surface_wall_shear_rmse",
-      "unit": "Pa",
-      "direction": "lower",
-      "kind": "error",
-      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
-      "aggregation": "per_geometry_then_macro_average",
-      "weighting": "surface_face_area"
+      "weighting": "volume_cells_equal"
     },
     {
       "id": "volume_velocity_rmse",
       "unit": "m/s",
       "direction": "lower",
       "kind": "error",
-      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "cell_volume"
+      "weighting": "volume_cells_equal"
     },
     {
       "id": "volume_pressure_rmse",
       "unit": "Pa",
       "direction": "lower",
       "kind": "error",
-      "equation": "\\sqrt{\\frac{\\sum_i w_i(\\hat{y}_i-y_i)^2}{\\sum_i w_i}}",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_i(\\hat{y}_i-y_i)^2}",
       "aggregation": "per_geometry_then_macro_average",
-      "weighting": "cell_volume"
+      "weighting": "volume_cells_equal"
     },
     {
       "id": "cd_r2",

@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_64",
   "split_id": "train_64",
-  "case_set_id": "official_test",
-  "split_sha256": "8dafe3a007cdc65b2fb974236e8e720b4b22d77d7d192147e21f3492900fcbd6",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "4096a48bae43c535609aa507d979e6bf9db062f370c3a3c0a509149ca4999522",
   "parameter_count_millions": 8.2,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "5654266df8a709b1ccd86364a1695e890934f6ffcf8ce851144a1f3e28b0a922"
+    "evidence_sha256": "8978ce6fbbce20b4321d246246e41c88c76f9480ff65c4b440ffa3bddf5a69a8"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 94.484,
     "vki_mach_rrmse": 0.04592,
     "vki_mach_rel_l2": 4.832,
     "vki_mach_rel_l1": 3.394,
@@ -68,13 +69,17 @@
     "vki_angle_out_rel_l2": 6.028,
     "vki_angle_out_rel_l1": 4.251,
     "vki_angle_out_r2": 0.9455,
-    "total_error": 0.05516
+    "total_error": 0.05516,
+    "vki_mach_area_rel_l2": 4.691262,
+    "vki_nut_area_rel_l2": 10.14466,
+    "vki_m_iso_equal_rel_l2": 7.6405,
+    "vki_m_iso_line_rel_l2": 7.417961
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 168,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

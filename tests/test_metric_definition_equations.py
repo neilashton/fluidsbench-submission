@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 import json
+import math
 import unittest
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_SCORE_EQUATIONS = {
-    "overall_score": (
-        r"0.50\,S_{\mathrm{field}} + 0.25\,S_{\mathrm{force}}"
-        r" + 0.25\,S_{\mathrm{profile}}"
-    ),
+    "overall_score": r"\sum_k \alpha_k S_k,\quad \sum_k \alpha_k=1",
     "field_score": (
         r"2\sum_j w_j\max\!\left(0,\,100\left(1-\frac{e_j}{c_j}\right)\right)"
     ),
@@ -43,6 +41,40 @@ class MetricDefinitionEquationTests(unittest.TestCase):
                 for definition in specification["metrics"]
                 if definition.get("id") in EXPECTED_SCORE_EQUATIONS
             }
-            if equations:
-                with self.subTest(dataset=specification["dataset_id"]):
-                    self.assertEqual(equations, EXPECTED_SCORE_EQUATIONS)
+            with self.subTest(dataset=specification["dataset_id"]):
+                self.assertIn("overall_score", equations)
+                self.assertEqual(
+                    equations,
+                    {metric_id: EXPECTED_SCORE_EQUATIONS[metric_id] for metric_id in equations},
+                )
+
+    def test_every_dataset_declares_the_same_overall_ranking_interface(self) -> None:
+        for path in sorted((ROOT / "benchmark-specs").glob("*/submission-spec.json")):
+            specification = load_json(path)
+            with self.subTest(dataset=specification["dataset_id"]):
+                self.assertEqual(
+                    specification["ranking"],
+                    {
+                        "metric_id": "overall_score",
+                        "direction": "higher",
+                        "decimal_places": 1,
+                        "rounding": "decimal_half_up",
+                        "method": "competition",
+                    },
+                )
+                composite = specification["overall_score_composite"]
+                self.assertEqual(composite["metric_id"], "overall_score")
+                self.assertEqual(composite["operation"], "weighted_component_scores")
+                self.assertTrue(composite["components"])
+                self.assertTrue(
+                    math.isclose(
+                        sum(component["weight"] for component in composite["components"]),
+                        1.0,
+                        rel_tol=0.0,
+                        abs_tol=1e-12,
+                    )
+                )
+                metric_ids = {metric["id"] for metric in specification["metrics"]}
+                self.assertTrue(
+                    all(component["metric_id"] in metric_ids for component in composite["components"])
+                )

@@ -16,8 +16,8 @@
   "dataset_version": "prototype-1",
   "split": "train_500",
   "split_id": "train_500",
-  "case_set_id": "official_test",
-  "split_sha256": "65ae45180fefb4607530d03bf06872b739da8752071f88d0acd302c87b1794e1",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "8dfae2bb66528f9c2c079eb5396cd3acd18b21ff23f530b67d9f34b6b6432a8d",
   "parameter_count_millions": 7.15,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "c2a722525afc9106ebe480addcfa0a179f44b0686a8bc273e04cdf6ebc787853"
+    "evidence_sha256": "ca994b12a8830b1e4d5ddbce40200652a2791f4f096d2cd14515aedada598fad"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 97.65016666666665,
     "rotor_density_rrmse": 0.02412,
     "rotor_density_rel_l2": 2.541,
     "rotor_density_rel_l1": 1.788,
@@ -72,13 +73,16 @@
     "rotor_efficiency_r2": 0.9817,
     "rotor_efficiency_mae": 0.005,
     "rotor_efficiency_rmse": 0.0072,
-    "total_error": 0.0235
+    "total_error": 0.0235,
+    "rotor_density_area_rel_l2": 2.619588,
+    "rotor_pressure_area_rel_l2": 3.234021,
+    "rotor_temperature_area_rel_l2": 2.241237
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
     "case_count": 200,
-    "case_set_id": "official_test"
+    "case_set_id": "source_evaluation_prototype"
   },
-  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result."
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

@@ -29,7 +29,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "68663af37d4832767ac79d34974fb313f4fac192ce07f18c5025559f2eac4e0c"
+      "evidence_sha256": "4cf5919b88e29816174c65b0e429c1e36bd8063dd313bff2ec354371e6e53d15"
     },
     "approval": {
       "status": "prototype",
@@ -62,7 +62,11 @@
       "field_score": 72.72,
       "force_score": 97.94,
       "diagnostic_score": 95.34,
-      "overall_score": 84.68
+      "overall_score": 84.68,
+      "surface_pressure_equal_entity_rel_l2": 4.42,
+      "surface_wall_shear_equal_entity_rel_l2": 5.92,
+      "volume_velocity_physical_rel_l2": 3.12,
+      "volume_pressure_physical_rel_l2": 3.54
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -71,7 +75,7 @@
       "case_set_id": "standard",
       "index_sha256": "cdaa792e5aa82f87cbf2ad02ffe63f6396c1314d87bd35082c62cdfea3aa7692"
     },
-    "note": "Dummy HiLiftAeroML submission with compact profile curves. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "Dummy HiLiftAeroML submission with compact profile curves. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 16.3,
     "ranking": {
       "metric_id": "overall_score",
@@ -125,7 +129,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "1d38dad10c57dfce4faa307fe78e0cb9d737665e8c03144aed8c5bac99d6d1e0"
+      "evidence_sha256": "a62f76932aea1b186309c392718298a1d55091c00c5b325d75a3fe91cb81312a"
     },
     "approval": {
       "status": "prototype",
@@ -158,7 +162,11 @@
       "field_score": 49.99166666666667,
       "force_score": 99.08000000000001,
       "diagnostic_score": 94.36,
-      "overall_score": 73.35583333333334
+      "overall_score": 73.35583333333334,
+      "surface_pressure_equal_entity_rel_l2": 4.416,
+      "surface_wall_shear_equal_entity_rel_l2": 10.896,
+      "volume_velocity_physical_rel_l2": 9.552083,
+      "volume_pressure_physical_rel_l2": 5.104167
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -167,7 +175,7 @@
       "case_set_id": "single_aoa_12",
       "index_sha256": "369eb40c8c8f447a030de9d4058d596ef5c09cc89b97e93ad7e47a1c1fad43ae"
     },
-    "note": "HiLiftAeroML AoA = 12 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 12 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 9.05,
     "ranking": {
       "metric_id": "overall_score",
@@ -221,7 +229,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "269f17549247e84934ac67ef3d05bedb7706a8b788397337601a8f86b2727cc5"
+      "evidence_sha256": "12acbfe6c51a9190be0ecf229b3d05ab3e1ad12eecc89718f327c29dfdbdcbc2"
     },
     "approval": {
       "status": "prototype",
@@ -254,7 +262,11 @@
       "field_score": 1.080000000000001,
       "force_score": 91.28,
       "diagnostic_score": 81.52000000000001,
-      "overall_score": 43.74
+      "overall_score": 43.74,
+      "surface_pressure_equal_entity_rel_l2": 14.5324,
+      "surface_wall_shear_equal_entity_rel_l2": 19.1008,
+      "volume_velocity_physical_rel_l2": 17.989362,
+      "volume_pressure_physical_rel_l2": 15.095745
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -263,7 +275,7 @@
       "case_set_id": "single_aoa_22",
       "index_sha256": "55894fab5a2b9b79ab42ea2f957bbdeb06b4d16dc714eb4586cfa4511bdd0e86"
     },
-    "note": "HiLiftAeroML AoA = 22 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 22 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 9.05,
     "ranking": {
       "metric_id": "overall_score",
@@ -317,7 +329,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "10ace0b36aefed2b71684365cc13f0b9590ab8fdc811ecd9d16e4b36441b88e9"
+      "evidence_sha256": "81863076a089eb9be7c3ea592f581f18e89b4f34ec60967772225bc8601ec5fc"
     },
     "approval": {
       "status": "prototype",
@@ -350,7 +362,11 @@
       "field_score": 51.52666666666667,
       "force_score": 99.74,
       "diagnostic_score": 96.24000000000001,
-      "overall_score": 74.75833333333334
+      "overall_score": 74.75833333333334,
+      "surface_pressure_equal_entity_rel_l2": 5.8092,
+      "surface_wall_shear_equal_entity_rel_l2": 11.9568,
+      "volume_velocity_physical_rel_l2": 7.106383,
+      "volume_pressure_physical_rel_l2": 5.340426
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -359,7 +375,7 @@
       "case_set_id": "single_aoa_4",
       "index_sha256": "635f4391e6817b69b3001f5dc5e0580e1dee1218db27387c4a05d8de1151a9fa"
     },
-    "note": "HiLiftAeroML AoA = 4 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 4 deg GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 9.05,
     "ranking": {
       "metric_id": "overall_score",
@@ -413,7 +429,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "2685cc876a20575018a5cc7308ee7af07c3481558a503303d2d4cd9de76f126e"
+      "evidence_sha256": "4dbbd4dc69b5527d41fef2b399179eef062e5f5fc5eb8fb280bba328b2166af0"
     },
     "approval": {
       "status": "prototype",
@@ -446,7 +462,11 @@
       "field_score": 38.53333333333333,
       "force_score": 99.38,
       "diagnostic_score": 94.47999999999999,
-      "overall_score": 67.73166666666665
+      "overall_score": 67.73166666666665,
+      "surface_pressure_equal_entity_rel_l2": 8.398,
+      "surface_wall_shear_equal_entity_rel_l2": 10.5355,
+      "volume_velocity_physical_rel_l2": 9.242105,
+      "volume_pressure_physical_rel_l2": 8.484211
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -455,7 +475,7 @@
       "case_set_id": "standard",
       "index_sha256": "d9d960a63a6d6af6b07306acd4164be4602e4898502fabeae39f6c6f66c873d5"
     },
-    "note": "HiLiftAeroML full-split GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML full-split GeoTransformer L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 9.05,
     "ranking": {
       "metric_id": "overall_score",
@@ -509,7 +529,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "57f33c86a95a4429449020933f21b449c74dd8eddcceb334ab3d288336c4197c"
+      "evidence_sha256": "021deb3b2247e295eca8872e80f797cbfb3f4dfc62efe989ca1b384860560337"
     },
     "approval": {
       "status": "prototype",
@@ -542,7 +562,11 @@
       "field_score": 35.464999999999996,
       "force_score": 99.24,
       "diagnostic_score": 92.96000000000001,
-      "overall_score": 65.7825
+      "overall_score": 65.7825,
+      "surface_pressure_equal_entity_rel_l2": 5.5836,
+      "surface_wall_shear_equal_entity_rel_l2": 12.1636,
+      "volume_velocity_physical_rel_l2": 12.117021,
+      "volume_pressure_physical_rel_l2": 8.968085
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -551,7 +575,7 @@
       "case_set_id": "standard",
       "index_sha256": "6512515371f9663255a3ef2ff6231ccd2cfc80754d51fdc5344ac628a84b44b1"
     },
-    "note": "HiLiftAeroML AoA = 12 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 12 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 6.02,
     "ranking": {
       "metric_id": "overall_score",
@@ -605,7 +629,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "0838d3c7a995f52d133d559a6544d53953c9f9d1e223799aa4602aaff1560025"
+      "evidence_sha256": "61ad224312424b4fad7792a8c090d6a883d4a98e458598df645a2bd9566c9ab3"
     },
     "approval": {
       "status": "prototype",
@@ -638,7 +662,11 @@
       "field_score": 0,
       "force_score": 91.78,
       "diagnostic_score": 80.16,
-      "overall_score": 42.985
+      "overall_score": 42.985,
+      "surface_pressure_equal_entity_rel_l2": 15.5946,
+      "surface_wall_shear_equal_entity_rel_l2": 19.0162,
+      "volume_velocity_physical_rel_l2": 20.340426,
+      "volume_pressure_physical_rel_l2": 16.62766
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -647,7 +675,7 @@
       "case_set_id": "geometry",
       "index_sha256": "ced942bb648a4bc7ca0316189f7ed38cf18d1515d7bce527f80a52ad25e56bd1"
     },
-    "note": "HiLiftAeroML AoA = 22 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 22 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 6.02,
     "ranking": {
       "metric_id": "overall_score",
@@ -701,7 +729,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "9bbd1abb647900b07a5fd0334f1d420af40aadb85e9250e5056da2c8c9f5ee5f"
+      "evidence_sha256": "66f795b017adfa26a281cc933a4b7aa0ea6e167f76c7b03eea2481a1fa758fc8"
     },
     "approval": {
       "status": "prototype",
@@ -734,7 +762,11 @@
       "field_score": 36.29,
       "force_score": 99.28,
       "diagnostic_score": 93.52,
-      "overall_score": 66.345
+      "overall_score": 66.345,
+      "surface_pressure_equal_entity_rel_l2": 7.77,
+      "surface_wall_shear_equal_entity_rel_l2": 13.98,
+      "volume_velocity_physical_rel_l2": 9.82,
+      "volume_pressure_physical_rel_l2": 7.23
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -743,7 +775,7 @@
       "case_set_id": "stall",
       "index_sha256": "b94266b47722e2d323187abb07308ebae4d58ed3e6c671528fac6a5ff02d9a21"
     },
-    "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements.",
+    "note": "HiLiftAeroML AoA = 4 deg Transolver L2 and force R2 metrics from Table 6 of the local HiLiftAeroML PDF; L1 and Cp-cut R2 values are illustrative. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Dummy velocity traces use the official HLPW-5 A.1-D.3 station IDs and full-scale locations; the profile values are illustrative and are not HLPW-5 measurements. Dummy Cp traces cover the official HLPW-5 wing pressure rows A-J; the profile values are illustrative and are not HLPW-5 measurements. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 6.02,
     "ranking": {
       "metric_id": "overall_score",

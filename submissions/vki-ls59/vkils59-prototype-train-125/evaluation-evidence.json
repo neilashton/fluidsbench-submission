@@ -8,6 +8,7 @@
   "generated_at": "2026-07-15T00:00:00Z",
   "status": "prototype_dummy_data",
   "metric_values": {
+    "overall_score": 95.41975,
     "vki_mach_rrmse": 0.03813,
     "vki_mach_rel_l2": 4.012,
     "vki_mach_rel_l1": 2.818,
@@ -40,9 +41,13 @@
     "vki_angle_out_rel_l2": 5.005,
     "vki_angle_out_rel_l1": 3.53,
     "vki_angle_out_r2": 0.9576,
-    "total_error": 0.0458
+    "total_error": 0.0458,
+    "vki_mach_area_rel_l2": 3.820952,
+    "vki_nut_area_rel_l2": 8.26381,
+    "vki_m_iso_equal_rel_l2": 6.3445,
+    "vki_m_iso_line_rel_l2": 6.042381
   },
-  "profile_index_sha256": "399039df801d07f622508c746ede949238ab4124fb72d48a49d3b48daf854a3b",
-  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record.",
+  "profile_index_sha256": "152453f0ed5c9805b98bae02cc22ecd64ba454e40e81dc46e04e5a854e8732b9",
+  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
   "command": "not-applicable (illustrative dummy data)"
 }

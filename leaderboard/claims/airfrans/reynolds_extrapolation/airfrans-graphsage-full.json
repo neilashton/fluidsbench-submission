@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 11
     },
     "source_submission": {
       "path": "submissions/airfrans/airfrans-graphsage-full/submission.json",
-      "sha256": "01da1ca56656dc04a4b64cf20e83383e1b7ab3d24d63ed578ec92cb2bc4681d9"
+      "sha256": "f7e9a1af41e68a101cbd198d7b81cdd17a35480987742003beb0b5d3320c4aa4"
     },
     "evaluation_evidence": {
       "path": "submissions/airfrans/airfrans-graphsage-full/evaluation-evidence.json",
-      "sha256": "93ed680fab0a509a2389d7eb11ab4ed7ac7ef40464e8bc05b4f0e2054d8eb408"
+      "sha256": "b9b0da60e58f9308559aa44bd506be1c39cbef5829b1776921cd73808470c304"
     },
     "profile_index": {
       "path": "submissions/airfrans/airfrans-graphsage-full/profiles/index.json",

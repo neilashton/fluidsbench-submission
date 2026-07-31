@@ -37,7 +37,7 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "08e46bffd105c7b08f16d5391fa6d8ab8abb9e1a518f7e0daffb1db51ec08277"
+    "evidence_sha256": "9ce868708fad04ecb3fcf4dbd07d913dbe7d9fa2a8959c759dc416a4611dd4f3"
   },
   "approval": {
     "status": "prototype",
@@ -69,7 +69,11 @@
     "field_score": 81.33333333333334,
     "force_score": 98.74000000000001,
     "diagnostic_score": 97.6,
-    "overall_score": 89.75166666666667
+    "overall_score": 89.75166666666667,
+    "surface_pressure_equal_entity_rel_l2": 2.9876,
+    "surface_wall_shear_equal_entity_rel_l2": 4.0546,
+    "volume_velocity_physical_rel_l2": 2.103093,
+    "volume_pressure_physical_rel_l2": 2.494845
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
@@ -77,5 +81,5 @@
     "case_count": 97,
     "case_set_id": "geometry"
   },
-  "note": "Dummy DrivAerML submission with compact profile curves. The displayed split assignment is illustrative dummy data."
+  "note": "Dummy DrivAerML submission with compact profile curves. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."
 }

@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-136a5157fb69/ahmedml/low_drag/pointnet",
+  "claim_id": "prototype-dev-2026-07-15-069002c306a8/ahmedml/low_drag/pointnet",
   "release": {
-    "id": "prototype-dev-2026-07-15-136a5157fb69",
+    "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "published_at": "2026-07-27T23:47:30Z",
+    "published_at": "2026-07-31T18:16:11Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "136a5157fb69d907688db6f746bae36d9e6e74fb5f11acf5184d6e03a201f888",
+      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
       "row_index": 6
     },
     "source_submission": {
       "path": "submissions/ahmedml/pointnet/submission.json",
-      "sha256": "0655d6eb9977fd63cae1c8c3d2e233d81a931b811b377c1abc1d977b31799720"
+      "sha256": "c873d2a4cba8ea6b652a9cd0684ca735a745410e0d99ef3bb0448b901c682b0a"
     },
     "evaluation_evidence": {
       "path": "submissions/ahmedml/pointnet/evaluation-evidence.json",
-      "sha256": "c66c78214edb18e96a7d3eb8041905878b464cc3d1eea79b731225e78820e22c"
+      "sha256": "582e8aff54c68ea356dbba0e5f3b4a26fc5e6f62f8fba11f0bc1d63f1c1eef44"
     },
     "profile_index": {
       "path": "submissions/ahmedml/pointnet/profiles/index.json",
