@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-07-31T19:45:16Z",
+  "generated_at": "2026-08-01T02:05:14Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -21,7 +21,7 @@
   "data_release": {
     "id": "prototype-dev-2026-07-15-069002c306a8",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-07-31T19:45:16Z",
+    "generated_at": "2026-08-01T02:05:14Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
@@ -51,7 +51,7 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "64af65a6c51d73299b84af1a685486921ebcc7b7526ff4477974075ead7d0ebd",
+      "index_sha256": "c635adf77d9e0a73a089b09fc5db9c3344b3acc092e583af6031a78e60d5b728",
       "record_count": 72,
       "eligible_record_count": 0
     }
@@ -105,7 +105,7 @@
       },
       {
         "id": "volume_velocity",
-        "label": "Flow-domain velocity",
+        "label": "Velocity",
         "unit": "m/s",
         "digits": 2,
         "statistics": [
@@ -116,7 +116,7 @@
       },
       {
         "id": "volume_pressure",
-        "label": "Flow-domain pressure",
+        "label": "Pressure",
         "unit": "Pa",
         "digits": 1,
         "statistics": [
@@ -268,6 +268,34 @@
         "c_drag_mae",
         "c_lift_mae"
       ],
+      "metric_definition_overrides": {
+        "surface_pressure_rel_l2": {
+          "label": "Surface pressure rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface pressure; each scored point, face, or polygon is weighted by the corresponding benchmark-supplied area. Lower is better."
+        },
+        "surface_pressure_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface pressure. Lower is better."
+        },
+        "surface_pressure_mae": {
+          "description": "Area-weighted mean absolute error for surface pressure. Lower is better."
+        },
+        "surface_pressure_rmse": {
+          "description": "Area-weighted root-mean-square error for surface pressure. Lower is better."
+        },
+        "surface_wall_shear_rel_l2": {
+          "label": "Surface wall shear rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface wall shear; each scored point, face, or polygon is weighted by the corresponding benchmark-supplied area. Lower is better."
+        },
+        "surface_wall_shear_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface wall shear. Lower is better."
+        },
+        "surface_wall_shear_mae": {
+          "description": "Area-weighted mean absolute error for surface wall shear. Lower is better."
+        },
+        "surface_wall_shear_rmse": {
+          "description": "Area-weighted root-mean-square error for surface wall shear. Lower is better."
+        }
+      },
       "ranking": {
         "metric_id": "overall_score",
         "direction": "higher",
@@ -583,6 +611,22 @@
         "c_drag_mae",
         "c_lift_mae"
       ],
+      "metric_definition_overrides": {
+        "surface_pressure_rel_l2": {
+          "label": "Surface pressure rel. L2 (length-weighted)",
+          "description": "Length-weighted relative L2 error for surface pressure; each scored boundary point is weighted by its benchmark-supplied represented curve length. Lower is better."
+        },
+        "surface_pressure_rel_l1": {
+          "description": "Length-weighted relative L1 error for surface pressure. Lower is better."
+        },
+        "surface_wall_shear_rel_l2": {
+          "label": "Surface wall shear rel. L2 (length-weighted)",
+          "description": "Length-weighted relative L2 error for surface wall shear; each scored boundary point is weighted by its benchmark-supplied represented curve length. Lower is better."
+        },
+        "surface_wall_shear_rel_l1": {
+          "description": "Length-weighted relative L1 error for surface wall shear. Lower is better."
+        }
+      },
       "ranking": {
         "metric_id": "overall_score",
         "direction": "higher",
@@ -935,6 +979,34 @@
         "c_drag_mae",
         "c_lift_mae"
       ],
+      "metric_definition_overrides": {
+        "surface_pressure_rel_l2": {
+          "label": "Surface pressure rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface pressure; each scored point, face, or polygon is weighted by the corresponding benchmark-supplied area. Lower is better."
+        },
+        "surface_pressure_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface pressure. Lower is better."
+        },
+        "surface_pressure_mae": {
+          "description": "Area-weighted mean absolute error for surface pressure. Lower is better."
+        },
+        "surface_pressure_rmse": {
+          "description": "Area-weighted root-mean-square error for surface pressure. Lower is better."
+        },
+        "surface_wall_shear_rel_l2": {
+          "label": "Surface wall shear rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface wall shear; each scored point, face, or polygon is weighted by the corresponding benchmark-supplied area. Lower is better."
+        },
+        "surface_wall_shear_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface wall shear. Lower is better."
+        },
+        "surface_wall_shear_mae": {
+          "description": "Area-weighted mean absolute error for surface wall shear. Lower is better."
+        },
+        "surface_wall_shear_rmse": {
+          "description": "Area-weighted root-mean-square error for surface wall shear. Lower is better."
+        }
+      },
       "ranking": {
         "metric_id": "overall_score",
         "direction": "higher",
@@ -1229,6 +1301,15 @@
         "surface_pressure_rel_l1",
         "surface_pressure_r2"
       ],
+      "metric_definition_overrides": {
+        "surface_pressure_rel_l2": {
+          "label": "Surface pressure rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface pressure; each scored surface point is weighted by its benchmark-supplied represented area. Lower is better."
+        },
+        "surface_pressure_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface pressure. Lower is better."
+        }
+      },
       "ranking": {
         "metric_id": "overall_score",
         "direction": "higher",
@@ -1615,6 +1696,34 @@
         "c_lift_mae",
         "c_pitch_mae"
       ],
+      "metric_definition_overrides": {
+        "surface_pressure_rel_l2": {
+          "label": "Surface pressure rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface pressure; each scored surface point is weighted by its benchmark-supplied represented area. Lower is better."
+        },
+        "surface_pressure_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface pressure. Lower is better."
+        },
+        "surface_pressure_mae": {
+          "description": "Area-weighted mean absolute error for surface pressure. Lower is better."
+        },
+        "surface_pressure_rmse": {
+          "description": "Area-weighted root-mean-square error for surface pressure. Lower is better."
+        },
+        "surface_wall_shear_rel_l2": {
+          "label": "Surface wall shear rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface wall shear; each scored surface point is weighted by its benchmark-supplied represented area. Lower is better."
+        },
+        "surface_wall_shear_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface wall shear. Lower is better."
+        },
+        "surface_wall_shear_mae": {
+          "description": "Area-weighted mean absolute error for surface wall shear. Lower is better."
+        },
+        "surface_wall_shear_rmse": {
+          "description": "Area-weighted root-mean-square error for surface wall shear. Lower is better."
+        }
+      },
       "ranking": {
         "metric_id": "overall_score",
         "direction": "higher",
@@ -2156,6 +2265,22 @@
         "c_drag_mae",
         "c_lift_mae"
       ],
+      "metric_definition_overrides": {
+        "surface_pressure_rel_l2": {
+          "label": "Surface pressure rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface pressure; each scored surface point is weighted by its benchmark-supplied represented area. Lower is better."
+        },
+        "surface_pressure_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface pressure. Lower is better."
+        },
+        "surface_wall_shear_rel_l2": {
+          "label": "Surface wall shear rel. L2 (area-weighted)",
+          "description": "Area-weighted relative L2 error for surface wall shear; each scored surface point is weighted by its benchmark-supplied represented area. Lower is better."
+        },
+        "surface_wall_shear_rel_l1": {
+          "description": "Area-weighted relative L1 error for surface wall shear. Lower is better."
+        }
+      },
       "ranking": {
         "metric_id": "overall_score",
         "direction": "higher",
@@ -3617,8 +3742,8 @@
     },
     {
       "id": "volume_velocity_rel_l2",
-      "label": "Flow-domain velocity rel. L2 (unweighted)",
-      "description": "Unweighted relative L2 error for flow-domain velocity; every original mesh point or cell counts equally. Lower is better.",
+      "label": "Velocity rel. L2 (unweighted)",
+      "description": "Unweighted relative L2 error for velocity; every original mesh point or cell counts equally. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -3633,8 +3758,8 @@
     },
     {
       "id": "volume_velocity_rel_l1",
-      "label": "Flow-domain velocity rel. L1",
-      "description": "Unweighted relative L1 error for flow-domain velocity; every original mesh point or cell counts equally. Lower is better.",
+      "label": "Velocity rel. L1",
+      "description": "Unweighted relative L1 error for velocity; every original mesh point or cell counts equally. Lower is better.",
       "group": "relative-l1",
       "group_label": "Relative L1",
       "column_group": "relative",
@@ -3649,8 +3774,8 @@
     },
     {
       "id": "volume_velocity_mae",
-      "label": "Flow-domain velocity MAE",
-      "description": "Unweighted mean absolute error for flow-domain velocity; every original mesh point or cell counts equally. Lower is better.",
+      "label": "Velocity MAE",
+      "description": "Unweighted mean absolute error for velocity; every original mesh point or cell counts equally. Lower is better.",
       "group": "absolute-mae",
       "group_label": "Absolute MAE",
       "column_group": "absolute",
@@ -3665,8 +3790,8 @@
     },
     {
       "id": "volume_velocity_rmse",
-      "label": "Flow-domain velocity RMSE",
-      "description": "Unweighted root-mean-square error for flow-domain velocity; every original mesh point or cell counts equally. Lower is better.",
+      "label": "Velocity RMSE",
+      "description": "Unweighted root-mean-square error for velocity; every original mesh point or cell counts equally. Lower is better.",
       "group": "absolute-rmse",
       "group_label": "Absolute RMSE",
       "column_group": "absolute",
@@ -3681,8 +3806,8 @@
     },
     {
       "id": "volume_pressure_rel_l2",
-      "label": "Flow-domain pressure rel. L2 (unweighted)",
-      "description": "Unweighted relative L2 error for flow-domain pressure; every original mesh point or cell counts equally. Lower is better.",
+      "label": "Pressure rel. L2 (unweighted)",
+      "description": "Unweighted relative L2 error for pressure; every original mesh point or cell counts equally. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -3697,8 +3822,8 @@
     },
     {
       "id": "volume_pressure_rel_l1",
-      "label": "Flow-domain pressure rel. L1",
-      "description": "Unweighted relative L1 error for flow-domain pressure; every original mesh point or cell counts equally. Lower is better.",
+      "label": "Pressure rel. L1",
+      "description": "Unweighted relative L1 error for pressure; every original mesh point or cell counts equally. Lower is better.",
       "group": "relative-l1",
       "group_label": "Relative L1",
       "column_group": "relative",
@@ -3713,8 +3838,8 @@
     },
     {
       "id": "volume_pressure_mae",
-      "label": "Flow-domain pressure MAE",
-      "description": "Unweighted mean absolute error for flow-domain pressure; every original mesh point or cell counts equally. Lower is better.",
+      "label": "Pressure MAE",
+      "description": "Unweighted mean absolute error for pressure; every original mesh point or cell counts equally. Lower is better.",
       "group": "absolute-mae",
       "group_label": "Absolute MAE",
       "column_group": "absolute",
@@ -3729,8 +3854,8 @@
     },
     {
       "id": "volume_pressure_rmse",
-      "label": "Flow-domain pressure RMSE",
-      "description": "Unweighted root-mean-square error for flow-domain pressure; every original mesh point or cell counts equally. Lower is better.",
+      "label": "Pressure RMSE",
+      "description": "Unweighted root-mean-square error for pressure; every original mesh point or cell counts equally. Lower is better.",
       "group": "absolute-rmse",
       "group_label": "Absolute RMSE",
       "column_group": "absolute",
@@ -5271,8 +5396,8 @@
     },
     {
       "id": "volume_velocity_physical_rel_l2",
-      "label": "Flow-domain velocity rel. L2 (volume-weighted)",
-      "description": "Volume-weighted relative L2 error for flow-domain velocity; each cell uses its volume and point data use the corresponding benchmark-supplied per-point volume. Lower is better.",
+      "label": "Velocity rel. L2 (volume-weighted)",
+      "description": "Volume-weighted relative L2 error for velocity; each cell uses its volume and point data use the corresponding benchmark-supplied per-point volume. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -5287,8 +5412,8 @@
     },
     {
       "id": "volume_pressure_physical_rel_l2",
-      "label": "Flow-domain pressure rel. L2 (volume-weighted)",
-      "description": "Volume-weighted relative L2 error for flow-domain pressure; each cell uses its volume and point data use the corresponding benchmark-supplied per-point volume. Lower is better.",
+      "label": "Pressure rel. L2 (volume-weighted)",
+      "description": "Volume-weighted relative L2 error for pressure; each cell uses its volume and point data use the corresponding benchmark-supplied per-point volume. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
       "column_group": "relative",
@@ -5575,7 +5700,7 @@
     },
     {
       "id": "flow_domain_velocity_rel_l2",
-      "label": "Flow-domain velocity rel. L2 (unweighted nodes)",
+      "label": "Velocity rel. L2 (unweighted nodes)",
       "description": "Unweighted relative L2 error for velocity over the complete two-dimensional flow domain; every original interior node counts equally. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
@@ -5591,7 +5716,7 @@
     },
     {
       "id": "flow_domain_velocity_physical_rel_l2",
-      "label": "Flow-domain velocity rel. L2 (area-weighted)",
+      "label": "Velocity rel. L2 (area-weighted)",
       "description": "Area-weighted relative L2 error for velocity over the complete two-dimensional flow domain; FluidsBench supplies the area represented by each node. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
@@ -5607,7 +5732,7 @@
     },
     {
       "id": "flow_domain_pressure_rel_l2",
-      "label": "Flow-domain pressure rel. L2 (unweighted nodes)",
+      "label": "Pressure rel. L2 (unweighted nodes)",
       "description": "Unweighted relative L2 error for pressure over the complete two-dimensional flow domain; every original interior node counts equally. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
@@ -5623,7 +5748,7 @@
     },
     {
       "id": "flow_domain_pressure_physical_rel_l2",
-      "label": "Flow-domain pressure rel. L2 (area-weighted)",
+      "label": "Pressure rel. L2 (area-weighted)",
       "description": "Area-weighted relative L2 error for pressure over the complete two-dimensional flow domain; FluidsBench supplies the area represented by each node. Lower is better.",
       "group": "relative-l2",
       "group_label": "Relative L2",
@@ -5639,8 +5764,8 @@
     },
     {
       "id": "flow_domain_velocity_rel_l1",
-      "label": "Flow-domain velocity rel. L1",
-      "description": "Equal-interior-node relative L1 error for velocity over the complete two-dimensional flow domain. Lower is better.",
+      "label": "Velocity rel. L1",
+      "description": "Unweighted relative L1 error for velocity over the complete two-dimensional flow domain; every original interior node counts equally. Lower is better.",
       "group": "relative-l1",
       "group_label": "Relative L1",
       "column_group": "relative",
@@ -5655,8 +5780,8 @@
     },
     {
       "id": "flow_domain_pressure_rel_l1",
-      "label": "Flow-domain pressure rel. L1",
-      "description": "Equal-interior-node relative L1 error for pressure over the complete two-dimensional flow domain. Lower is better.",
+      "label": "Pressure rel. L1",
+      "description": "Unweighted relative L1 error for pressure over the complete two-dimensional flow domain; every original interior node counts equally. Lower is better.",
       "group": "relative-l1",
       "group_label": "Relative L1",
       "column_group": "relative",

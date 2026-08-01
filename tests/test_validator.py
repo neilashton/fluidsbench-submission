@@ -150,6 +150,11 @@ class ValidatorTests(unittest.TestCase):
         airfrans = next(dataset for dataset in manifest["datasets"] if dataset["slug"] == "airfrans")
         airfrans["metric_ids"] = ["stale_generated_metric"]
         airfrans["ranking"] = {"metric_id": "stale_generated_metric"}
+        airfrans["metric_definition_overrides"] = {
+            "surface_pressure_rel_l2": {
+                "label": "Surface pressure rel. L2 (length-weighted)"
+            }
+        }
 
         updated = manifest_with_benchmark_contract(manifest)
         updated_airfrans = next(
@@ -165,6 +170,10 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(
             updated_airfrans["overall_score_composite"],
             specification["overall_score_composite"],
+        )
+        self.assertEqual(
+            updated_airfrans["metric_definition_overrides"],
+            airfrans["metric_definition_overrides"],
         )
         self.assertEqual(airfrans["metric_ids"], ["stale_generated_metric"])
 

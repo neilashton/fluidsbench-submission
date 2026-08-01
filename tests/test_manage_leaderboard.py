@@ -365,6 +365,66 @@ class ManageLeaderboardTests(unittest.TestCase):
         errors = manage_leaderboard.release_contract_errors(manifest)
         self.assertTrue(any("must match the metric display digits" in error for error in errors))
 
+    def test_metric_definition_overrides_are_presentation_only_and_dataset_scoped(self) -> None:
+        manifest = self.ranking_manifest()
+        manifest["metric_definitions"].append(
+            {"id": "unused", "unit": "%", "digits": 2, "direction": "lower"}
+        )
+        dataset = manifest["datasets"][0]
+        dataset["metric_ids"] = ["score"]
+        dataset["metric_definition_overrides"] = {
+            "score": {
+                "label": "Dataset score",
+                "description": "Dataset-specific presentation text.",
+            }
+        }
+        valid_errors = manage_leaderboard.release_contract_errors(manifest)
+        self.assertFalse(any("metric_definition_overrides" in error for error in valid_errors))
+
+        unknown = deepcopy(manifest)
+        unknown["datasets"][0]["metric_definition_overrides"] = {
+            "missing": {"label": "Missing metric"}
+        }
+        self.assertTrue(
+            any(
+                "references unknown metric missing" in error
+                for error in manage_leaderboard.release_contract_errors(unknown)
+            )
+        )
+
+        inactive = deepcopy(manifest)
+        inactive["datasets"][0]["metric_definition_overrides"] = {
+            "unused": {"label": "Inactive metric"}
+        }
+        self.assertTrue(
+            any(
+                "metric unused is not in metric_ids" in error
+                for error in manage_leaderboard.release_contract_errors(inactive)
+            )
+        )
+
+        semantic_override = deepcopy(manifest)
+        semantic_override["datasets"][0]["metric_definition_overrides"] = {
+            "score": {"label": "Changed score", "direction": "lower"}
+        }
+        self.assertTrue(
+            any(
+                "may only define label and description" in error
+                for error in manage_leaderboard.release_contract_errors(semantic_override)
+            )
+        )
+
+        empty_text = deepcopy(manifest)
+        empty_text["datasets"][0]["metric_definition_overrides"] = {
+            "score": {"description": "  "}
+        }
+        self.assertTrue(
+            any(
+                "description must be a non-empty string" in error
+                for error in manage_leaderboard.release_contract_errors(empty_text)
+            )
+        )
+
     def test_official_generation_preserves_explicit_timestamp_and_has_no_today_fallback(self) -> None:
         generated_at = "2026-07-20T12:00:00Z"
         manifest = self.ranking_manifest()

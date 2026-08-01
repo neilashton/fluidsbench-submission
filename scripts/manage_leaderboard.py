@@ -48,6 +48,7 @@ RANKING_METHOD = "competition"
 RANKING_ROUNDING = "decimal_half_up"
 RANKING_SCOPE = ["release_id", "dataset_id", "split_id"]
 RELEASE_ID_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9.-]{0,158}[a-z0-9])?$")
+METRIC_DEFINITION_OVERRIDE_KEYS = frozenset({"label", "description"})
 
 
 def ranking_contract() -> dict[str, Any]:
@@ -210,6 +211,44 @@ def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
     for dataset in manifest.get("datasets", []):
         ranking = dataset.get("ranking")
         label = dataset.get("slug", dataset.get("name", "unknown dataset"))
+        overrides = dataset.get("metric_definition_overrides")
+        if overrides is not None:
+            if not isinstance(overrides, dict):
+                errors.append(f"dataset {label} metric_definition_overrides must be an object")
+            else:
+                metric_ids = dataset.get("metric_ids", [])
+                active_metric_ids = set(metric_ids) if isinstance(metric_ids, list) else set()
+                for metric_id, override in overrides.items():
+                    if metric_id not in definitions:
+                        errors.append(
+                            f"dataset {label} metric_definition_overrides references unknown metric {metric_id}"
+                        )
+                    elif metric_id not in active_metric_ids:
+                        errors.append(
+                            f"dataset {label} metric_definition_overrides metric {metric_id} is not in metric_ids"
+                        )
+                    if not isinstance(override, dict):
+                        errors.append(
+                            f"dataset {label} metric_definition_overrides.{metric_id} must be an object"
+                        )
+                        continue
+                    unsupported_keys = set(override) - METRIC_DEFINITION_OVERRIDE_KEYS
+                    if unsupported_keys:
+                        errors.append(
+                            f"dataset {label} metric_definition_overrides.{metric_id} may only define "
+                            f"label and description; unsupported={sorted(unsupported_keys)}"
+                        )
+                    presentation_keys = set(override) & METRIC_DEFINITION_OVERRIDE_KEYS
+                    if not presentation_keys:
+                        errors.append(
+                            f"dataset {label} metric_definition_overrides.{metric_id} must define label or description"
+                        )
+                    for key in presentation_keys:
+                        if not isinstance(override[key], str) or not override[key].strip():
+                            errors.append(
+                                f"dataset {label} metric_definition_overrides.{metric_id}.{key} "
+                                "must be a non-empty string"
+                            )
         if not isinstance(ranking, dict):
             errors.append(f"dataset {label} must define its ranking policy")
             continue
