@@ -28,8 +28,7 @@
         "entities": "all_nodes_in_the_released_cropped_domain_mesh",
         "arrays": [
           "U",
-          "p",
-          "nut"
+          "p"
         ],
         "units_note": "p is kinematic pressure in m^2/s^2",
         "physical_weight": "mass_lumped_dual_cell_area",
@@ -82,14 +81,13 @@
     "metric_id": "overall_score",
     "operation": "weighted_component_scores",
     "components": [
-      { "metric_id": "surface_pressure_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 15.0 },
-      { "metric_id": "surface_wall_shear_rel_l2", "weight": 0.1, "transform": "bounded_error", "cap": 20.0 },
-      { "metric_id": "flow_domain_velocity_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 12.0 },
-      { "metric_id": "flow_domain_pressure_rel_l2", "weight": 0.1, "transform": "bounded_error", "cap": 15.0 },
-      { "metric_id": "cd_r2", "weight": 0.15, "transform": "bounded_quality" },
-      { "metric_id": "cl_r2", "weight": 0.1, "transform": "bounded_quality" },
-      { "metric_id": "velocity_profile_r2", "weight": 0.15, "transform": "bounded_quality" },
-      { "metric_id": "cp_cut_r2", "weight": 0.1, "transform": "bounded_quality" }
+      { "metric_id": "surface_pressure_rel_l2", "weight": 0.16, "transform": "bounded_error", "cap": 15.0 },
+      { "metric_id": "surface_wall_shear_rel_l2", "weight": 0.18, "transform": "bounded_error", "cap": 20.0 },
+      { "metric_id": "flow_domain_velocity_rel_l2", "weight": 0.22, "transform": "bounded_error", "cap": 12.0 },
+      { "metric_id": "flow_domain_pressure_rel_l2", "weight": 0.11, "transform": "bounded_error", "cap": 15.0 },
+      { "metric_id": "cd_r2", "weight": 0.12, "transform": "bounded_quality" },
+      { "metric_id": "cl_r2", "weight": 0.10, "transform": "bounded_quality" },
+      { "metric_id": "velocity_profile_r2", "weight": 0.11, "transform": "bounded_quality" }
     ],
     "tolerance": 1e-06
   },
@@ -260,15 +258,6 @@
       "weighting": "samples_equal"
     },
     {
-      "id": "cp_cut_r2",
-      "unit": "",
-      "direction": "higher",
-      "kind": "r2",
-      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
-      "aggregation": "flatten_all_required_profile_samples",
-      "weighting": "samples_equal"
-    },
-    {
       "id": "cd_r2",
       "unit": "",
       "direction": "higher",
@@ -307,30 +296,16 @@
   ],
   "profile_panels": [
     {
-      "id": "pressure_profiles",
-      "required": true,
-      "allow_unlisted_stations": false,
-      "minimum_points": 2,
-      "coordinate_order": "strictly_increasing",
-      "station_ids": [
-        "upper_surface",
-        "lower_surface"
-      ],
-      "quantity_ids": [
-        "cp"
-      ]
-    },
-    {
       "id": "velocity_profiles",
       "required": false,
       "allow_unlisted_stations": false,
       "minimum_points": 2,
       "coordinate_order": "strictly_increasing",
       "station_ids": [
-        "prototype_0_25l",
-        "prototype_0_50l",
-        "prototype_1_00l",
-        "wake_x_1_50c"
+        "x_0_25c",
+        "x_0_50c",
+        "x_0_75c",
+        "x_0_95c"
       ],
       "quantity_ids": [
         "velocity_ratio"
@@ -342,36 +317,36 @@
       "id": "full",
       "label": "Full",
       "index_file": "splits/full.json",
-      "case_count": 1,
+      "case_count": 200,
       "case_set_id": "standard",
-      "case_id_status": "prototype_generated",
+      "case_id_status": "official",
       "sha256": "1408d36b5a48acfcb23d1659c5b7debb126773c593b25224b09030b5aee1796e"
     },
     {
       "id": "scarce",
       "label": "Scarce",
       "index_file": "splits/scarce.json",
-      "case_count": 1,
+      "case_count": 200,
       "case_set_id": "standard",
-      "case_id_status": "prototype_generated",
+      "case_id_status": "official",
       "sha256": "478694004a2267057e41b81c51569962ba156a38d138312734d5eca606d0c2d7"
     },
     {
       "id": "reynolds_extrapolation",
       "label": "Reynolds extrapolation",
       "index_file": "splits/reynolds_extrapolation.json",
-      "case_count": 1,
+      "case_count": 496,
       "case_set_id": "reynolds_extrapolation",
-      "case_id_status": "prototype_generated",
+      "case_id_status": "official",
       "sha256": "365b1443d013bfb8676bc6892f69b2ec5bea89b7a7ce3a2feb435ec220a1f695"
     },
     {
       "id": "aoa_extrapolation",
       "label": "AoA extrapolation",
       "index_file": "splits/aoa_extrapolation.json",
-      "case_count": 1,
+      "case_count": 196,
       "case_set_id": "aoa_extrapolation",
-      "case_id_status": "prototype_generated",
+      "case_id_status": "official",
       "sha256": "0f6e770b351bb1b0ba8de60bca2484892f467c0436177eac921a77461b3c72ff"
     }
   ]
