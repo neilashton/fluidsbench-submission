@@ -25,6 +25,14 @@ Files:
   proposed human-readable contract;
 - [`contract-proposal.json`](contract-proposal.json): the same decisions in a
   machine-readable form;
+- [`AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md`](AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md):
+  the non-activating AutoCFD4/5 profile, pressure-probe, resolution, reduction,
+  and overall-score proposal;
+- `autocfd_cp_taps_nominal.csv`: the 209 unique nominal AutoCFD pressure taps;
+- `autocfd_cp_panel_membership.csv`: their AutoCFD plot-panel ordering,
+  including intentional reuse between panels;
+- `autocfd_velocity_lines_nominal.csv`: all 16 exact AutoCFD line endpoints and
+  the candidate fixed sampling counts;
 - `owner-published-splits.json`: the exact public train/validation/test lists;
 - `split-index-candidates/`: FluidsBench-shaped test indexes derived without
   changing the owner-published order; and

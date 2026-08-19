@@ -299,6 +299,12 @@ calculation a fully specified coefficient calculation.
   GeoTransolver scoring. Remove them from any proposed ranking. They can return
   as supplementary diagnostics only after exact coordinates, tolerance,
   interpolation, ordering, quantities, and truth hashes are published.
+- The exact nominal AutoCFD4/5 pressure taps and velocity lines, together with
+  candidate FluidsBench sampling, reduction, and composite semantics, are now
+  recorded in `AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md` and its three CSV
+  registries. They remain non-activating because the case-specific morph
+  correspondence, resolution-convergence audit, truth release, and owner
+  decisions listed there are not yet complete.
 
 ## Approval blockers
 
