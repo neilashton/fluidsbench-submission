@@ -6,12 +6,17 @@ PolyData files; no public data download is required.
 
 from __future__ import annotations
 
+import gc
 import hashlib
 import importlib.util
+import io
 import json
 import tempfile
 import unittest
+import weakref
+from contextlib import redirect_stderr
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
@@ -60,6 +65,42 @@ def _write_ascii_vtk(path: Path, points: np.ndarray, polygons: list[list[int]], 
     lines.append(f"POINT_DATA {len(points)}")
     lines.append("SCALARS p float 1")
     lines.append("LOOKUP_TABLE default")
+    lines.extend(f"{value:.6f}" for value in pressure)
+    path.write_text("\n".join(lines) + "\n", encoding="ascii")
+
+
+def _write_ascii_vtk_v5(
+    path: Path,
+    points: np.ndarray,
+    polygons: list[list[int]],
+    pressure: np.ndarray,
+) -> None:
+    """Write the offset/connectivity cell layout used by legacy VTK 5.x."""
+
+    connectivity = [vertex for polygon in polygons for vertex in polygon]
+    offsets = [0]
+    for polygon in polygons:
+        offsets.append(offsets[-1] + len(polygon))
+    lines = [
+        "# vtk DataFile Version 5.1",
+        "synthetic drivaernetplusplus VTK 5 fixture",
+        "ASCII",
+        "DATASET POLYDATA",
+        f"POINTS {len(points)} float",
+    ]
+    lines.extend(" ".join(f"{value:.6f}" for value in row) for row in points)
+    lines.extend(
+        [
+            f"POLYGONS {len(offsets)} {len(connectivity)}",
+            "OFFSETS vtktypeint64",
+            " ".join(str(value) for value in offsets),
+            "CONNECTIVITY vtktypeint64",
+            " ".join(str(value) for value in connectivity),
+            f"POINT_DATA {len(points)}",
+            "SCALARS p float 1",
+            "LOOKUP_TABLE default",
+        ]
+    )
     lines.extend(f"{value:.6f}" for value in pressure)
     path.write_text("\n".join(lines) + "\n", encoding="ascii")
 
@@ -289,6 +330,25 @@ class TestPublisherSyntheticRelease(unittest.TestCase):
             )
 
 
+class TestLegacyVtkParser(unittest.TestCase):
+    def test_vtk_5_offsets_connectivity_layout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vtk_path = Path(tmp) / "DrivAer_E_S_WW_WM_001.vtk"
+            points, polygons, pressure = _synthetic_case(3)
+            _write_ascii_vtk_v5(vtk_path, points, polygons, pressure)
+
+            observed_points, observed_polygons, point_data = (
+                publisher.parse_legacy_vtk_polydata(vtk_path)
+            )
+            np.testing.assert_allclose(observed_points, points, rtol=0, atol=1e-12)
+            self.assertEqual(observed_polygons, polygons)
+            np.testing.assert_allclose(point_data["p"], pressure, rtol=0, atol=5e-6)
+
+            columns = publisher.build_case_columns(vtk_path)
+            expected_weights = publisher.mass_lumped_dual_areas(points, polygons)
+            np.testing.assert_allclose(columns["weight"], expected_weights, rtol=1e-12)
+
+
 class TestPublisherFailureModes(unittest.TestCase):
     def test_missing_case_file_raises(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -308,6 +368,87 @@ class TestPublisherFailureModes(unittest.TestCase):
                         "--no-self-check",
                     ]
                 )
+            self.assertFalse((root / "release").exists())
+
+    def test_nonempty_output_directory_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            out_dir = root / "release"
+            out_dir.mkdir()
+            stale = out_dir / "case-sets" / "old" / "chunk-000.json"
+            stale.parent.mkdir(parents=True)
+            stale.write_text("{}\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(
+                publisher.PublisherError, "output directory must be empty"
+            ):
+                publisher.write_release(
+                    out_dir,
+                    ["E_S_WW_WM_001"],
+                    root,
+                    release_id="test-release",
+                    case_set_id="sample",
+                    chunk_size=1,
+                    published_at="1970-01-01T00:00:00Z",
+                )
+            self.assertEqual(stale.read_text(encoding="utf-8"), "{}\n")
+
+    def test_nonpositive_numeric_options_are_rejected(self):
+        for option, value in (
+            ("--chunk-size", "0"),
+            ("--chunk-size", "-1"),
+            ("--limit", "0"),
+            ("--limit", "-1"),
+        ):
+            with self.subTest(option=option, value=value):
+                with self.assertRaises(SystemExit), redirect_stderr(io.StringIO()):
+                    publisher.main(
+                        [
+                            "--vtk-dir", ".",
+                            "--out", "unused-output",
+                            option, value,
+                        ]
+                    )
+
+    def test_streaming_writer_releases_each_case_arrays(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            vtk_dir = root / "vtk"
+            vtk_dir.mkdir()
+            case_ids = ["case-a", "case-b", "case-c"]
+            for case_id in case_ids:
+                (vtk_dir / f"DrivAer_{case_id}.vtk").touch()
+
+            array_references: list[weakref.ReferenceType] = []
+
+            def build_columns(_path):
+                gc.collect()
+                self.assertTrue(all(reference() is None for reference in array_references))
+                columns = {
+                    "support_id": np.asarray(["p00000000", "p00000001"]),
+                    "x": np.asarray([0.0, 1.0]),
+                    "y": np.asarray([0.0, 0.0]),
+                    "z": np.asarray([0.0, 0.0]),
+                    "weight": np.asarray([0.5, 0.5]),
+                    "p_true": np.asarray([1.0, 2.0]),
+                }
+                array_references.append(weakref.ref(columns["p_true"]))
+                return columns
+
+            with mock.patch.object(
+                publisher, "build_case_columns", side_effect=build_columns
+            ):
+                publisher.write_release(
+                    root / "release",
+                    case_ids,
+                    vtk_dir,
+                    release_id="test-release",
+                    case_set_id="sample",
+                    chunk_size=3,
+                    published_at="1970-01-01T00:00:00Z",
+                )
+            gc.collect()
+            self.assertTrue(all(reference() is None for reference in array_references))
 
     def test_missing_pressure_array_raises(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -318,6 +459,15 @@ class TestPublisherFailureModes(unittest.TestCase):
             content = vtk_path.read_text(encoding="ascii").replace("SCALARS p ", "SCALARS q ")
             vtk_path.write_text(content, encoding="ascii")
             with self.assertRaises(publisher.PublisherError):
+                publisher.build_case_columns(vtk_path)
+
+    def test_nonfinite_pressure_array_raises(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            vtk_path = Path(tmp) / "DrivAer_E_S_WW_WM_001.vtk"
+            points, polygons, pressure = _synthetic_case(1)
+            pressure[0] = np.nan
+            _write_ascii_vtk(vtk_path, points, polygons, pressure)
+            with self.assertRaisesRegex(publisher.PublisherError, "pressure array"):
                 publisher.build_case_columns(vtk_path)
 
     def test_self_check_runs_end_to_end(self):

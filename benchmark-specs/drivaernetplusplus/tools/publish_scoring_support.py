@@ -162,6 +162,8 @@ def parse_legacy_vtk_polydata(path: Path) -> tuple[np.ndarray, list[list[int]], 
         if keyword == "POINTS":
             take(1)
             n_points = int(take(1)[0])
+            if n_points <= 0:
+                raise PublisherError(f"{path}: POINTS count must be positive")
             take(1)  # dtype
             values = np.asarray(take(3 * n_points), dtype=np.float64)
             points = values.reshape(n_points, 3)
@@ -169,13 +171,28 @@ def parse_legacy_vtk_polydata(path: Path) -> tuple[np.ndarray, list[list[int]], 
             take(1)
             declared = int(take(1)[0])
             total = int(take(1)[0])
+            if declared <= 0 or total < 0:
+                raise PublisherError(
+                    f"{path}: invalid POLYGONS dimensions {declared} {total}"
+                )
             if peek().upper() == "OFFSETS":
                 take(1)
                 take(1)  # dtype
                 offsets = np.asarray(take(declared), dtype=np.int64)
-                take(1)  # CONNECTIVITY
+                connectivity_keyword = take(1)[0]
+                if connectivity_keyword.upper() != "CONNECTIVITY":
+                    raise PublisherError(
+                        f"{path}: expected CONNECTIVITY after POLYGONS OFFSETS, "
+                        f"got {connectivity_keyword!r}"
+                    )
                 take(1)  # dtype
                 connectivity = np.asarray(take(total), dtype=np.int64)
+                if offsets[0] != 0 or offsets[-1] != total:
+                    raise PublisherError(
+                        f"{path}: POLYGONS offsets must start at 0 and end at {total}"
+                    )
+                if np.any(np.diff(offsets) < 0):
+                    raise PublisherError(f"{path}: POLYGONS offsets must be non-decreasing")
                 for start, stop in zip(offsets[:-1], offsets[1:]):
                     polygons.append([int(v) for v in connectivity[start:stop]])
             else:
@@ -241,6 +258,19 @@ def parse_legacy_vtk_polydata(path: Path) -> tuple[np.ndarray, list[list[int]], 
         raise PublisherError(f"{path}: no POINTS block found")
     if not polygons:
         raise PublisherError(f"{path}: no POLYGONS connectivity found")
+    if not np.all(np.isfinite(points)):
+        raise PublisherError(f"{path}: point coordinates must be finite")
+    for polygon_index, polygon in enumerate(polygons):
+        if len(polygon) < 3:
+            raise PublisherError(
+                f"{path}: polygon {polygon_index} has fewer than 3 vertices"
+            )
+        invalid = [vertex for vertex in polygon if vertex < 0 or vertex >= len(points)]
+        if invalid:
+            raise PublisherError(
+                f"{path}: polygon {polygon_index} contains out-of-range point IDs "
+                f"{invalid[:5]}"
+            )
     return points, polygons, point_data
 
 
@@ -306,7 +336,11 @@ def build_case_columns(vtk_path: Path) -> dict[str, np.ndarray]:
     pressure = np.asarray(point_data[PRESSURE_ARRAY], dtype=np.float64)
     if pressure.ndim != 1 or len(pressure) != len(points):
         raise PublisherError(f"{vtk_path}: pressure array shape {pressure.shape} is not per-point")
+    if not np.all(np.isfinite(pressure)):
+        raise PublisherError(f"{vtk_path}: pressure array must contain only finite values")
     weights = mass_lumped_dual_areas(points, polygons)
+    if not np.all(np.isfinite(weights)) or np.any(weights < 0):
+        raise PublisherError(f"{vtk_path}: dual-area weights must be finite and non-negative")
     if not float(np.sum(weights)) > 0:
         raise PublisherError(f"{vtk_path}: dual-area weights sum to zero")
     support_ids = np.asarray([f"p{index:08d}" for index in range(len(points))])
@@ -339,28 +373,65 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
         handle.write("\n")
 
 
+def require_empty_output_directory(out_dir: Path) -> None:
+    """Reject output paths that could retain artifacts from an earlier run."""
+
+    if not out_dir.exists():
+        return
+    if not out_dir.is_dir():
+        raise PublisherError(f"output path exists and is not a directory: {out_dir}")
+    if any(out_dir.iterdir()):
+        raise PublisherError(
+            f"output directory must be empty to avoid stale release artifacts: {out_dir}"
+        )
+
+
 def write_release(
     out_dir: Path,
-    case_tables: dict[str, dict[str, np.ndarray]],
+    case_ids: list[str],
+    vtk_dir: Path,
     *,
     release_id: str,
     case_set_id: str,
     chunk_size: int,
     published_at: str,
 ) -> Path:
-    """Write ground-truth tables plus the hashed manifest/index/chunk chain."""
+    """Stream source cases into a hashed manifest/index/chunk release.
+
+    Only one case's uncompressed arrays are retained at a time.  Chunk payloads
+    contain metadata only, so the full official split has bounded peak memory.
+    """
+
+    if chunk_size <= 0:
+        raise PublisherError("chunk_size must be positive")
+    if not case_ids:
+        raise PublisherError("at least one case is required")
+    if len(case_ids) != len(set(case_ids)):
+        raise PublisherError("case IDs must be unique")
+
+    require_empty_output_directory(out_dir)
+    source_paths = {
+        case_id: case_vtk_path(vtk_dir, case_id)
+        for case_id in case_ids
+    }
+    missing_paths = [path for path in source_paths.values() if not path.is_file()]
+    if missing_paths:
+        preview = ", ".join(str(path) for path in missing_paths[:5])
+        suffix = "" if len(missing_paths) <= 5 else f" (+{len(missing_paths) - 5} more)"
+        raise PublisherError(f"missing public surface-pressure file(s): {preview}{suffix}")
 
     case_set_dir = out_dir / "case-sets" / case_set_id
     data_dir = case_set_dir / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
 
-    case_ids = list(case_tables)
     chunk_descriptors = []
     for chunk_index in range(0, len(case_ids), chunk_size):
         chunk_case_ids = case_ids[chunk_index : chunk_index + chunk_size]
         cases_payload = []
         for case_id in chunk_case_ids:
-            columns = case_tables[case_id]
+            vtk_path = source_paths[case_id]
+            columns = build_case_columns(vtk_path)
+            entity_count = int(len(columns["support_id"]))
             table_path = data_dir / f"{case_id}.npz"
             np.savez_compressed(table_path, **columns)
             cases_payload.append(
@@ -369,7 +440,7 @@ def write_release(
                     "support_instances": [
                         {
                             "support_id": SUPPORT_ID,
-                            "entity_count": int(len(columns["support_id"])),
+                            "entity_count": entity_count,
                             "artifacts": [
                                 {
                                     "role": "ground_truth_table",
@@ -382,6 +453,8 @@ def write_release(
                     ],
                 }
             )
+            print(f"materialized {case_id}: {entity_count} points")
+            del columns
         chunk_name = f"chunk-{chunk_index // chunk_size:03d}.json"
         chunk_path = case_set_dir / chunk_name
         write_json(
@@ -570,18 +643,35 @@ def load_split(path: Path) -> dict[str, Any]:
         return json.load(handle)
 
 
+def positive_int(value: str) -> int:
+    """Argparse type accepting integers greater than zero."""
+
+    try:
+        parsed = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(f"expected an integer, got {value!r}") from error
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("value must be greater than zero")
+    return parsed
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--vtk-dir", type=Path, required=True,
                         help="Local directory containing SurfacePressureVTK files")
     parser.add_argument("--split", type=Path, default=DEFAULT_SPLIT,
                         help="FluidsBench split index JSON (default: official_test)")
-    parser.add_argument("--out", type=Path, required=True, help="Output release directory")
+    parser.add_argument(
+        "--out", type=Path, required=True,
+        help="Output release directory (must be absent or empty)",
+    )
     parser.add_argument("--release-id", default=DEFAULT_RELEASE_ID)
-    parser.add_argument("--chunk-size", type=int, default=64, help="Cases per chunk file")
-    parser.add_argument("--limit", type=int, default=None,
+    parser.add_argument(
+        "--chunk-size", type=positive_int, default=64, help="Cases per chunk file"
+    )
+    parser.add_argument("--limit", type=positive_int, default=None,
                         help="Materialize only the first N split cases (sample run)")
-    parser.add_argument("--case-ids", nargs="*", default=None,
+    parser.add_argument("--case-ids", nargs="+", default=None,
                         help="Materialize exactly these case IDs (must belong to the split)")
     parser.add_argument("--published-at", default="1970-01-01T00:00:00Z",
                         help="Timestamp recorded in the draft manifest")
@@ -590,7 +680,7 @@ def main(argv: list[str] | None = None) -> int:
 
     split = load_split(args.split)
     case_ids = list(split["case_ids"])
-    if args.case_ids:
+    if args.case_ids is not None:
         unknown = sorted(set(args.case_ids) - set(case_ids))
         if unknown:
             parser.error(f"case IDs not in split {split.get('split_id')!r}: {unknown[:5]}")
@@ -600,17 +690,10 @@ def main(argv: list[str] | None = None) -> int:
     if not case_ids:
         parser.error("no cases selected")
 
-    case_tables: dict[str, dict[str, np.ndarray]] = {}
-    for case_id in case_ids:
-        vtk_path = case_vtk_path(args.vtk_dir, case_id)
-        if not vtk_path.is_file():
-            raise PublisherError(f"missing public surface-pressure file: {vtk_path}")
-        case_tables[case_id] = build_case_columns(vtk_path)
-        print(f"materialized {case_id}: {len(case_tables[case_id]['support_id'])} points")
-
     manifest_path = write_release(
         args.out,
-        case_tables,
+        case_ids,
+        args.vtk_dir,
         release_id=args.release_id,
         case_set_id=str(split.get("case_set_id", "official_test")),
         chunk_size=args.chunk_size,
