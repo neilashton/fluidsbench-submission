@@ -273,7 +273,9 @@ def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
 
 def write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
+    # newline="\n" keeps generated feeds byte-identical across platforms
+    # (without it, Windows emits CRLF and every generated file rewrites).
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(value, handle, indent=2, ensure_ascii=True)
         handle.write("\n")
 
@@ -293,26 +295,28 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
         row = deepcopy(submission)
         row.pop("$schema", None)
         row["parameter_count"] = row.get("parameter_count_millions")
-        row["profile_data"]["index_file"] = str(
-            (path.parent / row["profile_data"]["index_file"]).relative_to(ROOT)
+        # .as_posix() keeps embedded feed paths platform-independent (Windows
+        # str(Path) would embed backslashes and change every feed byte).
+        row["profile_data"]["index_file"] = (
+            (path.parent / row["profile_data"]["index_file"]).relative_to(ROOT).as_posix()
         )
         profile_index_path = ROOT / row["profile_data"]["index_file"]
         if profile_index_path.is_file():
             row["profile_data"]["index_sha256"] = sha256_file(profile_index_path)
         if submission.get("schema_version") == "3.0":
             discretization_path = path.parent / submission["spatial_discretization"]["file"]
-            row["spatial_discretization"]["file"] = str(discretization_path.relative_to(ROOT))
+            row["spatial_discretization"]["file"] = discretization_path.relative_to(ROOT).as_posix()
             if discretization_path.is_file():
                 discretization = load_json(discretization_path)
                 row["spatial_discretization"]["summary"] = discretization
                 case_manifest = discretization.get("case_manifest", {})
                 case_file = case_manifest.get("file")
                 if isinstance(case_file, str):
-                    row["spatial_discretization"]["summary"]["case_manifest"]["file"] = str(
-                        (path.parent / case_file).relative_to(ROOT)
+                    row["spatial_discretization"]["summary"]["case_manifest"]["file"] = (
+                        (path.parent / case_file).relative_to(ROOT).as_posix()
                     )
             case_metrics_path = path.parent / submission["case_metrics"]["file"]
-            row["case_metrics"]["file"] = str(case_metrics_path.relative_to(ROOT))
+            row["case_metrics"]["file"] = case_metrics_path.relative_to(ROOT).as_posix()
 
             declared_artifacts = submission.get("prediction_artifacts", [])
             checks_path = path.parent / "prediction-artifact-checks.json"
@@ -339,7 +343,7 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
                             and check.get("status") in successful_statuses
                         ),
                         "checks": deepcopy(checks.get("checks", [])),
-                        "check_file": str(checks_path.relative_to(ROOT)),
+                        "check_file": checks_path.relative_to(ROOT).as_posix(),
                         "check_sha256": sha256_file(checks_path),
                     }
                 )
@@ -364,7 +368,7 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
                 "reviewed_submission_sha256": validation["reviewed_submission_sha256"],
                 "evaluation_evidence_sha256": validation["evaluation_evidence_sha256"],
                 "profile_index_sha256": validation["profile_index_sha256"],
-                "evidence_path": str(validation_path.relative_to(ROOT)),
+                "evidence_path": validation_path.relative_to(ROOT).as_posix(),
                 "evidence_sha256": validation_metadata["evidence_sha256"],
             }
             for key in (
@@ -503,7 +507,7 @@ def immutable_claim_record_url(release: dict[str, Any], row: dict[str, Any]) -> 
 def available_file_binding(path: Path) -> dict[str, str] | None:
     if not path.is_file():
         return None
-    return {"path": str(path.relative_to(ROOT)), "sha256": sha256_file(path)}
+    return {"path": path.relative_to(ROOT).as_posix(), "sha256": sha256_file(path)}
 
 
 def scoring_support_file_binding(row: dict[str, Any]) -> dict[str, str] | None:
@@ -518,7 +522,7 @@ def scoring_support_file_binding(row: dict[str, Any]) -> dict[str, str] | None:
     directory = ROOT / "benchmark-specs" / row["dataset_id"] / "scoring-support"
     for path in sorted(directory.glob("**/manifest.json")):
         if sha256_file(path) == expected_sha256:
-            return {"path": str(path.relative_to(ROOT)), "sha256": expected_sha256}
+            return {"path": path.relative_to(ROOT).as_posix(), "sha256": expected_sha256}
     return None
 
 
