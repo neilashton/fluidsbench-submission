@@ -106,7 +106,7 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "2\\sum_j w_j\\max\\!\\left(0,\\,100\\left(1-\\frac{e_j}{c_j}\\right)\\right)",
+      "equation": "\\frac{1}{0.67}\\sum_j w_j\\max\\!\\left(0,\\,100\\left(1-\\frac{e_j}{c_j}\\right)\\right)",
       "aggregation": "derived_score_equation",
       "weighting": "equation_weights"
     },
@@ -115,7 +115,7 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.15\\,S_{C_D} + 0.10\\,S_{C_L}}{0.25}",
+      "equation": "\\frac{0.12\\,S_{C_D} + 0.10\\,S_{C_L}}{0.22}",
       "aggregation": "derived_score_equation",
       "weighting": "equation_weights"
     },
@@ -124,7 +124,7 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.15\\,S_{\\mathrm{velocity}} + 0.10\\,S_{C_p}}{0.25}",
+      "equation": "S_{\\mathrm{velocity}}",
       "aggregation": "derived_score_equation",
       "weighting": "equation_weights"
     },
@@ -302,14 +302,15 @@
       "minimum_points": 2,
       "coordinate_order": "strictly_increasing",
       "station_ids": [
-        "x_0_25c",
-        "x_0_50c",
-        "x_0_75c",
-        "x_0_95c"
+        "upper_x_0_25c",
+        "upper_x_0_50c",
+        "upper_x_0_75c",
+        "upper_x_0_95c"
       ],
       "quantity_ids": [
         "velocity_ratio"
-      ]
+      ],
+      "note": "Profiles extracted on the upper surface (suction side) along the surface normal (length 0.1m, 1000 points). The coordinate is the distance from the wall; velocities are Cartesian components normalized by the freestream inlet velocity magnitude. Stations at 0.75c and 0.95c evaluate trailing-edge boundary layer separation."
     }
   ],
   "splits": [
@@ -320,7 +321,7 @@
       "case_count": 200,
       "case_set_id": "standard",
       "case_id_status": "official",
-      "sha256": "1408d36b5a48acfcb23d1659c5b7debb126773c593b25224b09030b5aee1796e"
+      "sha256": "74ce9627502a83d463ce655017dbca832ac3dc1d41c425b8407eecdae61e231c"
     },
     {
       "id": "scarce",
@@ -329,7 +330,7 @@
       "case_count": 200,
       "case_set_id": "standard",
       "case_id_status": "official",
-      "sha256": "478694004a2267057e41b81c51569962ba156a38d138312734d5eca606d0c2d7"
+      "sha256": "b2275025db9e73c7889622c97c0838208af4419c98c5875688e49a9d540f669f"
     },
     {
       "id": "reynolds_extrapolation",
@@ -338,7 +339,7 @@
       "case_count": 496,
       "case_set_id": "reynolds_extrapolation",
       "case_id_status": "official",
-      "sha256": "365b1443d013bfb8676bc6892f69b2ec5bea89b7a7ce3a2feb435ec220a1f695"
+      "sha256": "554184bec2bd32eb6e6de36e32d9a67ae57747a08bfaf427dbb008e6db1833e9"
     },
     {
       "id": "aoa_extrapolation",
@@ -347,7 +348,7 @@
       "case_count": 196,
       "case_set_id": "aoa_extrapolation",
       "case_id_status": "official",
-      "sha256": "0f6e770b351bb1b0ba8de60bca2484892f467c0436177eac921a77461b3c72ff"
+      "sha256": "0a29a7de40b200057acdf4e37d3bcbcbbb176108c4553f3417f5d24762df61e9"
     }
   ]
 }

@@ -8,6 +8,7 @@
   "generated_at": "2023-06-01T00:00:00Z",
   "status": "prototype_dummy_data",
   "metric_values": {
+    "overall_score": 54.155,
     "surface_pressure_rel_l2": 33.62,
     "surface_pressure_rel_l1": 24.206,
     "surface_wall_shear_rel_l2": 4.29,
@@ -19,19 +20,17 @@
     "cd_r2": 0.957,
     "cl_r2": 0.992,
     "velocity_profile_r2": 0.902,
-    "cp_cut_r2": 0.913,
     "c_drag_mae": 0.0058,
     "c_lift_mae": 0.0017,
-    "field_score": 29.693333333333335,
-    "force_score": 97.1,
-    "diagnostic_score": 90.64000000000001,
-    "overall_score": 61.78166666666667,
+    "field_score": 34.07313432835821,
+    "force_score": 97.29090909090911,
+    "diagnostic_score": 90.2,
     "surface_pressure_equal_entity_rel_l2": 31.939,
     "surface_wall_shear_equal_entity_rel_l2": 4.0755,
     "flow_domain_velocity_physical_rel_l2": 10.336842,
     "flow_domain_pressure_physical_rel_l2": 9.052632
   },
-  "profile_index_sha256": "5b12393e2f38b9600d3de83e85d88ff8ba72f87c3180c766b9999197d8e1ca93",
+  "profile_index_sha256": "dff424122af9e985ca42d2dc5679009e3e24df7bd1c40c7810f61b4a66400dcb",
   "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
   "command": "not-applicable (illustrative dummy data)"
 }

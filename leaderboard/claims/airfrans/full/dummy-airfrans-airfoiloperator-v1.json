@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-069002c306a8/airfrans/full/dummy-airfrans-airfoiloperator-v1",
+  "claim_id": "prototype-dev-2026-07-15-18da0a7964e3/airfrans/full/dummy-airfrans-airfoiloperator-v1",
   "release": {
-    "id": "prototype-dev-2026-07-15-069002c306a8",
+    "id": "prototype-dev-2026-07-15-18da0a7964e3",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-01T02:05:14Z",
+    "published_at": "2026-08-19T11:36:19Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 82.99333333333334,
-    "ranked_value": 83.0,
-    "display_value": "83.0",
+    "value": 78.72800000000001,
+    "ranked_value": 78.7,
+    "display_value": "78.7",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
+      "feed_sha256": "18da0a7964e3dc3d0f38a7e1f2bf79786b1e29e13d58a05c108b11af4b6c4f3e",
       "row_index": 14
     },
     "source_submission": {
       "path": "submissions/airfrans/dummy-airfrans-airfoiloperator-v1/submission.json",
-      "sha256": "5db0408ab5c6c1dacc8a803743b6b8e3adb92e5f9d888df07f9729ec1bb8990f"
+      "sha256": "c0225b38f0e60a6aaf2b4bc7880edc394cf918dee1bb3b7aec5047fd327b6257"
     },
     "evaluation_evidence": {
       "path": "submissions/airfrans/dummy-airfrans-airfoiloperator-v1/evaluation-evidence.json",
-      "sha256": "5095d576a8a293be713007194861d2a5f4818392f1cf84cd216146f9b410a0e0"
+      "sha256": "93fa0c592540cfac2ba8e8cf145063e3a20bf41ac3c374f35b09d7ab8a707d90"
     },
     "profile_index": {
       "path": "submissions/airfrans/dummy-airfrans-airfoiloperator-v1/profiles/index.json",
-      "sha256": "7caf046a9ff542dd182f79e6bd40069fde0d77d7f33092aff6cd1fc73f2082ed"
+      "sha256": "0afa452081c594b90b8a6460615aa776380e0a1dca95925b94edd16f18ff7755"
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-08-01T02:05:14Z",
+  "generated_at": "2026-08-19T11:36:19Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-07-15-069002c306a8",
+    "id": "prototype-dev-2026-07-15-18da0a7964e3",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-08-01T02:05:14Z",
+    "generated_at": "2026-08-19T11:36:19Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "069002c306a8f778484e6f4c353945ea454b9082a254ae35479dd73b372e5ae1",
+    "feed_sha256": "18da0a7964e3dc3d0f38a7e1f2bf79786b1e29e13d58a05c108b11af4b6c4f3e",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,7 +51,7 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "c635adf77d9e0a73a089b09fc5db9c3344b3acc092e583af6031a78e60d5b728",
+      "index_sha256": "b60d285ab0d4076a422592a79b94ef56e54cd1f96261f4a8ab384352e5d671c7",
       "record_count": 72,
       "eligible_record_count": 0
     }
@@ -605,7 +605,6 @@
         "flow_domain_velocity_rel_l1",
         "flow_domain_pressure_rel_l1",
         "velocity_profile_r2",
-        "cp_cut_r2",
         "cd_r2",
         "cl_r2",
         "c_drag_mae",
@@ -769,8 +768,7 @@
             "entities": "all_nodes_in_the_released_cropped_domain_mesh",
             "arrays": [
               "U",
-              "p",
-              "nut"
+              "p"
             ],
             "units_note": "p is kinematic pressure in m^2/s^2",
             "physical_weight": "mass_lumped_dual_cell_area",
@@ -816,31 +814,31 @@
         "components": [
           {
             "metric_id": "surface_pressure_rel_l2",
-            "weight": 0.15,
+            "weight": 0.16,
             "transform": "bounded_error",
             "cap": 15.0
           },
           {
             "metric_id": "surface_wall_shear_rel_l2",
-            "weight": 0.1,
+            "weight": 0.18,
             "transform": "bounded_error",
             "cap": 20.0
           },
           {
             "metric_id": "flow_domain_velocity_rel_l2",
-            "weight": 0.15,
+            "weight": 0.22,
             "transform": "bounded_error",
             "cap": 12.0
           },
           {
             "metric_id": "flow_domain_pressure_rel_l2",
-            "weight": 0.1,
+            "weight": 0.11,
             "transform": "bounded_error",
             "cap": 15.0
           },
           {
             "metric_id": "cd_r2",
-            "weight": 0.15,
+            "weight": 0.12,
             "transform": "bounded_quality"
           },
           {
@@ -850,12 +848,7 @@
           },
           {
             "metric_id": "velocity_profile_r2",
-            "weight": 0.15,
-            "transform": "bounded_quality"
-          },
-          {
-            "metric_id": "cp_cut_r2",
-            "weight": 0.1,
+            "weight": 0.11,
             "transform": "bounded_quality"
           }
         ],

@@ -17,7 +17,7 @@
   "split": "Scarce",
   "split_id": "scarce",
   "case_set_id": "standard",
-  "split_sha256": "478694004a2267057e41b81c51569962ba156a38d138312734d5eca606d0c2d7",
+  "split_sha256": "b2275025db9e73c7889622c97c0838208af4419c98c5875688e49a9d540f669f",
   "parameter_count_millions": 0.07,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "a4d1a70b0e64ad3bb7038f9c45f56cf1e6c4d2c21f3bedac2f8303383cbe1288"
+    "evidence_sha256": "e07a4d708b27b056de61e73972bd6730deae9de97a9abce042e8df2b42308d0d"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 43.93333333333333,
     "surface_pressure_rel_l2": 19.75,
     "surface_pressure_rel_l1": 14.22,
     "surface_wall_shear_rel_l2": 10.39,
@@ -47,13 +48,11 @@
     "cd_r2": 0.896,
     "cl_r2": 0.995,
     "velocity_profile_r2": 0.867,
-    "cp_cut_r2": 0.967,
     "c_drag_mae": 0.0131,
     "c_lift_mae": 0.0016,
-    "field_score": 18.78333333333333,
-    "force_score": 93.56,
-    "diagnostic_score": 90.7,
-    "overall_score": 55.45666666666666,
+    "field_score": 20.43930348258706,
+    "force_score": 94.10000000000001,
+    "diagnostic_score": 86.7,
     "surface_pressure_equal_entity_rel_l2": 19.1575,
     "surface_wall_shear_equal_entity_rel_l2": 10.0783,
     "flow_domain_velocity_physical_rel_l2": 13.731959,
@@ -62,7 +61,7 @@
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
-    "case_count": 1,
+    "case_count": 200,
     "case_set_id": "standard"
   },
   "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error comparisons until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."

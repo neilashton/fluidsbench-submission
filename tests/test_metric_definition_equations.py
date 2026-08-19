@@ -17,6 +17,14 @@ EXPECTED_SCORE_EQUATIONS = {
         r"\frac{0.15\,S_{\mathrm{velocity}} + 0.10\,S_{C_p}}{0.25}"
     ),
 }
+AIRFRANS_SCORE_EQUATIONS = {
+    "overall_score": r"\sum_k \alpha_k S_k,\quad \sum_k \alpha_k=1",
+    "field_score": (
+        r"\frac{1}{0.67}\sum_j w_j\max\!\left(0,\,100\left(1-\frac{e_j}{c_j}\right)\right)"
+    ),
+    "force_score": r"\frac{0.12\,S_{C_D} + 0.10\,S_{C_L}}{0.22}",
+    "diagnostic_score": r"S_{\mathrm{velocity}}",
+}
 
 
 def load_json(path: Path) -> dict:
@@ -36,16 +44,20 @@ class MetricDefinitionEquationTests(unittest.TestCase):
     def test_dataset_score_equations_match_leaderboard_definitions(self) -> None:
         for path in sorted((ROOT / "benchmark-specs").glob("*/submission-spec.json")):
             specification = load_json(path)
+            
+            # Modified equations for AirfRANS
+            expected_dict = AIRFRANS_SCORE_EQUATIONS if specification["dataset_id"] == "airfrans" else EXPECTED_SCORE_EQUATIONS
+            
             equations = {
                 definition["id"]: definition["equation"]
                 for definition in specification["metrics"]
-                if definition.get("id") in EXPECTED_SCORE_EQUATIONS
+                if definition.get("id") in expected_dict
             }
             with self.subTest(dataset=specification["dataset_id"]):
                 self.assertIn("overall_score", equations)
                 self.assertEqual(
                     equations,
-                    {metric_id: EXPECTED_SCORE_EQUATIONS[metric_id] for metric_id in equations},
+                    {metric_id: expected_dict[metric_id] for metric_id in equations},
                 )
 
     def test_every_dataset_declares_the_same_overall_ranking_interface(self) -> None:
