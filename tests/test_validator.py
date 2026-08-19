@@ -18,6 +18,7 @@ from scripts.validate_submission import (
     validate_evaluation_evidence,
     validate_open_reproducibility,
     validate_metrics,
+    validate_profiles,
     validate_v3_case_metrics,
     validate_v3_discretization,
     validate_v3_prediction_metadata,
@@ -172,6 +173,14 @@ class ValidatorTests(unittest.TestCase):
             specification["overall_score_composite"],
         )
         self.assertEqual(
+            updated_airfrans["component_score_groups"],
+            specification["component_score_groups"],
+        )
+        self.assertEqual(
+            updated_airfrans["profile_definition"],
+            specification["profile_definition"],
+        )
+        self.assertEqual(
             updated_airfrans["metric_definition_overrides"],
             airfrans["metric_definition_overrides"],
         )
@@ -266,6 +275,7 @@ class ValidatorTests(unittest.TestCase):
                 "metric_ids": [metric["id"] for metric in specification["metrics"]],
                 "submission_format": "legacy_external_aero",
                 "overall_score_composite": specification["overall_score_composite"],
+                "component_score_groups": specification["component_score_groups"],
             },
             {"metric_definitions": specification["metrics"]},
         )
@@ -280,6 +290,7 @@ class ValidatorTests(unittest.TestCase):
                 "metric_ids": [metric["id"] for metric in specification["metrics"]],
                 "submission_format": "legacy_external_aero",
                 "overall_score_composite": specification["overall_score_composite"],
+                "component_score_groups": specification["component_score_groups"],
             },
             {"metric_definitions": specification["metrics"]},
         )
@@ -509,6 +520,109 @@ class ValidatorTests(unittest.TestCase):
             write_json(index_path, index)
             errors, _ = validate_submission_file(destination / "submission.json")
             self.assertIn("coordinates must be strictly increasing", "\n".join(errors))
+
+    def test_declared_profile_sample_count_is_required_outside_prototypes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            temporary_root = Path(temporary)
+            directory = temporary_root / "submissions" / "airfrans" / "model"
+            profiles = directory / "profiles"
+            split_path = temporary_root / "benchmark-specs" / "airfrans" / "splits" / "full.json"
+            write_json(
+                split_path,
+                {
+                    "schema_version": "1.0",
+                    "dataset_id": "airfrans",
+                    "split_id": "full",
+                    "case_set_id": "standard",
+                    "case_id_status": "official",
+                    "case_count": 1,
+                    "case_ids": ["case-001"],
+                },
+            )
+            chunk_path = profiles / "chunk-000.json"
+            write_json(
+                chunk_path,
+                {
+                    "schema_version": "1.0",
+                    "cases": [
+                        {
+                            "case_id": "case-001",
+                            "series": [
+                                {
+                                    "panel_id": "velocity_profiles",
+                                    "station_id": "station",
+                                    "quantity_id": "velocity_x_ratio",
+                                    "coordinate": [0.0, 0.5, 1.0],
+                                    "prediction": [1.0, 1.0, 1.0],
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+            index_path = profiles / "index.json"
+            write_json(
+                index_path,
+                {
+                    "schema_version": "1.0",
+                    "submission_id": "model",
+                    "dataset_id": "airfrans",
+                    "split_id": "full",
+                    "case_set_id": "standard",
+                    "case_count": 1,
+                    "chunks": [
+                        {
+                            "file": "chunk-000.json",
+                            "case_ids": ["case-001"],
+                            "sha256": sha256_file(chunk_path),
+                        }
+                    ],
+                },
+            )
+            submission = {
+                "submission_id": "model",
+                "dataset_id": "airfrans",
+                "split_id": "full",
+                "case_set_id": "standard",
+                "split_sha256": sha256_file(split_path),
+                "profile_data": {
+                    "index_file": "profiles/index.json",
+                    "case_count": 1,
+                    "case_set_id": "standard",
+                },
+            }
+            dataset_spec = {
+                "profile_panels": [
+                    {
+                        "id": "velocity_profiles",
+                        "required": True,
+                        "minimum_points": 2,
+                        "sample_count": 4,
+                        "coordinate_interval": [0.0, 1.0],
+                        "coordinate_spacing": "uniform",
+                        "station_ids": ["station"],
+                        "quantity_ids": ["velocity_x_ratio"],
+                    }
+                ]
+            }
+            split_entry = {
+                "index_file": "splits/full.json",
+                "sha256": sha256_file(split_path),
+                "case_set_id": "standard",
+                "case_id_status": "official",
+                "case_count": 1,
+            }
+
+            errors: list[str] = []
+            with patch("scripts.validate_submission.ROOT", temporary_root):
+                validate_profiles(errors.append, directory, submission, dataset_spec, split_entry)
+            self.assertIn("must contain exactly 4 points", "\n".join(errors))
+
+            errors = []
+            submission["approval"] = {"status": "prototype"}
+            with patch("scripts.validate_submission.ROOT", temporary_root):
+                validate_profiles(errors.append, directory, submission, dataset_spec, split_entry)
+            self.assertEqual(errors, [])
 
     def test_non_finite_profile_value_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

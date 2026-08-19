@@ -19,7 +19,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from reference.scores import composite_overall_score, legacy_aero_scores
+from reference.scores import (
+    composite_component_group_scores,
+    composite_overall_score,
+    legacy_aero_scores,
+)
 from reference.weightings import evaluator_weighting
 
 try:
@@ -83,6 +87,16 @@ def manifest_with_benchmark_contract(manifest: dict[str, Any]) -> dict[str, Any]
             dataset["overall_score_composite"] = deepcopy(composite)
         else:
             dataset.pop("overall_score_composite", None)
+        component_groups = specification.get("component_score_groups")
+        if isinstance(component_groups, dict):
+            dataset["component_score_groups"] = deepcopy(component_groups)
+        else:
+            dataset.pop("component_score_groups", None)
+        profile_definition = specification.get("profile_definition")
+        if isinstance(profile_definition, dict):
+            dataset["profile_definition"] = deepcopy(profile_definition)
+        else:
+            dataset.pop("profile_definition", None)
         scoring_support = specification.get("scoring_support")
         if isinstance(scoring_support, dict):
             dataset["scoring_support"] = {
@@ -344,7 +358,52 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
                     values[target_metric_id], expected, rel_tol=0.0, abs_tol=tolerance
                 ):
                     add(f"metric_values.{target_metric_id} does not match its declared composite equation")
-    if dataset.get("submission_format") == "legacy_external_aero" and all(
+    component_groups = dataset.get("component_score_groups")
+    score_tolerance = 1e-6
+    if isinstance(component_groups, dict):
+        groups = component_groups.get("groups")
+        target_ids = (
+            [group.get("metric_id") for group in groups if isinstance(group, dict)]
+            if isinstance(groups, list)
+            else []
+        )
+        grouped_component_ids = (
+            [
+                metric_id
+                for group in groups
+                if isinstance(group, dict) and isinstance(group.get("component_metric_ids"), list)
+                for metric_id in group["component_metric_ids"]
+            ]
+            if isinstance(groups, list)
+            else []
+        )
+        score_tolerance = component_groups.get("tolerance", 1e-6)
+        if (
+            component_groups.get("operation") != "normalized_weighted_component_scores"
+            or not isinstance(groups, list)
+            or not groups
+            or len(target_ids) != len(groups)
+            or any(not isinstance(metric_id, str) or metric_id not in expected_ids for metric_id in target_ids)
+            or any(
+                not isinstance(metric_id, str) or metric_id not in expected_ids
+                for metric_id in grouped_component_ids
+            )
+        ):
+            add("dataset component_score_groups does not reference a valid target and component metric set")
+        elif not isinstance(composite, dict):
+            add("dataset component_score_groups requires overall_score_composite")
+        elif not is_number(score_tolerance) or score_tolerance < 0:
+            add("dataset component_score_groups requires a non-negative tolerance")
+        elif all(is_number(values.get(metric_id)) for metric_id in grouped_component_ids):
+            try:
+                expected_scores = composite_component_group_scores(
+                    values,
+                    composite,
+                    component_groups,
+                )
+            except (KeyError, TypeError, ValueError) as exc:
+                add(f"dataset component_score_groups is invalid: {exc}")
+    elif dataset.get("submission_format") == "legacy_external_aero" and all(
         is_number(values.get(metric_id))
         for metric_id in {"cd_r2", "cl_r2", "velocity_profile_r2", "cp_cut_r2"}
     ):
@@ -355,7 +414,7 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
     if expected_scores is not None:
         for metric_id, expected in expected_scores.items():
             if not is_number(values.get(metric_id)) or not math.isclose(
-                values[metric_id], expected, rel_tol=0.0, abs_tol=1e-6
+                values[metric_id], expected, rel_tol=0.0, abs_tol=score_tolerance
             ):
                 add(f"metric_values.{metric_id} does not match its declared score equation")
 
@@ -2232,6 +2291,7 @@ def validate_profiles(
         add("profile_data.case_set_id must equal submission case_set_id")
 
     panels = {panel["id"]: panel for panel in dataset_spec["profile_panels"]}
+    prototype_fixture = submission.get("approval", {}).get("status") == "prototype"
     indexed_case_ids: list[str] = []
     loaded_case_ids: list[str] = []
     series_count = 0
@@ -2295,10 +2355,55 @@ def validate_profiles(
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} coordinate and prediction lengths differ")
                 if len(coordinates) < panel.get("minimum_points", 2):
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} has too few points")
+                expected_sample_count = panel.get("sample_count")
+                if (
+                    not prototype_fixture
+                    and isinstance(expected_sample_count, int)
+                    and not isinstance(expected_sample_count, bool)
+                    and len(coordinates) != expected_sample_count
+                ):
+                    add(
+                        f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} "
+                        f"must contain exactly {expected_sample_count} points"
+                    )
                 if any(not is_number(value) for value in coordinates):
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} coordinates must be finite numbers")
                 elif any(right <= left for left, right in zip(coordinates, coordinates[1:])):
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} coordinates must be strictly increasing")
+                else:
+                    interval = panel.get("coordinate_interval")
+                    if (
+                        isinstance(interval, list)
+                        and len(interval) == 2
+                        and all(is_number(value) for value in interval)
+                        and len(coordinates) >= 2
+                    ):
+                        start, end = interval
+                        if not math.isclose(coordinates[0], start, rel_tol=0.0, abs_tol=1e-12):
+                            add(
+                                f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} "
+                                f"coordinate must start at {start}"
+                            )
+                        if not math.isclose(coordinates[-1], end, rel_tol=0.0, abs_tol=1e-12):
+                            add(
+                                f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} "
+                                f"coordinate must end at {end}"
+                            )
+                        if panel.get("coordinate_spacing") == "uniform":
+                            denominator = len(coordinates) - 1
+                            if any(
+                                not math.isclose(
+                                    value,
+                                    start + (end - start) * index / denominator,
+                                    rel_tol=0.0,
+                                    abs_tol=1e-12,
+                                )
+                                for index, value in enumerate(coordinates)
+                            ):
+                                add(
+                                    f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} "
+                                    "coordinates must be uniformly spaced over the declared interval"
+                                )
                 if any(not is_number(value) for value in predictions):
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} predictions must be finite numbers")
                 series_count += 1

@@ -68,6 +68,12 @@
       "approve_loader_evaluator_and_immutable_scoring_support_manifest"
     ]
   },
+  "profile_definition": {
+    "id": "airfrans-boundary-layer-v1",
+    "file": "velocity-profiles-v1.json",
+    "sha256": "a3022f5085bd03c784753f16957b7a81a00dadcc24a433a2fb79afd1de9f0ab7",
+    "status": "owner_review_required"
+  },
   "evaluation_reference_version": "prototype-1",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {
@@ -91,6 +97,34 @@
     ],
     "tolerance": 1e-06
   },
+  "component_score_groups": {
+    "operation": "normalized_weighted_component_scores",
+    "groups": [
+      {
+        "metric_id": "field_score",
+        "component_metric_ids": [
+          "surface_pressure_rel_l2",
+          "surface_wall_shear_rel_l2",
+          "flow_domain_velocity_rel_l2",
+          "flow_domain_pressure_rel_l2"
+        ]
+      },
+      {
+        "metric_id": "force_score",
+        "component_metric_ids": [
+          "cd_r2",
+          "cl_r2"
+        ]
+      },
+      {
+        "metric_id": "diagnostic_score",
+        "component_metric_ids": [
+          "velocity_profile_r2"
+        ]
+      }
+    ],
+    "tolerance": 1e-06
+  },
   "metrics": [
     {
       "id": "overall_score",
@@ -106,27 +140,27 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{1}{0.67}\\sum_j w_j\\max\\!\\left(0,\\,100\\left(1-\\frac{e_j}{c_j}\\right)\\right)",
+      "equation": "\\frac{\\sum_{j\\in F}\\alpha_j S_j}{\\sum_{j\\in F}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "force_score",
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.12\\,S_{C_D} + 0.10\\,S_{C_L}}{0.22}",
+      "equation": "\\frac{\\sum_{j\\in C}\\alpha_j S_j}{\\sum_{j\\in C}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "diagnostic_score",
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "S_{\\mathrm{velocity}}",
+      "equation": "\\frac{\\sum_{j\\in D}\\alpha_j S_j}{\\sum_{j\\in D}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "surface_pressure_rel_l2",
@@ -297,10 +331,20 @@
   "profile_panels": [
     {
       "id": "velocity_profiles",
-      "required": false,
+      "metric_id": "velocity_profile_r2",
+      "profile_definition_id": "airfrans-boundary-layer-v1",
+      "required": true,
       "allow_unlisted_stations": false,
       "minimum_points": 2,
+      "sample_count": 1001,
       "coordinate_order": "strictly_increasing",
+      "coordinate_id": "wall_normal_arclength_m",
+      "coordinate_unit": "m",
+      "coordinate_interval": [
+        0.0,
+        0.1
+      ],
+      "coordinate_spacing": "uniform",
       "station_ids": [
         "upper_x_0_25c",
         "upper_x_0_50c",
@@ -308,9 +352,10 @@
         "upper_x_0_95c"
       ],
       "quantity_ids": [
-        "velocity_ratio"
+        "velocity_x_ratio",
+        "velocity_y_ratio"
       ],
-      "note": "Profiles extracted on the upper surface (suction side) along the surface normal (length 0.1m, 1000 points). The coordinate is the distance from the wall; velocities are Cartesian components normalized by the freestream inlet velocity magnitude. Stations at 0.75c and 0.95c evaluate trailing-edge boundary layer separation."
+      "note": "Required Cartesian velocity profiles on the extrados at x/c = 0.25, 0.50, 0.75, and 0.95. The complete extraction contract is pinned by profile_definition."
     }
   ],
   "splits": [
@@ -321,7 +366,7 @@
       "case_count": 200,
       "case_set_id": "standard",
       "case_id_status": "official",
-      "sha256": "74ce9627502a83d463ce655017dbca832ac3dc1d41c425b8407eecdae61e231c"
+      "sha256": "b300910d8eb27c11652064ba1c72a669fe4539addd76222f03af072f2f169e9f"
     },
     {
       "id": "scarce",
@@ -330,7 +375,7 @@
       "case_count": 200,
       "case_set_id": "standard",
       "case_id_status": "official",
-      "sha256": "b2275025db9e73c7889622c97c0838208af4419c98c5875688e49a9d540f669f"
+      "sha256": "c63cb0e1ccc480623ab2fb953335e37086b5203350a7ab4b9563ea4872cf9ebb"
     },
     {
       "id": "reynolds_extrapolation",
@@ -339,7 +384,7 @@
       "case_count": 496,
       "case_set_id": "reynolds_extrapolation",
       "case_id_status": "official",
-      "sha256": "554184bec2bd32eb6e6de36e32d9a67ae57747a08bfaf427dbb008e6db1833e9"
+      "sha256": "1c1a11cbee7f7445622f4603b5f190b73692bd0804358746af538cb336587188"
     },
     {
       "id": "aoa_extrapolation",
@@ -348,7 +393,7 @@
       "case_count": 196,
       "case_set_id": "aoa_extrapolation",
       "case_id_status": "official",
-      "sha256": "0a29a7de40b200057acdf4e37d3bcbcbbb176108c4553f3417f5d24762df61e9"
+      "sha256": "58621bbd012d3d14f45f49783696ddb4f03766bd2db144624c2d77711b17961b"
     }
   ]
 }

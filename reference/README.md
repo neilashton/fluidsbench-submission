@@ -169,29 +169,19 @@ S_{overall}=\sum_k \alpha_k S_k.
 \]
 
 The exact component metric IDs, transforms, caps, and weights live in each dataset's `overall_score_composite` object. The
-validator recalculates the composite from those component values. It also checks the legacy intermediate aggregates where they
-remain part of the published result.
-
-For the prototype external-aerodynamics datasets, the four field errors have caps \(c_j=(15,20,12,15)\) and weights
-\(w_j=(0.15,0.10,0.15,0.10)\):
+validator recalculates the composite from those component values. External-aerodynamics specifications additionally partition
+those components into field, force, and diagnostic groups through `component_score_groups`. For any declared group \(G\), its
+intermediate score is the normalized weighted score
 
 \[
-S_{field}=\frac{\sum_j w_j\,\operatorname{clip}(100(1-e_j/c_j),0,100)}{0.50}
+S_G=\frac{\sum_{j\in G}\alpha_jS_j}{\sum_{j\in G}\alpha_j}.
 \]
 
-\[
-S_{force}=\frac{0.15\,\operatorname{clip}(R^2_{C_D},0,1)100+
-0.10\,\operatorname{clip}(R^2_{C_L},0,1)100}{0.25}
-\]
-
-\[
-S_{profile}=\frac{0.15\,\operatorname{clip}(R^2_{velocity},0,1)100+
-0.10\,\operatorname{clip}(R^2_{C_p},0,1)100}{0.25}
-\]
-
-\[
-S_{overall}=0.50S_{field}+0.25S_{force}+0.25S_{profile}
-\]
+The published metric equations use \(F\), \(C\), and \(D\) for the declared field, coefficient/force, and diagnostic groups.
+The group declarations must cover every overall-score component exactly once. This makes the intermediate scores executable for
+dataset-specific weightings and component sets, including a diagnostic group containing only a velocity-profile metric. The
+validator derives these scores from the same transformations and weights as the overall composite rather than maintaining a
+second hard-coded formula.
 
 For the four newly unified rankings, the same generic rule simplifies to `100 - blended_surface_rel_l2` for BlendedNet,
 `100 - surface_pressure_rel_l2` for DrivAerNet++, and `100 * (1 - total_error)` for Rotor37 and VKI-LS59, with the result bounded

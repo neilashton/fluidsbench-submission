@@ -6,6 +6,20 @@
   "split_label": "Full",
   "case_id_status": "official",
   "case_count": 200,
+  "source": {
+    "dataset_release": "AirfRANS NeurIPS 2022 public release",
+    "archive_url": "https://data.isir.upmc.fr/extrality/NeurIPS_2022/Dataset.zip",
+    "archive_size_bytes": 10029067577,
+    "archive_last_modified": "2022-08-11T15:01:09Z",
+    "manifest_member": "Dataset/manifest.json",
+    "manifest_sha256": "3d1320005bcf3d94df80df2bf8338dd6ce6d394c6beafa14849b4ce1de7def13",
+    "manifest_key": "full_test",
+    "loader_commit": "d35d4035d8ba6fa98c1a6662be925c2fc777610b",
+    "loader_file": "src/airfrans/dataset.py",
+    "loader_file_sha256": "21fee60ef9451fa5eb2634ccc80125acac2e387a1ba15e75ecc7ae5ec64c0675",
+    "case_ids_sha256": "d91db30fce76e3c00fa4f89d21189f29723aa36d3e04fe45631f0fd54930f964",
+    "case_ids_digest_algorithm": "sha256(canonical_json(case_ids))"
+  },
   "case_ids": [
     "airFoil2D_SST_31.812_1.334_0.371_3.287_0.0_19.548",
     "airFoil2D_SST_39.741_14.642_3.175_3.316_1.0_10.583",

@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-08-19T11:36:19Z",
+  "generated_at": "2026-08-19T13:59:56Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-07-15-18da0a7964e3",
+    "id": "prototype-dev-2026-07-15-abf839beb336",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-08-19T11:36:19Z",
+    "generated_at": "2026-08-19T13:59:56Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "18da0a7964e3dc3d0f38a7e1f2bf79786b1e29e13d58a05c108b11af4b6c4f3e",
+    "feed_sha256": "abf839beb336e15d0912896100dcb67c077437fe417d46d53a79d25448647264",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,7 +51,7 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "b60d285ab0d4076a422592a79b94ef56e54cd1f96261f4a8ab384352e5d671c7",
+      "index_sha256": "401a36ef48625fb409b194e7af2c1bc796533d76ff170cf66a3fd428cd141629",
       "record_count": 72,
       "eligible_record_count": 0
     }
@@ -544,6 +544,35 @@
           }
         ],
         "tolerance": 1e-06
+      },
+      "component_score_groups": {
+        "operation": "normalized_weighted_component_scores",
+        "groups": [
+          {
+            "metric_id": "field_score",
+            "component_metric_ids": [
+              "surface_pressure_rel_l2",
+              "surface_wall_shear_rel_l2",
+              "volume_velocity_rel_l2",
+              "volume_pressure_rel_l2"
+            ]
+          },
+          {
+            "metric_id": "force_score",
+            "component_metric_ids": [
+              "cd_r2",
+              "cl_r2"
+            ]
+          },
+          {
+            "metric_id": "diagnostic_score",
+            "component_metric_ids": [
+              "velocity_profile_r2",
+              "cp_cut_r2"
+            ]
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -635,109 +664,76 @@
       },
       "diagnostic_panels": [
         {
-          "id": "pressure_profiles",
-          "title": "Pressure-coefficient profiles",
-          "description": "Reference and submitted pressure-coefficient traces at the selected station.",
-          "data_key": "cp_cuts",
-          "x_keys": [
-            "x",
-            "x_over_c",
-            "x_over_l"
-          ],
-          "quantities": [
-            {
-              "id": "cp",
-              "label": "Cp",
-              "y_label": "Pressure coefficient, Cp",
-              "y_keys": [
-                "cp"
-              ],
-              "unit": ""
-            }
-          ],
-          "stations": [
-            {
-              "id": "upper_surface",
-              "label": "Upper surface (extrados)",
-              "x_label": "x/c along upper airfoil surface",
-              "description": "Upper-surface pressure-coefficient trace used by the AirfRANS validation and benchmark plots.",
-              "basis": "published_validation_trace",
-              "source_url": "https://arxiv.org/abs/2212.07564"
-            },
-            {
-              "id": "lower_surface",
-              "label": "Lower surface (intrados)",
-              "x_label": "x/c along lower airfoil surface",
-              "description": "Lower-surface pressure-coefficient trace used by the AirfRANS validation and benchmark plots.",
-              "basis": "published_validation_trace",
-              "source_url": "https://arxiv.org/abs/2212.07564"
-            }
-          ],
-          "required": true,
-          "required_series_fields": [
-            "case_id",
-            "station_id"
-          ],
-          "reverse_y": true
-        },
-        {
           "id": "velocity_profiles",
           "title": "Velocity profiles",
-          "description": "Reference and submitted normalized velocity traces at the selected station.",
+          "description": "Required Cartesian velocity components normalized by freestream speed on four extrados-normal sampling lines.",
           "data_key": "velocity_profiles",
+          "profile_definition_id": "airfrans-boundary-layer-v1",
+          "sample_count": 1001,
+          "coordinate_unit": "m",
           "x_keys": [
-            "x",
+            "wall_normal_arclength_m",
             "offset",
             "distance"
           ],
           "quantities": [
             {
-              "id": "velocity_ratio",
-              "label": "Velocity",
-              "y_label": "Normalized velocity",
+              "id": "velocity_x_ratio",
+              "label": "Ux/Uinf",
+              "y_label": "Cartesian x velocity / freestream speed",
               "y_keys": [
-                "u_over_u_inf",
-                "velocity_ratio"
+                "velocity_x_ratio",
+                "u_over_u_inf"
+              ],
+              "unit": ""
+            },
+            {
+              "id": "velocity_y_ratio",
+              "label": "Uy/Uinf",
+              "y_label": "Cartesian y velocity / freestream speed",
+              "y_keys": [
+                "velocity_y_ratio",
+                "v_over_u_inf"
               ],
               "unit": ""
             }
           ],
           "stations": [
             {
-              "id": "prototype_0_25l",
-              "label": "0.25L",
-              "x_label": "Profile coordinate",
-              "description": "Prototype velocity profile at 0.25 reference lengths.",
-              "basis": "fluidsbench_benchmark_trace",
-              "source_url": "https://fluidsbench.github.io/"
+              "id": "upper_x_0_25c",
+              "label": "Extrados x/c = 0.25",
+              "x_label": "Wall-normal arclength, m",
+              "description": "Attached-flow profile on the upper airfoil surface at x/c = 0.25.",
+              "basis": "pinned_airfrans_boundary_layer",
+              "source_url": "https://github.com/Extrality/airfrans_lib/blob/d35d4035d8ba6fa98c1a6662be925c2fc777610b/src/airfrans/simulation.py#L320-L415"
             },
             {
-              "id": "prototype_0_50l",
-              "label": "0.50L",
-              "x_label": "Profile coordinate",
-              "description": "Prototype velocity profile at 0.50 reference lengths.",
-              "basis": "fluidsbench_benchmark_trace",
-              "source_url": "https://fluidsbench.github.io/"
+              "id": "upper_x_0_50c",
+              "label": "Extrados x/c = 0.50",
+              "x_label": "Wall-normal arclength, m",
+              "description": "Mid-chord profile on the upper airfoil surface at x/c = 0.50.",
+              "basis": "pinned_airfrans_boundary_layer",
+              "source_url": "https://github.com/Extrality/airfrans_lib/blob/d35d4035d8ba6fa98c1a6662be925c2fc777610b/src/airfrans/simulation.py#L320-L415"
             },
             {
-              "id": "prototype_1_00l",
-              "label": "1.00L",
-              "x_label": "Profile coordinate",
-              "description": "Prototype velocity profile at 1.00 reference lengths.",
-              "basis": "fluidsbench_benchmark_trace",
-              "source_url": "https://fluidsbench.github.io/"
+              "id": "upper_x_0_75c",
+              "label": "Extrados x/c = 0.75",
+              "x_label": "Wall-normal arclength, m",
+              "description": "Adverse-pressure-gradient profile on the upper airfoil surface at x/c = 0.75.",
+              "basis": "pinned_airfrans_boundary_layer",
+              "source_url": "https://github.com/Extrality/airfrans_lib/blob/d35d4035d8ba6fa98c1a6662be925c2fc777610b/src/airfrans/simulation.py#L320-L415"
             },
             {
-              "id": "wake_x_1_50c",
-              "label": "Wake at 1.50c",
-              "x_label": "Profile coordinate",
-              "description": "Airfoil wake profile at x/c = 1.50.",
-              "basis": "fluidsbench_benchmark_trace",
-              "source_url": "https://fluidsbench.org/datasets/"
+              "id": "upper_x_0_95c",
+              "label": "Extrados x/c = 0.95",
+              "x_label": "Wall-normal arclength, m",
+              "description": "Near-trailing-edge profile on the upper airfoil surface at x/c = 0.95.",
+              "basis": "pinned_airfrans_boundary_layer",
+              "source_url": "https://github.com/Extrality/airfrans_lib/blob/d35d4035d8ba6fa98c1a6662be925c2fc777610b/src/airfrans/simulation.py#L320-L415"
             }
           ],
-          "required": false,
-          "allow_unlisted_stations": true,
+          "required": true,
+          "allow_unlisted_stations": false,
           "required_series_fields": [
             "case_id",
             "station_id"
@@ -853,6 +849,40 @@
           }
         ],
         "tolerance": 1e-06
+      },
+      "component_score_groups": {
+        "operation": "normalized_weighted_component_scores",
+        "groups": [
+          {
+            "metric_id": "field_score",
+            "component_metric_ids": [
+              "surface_pressure_rel_l2",
+              "surface_wall_shear_rel_l2",
+              "flow_domain_velocity_rel_l2",
+              "flow_domain_pressure_rel_l2"
+            ]
+          },
+          {
+            "metric_id": "force_score",
+            "component_metric_ids": [
+              "cd_r2",
+              "cl_r2"
+            ]
+          },
+          {
+            "metric_id": "diagnostic_score",
+            "component_metric_ids": [
+              "velocity_profile_r2"
+            ]
+          }
+        ],
+        "tolerance": 1e-06
+      },
+      "profile_definition": {
+        "id": "airfrans-boundary-layer-v1",
+        "file": "velocity-profiles-v1.json",
+        "sha256": "a3022f5085bd03c784753f16957b7a81a00dadcc24a433a2fb79afd1de9f0ab7",
+        "status": "owner_review_required"
       }
     },
     {
@@ -1256,6 +1286,35 @@
             "metric_id": "cp_cut_r2",
             "weight": 0.1,
             "transform": "bounded_quality"
+          }
+        ],
+        "tolerance": 1e-06
+      },
+      "component_score_groups": {
+        "operation": "normalized_weighted_component_scores",
+        "groups": [
+          {
+            "metric_id": "field_score",
+            "component_metric_ids": [
+              "surface_pressure_rel_l2",
+              "surface_wall_shear_rel_l2",
+              "volume_velocity_rel_l2",
+              "volume_pressure_rel_l2"
+            ]
+          },
+          {
+            "metric_id": "force_score",
+            "component_metric_ids": [
+              "cd_r2",
+              "cl_r2"
+            ]
+          },
+          {
+            "metric_id": "diagnostic_score",
+            "component_metric_ids": [
+              "velocity_profile_r2",
+              "cp_cut_r2"
+            ]
           }
         ],
         "tolerance": 1e-06
@@ -2202,6 +2261,35 @@
           }
         ],
         "tolerance": 1e-06
+      },
+      "component_score_groups": {
+        "operation": "normalized_weighted_component_scores",
+        "groups": [
+          {
+            "metric_id": "field_score",
+            "component_metric_ids": [
+              "surface_pressure_rel_l2",
+              "surface_wall_shear_rel_l2",
+              "volume_velocity_rel_l2",
+              "volume_pressure_rel_l2"
+            ]
+          },
+          {
+            "metric_id": "force_score",
+            "component_metric_ids": [
+              "cd_r2",
+              "cl_r2"
+            ]
+          },
+          {
+            "metric_id": "diagnostic_score",
+            "component_metric_ids": [
+              "velocity_profile_r2",
+              "cp_cut_r2"
+            ]
+          }
+        ],
+        "tolerance": 1e-06
       }
     },
     {
@@ -2519,6 +2607,35 @@
             "metric_id": "cp_cut_r2",
             "weight": 0.1,
             "transform": "bounded_quality"
+          }
+        ],
+        "tolerance": 1e-06
+      },
+      "component_score_groups": {
+        "operation": "normalized_weighted_component_scores",
+        "groups": [
+          {
+            "metric_id": "field_score",
+            "component_metric_ids": [
+              "surface_pressure_rel_l2",
+              "surface_wall_shear_rel_l2",
+              "volume_velocity_rel_l2",
+              "volume_pressure_rel_l2"
+            ]
+          },
+          {
+            "metric_id": "force_score",
+            "component_metric_ids": [
+              "cd_r2",
+              "cl_r2"
+            ]
+          },
+          {
+            "metric_id": "diagnostic_score",
+            "component_metric_ids": [
+              "velocity_profile_r2",
+              "cp_cut_r2"
+            ]
           }
         ],
         "tolerance": 1e-06
@@ -3568,7 +3685,7 @@
       "digits": 1,
       "direction": "higher",
       "kind": "score",
-      "equation": "2\\sum_j w_j\\max\\!\\left(0,\\,100\\left(1-\\frac{e_j}{c_j}\\right)\\right)",
+      "equation": "\\frac{\\sum_{j\\in F}\\alpha_j S_j}{\\sum_{j\\in F}\\alpha_j}",
       "comparison_group": "summary",
       "comparison_group_label": "Summary scores",
       "column_group_label": "Scores"
@@ -3584,7 +3701,7 @@
       "digits": 1,
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.15\\,S_{C_D} + 0.10\\,S_{C_L}}{0.25}",
+      "equation": "\\frac{\\sum_{j\\in C}\\alpha_j S_j}{\\sum_{j\\in C}\\alpha_j}",
       "comparison_group": "summary",
       "comparison_group_label": "Summary scores",
       "column_group_label": "Scores"
@@ -3600,7 +3717,7 @@
       "digits": 1,
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.15\\,S_{\\mathrm{velocity}} + 0.10\\,S_{C_p}}{0.25}",
+      "equation": "\\frac{\\sum_{j\\in D}\\alpha_j S_j}{\\sum_{j\\in D}\\alpha_j}",
       "comparison_group": "summary",
       "comparison_group_label": "Summary scores",
       "column_group_label": "Scores"

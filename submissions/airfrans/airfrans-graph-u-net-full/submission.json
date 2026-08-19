@@ -17,7 +17,7 @@
   "split": "Scarce",
   "split_id": "scarce",
   "case_set_id": "standard",
-  "split_sha256": "b2275025db9e73c7889622c97c0838208af4419c98c5875688e49a9d540f669f",
+  "split_sha256": "c63cb0e1ccc480623ab2fb953335e37086b5203350a7ab4b9563ea4872cf9ebb",
   "parameter_count_millions": 0.07,
   "submitter_name": "Neil Ashton",
   "institution": "FluidsBench dummy data",
@@ -29,14 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "e07a4d708b27b056de61e73972bd6730deae9de97a9abce042e8df2b42308d0d"
+    "evidence_sha256": "6a04ff9309cbd7f87833f873cf58b5b637bc60269bd890b5accb4ed89c47dedd"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
-    "overall_score": 43.93333333333333,
+    "overall_score": 43.93333333333334,
     "surface_pressure_rel_l2": 19.75,
     "surface_pressure_rel_l1": 14.22,
     "surface_wall_shear_rel_l2": 10.39,

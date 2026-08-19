@@ -17,7 +17,7 @@
     "split": "Scarce",
     "split_id": "scarce",
     "case_set_id": "standard",
-    "split_sha256": "b2275025db9e73c7889622c97c0838208af4419c98c5875688e49a9d540f669f",
+    "split_sha256": "c63cb0e1ccc480623ab2fb953335e37086b5203350a7ab4b9563ea4872cf9ebb",
     "parameter_count_millions": 0.07,
     "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
@@ -29,14 +29,14 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "e07a4d708b27b056de61e73972bd6730deae9de97a9abce042e8df2b42308d0d"
+      "evidence_sha256": "6a04ff9309cbd7f87833f873cf58b5b637bc60269bd890b5accb4ed89c47dedd"
     },
     "approval": {
       "status": "prototype",
       "note": "Illustrative dummy data; not scientifically reviewed or approved."
     },
     "metric_values": {
-      "overall_score": 43.93333333333333,
+      "overall_score": 43.93333333333334,
       "surface_pressure_rel_l2": 19.75,
       "surface_pressure_rel_l1": 14.22,
       "surface_wall_shear_rel_l2": 10.39,
@@ -63,13 +63,13 @@
       "index_file": "submissions/airfrans/airfrans-graph-u-net-full/profiles/index.json",
       "case_count": 200,
       "case_set_id": "standard",
-      "index_sha256": "cde8dea36da548cb7d89b8e0b03be3d3edd1137c5fd54a9395f4ad8e46ac0ba3"
+      "index_sha256": "12e8534dc202dd62de16abf0c7dbb8550e0f87bbad0f950d42dbf45f43a56d9a"
     },
     "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error comparisons until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 0.07,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 43.93333333333333,
+      "value": 43.93333333333334,
       "ranked_value": 43.9,
       "display_value": "43.9",
       "unit": "",
@@ -107,7 +107,7 @@
     "split": "Reynolds extrapolation",
     "split_id": "reynolds_extrapolation",
     "case_set_id": "reynolds_extrapolation",
-    "split_sha256": "554184bec2bd32eb6e6de36e32d9a67ae57747a08bfaf427dbb008e6db1833e9",
+    "split_sha256": "1c1a11cbee7f7445622f4603b5f190b73692bd0804358746af538cb336587188",
     "parameter_count_millions": 0.03,
     "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
@@ -119,7 +119,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "a93aaa3f1e146b816b30b500ed0a90da34252966a3eeddaa00879965baf11201"
+      "evidence_sha256": "7030df4474b769bc67534d86cac58177db588cfb6bd9b1e81999551053cbab27"
     },
     "approval": {
       "status": "prototype",
@@ -153,7 +153,7 @@
       "index_file": "submissions/airfrans/airfrans-graphsage-full/profiles/index.json",
       "case_count": 496,
       "case_set_id": "reynolds_extrapolation",
-      "index_sha256": "a8783c71bbcf15367bc17cbefdef3d60c6d39093eb29724969a22277f5d7cf5d"
+      "index_sha256": "ed1923a5c93d3d03d7756231f52d151dff88db066ecb26b29c56ea8423717b50"
     },
     "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error comparisons until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 0.03,
@@ -197,7 +197,7 @@
     "split": "AoA extrapolation",
     "split_id": "aoa_extrapolation",
     "case_set_id": "aoa_extrapolation",
-    "split_sha256": "0a29a7de40b200057acdf4e37d3bcbcbbb176108c4553f3417f5d24762df61e9",
+    "split_sha256": "58621bbd012d3d14f45f49783696ddb4f03766bd2db144624c2d77711b17961b",
     "parameter_count_millions": 0.02,
     "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
@@ -209,7 +209,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "e68c4f3c92486fc1a2753dcd3a0ee06c58070829608729b367dbd1acf02b2474"
+      "evidence_sha256": "cd37ee481f0ff531a1ea1dd859808debabd2faa920b5e966c1f3d5a18d43c8c0"
     },
     "approval": {
       "status": "prototype",
@@ -243,7 +243,7 @@
       "index_file": "submissions/airfrans/airfrans-mlp-full/profiles/index.json",
       "case_count": 196,
       "case_set_id": "aoa_extrapolation",
-      "index_sha256": "dff424122af9e985ca42d2dc5679009e3e24df7bd1c40c7810f61b4a66400dcb"
+      "index_sha256": "741e3d20b4de92ea4694b3faa59934f22c6394c4997028b2f4b4155db63d655f"
     },
     "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error comparisons until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 0.02,
@@ -287,7 +287,7 @@
     "split": "Full",
     "split_id": "full",
     "case_set_id": "standard",
-    "split_sha256": "74ce9627502a83d463ce655017dbca832ac3dc1d41c425b8407eecdae61e231c",
+    "split_sha256": "b300910d8eb27c11652064ba1c72a669fe4539addd76222f03af072f2f169e9f",
     "parameter_count_millions": 0.08,
     "submitter_name": "Neil Ashton",
     "institution": "FluidsBench dummy data",
@@ -299,7 +299,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "4a8f4d93898e7d82314519474e562cd17c185c345d0850094061cacf65dd2e05"
+      "evidence_sha256": "f86a4297c70e0cbb88e53a7a5c18f5a743178dd5c4c504da5b3bd11ed77630bc"
     },
     "approval": {
       "status": "prototype",
@@ -333,7 +333,7 @@
       "index_file": "submissions/airfrans/airfrans-pointnet-full/profiles/index.json",
       "case_count": 200,
       "case_set_id": "standard",
-      "index_sha256": "2e64506c784f6ecbce0132a3cf1b9494b90c31475df52337de0d70a25881a34e"
+      "index_sha256": "d641a1354733cad42bbc4fb56f0df533fc42394fe963f14dfab4bbd238945754"
     },
     "note": "AirfRANS full-data baseline from the arXiv v3 benchmark tables. Field columns are prototype conversions from normalized MSE values; force R2 columns are placeholders derived from force relative-error comparisons until a dimensional FluidsBench evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 0.08,
@@ -377,7 +377,7 @@
     "split": "Full",
     "split_id": "full",
     "case_set_id": "standard",
-    "split_sha256": "74ce9627502a83d463ce655017dbca832ac3dc1d41c425b8407eecdae61e231c",
+    "split_sha256": "b300910d8eb27c11652064ba1c72a669fe4539addd76222f03af072f2f169e9f",
     "parameter_count_millions": 4.9,
     "submitter_name": "Neil Ashton",
     "institution": "Example Flow Institute",
@@ -389,7 +389,7 @@
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "93fa0c592540cfac2ba8e8cf145063e3a20bf41ac3c374f35b09d7ab8a707d90"
+      "evidence_sha256": "2930d49556fd951e945308fb64e487a417ab33c1491b9210ae6796b91f12f244"
     },
     "approval": {
       "status": "prototype",
@@ -423,7 +423,7 @@
       "index_file": "submissions/airfrans/dummy-airfrans-airfoiloperator-v1/profiles/index.json",
       "case_count": 200,
       "case_set_id": "standard",
-      "index_sha256": "0afa452081c594b90b8a6460615aa776380e0a1dca95925b94edd16f18ff7755"
+      "index_sha256": "2a1cec2feb48dad9d4098b1f36d5e854fc1e18d4e1ef6e4931d30d4dc6b12100"
     },
     "note": "Dummy AirfRANS submission with compact profile curves. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 4.9,
