@@ -81,6 +81,35 @@
     ],
     "tolerance": 1e-06
   },
+  "component_score_groups": {
+    "operation": "normalized_weighted_component_scores",
+    "groups": [
+      {
+        "metric_id": "field_score",
+        "component_metric_ids": [
+          "surface_pressure_rel_l2",
+          "surface_wall_shear_rel_l2",
+          "volume_velocity_rel_l2",
+          "volume_pressure_rel_l2"
+        ]
+      },
+      {
+        "metric_id": "force_score",
+        "component_metric_ids": [
+          "cd_r2",
+          "cl_r2"
+        ]
+      },
+      {
+        "metric_id": "diagnostic_score",
+        "component_metric_ids": [
+          "velocity_profile_r2",
+          "cp_cut_r2"
+        ]
+      }
+    ],
+    "tolerance": 1e-06
+  },
   "metrics": [
     {
       "id": "overall_score",
@@ -96,27 +125,27 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "2\\sum_j w_j\\max\\!\\left(0,\\,100\\left(1-\\frac{e_j}{c_j}\\right)\\right)",
+      "equation": "\\frac{\\sum_{j\\in F}\\alpha_j S_j}{\\sum_{j\\in F}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "force_score",
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.15\\,S_{C_D} + 0.10\\,S_{C_L}}{0.25}",
+      "equation": "\\frac{\\sum_{j\\in C}\\alpha_j S_j}{\\sum_{j\\in C}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "diagnostic_score",
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.15\\,S_{\\mathrm{velocity}} + 0.10\\,S_{C_p}}{0.25}",
+      "equation": "\\frac{\\sum_{j\\in D}\\alpha_j S_j}{\\sum_{j\\in D}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "surface_pressure_rel_l2",

@@ -9,13 +9,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_SCORE_EQUATIONS = {
     "overall_score": r"\sum_k \alpha_k S_k,\quad \sum_k \alpha_k=1",
-    "field_score": (
-        r"2\sum_j w_j\max\!\left(0,\,100\left(1-\frac{e_j}{c_j}\right)\right)"
-    ),
-    "force_score": r"\frac{0.15\,S_{C_D} + 0.10\,S_{C_L}}{0.25}",
-    "diagnostic_score": (
-        r"\frac{0.15\,S_{\mathrm{velocity}} + 0.10\,S_{C_p}}{0.25}"
-    ),
+    "field_score": r"\frac{\sum_{j\in F}\alpha_j S_j}{\sum_{j\in F}\alpha_j}",
+    "force_score": r"\frac{\sum_{j\in C}\alpha_j S_j}{\sum_{j\in C}\alpha_j}",
+    "diagnostic_score": r"\frac{\sum_{j\in D}\alpha_j S_j}{\sum_{j\in D}\alpha_j}",
 }
 
 
@@ -47,6 +43,33 @@ class MetricDefinitionEquationTests(unittest.TestCase):
                     equations,
                     {metric_id: EXPECTED_SCORE_EQUATIONS[metric_id] for metric_id in equations},
                 )
+
+    def test_intermediate_score_groups_partition_overall_components(self) -> None:
+        intermediate_ids = {"field_score", "force_score", "diagnostic_score"}
+        for path in sorted((ROOT / "benchmark-specs").glob("*/submission-spec.json")):
+            specification = load_json(path)
+            metric_ids = {metric["id"] for metric in specification["metrics"]}
+            if not intermediate_ids.issubset(metric_ids):
+                continue
+            with self.subTest(dataset=specification["dataset_id"]):
+                declaration = specification["component_score_groups"]
+                self.assertEqual(
+                    declaration["operation"],
+                    "normalized_weighted_component_scores",
+                )
+                groups = declaration["groups"]
+                self.assertEqual({group["metric_id"] for group in groups}, intermediate_ids)
+                grouped_ids = [
+                    metric_id
+                    for group in groups
+                    for metric_id in group["component_metric_ids"]
+                ]
+                component_ids = [
+                    component["metric_id"]
+                    for component in specification["overall_score_composite"]["components"]
+                ]
+                self.assertEqual(len(grouped_ids), len(set(grouped_ids)))
+                self.assertEqual(set(grouped_ids), set(component_ids))
 
     def test_every_dataset_declares_the_same_overall_ranking_interface(self) -> None:
         for path in sorted((ROOT / "benchmark-specs").glob("*/submission-spec.json")):
