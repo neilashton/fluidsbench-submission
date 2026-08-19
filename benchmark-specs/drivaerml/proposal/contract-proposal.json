@@ -1,11 +1,11 @@
 {
   "schema_version": "0.1-scientific-review-proposal",
   "dataset_id": "drivaerml",
-  "status": "owner_review_required",
+  "status": "owner_policy_recorded_activation_validation_required",
   "submissions_open": false,
   "non_activating": true,
   "purpose": "Candidate scientific contract; this file does not replace the active prototype submission specification.",
-  "prepared_date": "2026-08-18",
+  "prepared_date": "2026-08-19",
   "source_release": {
     "repository": "neashton/drivaerml",
     "repository_type": "huggingface_dataset",
@@ -93,8 +93,10 @@
             "target_id": "surface_wall_shear",
             "array": "wallShearStressMeanTrim",
             "components": 3,
-            "quantity": "wall_shear_stress_vector",
-            "units_policy": "owner_must_pin_kinematic_or_dynamic_units_and_sign_before_activation",
+            "quantity": "time_averaged_kinematic_wall_shear_stress_vector",
+            "units": "m^2/s^2",
+            "openfoam_patch_normal_convention": "normal_points_into_fluid_domain",
+            "dynamic_traction_conversion": "multiply_by_rho_inf",
             "field_comparison_sign_transform": "none_use_raw_stored_vector"
           }
         ]
@@ -146,6 +148,9 @@
       "case_aggregation": "arithmetic_macro_average_cases_equally",
       "vector_error": "euclidean_norm_of_componentwise_error",
       "vector_magnitude_difference_is_accepted_primary_metric": false,
+      "case_relative_l2_truth_denominator": "must_be_finite_and_strictly_positive_otherwise_hard_benchmark_support_error",
+      "required_valid_entity_nonfinite_prediction": "hard_submission_error_never_drop_or_impute",
+      "nonfinite_truth_coordinate_or_required_weight": "hard_benchmark_support_error_never_drop_or_impute",
       "physical_measure_relative_l2": {
         "required": true,
         "role": "continuum_norm_view",
@@ -170,17 +175,19 @@
           "volume_velocity": "m/s",
           "surface_pressure": "m^2/s^2",
           "volume_pressure": "m^2/s^2",
-          "surface_wall_shear": "owner_confirmation_required"
+          "surface_wall_shear": "m^2/s^2"
         },
         "reason": "relative pressure norms can be small-denominator or gauge sensitive"
       },
       "ranking_priority": {
-        "status": "not_frozen_pending_baseline_sensitivity_review",
+        "status": "selected_for_owner_approved_composite_pending_baseline_sensitivity_review",
         "current_repository_volume_default": "equal_entity_primary_physical_measure_secondary",
+        "surface_composite_default": "physical_area_primary_equal_entity_secondary",
         "proposal_overrides_repository_default": false
       },
       "chunk_rule": "sum_additive_numerators_denominators_counts_and_weights_over_all_chunks_before_nonlinear_reduction",
-      "forbidden_chunk_rule": "average_chunk_local_metrics"
+      "forbidden_chunk_rule": "average_chunk_local_metrics",
+      "numeric_accumulation_status": "activation_blocked_until_binary64_accumulator_raw_entity_block_merge_order_and_full_case_vs_chunked_tolerance_are_pinned_and_replayed"
     },
     "pressure_quantities": {
       "canonical_static_pressure_array": "pMeanTrim",
@@ -333,16 +340,79 @@
       "drag_axis": "+x",
       "lift_axis": "+z"
     },
-    "field_integration_status": "deferred_pending_golden_replay",
-    "source_pin_gap": "per_case_geo_ref_run_csv_identities_or_equivalent_Aref_Lref_and_reference_point_table_not_yet_pinned",
-    "must_pin": [
-      "normal_orientation",
-      "pressure_gauge",
-      "wall_shear_sign",
-      "included_surface_entities",
-      "reference_area_convention",
-      "reference_length_convention",
-      "accepted_replay_tolerance"
+    "ranked_field_integrated_coefficients": {
+      "source_truth": "force_mom_constref_all.csv",
+      "source_truth_sha256": "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865",
+      "source_schema": {
+        "exact_header": [
+          "run",
+          "cd",
+          "cl",
+          "clf",
+          "clr",
+          "cs"
+        ],
+        "row_count": 484,
+        "case_key_column": "run",
+        "case_key_type": "base10_integer",
+        "case_id_join": "integer_N_maps_to_exact_case_id_run_N",
+        "ranked_columns": {
+          "Cd": "cd",
+          "Cl": "cl"
+        },
+        "ranked_units": "dimensionless",
+        "coverage": "exactly_the_484_public_manifest_runs",
+        "hard_errors": [
+          "missing_run",
+          "duplicate_run",
+          "noninteger_run",
+          "nonfinite_ranked_value",
+          "unexpected_or_manifest_extraneous_run"
+        ]
+      },
+      "reference_area_m2": 2.17,
+      "Cd_equation": "F_x/(0.5*rho_inf*U_inf^2*A_ref)",
+      "Cl_equation": "F_z/(0.5*rho_inf*U_inf^2*A_ref)",
+      "case_reduction": "equal_case_rmse",
+      "geometry_specific_reference_role": "separately_reported_unranked_abupt_aerodynamic_efficiency_diagnostic"
+    },
+    "field_integration": {
+      "surface_support": "every_native_boundary_polygon_exactly_once",
+      "polygon_vertex_order": "released_vtp_connectivity_order",
+      "polygon_centroid": "arithmetic_mean_of_polygon_vertices",
+      "oriented_area_vector_equation": "A_f=0.5*sum_i(cross(v_i-c_f,v_i_plus_1-c_f))",
+      "pressure_field": "CellData_pMeanTrim_relative_kinematic_pressure_m2_per_s2_used_as_released_without_offset",
+      "wall_shear_field": "CellData_wallShearStressMeanTrim_kinematic_traction_m2_per_s2_patch_normal_into_fluid_domain",
+      "body_force_equation": "F=rho_inf*sum_f(pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f))",
+      "density_conversion": "the_single_outer_rho_inf_factor_converts_both_kinematic_fields_to_dynamic_force",
+      "pressure_reference": "p_ref_0_Pa_at_x80_y10_z10_m_outlet",
+      "run_1_replay": {
+        "source_boundary": {
+          "path_at_pinned_dataset_revision": "run_1/boundary_1.vtp",
+          "sha256": "01d388402dad7a783db9c666ddb18e6db745aac16a3193c275e0726dd108bb40"
+        },
+        "source_truth": {
+          "path_at_pinned_dataset_revision": "force_mom_constref_all.csv",
+          "sha256": "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865",
+          "row_selector": "integer_run_equals_1"
+        },
+        "native_polygon_count": 8828095,
+        "reconstructed_Cd": 0.31092465669905184,
+        "truth_Cd": 0.3109247,
+        "absolute_Cd_difference": 4.3300948160407415e-8,
+        "reconstructed_Cl": 0.06938221152817933,
+        "truth_Cl": 0.06938221,
+        "absolute_Cl_difference": 1.5281793330768068e-9,
+        "passed_proposed_absolute_tolerance": true
+      },
+      "all_case_activation_absolute_tolerance_per_coefficient": 0.000001,
+      "all_484_public_cases_must_pass": true,
+      "chunk_invariance_required": true
+    },
+    "field_integration_status": "formula_selected_run_1_replay_passed_pending_all_484_replay",
+    "must_validate": [
+      "all_484_public_cases_reproduce_Cd_and_Cl_within_absolute_1e-6",
+      "full_case_and_chunked_additive_reductions_are_identical_within_frozen_numeric_tolerance"
     ]
   },
   "validity_contract": {
@@ -362,15 +432,427 @@
   },
   "deferred_contracts": {
     "profiles_and_cp_cuts": {
-      "status": "not_ranked_not_required",
-      "reason": "current prototype names do not pin coordinates interpolation ordering tolerances quantities and ground_truth_hashes"
+      "status": "owner_policy_approved_pending_implementation_validation",
+      "proposal_document": "AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md",
+      "authoritative_autocfd_inputs": {
+        "case2_description_pdf": {
+          "url": "https://autocfd5.s3.eu-west-1.amazonaws.com/test-cases/case2/AutoCFD5_Case2_Intro_260223.pdf",
+          "sha256": "2308a7e11202eeadc4f4080b4d5703af89207ddf342ede86f16aeaf90e3f67a7"
+        },
+        "result_template_v8_xlsm": {
+          "url": "https://autocfd5.s3.eu-west-1.amazonaws.com/test-cases/case2/AutoCFD5_DrivAer_Result_Template_v8.xlsm",
+          "sha256": "5c7e04e5ccd7190b4f81173a3e5dcde09b9e25a9d91fdb866d48beab2e1e8960"
+        }
+      },
+      "velocity_profiles": {
+        "registry": {
+          "path": "autocfd_velocity_lines_nominal.csv",
+          "sha256": "6eb1528034e27a75ab1949551d58c8a161331bf6d343ca7fb4324f0800ca4d12"
+        },
+        "expanded_scoring_registry": "autocfd_velocity_samples_10mm.csv",
+        "expanded_scoring_registry_sha256": "5f1bcf84a633aa6bfdd776764c3295d5d624ef0b6c3649f67de446281ae5ba97",
+        "line_count": 16,
+        "ranked_line_count": 16,
+        "experimental_parity_subset_count": 11,
+        "experimental_parity_subset_profile_ids": [
+          "V1",
+          "V2",
+          "V3",
+          "V5",
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5",
+          "U6",
+          "L1"
+        ],
+        "quantity": "magnitude(UMeanTrim)/38.889",
+        "association": "native_volume_CellData_containing_cell",
+        "containing_cell_semantics": "all_closure_containing_candidates_then_smallest_raw_vtk_cell_id",
+        "containing_cell_implementation_status": "activation_blocked_pending_published_reference_evaluator_and_golden_assignment_replay",
+        "containing_cell_activation_pins_required": [
+          "candidate_discovery_algorithm",
+          "closure_predicate_and_tolerance_application_for_hex_polyhedron_wedge_pyramid_and_tetrahedron",
+          "reference_evaluator_revision_and_dependency_versions",
+          "candidate_count_semantics",
+          "all_case_assignment_and_tolerance_sensitivity_hashes"
+        ],
+        "point_in_cell_closure_tolerance_m": 0.000001,
+        "tolerance_sensitivity_m": [
+          0.0000005,
+          0.000002
+        ],
+        "face_tie_break": "smallest_raw_vtk_cell_id",
+        "invalid_gap_rule": "trapezoid_edge_contributes_only_if_both_endpoints_valid_no_gap_bridging",
+        "minimum_case_line_support": "positive_contributing_arc_length",
+        "case_line_error_id": "velocity_profile_uinf_rmse",
+        "case_line_error_equation": "sqrt(sum_valid_edges(ds_k*(e_k^2+e_kplus1^2)/2)/sum_valid_edges(ds_k)), where e=norm(U_pred)/U_inf-norm(U_truth)/U_inf",
+        "ranked_error_equation": "mean_cases(mean_16_lines(case_line_error))",
+        "experimental_subset_report_equation": "mean_cases(mean_11_declared_experimental_parity_lines(case_line_error))",
+        "scoring_spacing_m": 0.01,
+        "scoring_sample_count_per_case": 3756,
+        "reference_sample_count_per_case": 37416,
+        "resolution_convergence": {
+          "reference_spacing_m": 0.001,
+          "candidate_spacings_m": [
+            0.002,
+            0.005,
+            0.01
+          ],
+          "nested_reference_strides": [
+            2,
+            5,
+            10
+          ],
+          "sample_counts_per_case": {
+            "0.001": 37416,
+            "0.002": 18716,
+            "0.005": 7496,
+            "0.01": 3756
+          },
+          "relative_change_equation": "abs(L_h-L_1mm)/L_1mm",
+          "zero_reference_loss_rule": "if_L_1mm_lte_1e-12_require_absolute_agreement_lte_1e-12",
+          "aggregate_limit": 0.005,
+          "every_case_macro_limit": 0.01,
+          "every_case_line_limit": 0.02,
+          "method_order_statistic": "kendall_tau_b",
+          "method_order_ranking_quantity": "final_E_profile_not_eight_component_overall_score",
+          "method_order_minimum": 0.99,
+          "score_tie_absolute_tolerance": 1e-12,
+          "method_set": "pinned_before_study_including_physics_null_nearest_training_design_vector_control_and_at_least_three_distinct_trained_model_checkpoints",
+          "failure_rule": "diagnostic_remains_unranked_until_new_version_globally_adopts_coarsest_finer_passing_grid"
+        }
+      },
+      "cp_probes": {
+        "nominal_registry": {
+          "path": "autocfd_cp_taps_nominal.csv",
+          "sha256": "2c1e216ef5693b26d43b9b4f55586ca35516224af0ad874987e5902c67f08e6f"
+        },
+        "panel_registry": {
+          "path": "autocfd_cp_panel_membership.csv",
+          "sha256": "6e288077b8b87e0c5d8d77c1050b07e4b5dd155a8e4fad8815ce4b0581995538"
+        },
+        "component_registry": {
+          "path": "autocfd_cp_tap_component_registry.csv",
+          "sha256": "b4ef9270f2633f2bd3d271e18de23f93e8da3398d67fbc34e77271fb37cbce66",
+          "status": "candidate_all_rows_pending_owner_visual_signoff"
+        },
+        "unique_probe_count": 209,
+        "panel_count": 15,
+        "panel_membership_row_count": 217,
+        "ranked_error_id": "cp_probe_rmse",
+        "case_ranked_error_equation": "R_c=sqrt(sum_i_1_to_209((Cp_pred_ci-Cp_truth_ci)^2)/209)",
+        "ranked_error_equation": "mean_cases(R_c)",
+        "case_panel_error_equation": "R_cp=sqrt(mean_membership_rows_in_panel((Cp_pred_c_probe_of_row-Cp_truth_c_probe_of_row)^2))",
+        "reported_panel_error_equation": "mean_cases(R_cp)_for_each_panel",
+        "panel_macro_sensitivity_equation": "mean_cases(mean_15_panels(R_cp))",
+        "panel_duplicate_rule": "a_probe_reused_between_panels_counts_once_in_each_containing_panel_but_once_in_ranked_209_unique_probe_metric",
+        "quantity": "2*pMeanTrim/(38.889^2)",
+        "separate_predicted_CpMeanTrim_required": false,
+        "released_CpMeanTrim_role": "source_replay_qa_only",
+        "run_1_cp_replay_source": {
+          "path_at_pinned_dataset_revision": "run_1/boundary_1.vtp",
+          "sha256": "01d388402dad7a783db9c666ddb18e6db745aac16a3193c275e0726dd108bb40",
+          "compared_arrays": [
+            "CellData_pMeanTrim",
+            "CellData_CpMeanTrim"
+          ]
+        },
+        "run_1_cp_replay_max_abs_difference": 0.0000004693955464318833,
+        "run_1_cp_replay_rmse_difference": 0.000000016975983521684717,
+        "cp_source_relation_all_case_max_abs_tolerance": 0.000001,
+        "cp_source_relation_all_484_public_cases_must_pass": true,
+        "official_baseline_surface": {
+          "url": "https://autocfd5.s3.eu-west-1.amazonaws.com/test-cases/case2/DrivAer_Notchback_baseline_geometry.stl.gz",
+          "sha256": "ef04c7964530f32a8c805efd8c26364f8e63ee508084292295ab0b15d828001f"
+        },
+        "retained_ansa_morph_correspondence": "not_believed_available_owner_decision_2026-08-19",
+        "probe_623_y_m": -0.59,
+        "probe_629_y_m": -0.36,
+        "probe_623_629_authority": "mandatory_v8_surface_data_input_tables_not_hidden_plot_sheet",
+        "mapping": "owner_atlas_constrained_named_solid_projection_then_native_vtp_bridge",
+        "case_stl_component_vocabulary_status": "49_names_observed_only_in_pinned_run_1_reference_all_484_name_sets_and_hashes_required_before_activation",
+        "component_registry_projection_fields": [
+          "projection_mode",
+          "cut_axis",
+          "cut_value_m",
+          "projection_rule_source"
+        ],
+        "component_registry_assignment_audit_fields": [
+          "component_assignment_baseline_stl_raw_cell_id",
+          "component_assignment_baseline_stl_solid_local_cell_id",
+          "component_assignment_nearest_x_m",
+          "component_assignment_nearest_y_m",
+          "component_assignment_nearest_z_m",
+          "component_assignment_nearest_distance_m",
+          "component_assignment_second_component",
+          "component_assignment_second_distance_m",
+          "component_assignment_distance_gap_m"
+        ],
+        "component_registry_assignment_audit_role": "unrestricted_3d_baseline_nearest_triangle_used_only_for_candidate_anatomical_component_selection_not_rule_specific_mapping_or_scoring_support",
+        "per_case_projection_rule_must_be_recomputed": true,
+        "projection_rule_families": {
+          "pid_600_and_610": "cut_y_0",
+          "pid_601_and_611": "cut_z_0.150_m",
+          "pid_614": "cut_z_0.500_m",
+          "pid_624_points_1_and_8_through_17": "cut_y_neg_0.750_m",
+          "pid_624_points_2_7_and_18_through_26": "cut_y_neg_0.600_m",
+          "pid_624_points_3_through_6": "cut_each_nominal_probe_z",
+          "pid_625_points_1_through_21": "cut_y_0",
+          "pid_602_603_604_612_613_615_and_pid_625_points_22_through_34": "component_closest_3d"
+        },
+        "cut_projection": "closest_point_on_exact_plane_triangle_intersection_segments",
+        "cut_plane_vertex_tolerance_m": 1e-9,
+        "cut_plane_vertex_predicate": "abs(signed_distance_to_plane)_lte_1e-9_m",
+        "coplanar_triangle_rule": "entire_closed_triangle_is_candidate",
+        "stl_projection_distance_tie_m": 0.000001,
+        "stl_projection_distance_tie_rule": "candidate_distance_lte_dmin_plus_tolerance",
+        "stl_triangle_id": "zero_based_global_facet_order_in_ascii_stl",
+        "stl_projection_tie_break": "smallest_raw_stl_triangle_id",
+        "native_vtp_bridge_max_distance_m": 0.002,
+        "native_vtp_bridge_review_distance_m": 0.0005,
+        "native_vtp_bridge_min_abs_normal_dot": 0.8660254037844387,
+        "native_vtp_bridge_distance_tie_m": 0.000001,
+        "native_vtp_bridge_distance_tie_rule": "candidate_distance_lte_dmin_plus_tolerance",
+        "native_vtp_bridge_normal_agreement_tie": 1e-12,
+        "normal_convention": "stl_ordered_vertex_cross_product_and_vtp_normalized_cyclic_sum_vi_cross_vi_plus_1_absolute_dot_orientation_invariant",
+        "normal_degenerate_area_vector_magnitude_m2_lte": 1e-15,
+        "nominal_displacement_max_m": 0.278618,
+        "nominal_displacement_review_m": 0.2089635,
+        "nominal_displacement_definition": "euclidean_distance_from_nominal_probe_xyz_to_rule_specific_case_stl_projection_xyz",
+        "unrestricted_nearest_surface_fallback_allowed": false,
+        "excluded_component_classes_unless_explicitly_assigned_by_frozen_atlas": [
+          "domain",
+          "artificial_CTRL_SURFACE",
+          "tyre",
+          "rim",
+          "brake_disc",
+          "wheel_support",
+          "plinth",
+          "powertrain",
+          "exhaust",
+          "mirror",
+          "door_handle"
+        ],
+        "normative_mapping_validity_checks": [
+          "declared_named_component_exists_in_pinned_case_stl",
+          "declared_projection_returns_finite_nondegenerate_candidate",
+          "rule_specific_nominal_displacement_lte_0.278618_m",
+          "native_vtp_bridge_distance_lte_0.002_m",
+          "native_vtp_bridge_abs_normal_dot_gte_0.8660254037844387",
+          "one_raw_vtk_polygon_selected_after_frozen_distance_normal_and_id_ties"
+        ],
+        "all_209_unique_probes_must_be_valid_in_every_ranked_case": true,
+        "failed_mapping_without_frozen_owner_override": "cp_component_unranked_no_case_or_probe_omission",
+        "owner_override_key": [
+          "case_id",
+          "autocfd_probe_id"
+        ],
+        "owner_override_required_fields": [
+          "replacement_mapping_ids_and_coordinates",
+          "reason",
+          "author",
+          "version",
+          "source_hashes"
+        ],
+        "owner_override_policy": "freeze_before_activation_and_never_edit_active_support_in_place",
+        "non_normative_owner_review_diagnostics": [
+          "side",
+          "symmetry",
+          "panel_order",
+          "mirrored_pair",
+          "duplicate_or_collapse"
+        ],
+        "non_normative_diagnostic_rule": "cannot_change_mapping_selection_or_validity_until_a_later_version_pins_equations_tolerances_and_outcomes",
+        "baseline_component_audit": {
+          "method": "exact_per_named_solid_triangle_closest_point_with_globally_exact_top3_aabb_pruning",
+          "decompressed_official_baseline_stl_sha256": "b820cd4b65aa2ac9d7eb582351e47b092daac877a23a2c9f6521c96022336eb6",
+          "drivaerml_run_1_named_stl_sha256": "411e6651284a26fc94924106b833fd79febc6deba63922c929dd8acfc99720d2",
+          "plausible_wetted_probe_count": 209,
+          "unique_drivaerml_component_count": 17,
+          "probe_mapped_to_excluded_component_count": 0,
+          "first_second_component_gap_lte_0p1mm_count": 0,
+          "component_assignment_nearest_within_1mm_probe_count": 205,
+          "component_assignment_nearest_over_1mm_probe_ids": [
+            552,
+            553,
+            625,
+            626
+          ],
+          "component_assignment_nearest_over_0p5mm_additional_probe_ids": [
+            120
+          ],
+          "maximum_component_assignment_nearest_distance_m": 0.005000632712430017
+        }
+      },
+      "activation_requirements": [
+        "all_case_named_stl_source_hashes",
+        "all_case_mapping_and_validity_support",
+        "owner_visual_atlas_signoff",
+        "published_containing_cell_reference_evaluator_and_all_case_assignment_replay",
+        "profile_resolution_convergence",
+        "all_484_case_cp_source_relation_replay",
+        "golden_truth_hashes",
+        "deterministic_replay_tests"
+      ]
     },
     "overall_composite": {
-      "status": "not_frozen",
-      "reason": "prototype weights and caps lack baseline sensitivity and scientific approval"
+      "status": "owner_structure_approved_pending_baseline_and_replay_validation",
+      "component_weights": {
+        "native_surface_pressure_field": 0.15,
+        "native_surface_wall_shear_field": 0.1,
+        "native_volume_velocity_field": 0.15,
+        "native_volume_pressure_field": 0.1,
+        "field_integrated_Cd": 0.15,
+        "field_integrated_Cl": 0.1,
+        "autocfd_velocity_profiles": 0.15,
+        "autocfd_cp_probes": 0.1
+      },
+      "branch_weights": {
+        "global_fields": 0.5,
+        "field_integrated_engineering_quantities": 0.25,
+        "autocfd_local_diagnostics": 0.25
+      },
+      "component_error_metrics": {
+        "native_surface_pressure_field": "equal_case_mean_of_case_area_weighted_relative_l2",
+        "native_surface_wall_shear_field": "equal_case_mean_of_case_area_weighted_relative_l2",
+        "native_volume_velocity_field": "equal_case_mean_of_case_equal_native_cell_relative_l2",
+        "native_volume_pressure_field": "equal_case_mean_of_case_equal_native_cell_relative_l2",
+        "field_integrated_Cd": "equal_case_rmse",
+        "field_integrated_Cl": "equal_case_rmse",
+        "autocfd_velocity_profiles": "equal_case_equal_line_mean_of_arc_weighted_rmse",
+        "autocfd_cp_probes": "equal_case_mean_of_209_unique_probe_rmse"
+      },
+      "ranked_force_reference": {
+        "convention": "constant_autocfd",
+        "reference_area_m2": 2.17,
+        "density_kg_per_m3": 1.0,
+        "velocity_m_per_s": 38.889,
+        "Cd_axis": "+x",
+        "Cl_axis": "+z",
+        "source_truth": "force_mom_constref_all.csv",
+        "geometry_specific_reference_is_ranked": false
+      },
+      "component_skill": "100*(1-E_j/B_j)",
+      "component_skill_denominator_requirement": "B_j_must_be_finite_and_strictly_positive_otherwise_component_and_overall_score_are_unranked",
+      "physics_null_predictions": {
+        "native_surface_pressure_field": 0.0,
+        "native_surface_wall_shear_field": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "native_volume_velocity_field_m_per_s": [
+          38.889,
+          0.0,
+          0.0
+        ],
+        "native_volume_pressure_field": 0.0,
+        "field_integrated_Cd": 0.0,
+        "field_integrated_Cl": 0.0,
+        "autocfd_velocity_profile_u_over_uinf": 1.0,
+        "autocfd_cp": 0.0
+      },
+      "branch_membership": {
+        "global_fields": [
+          "native_surface_pressure_field",
+          "native_surface_wall_shear_field",
+          "native_volume_velocity_field",
+          "native_volume_pressure_field"
+        ],
+        "field_integrated_engineering_quantities": [
+          "field_integrated_Cd",
+          "field_integrated_Cl"
+        ],
+        "autocfd_local_diagnostics": [
+          "autocfd_velocity_profiles",
+          "autocfd_cp_probes"
+        ]
+      },
+      "branch_score_equation": "sum_j_in_branch(w_j*S_j)/sum_j_in_branch(w_j)",
+      "overall_score_equation": "sum_all_components(w_j*S_j)",
+      "ranking_clips_negative_skill": false,
+      "prototype_error_caps_allowed": false,
+      "sensitivity_controls": {
+        "nearest_training_design_vector": {
+          "role": "benchmark_owned_unranked_control_not_a_submission_method",
+          "descriptor_source": {
+            "path_at_pinned_dataset_revision": "geo_parameters_all.csv",
+            "dataset_revision": "7a5c0948ce27be709b1116a3a190f806e7a8f79f",
+            "git_blob_sha1": "dece27802392abf566e07fbcfb6b689485a0088a",
+            "sha256": "2d4e8b3f166d1facab2a38821af2c3cc1dbba47cfbb7bf0814e3e0bf1fe3e829",
+            "size_bytes": 77574,
+            "row_key_join": "case_id_run_N_to_integer_column_Run_equals_N",
+            "header_normalization": "strip_ascii_whitespace"
+          },
+          "descriptor_columns_in_order": [
+            "Vehicle_Length",
+            "Vehicle_Width",
+            "Vehicle_Height",
+            "Front_Overhang",
+            "Front_Planview",
+            "Hood_Angle",
+            "Approach_Angle",
+            "Windscreen_Angle",
+            "Greenhouse_Tapering",
+            "Backlight_Angle",
+            "Decklid_Height",
+            "Rearend_tapering",
+            "Rear_Overhang",
+            "Rear_Diffusor_Angle",
+            "Vehicle_Ride_Height",
+            "Vehicle_Pitch"
+          ],
+          "donor_pool": "exact_selected_split_train_list_only_never_validation_or_test",
+          "standardization": "training_pool_mean_and_population_standard_deviation_ddof_0_per_column",
+          "standardization_error": "missing_nonfinite_or_nonpositive_standard_deviation_is_hard_error",
+          "distance_squared_equation": "sum_j(((x_target_j-x_train_j)/sigma_train_j)^2)",
+          "selection": "minimum_distance_squared_then_smallest_integer_Run_on_exact_tie",
+          "forbidden_selection_inputs": [
+            "force",
+            "flow",
+            "geo_ref",
+            "validation_statistics",
+            "test_statistics"
+          ],
+          "required_donor_map_columns": [
+            "split_id",
+            "target_case_id",
+            "donor_case_id",
+            "distance_squared"
+          ],
+          "donor_map_must_be_published_and_hashed": true,
+          "field_transfer_status": "activation_blocked_pending_deterministic_donor_to_target_surface_and_volume_operator_support_validity_policy_and_golden_replay",
+          "raw_vtk_ids_may_be_copied_between_cases": false
+        }
+      },
+      "uncertainty": {
+        "method": "paired_equal_case_nonparametric_bootstrap_recomputing_E_j_and_B_j_per_replicate",
+        "replicates": 10000,
+        "seed": 20260819,
+        "interval": "two_sided_percentile_95_percent",
+        "case_order": "evaluated_case_ids_sorted_by_base10_integer_run_ascending",
+        "rng": "numpy_2.2.6_Generator_PCG64",
+        "index_generation": "rng.integers(0,n_cases,size=(10000,n_cases),dtype=numpy.int64,endpoint=false)_row_major",
+        "paired_rule": "one_resampled_case_index_vector_is_shared_by_every_method_and_component_within_each_replicate",
+        "percentile_endpoints": [
+          2.5,
+          97.5
+        ],
+        "percentile_interpolation": "numpy_percentile_method_linear_Hyndman_Fan_type_7",
+        "activation_artifact": "publish_generated_index_matrix_or_canonical_serialization_and_sha256"
+      },
+      "activation_requirements": [
+        "field_integrated_force_all_484_case_golden_replay_and_chunk_invariance",
+        "physics_null_denominators",
+        "nearest_training_design_vector_donor_map_and_golden_field_transfer_control",
+        "real_model_sensitivity",
+        "equal_case_bootstrap_confidence_intervals"
+      ]
     },
     "single_metric_ranking": {
-      "status": "not_frozen"
+      "status": "owner_structure_approved_pending_activation_validation"
     }
   },
   "activation_blockers": [
@@ -378,9 +860,12 @@
     "immutable_surface_and_volume_stable_id_coordinate_and_weight_support_with_pinned_geometry_algorithms_tolerances_and_qa",
     "owner_approved_exclusion_policy_and_mask_if_needed",
     "golden_scalar_and_vector_reductions_with_chunk_invariance_tests",
-    "force_scalar_columns_reductions_edge_behavior_per_case_geometry_references_integration_semantics_and_multi_case_replay",
+    "all_484_case_explicit_force_formula_replay_and_chunk_invariance_against_constant_reference_truth",
+    "published_profile_containing_cell_reference_evaluator_all_case_assignments_and_resolution_convergence",
+    "all_484_case_named_stl_probe_mapping_support_visual_signoff_and_cp_source_relation_replay",
     "official_split_indexes_derived_from_pinned_owner_manifest",
-    "baseline_sensitivity_review_before_any_composite_ranking",
+    "nearest_training_design_vector_donor_map_and_golden_donor_to_target_field_transfer_control",
+    "published_bootstrap_index_matrix_hash_and_baseline_sensitivity_review_before_any_composite_ranking",
     "dataset_owner_approval_of_scoring_support_and_evaluator_release"
   ]
 }

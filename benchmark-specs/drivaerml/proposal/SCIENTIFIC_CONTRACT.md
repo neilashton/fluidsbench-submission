@@ -1,8 +1,9 @@
 # DrivAerML benchmark contract proposed for scientific review
 
-Status: **owner review required; submissions remain closed**
+Status: **owner policy decisions recorded; activation validation required;
+submissions remain closed**
 
-Prepared: 2026-08-18
+Prepared: 2026-08-19
 
 Scope: the public `neashton/drivaerml` release pinned in this directory
 
@@ -15,12 +16,15 @@ The owner must still confirm that the volume arrays are the un-interpolated
 solver carrier before activation. Models may resample, interpolate, or use point
 representations internally, but their predictions must be returned once for
 every frozen canonical entity. The benchmark reports both physical-measure and
-equal-entity errors, calculated per case and then macro-averaged; their ranking
-priority is deliberately not frozen yet. AB-UPT and GeoTransolver are preserved
-as explicitly different literature tracks because they do not use the same
-volume support. No profile, cut, force integration, exclusion mask, or overall
-composite becomes official until its complete definition and a golden reference
-calculation are approved.
+equal-entity errors, calculated per case and then macro-averaged. The proposed
+composite selects physical-area weighting for surface fields and the existing
+repository equal-cell default for volume fields, while reporting the
+cell-volume-weighted view beside it; activation remains conditional on the
+declared baseline/model sensitivity study. AB-UPT and GeoTransolver are
+preserved as explicitly different literature tracks because they do not use the
+same volume support. No profile, cut, force integration, exclusion mask, or
+overall composite becomes official until its complete definition and a golden
+reference calculation are approved.
 
 ## Why this is the review-grade choice
 
@@ -116,18 +120,22 @@ The scoring-support audit must verify that every case uses this convention.
 Kinematic pressure is reported in `m^2/s^2`; a conversion to pascals must be a
 separately named, explicitly density-scaled metric.
 
-The raw wall-shear vector is a required prediction target, but activation remains
-blocked until the owner pins whether the stored array is kinematic traction or
-dynamic stress, its units, its sign relative to the fluid/body traction, and the
-conversion used for force integration. Field comparison itself uses the raw
-stored vector without a sign transformation.
+The raw wall-shear vector is a required prediction target and is the
+time-averaged OpenFOAM wall-shear-stress field: kinematic traction in
+`m^2/s^2`, defined using the patch normal into the fluid domain. Convert it to
+dynamic traction only by multiplying by `rho_inf`. Field comparison uses the
+raw stored vector without a sign transformation. The field-derived body-force
+sign is fixed separately below by replay against the public force table.
 
 The release also contains `CpMeanTrim` and `CptMeanTrim`. They must not both be
 called “pressure” without qualification. `CpMeanTrim` is the static pressure
 coefficient; `CptMeanTrim` is the total pressure coefficient used by the AB-UPT
 volume-pressure paper result. The canonical target above is static
 `pMeanTrim`; a future coefficient target must have a separate metric ID and an
-owner-verified conversion. Kinematic pressure must not be labelled as pascals.
+owner-verified conversion. The proposed AutoCFD tap diagnostic supplies that
+separate metric ID and deterministically derives
+`Cp=2*pMeanTrim/(38.889 m/s)^2`; it does not add a separately submitted field.
+Kinematic pressure must not be labelled as pascals.
 
 For vector fields, the error at an entity is the norm of the component-wise
 error vector. A difference between predicted and true vector magnitudes is not a
@@ -152,6 +160,12 @@ E_{2,1}=100\sqrt{\frac{\sum_i \lVert\hat y_i-y_i\rVert_2^2}
 - Physical-measure and equal-entity MAE and RMSE are mandatory diagnostics,
   particularly for pressure fields whose relative denominator can be small or
   gauge-sensitive.
+- Every case-level relative-L2 truth denominator must be finite and strictly
+  positive. A zero or nonfinite denominator is a benchmark-support error; the
+  case may not be silently omitted, pooled, or replaced by zero.
+- Any nonfinite prediction on a required valid entity is a hard submission
+  error. Any nonfinite truth value, coordinate, or required weight is a hard
+  benchmark-support error.
 
 For either `w_i` equal to the physical weight or one, the absolute diagnostics
 are
@@ -165,20 +179,24 @@ are
 
 For a scalar, the norm is absolute value; for a vector, it is the Euclidean norm
 of the component-wise error. The result has the source target's unit: `m/s` for
-velocity, `m^2/s^2` for kinematic pressure, and the owner-confirmed raw
-wall-shear unit.
+velocity and `m^2/s^2` for both kinematic pressure and the raw kinematic
+wall-shear vector.
 
 - Compute each complete case first, then take the arithmetic mean of the case
   values. Do not pool large cases with small cases.
 - With chunked evaluation, sum the additive numerators, denominators, counts,
   and weights across all chunks before applying a square root or division. Never
   average chunk-local norms.
+- The activation release must additionally pin the binary64 accumulator,
+  raw-entity/block merge order, and full-case-versus-chunked acceptance
+  tolerance. Until that numeric replay is published, chunk invariance is an
+  activation claim rather than a completed implementation.
 
 The physical and equal-entity results answer different questions and neither may
-be omitted. A single leaderboard ranking and error caps are deferred until
-reference baselines establish their distributions and reviewers approve a
-scientific weighting. The present prototype composite is not proposed for
-promotion.
+be omitted. The owner-approved composite remains inactive until reference
+baselines establish its distributions and the declared sensitivity review
+confirms that one ranking is stable enough to publish. The present prototype
+error caps and composite are not proposed for promotion.
 
 FluidsBench's current generic rule nominates the equal-cell volume result as
 primary, whereas a physical weighting approximates a continuum-domain norm and
@@ -268,21 +286,33 @@ conventions:
 - `force_mom_constref_all.csv`: constant `A_ref=2.17 m^2` and
   `L_ref=2.78618 m`; this retains geometry-size effects under one normalization.
 
-No scalar submission metric is frozen yet. Before activation, the owner must
-select the exact columns (for example `Cd`, `Cl`, side force, or moments), define
-separate metric IDs for the two normalization conventions, pin their reduction
-and edge behavior, and decide which—if either—enters ranking. If both are
-activated, they must be reported separately because they answer different
-design questions.
+No directly predicted scalar-force submission metric is frozen yet. For forces
+reconstructed from the submitted surface fields, however, the proposed
+composite selects the constant AutoCFD convention: rank `Cd` and `Cl` from
+`force_mom_constref_all.csv` using `A_ref=2.17 m^2`. The geometry-specific
+`force_mom_all.csv` result remains a separately named, unranked AB-UPT/
+aerodynamic-efficiency diagnostic. The two conventions must never be mixed
+between cases because they answer different design questions.
+
+The pinned constant-reference aggregate table has exact columns
+`run,cd,cl,clf,clr,cs`. It contains 484 finite rows and exactly one integer
+`run` for every public case; join `run=N` to `case_id=run_N`. Ranked `Cd` and
+`Cl` truth comes from the lowercase `cd` and `cl` columns and is dimensionless.
+Reject missing, duplicate, non-integer, nonfinite, unexpected, or
+manifest-extraneous run IDs rather than dropping or positionally aligning them.
 
 The freestream values are `U_inf=38.889 m/s` and `rho_inf=1 kg/m^3`; drag is
-the x direction and lift is the z direction. Field-derived force scoring remains
-blocked until the approved evaluator pins normal orientation, pressure gauge,
-wall-shear sign, inclusion surfaces, and both reference conventions, then
-reproduces the public force values on multiple golden cases within an approved
-tolerance. The source pin must first be extended to include every per-case
-`geo_ref_<run>.csv` identity, or an immutable equivalent table of `A_ref`,
-`L_ref`, and reference point values. Do not call a scale-free force R-squared
+the x direction and lift is the z direction. For each native polygon, let
+`c_f` be the arithmetic mean of its vertex coordinates and form
+`A_f=0.5*sum_i((v_i-c_f) cross (v_(i+1)-c_f))` in released connectivity order.
+Using every native polygon exactly once, calculate
+`F=rho_inf*sum_f(pMeanTrim_f*A_f-wallShearStressMeanTrim_f*|A_f|)`, then
+`Cd=F_x/(0.5*rho_inf*U_inf^2*A_ref)` and
+`Cl=F_z/(0.5*rho_inf*U_inf^2*A_ref)`. Run 1 reproduces the pinned rounded
+`Cd/Cl` within `4.33e-8/1.53e-9`; activation requires both absolute differences
+to be at most `1e-6` in every public case. Per-case `geo_ref_<run>.csv`
+identities are needed only to activate the separately reported geometry-
+specific-reference diagnostic. Do not call a scale-free force R-squared
 calculation a fully specified coefficient calculation.
 
 ## Validity, exclusions, profiles, and cuts
@@ -296,15 +326,16 @@ calculation a fully specified coefficient calculation.
   The same frozen mask applies to every submission.
 - The present prototype profile and Cp-cut station names do not include a full
   extraction and ground-truth contract and are not supported by AB-UPT or
-  GeoTransolver scoring. Remove them from any proposed ranking. They can return
-  as supplementary diagnostics only after exact coordinates, tolerance,
-  interpolation, ordering, quantities, and truth hashes are published.
+  GeoTransolver scoring. Do not score those placeholders. They may be replaced
+  by the separately versioned AutoCFD proposal below only after its exact
+  coordinates, tolerance, extraction, ordering, quantities, truth hashes, and
+  validation support are published and activated.
 - The exact nominal AutoCFD4/5 pressure taps and velocity lines, together with
-  candidate FluidsBench sampling, reduction, and composite semantics, are now
-  recorded in `AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md` and its three CSV
-  registries. They remain non-activating because the case-specific morph
-  correspondence, resolution-convergence audit, truth release, and owner
-  decisions listed there are not yet complete.
+  fixed proposed FluidsBench sampling, reduction, and composite semantics, are
+  now recorded in `AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md` and its five CSV
+  registries. They remain non-activating because the case-specific surrogate
+  mapping, resolution-convergence audit, truth release, and validation gates
+  listed there are not yet complete.
 
 ## Approval blockers
 
@@ -319,13 +350,17 @@ owner-approves all of the following:
    algorithms, tolerances, and QA checks;
 3. a declared exclusion policy and, if needed, a public stable-ID mask;
 4. golden calculations for scalar and vector field reductions, including
-   chunk-invariance tests;
-5. exact force integration semantics and multi-case replay against the public
-   force files, plus pinned per-case geometry references and explicit scalar
+   chunk-invariance tests, plus the reference profile locator and all-case
+   AutoCFD profile/Cp support replay;
+5. an all-484-case replay of the now-explicit force integration formula against
+   the public constant-reference force file, plus chunk-invariance tests and,
+   if the distinct directly predicted scalar task is ever activated, explicit
    target columns, reductions, and edge behavior;
 6. official split index files generated from the pinned owner manifest;
-7. a decision on whether any single composite ranking is scientifically
-   justified after baseline sensitivity analysis; and
+7. the nearest-training-design donor map and golden donor-to-target transfer,
+   the frozen bootstrap index artifact, and evidence from the declared
+   baseline/model sensitivity analysis that the owner-approved composite is
+   stable enough for a single ranking; and
 8. dataset-owner approval of the immutable scoring-support manifest and
    evaluator release.
 
@@ -340,5 +375,6 @@ owner-approves all of the following:
 - [GeoTransolver full-support inference implementation](https://github.com/NVIDIA/physicsnemo/blob/43de886be3e623758a1798d45fee5da44e21c335/examples/cfd/external_aerodynamics/transformer_models/src/inference_on_zarr.py)
 - [GeoTransolver preprocessing release](https://github.com/NVIDIA/physicsnemo-curator/tree/6d6d98e4a427353fbf2933601b398ee998d4314f/examples/external_aerodynamics)
 - [GeoTransolver DrivAerML split release](https://github.com/NVIDIA/physicsnemo-cfd/tree/0612ec4ed54484a47bfa134eda7b3b012a607624/workflows/benchmarking/drivaer_ml_files)
+- [OpenFOAM wall-shear-stress field definition](https://doc.openfoam.com/2306/tools/post-processing/function-objects/field/wallShearStress/)
 - [AhmedML dataset paper](https://arxiv.org/html/2407.20801)
 - [WindsorML dataset paper](https://arxiv.org/html/2407.19320)

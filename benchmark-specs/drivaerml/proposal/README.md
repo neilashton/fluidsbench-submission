@@ -31,12 +31,21 @@ Files:
 - `autocfd_cp_taps_nominal.csv`: the 209 unique nominal AutoCFD pressure taps;
 - `autocfd_cp_panel_membership.csv`: their AutoCFD plot-panel ordering,
   including intentional reuse between panels;
+- `autocfd_cp_tap_component_registry.csv`: the owner-review atlas connecting
+  each nominal tap to one candidate named DrivAerML surface component and one
+  per-case projection rule; its `component_assignment_*` values are anatomy
+  audit evidence, not scoring support (visual owner sign-off is still an
+  activation gate);
 - `autocfd_velocity_lines_nominal.csv`: all 16 exact AutoCFD line endpoints and
-  the candidate fixed sampling counts;
+  the fixed proposed 10 mm scoring and 1 mm validation counts;
+- `autocfd_velocity_samples_10mm.csv`: all 3,756 explicit points on the fixed
+  proposed scoring grid;
 - `owner-published-splits.json`: the exact public train/validation/test lists;
 - `split-index-candidates/`: FluidsBench-shaped test indexes derived without
   changing the owner-published order; and
-- `native-source-pin.json`: immutable file identities for the 484 public cases.
+- `native-source-pin.json`: immutable canonical boundary/volume and existing
+  support-file identities for the 484 public cases (the named case-STL pin is
+  an explicit remaining activation gate).
 
 The proposal must remain closed until the blockers in
 `SCIENTIFIC_CONTRACT.md` are resolved and the dataset owner approves one
