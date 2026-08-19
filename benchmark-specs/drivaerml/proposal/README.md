@@ -19,12 +19,26 @@ score: AB-UPT samples volume cells, while GeoTransolver evaluates raw VTU
 `PointData` vertices. An executable parity claim additionally requires every
 paper-specific sampling and reduction detail to be pinned.
 
+The proposed engineering branch reconstructs whole-vehicle force and pitch
+moment from the submitted native surface fields. It reports `Cd`, `Cl`,
+`CmPitch`, `Clf`, and `Clr`; the composite ranks the independent `Cd`,
+total-`Cl`, and
+front/rear-balance modes without treating `Cl=Clf+Clr` as three independent
+measurements.
+
 Files:
 
 - [`SCIENTIFIC_CONTRACT.md`](SCIENTIFIC_CONTRACT.md): review rationale and the
   proposed human-readable contract;
 - [`contract-proposal.json`](contract-proposal.json): the same decisions in a
   machine-readable form;
+- [`force-definition-audit-all484.json`](force-definition-audit-all484.json):
+  the all-public-case coefficient closure, constant-reference, and
+  moment-origin consistency audit (not a substitute for the pending all-case
+  native-field replay);
+- [`run-1-force-axle-replay-summary.json`](run-1-force-axle-replay-summary.json):
+  the golden native-polygon force and pitch-moment replay for `Cd`, `Cl`,
+  `Clf`, and `Clr` in run 1;
 - [`AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md`](AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md):
   the non-activating AutoCFD4/5 profile, pressure-probe, resolution, reduction,
   and overall-score proposal;

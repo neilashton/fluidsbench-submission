@@ -358,7 +358,21 @@
         "case_id_join": "integer_N_maps_to_exact_case_id_run_N",
         "ranked_columns": {
           "Cd": "cd",
-          "Cl": "cl"
+          "Cl": "cl",
+          "CmPitch": "casewise_(clf-clr)/2"
+        },
+        "mandatory_report_only_columns": {
+          "Clf": "clf",
+          "Clr": "clr"
+        },
+        "available_unranked_column": {
+          "Cs": "cs"
+        },
+        "source_lift_closure": {
+          "equation": "cl=clf+clr",
+          "maximum_absolute_residual": 0.0000001,
+          "rms_residual": 0.00000003178935572765151,
+          "interpretation": "seven_digit_csv_rounding"
         },
         "ranked_units": "dimensionless",
         "coverage": "exactly_the_484_public_manifest_runs",
@@ -371,19 +385,37 @@
         ]
       },
       "reference_area_m2": 2.17,
+      "reference_length_m": 2.78618,
+      "forces_centre_of_rotation_m": [
+        1.40009,
+        0.0,
+        -0.3176
+      ],
+      "pitch_axis": "+y",
       "Cd_equation": "F_x/(0.5*rho_inf*U_inf^2*A_ref)",
       "Cl_equation": "F_z/(0.5*rho_inf*U_inf^2*A_ref)",
-      "case_reduction": "equal_case_rmse",
+      "CmPitch_equation": "M_CoR_y/(0.5*rho_inf*U_inf^2*A_ref*L_ref)",
+      "Clf_equation": "Cl/2+CmPitch",
+      "Clr_equation": "Cl/2-CmPitch",
+      "front_rear_interpretation": "equivalent_axle_loads_from_whole_surface_force_and_pitch_moment_not_surface_partitions",
+      "case_reduction": "separate_equal_case_rmse_for_Cd_Cl_and_CmPitch",
+      "mandatory_report_only_reductions": "individual_equal_case_rmse_for_Clf_and_Clr_plus_maximum_predicted_casewise_Cl_minus_(Clf_plus_Clr)_closure_residual_and_published_source_truth_closure_audit",
+      "independent_lift_mode_rationale": "rank_Cl_and_CmPitch_once_each_to_measure_total_lift_and_axle_balance_without_double_counting_dependent_Clf_and_Clr",
       "geometry_specific_reference_role": "separately_reported_unranked_abupt_aerodynamic_efficiency_diagnostic"
     },
     "field_integration": {
       "surface_support": "every_native_boundary_polygon_exactly_once",
       "polygon_vertex_order": "released_vtp_connectivity_order",
-      "polygon_centroid": "arithmetic_mean_of_polygon_vertices",
+      "polygon_vertex_mean_for_area_vector": "arithmetic_mean_of_polygon_vertices",
       "oriented_area_vector_equation": "A_f=0.5*sum_i(cross(v_i-c_f,v_i_plus_1-c_f))",
+      "moment_application_point": "OpenFOAM_v2212_primitiveMeshTools_makeFaceCentresAndAreas_face_centre_C_f",
+      "moment_application_point_algorithm": "triangle_vertex_mean_else_triangle_area_magnitude_weighted_centroid_of_edge_vertex_mean_decomposition",
+      "moment_application_point_equation_nontriangle": "c_bar=mean_i(v_i); n_i=cross(v_i_plus_1-v_i,c_bar-v_i); a_i=norm(n_i); C_f=(1/3)*sum_i(a_i*(v_i+v_i_plus_1+c_bar))/sum_i(a_i)",
+      "zero_area_fallback_policy": "OpenFOAM_sum_a_below_ROOTVSMALL_fallback_is_a_hard_benchmark_support_error_because_scored_polygon_area_must_be_positive_and_finite",
       "pressure_field": "CellData_pMeanTrim_relative_kinematic_pressure_m2_per_s2_used_as_released_without_offset",
       "wall_shear_field": "CellData_wallShearStressMeanTrim_kinematic_traction_m2_per_s2_patch_normal_into_fluid_domain",
       "body_force_equation": "F=rho_inf*sum_f(pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f))",
+      "body_pitch_moment_equation": "M_CoR=rho_inf*sum_f(cross(C_f-CoR,pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f)))",
       "density_conversion": "the_single_outer_rho_inf_factor_converts_both_kinematic_fields_to_dynamic_force",
       "pressure_reference": "p_ref_0_Pa_at_x80_y10_z10_m_outlet",
       "run_1_replay": {
@@ -396,6 +428,10 @@
           "sha256": "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865",
           "row_selector": "integer_run_equals_1"
         },
+        "source_geo_ref": {
+          "path_at_pinned_dataset_revision": "run_1/geo_ref_1.csv",
+          "sha256": "ff4439f3d49ae8bedad6f9407c2ae269b01cfcc9496e2189db127b8908da6660"
+        },
         "native_polygon_count": 8828095,
         "reconstructed_Cd": 0.31092465669905184,
         "truth_Cd": 0.3109247,
@@ -403,17 +439,45 @@
         "reconstructed_Cl": 0.06938221152817933,
         "truth_Cl": 0.06938221,
         "absolute_Cl_difference": 1.5281793330768068e-9,
+        "reconstructed_CmPitch": -0.08006275533898458,
+        "truth_CmPitch_derived_from_rounded_Clf_Clr": -0.080062775,
+        "reconstructed_Clf": -0.04537164957489491,
+        "truth_Clf": -0.04537165,
+        "absolute_Clf_difference": 4.2510509001836283e-10,
+        "reconstructed_Clr": 0.11475386110307424,
+        "truth_Clr": 0.1147539,
+        "absolute_Clr_difference": 3.88969257636429e-8,
+        "reconstructed_pitch_moment_N_m": -366.03531854720944,
         "passed_proposed_absolute_tolerance": true
       },
       "all_case_activation_absolute_tolerance_per_coefficient": 0.000001,
+      "all_case_activation_coefficients": [
+        "Cd",
+        "Cl",
+        "Clf",
+        "Clr"
+      ],
       "all_484_public_cases_must_pass": true,
       "chunk_invariance_required": true
     },
-    "field_integration_status": "formula_selected_run_1_replay_passed_pending_all_484_replay",
+    "field_integration_status": "force_and_pitch_moment_formula_selected_run_1_Cd_Cl_Clf_Clr_replay_passed_pending_all_484_replay",
+    "proposal_evidence": {
+      "all_484_definition_and_reference_audit": {
+        "path": "force-definition-audit-all484.json",
+        "sha256": "f4d68d7204a6c6473afe05c2037dcd2c568847610994879d350fc31e36a9d422",
+        "scope_caveat": "definition_closure_and_reference_translation_not_native_field_replay"
+      },
+      "run_1_native_field_force_and_axle_replay": {
+        "path": "run-1-force-axle-replay-summary.json",
+        "sha256": "acd52d458bdafeaca13f19ce60ee753566742ef5bc36c68b20c1f52fe15f0db5"
+      }
+    },
     "must_validate": [
-      "all_484_public_cases_reproduce_Cd_and_Cl_within_absolute_1e-6",
+      "all_484_public_cases_reproduce_Cd_Cl_Clf_and_Clr_within_absolute_1e-6",
       "full_case_and_chunked_additive_reductions_are_identical_within_frozen_numeric_tolerance"
-    ]
+    ],
+    "normative_definition_source": "OpenFOAM_v2212_forceCoeffs_Cl_front_rear_equals_0.5_Cl_plus_minus_CmPitch",
+    "dataset_paper_equation_warning": "Appendix_B_displayed_equations_appear_to_swap_pitch_and_yaw_axes_and_apply_an_extra_L_ref_division_to_already_dimensionless_CmPitch_do_not_implement_literally"
   },
   "validity_contract": {
     "submitter_inferred_masks_allowed": false,
@@ -705,7 +769,8 @@
         "native_volume_velocity_field": 0.15,
         "native_volume_pressure_field": 0.1,
         "field_integrated_Cd": 0.15,
-        "field_integrated_Cl": 0.1,
+        "field_integrated_Cl": 0.05,
+        "field_integrated_CmPitch": 0.05,
         "autocfd_velocity_profiles": 0.15,
         "autocfd_cp_probes": 0.1
       },
@@ -721,18 +786,35 @@
         "native_volume_pressure_field": "equal_case_mean_of_case_equal_native_cell_relative_l2",
         "field_integrated_Cd": "equal_case_rmse",
         "field_integrated_Cl": "equal_case_rmse",
+        "field_integrated_CmPitch": "equal_case_rmse_of_casewise_(Clf-Clr)/2",
         "autocfd_velocity_profiles": "equal_case_equal_line_mean_of_arc_weighted_rmse",
         "autocfd_cp_probes": "equal_case_mean_of_209_unique_probe_rmse"
       },
       "ranked_force_reference": {
         "convention": "constant_autocfd",
         "reference_area_m2": 2.17,
+        "reference_length_m": 2.78618,
+        "forces_centre_of_rotation_m": [
+          1.40009,
+          0.0,
+          -0.3176
+        ],
         "density_kg_per_m3": 1.0,
         "velocity_m_per_s": 38.889,
         "Cd_axis": "+x",
         "Cl_axis": "+z",
+        "CmPitch_axis": "+y",
         "source_truth": "force_mom_constref_all.csv",
-        "geometry_specific_reference_is_ranked": false
+        "geometry_specific_reference_is_ranked": false,
+        "Clf_equation": "Cl/2+CmPitch",
+        "Clr_equation": "Cl/2-CmPitch",
+        "Clf_and_Clr_have_additional_composite_weight": false,
+        "mandatory_report_only_force_diagnostics": [
+          "individual_equal_case_RMSE_Clf",
+          "individual_equal_case_RMSE_Clr",
+          "maximum_predicted_casewise_Cl_minus_(Clf_plus_Clr)_closure_residual",
+          "source_truth_Cl_minus_(Clf_plus_Clr)_closure_audit"
+        ]
       },
       "component_skill": "100*(1-E_j/B_j)",
       "component_skill_denominator_requirement": "B_j_must_be_finite_and_strictly_positive_otherwise_component_and_overall_score_are_unranked",
@@ -751,6 +833,7 @@
         "native_volume_pressure_field": 0.0,
         "field_integrated_Cd": 0.0,
         "field_integrated_Cl": 0.0,
+        "field_integrated_CmPitch": 0.0,
         "autocfd_velocity_profile_u_over_uinf": 1.0,
         "autocfd_cp": 0.0
       },
@@ -763,7 +846,8 @@
         ],
         "field_integrated_engineering_quantities": [
           "field_integrated_Cd",
-          "field_integrated_Cl"
+          "field_integrated_Cl",
+          "field_integrated_CmPitch"
         ],
         "autocfd_local_diagnostics": [
           "autocfd_velocity_profiles",

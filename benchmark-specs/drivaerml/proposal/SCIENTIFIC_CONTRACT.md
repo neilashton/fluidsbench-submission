@@ -288,32 +288,90 @@ conventions:
 
 No directly predicted scalar-force submission metric is frozen yet. For forces
 reconstructed from the submitted surface fields, however, the proposed
-composite selects the constant AutoCFD convention: rank `Cd` and `Cl` from
-`force_mom_constref_all.csv` using `A_ref=2.17 m^2`. The geometry-specific
+composite selects the constant AutoCFD convention. Rank `Cd`, total lift `Cl`,
+and the independent front/rear balance
+`CmPitch=(Clf-Clr)/2` from `force_mom_constref_all.csv`. The engineering branch
+assigns overall weights `0.15/0.05/0.05` to `Cd/Cl/CmPitch`; this preserves the
+approved 60/40 drag/lift-family priority without counting the dependent
+quantities `Cl`, `Clf`, and `Clr` as three independent observations. Always
+publish `Clf` and `Clr` themselves, including their individual RMSEs, but do
+not give them additional composite weight. The geometry-specific
 `force_mom_all.csv` result remains a separately named, unranked AB-UPT/
-aerodynamic-efficiency diagnostic. The two conventions must never be mixed
-between cases because they answer different design questions.
+aerodynamic-efficiency diagnostic. The two reference conventions must never be
+mixed between cases because they answer different design questions.
 
 The pinned constant-reference aggregate table has exact columns
 `run,cd,cl,clf,clr,cs`. It contains 484 finite rows and exactly one integer
-`run` for every public case; join `run=N` to `case_id=run_N`. Ranked `Cd` and
-`Cl` truth comes from the lowercase `cd` and `cl` columns and is dimensionless.
-Reject missing, duplicate, non-integer, nonfinite, unexpected, or
-manifest-extraneous run IDs rather than dropping or positionally aligning them.
+`run` for every public case; join `run=N` to `case_id=run_N`. Truth for `Cd`,
+`Cl`, `Clf`, and `Clr` comes from the corresponding lowercase columns and is
+dimensionless; derive truth `CmPitch=(clf-clr)/2` case by case. All 484 rows
+satisfy `cl=clf+clr` to the released seven-digit precision (maximum absolute
+residual `1.0e-7`, RMS `3.18e-8`). Reject missing, duplicate, non-integer,
+nonfinite, unexpected, or manifest-extraneous run IDs rather than dropping or
+positionally aligning them.
+
+For each ranked coefficient `k` in `{Cd, Cl, CmPitch}`, use the equal-case raw
+error `E_k=sqrt((1/N)*sum_c((k_pred,c-k_true,c)^2))`; its physics-null
+denominator uses the identical case reduction with `k_pred,c=0`. Apply the
+same equal-case RMSE to the mandatory report-only `Clf` and `Clr` diagnostics.
+Publish the maximum predicted `Cl-(Clf+Clr)` closure residual separately from
+the frozen source-table closure audit, whose `1.0e-7` maximum reflects CSV
+rounding.
 
 The freestream values are `U_inf=38.889 m/s` and `rho_inf=1 kg/m^3`; drag is
-the x direction and lift is the z direction. For each native polygon, let
-`c_f` be the arithmetic mean of its vertex coordinates and form
+`+x`, lift is `+z`, and positive pitch is about `+y`. The constant convention
+uses `A_ref=2.17 m^2`, `L_ref=2.78618 m`, and
+`CoR=(1.40009,0,-0.3176) m`. Every one of the 484 public
+`geo_ref_<run>.csv` files has those same `aRefRef`, `lRefRef`, and
+`forcesCoRRef` values. The implied symmetric equivalent axle-load locations
+are `x_front=0.007 m` and `x_rear=2.79318 m`; these are load-reaction
+locations, not a front/rear surface partition.
+
+For each native polygon, let `c_f` be the arithmetic mean of its vertex
+coordinates and form
 `A_f=0.5*sum_i((v_i-c_f) cross (v_(i+1)-c_f))` in released connectivity order.
-Using every native polygon exactly once, calculate
-`F=rho_inf*sum_f(pMeanTrim_f*A_f-wallShearStressMeanTrim_f*|A_f|)`, then
-`Cd=F_x/(0.5*rho_inf*U_inf^2*A_ref)` and
-`Cl=F_z/(0.5*rho_inf*U_inf^2*A_ref)`. Run 1 reproduces the pinned rounded
-`Cd/Cl` within `4.33e-8/1.53e-9`; activation requires both absolute differences
-to be at most `1e-6` in every public case. Per-case `geo_ref_<run>.csv`
-identities are needed only to activate the separately reported geometry-
-specific-reference diagnostic. Do not call a scale-free force R-squared
-calculation a fully specified coefficient calculation.
+Let `C_f` be the OpenFOAM v2212
+`primitiveMeshTools::makeFaceCentresAndAreas` face centre: the vertex mean for
+a triangle, otherwise the triangle-area-magnitude-weighted centroid of the
+triangles formed from each edge and the vertex mean. Explicitly, for a
+non-triangle let `c_bar=(1/n)*sum_i(v_i)`,
+`n_i=(v_(i+1)-v_i) cross (c_bar-v_i)`, and `a_i=|n_i|`; then
+`C_f=(1/3)*sum_i(a_i*(v_i+v_(i+1)+c_bar))/sum_i(a_i)`. Released connectivity
+order is retained. OpenFOAM's `sum_i(a_i)<ROOTVSMALL` zero-area fallback is a
+hard benchmark-support error because every scored polygon must have positive
+finite area. Define
+`dF_f=pMeanTrim_f*A_f-wallShearStressMeanTrim_f*|A_f|` and, using every native
+polygon exactly once, calculate
+
+`F=rho_inf*sum_f(dF_f)` and
+`M_CoR=rho_inf*sum_f((C_f-CoR) cross dF_f)`.
+
+With `qA=0.5*rho_inf*U_inf^2*A_ref`, calculate
+`Cd=F_x/qA`, `Cl=F_z/qA`,
+`CmPitch=M_CoR,y/(qA*L_ref)`,
+`Clf=Cl/2+CmPitch`, and `Clr=Cl/2-CmPitch`. Thus `Cl=Clf+Clr` exactly before
+output rounding. These equations follow the OpenFOAM v2212 `forceCoeffs`
+implementation used for the dataset. Appendix B of the dataset paper appears
+to swap the pitch/yaw axes in its displayed moment equations and to divide an
+already dimensionless `CmPitch` by `L_ref` again in its displayed axle-split
+equation; the evaluator must not reproduce those apparent typographical
+inconsistencies.
+
+A full native-field replay for run 1 gives
+`Cd=0.310924656699`, `Cl=0.069382211528`,
+`CmPitch=-0.080062755339`, `Clf=-0.045371649575`, and
+`Clr=0.114753861103`. Absolute differences from the pinned rounded truth are
+`4.33e-8`, `1.53e-9`, `4.25e-10`, and `3.89e-8` for
+`Cd/Cl/Clf/Clr`, respectively. Activation requires every one of those four
+released coefficients to agree within absolute `1e-6` in every public case,
+plus the declared chunk-invariance replay. Per-case `geo_ref_<run>.csv`
+identities beyond the constant fields above are needed only to activate the
+separately reported geometry-specific-reference diagnostic. Do not call a
+scale-free force R-squared calculation a fully specified coefficient
+calculation. The compact replay evidence is in
+`run-1-force-axle-replay-summary.json`; the separate all-484 definition and
+reference-translation check is in `force-definition-audit-all484.json` and is
+explicitly not a substitute for the pending all-case native-field replay.
 
 ## Validity, exclusions, profiles, and cuts
 
@@ -352,8 +410,9 @@ owner-approves all of the following:
 4. golden calculations for scalar and vector field reductions, including
    chunk-invariance tests, plus the reference profile locator and all-case
    AutoCFD profile/Cp support replay;
-5. an all-484-case replay of the now-explicit force integration formula against
-   the public constant-reference force file, plus chunk-invariance tests and,
+5. an all-484-case replay of the now-explicit force-and-pitch-moment integration
+   formula against public constant-reference `Cd`, `Cl`, `Clf`, and `Clr`, plus
+   chunk-invariance tests and,
    if the distinct directly predicted scalar task is ever activated, explicit
    target columns, reductions, and edge behavior;
 6. official split index files generated from the pinned owner manifest;
@@ -376,5 +435,6 @@ owner-approves all of the following:
 - [GeoTransolver preprocessing release](https://github.com/NVIDIA/physicsnemo-curator/tree/6d6d98e4a427353fbf2933601b398ee998d4314f/examples/external_aerodynamics)
 - [GeoTransolver DrivAerML split release](https://github.com/NVIDIA/physicsnemo-cfd/tree/0612ec4ed54484a47bfa134eda7b3b012a607624/workflows/benchmarking/drivaer_ml_files)
 - [OpenFOAM wall-shear-stress field definition](https://doc.openfoam.com/2306/tools/post-processing/function-objects/field/wallShearStress/)
+- [OpenFOAM v2212 force-coefficient and axle-split definition](https://api.openfoam.com/2212/classFoam_1_1functionObjects_1_1forceCoeffs.html)
 - [AhmedML dataset paper](https://arxiv.org/html/2407.20801)
 - [WindsorML dataset paper](https://arxiv.org/html/2407.19320)

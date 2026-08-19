@@ -110,7 +110,7 @@ that passes; it must not silently change an active contract.
 
 For the Kendall calculation, rank methods by their final `E_profile` values
 (equivalently by profile skill with one frozen positive `B_profile`), never by
-the eight-component overall composite.
+the nine-component overall composite.
 
 For the proposed native `CellData` track, the benchmark-owned extractor locates
 every native volume cell whose closure contains each valid velocity sample and
@@ -312,7 +312,8 @@ priority:
 | native volume velocity field | 0.15 |
 | native volume pressure field | 0.10 |
 | field-integrated `Cd` | 0.15 |
-| field-integrated `Cl` | 0.10 |
+| field-integrated total `Cl` | 0.05 |
+| field-integrated axle balance `CmPitch` | 0.05 |
 | 16 AutoCFD velocity profiles | 0.15 |
 | 209 AutoCFD Cp probes | 0.10 |
 
@@ -323,12 +324,17 @@ The raw component errors are fixed as follows:
 - volume velocity and pressure: arithmetic mean over cases of the complete
   case equal-native-cell relative L2, preserving the current repository-wide
   volume default; publish the cell-volume-weighted result beside it;
-- field-integrated `Cd` and `Cl`: equal-case RMSE of the coefficients integrated
-  from the submitted surface fields using the constant AutoCFD convention
-  `A_ref=2.17 m^2`, `rho_inf=1 kg/m^3`, and `U_inf=38.889 m/s`, with drag in
-  `+x` and lift in `+z`. Thus `Cd=F_x/(0.5*rho_inf*U_inf^2*A_ref)` and
-  `Cl=F_z/(0.5*rho_inf*U_inf^2*A_ref)`. Report the geometry-specific-reference
-  coefficients separately as an unranked AB-UPT/aerodynamic-efficiency view;
+- field-integrated `Cd`, `Cl`, and `CmPitch`: separate equal-case RMSEs of the
+  coefficients integrated from the submitted surface fields using the constant
+  AutoCFD convention `A_ref=2.17 m^2`, `L_ref=2.78618 m`,
+  `CoR=(1.40009,0,-0.3176) m`, `rho_inf=1 kg/m^3`, and
+  `U_inf=38.889 m/s`, with drag in `+x`, lift in `+z`, and pitch about `+y`.
+  Always derive and publish `Clf=Cl/2+CmPitch` and
+  `Clr=Cl/2-CmPitch`, including their individual RMSEs, but do not assign them
+  additional composite weight: `Cl` and `CmPitch` are the two independent total
+  and axle-balance modes already containing the same information. Report the
+  geometry-specific-reference coefficients separately as an unranked AB-UPT/
+  aerodynamic-efficiency view;
 - velocity profiles: the equal-case/equal-line arc-weighted RMSE defined above;
   and
 - Cp probes: the equal-case 209-unique-probe RMSE defined above.
@@ -336,9 +342,18 @@ The raw component errors are fixed as follows:
 The pinned constant-reference truth table has the exact header
 `run,cd,cl,clf,clr,cs`, 484 finite rows, and one unique integer `run` for each
 public case. Join `run=N` to `case_id=run_N` without positional matching; the
-ranked dimensionless targets are lowercase columns `cd` and `cl`. A missing,
+ranked dimensionless targets are lowercase `cd`, lowercase `cl`, and
+`CmPitch=(clf-clr)/2`. The released `clf` and `clr` columns are mandatory
+reporting targets and satisfy `cl=clf+clr` to CSV rounding (maximum absolute
+residual `1.0e-7`). A missing,
 duplicate, non-integer, nonfinite, unexpected, or manifest-extraneous run is a
 hard evaluator error. The 16 known held-back run numbers are absent by design.
+
+For each ranked coefficient `k` in `{Cd, Cl, CmPitch}`, its raw error is
+`E_k=sqrt((1/N)*sum_c((k_pred,c-k_true,c)^2))`; compute `B_k` with the same
+case reduction and the declared zero-coefficient null. The report-only `Clf`
+and `Clr` RMSEs use that same equal-case formula against their released source
+columns.
 
 Do not use the prototype error caps or ranked flattened R-squared. For each
 component `j`, compute that raw error `E_j` and the identical reduction `B_j`
@@ -348,10 +363,11 @@ for a frozen physics-null prediction, then use
 
 The null is zero surface/volume pressure, zero wall shear, freestream volume
 velocity `(U_inf,0,0)`, velocity-profile ratio one, zero `Cp`, and zero `Cd` and
-`Cl`. Negative scores remain negative for ranking because they mean worse than
-the declared null; a clipped 0-100 value may be displayed but must not determine
-rank. `Cd` and `Cl` in the composite are integrated from the submitted surface
-fields using that constant-reference force contract. If a separately versioned
+`Cl` and `CmPitch`. Negative scores remain negative for ranking because they
+mean worse than the declared null; a clipped 0-100 value may be displayed but
+must not determine rank. `Cd`, `Cl`, `CmPitch`, `Clf`, and `Clr` are integrated
+or derived from the submitted surface fields using that constant-reference
+force contract. If a separately versioned
 direct-scalar force task is later activated, report it separately; it cannot
 enter this composite. For every native boundary polygon `f`, let `c_f` be the
 arithmetic mean of its vertex coordinates and define the
@@ -359,24 +375,49 @@ released-connectivity-order oriented area vector
 
 `A_f = 0.5 * sum_i((v_i-c_f) cross (v_(i+1)-c_f))`.
 
-With `p_f=pMeanTrim_f` and `tau_f=wallShearStressMeanTrim_f`, use every native
-polygon exactly once and compute
+Let `C_f` be the OpenFOAM v2212
+`primitiveMeshTools::makeFaceCentresAndAreas` face centre: the vertex mean for
+a triangle and otherwise the triangle-area-magnitude-weighted centroid about
+the vertex mean. With `p_f=pMeanTrim_f` and
+`tau_f=wallShearStressMeanTrim_f`, use every native polygon exactly once and
+compute
 
-`F = rho_inf * sum_f(p_f*A_f - tau_f*|A_f|)`.
+`dF_f = p_f*A_f - tau_f*|A_f|`,
+
+`F = rho_inf * sum_f(dF_f)`, and
+
+`M_CoR = rho_inf * sum_f((C_f-CoR) cross dF_f)`.
 
 Both stored fields are kinematic (`m^2/s^2`), so multiplication by `rho_inf`
-produces dynamic force. A run-1 replay over all 8,828,095 polygons gives
-`Cd=0.310924656699` and `Cl=0.069382211528`, versus pinned rounded truth
-`0.3109247` and `0.06938221` (absolute differences `4.33e-8` and `1.53e-9`).
-Before activation, require every public case to reproduce both coefficients
-within absolute `1e-6`; do not activate if that all-case replay fails. Each
-`B_j` must be finite and strictly positive; otherwise that component and the
-overall composite remain unranked.
+produces dynamic force and moment. With
+`qA=0.5*rho_inf*U_inf^2*A_ref`, calculate
+`Cd=F_x/qA`, `Cl=F_z/qA`, `CmPitch=M_CoR,y/(qA*L_ref)`,
+`Clf=Cl/2+CmPitch`, and `Clr=Cl/2-CmPitch`. These are equivalent front/rear
+axle loads from the whole-surface force and pitch moment, not front/rear surface
+integrals. The evaluator follows the
+[OpenFOAM v2212 `forceCoeffs` definition](https://api.openfoam.com/2212/classFoam_1_1functionObjects_1_1forceCoeffs.html);
+Appendix B of the dataset paper contains apparent pitch/yaw-axis and
+extra-`L_ref` typographical inconsistencies and must not be implemented
+literally.
 
-Publish all eight raw errors and component skills, the three 0.50/0.25/0.25
+A run-1 replay over all 8,828,095 polygons gives
+`Cd=0.310924656699`, `Cl=0.069382211528`,
+`CmPitch=-0.080062755339`, `Clf=-0.045371649575`, and
+`Clr=0.114753861103`. Absolute differences from pinned rounded truth are
+`4.33e-8`, `1.53e-9`, `4.25e-10`, and `3.89e-8` for
+`Cd/Cl/Clf/Clr`. Before activation, require every public case to reproduce all
+four released coefficients within absolute `1e-6`; do not activate if that
+all-case replay fails. Each `B_j` must be finite and strictly positive;
+otherwise that component and the overall composite remain unranked.
+
+Publish all nine raw errors and component skills, the three 0.50/0.25/0.25
 branch scores, the overall score, and equal-case bootstrap confidence intervals.
 Compute each branch as the normalized weighted mean of its component skills;
-the overall score is equivalently `sum_j(w_j*S_j)` over the eight table rows.
+the overall score is equivalently `sum_j(w_j*S_j)` over the nine table rows.
+Also publish report-only individual RMSEs for `Clf` and `Clr`, the maximum
+predicted per-case closure residual `Cl-(Clf+Clr)`, and the frozen source-truth
+closure audit (whose current maximum is `1.0e-7` from CSV rounding); those
+diagnostics receive no extra weight.
 Bootstrap replicates resample cases and recompute both `E_j` and `B_j` on each
 replicate. Use 10,000 paired case-bootstrap replicates with seed `20260819`, one
 shared resampled case-index vector across every method and component within a
@@ -446,9 +487,9 @@ policy questions:
 3. Publish and hash the reference containing-cell implementation for all five
    released cell types, then golden-replay every profile assignment and
    tolerance-sensitivity result.
-4. Replay the now-explicit native force integration over all 484 cases and
-   require the declared absolute `1e-6` `Cd`/`Cl` tolerance, plus chunk-
-   invariance tests.
+4. Replay the now-explicit native force-and-pitch-moment integration over all
+   484 cases and require the declared absolute `1e-6` tolerance for `Cd`, `Cl`,
+   `Clf`, and `Clr`, plus chunk-invariance tests.
 5. Generate versioned golden truth and scoring support for the 209 probes and
    16 lines, with checksums, source raw IDs, validity masks, and deterministic
    evaluator replay tests.
