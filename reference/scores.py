@@ -38,15 +38,10 @@ def arithmetic_mean(values: Mapping[str, float], metric_ids: Sequence[str]) -> f
     return sum(float(values[metric_id]) for metric_id in metric_ids) / len(metric_ids)
 
 
-def composite_overall_score(values: Mapping[str, float], declaration: Mapping[str, Any]) -> float:
-    """Evaluate a dataset-declared, weighted 0--100 composite score.
-
-    ``bounded_error`` components convert an error ``e`` with published cap
-    ``c`` to ``clip(100 * (1 - e / c), 0, 100)``. ``bounded_quality``
-    components convert a quality value such as R2 to
-    ``100 * clip(q, 0, 1)``. Component weights must be non-negative and sum
-    to one.
-    """
+def _transformed_components(
+    values: Mapping[str, float], declaration: Mapping[str, Any]
+) -> dict[str, tuple[float, float]]:
+    """Return ``metric_id -> (weight, bounded 0--100 score)``."""
 
     if declaration.get("operation") != "weighted_component_scores":
         raise ValueError("unsupported overall-score composite operation")
@@ -54,16 +49,13 @@ def composite_overall_score(values: Mapping[str, float], declaration: Mapping[st
     if not isinstance(components, Sequence) or isinstance(components, (str, bytes)) or not components:
         raise ValueError("overall-score composite requires at least one component")
 
-    weighted_score = 0.0
-    weight_sum = 0.0
-    seen_metric_ids: set[str] = set()
+    result: dict[str, tuple[float, float]] = {}
     for component in components:
         if not isinstance(component, Mapping):
             raise ValueError("overall-score components must be objects")
         metric_id = component.get("metric_id")
-        if not isinstance(metric_id, str) or not metric_id or metric_id in seen_metric_ids:
+        if not isinstance(metric_id, str) or not metric_id or metric_id in result:
             raise ValueError("overall-score component metric IDs must be non-empty and unique")
-        seen_metric_ids.add(metric_id)
         weight = float(component.get("weight"))
         if not math.isfinite(weight) or weight < 0.0:
             raise ValueError("overall-score component weights must be finite and non-negative")
@@ -83,12 +75,102 @@ def composite_overall_score(values: Mapping[str, float], declaration: Mapping[st
             component_score = 100.0 * _clamp(source_value, 0.0, 1.0)
         else:
             raise ValueError("unsupported overall-score component transform")
-        weighted_score += weight * component_score
-        weight_sum += weight
+        result[metric_id] = (weight, component_score)
+    return result
 
-    if not math.isclose(weight_sum, 1.0, rel_tol=0.0, abs_tol=1e-12):
+
+def _require_normalized_weights(components: Mapping[str, tuple[float, float]]) -> None:
+    if not math.isclose(
+        sum(weight for weight, _ in components.values()),
+        1.0,
+        rel_tol=0.0,
+        abs_tol=1e-12,
+    ):
         raise ValueError("overall-score component weights must sum to one")
+
+
+def composite_overall_score(values: Mapping[str, float], declaration: Mapping[str, Any]) -> float:
+    """Evaluate a dataset-declared, weighted 0--100 composite score.
+
+    ``bounded_error`` components convert an error ``e`` with published cap
+    ``c`` to ``clip(100 * (1 - e / c), 0, 100)``. ``bounded_quality``
+    components convert a quality value such as R2 to
+    ``100 * clip(q, 0, 1)``. Component weights must be non-negative and sum
+    to one.
+    """
+
+    components = _transformed_components(values, declaration)
+    _require_normalized_weights(components)
+    weighted_score = sum(weight * score for weight, score in components.values())
     return _clamp(weighted_score, 0.0, 100.0)
+
+
+def composite_component_group_scores(
+    values: Mapping[str, float],
+    overall_declaration: Mapping[str, Any],
+    group_declaration: Mapping[str, Any],
+) -> dict[str, float]:
+    """Evaluate normalized intermediate scores from overall-score components.
+
+    A group names a result metric (for example ``field_score``) and the
+    component metric IDs that contribute to it. Component transformations and
+    weights are inherited from ``overall_score_composite`` so there is only one
+    numerical source of truth. Groups must partition the overall components.
+    """
+
+    if group_declaration.get("operation") != "normalized_weighted_component_scores":
+        raise ValueError("unsupported component-score group operation")
+    groups = group_declaration.get("groups")
+    if not isinstance(groups, Sequence) or isinstance(groups, (str, bytes)) or not groups:
+        raise ValueError("component-score declaration requires at least one group")
+
+    components = _transformed_components(values, overall_declaration)
+    _require_normalized_weights(components)
+    results: dict[str, float] = {}
+    grouped_component_ids: list[str] = []
+    for group in groups:
+        if not isinstance(group, Mapping):
+            raise ValueError("component-score groups must be objects")
+        target_metric_id = group.get("metric_id")
+        if (
+            not isinstance(target_metric_id, str)
+            or not target_metric_id
+            or target_metric_id in results
+        ):
+            raise ValueError("component-score target metric IDs must be non-empty and unique")
+        component_metric_ids = group.get("component_metric_ids")
+        if (
+            not isinstance(component_metric_ids, Sequence)
+            or isinstance(component_metric_ids, (str, bytes))
+            or not component_metric_ids
+            or any(not isinstance(metric_id, str) or not metric_id for metric_id in component_metric_ids)
+            or len(component_metric_ids) != len(set(component_metric_ids))
+        ):
+            raise ValueError("each component-score group requires unique component metric IDs")
+        unknown = set(component_metric_ids) - set(components)
+        if unknown:
+            raise ValueError(f"component-score group references unknown components: {sorted(unknown)}")
+
+        grouped_component_ids.extend(component_metric_ids)
+        group_weight = sum(components[metric_id][0] for metric_id in component_metric_ids)
+        if group_weight <= 0.0:
+            raise ValueError("component-score group weights must sum to a positive value")
+        results[target_metric_id] = _clamp(
+            sum(
+                components[metric_id][0] * components[metric_id][1]
+                for metric_id in component_metric_ids
+            )
+            / group_weight,
+            0.0,
+            100.0,
+        )
+
+    if len(grouped_component_ids) != len(set(grouped_component_ids)):
+        raise ValueError("overall-score components may belong to only one component-score group")
+    if set(grouped_component_ids) != set(components):
+        missing = sorted(set(components) - set(grouped_component_ids))
+        raise ValueError(f"component-score groups do not cover overall components: {missing}")
+    return results
 
 
 def _legacy_error_value(values: Mapping[str, float], metric_id: str) -> float:

@@ -60,7 +60,8 @@ and [`examples/v2-template/`](examples/v2-template/) is retained only to interpr
 
 Read the selected dataset's page on the [FluidsBench website](https://fluidsbench.org/datasets/) and its machine-readable
 specification under [`benchmark-specs/`](benchmark-specs/). The specification lists accepted splits, required metric IDs, units,
-directions, profile panels, stations, and quantities.
+directions, profile panels, stations, and quantities. Where profile extraction depends on a dataset library, the optional
+`profile_definition` binding also pins a machine-readable extraction file and its SHA-256 digest.
 
 The equations, edge cases, fixed-support joins, and NumPy reference implementations are documented in
 [`reference/README.md`](reference/README.md). Each dataset specification identifies the exact files and field associations. It uses
@@ -173,7 +174,9 @@ parallel arrays:
 ```
 
 Use roughly 20-30 geometries per chunk. Coordinates must be finite, unique, and strictly increasing. Every required case,
-panel, station, and quantity is declared by the dataset specification and split index. The profile schemas are:
+panel, station, quantity, and any exact coordinate/sample-count rule is declared by the dataset specification and its bound
+profile definition. Prototype fixtures may use an explicitly declared abridged profile only while they remain labelled
+`approval.status=prototype`. The profile schemas are:
 
 - [`schemas/v1/profile-index.schema.json`](schemas/v1/profile-index.schema.json)
 - [`schemas/v1/profile-chunk.schema.json`](schemas/v1/profile-chunk.schema.json)

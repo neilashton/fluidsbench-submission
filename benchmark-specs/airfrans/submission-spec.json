@@ -28,8 +28,7 @@
         "entities": "all_nodes_in_the_released_cropped_domain_mesh",
         "arrays": [
           "U",
-          "p",
-          "nut"
+          "p"
         ],
         "units_note": "p is kinematic pressure in m^2/s^2",
         "physical_weight": "mass_lumped_dual_cell_area",
@@ -69,6 +68,12 @@
       "approve_loader_evaluator_and_immutable_scoring_support_manifest"
     ]
   },
+  "profile_definition": {
+    "id": "airfrans-boundary-layer-v1",
+    "file": "velocity-profiles-v1.json",
+    "sha256": "a3022f5085bd03c784753f16957b7a81a00dadcc24a433a2fb79afd1de9f0ab7",
+    "status": "owner_review_required"
+  },
   "evaluation_reference_version": "prototype-1",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {
@@ -82,14 +87,41 @@
     "metric_id": "overall_score",
     "operation": "weighted_component_scores",
     "components": [
-      { "metric_id": "surface_pressure_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 15.0 },
-      { "metric_id": "surface_wall_shear_rel_l2", "weight": 0.1, "transform": "bounded_error", "cap": 20.0 },
-      { "metric_id": "flow_domain_velocity_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 12.0 },
-      { "metric_id": "flow_domain_pressure_rel_l2", "weight": 0.1, "transform": "bounded_error", "cap": 15.0 },
-      { "metric_id": "cd_r2", "weight": 0.15, "transform": "bounded_quality" },
-      { "metric_id": "cl_r2", "weight": 0.1, "transform": "bounded_quality" },
-      { "metric_id": "velocity_profile_r2", "weight": 0.15, "transform": "bounded_quality" },
-      { "metric_id": "cp_cut_r2", "weight": 0.1, "transform": "bounded_quality" }
+      { "metric_id": "surface_pressure_rel_l2", "weight": 0.16, "transform": "bounded_error", "cap": 15.0 },
+      { "metric_id": "surface_wall_shear_rel_l2", "weight": 0.18, "transform": "bounded_error", "cap": 20.0 },
+      { "metric_id": "flow_domain_velocity_rel_l2", "weight": 0.22, "transform": "bounded_error", "cap": 12.0 },
+      { "metric_id": "flow_domain_pressure_rel_l2", "weight": 0.11, "transform": "bounded_error", "cap": 15.0 },
+      { "metric_id": "cd_r2", "weight": 0.12, "transform": "bounded_quality" },
+      { "metric_id": "cl_r2", "weight": 0.10, "transform": "bounded_quality" },
+      { "metric_id": "velocity_profile_r2", "weight": 0.11, "transform": "bounded_quality" }
+    ],
+    "tolerance": 1e-06
+  },
+  "component_score_groups": {
+    "operation": "normalized_weighted_component_scores",
+    "groups": [
+      {
+        "metric_id": "field_score",
+        "component_metric_ids": [
+          "surface_pressure_rel_l2",
+          "surface_wall_shear_rel_l2",
+          "flow_domain_velocity_rel_l2",
+          "flow_domain_pressure_rel_l2"
+        ]
+      },
+      {
+        "metric_id": "force_score",
+        "component_metric_ids": [
+          "cd_r2",
+          "cl_r2"
+        ]
+      },
+      {
+        "metric_id": "diagnostic_score",
+        "component_metric_ids": [
+          "velocity_profile_r2"
+        ]
+      }
     ],
     "tolerance": 1e-06
   },
@@ -108,27 +140,27 @@
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "2\\sum_j w_j\\max\\!\\left(0,\\,100\\left(1-\\frac{e_j}{c_j}\\right)\\right)",
+      "equation": "\\frac{\\sum_{j\\in F}\\alpha_j S_j}{\\sum_{j\\in F}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "force_score",
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.15\\,S_{C_D} + 0.10\\,S_{C_L}}{0.25}",
+      "equation": "\\frac{\\sum_{j\\in C}\\alpha_j S_j}{\\sum_{j\\in C}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "diagnostic_score",
       "unit": "",
       "direction": "higher",
       "kind": "score",
-      "equation": "\\frac{0.15\\,S_{\\mathrm{velocity}} + 0.10\\,S_{C_p}}{0.25}",
+      "equation": "\\frac{\\sum_{j\\in D}\\alpha_j S_j}{\\sum_{j\\in D}\\alpha_j}",
       "aggregation": "derived_score_equation",
-      "weighting": "equation_weights"
+      "weighting": "dataset_declared_component_weights"
     },
     {
       "id": "surface_pressure_rel_l2",
@@ -260,15 +292,6 @@
       "weighting": "samples_equal"
     },
     {
-      "id": "cp_cut_r2",
-      "unit": "",
-      "direction": "higher",
-      "kind": "r2",
-      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
-      "aggregation": "flatten_all_required_profile_samples",
-      "weighting": "samples_equal"
-    },
-    {
       "id": "cd_r2",
       "unit": "",
       "direction": "higher",
@@ -307,34 +330,32 @@
   ],
   "profile_panels": [
     {
-      "id": "pressure_profiles",
+      "id": "velocity_profiles",
+      "metric_id": "velocity_profile_r2",
+      "profile_definition_id": "airfrans-boundary-layer-v1",
       "required": true,
       "allow_unlisted_stations": false,
       "minimum_points": 2,
+      "sample_count": 1001,
       "coordinate_order": "strictly_increasing",
+      "coordinate_id": "wall_normal_arclength_m",
+      "coordinate_unit": "m",
+      "coordinate_interval": [
+        0.0,
+        0.1
+      ],
+      "coordinate_spacing": "uniform",
       "station_ids": [
-        "upper_surface",
-        "lower_surface"
+        "upper_x_0_25c",
+        "upper_x_0_50c",
+        "upper_x_0_75c",
+        "upper_x_0_95c"
       ],
       "quantity_ids": [
-        "cp"
-      ]
-    },
-    {
-      "id": "velocity_profiles",
-      "required": false,
-      "allow_unlisted_stations": false,
-      "minimum_points": 2,
-      "coordinate_order": "strictly_increasing",
-      "station_ids": [
-        "prototype_0_25l",
-        "prototype_0_50l",
-        "prototype_1_00l",
-        "wake_x_1_50c"
+        "velocity_x_ratio",
+        "velocity_y_ratio"
       ],
-      "quantity_ids": [
-        "velocity_ratio"
-      ]
+      "note": "Required Cartesian velocity profiles on the extrados at x/c = 0.25, 0.50, 0.75, and 0.95. The complete extraction contract is pinned by profile_definition."
     }
   ],
   "splits": [
@@ -342,37 +363,37 @@
       "id": "full",
       "label": "Full",
       "index_file": "splits/full.json",
-      "case_count": 1,
+      "case_count": 200,
       "case_set_id": "standard",
-      "case_id_status": "prototype_generated",
-      "sha256": "1408d36b5a48acfcb23d1659c5b7debb126773c593b25224b09030b5aee1796e"
+      "case_id_status": "official",
+      "sha256": "b300910d8eb27c11652064ba1c72a669fe4539addd76222f03af072f2f169e9f"
     },
     {
       "id": "scarce",
       "label": "Scarce",
       "index_file": "splits/scarce.json",
-      "case_count": 1,
+      "case_count": 200,
       "case_set_id": "standard",
-      "case_id_status": "prototype_generated",
-      "sha256": "478694004a2267057e41b81c51569962ba156a38d138312734d5eca606d0c2d7"
+      "case_id_status": "official",
+      "sha256": "c63cb0e1ccc480623ab2fb953335e37086b5203350a7ab4b9563ea4872cf9ebb"
     },
     {
       "id": "reynolds_extrapolation",
       "label": "Reynolds extrapolation",
       "index_file": "splits/reynolds_extrapolation.json",
-      "case_count": 1,
+      "case_count": 496,
       "case_set_id": "reynolds_extrapolation",
-      "case_id_status": "prototype_generated",
-      "sha256": "365b1443d013bfb8676bc6892f69b2ec5bea89b7a7ce3a2feb435ec220a1f695"
+      "case_id_status": "official",
+      "sha256": "1c1a11cbee7f7445622f4603b5f190b73692bd0804358746af538cb336587188"
     },
     {
       "id": "aoa_extrapolation",
       "label": "AoA extrapolation",
       "index_file": "splits/aoa_extrapolation.json",
-      "case_count": 1,
+      "case_count": 196,
       "case_set_id": "aoa_extrapolation",
-      "case_id_status": "prototype_generated",
-      "sha256": "0f6e770b351bb1b0ba8de60bca2484892f467c0436177eac921a77461b3c72ff"
+      "case_id_status": "official",
+      "sha256": "58621bbd012d3d14f45f49783696ddb4f03766bd2db144624c2d77711b17961b"
     }
   ]
 }

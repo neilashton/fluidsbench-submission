@@ -17,7 +17,7 @@
   "split": "Full",
   "split_id": "full",
   "case_set_id": "standard",
-  "split_sha256": "1408d36b5a48acfcb23d1659c5b7debb126773c593b25224b09030b5aee1796e",
+  "split_sha256": "b300910d8eb27c11652064ba1c72a669fe4539addd76222f03af072f2f169e9f",
   "parameter_count_millions": 4.9,
   "submitter_name": "Neil Ashton",
   "institution": "Example Flow Institute",
@@ -29,13 +29,14 @@
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "5095d576a8a293be713007194861d2a5f4818392f1cf84cd216146f9b410a0e0"
+    "evidence_sha256": "2930d49556fd951e945308fb64e487a417ab33c1491b9210ae6796b91f12f244"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
+    "overall_score": 78.72800000000001,
     "surface_pressure_rel_l2": 5.1,
     "surface_pressure_rel_l1": 3.62,
     "surface_wall_shear_rel_l2": 6.32,
@@ -47,13 +48,11 @@
     "cd_r2": 0.968,
     "cl_r2": 0.992,
     "velocity_profile_r2": 0.948,
-    "cp_cut_r2": 0.944,
     "c_drag_mae": 0.004,
     "c_lift_mae": 0.0024,
-    "field_score": 69.78666666666668,
-    "force_score": 97.76,
-    "diagnostic_score": 94.63999999999999,
-    "overall_score": 82.99333333333334,
+    "field_score": 69.79701492537313,
+    "force_score": 97.89090909090909,
+    "diagnostic_score": 94.8,
     "surface_pressure_equal_entity_rel_l2": 4.794,
     "surface_wall_shear_equal_entity_rel_l2": 5.9408,
     "flow_domain_velocity_physical_rel_l2": 3.659574,
@@ -62,7 +61,7 @@
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
     "index_file": "profiles/index.json",
-    "case_count": 1,
+    "case_count": 200,
     "case_set_id": "standard"
   },
   "note": "Dummy AirfRANS submission with compact profile curves. The displayed split assignment is illustrative dummy data. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields."

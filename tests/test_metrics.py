@@ -15,7 +15,12 @@ from reference.metrics import (
     weighted_mse,
     weighted_rmse,
 )
-from reference.scores import arithmetic_mean, composite_overall_score, legacy_aero_scores
+from reference.scores import (
+    arithmetic_mean,
+    composite_component_group_scores,
+    composite_overall_score,
+    legacy_aero_scores,
+)
 
 
 class MetricTests(unittest.TestCase):
@@ -66,6 +71,86 @@ class MetricTests(unittest.TestCase):
         flow_domain_values["flow_domain_pressure_rel_l2"] = flow_domain_values.pop("volume_pressure_rel_l2")
         self.assertEqual(legacy_aero_scores(flow_domain_values), scores)
         self.assertAlmostEqual(arithmetic_mean({"a": 1.0, "b": 3.0}, ["a", "b"]), 2.0)
+
+        overall_declaration = {
+            "operation": "weighted_component_scores",
+            "components": [
+                {"metric_id": "surface_pressure_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 15.0},
+                {"metric_id": "surface_wall_shear_rel_l2", "weight": 0.10, "transform": "bounded_error", "cap": 20.0},
+                {"metric_id": "volume_velocity_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 12.0},
+                {"metric_id": "volume_pressure_rel_l2", "weight": 0.10, "transform": "bounded_error", "cap": 15.0},
+                {"metric_id": "cd_r2", "weight": 0.15, "transform": "bounded_quality"},
+                {"metric_id": "cl_r2", "weight": 0.10, "transform": "bounded_quality"},
+                {"metric_id": "velocity_profile_r2", "weight": 0.15, "transform": "bounded_quality"},
+                {"metric_id": "cp_cut_r2", "weight": 0.10, "transform": "bounded_quality"},
+            ],
+        }
+        group_declaration = {
+            "operation": "normalized_weighted_component_scores",
+            "groups": [
+                {
+                    "metric_id": "field_score",
+                    "component_metric_ids": [
+                        "surface_pressure_rel_l2",
+                        "surface_wall_shear_rel_l2",
+                        "volume_velocity_rel_l2",
+                        "volume_pressure_rel_l2",
+                    ],
+                },
+                {
+                    "metric_id": "force_score",
+                    "component_metric_ids": ["cd_r2", "cl_r2"],
+                },
+                {
+                    "metric_id": "diagnostic_score",
+                    "component_metric_ids": ["velocity_profile_r2", "cp_cut_r2"],
+                },
+            ],
+        }
+        declared_scores = composite_component_group_scores(
+            values,
+            overall_declaration,
+            group_declaration,
+        )
+        self.assertEqual(declared_scores, {key: scores[key] for key in declared_scores})
+        self.assertAlmostEqual(
+            composite_overall_score(values, overall_declaration),
+            scores["overall_score"],
+        )
+
+    def test_single_component_group_score(self) -> None:
+        overall_declaration = {
+            "operation": "weighted_component_scores",
+            "components": [
+                {"metric_id": "error", "weight": 0.67, "transform": "bounded_error", "cap": 20.0},
+                {"metric_id": "quality", "weight": 0.22, "transform": "bounded_quality"},
+                {"metric_id": "profile", "weight": 0.11, "transform": "bounded_quality"},
+            ],
+        }
+        group_declaration = {
+            "operation": "normalized_weighted_component_scores",
+            "groups": [
+                {"metric_id": "field_score", "component_metric_ids": ["error"]},
+                {"metric_id": "force_score", "component_metric_ids": ["quality"]},
+                {"metric_id": "diagnostic_score", "component_metric_ids": ["profile"]},
+            ],
+        }
+        self.assertEqual(
+            composite_component_group_scores(
+                {"error": 10.0, "quality": 0.8, "profile": 0.7},
+                overall_declaration,
+                group_declaration,
+            ),
+            {"field_score": 50.0, "force_score": 80.0, "diagnostic_score": 70.0},
+        )
+        incomplete_groups = dict(group_declaration)
+        incomplete_groups["groups"] = group_declaration["groups"][:-1]
+        with self.assertRaisesRegex(ValueError, "do not cover overall components"):
+            composite_component_group_scores(
+                {"error": 10.0, "quality": 0.8, "profile": 0.7},
+                overall_declaration,
+                incomplete_groups,
+            )
 
     def test_dataset_declared_composite_score(self) -> None:
         declaration = {
