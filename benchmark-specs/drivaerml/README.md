@@ -1,6 +1,6 @@
 # DrivAerML submission contract
 
-The reviewed proposal is now the active participant-facing candidate contract.
+The reviewed proposal is now the participant-facing candidate contract.
 It uses the exact public DrivAerML release and the eight owner-published splits,
 but submissions remain closed while the benchmark-owned evaluator and reference
 artifacts complete their final scientific validation. Existing rows are clearly
@@ -35,16 +35,17 @@ For every selected case:
    complete case is represented. Never average chunk-local L1, L2, MAE, or RMSE
    values.
 4. Derive `Cd`, `Cl`, and `CmPitch` by integrating submitted surface pressure and
-   wall shear with the frozen constant-reference convention. The authoritative
+   wall shear with the defined constant-reference convention. The authoritative
    truth is `force_mom_constref_all.csv`; per-case
    `run_N/force_mom_constref_N.csv` files are convenience mirrors that must
    replay the matching aggregate row.
 5. Extract the AutoCFD5 diagnostics defined in
    [`autocfd5-profiles-v8.json`](autocfd5-profiles-v8.json): 16 velocity lines on
    the candidate 10 mm grid and 209 unique pressure probes shown through 15
-   ordered display panels. The ranked velocity error is the equal-case,
+   ordered display panels. Once the contract is activated, the ranked velocity
+   error will be the equal-case,
    equal-line mean of arc-length trapezoidal RMSE for `|U|/Uinf`. The ranked
-   pressure error is the equal-case mean of RMSE across 209 unique probes;
+   pressure error will be the equal-case mean of RMSE across 209 unique probes;
    probes repeated between display panels count only once in that ranked value.
 
 The primary leaderboard definition has nine components: four global fields,
@@ -55,7 +56,42 @@ score. `Clf` and `Clr` remain mandatory report-only diagnostics because they are
 dependent on `Cl` and `CmPitch` and must not receive duplicate composite weight.
 
 The complete machine-readable source of truth is
-[`submission-spec.json`](submission-spec.json). The history, evidence, and
-paper-parity definitions remain in [`proposal/`](proposal/). The exact work still
-needed before opening submissions is tracked in
+[`submission-spec.json`](submission-spec.json). Candidate evidence and its
+eligibility status are indexed in [`evidence/README.md`](evidence/README.md);
+history and paper-parity definitions remain in [`proposal/`](proposal/). The
+exact work still needed before opening submissions is tracked in
 [`ACTIVATION_CHECKLIST.md`](ACTIVATION_CHECKLIST.md).
+
+The candidate evaluator's all-484 native-surface force replay is recorded in
+[`evidence/force-replay-all484.json`](evidence/force-replay-all484.json). This
+passing implementation evidence does not constitute owner approval or open
+submissions.
+
+The path-free two-case native-volume implementation pilot is recorded in
+[`evidence/native-volume-run1-run44-equal-cell-primary-pilot.json`](evidence/native-volume-run1-run44-equal-cell-primary-pilot.json).
+It covers one two-part and one three-part VTU and the equal-cell primary
+reduction only; deterministic physical-volume weights and all-case volume
+coverage remain activation gates.
+
+The all-484 Cp candidate sweep retains every one of the 101,156 case/probe rows:
+100,281 are valid and 875 are explicitly invalid. Its mapping, named-STL
+inventory, truth replay, and compact atlas manifest are indexed in
+[`evidence/README.md`](evidence/README.md). The invalid rows and review flags
+still require owner disposition and visual sign-off, so these artifacts are not
+official scoring support and cannot make a submission eligible.
+
+The prescribed 1, 2, 5, and 10 mm profile study can be checked with
+[`proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md`](proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md).
+Activation evidence still requires complete all-case velocity mappings and
+genuine predictions from at least three distinct trained model artifacts. Those
+model predictions are not currently available and remain an owner input; no
+real-model sensitivity result is claimed. Physics-null denominators and the
+bootstrap remain blocked until the evaluator is frozen.
+
+AutoCFD contributors can follow the bounded-memory native-mesh workflow in the
+[`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md). A one-command synthetic
+two-part/three-part dry run is provided under
+[`examples/drivaerml-candidate-native-chunks/`](../../examples/drivaerml-candidate-native-chunks/);
+it is an ineligible transport and packaging fixture, not an official
+DrivAerML submission. Candidate native-volume support generation uses the exact
+receipt-compatible runtime Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2.

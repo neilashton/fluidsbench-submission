@@ -4,10 +4,14 @@
   "dataset_name": "DrivAerML",
   "dataset_version": "drivaerml-native-v1-candidate",
   "status": "candidate_scoring_contract",
+  "contract_base_path": "benchmark-specs/drivaerml/",
+  "contract_base_path_scope": "repository_relative_contract_artifact_fields_only; upstream_dataset_paths_resolve_within_source_release",
   "scoring_support": {
     "status": "owner_review_required",
     "submissions_open": false,
-    "closed_reason": "The participant contract and official splits are published, but ranking remains closed until volume weights, all-case force/profile replay, physics-null baselines, sensitivity analysis, and owner approval are frozen.",
+    "closed_reason": "The participant contract and official splits are published, but ranking remains closed until deterministic volume weights, all-case velocity replay, Cp failure resolution and visual review, physics-null baselines, genuine-model sensitivity analysis, schema-v3 nonspatial-result binding, force-replay review, and immutable evaluator/scoring-support owner approval are complete.",
+    "candidate_evidence_index_file": "evidence/README.md",
+    "candidate_evidence_manifest_file": "evidence/manifest.json",
     "source_release": {
       "provider": "Hugging Face Hub",
       "repository": "neashton/drivaerml",
@@ -102,7 +106,32 @@
           "pMeanTrim": "m^2/s^2"
         },
         "primary_weighting": "one_per_native_cell",
-        "secondary_weighting": "benchmark_computed_cell_volume_pending_frozen_publication"
+        "secondary_weighting": "benchmark_computed_cell_volume_pending_frozen_publication",
+        "candidate_secondary_weight_status": {
+          "status": "blocked_real_pilot_positive_finite_gate_not_passed",
+          "candidate_algorithm": "VTK_9.5.2_vtkCellSizeFilter_volume_only",
+          "accepted_weight_artifact_exists": false,
+          "owner_scientific_decision_required": true,
+          "diagnostic_evidence": [
+            {
+              "file": "evidence/volume-cell-types-run_1-pilot.json",
+              "sha256": "63f4c794807fd4d327d2e5017db585b41047c758e1ca9eeb4d22f2010817092e",
+              "status": "diagnostic_only_not_a_volume_weight_definition"
+            },
+            {
+              "file": "evidence/volume-cell-types-run_44-pilot.json",
+              "sha256": "4f3a1cc6bf1c4010daf4a94c2bdf56cc9fb4a684e8cb2610dce6f00bcf482f71",
+              "status": "diagnostic_only_not_a_volume_weight_definition"
+            }
+          ]
+        },
+        "candidate_primary_validation_evidence": {
+          "file": "evidence/native-volume-run1-run44-equal-cell-primary-pilot.json",
+          "sha256": "d009b6ac708fa320d21492b4cc44fc846b61e99b445836b5dedc704a934592d7",
+          "status": "two_case_equal_cell_primary_pilot_only",
+          "physical_volume_secondary_exercised": false,
+          "complete_all_484_cases": false
+        }
       },
       {
         "id": "field_integrated_force_truth",
@@ -204,12 +233,29 @@
         "Clf": "Cl/2+CmPitch",
         "Clr": "Cl/2-CmPitch",
         "composite_weight": 0.0
+      },
+      "candidate_validation_evidence": {
+        "file": "evidence/force-replay-all484.json",
+        "sha256": "631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17",
+        "status": "all_484_cases_passed_candidate_evaluator",
+        "owner_scientific_approval": false
       }
     },
     "profile_definition": {
       "file": "autocfd5-profiles-v8.json",
       "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
-      "status": "candidate_support_pending_all_case_validation"
+      "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+      "candidate_cp_validation_evidence": {
+        "file": "evidence/cp-mapping-all484-hardened.json",
+        "sha256": "634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81",
+        "case_count": 484,
+        "probe_row_count": 101156,
+        "valid_mapping_count": 100281,
+        "invalid_mapping_count": 875,
+        "omitted_row_count": 0,
+        "public_scoring_support_eligible": false,
+        "owner_visual_signoff": false
+      }
     },
     "participant_process": [
       "select one official split and use only its train list for fitting and training statistics",
@@ -217,19 +263,21 @@
       "reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling",
       "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
       "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
-      "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the frozen evaluator",
+      "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
       "submit scalar metrics, per-case evidence, profile display chunks, and optional prediction artifact locations through the current FluidsBench schema"
     ],
     "activation_gates": {
       "official_splits": "complete",
       "pinned_native_files": "complete",
-      "surface_area_weights": "published_candidate_requires_final_replay",
-      "volume_cell_weights": "pending_publication_and_golden_replay",
-      "force_evaluator": "run_1_passed_all_484_pending",
+      "surface_area_weights": "all_484_candidate_order_count_hash_and_value_audit_passed_owner_release_approval_pending",
+      "volume_cell_weights": "blocked_real_pilot_positive_finite_gate_not_passed_owner_algorithm_decision_pending",
+      "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
       "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
-      "cp_probes": "definition_complete_all_case_mapping_and_visual_signoff_pending",
+      "cp_probes": "all_484_candidate_mapping_and_cp_equation_replay_complete_with_875_explicit_invalid_rows_owner_resolution_and_visual_signoff_pending",
       "physics_null_baselines": "pending",
-      "composite_sensitivity_and_bootstrap": "pending",
+      "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
+      "schema_v3_nonspatial_result_binding": "candidate_adapter_exists_but_force_velocity_and_cp_values_require_dataset_specific_validation_or_hash_bound_maintainer_receipt_before_activation",
+      "independent_participant_dry_run": "pending",
       "owner_evaluator_approval": "pending"
     },
     "owner_decisions_required": [
@@ -237,8 +285,10 @@
       "approve_all_case_native_array_inventory_and_exclusion_policy",
       "approve_all_484_case_force_replay_and_chunk_invariance",
       "approve_velocity_assignment_and_resolution_convergence",
-      "approve_cp_probe_mapping_support_and_visual_atlas",
+      "resolve_and_approve_all_875_explicit_cp_mapping_failures_and_visual_atlas",
+      "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
       "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
+      "approve_dataset_specific_schema_v3_nonspatial_result_validation_or_hash_bound_maintainer_receipt",
       "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions"
     ]
   },
@@ -703,7 +753,7 @@
     "id": "drivaerml-autocfd5-v8-candidate",
     "file": "autocfd5-profiles-v8.json",
     "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
-    "status": "candidate_support_pending_all_case_validation"
+    "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending"
   },
   "profile_panels": [
     {

@@ -1,0 +1,190 @@
+# DrivAerML candidate participant guide
+
+This guide describes the proposed native-mesh workflow for AutoCFD and
+FluidsBench contributors. The contract is still a closed candidate:
+`submissions_open` is `false`, the composite is inactive, and no package made
+with these instructions is an official leaderboard submission yet.
+
+## 1. Choose one official split
+
+Choose exactly one JSON file in [`splits/`](splits/). Fit the model and every
+learned or data-dependent preprocessing quantity using only that file's
+`train` cases. The `validation` cases may be used only as the split permits for
+model selection. The `test` fields are public evaluation data, but must not
+affect fitting, tuning, checkpoint choice, manual selection, normalization, or
+other training statistics.
+
+Record the split ID, ordered train/validation/test case lists, source dataset
+revision, model commit, checkpoint hash, and preprocessing configuration.
+
+## 2. Predict on the actual native supports
+
+The source dataset is `neashton/drivaerml` at immutable revision
+`7a5c0948ce27be709b1116a3a190f806e7a8f79f`. Resolve every case and multipart
+file from [`proposal/native-source-pin.json`](proposal/native-source-pin.json),
+not from directory discovery or a presumed run-number range.
+
+For each evaluated case:
+
+1. Read `run_N/boundary_N.vtp` without remeshing or triangulating it. Predict
+   scalar `pMeanTrim` and three-component `wallShearStressMeanTrim` as native
+   polygon `CellData` in zero-based raw VTK cell order.
+2. Byte-concatenate the pinned `.00.part`, `.01.part`, and optional `.02.part`
+   files in that exact order, with no delimiter or transformation. Ten cases
+   have three parts. A seekable segmented reader may present the same logical
+   bytes without writing a roughly 50 GB reconstructed VTU.
+3. Read the reconstructed unstructured grid without remeshing. Predict scalar
+   `pMeanTrim` and three-component `UMeanTrim` for every native volume
+   `CellData` cell in zero-based raw VTK cell order.
+
+Surface pressure and wall shear are kinematic quantities in `m^2/s^2`.
+Volume pressure is in `m^2/s^2`, velocity is in `m/s`, coordinates are in
+metres, surface weights are in `m^2`, and volume weights are in `m^3`.
+
+## 3. Use bounded native-cell chunks correctly
+
+Inference chunks are independent of multipart byte-transport parts. A
+prediction chunk contains a contiguous half-open raw-cell interval and the
+corresponding fields. Across a case, the intervals must exactly partition
+`[0, native_cell_count)` with no gap, overlap, duplicate, omission, remapping,
+or extrapolation.
+
+The candidate local evaluator accepts one manifest per case and support. Each
+manifest identifies its count and SHA-256-bound NPZ chunks. Every NPZ contains
+signed-int64 `raw_cell_id` and exactly these Float32 or Float64 arrays:
+
+| Support | Required arrays |
+| --- | --- |
+| `surface_native_cells` | `pMeanTrim: [N]`, `wallShearStressMeanTrim: [N,3]` |
+| `volume_native_cells` | `pMeanTrim: [N]`, `UMeanTrim: [N,3]` |
+
+For bounded validation, each NPZ chunk may contain at most 512 MiB of
+uncompressed array data. Its ZIP central directory may be at most 64 KiB and
+each NPY header at most 4,096 bytes. Use uncompressed, C-contiguous, non-object
+arrays; split larger predictions into more contiguous raw-cell intervals.
+
+Chunking must not change a metric. For each complete case, add the weighted
+squared-error numerator, weighted truth-square denominator, weighted absolute
+error, entity count, and total weight across chunks. Apply square roots and
+division only after the complete case is represented. Never average
+chunk-local relative-L2, MAE, or RMSE values.
+
+The primary surface metrics use the fixed published same-order polygon areas;
+equal-polygon metrics are mandatory secondary values. The primary volume
+metrics weight native cells equally; deterministic cell-volume-weighted
+metrics are mandatory secondary values. The evaluator audits, but never
+regenerates, the fixed surface-area inputs.
+
+## 4. Let the evaluator derive engineering diagnostics
+
+Submit native fields rather than hand-calculated force or profile values. The
+candidate evaluator integrates submitted surface pressure and wall shear to
+derive `Cd`, `Cl`, `CmPitch`, and report-only `Clf`/`Clr`. After activation, the
+owner-approved frozen evaluator will use the approved mappings to derive
+AutoCFD5 velocity profiles and Cp probes. This ensures truth and predictions use
+the same geometry, raw IDs, force convention, validity masks, and reductions.
+
+The current candidate definitions contain 16 velocity lines and 209 unique Cp
+probes. Their geometric all-case mappings, resolution study, visual review,
+and immutable release are still activation blockers; contributors must not
+invent their own replacements for official scoring.
+
+## 5. Install and run the candidate tools
+
+The generic repository checks use `requirements.txt`. Native DrivAerML
+geometry evidence uses the exact optional stack in
+[`requirements-drivaerml-evaluator.txt`](../../requirements-drivaerml-evaluator.txt):
+Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2. The strict scientific-support
+generators check all three versions before reading a native volume; a different
+Python patch release is not receipt-compatible.
+
+```bash
+python3.12 --version  # must print: Python 3.12.13
+python3.12 -m venv .venv-drivaerml
+.venv-drivaerml/bin/pip install -r requirements-drivaerml-evaluator.txt
+.venv-drivaerml/bin/python -c \
+  'import platform,numpy,vtk; print(platform.python_version(), numpy.__version__, vtk.vtkVersion.GetVTKVersion())'
+# must print: 3.12.13 2.2.6 9.5.2
+```
+
+Run the small two-part/three-part teaching fixture with one command:
+
+```bash
+.venv-drivaerml/bin/python examples/drivaerml-candidate-native-chunks/reference_driver.py \
+  --output /tmp/drivaerml-candidate-native-chunk-demo
+```
+
+The fixture is synthetic and explicitly ineligible. It proves ordered two- and
+three-part byte concatenation, raw-ID chunk coverage, additive reduction,
+full-versus-chunked invariance, and schema-v3 prediction/case-metric artifact
+validation. Its small transport payloads are JSON, not VTK; it does not claim a
+real DrivAerML reconstruction, result, or official scoring support.
+
+For a real case, first create or obtain candidate surface and volume prediction
+manifests. The zero-field generator is a transport test only, never a model or
+published baseline:
+
+```bash
+.venv-drivaerml/bin/python scripts/create_drivaerml_dummy_predictions.py \
+  --case-id run_1 \
+  --surface-count 8828095 \
+  --volume-count 147449586 \
+  --max-chunk-rows 1000000 \
+  --output-root /tmp/drivaerml-run1-zero
+```
+
+The following command documents the fail-closed real-case interface, but it
+cannot currently be completed with accepted real support: no valid source-bound
+physical-volume weights or pilot aggregate exist because the candidate volume
+algorithm has not passed the strict positive-finite gate. Do not substitute
+locally generated weights. Once an owner-approved pilot is published, evaluate
+the real native case with its receipt and aggregate; the explicit pilot switch
+below is valid only while the all-484 aggregate remains incomplete:
+
+```bash
+.venv-drivaerml/bin/python scripts/evaluate_drivaerml_candidate_case.py \
+  --case-id run_1 \
+  --native-source-pin benchmark-specs/drivaerml/proposal/native-source-pin.json \
+  --dataset-root /path/to/drivaerml \
+  --monolithic-vtu /path/to/drivaerml/run_1/volume_1.vtu \
+  --surface-area-npy /path/to/run_1/boundary_cell_area_1.npy \
+  --volume-weight-npy /path/to/run_1/volume_cell_volume_1.npy \
+  --volume-weight-receipt /path/to/run_1/volume-weight-receipt.json \
+  --volume-weight-receipt /path/to/run_44/volume-weight-receipt.json \
+  --volume-weight-aggregate /path/to/volume-weights-pilot-aggregate.json \
+  --pilot-volume-weight-aggregate-sha256 SHA256_OF_OWNER_PILOT_AGGREGATE \
+  --allow-incomplete-volume-weight-pilot \
+  --surface-prediction-manifest /path/to/surface/manifest.json \
+  --volume-prediction-manifest /path/to/volume/manifest.json \
+  --output /tmp/run_1-candidate-evidence.json
+```
+
+Use `--multipart` instead of `--monolithic-vtu` when the pinned part files are
+present below `--dataset-root`. Production evaluation is deliberately
+fail-closed until the complete 484-case aggregate hash is frozen in the
+evaluator contract; participants must never substitute their own weight array,
+receipt, or aggregate. Supply `--volume-weight-receipt` once for every case in
+the referenced aggregate (two times for this pilot and 484 times for the future
+complete aggregate).
+
+The real two-case driver is an implemented interface that is currently blocked
+until valid owner-approved volume weights and a hash-bound pilot aggregate are
+available. At that point, copy the example configuration and run
+[`real_reference_driver.py`](../../examples/drivaerml-candidate-native-chunks/real_reference_driver.py).
+It admits exactly pinned `run_1` and `run_44`, always uses their two- and
+three-part streams respectively, calls the same core and diagnostic evaluator
+entry points, and writes candidate evidence only. It never downloads data,
+generates scientific support, or creates a submission.
+
+## 6. Package through schema v3 only after activation
+
+The candidate tools produce deterministic local evaluation evidence, not an
+official `submission.json`. Once the owner publishes immutable official
+scoring support and opens DrivAerML submissions, package the selected split,
+model/checkpoint provenance, case evidence, profiles, and optional prediction
+locations through the repository's normal schema-v3 contributor process. The
+official evaluator release IDs and hashes must match exactly.
+
+Until then, use this workflow for implementation feedback and reproducibility
+review only. Do not describe a candidate dry run as an accepted submission,
+independent participant validation, or owner scientific approval.

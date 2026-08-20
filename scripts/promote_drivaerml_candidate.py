@@ -31,6 +31,71 @@ SOURCE_PIN_SHA256 = "4fc9077f8f23f4994c98f4d0e7a17aef7b998de4c996638e3a8a616b6d9
 SURFACE_AREA_MANIFEST_SHA256 = "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
 FORCE_TABLE_SHA256 = "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865"
 
+DRIVAER_DIMENSIONAL_CATALOG = (
+    {
+        "id": "drivaerml_surface_pmeantrim_native_area",
+        "label": "Surface pMeanTrim",
+        "unit": "m^2/s^2",
+        "digits": 3,
+        "statistics": ["mae", "rmse"],
+        "weighting": "native_surface_polygon_area",
+    },
+    {
+        "id": "drivaerml_surface_wallshearstressmeantrim_native_area",
+        "label": "Surface wallShearStressMeanTrim",
+        "unit": "m^2/s^2",
+        "digits": 3,
+        "statistics": ["mae", "rmse"],
+        "weighting": "native_surface_polygon_area",
+    },
+    {
+        "id": "drivaerml_volume_umeantrim_equal_cell",
+        "label": "Volume UMeanTrim",
+        "unit": "m/s",
+        "digits": 3,
+        "statistics": ["mae", "rmse"],
+        "weighting": "equal_native_volume_cell",
+    },
+    {
+        "id": "drivaerml_volume_pmeantrim_equal_cell",
+        "label": "Volume pMeanTrim",
+        "unit": "m^2/s^2",
+        "digits": 3,
+        "statistics": ["mae", "rmse"],
+        "weighting": "equal_native_volume_cell",
+    },
+)
+
+DRIVAER_COEFFICIENT_CATALOG = (
+    {
+        "id": "drivaerml_cd_equal_case_rmse",
+        "label": "Field-integrated C_D",
+        "unit": "",
+        "digits": 5,
+        "statistic": "rmse",
+        "aggregation": "all_test_cases",
+        "weighting": "cases_equal",
+    },
+    {
+        "id": "drivaerml_cl_equal_case_rmse",
+        "label": "Field-integrated C_L",
+        "unit": "",
+        "digits": 5,
+        "statistic": "rmse",
+        "aggregation": "all_test_cases",
+        "weighting": "cases_equal",
+    },
+    {
+        "id": "drivaerml_cmpitch_equal_case_rmse",
+        "label": "Field-integrated C_M pitch",
+        "unit": "",
+        "digits": 5,
+        "statistic": "rmse",
+        "aggregation": "all_test_cases",
+        "weighting": "cases_equal",
+    },
+)
+
 SPLITS = {
     "full": ("Full", "standard"),
     "medium": ("Medium", "standard"),
@@ -72,6 +137,29 @@ def write_json(path: Path, value: Any) -> None:
         f"{json.dumps(value, indent=2, ensure_ascii=True)}\n",
         encoding="utf-8",
     )
+
+
+def upsert_catalog_entries(
+    catalog_entries: list[dict[str, Any]],
+    dataset_entries: tuple[dict[str, Any], ...],
+) -> None:
+    """Add or replace only dataset-prefixed metric-catalog entries."""
+
+    positions = {
+        entry.get("id"): index
+        for index, entry in enumerate(catalog_entries)
+        if isinstance(entry, dict) and isinstance(entry.get("id"), str)
+    }
+    for entry in dataset_entries:
+        metric_id = entry["id"]
+        if not metric_id.startswith("drivaerml_"):
+            raise ValueError("DrivAerML catalog entries must use a dataset-prefixed ID")
+        position = positions.get(metric_id)
+        if position is None:
+            positions[metric_id] = len(catalog_entries)
+            catalog_entries.append(dict(entry))
+        else:
+            catalog_entries[position] = dict(entry)
 
 
 def sha256_file(path: Path) -> str:
@@ -499,9 +587,12 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "submissions_open": False,
         "closed_reason": (
             "The participant contract and official splits are published, but ranking remains closed until "
-            "volume weights, all-case force/profile replay, physics-null baselines, sensitivity analysis, "
-            "and owner approval are frozen."
+            "deterministic volume weights, all-case velocity replay, Cp failure resolution and visual review, "
+            "physics-null baselines, genuine-model sensitivity analysis, schema-v3 nonspatial-result binding, "
+            "force-replay review, and immutable evaluator/scoring-support owner approval are complete."
         ),
+        "candidate_evidence_index_file": "evidence/README.md",
+        "candidate_evidence_manifest_file": "evidence/manifest.json",
         "source_release": {
             "provider": "Hugging Face Hub",
             "repository": "neashton/drivaerml",
@@ -558,6 +649,31 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                 "array_units": {"UMeanTrim": "m/s", "pMeanTrim": "m^2/s^2"},
                 "primary_weighting": "one_per_native_cell",
                 "secondary_weighting": "benchmark_computed_cell_volume_pending_frozen_publication",
+                "candidate_secondary_weight_status": {
+                    "status": "blocked_real_pilot_positive_finite_gate_not_passed",
+                    "candidate_algorithm": "VTK_9.5.2_vtkCellSizeFilter_volume_only",
+                    "accepted_weight_artifact_exists": False,
+                    "owner_scientific_decision_required": True,
+                    "diagnostic_evidence": [
+                        {
+                            "file": "evidence/volume-cell-types-run_1-pilot.json",
+                            "sha256": "63f4c794807fd4d327d2e5017db585b41047c758e1ca9eeb4d22f2010817092e",
+                            "status": "diagnostic_only_not_a_volume_weight_definition",
+                        },
+                        {
+                            "file": "evidence/volume-cell-types-run_44-pilot.json",
+                            "sha256": "4f3a1cc6bf1c4010daf4a94c2bdf56cc9fb4a684e8cb2610dce6f00bcf482f71",
+                            "status": "diagnostic_only_not_a_volume_weight_definition",
+                        },
+                    ],
+                },
+                "candidate_primary_validation_evidence": {
+                    "file": "evidence/native-volume-run1-run44-equal-cell-primary-pilot.json",
+                    "sha256": "d009b6ac708fa320d21492b4cc44fc846b61e99b445836b5dedc704a934592d7",
+                    "status": "two_case_equal_cell_primary_pilot_only",
+                    "physical_volume_secondary_exercised": False,
+                    "complete_all_484_cases": False,
+                },
             },
             {
                 "id": "field_integrated_force_truth",
@@ -635,11 +751,28 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "face_area_and_centre_convention": "OpenFOAM_v2212_primitiveMeshTools_makeFaceCentresAndAreas",
             "ranked_reduction": "separate_equal_case_RMSE_for_Cd_Cl_and_CmPitch",
             "dependent_axle_loads": {"Clf": "Cl/2+CmPitch", "Clr": "Cl/2-CmPitch", "composite_weight": 0.0},
+            "candidate_validation_evidence": {
+                "file": "evidence/force-replay-all484.json",
+                "sha256": "631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17",
+                "status": "all_484_cases_passed_candidate_evaluator",
+                "owner_scientific_approval": False,
+            },
         },
         "profile_definition": {
             "file": str(profile_path.relative_to(BENCHMARK_ROOT)),
             "sha256": sha256_file(profile_path),
-            "status": "candidate_support_pending_all_case_validation",
+            "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+            "candidate_cp_validation_evidence": {
+                "file": "evidence/cp-mapping-all484-hardened.json",
+                "sha256": "634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81",
+                "case_count": 484,
+                "probe_row_count": 101156,
+                "valid_mapping_count": 100281,
+                "invalid_mapping_count": 875,
+                "omitted_row_count": 0,
+                "public_scoring_support_eligible": False,
+                "owner_visual_signoff": False,
+            },
         },
         "participant_process": [
             "select one official split and use only its train list for fitting and training statistics",
@@ -647,19 +780,21 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling",
             "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
             "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
-            "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the frozen evaluator",
+            "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
             "submit scalar metrics, per-case evidence, profile display chunks, and optional prediction artifact locations through the current FluidsBench schema",
         ],
         "activation_gates": {
             "official_splits": "complete",
             "pinned_native_files": "complete",
-            "surface_area_weights": "published_candidate_requires_final_replay",
-            "volume_cell_weights": "pending_publication_and_golden_replay",
-            "force_evaluator": "run_1_passed_all_484_pending",
+            "surface_area_weights": "all_484_candidate_order_count_hash_and_value_audit_passed_owner_release_approval_pending",
+            "volume_cell_weights": "blocked_real_pilot_positive_finite_gate_not_passed_owner_algorithm_decision_pending",
+            "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
             "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
-            "cp_probes": "definition_complete_all_case_mapping_and_visual_signoff_pending",
+            "cp_probes": "all_484_candidate_mapping_and_cp_equation_replay_complete_with_875_explicit_invalid_rows_owner_resolution_and_visual_signoff_pending",
             "physics_null_baselines": "pending",
-            "composite_sensitivity_and_bootstrap": "pending",
+            "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
+            "schema_v3_nonspatial_result_binding": "candidate_adapter_exists_but_force_velocity_and_cp_values_require_dataset_specific_validation_or_hash_bound_maintainer_receipt_before_activation",
+            "independent_participant_dry_run": "pending",
             "owner_evaluator_approval": "pending",
         },
         "owner_decisions_required": [
@@ -667,8 +802,10 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "approve_all_case_native_array_inventory_and_exclusion_policy",
             "approve_all_484_case_force_replay_and_chunk_invariance",
             "approve_velocity_assignment_and_resolution_convergence",
-            "approve_cp_probe_mapping_support_and_visual_atlas",
+            "resolve_and_approve_all_875_explicit_cp_mapping_failures_and_visual_atlas",
+            "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
             "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
+            "approve_dataset_specific_schema_v3_nonspatial_result_validation_or_hash_bound_maintainer_receipt",
             "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions",
         ],
     }
@@ -684,6 +821,8 @@ def build_specification(
         "dataset_name": "DrivAerML",
         "dataset_version": DATASET_VERSION,
         "status": "candidate_scoring_contract",
+        "contract_base_path": "benchmark-specs/drivaerml/",
+        "contract_base_path_scope": "repository_relative_contract_artifact_fields_only; upstream_dataset_paths_resolve_within_source_release",
         "scoring_support": build_scoring_support(profile_path),
         "evaluation_reference_version": EVALUATOR_VERSION,
         "default_field_reduction": "per_geometry_then_macro_average",
@@ -727,7 +866,7 @@ def build_specification(
             "id": profile["id"],
             "file": str(profile_path.relative_to(BENCHMARK_ROOT)),
             "sha256": sha256_file(profile_path),
-            "status": profile["status"],
+            "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
         },
         "profile_panels": build_profile_panels(profile),
         "splits": split_entries,
@@ -838,6 +977,13 @@ def diagnostic_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
 
 def update_manifest(specification: dict[str, Any], profile: dict[str, Any]) -> None:
     manifest = load_json(MANIFEST_PATH)
+    catalog = manifest["metric_catalog"]
+    upsert_catalog_entries(
+        catalog["dimensional_fields"], DRIVAER_DIMENSIONAL_CATALOG
+    )
+    upsert_catalog_entries(
+        catalog["coefficient_errors"], DRIVAER_COEFFICIENT_CATALOG
+    )
     definitions = manifest["metric_definitions"]
     positions = {definition["id"]: index for index, definition in enumerate(definitions)}
     existing_ids = set(positions)
@@ -850,12 +996,49 @@ def update_manifest(specification: dict[str, Any], profile: dict[str, Any]) -> N
         existing_ids.add(metric_id)
 
     dataset = next(item for item in manifest["datasets"] if item["slug"] == "drivaerml")
+    dataset["contract_base_path"] = specification["contract_base_path"]
+    dataset["contract_base_path_scope"] = specification["contract_base_path_scope"]
+    fixture_documents = [
+        load_json(path)
+        for path in sorted(SUBMISSIONS_ROOT.glob("*/submission.json"))
+    ]
+    if not fixture_documents or any(
+        not isinstance(document.get("submitted_at"), str)
+        for document in fixture_documents
+    ):
+        raise ValueError("DrivAerML prototype fixtures require submitted_at dates")
+    fixture_count = len(fixture_documents)
+    dataset["submission_count"] = fixture_count
+    dataset["updated_at"] = max(
+        document["submitted_at"] for document in fixture_documents
+    )
+    dataset["submission_population"] = {
+        "feed_row_count": fixture_count,
+        "prototype_ineligible_fixture_count": fixture_count,
+        "eligible_submission_count": 0,
+        "scientific_result_count": 0,
+        "submission_count_semantics": (
+            "all_current_feed_rows_are_structural_prototype_fixtures_not_eligible_submissions"
+        ),
+        "updated_at_semantics": (
+            "latest_submitted_at_date_among_prototype_fixture_rows_not_a_contract_or_scientific_evidence_update"
+        ),
+    }
     dataset["submission_format"] = "drivaerml_native_candidate_v1"
     dataset["metrics"] = {
-        "dimensional_fields": ["surface_pressure", "surface_wall_shear", "volume_velocity", "volume_pressure"],
-        "coefficient_errors": ["c_drag", "c_lift", "c_pitch"],
+        "dimensional_fields": [
+            entry["id"] for entry in DRIVAER_DIMENSIONAL_CATALOG
+        ],
+        "coefficient_errors": [
+            entry["id"] for entry in DRIVAER_COEFFICIENT_CATALOG
+        ],
     }
     dataset["metric_ids"] = [item["id"] for item in specification["metrics"]]
+    dataset["scoring_support"] = specification["scoring_support"]
+    dataset["overall_score_composite"] = specification[
+        "overall_score_composite"
+    ]
+    dataset["profile_definition"] = specification["profile_definition"]
     dataset["metric_definition_overrides"] = {
         "surface_pressure_rel_l2": {
             "label": "Surface p rel. L2 (area-weighted)",
@@ -1089,7 +1272,7 @@ def main() -> int:
         migrate_submission(directory, specification, profile)
         print(f"migrated {directory.relative_to(ROOT)}")
     print(
-        f"activated closed DrivAerML candidate with {len(split_entries)} official splits, "
+        f"updated closed DrivAerML candidate with {len(split_entries)} official splits, "
         f"{len(specification['metrics'])} metrics, and {len(directories)} prototype fixtures"
     )
     return 0

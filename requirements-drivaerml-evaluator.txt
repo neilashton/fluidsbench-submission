@@ -1,0 +1,16 @@
+-r requirements.txt
+
+# Interpreter requirement: Python 3.12.13 exactly. A requirements file cannot
+# install or constrain the interpreter itself; the strict generators reject
+# every other Python patch release before scanning native source data.
+#
+# Exact optional stack used to generate and replay DrivAerML native-cell
+# geometry evidence. Keep this separate from the repository-wide validator
+# requirements: most FluidsBench submissions do not need VTK.
+numpy==2.2.6
+vtk==9.5.2
+
+# Exact renderer used only for the candidate AutoCFD5 Cp owner-review atlas.
+# The atlas refuses to render under another version so PDF hashes remain
+# meaningful review evidence.
+matplotlib==3.11.1

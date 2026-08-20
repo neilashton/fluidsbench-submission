@@ -38,6 +38,26 @@ class DrivAerMLContractTests(unittest.TestCase):
             "7a5c0948ce27be709b1116a3a190f806e7a8f79f",
         )
 
+    def test_candidate_evidence_manifest_is_hash_complete_and_nonactivating(self) -> None:
+        support = self.specification["scoring_support"]
+        self.assertEqual(
+            support["candidate_evidence_manifest_file"], "evidence/manifest.json"
+        )
+        manifest = load_json(DATASET_ROOT / support["candidate_evidence_manifest_file"])
+        self.assertEqual(
+            manifest["status"], "candidate_evidence_not_scoring_support"
+        )
+        self.assertFalse(manifest["official_submission_scoring_enabled"])
+        self.assertFalse(manifest["owner_scientific_approval"])
+        files = [item["file"] for item in manifest["artifacts"]]
+        self.assertEqual(len(files), len(set(files)))
+        for artifact in manifest["artifacts"]:
+            with self.subTest(file=artifact["file"]):
+                path = DATASET_ROOT / "evidence" / artifact["file"]
+                self.assertTrue(path.is_file())
+                self.assertEqual(artifact["sha256"], sha256_file(path))
+                self.assertFalse(artifact["public_scoring_support_eligible"])
+
     def test_official_split_indexes_are_exact_owner_manifest_partitions(self) -> None:
         owner = load_json(DATASET_ROOT / "proposal" / "owner-published-splits.json")
         all_public_cases = set(owner["full_train"] + owner["full_val"] + owner["full_test"])
@@ -168,6 +188,36 @@ class DrivAerMLContractTests(unittest.TestCase):
             ],
         )
 
+    def test_all_case_cp_candidate_evidence_is_bound_but_not_scoring_support(self) -> None:
+        candidate = self.specification["scoring_support"]["profile_definition"][
+            "candidate_cp_validation_evidence"
+        ]
+        path = DATASET_ROOT / candidate["file"]
+        self.assertEqual(candidate["sha256"], sha256_file(path))
+        self.assertEqual(candidate["case_count"], 484)
+        self.assertEqual(candidate["probe_row_count"], 484 * 209)
+        self.assertEqual(
+            candidate["valid_mapping_count"] + candidate["invalid_mapping_count"],
+            candidate["probe_row_count"],
+        )
+        self.assertEqual(candidate["invalid_mapping_count"], 875)
+        self.assertEqual(candidate["omitted_row_count"], 0)
+        self.assertFalse(candidate["public_scoring_support_eligible"])
+        self.assertFalse(candidate["owner_visual_signoff"])
+
+        evidence = load_json(path)
+        self.assertEqual(evidence["case_count"], candidate["case_count"])
+        self.assertEqual(
+            evidence["aggregate"]["probe_row_count"],
+            candidate["probe_row_count"],
+        )
+        self.assertEqual(
+            evidence["aggregate"]["mapping_invalid_count"],
+            candidate["invalid_mapping_count"],
+        )
+        self.assertFalse(evidence["public_scoring_support_eligible"])
+        self.assertFalse(evidence["owner_visual_signoff_claimed"])
+
     def test_leaderboard_and_prototypes_use_the_candidate_contract(self) -> None:
         manifest = load_json(ROOT / "leaderboard" / "manifest.json")
         dataset = next(item for item in manifest["datasets"] if item["slug"] == "drivaerml")
@@ -185,6 +235,109 @@ class DrivAerMLContractTests(unittest.TestCase):
                 self.assertEqual(set(submission["metric_values"]), expected_metrics)
                 self.assertEqual(submission["approval"]["status"], "prototype")
                 self.assertEqual(submission["metric_values"]["overall_score"], 0.0)
+
+    def test_leaderboard_catalog_and_fixture_population_are_drivaer_specific(self) -> None:
+        manifest = load_json(ROOT / "leaderboard" / "manifest.json")
+        dataset = next(
+            item for item in manifest["datasets"] if item["slug"] == "drivaerml"
+        )
+        dimensional = {
+            item["id"]: item
+            for item in manifest["metric_catalog"]["dimensional_fields"]
+        }
+        coefficients = {
+            item["id"]: item
+            for item in manifest["metric_catalog"]["coefficient_errors"]
+        }
+
+        # Generic catalog entries remain unchanged for the other datasets.
+        self.assertEqual(dimensional["surface_pressure"]["unit"], "Pa")
+        self.assertEqual(dimensional["surface_wall_shear"]["unit"], "Pa")
+        self.assertEqual(dimensional["volume_pressure"]["unit"], "Pa")
+        self.assertEqual(coefficients["c_drag"]["statistic"], "mae")
+        self.assertEqual(coefficients["c_lift"]["statistic"], "mae")
+        self.assertEqual(coefficients["c_pitch"]["statistic"], "mae")
+
+        expected_dimensional = [
+            "drivaerml_surface_pmeantrim_native_area",
+            "drivaerml_surface_wallshearstressmeantrim_native_area",
+            "drivaerml_volume_umeantrim_equal_cell",
+            "drivaerml_volume_pmeantrim_equal_cell",
+        ]
+        expected_coefficients = [
+            "drivaerml_cd_equal_case_rmse",
+            "drivaerml_cl_equal_case_rmse",
+            "drivaerml_cmpitch_equal_case_rmse",
+        ]
+        self.assertEqual(
+            dataset["metrics"]["dimensional_fields"], expected_dimensional
+        )
+        self.assertEqual(
+            dataset["metrics"]["coefficient_errors"], expected_coefficients
+        )
+        for metric_id in expected_dimensional[:2]:
+            self.assertEqual(dimensional[metric_id]["unit"], "m^2/s^2")
+            self.assertEqual(
+                dimensional[metric_id]["weighting"],
+                "native_surface_polygon_area",
+            )
+        self.assertEqual(
+            dimensional["drivaerml_volume_umeantrim_equal_cell"]["unit"],
+            "m/s",
+        )
+        self.assertEqual(
+            dimensional["drivaerml_volume_pmeantrim_equal_cell"]["unit"],
+            "m^2/s^2",
+        )
+        for metric_id in expected_dimensional[2:]:
+            self.assertEqual(
+                dimensional[metric_id]["weighting"],
+                "equal_native_volume_cell",
+            )
+        for metric_id in expected_coefficients:
+            self.assertEqual(coefficients[metric_id]["statistic"], "rmse")
+            self.assertEqual(
+                coefficients[metric_id]["aggregation"], "all_test_cases"
+            )
+            self.assertEqual(coefficients[metric_id]["weighting"], "cases_equal")
+
+        selected_ids = set(expected_dimensional + expected_coefficients)
+        for other in manifest["datasets"]:
+            if other["slug"] == "drivaerml":
+                continue
+            other_ids = {
+                metric_id
+                for group in other.get("metrics", {}).values()
+                for metric_id in group
+            }
+            self.assertTrue(selected_ids.isdisjoint(other_ids), other["slug"])
+
+        fixture_paths = sorted(
+            (ROOT / "submissions" / "drivaerml").glob("*/submission.json")
+        )
+        fixtures = [load_json(path) for path in fixture_paths]
+        population = dataset["submission_population"]
+        self.assertEqual(dataset["submission_count"], len(fixtures))
+        self.assertEqual(population["feed_row_count"], len(fixtures))
+        self.assertEqual(
+            population["prototype_ineligible_fixture_count"], len(fixtures)
+        )
+        self.assertEqual(population["eligible_submission_count"], 0)
+        self.assertEqual(population["scientific_result_count"], 0)
+        self.assertEqual(
+            population["submission_count_semantics"],
+            "all_current_feed_rows_are_structural_prototype_fixtures_not_eligible_submissions",
+        )
+        self.assertTrue(
+            all(item["approval"]["status"] == "prototype" for item in fixtures)
+        )
+        self.assertEqual(
+            dataset["updated_at"], max(item["submitted_at"] for item in fixtures)
+        )
+        self.assertEqual(
+            population["updated_at_semantics"],
+            "latest_submitted_at_date_among_prototype_fixture_rows_not_a_contract_or_scientific_evidence_update",
+        )
 
 
 if __name__ == "__main__":
