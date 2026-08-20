@@ -9,10 +9,10 @@ with these instructions is an official leaderboard submission yet.
 
 Choose exactly one JSON file in [`splits/`](splits/). Fit the model and every
 learned or data-dependent preprocessing quantity using only that file's
-`train` cases. The `validation` cases may be used only as the split permits for
-model selection. The `test` fields are public evaluation data, but must not
-affect fitting, tuning, checkpoint choice, manual selection, normalization, or
-other training statistics.
+`train_case_ids`. The `validation_case_ids` may be used only as the split
+permits for model selection. The `case_ids` are public evaluation cases, but
+their fields must not affect fitting, tuning, checkpoint choice, manual
+selection, normalization, or other training statistics.
 
 Record the split ID, ordered train/validation/test case lists, source dataset
 revision, model commit, checkpoint hash, and preprocessing configuration.
@@ -58,10 +58,12 @@ signed-int64 `raw_cell_id` and exactly these Float32 or Float64 arrays:
 | `surface_native_cells` | `pMeanTrim: [N]`, `wallShearStressMeanTrim: [N,3]` |
 | `volume_native_cells` | `pMeanTrim: [N]`, `UMeanTrim: [N,3]` |
 
-For bounded validation, each NPZ chunk may contain at most 512 MiB of
-uncompressed array data. Its ZIP central directory may be at most 64 KiB and
-each NPY header at most 4,096 bytes. Use uncompressed, C-contiguous, non-object
-arrays; split larger predictions into more contiguous raw-cell intervals.
+For bounded validation, each NPZ chunk may contain at most 512 MiB across the
+sum of all archive members' declared uncompressed byte sizes; this is not a
+limit on the compressed archive size. Both ZIP `ZIP_STORED` and `ZIP_DEFLATED`
+compression are accepted. Its ZIP central directory may be at most 64 KiB and
+each NPY header at most 4,096 bytes. Use C-contiguous, non-object arrays; split
+larger predictions into more contiguous raw-cell intervals.
 
 Chunking must not change a metric. For each complete case, add the weighted
 squared-error numerator, weighted truth-square denominator, weighted absolute
@@ -97,8 +99,9 @@ The generic repository checks use `requirements.txt`. Native DrivAerML
 geometry evidence uses the exact optional stack in
 [`requirements-drivaerml-evaluator.txt`](../../requirements-drivaerml-evaluator.txt):
 Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2. The strict scientific-support
-generators check all three versions before reading a native volume; a different
-Python patch release is not receipt-compatible.
+generators check their declared versions before reading native geometry; a
+different Python patch release is not receipt-compatible. This VTK 9.5.2 stack
+continues to bind the surface, Cp, and velocity evidence.
 
 ```bash
 python3.12 --version  # must print: Python 3.12.13
@@ -108,6 +111,16 @@ python3.12 -m venv .venv-drivaerml
   'import platform,numpy,vtk; print(platform.python_version(), numpy.__version__, vtk.vtkVersion.GetVTKVersion())'
 # must print: 3.12.13 2.2.6 9.5.2
 ```
+
+Physical-volume weights are benchmark-owned fixed inputs, not arrays that a
+participant should regenerate. Their replacement candidate is tested in the
+separate
+[`requirements-drivaerml-volume-weights.txt`](../../requirements-drivaerml-volume-weights.txt)
+environment, pinned to the same Python and NumPy versions but VTK 9.6.0. The
+original VTK 9.5.2 candidate failed closed on one `run_1` wedge; VTK 9.6.0 has
+passed only an isolated exact-cell probe so far. Until the full native pilot,
+all-case generation, publication, and owner approval pass, no locally generated
+weight is submission-eligible.
 
 Run the small two-part/three-part teaching fixture with one command:
 
@@ -142,12 +155,12 @@ published baseline:
 
 The following command documents the fail-closed real-case interface, but it
 cannot currently be completed with accepted real support: no valid source-bound
-physical-volume weights or pilot aggregate exist because the candidate volume
-algorithm has not passed the strict positive-finite gate. Do not substitute
-locally generated weights. Once an owner-approved pilot is published, evaluate
-the real native case with its receipt and aggregate; the explicit pilot switch
-below is valid only while the all-484 physical-volume-weight aggregate remains
-incomplete:
+physical-volume weights or pilot aggregate exist. The VTK 9.6.0 replacement
+candidate has passed an isolated exact-wedge test but has not yet passed the
+full native `run_1`/`run_44` gate. Do not substitute locally generated weights.
+Once an owner-approved pilot is published, evaluate the real native case with
+its receipt and aggregate; the explicit pilot switch below is valid only while
+the all-484 physical-volume-weight aggregate remains incomplete:
 
 ```bash
 .venv-drivaerml/bin/python scripts/evaluate_drivaerml_candidate_case.py \

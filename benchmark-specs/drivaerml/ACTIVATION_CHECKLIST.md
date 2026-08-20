@@ -20,8 +20,11 @@ official leaderboard results.
   metrics are part of the required metric vocabulary.
 - The multipart VTU rule covers all 978 parts, including the ten three-part cases,
   and the inference/chunk reduction rule is explicit.
-- The constant-reference force convention, field-integration equations, `Cd`,
-  `Cl`, `CmPitch`, and report-only `Clf`/`Clr` roles are explicit.
+- The constant-reference force convention and field-integration equations are
+  explicit. The authoritative tables provide `Cd`, `Cl`, `Clf`, and `Clr`
+  columns. Candidate `CmPitch` truth is derived algebraically as
+  `(Clf-Clr)/2`; accepting that derived moment as the benchmark convention
+  remains pending owner scientific approval. `Clf`/`Clr` remain report-only.
 - The AutoCFD5 v8 registries define 16 velocity lines, 209 unique Cp probes, and
   15 pressure display panels.
 - The nine component weights and unclipped physics-null skill transform are
@@ -74,6 +77,21 @@ official leaderboard results.
   [`evidence/volume-weight-vtk-run_1-failure-diagnostic.json`](evidence/volume-weight-vtk-run_1-failure-diagnostic.json)
   (SHA-256 `aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e`).
   This completes a rejection diagnostic, not the physical-volume scoring gate.
+- A separately pinned VTK 9.6.0 replacement candidate was tested on that exact
+  six-point wedge. Both `vtkCellSizeFilter` and the direct Verdict wedge
+  routine returned the positive signed candidate value
+  `2.073401809774423e-12 m^3`; applying connectivity permutation
+  `(0,2,1,3,5,4)` and a folded-wedge control produced negative values, so the
+  candidate is not applying an absolute value. The runtime, source tag/commit, wheel hashes,
+  point coordinates, and external probe identities are recorded in
+  [`evidence/volume-weight-vtk96-run_1-wedge-probe.json`](evidence/volume-weight-vtk96-run_1-wedge-probe.json)
+  (SHA-256 `2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6`).
+  This is an isolated algorithm probe only. VTK 9.6 also changes the native
+  hexahedron and pyramid paths, while millions of polyhedra retain a generic
+  triangulation-plus-signed-tetra path. Full native `run_1`/`run_44`,
+  mixed-cell/polyhedron, OpenFOAM-`V()` comparison if available (or an explicit
+  owner convention decision), all-case, publication, and owner-approval gates
+  remain open, and no accepted array is claimed.
 - The hardened Cp candidate sweep covered all 484 cases and retained all
   101,156 case/probe rows: 100,281 valid and 875 explicitly invalid. Its source
   inventory covers 364,568,214 raw STL facets, and the 488-page external review
@@ -87,14 +105,14 @@ official leaderboard results.
 1. Publish the deterministic per-native-cell volume array (or a frozen evaluator
    algorithm that produces it), with per-case counts, positive/finite checks,
    aggregate QA, hashes, dependency versions, and chunk-invariance golden tests.
-   The current VTK 9.5.2 `vtkCellSizeFilter` volume-only candidate has not passed
-   the strict one-positive-finite-volume-per-native-cell gate on `run_1`: its
-   sole invalid value was the negative `vtkWedge` volume recorded above. No
-   physical-volume weight artifact is accepted. The mixed-cell inventories in
-   [`evidence/README.md`](evidence/README.md) are diagnostic-only. An
-   owner-approved, scientifically justified algorithm and raw-order mapping
-   remain a scientific decision; the rejected value must not be silently
-   absolutized, masked, or replaced by an epsilon.
+   The VTK 9.5.2 candidate was rejected by the negative `run_1` wedge recorded
+   above. VTK 9.6.0 is now a replacement candidate because its isolated exact
+   wedge and signed controls pass without an absolute value, mask, or epsilon.
+   It has not yet passed full native `run_1`/`run_44`, mixed-cell/polyhedron,
+   all-case, or publication validation, so no physical-volume weight artifact
+   is accepted. The cell-type inventories and isolated probe in
+   [`evidence/README.md`](evidence/README.md) remain diagnostic-only. Freezing
+   this algorithm and raw-order mapping remains an owner scientific decision.
 2. Obtain owner scientific approval of the completed candidate all-case native
    array evidence. The all-484 volume replay now covers association, tuple and
    component counts, finite values, declared units, stable raw IDs, complete
@@ -113,14 +131,28 @@ official leaderboard results.
    maintainer receipt matches a benchmark-owned frozen evaluator version and
    immutable Git revision; that binding remains deliberately pending with no
    revision while the evaluator is still a candidate. The remaining production
-   gates are not complete.
+   gates are not complete. As an explicit activation gate,
+   [`real_reference_driver.py`](../../examples/drivaerml-candidate-native-chunks/real_reference_driver.py)
+   must execute on the pinned real `run_1` and `run_44` inputs, and its
+   hash-bound validation receipt must be retained as indexed evidence.
 4. Obtain dataset-owner scientific review of the completed all-484 force replay
    and its tolerance choices. The numerical replay, mirror checks, axle-load
    closure, fixed-area audit, and chunk-invariance evidence are complete at the
    path above; owner approval is not.
 5. Publish and hash every case/line containing-cell assignment for the 16 velocity
    profiles. Run the prescribed 1, 2, 5, and 10 mm convergence study and method
-   ordering test before retaining 10 mm as the ranked grid.
+   ordering test before retaining 10 mm as the ranked grid. All 2, 5, and 10 mm
+   comparisons against the 1 mm reference must pass; a passing 10 mm result
+   cannot hide a failed finer candidate. The candidate
+   prediction-based reducer now verifies complete native chunk manifests,
+   streams pinned multipart `UMeanTrim` truth, separates geometric assignment
+   invariance from loss/method-order convergence, and refuses owner-review
+   eligibility for any reduced pilot. Its synthetic tests are not real-model
+   evidence. Complete all-case assignments, the genuine prediction artifacts,
+   and the real convergence replay remain outstanding. The current reducer is
+   bounded-memory but single-process and non-resumable; immutable per-case
+   worker receipts plus strict restartable aggregation remain an execution-
+   hardening gate before the all-484, five-method replay.
 6. Publish and hash every case/probe Cp mapping, named-STL source inventory,
    bridge checks, overrides, and the all-case `Cp=2*pMeanTrim/Uinf^2` replay.
    Complete the owner visual atlas sign-off; no failed case or probe may be

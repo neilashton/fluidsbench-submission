@@ -805,7 +805,7 @@ def _write_submission_package(
                 "result_data_license_spdx": "CC-BY-4.0",
             },
             "scoring_support": {
-                "status": "official",
+                "status": "candidate",
                 "release_id": RELEASE_ID,
                 "manifest_url": (
                     "https://example.invalid/fluidsbench/synthetic-drivaerml-shaped/"
@@ -836,8 +836,8 @@ def _write_submission_package(
             "note": (
                 "INELIGIBLE SYNTHETIC FIXTURE. This is not DrivAerML data, an "
                 "active DrivAerML contract, a model result, owner approval, or an "
-                "independent participant dry run. The schema-required official "
-                "status applies only to this isolated fictional support namespace."
+                "independent participant dry run. Candidate status applies only "
+                "to this isolated fictional support namespace."
             ),
         },
     )
@@ -1022,7 +1022,7 @@ def run_demo(output: Path) -> dict[str, Any]:
         "$schema": "https://fluidsbench.org/schemas/scoring-support/v1/manifest.schema.json",
         "schema_version": "1.0",
         "release_id": RELEASE_ID,
-        "status": "prototype",
+        "status": "candidate",
         "published_at": "2026-08-20T00:00:00Z",
         "dataset_id": DATASET_ID,
         "dataset_version": DATASET_VERSION,
@@ -1044,7 +1044,7 @@ def run_demo(output: Path) -> dict[str, Any]:
             }
         ],
         "notes": (
-            "Synthetic prototype support only. This is not DrivAerML data, active "
+            "Synthetic candidate support only. This is not DrivAerML data, active "
             "DrivAerML scoring support, a participant result, or owner approval."
         ),
     }
@@ -1120,7 +1120,7 @@ def run_demo(output: Path) -> dict[str, Any]:
         raise ValueError("synthetic discretization JSONL does not cover both cases")
 
     receipt = {
-        "status": "PASS",
+        "status": "candidate_demo_valid",
         "mode": "synthetic_candidate_dry_run",
         "claims": {
             "uses_real_drivaerml_data": False,
@@ -1199,7 +1199,7 @@ def main() -> int:
     except (OSError, ValueError) as error:
         parser.error(str(error))
     print(
-        "PASS: synthetic DrivAerML-shaped chunk/package dry run; "
+        "CANDIDATE DEMO VALID: synthetic DrivAerML-shaped chunk/package dry run; "
         f"receipt={args.output.resolve() / 'validation-receipt.json'}"
     )
     print(receipt["official_submission_block"])

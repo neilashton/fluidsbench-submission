@@ -20,13 +20,14 @@ python3 -m venv .venv-drivaerml
 
 The generated submission is explicitly synthetic and ineligible. It has no
 approval block and belongs to the separate `synthetic-drivaerml-shaped`
-namespace. Schema v3 requires the literal `scoring_support.status` value
-`official`; the submission note limits that marker to the isolated fictional
-support namespace. The bundled support manifest remains `prototype`, and the
-driver requires the real `drivaerml` specification to remain exactly
+namespace. Both its submission declaration and bundled support manifest use
+the non-approving `candidate` status. The driver requires the real
+`drivaerml` specification to remain exactly
 `candidate_scoring_contract` / `owner_review_required` /
-`submissions_open: false` before it runs. All generated package identifiers
-must begin with `synthetic-` and differ from the real dataset ID.
+`submissions_open: false` before it runs. The driver checks that the generated
+submission ID, dataset ID, and scoring-support release ID begin with
+`synthetic-` and remain distinct from the real dataset; other identifiers
+follow their field-specific schema vocabulary.
 
 The fixture demonstrates ordered two-part and three-part byte transport,
 raw-cell IDs, independently bounded inference chunks, complete duplicate-free
@@ -37,9 +38,12 @@ JSON Schema. Its transport bytes are JSON, not VTK.
 
 The driver performs those schema checks as part of the one command. The
 fictional dataset ID is deliberately not registered with the normal
-`scripts/validate_submission.py` official-dataset validator, so that validator
-will reject this teaching package. This keeps the real closed DrivAerML
-contract fail-closed rather than creating a synthetic acceptance path.
+`scripts/validate_submission.py` dataset registry, so both normal validation
+and `--candidate-dry-run` reject this teaching package. Candidate dry-run
+validation is reserved for an explicitly registered dataset with an exact
+benchmark-owned candidate-manifest binding. This keeps the real closed
+DrivAerML contract fail-closed rather than creating a synthetic acceptance
+path.
 
 ## Real run_1/run_44 pilot
 
@@ -86,7 +90,10 @@ diagnostic candidate evidence for both cases plus a hashed validation receipt;
 it never contains `submission.json`.
 
 Prediction `.npz` files remain bounded inputs: the loader caps an NPY header at
-4 KiB, total uncompressed archive content at 512 MiB, and the ZIP central
-directory at 64 KiB. Split transport parts and inference chunks are independent
-concepts. Never average chunk-local RMSE values; let the evaluator accumulate
-additive statistics and reduce once after complete raw-cell coverage.
+4 KiB, the sum of all archive members' declared uncompressed byte sizes at 512
+MiB, and the ZIP central directory at 64 KiB. ZIP `ZIP_STORED` and
+`ZIP_DEFLATED` compression are both accepted; the 512 MiB cap is not a
+compressed-file-size limit. Split transport parts and inference chunks are
+independent concepts.
+Never average chunk-local RMSE values; let the evaluator accumulate additive
+statistics and reduce once after complete raw-cell coverage.

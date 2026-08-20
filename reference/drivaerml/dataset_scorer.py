@@ -33,6 +33,7 @@ from .source import (
     NativeSourcePin,
     load_native_source_pin,
 )
+from .volume_weights import ALLOWED_NATIVE_CELL_TYPES
 
 
 CANDIDATE_DATASET_SCHEMA = "drivaerml-candidate-dataset-evaluation-v1"
@@ -44,7 +45,7 @@ CORE_CASE_STATUS = "candidate_evaluator_evidence_not_official_submission"
 DIAGNOSTIC_CASE_SCHEMA = "drivaerml-autocfd5-case-diagnostics-candidate-v1"
 DIAGNOSTIC_CASE_STATUS = "candidate_diagnostics_not_active_or_official_submission"
 SOURCE_BOUND_VOLUME_WEIGHT_STATUS = (
-    "source_bound_v2_receipt_and_aggregate_membership_verified"
+    "source_bound_receipt_v3_aggregate_v2_membership_verified"
 )
 
 OFFICIAL_REPOSITORY_ID = "neashton/drivaerml"
@@ -261,6 +262,9 @@ class _CoreCase:
     volume_weight_receipt_sha256: str
     volume_weight_aggregate_sha256: str
     volume_weight_algorithm_sha256: str
+    volume_weight_native_cell_type_payload_sha256: str
+    volume_weight_aggregate_native_cell_type_manifest_sha256: str
+    volume_weight_aggregate_per_vtk_cell_type: tuple[Mapping[str, object], ...]
 
 
 @dataclass(frozen=True)
@@ -996,6 +1000,194 @@ def _validate_field_metrics(
     return normalized_values, normalized_statistics
 
 
+def _validate_volume_weight_cell_types(
+    value: Mapping[str, object],
+    *,
+    case_id: str,
+    volume_count: int,
+    volume_sum: float,
+    volume_minimum: float,
+    volume_maximum: float,
+) -> tuple[str, str, tuple[Mapping[str, object], ...]]:
+    native = _exact_keys(
+        value["native_cell_types"],
+        {"dtype", "shape", "order", "payload_sha256", "histogram"},
+        f"core evidence {case_id}.volume_weights.native_cell_types",
+    )
+    if (
+        native["dtype"] != "uint8"
+        or native["shape"] != [volume_count]
+        or native["order"] != "zero_based_raw_vtk_cell_order"
+    ):
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} native cell-type binding mismatch"
+        )
+    payload_sha = _sha256(
+        native["payload_sha256"], f"{case_id} native cell-type payload SHA-256"
+    )
+    raw_histogram = native["histogram"]
+    if not isinstance(raw_histogram, list) or not raw_histogram:
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} native cell-type histogram is empty"
+        )
+    histogram: list[dict[str, object]] = []
+    previous_id = -1
+    for index, raw_row in enumerate(raw_histogram):
+        row = _exact_keys(
+            raw_row,
+            {"vtk_cell_type_id", "vtk_cell_type_name", "cell_count"},
+            f"{case_id} native cell-type histogram row {index}",
+        )
+        type_id = _integer(
+            row["vtk_cell_type_id"], f"{case_id} VTK cell-type ID", minimum=1
+        )
+        name = ALLOWED_NATIVE_CELL_TYPES.get(type_id)
+        count = _integer(
+            row["cell_count"], f"{case_id} VTK cell-type count", minimum=1
+        )
+        if type_id <= previous_id or name is None or row["vtk_cell_type_name"] != name:
+            raise DrivAerDatasetScorerError(
+                f"core evidence {case_id} native cell-type histogram mismatch"
+            )
+        histogram.append(
+            {
+                "vtk_cell_type_id": type_id,
+                "vtk_cell_type_name": name,
+                "cell_count": count,
+            }
+        )
+        previous_id = type_id
+    if sum(int(row["cell_count"]) for row in histogram) != volume_count:
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} native cell-type count mismatch"
+        )
+
+    per_type = value["per_vtk_cell_type"]
+    if not isinstance(per_type, list) or len(per_type) != len(histogram):
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} per-type volume coverage mismatch"
+        )
+    normalized_case_rows: list[dict[str, object]] = []
+    per_type_keys = {
+        "vtk_cell_type_id",
+        "vtk_cell_type_name",
+        "cell_count",
+        "volume_sum_m3",
+        "volume_min_m3",
+        "volume_max_m3",
+    }
+    for index, (raw_row, type_row) in enumerate(
+        zip(per_type, histogram, strict=True)
+    ):
+        row = _exact_keys(
+            raw_row, per_type_keys, f"{case_id} per-type volume row {index}"
+        )
+        if any(
+            row[name] != type_row[name]
+            for name in ("vtk_cell_type_id", "vtk_cell_type_name", "cell_count")
+        ):
+            raise DrivAerDatasetScorerError(
+                f"core evidence {case_id} per-type volume/histogram mismatch"
+            )
+        count = int(type_row["cell_count"])
+        type_sum = _finite(row["volume_sum_m3"], f"{case_id} per-type sum")
+        type_min = _finite(row["volume_min_m3"], f"{case_id} per-type minimum")
+        type_max = _finite(row["volume_max_m3"], f"{case_id} per-type maximum")
+        if (
+            type_sum <= 0.0
+            or type_min <= 0.0
+            or type_max < type_min
+            or not type_min * count <= type_sum <= type_max * count
+        ):
+            raise DrivAerDatasetScorerError(
+                f"core evidence {case_id} per-type volume statistics mismatch"
+            )
+        normalized_case_rows.append(
+            {
+                **type_row,
+                "volume_sum_m3": type_sum,
+                "volume_min_m3": type_min,
+                "volume_max_m3": type_max,
+            }
+        )
+    if (
+        not _same_float(
+            math.fsum(float(row["volume_sum_m3"]) for row in normalized_case_rows),
+            volume_sum,
+        )
+        or min(float(row["volume_min_m3"]) for row in normalized_case_rows)
+        != volume_minimum
+        or max(float(row["volume_max_m3"]) for row in normalized_case_rows)
+        != volume_maximum
+    ):
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} per-type/full volume statistics mismatch"
+        )
+
+    manifest_sha = _sha256(
+        value["aggregate_native_cell_type_payload_manifest_sha256"],
+        f"{case_id} aggregate cell-type manifest SHA-256",
+    )
+    raw_aggregate_rows = value["aggregate_per_vtk_cell_type"]
+    if not isinstance(raw_aggregate_rows, list) or not raw_aggregate_rows:
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} aggregate per-type volumes are empty"
+        )
+    aggregate_rows: list[Mapping[str, object]] = []
+    previous_id = -1
+    aggregate_keys = per_type_keys | {"case_count"}
+    for index, raw_row in enumerate(raw_aggregate_rows):
+        row = _exact_keys(
+            raw_row,
+            aggregate_keys,
+            f"{case_id} aggregate per-type volume row {index}",
+        )
+        type_id = _integer(
+            row["vtk_cell_type_id"], f"{case_id} aggregate VTK type ID", minimum=1
+        )
+        name = ALLOWED_NATIVE_CELL_TYPES.get(type_id)
+        case_count = _integer(
+            row["case_count"], f"{case_id} aggregate type case count", minimum=1
+        )
+        cell_count = _integer(
+            row["cell_count"], f"{case_id} aggregate type cell count", minimum=1
+        )
+        type_sum = _finite(
+            row["volume_sum_m3"], f"{case_id} aggregate type volume sum"
+        )
+        type_min = _finite(
+            row["volume_min_m3"], f"{case_id} aggregate type volume minimum"
+        )
+        type_max = _finite(
+            row["volume_max_m3"], f"{case_id} aggregate type volume maximum"
+        )
+        if (
+            type_id <= previous_id
+            or name is None
+            or row["vtk_cell_type_name"] != name
+            or type_sum <= 0.0
+            or type_min <= 0.0
+            or type_max < type_min
+            or not type_min * cell_count <= type_sum <= type_max * cell_count
+        ):
+            raise DrivAerDatasetScorerError(
+                f"core evidence {case_id} aggregate per-type volume mismatch"
+            )
+        aggregate_rows.append(
+            {
+                "vtk_cell_type_id": type_id,
+                "vtk_cell_type_name": name,
+                "case_count": case_count,
+                "cell_count": cell_count,
+                "volume_sum_m3": type_sum,
+                "volume_min_m3": type_min,
+                "volume_max_m3": type_max,
+            }
+        )
+        previous_id = type_id
+    return payload_sha, manifest_sha, tuple(aggregate_rows)
+
+
 def _validate_core_case(
     document: Mapping[str, Any],
     path: Path,
@@ -1148,8 +1340,25 @@ def _validate_core_case(
         raise DrivAerDatasetScorerError(f"core evidence {case_id} native volume mismatch")
     volume_weights = _exact_keys(
         source["volume_weights"],
-        {"source_file", "sha256", "case_id", "source_volume_part_sha256", "entity_count", "volume_sum_m3", "volume_min_m3", "volume_max_m3", "dtype", "role", "binding_status", "native_source_pin_sha256", "receipt_sha256", "aggregate_sha256", "aggregate_complete", "algorithm_sha256"},
+        {
+            "source_file", "sha256", "case_id", "source_volume_part_sha256",
+            "entity_count", "volume_sum_m3", "volume_min_m3", "volume_max_m3",
+            "dtype", "role", "binding_status", "native_source_pin_sha256",
+            "receipt_sha256", "aggregate_sha256", "aggregate_complete",
+            "algorithm_sha256", "native_cell_types", "per_vtk_cell_type",
+            "aggregate_native_cell_type_payload_manifest_sha256",
+            "aggregate_per_vtk_cell_type",
+        },
         f"core evidence {case_id}.volume_weights",
+    )
+    volume_minimum = _finite(
+        volume_weights["volume_min_m3"], f"{case_id} minimum volume"
+    )
+    volume_sum = _finite(
+        volume_weights["volume_sum_m3"], f"{case_id} volume sum"
+    )
+    volume_maximum = _finite(
+        volume_weights["volume_max_m3"], f"{case_id} maximum volume"
     )
     if (
         volume_weights["case_id"] != case_id
@@ -1160,14 +1369,27 @@ def _validate_core_case(
         or volume_weights["binding_status"] != SOURCE_BOUND_VOLUME_WEIGHT_STATUS
         or volume_weights["native_source_pin_sha256"] != contract.native_source_pin_sha256
         or volume_weights["aggregate_complete"] is not True
-        or _finite(volume_weights["volume_min_m3"], f"{case_id} minimum volume") <= 0.0
-        or _finite(volume_weights["volume_sum_m3"], f"{case_id} volume sum") <= 0.0
+        or volume_minimum <= 0.0
+        or volume_sum <= 0.0
+        or volume_maximum < volume_minimum
     ):
         raise DrivAerDatasetScorerError(f"core evidence {case_id} volume-weight binding mismatch")
     volume_weight_sha = _sha256(volume_weights["sha256"], f"{case_id} volume-weight SHA-256")
     receipt_sha = _sha256(volume_weights["receipt_sha256"], f"{case_id} volume-weight receipt SHA-256")
     aggregate_sha = _sha256(volume_weights["aggregate_sha256"], f"{case_id} volume-weight aggregate SHA-256")
     algorithm_sha = _sha256(volume_weights["algorithm_sha256"], f"{case_id} volume-weight algorithm SHA-256")
+    (
+        native_cell_type_payload_sha,
+        aggregate_cell_type_manifest_sha,
+        aggregate_per_vtk_cell_type,
+    ) = _validate_volume_weight_cell_types(
+        volume_weights,
+        case_id=case_id,
+        volume_count=volume_count,
+        volume_sum=volume_sum,
+        volume_minimum=volume_minimum,
+        volume_maximum=volume_maximum,
+    )
 
     native_arrays = _mapping(source["volume_native_arrays"], f"{case_id} volume native arrays")
     if set(native_arrays) != {"pMeanTrim", "UMeanTrim"}:
@@ -1307,6 +1529,15 @@ def _validate_core_case(
         volume_weight_receipt_sha256=receipt_sha,
         volume_weight_aggregate_sha256=aggregate_sha,
         volume_weight_algorithm_sha256=algorithm_sha,
+        volume_weight_native_cell_type_payload_sha256=(
+            native_cell_type_payload_sha
+        ),
+        volume_weight_aggregate_native_cell_type_manifest_sha256=(
+            aggregate_cell_type_manifest_sha
+        ),
+        volume_weight_aggregate_per_vtk_cell_type=(
+            aggregate_per_vtk_cell_type
+        ),
     )
 
 
@@ -1831,10 +2062,30 @@ def evaluate_candidate_dataset(
 
     aggregate_hashes = {case.volume_weight_aggregate_sha256 for case in core_cases}
     algorithm_hashes = {case.volume_weight_algorithm_sha256 for case in core_cases}
-    if len(aggregate_hashes) != 1 or len(algorithm_hashes) != 1:
+    cell_type_manifest_hashes = {
+        case.volume_weight_aggregate_native_cell_type_manifest_sha256
+        for case in core_cases
+    }
+    aggregate_per_type_rows = {
+        json.dumps(
+            case.volume_weight_aggregate_per_vtk_cell_type,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        for case in core_cases
+    }
+    if (
+        len(aggregate_hashes) != 1
+        or len(algorithm_hashes) != 1
+        or len(cell_type_manifest_hashes) != 1
+        or len(aggregate_per_type_rows) != 1
+    ):
         raise DrivAerDatasetScorerError(
             "core evidence cases use inconsistent volume-weight support identities"
         )
+    aggregate_per_vtk_cell_type = json.loads(
+        next(iter(aggregate_per_type_rows))
+    )
 
     field_metric_values = {
         metric_id: _macro([case.field_metrics[metric_id] for case in core_cases])
@@ -2062,6 +2313,10 @@ def evaluate_candidate_dataset(
             "surface_area_manifest_sha256": contract.surface_area_manifest_sha256,
             "volume_weight_aggregate_sha256": next(iter(aggregate_hashes)),
             "volume_weight_algorithm_sha256": next(iter(algorithm_hashes)),
+            "volume_weight_native_cell_type_payload_manifest_sha256": next(
+                iter(cell_type_manifest_hashes)
+            ),
+            "volume_weight_per_vtk_cell_type": aggregate_per_vtk_cell_type,
             "volume_weight_aggregate_predeclared_in_submission_spec": False,
             "autocfd5_profile_file": contract.profile_file,
             "autocfd5_profile_sha256": contract.profile_sha256,

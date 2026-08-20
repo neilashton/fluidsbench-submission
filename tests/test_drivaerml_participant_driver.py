@@ -58,7 +58,7 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "bundle"
             receipt = self.driver.run_demo(output)
-            self.assertEqual(receipt["status"], "PASS")
+            self.assertEqual(receipt["status"], "candidate_demo_valid")
             self.assertEqual(
                 [(case["case_id"], case["transport"]["part_count"]) for case in receipt["cases"]],
                 [("run_1", 2), ("run_44", 3)],
@@ -100,13 +100,13 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             self.assertNotIn("approval", submission)
             self.assertIn("INELIGIBLE SYNTHETIC FIXTURE", submission["note"])
             self.assertIn(
-                "schema-required official status",
+                "candidate status applies only",
                 submission["note"].lower(),
             )
             support = json.loads(
                 (output / "support" / "manifest.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(support["status"], "prototype")
+            self.assertEqual(support["status"], "candidate")
             self.assertEqual(
                 submission["scoring_support"]["manifest_sha256"],
                 self.sha256(output / "support" / "manifest.json"),
@@ -181,7 +181,24 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
-            self.assertIn("PASS: synthetic DrivAerML-shaped", completed.stdout)
+            self.assertIn(
+                "CANDIDATE DEMO VALID: synthetic DrivAerML-shaped",
+                completed.stdout,
+            )
+            candidate_validation = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/validate_submission.py",
+                    "--candidate-dry-run",
+                    str(output),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(candidate_validation.returncode, 1)
+            self.assertIn("unknown dataset_id", candidate_validation.stderr)
 
             repeated = subprocess.run(
                 [sys.executable, str(DRIVER_PATH), "--output", str(output)],

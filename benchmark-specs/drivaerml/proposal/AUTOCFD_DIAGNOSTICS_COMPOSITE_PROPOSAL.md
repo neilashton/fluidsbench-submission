@@ -94,11 +94,13 @@ are expanded in `autocfd_velocity_samples_10mm.csv` so evaluator
 implementations need not reproduce decimal rounding independently.
 
 Before activation, build a 1 mm reference support (37,416 samples per case) and
-audit nested 2, 5, and 10 mm grids. The proposed 10 mm grid passes only if it
-changes aggregate profile loss by no more than 0.5%, every case-macro loss by
-no more than 1%, every case-line loss by no more than 2%, and method-order
-Kendall tau-b remains at least 0.99 relative to 1 mm. For candidate spacing
-`h`, define a relative change as `|L_h-L_1mm|/L_1mm`. If `L_1mm <= 1e-12`,
+audit nested 2, 5, and 10 mm grids. Every candidate grid (2, 5, and 10 mm) must
+change aggregate profile loss by no more than 0.5%, every case-macro loss by
+no more than 1%, every case-line loss by no more than 2%, and retain a
+method-order Kendall tau-b of at least 0.99 relative to 1 mm before the proposed
+10 mm grid can be retained. A passing 10 mm block cannot hide a failed 2 or
+5 mm block. For candidate spacing `h`, define a relative change as
+`|L_h-L_1mm|/L_1mm`. If `L_1mm <= 1e-12`,
 require absolute agreement within `1e-12` instead. Apply the 0.5% limit to the
 final case/line macro loss, the 1% limit to each case's 16-line macro loss, and
 the 2% limit to each case-line loss. Compute Kendall tau-b on the final method

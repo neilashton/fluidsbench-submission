@@ -12,6 +12,7 @@ from pathlib import Path
 
 from reference.drivaerml.profile_convergence import (
     INPUT_SCHEMA,
+    OFFICIAL_CASE_ORDER,
     OUTPUT_SCHEMA,
     PROFILE_ORDER,
     ProfileConvergenceError,
@@ -111,8 +112,38 @@ def _write_json(path: Path, value: object) -> None:
 
 
 class DrivAerMLProfileConvergenceTests(unittest.TestCase):
-    def test_complete_passing_study_is_activation_review_eligible(self) -> None:
+    def test_reduced_pilot_is_never_activation_review_eligible(self) -> None:
         result = evaluate_profile_convergence(_document())
+
+        self.assertFalse(result["profile_resolution_activation_eligible"])
+        self.assertEqual(
+            result["status"],
+            "ineligible_incomplete_official_484_case_scope",
+        )
+        self.assertFalse(result["scope"]["complete_official_case_order"])
+        self.assertIn(
+            "incomplete_official_484_case_scope", result["blocking_reasons"]
+        )
+        self.assertTrue(result["selection"]["activation_candidate_passed"])
+
+    def test_484_case_membership_and_order_must_both_be_exact(self) -> None:
+        permuted = list(OFFICIAL_CASE_ORDER)
+        permuted[0], permuted[1] = permuted[1], permuted[0]
+        result = evaluate_profile_convergence(
+            _document(case_order=tuple(permuted))
+        )
+
+        self.assertFalse(result["profile_resolution_activation_eligible"])
+        self.assertFalse(result["scope"]["complete_official_case_order"])
+        self.assertEqual(
+            result["status"],
+            "ineligible_incomplete_official_484_case_scope",
+        )
+
+    def test_complete_passing_study_is_activation_review_eligible(self) -> None:
+        result = evaluate_profile_convergence(
+            _document(case_order=OFFICIAL_CASE_ORDER)
+        )
 
         self.assertEqual(result["schema"], OUTPUT_SCHEMA)
         self.assertTrue(result["profile_resolution_activation_eligible"])
@@ -129,13 +160,42 @@ class DrivAerMLProfileConvergenceTests(unittest.TestCase):
         self.assertEqual(ten_mm["method_ordering"]["pair_counts"]["total"], 10)
         self.assertEqual(len(ten_mm["methods"]), 5)
         for method in ten_mm["methods"]:
-            self.assertEqual(len(method["cases"]), 2)
+            self.assertEqual(len(method["cases"]), len(OFFICIAL_CASE_ORDER))
             self.assertEqual(len(method["cases"][0]["case_lines"]), 16)
+
+    def test_exact_484_study_fails_if_finer_candidate_fails(self) -> None:
+        document = _document(case_order=OFFICIAL_CASE_ORDER)
+        reference = document["losses"][0][0][0][0]
+        # Fail only the 2 mm case-line gate.  The retained 10 mm candidate
+        # still passes, so this is a regression guard against selecting it
+        # without enforcing the complete prescribed 2/5/10 mm envelope.
+        document["losses"][0][0][0][1] = reference * 1.0200001
+
+        result = evaluate_profile_convergence(document)
+
+        self.assertFalse(result["spacing_results"][0]["passed"])
+        self.assertTrue(result["spacing_results"][1]["passed"])
+        self.assertTrue(result["spacing_results"][2]["passed"])
+        self.assertTrue(result["selection"]["activation_candidate_passed"])
+        self.assertFalse(
+            result["selection"]["all_prescribed_candidate_spacings_passed"]
+        )
+        self.assertEqual(
+            result["selection"]["failed_candidate_spacings_mm"], [2]
+        )
+        self.assertFalse(result["profile_resolution_activation_eligible"])
+        self.assertEqual(result["status"], "ineligible_resolution_threshold_failure")
+        self.assertIn(
+            "resolution_threshold_or_method_order_failure",
+            result["blocking_reasons"],
+        )
 
     def test_missing_genuine_models_reports_ineligible_without_inventing_them(
         self,
     ) -> None:
-        document = _document(trained_count=0)
+        document = _document(
+            trained_count=0, case_order=OFFICIAL_CASE_ORDER
+        )
         result = evaluate_profile_convergence(document)
 
         self.assertFalse(result["profile_resolution_activation_eligible"])
@@ -321,7 +381,9 @@ class DrivAerMLProfileConvergenceTests(unittest.TestCase):
             root = Path(temporary)
             input_path = root / "study.json"
             output_path = root / "evidence.json"
-            _write_json(input_path, _document())
+            _write_json(
+                input_path, _document(case_order=OFFICIAL_CASE_ORDER)
+            )
             standard_output = io.StringIO()
             standard_error = io.StringIO()
             with (
@@ -337,7 +399,9 @@ class DrivAerMLProfileConvergenceTests(unittest.TestCase):
             self.assertTrue(result["profile_resolution_activation_eligible"])
             self.assertRegex(result["input"]["file_byte_sha256"], r"^[0-9a-f]{64}$")
 
-            ineligible = _document(trained_count=0)
+            ineligible = _document(
+                trained_count=0, case_order=OFFICIAL_CASE_ORDER
+            )
             _write_json(input_path, ineligible)
             with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(
                 io.StringIO()

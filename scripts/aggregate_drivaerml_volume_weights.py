@@ -18,17 +18,24 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+import numpy as np
+
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from reference.drivaerml.volume_weights import (  # noqa: E402
+    ALLOWED_NATIVE_CELL_TYPES,
     DEFAULT_COPY_CHUNK_SIZE,
     DEFAULT_SOURCE_VERIFICATION_CHUNK_BYTES,
+    IMPLEMENTATION_RELATIVE_PATHS,
+    PINNED_ENVIRONMENT_BINDING,
     RECEIPT_SCHEMA,
     RECEIPT_SCHEMA_VERSION,
+    _git_bytes,
     algorithm_settings,
+    implementation_file_records,
 )
 
 
@@ -51,8 +58,8 @@ OFFICIAL_CASE_IDS = tuple(
 PINNED_VERSIONS = {
     "python": "3.12.13",
     "numpy": "2.2.6",
-    "vtk": "9.5.2",
-    "vtk_source": "vtk version 9.5.2",
+    "vtk": "9.6.0",
+    "vtk_source": "vtk version 9.6.0",
 }
 PINNED_ALGORITHM = algorithm_settings()
 PINNED_ALGORITHM_SHA256 = hashlib.sha256(
@@ -63,6 +70,7 @@ PINNED_ALGORITHM_SHA256 = hashlib.sha256(
 
 _CASE_RE = re.compile(r"run_([1-9][0-9]*)")
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
+_GIT_REVISION_RE = re.compile(r"[0-9a-f]{40}")
 _WINDOWS_ABSOLUTE_RE = re.compile(r"[A-Za-z]:[\\/]")
 
 
@@ -347,6 +355,177 @@ def _validate_reader_audit(value: object, case_id: str) -> dict[str, Any]:
     return result
 
 
+def _validate_native_cell_types(
+    value: object,
+    *,
+    case_id: str,
+    expected_cell_count: int,
+) -> dict[str, Any]:
+    audit = _exact_keys(
+        value,
+        {"dtype", "shape", "order", "payload_sha256", "histogram"},
+        f"{case_id} native_cell_types",
+    )
+    if audit["dtype"] != "uint8":
+        raise VolumeWeightAggregateError(f"{case_id} cell-type dtype must be uint8")
+    if audit["shape"] != [expected_cell_count]:
+        raise VolumeWeightAggregateError(
+            f"{case_id} cell-type shape/count are inconsistent"
+        )
+    if audit["order"] != "zero_based_raw_vtk_cell_order":
+        raise VolumeWeightAggregateError(
+            f"{case_id} cell-type order is not frozen raw VTK order"
+        )
+    payload_sha256 = _sha256(
+        audit["payload_sha256"], f"{case_id} cell-type payload SHA-256"
+    )
+    raw_histogram = audit["histogram"]
+    if not isinstance(raw_histogram, list) or not raw_histogram:
+        raise VolumeWeightAggregateError(
+            f"{case_id} cell-type histogram must be a non-empty list"
+        )
+    histogram: list[dict[str, Any]] = []
+    previous_type_id = -1
+    for index, raw_row in enumerate(raw_histogram):
+        row = _exact_keys(
+            raw_row,
+            {"vtk_cell_type_id", "vtk_cell_type_name", "cell_count"},
+            f"{case_id} cell-type histogram row {index}",
+        )
+        type_id = _integer(
+            row["vtk_cell_type_id"],
+            f"{case_id} cell-type histogram row {index} ID",
+            minimum=1,
+        )
+        if type_id <= previous_type_id:
+            raise VolumeWeightAggregateError(
+                f"{case_id} cell-type histogram must use unique increasing IDs"
+            )
+        expected_name = ALLOWED_NATIVE_CELL_TYPES.get(type_id)
+        if expected_name is None:
+            raise VolumeWeightAggregateError(
+                f"{case_id} contains unsupported VTK cell type {type_id}"
+            )
+        if row["vtk_cell_type_name"] != expected_name:
+            raise VolumeWeightAggregateError(
+                f"{case_id} VTK cell-type name differs from its frozen ID"
+            )
+        count = _integer(
+            row["cell_count"],
+            f"{case_id} cell-type histogram row {index} count",
+            minimum=1,
+        )
+        histogram.append(
+            {
+                "vtk_cell_type_id": type_id,
+                "vtk_cell_type_name": expected_name,
+                "cell_count": count,
+            }
+        )
+        previous_type_id = type_id
+    if sum(row["cell_count"] for row in histogram) != expected_cell_count:
+        raise VolumeWeightAggregateError(
+            f"{case_id} cell-type histogram/count are inconsistent"
+        )
+    return {
+        "dtype": "uint8",
+        "shape": [expected_cell_count],
+        "order": "zero_based_raw_vtk_cell_order",
+        "payload_sha256": payload_sha256,
+        "histogram": histogram,
+    }
+
+
+def _validate_per_type_output(
+    value: object,
+    *,
+    case_id: str,
+    histogram: Sequence[Mapping[str, Any]],
+    overall_sum: float,
+    overall_min: float,
+    overall_max: float,
+) -> list[dict[str, Any]]:
+    if not isinstance(value, list) or len(value) != len(histogram):
+        raise VolumeWeightAggregateError(
+            f"{case_id} per-type output coverage is not exact"
+        )
+    result: list[dict[str, Any]] = []
+    for index, (raw_row, type_row) in enumerate(zip(value, histogram, strict=True)):
+        row = _exact_keys(
+            raw_row,
+            {
+                "vtk_cell_type_id",
+                "vtk_cell_type_name",
+                "cell_count",
+                "volume_sum_m3",
+                "volume_min_m3",
+                "volume_max_m3",
+            },
+            f"{case_id} per-type output row {index}",
+        )
+        for key in ("vtk_cell_type_id", "vtk_cell_type_name", "cell_count"):
+            if row[key] != type_row[key]:
+                raise VolumeWeightAggregateError(
+                    f"{case_id} per-type output differs from input histogram"
+                )
+        type_sum = _finite(
+            row["volume_sum_m3"],
+            f"{case_id} type {type_row['vtk_cell_type_id']} volume sum",
+            positive=True,
+        )
+        type_min = _finite(
+            row["volume_min_m3"],
+            f"{case_id} type {type_row['vtk_cell_type_id']} volume minimum",
+            positive=True,
+        )
+        type_max = _finite(
+            row["volume_max_m3"],
+            f"{case_id} type {type_row['vtk_cell_type_id']} volume maximum",
+            positive=True,
+        )
+        if type_min > type_max:
+            raise VolumeWeightAggregateError(
+                f"{case_id} per-type volume minimum exceeds maximum"
+            )
+        count = int(type_row["cell_count"])
+        lower = type_min * count
+        upper = type_max * count
+        if not math.isfinite(lower) or not math.isfinite(upper):
+            raise VolumeWeightAggregateError(
+                f"{case_id} per-type count/range product is non-finite"
+            )
+        tolerance = max(abs(type_sum), abs(lower), abs(upper)) * 1.0e-12
+        if type_sum < lower - tolerance or type_sum > upper + tolerance:
+            raise VolumeWeightAggregateError(
+                f"{case_id} per-type volume sum is inconsistent with its range"
+            )
+        result.append(
+            {
+                "vtk_cell_type_id": type_row["vtk_cell_type_id"],
+                "vtk_cell_type_name": type_row["vtk_cell_type_name"],
+                "cell_count": count,
+                "volume_sum_m3": type_sum,
+                "volume_min_m3": type_min,
+                "volume_max_m3": type_max,
+            }
+        )
+    summed = math.fsum(row["volume_sum_m3"] for row in result)
+    tolerance = max(abs(summed), abs(overall_sum)) * 1.0e-12
+    if abs(summed - overall_sum) > tolerance:
+        raise VolumeWeightAggregateError(
+            f"{case_id} per-type volume sums differ from the full output"
+        )
+    if min(row["volume_min_m3"] for row in result) != overall_min:
+        raise VolumeWeightAggregateError(
+            f"{case_id} per-type minima differ from the full output"
+        )
+    if max(row["volume_max_m3"] for row in result) != overall_max:
+        raise VolumeWeightAggregateError(
+            f"{case_id} per-type maxima differ from the full output"
+        )
+    return result
+
+
 def _validate_native_source_binding(
     value: object,
     *,
@@ -472,25 +651,123 @@ def _validate_native_source_binding(
     }
 
 
+def _validate_implementation_binding(
+    value: object,
+    *,
+    case_id: str,
+    expected_files: Sequence[Mapping[str, str]],
+    committed_files_by_revision: dict[str, list[dict[str, str]]],
+) -> dict[str, object]:
+    binding = _exact_keys(
+        value,
+        {"git_revision", "worktree_clean", "files"},
+        f"{case_id} implementation_binding",
+    )
+    revision = _string(
+        binding["git_revision"], f"{case_id} implementation Git revision"
+    )
+    if _GIT_REVISION_RE.fullmatch(revision) is None:
+        raise VolumeWeightAggregateError(
+            f"{case_id} implementation Git revision must be resolved 40-hex"
+        )
+    if binding["worktree_clean"] is not True:
+        raise VolumeWeightAggregateError(
+            f"{case_id} implementation worktree must be recorded clean"
+        )
+
+    raw_files = binding["files"]
+    if not isinstance(raw_files, list) or len(raw_files) != len(expected_files):
+        raise VolumeWeightAggregateError(
+            f"{case_id} implementation file coverage is not exact"
+        )
+    files: list[dict[str, str]] = []
+    for index, (raw_file, expected) in enumerate(
+        zip(raw_files, expected_files, strict=True)
+    ):
+        file_record = _exact_keys(
+            raw_file,
+            {"path", "sha256"},
+            f"{case_id} implementation file {index}",
+        )
+        path = _relative_path(
+            file_record["path"], f"{case_id} implementation file {index} path"
+        )
+        digest = _sha256(
+            file_record["sha256"],
+            f"{case_id} implementation file {index} SHA-256",
+        )
+        if path != expected["path"] or digest != expected["sha256"]:
+            raise VolumeWeightAggregateError(
+                f"{case_id} implementation file {index} differs from the "
+                "current frozen evaluator implementation"
+            )
+        files.append({"path": path, "sha256": digest})
+    if tuple(row["path"] for row in files) != IMPLEMENTATION_RELATIVE_PATHS:
+        raise VolumeWeightAggregateError(
+            f"{case_id} implementation file order/set is not frozen"
+        )
+    if revision not in committed_files_by_revision:
+        committed_files_by_revision[revision] = (
+            _committed_implementation_file_records(revision, expected_files)
+        )
+    if files != committed_files_by_revision[revision]:
+        raise VolumeWeightAggregateError(
+            f"{case_id} implementation files differ from git show at the "
+            "recorded revision"
+        )
+    return {
+        "git_revision": revision,
+        "worktree_clean": True,
+        "files": files,
+    }
+
+
+def _committed_implementation_file_records(
+    revision: str,
+    expected_files: Sequence[Mapping[str, str]],
+) -> list[dict[str, str]]:
+    """Hash the exact Git blobs named by one receipt revision."""
+
+    records: list[dict[str, str]] = []
+    try:
+        for expected in expected_files:
+            path = expected["path"]
+            payload = _git_bytes(ROOT, "show", f"{revision}:{path}")
+            records.append(
+                {"path": path, "sha256": hashlib.sha256(payload).hexdigest()}
+            )
+    except ValueError as error:
+        raise VolumeWeightAggregateError(
+            "cannot resolve implementation files at recorded Git revision"
+        ) from error
+    return records
+
+
 def _validate_receipt(
     receipt: Mapping[str, Any],
     *,
     receipt_sha256: str,
+    receipt_path: Path,
     pinned_case: Mapping[str, Any],
     pin_sha256: str,
     repository: Mapping[str, Any],
+    expected_implementation_files: Sequence[Mapping[str, str]],
+    committed_files_by_revision: dict[str, list[dict[str, str]]],
 ) -> dict[str, Any]:
     expected_root_keys = {
         "schema",
         "schema_version",
         "status",
         "case_id",
+        "implementation_binding",
+        "environment_binding",
         "native_source_binding",
         "output",
         "versions",
         "algorithm",
         "execution",
         "reader_audit",
+        "native_cell_types",
     }
     _exact_keys(receipt, expected_root_keys, "volume-weight receipt")
     if (
@@ -503,6 +780,21 @@ def _validate_receipt(
     case_id = _string(receipt["case_id"], "volume-weight receipt case_id")
     if pinned_case.get("case_id") != case_id:
         raise VolumeWeightAggregateError(f"receipt {case_id} differs from pinned case")
+    implementation_binding = _validate_implementation_binding(
+        receipt["implementation_binding"],
+        case_id=case_id,
+        expected_files=expected_implementation_files,
+        committed_files_by_revision=committed_files_by_revision,
+    )
+    environment_binding = _exact_keys(
+        receipt["environment_binding"],
+        PINNED_ENVIRONMENT_BINDING,
+        f"{case_id} environment_binding",
+    )
+    if dict(environment_binding) != PINNED_ENVIRONMENT_BINDING:
+        raise VolumeWeightAggregateError(
+            f"{case_id} environment binding is not the frozen declared identity"
+        )
     source_binding = _validate_native_source_binding(
         receipt["native_source_binding"],
         case_id=case_id,
@@ -546,6 +838,7 @@ def _validate_receipt(
             "volume_sum_m3",
             "volume_min_m3",
             "volume_max_m3",
+            "per_vtk_cell_type",
         },
         f"{case_id} output",
     )
@@ -585,10 +878,35 @@ def _validate_receipt(
         raise VolumeWeightAggregateError(
             f"{case_id} volume sum is inconsistent with count/minimum/maximum"
         )
+    native_cell_types = _validate_native_cell_types(
+        receipt["native_cell_types"],
+        case_id=case_id,
+        expected_cell_count=cell_count,
+    )
+    per_vtk_cell_type = _validate_per_type_output(
+        output["per_vtk_cell_type"],
+        case_id=case_id,
+        histogram=native_cell_types["histogram"],
+        overall_sum=volume_sum,
+        overall_min=volume_min,
+        overall_max=volume_max,
+    )
+    _validate_output_npy(
+        receipt_path.parent / output_file,
+        case_id=case_id,
+        expected_size_bytes=output_size,
+        expected_sha256=output_sha256,
+        expected_cell_count=cell_count,
+        expected_volume_sum_m3=volume_sum,
+        expected_volume_min_m3=volume_min,
+        expected_volume_max_m3=volume_max,
+    )
 
     return {
         "case_id": case_id,
         "receipt_sha256": receipt_sha256,
+        "implementation_binding": implementation_binding,
+        "environment_binding": dict(environment_binding),
         "native_source_binding": source_binding,
         "output": {
             "file": output_file,
@@ -600,9 +918,97 @@ def _validate_receipt(
             "volume_sum_m3": volume_sum,
             "volume_min_m3": volume_min,
             "volume_max_m3": volume_max,
+            "per_vtk_cell_type": per_vtk_cell_type,
         },
         "reader_audit": reader_audit,
+        "native_cell_types": native_cell_types,
     }
+
+
+def _validate_output_npy(
+    path: Path,
+    *,
+    case_id: str,
+    expected_size_bytes: int,
+    expected_sha256: str,
+    expected_cell_count: int,
+    expected_volume_sum_m3: float,
+    expected_volume_min_m3: float,
+    expected_volume_max_m3: float,
+) -> None:
+    """Replay one generated NPY's bytes, layout, values, and statistics."""
+
+    try:
+        before = path.stat()
+    except OSError as error:
+        raise VolumeWeightAggregateError(
+            f"{case_id} output NPY is unavailable beside its receipt"
+        ) from error
+    if not path.is_file() or before.st_size != expected_size_bytes:
+        raise VolumeWeightAggregateError(
+            f"{case_id} output NPY file size differs from its receipt"
+        )
+    if sha256_file(path) != expected_sha256:
+        raise VolumeWeightAggregateError(
+            f"{case_id} output NPY bytes differ from its receipt SHA-256"
+        )
+    try:
+        values = np.load(path, mmap_mode="r", allow_pickle=False)
+    except (OSError, ValueError) as error:
+        raise VolumeWeightAggregateError(
+            f"{case_id} output is not a valid non-pickle NPY"
+        ) from error
+    try:
+        if values.dtype != np.dtype("<f8") or values.shape != (expected_cell_count,):
+            raise VolumeWeightAggregateError(
+                f"{case_id} actual NPY dtype/shape differ from its receipt"
+            )
+        partial_sums: list[float] = []
+        minimum = math.inf
+        maximum = -math.inf
+        for start in range(0, expected_cell_count, DEFAULT_COPY_CHUNK_SIZE):
+            stop = min(start + DEFAULT_COPY_CHUNK_SIZE, expected_cell_count)
+            chunk = np.asarray(values[start:stop])
+            if not np.all(np.isfinite(chunk)) or np.any(chunk <= 0.0):
+                raise VolumeWeightAggregateError(
+                    f"{case_id} actual NPY contains a non-positive or non-finite value"
+                )
+            partial_sums.append(float(np.sum(chunk, dtype=np.float64)))
+            minimum = min(minimum, float(np.min(chunk)))
+            maximum = max(maximum, float(np.max(chunk)))
+        total = math.fsum(partial_sums)
+    finally:
+        del values
+    if (
+        total != expected_volume_sum_m3
+        or minimum != expected_volume_min_m3
+        or maximum != expected_volume_max_m3
+    ):
+        raise VolumeWeightAggregateError(
+            f"{case_id} actual NPY statistics differ from its receipt"
+        )
+    try:
+        after = path.stat()
+    except OSError as error:
+        raise VolumeWeightAggregateError(
+            f"{case_id} output NPY disappeared during validation"
+        ) from error
+    before_identity = (
+        before.st_dev,
+        before.st_ino,
+        before.st_size,
+        before.st_mtime_ns,
+    )
+    after_identity = (
+        after.st_dev,
+        after.st_ino,
+        after.st_size,
+        after.st_mtime_ns,
+    )
+    if after_identity != before_identity:
+        raise VolumeWeightAggregateError(
+            f"{case_id} output NPY changed during validation"
+        )
 
 
 def _assert_no_absolute_paths(value: object, label: str = "evidence") -> None:
@@ -639,6 +1045,12 @@ def aggregate_volume_weight_receipts(
         expected_pin_sha256=expected_pin_sha256,
     )
     repository = _mapping(pin["repository"], "native source pin repository")
+    try:
+        expected_implementation_files = implementation_file_records(ROOT)
+    except ValueError as error:
+        raise VolumeWeightAggregateError(
+            f"cannot hash current volume-weight implementation: {error}"
+        ) from error
     pilot = pilot_case_ids is not None
     if pilot:
         expected_cases = _ordered_cases(pilot_case_ids or (), "pilot case IDs")
@@ -652,6 +1064,7 @@ def aggregate_volume_weight_receipts(
         expected_cases = official_cases
 
     receipts_by_case: dict[str, dict[str, Any]] = {}
+    committed_files_by_revision: dict[str, list[dict[str, str]]] = {}
     for raw_path in receipt_paths:
         path = Path(raw_path)
         receipt_sha256 = sha256_file(path)
@@ -664,9 +1077,12 @@ def aggregate_volume_weight_receipts(
         receipts_by_case[case_id] = _validate_receipt(
             receipt,
             receipt_sha256=receipt_sha256,
+            receipt_path=path,
             pinned_case=pinned_cases[case_id],
             pin_sha256=pin_sha256,
             repository=repository,
+            expected_implementation_files=expected_implementation_files,
+            committed_files_by_revision=committed_files_by_revision,
         )
     if set(receipts_by_case) != set(expected_cases):
         missing = sorted(set(expected_cases) - set(receipts_by_case), key=_case_number)
@@ -676,6 +1092,29 @@ def aggregate_volume_weight_receipts(
             f"(missing={missing}, unexpected={unexpected})"
         )
     records = [receipts_by_case[case_id] for case_id in expected_cases]
+    implementation_binding = records[0]["implementation_binding"]
+    if any(
+        row["implementation_binding"] != implementation_binding
+        for row in records[1:]
+    ):
+        raise VolumeWeightAggregateError(
+            "all volume-weight receipts must have an identical implementation binding"
+        )
+    environment_binding = records[0]["environment_binding"]
+    if any(
+        row["environment_binding"] != environment_binding for row in records[1:]
+    ):
+        raise VolumeWeightAggregateError(
+            "all volume-weight receipts must have an identical environment binding"
+        )
+    public_records = [
+        {
+            key: value
+            for key, value in row.items()
+            if key not in {"implementation_binding", "environment_binding"}
+        }
+        for row in records
+    ]
 
     try:
         aggregate_volume_sum = math.fsum(
@@ -685,8 +1124,82 @@ def aggregate_volume_weight_receipts(
         raise VolumeWeightAggregateError("aggregate volume sum overflowed") from error
     if not math.isfinite(aggregate_volume_sum) or aggregate_volume_sum <= 0.0:
         raise VolumeWeightAggregateError("aggregate volume sum must be finite and positive")
+    per_type_accumulator: dict[int, dict[str, Any]] = {}
+    for row in records:
+        seen_case_types: set[int] = set()
+        for type_row in row["output"]["per_vtk_cell_type"]:
+            type_id = int(type_row["vtk_cell_type_id"])
+            if type_id in seen_case_types:
+                raise VolumeWeightAggregateError(
+                    f"{row['case_id']} repeats a per-type output row"
+                )
+            seen_case_types.add(type_id)
+            accumulator = per_type_accumulator.setdefault(
+                type_id,
+                {
+                    "vtk_cell_type_id": type_id,
+                    "vtk_cell_type_name": type_row["vtk_cell_type_name"],
+                    "case_count": 0,
+                    "cell_count": 0,
+                    "volume_sums": [],
+                    "volume_min_m3": math.inf,
+                    "volume_max_m3": -math.inf,
+                },
+            )
+            accumulator["case_count"] += 1
+            accumulator["cell_count"] += int(type_row["cell_count"])
+            accumulator["volume_sums"].append(float(type_row["volume_sum_m3"]))
+            accumulator["volume_min_m3"] = min(
+                accumulator["volume_min_m3"], type_row["volume_min_m3"]
+            )
+            accumulator["volume_max_m3"] = max(
+                accumulator["volume_max_m3"], type_row["volume_max_m3"]
+            )
+    aggregate_per_type = [
+        {
+            "vtk_cell_type_id": type_id,
+            "vtk_cell_type_name": per_type_accumulator[type_id][
+                "vtk_cell_type_name"
+            ],
+            "case_count": per_type_accumulator[type_id]["case_count"],
+            "cell_count": per_type_accumulator[type_id]["cell_count"],
+            "volume_sum_m3": math.fsum(
+                per_type_accumulator[type_id]["volume_sums"]
+            ),
+            "volume_min_m3": per_type_accumulator[type_id]["volume_min_m3"],
+            "volume_max_m3": per_type_accumulator[type_id]["volume_max_m3"],
+        }
+        for type_id in sorted(per_type_accumulator)
+    ]
+    aggregate_cell_count = sum(row["output"]["cell_count"] for row in records)
+    if sum(row["cell_count"] for row in aggregate_per_type) != aggregate_cell_count:
+        raise VolumeWeightAggregateError(
+            "aggregate per-type cell counts differ from the full aggregate"
+        )
+    per_type_volume_sum = math.fsum(
+        row["volume_sum_m3"] for row in aggregate_per_type
+    )
+    aggregate_sum_tolerance = max(
+        abs(per_type_volume_sum), abs(aggregate_volume_sum)
+    ) * 1.0e-12
+    if abs(per_type_volume_sum - aggregate_volume_sum) > aggregate_sum_tolerance:
+        raise VolumeWeightAggregateError(
+            "aggregate per-type volume sums differ from the full aggregate"
+        )
+    cell_type_payload_manifest = [
+        {
+            "case_id": row["case_id"],
+            "payload_sha256": row["native_cell_types"]["payload_sha256"],
+        }
+        for row in records
+    ]
+    cell_type_payload_manifest_sha256 = hashlib.sha256(
+        json.dumps(
+            cell_type_payload_manifest, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+    ).hexdigest()
     evidence: dict[str, Any] = {
-        "schema": "drivaerml-volume-cell-weight-receipt-aggregate-v1",
+        "schema": "drivaerml-volume-cell-weight-receipt-aggregate-v2",
         "mode": "partial_pilot" if pilot else "complete",
         "status": (
             "incomplete_non_public_pilot"
@@ -715,6 +1228,8 @@ def aggregate_volume_weight_receipts(
             ),
         },
         "dependencies": dict(PINNED_VERSIONS),
+        "implementation_binding": implementation_binding,
+        "environment_binding": environment_binding,
         "algorithm": {
             "sha256": PINNED_ALGORITHM_SHA256,
             "settings": PINNED_ALGORITHM,
@@ -726,7 +1241,7 @@ def aggregate_volume_weight_receipts(
             },
         },
         "aggregate": {
-            "cell_count": sum(row["output"]["cell_count"] for row in records),
+            "cell_count": aggregate_cell_count,
             "source_vtu_size_bytes": sum(
                 row["native_source_binding"]["logical_volume"]["size_bytes"]
                 for row in records
@@ -738,8 +1253,12 @@ def aggregate_volume_weight_receipts(
             "all_outputs_dtype": "<f8",
             "all_outputs_one_dimensional": True,
             "all_values_strictly_positive_finite": True,
+            "native_cell_type_payload_manifest_sha256": (
+                cell_type_payload_manifest_sha256
+            ),
+            "per_vtk_cell_type": aggregate_per_type,
         },
-        "cases": records,
+        "cases": public_records,
     }
     if pilot:
         evidence["pilot_warning"] = (

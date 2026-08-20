@@ -13,6 +13,7 @@ import numpy as np
 
 from reference.drivaerml import volume_weights as volume_weights_module
 from reference.drivaerml.volume_weights import (
+    IMPLEMENTATION_RELATIVE_PATHS,
     RAW_CELL_ID_ARRAY_NAME,
     REQUIRED_NUMPY_VERSION,
     REQUIRED_PYTHON_VERSION,
@@ -34,10 +35,25 @@ from reference.drivaerml.volume_weights import (
 
 
 VTK_READY = vtk_available()
-MIXED_GOLDEN_NPY_SHA256 = "25a1b2e0e25d894ecb126786b356a8f5b875f2ccd2aae0a536a82e16528f01d5"
+MIXED_GOLDEN_NPY_SHA256 = "999b66b5b9b425d4019ba96ec431e6a6d3c92457d1e964de495a74c482b67c66"
 if VTK_READY:
     import vtk
     from vtk.util.numpy_support import vtk_to_numpy
+
+
+def _fake_implementation_binding(
+    revision: str = "b" * 40,
+    *,
+    digest_seed: str = "c",
+) -> dict[str, object]:
+    return {
+        "git_revision": revision,
+        "worktree_clean": True,
+        "files": [
+            {"path": path, "sha256": digest_seed * 64}
+            for path in IMPLEMENTATION_RELATIVE_PATHS
+        ],
+    }
 
 
 @unittest.skipUnless(VTK_READY, f"optional VTK {REQUIRED_VTK_VERSION} is unavailable")
@@ -75,8 +91,9 @@ class DrivAerMLVolumeWeightTests(unittest.TestCase):
                 (4, 0, 1), (5, 0, 1), (4, 1, 1),
             ],
         )
-        # VTK's signed wedge convention requires the outward-oriented triangular
-        # faces to use this ordering for the coordinates above.
+        # These coordinates require this outward-oriented VTK connectivity.
+        # VTK 9.6 then converts VTK order to Verdict order before its
+        # type-specific volume routine.
         wedge_order = [wedge[index] for index in (0, 2, 1, 3, 5, 4)]
         grid.InsertNextCell(vtk.VTK_WEDGE, len(wedge_order), wedge_order)
 
@@ -187,6 +204,72 @@ class DrivAerMLVolumeWeightTests(unittest.TestCase):
             self.assertAlmostEqual(receipt["output"]["volume_sum_m3"], 3.0)
             self.assertAlmostEqual(receipt["output"]["volume_min_m3"], 1.0 / 6.0)
             self.assertAlmostEqual(receipt["output"]["volume_max_m3"], 1.0)
+            self.assertEqual(
+                receipt["native_cell_types"]["payload_sha256"],
+                hashlib.sha256(bytes([10, 12, 13, 14, 42])).hexdigest(),
+            )
+            self.assertEqual(
+                [
+                    row["vtk_cell_type_id"]
+                    for row in receipt["native_cell_types"]["histogram"]
+                ],
+                [10, 12, 13, 14, 42],
+            )
+            self.assertEqual(
+                [row["cell_count"] for row in receipt["output"]["per_vtk_cell_type"]],
+                [1, 1, 1, 1, 1],
+            )
+            np.testing.assert_allclose(
+                [row["volume_sum_m3"] for row in receipt["output"]["per_vtk_cell_type"]],
+                expected,
+                rtol=1e-14,
+            )
+            settings = algorithm_settings()
+            self.assertEqual(
+                [
+                    row["vtk_cell_type_id"]
+                    for row in settings["native_cell_types"]["allowed_vtk_cell_types"]
+                ],
+                [10, 12, 13, 14, 42],
+            )
+            self.assertIn(
+                "TriangulateIds(1)",
+                settings["cell_size_filter"]["cell_type_dispatch"][
+                    "42_vtkPolyhedron"
+                ],
+            )
+
+    def test_run1_raw_124707859_warped_wedge_vtk96_golden(self) -> None:
+        coordinates = [
+            (2.853458881378174, -0.6911346912384033, 0.2862381041049957),
+            (2.8534789085388184, -0.6911271810531616, 0.2862693667411804),
+            (2.8531076908111572, -0.691166877746582, 0.28628215193748474),
+            (2.853198766708374, -0.6906293630599976, 0.2867734432220459),
+            (2.8532962799072266, -0.6907302141189575, 0.286699503660202),
+            (2.8529064655303955, -0.6907230615615845, 0.28664684295654297),
+        ]
+        points = vtk.vtkPoints()
+        ids = self._append_points(points, coordinates)
+        grid = vtk.vtkUnstructuredGrid()
+        grid.SetPoints(points)
+        grid.InsertNextCell(vtk.VTK_WEDGE, len(ids), ids)
+
+        computation = compute_volume_weights(grid)
+
+        expected = 2.073401809774423e-12
+        self.assertEqual(computation.raw_cell_ids.tolist(), [0])
+        self.assertAlmostEqual(
+            float(computation.volumes_m3[0]), expected, delta=5.0e-27
+        )
+        self.assertAlmostEqual(
+            float(vtk.vtkMeshQuality.WedgeVolume(grid.GetCell(0))),
+            expected,
+            delta=5.0e-27,
+        )
+        self.assertEqual(
+            algorithm_settings()["cell_size_filter"]["vtk_version"],
+            "9.6.0",
+        )
 
     def test_degenerate_or_empty_cells_fail_closed(self) -> None:
         points = vtk.vtkPoints()
@@ -201,7 +284,7 @@ class DrivAerMLVolumeWeightTests(unittest.TestCase):
         ):
             compute_volume_weights(degenerate)
 
-        # This otherwise valid wedge has VTK's opposite signed orientation.
+        # This otherwise valid wedge has the opposite canonical orientation.
         # Rejection proves that the candidate never takes an absolute value.
         wedge_points = vtk.vtkPoints()
         for coordinate in (
@@ -223,6 +306,51 @@ class DrivAerMLVolumeWeightTests(unittest.TestCase):
         with self.assertRaisesRegex(DrivAerVolumeWeightError, "no native volume cells"):
             compute_volume_weights(empty)
 
+    def test_unsupported_native_cell_type_fails_before_filter(self) -> None:
+        points = vtk.vtkPoints()
+        for coordinate in (
+            (0, 0, 0), (1, 0, 0), (0, 1, 0), (1, 1, 0),
+            (0, 0, 1), (1, 0, 1), (0, 1, 1), (1, 1, 1),
+        ):
+            points.InsertNextPoint(*coordinate)
+        grid = vtk.vtkUnstructuredGrid()
+        grid.SetPoints(points)
+        grid.InsertNextCell(vtk.VTK_VOXEL, 8, list(range(8)))
+        with mock.patch(
+            "reference.drivaerml.volume_weights._run_vtk_algorithm_stage"
+        ) as filter_stage, self.assertRaisesRegex(
+            DrivAerVolumeWeightError,
+            r"unsupported VTK cell types.*unsupported=\[11\].*raw_cell_id.*0",
+        ):
+            compute_volume_weights(grid)
+        filter_stage.assert_not_called()
+
+    def test_reader_and_filter_use_event_checked_stages(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            source = Path(directory_name) / "mixed.vtu"
+            self.write_vtu(self.mixed_grid(), source)
+            real_stage = volume_weights_module._run_vtk_algorithm_stage
+            labels: list[str] = []
+
+            def capture_stage(algorithm: object, label: str, operation: object) -> None:
+                labels.append(label)
+                real_stage(algorithm, label, operation)  # type: ignore[arg-type]
+
+            with mock.patch(
+                "reference.drivaerml.volume_weights._run_vtk_algorithm_stage",
+                side_effect=capture_stage,
+            ):
+                geometry, _ = read_geometry_only_vtu(source)
+                compute_volume_weights(geometry)
+            self.assertEqual(
+                labels,
+                [
+                    "vtkXMLUnstructuredGridReader metadata pass",
+                    "vtkXMLUnstructuredGridReader geometry pass",
+                    "vtkCellSizeFilter",
+                ],
+            )
+
     def test_reordered_ids_and_invalid_output_values_fail_closed(self) -> None:
         computation = compute_volume_weights(self.mixed_grid())
         raw_array = computation.output_grid.GetCellData().GetArray(RAW_CELL_ID_ARRAY_NAME)
@@ -233,6 +361,17 @@ class DrivAerMLVolumeWeightTests(unittest.TestCase):
                 computation.output_grid,
                 expected_cell_count=5,
                 chunk_size=2,
+            )
+
+        type_computation = compute_volume_weights(self.mixed_grid())
+        output_types = vtk_to_numpy(type_computation.output_grid.GetCellTypes())
+        output_types[0] = vtk.VTK_HEXAHEDRON
+        with self.assertRaisesRegex(DrivAerVolumeWeightError, "changed raw cell types"):
+            _validated_filter_output(
+                type_computation.output_grid,
+                expected_cell_count=5,
+                chunk_size=2,
+                expected_native_cell_types=type_computation.native_cell_types,
             )
 
         with tempfile.TemporaryDirectory() as directory_name:
@@ -271,16 +410,20 @@ class DrivAerMLVolumeWeightTests(unittest.TestCase):
             output = root / "pinned-volumes.npy"
             receipt_path = root / "pinned-volumes.json"
 
-            receipt = generate_pinned_volume_weights(
-                pin_path,
-                root,
-                "run_44",
-                output,
-                receipt_path,
-                monolithic_vtu=monolithic,
-                copy_chunk_size=2,
-                source_verification_chunk_bytes=37,
-            )
+            with mock.patch(
+                "reference.drivaerml.volume_weights._capture_implementation_binding",
+                return_value=_fake_implementation_binding(),
+            ):
+                receipt = generate_pinned_volume_weights(
+                    pin_path,
+                    root,
+                    "run_44",
+                    output,
+                    receipt_path,
+                    monolithic_vtu=monolithic,
+                    copy_chunk_size=2,
+                    source_verification_chunk_bytes=37,
+                )
 
             self.assertEqual(receipt["output"]["cell_count"], 5)
             self.assertEqual(receipt["output"]["sha256"], MIXED_GOLDEN_NPY_SHA256)
@@ -373,7 +516,9 @@ def _fake_artifacts(
     output_npy: Path | str,
     *,
     copy_chunk_size: int,
+    replace_existing_output: bool = True,
 ) -> dict[str, object]:
+    del replace_existing_output
     output_path = Path(output_npy)
     np.save(output_path, np.asarray([0.25, 0.75], dtype="<f8"))
     return {
@@ -387,12 +532,35 @@ def _fake_artifacts(
             "volume_sum_m3": 1.0,
             "volume_min_m3": 0.25,
             "volume_max_m3": 0.75,
+            "per_vtk_cell_type": [
+                {
+                    "vtk_cell_type_id": 10,
+                    "vtk_cell_type_name": "vtkTetra",
+                    "cell_count": 2,
+                    "volume_sum_m3": 1.0,
+                    "volume_min_m3": 0.25,
+                    "volume_max_m3": 0.75,
+                }
+            ],
+        },
+        "native_cell_types": {
+            "dtype": "uint8",
+            "shape": [2],
+            "order": "zero_based_raw_vtk_cell_order",
+            "payload_sha256": hashlib.sha256(bytes([10, 10])).hexdigest(),
+            "histogram": [
+                {
+                    "vtk_cell_type_id": 10,
+                    "vtk_cell_type_name": "vtkTetra",
+                    "cell_count": 2,
+                }
+            ],
         },
         "versions": {
             "python": "test",
             "numpy": np.__version__,
-            "vtk": "9.5.2",
-            "vtk_source": "vtk version 9.5.2",
+            "vtk": REQUIRED_VTK_VERSION,
+            "vtk_source": volume_weights_module.REQUIRED_VTK_SOURCE_VERSION,
         },
         "algorithm": algorithm_settings(),
         "execution": {"copy_chunk_size": copy_chunk_size},
@@ -415,6 +583,12 @@ class DrivAerMLPinnedVolumeWeightSourceTests(unittest.TestCase):
         )
         patcher.start()
         self.addCleanup(patcher.stop)
+        implementation_patcher = mock.patch(
+            "reference.drivaerml.volume_weights._capture_implementation_binding",
+            return_value=_fake_implementation_binding(),
+        )
+        implementation_patcher.start()
+        self.addCleanup(implementation_patcher.stop)
 
     def test_exact_segments_are_verified_before_geometry_and_bound_path_free(self) -> None:
         with tempfile.TemporaryDirectory() as directory_name:
@@ -429,7 +603,9 @@ class DrivAerMLPinnedVolumeWeightSourceTests(unittest.TestCase):
                 output_npy: Path | str,
                 *,
                 copy_chunk_size: int,
+                replace_existing_output: bool = True,
             ) -> dict[str, object]:
+                self.assertFalse(replace_existing_output)
                 vtk_source_audit["path"] = source
                 vtk_source_audit["bytes"] = source.read_bytes()
                 vtk_source_audit["identity"] = (
@@ -467,6 +643,9 @@ class DrivAerMLPinnedVolumeWeightSourceTests(unittest.TestCase):
                 (monolithic.stat().st_dev, monolithic.stat().st_ino),
             )
             binding = receipt["native_source_binding"]
+            self.assertEqual(
+                receipt["implementation_binding"], _fake_implementation_binding()
+            )
             self.assertEqual(binding["pin"]["sha256"], sha256_file(pin_path))
             self.assertEqual(binding["pin"]["repository_id"], "synthetic/drivaerml")
             self.assertEqual(binding["pin"]["repository_revision"], "a" * 40)
@@ -540,7 +719,9 @@ class DrivAerMLPinnedVolumeWeightSourceTests(unittest.TestCase):
                 output_npy: Path | str,
                 *,
                 copy_chunk_size: int,
+                replace_existing_output: bool = True,
             ) -> dict[str, object]:
+                self.assertFalse(replace_existing_output)
                 self.assertEqual(source.read_bytes(), monolithic.read_bytes())
                 result = _fake_artifacts(
                     source,
@@ -625,13 +806,15 @@ class DrivAerMLVolumeWeightRuntimePreflightTests(unittest.TestCase):
         ), mock.patch(
             "reference.drivaerml.volume_weights._require_vtk",
             side_effect=DrivAerVolumeWeightError(
-                "DrivAerML volume weights require VTK 9.5.2, got 9.4.2"
+                f"DrivAerML volume weights require VTK {REQUIRED_VTK_VERSION}, "
+                "got 9.4.2"
             ),
         ) as vtk_gate, mock.patch(
             "reference.drivaerml.volume_weights.sha256_file"
         ) as source_hash:
             with self.assertRaisesRegex(
-                DrivAerVolumeWeightError, "VTK 9.5.2, got 9.4.2"
+                DrivAerVolumeWeightError,
+                rf"VTK {REQUIRED_VTK_VERSION}, got 9.4.2",
             ):
                 generate_pinned_volume_weights(
                     "missing-pin.json",
@@ -654,17 +837,344 @@ class DrivAerMLVolumeWeightRuntimePreflightTests(unittest.TestCase):
             REQUIRED_NUMPY_VERSION,
         ), mock.patch(
             "reference.drivaerml.volume_weights._require_vtk"
-        ) as vtk_gate:
+        ) as vtk_gate, mock.patch(
+            "reference.drivaerml.volume_weights._verify_installed_environment"
+        ) as environment_gate:
             _require_frozen_runtime()
         vtk_gate.assert_called_once_with()
+        environment_gate.assert_called_once_with()
+
+    def test_platform_mismatch_precedes_vtk_and_source_io(self) -> None:
+        with mock.patch.object(
+            volume_weights_module.platform,
+            "python_version",
+            return_value=REQUIRED_PYTHON_VERSION,
+        ), mock.patch.object(
+            volume_weights_module.np,
+            "__version__",
+            REQUIRED_NUMPY_VERSION,
+        ), mock.patch.object(
+            volume_weights_module.platform,
+            "python_implementation",
+            return_value=volume_weights_module.REQUIRED_PYTHON_IMPLEMENTATION,
+        ), mock.patch.object(
+            volume_weights_module.platform,
+            "system",
+            return_value="Linux",
+        ), mock.patch.object(
+            volume_weights_module.platform,
+            "machine",
+            return_value="x86_64",
+        ), mock.patch(
+            "reference.drivaerml.volume_weights._require_vtk"
+        ) as vtk_gate, mock.patch(
+            "reference.drivaerml.volume_weights.load_native_source_pin"
+        ) as source_pin, self.assertRaisesRegex(
+            DrivAerVolumeWeightError, "requires platform Linux/aarch64"
+        ):
+            generate_pinned_volume_weights(
+                "missing-pin.json", ".", "run_1", "weights.npy", "receipt.json"
+            )
+        vtk_gate.assert_not_called()
+        source_pin.assert_not_called()
+
+
+class DrivAerMLVolumeWeightImplementationBindingTests(unittest.TestCase):
+    def test_clean_binding_matches_every_committed_blob(self) -> None:
+        root = volume_weights_module._REPOSITORY_ROOT
+        revision = "d" * 40
+
+        def committed_bytes(
+            repository_root: Path, command: str, object_name: str
+        ) -> bytes:
+            self.assertEqual(repository_root, root)
+            self.assertEqual(command, "show")
+            prefix = f"{revision}:"
+            self.assertTrue(object_name.startswith(prefix))
+            return (root / object_name.removeprefix(prefix)).read_bytes()
+
+        with mock.patch(
+            "reference.drivaerml.volume_weights._git_text",
+            side_effect=(str(root), revision, ""),
+        ), mock.patch(
+            "reference.drivaerml.volume_weights._git_bytes",
+            side_effect=committed_bytes,
+        ) as git_bytes:
+            binding = volume_weights_module._capture_implementation_binding()
+        self.assertEqual(binding["git_revision"], revision)
+        self.assertTrue(binding["worktree_clean"])
+        self.assertEqual(
+            [row["path"] for row in binding["files"]],
+            list(IMPLEMENTATION_RELATIVE_PATHS),
+        )
+        self.assertEqual(git_bytes.call_count, len(IMPLEMENTATION_RELATIVE_PATHS))
+
+    def test_committed_blob_mismatch_fails_closed(self) -> None:
+        root = volume_weights_module._REPOSITORY_ROOT
+        revision = "d" * 40
+        with mock.patch(
+            "reference.drivaerml.volume_weights._git_text",
+            side_effect=(str(root), revision, ""),
+        ), mock.patch(
+            "reference.drivaerml.volume_weights._git_bytes",
+            return_value=b"not the committed implementation",
+        ), self.assertRaisesRegex(
+            DrivAerVolumeWeightError, "differs from its committed Git revision"
+        ):
+            volume_weights_module._capture_implementation_binding()
+
+    def test_dirty_and_unresolved_git_fail_before_native_source_io(self) -> None:
+        root = volume_weights_module._REPOSITORY_ROOT
+        cases = (
+            (
+                [str(root), "not-a-revision"],
+                "resolved 40-hex Git revision",
+            ),
+            (
+                [str(root), "d" * 40, " M reference/drivaerml/source.py"],
+                "clean Git worktree",
+            ),
+        )
+        with tempfile.TemporaryDirectory() as directory_name:
+            directory = Path(directory_name)
+            for git_outputs, expected in cases:
+                with self.subTest(expected=expected), mock.patch(
+                    "reference.drivaerml.volume_weights._require_frozen_runtime"
+                ), mock.patch(
+                    "reference.drivaerml.volume_weights._git_text",
+                    side_effect=git_outputs,
+                ), mock.patch(
+                    "reference.drivaerml.volume_weights.load_native_source_pin"
+                ) as source_pin, mock.patch(
+                    "reference.drivaerml.volume_weights._compute_volume_weight_artifacts"
+                ) as geometry:
+                    with self.assertRaisesRegex(DrivAerVolumeWeightError, expected):
+                        generate_pinned_volume_weights(
+                            directory / "missing-pin.json",
+                            directory,
+                            "run_1",
+                            directory / "weights.npy",
+                            directory / "receipt.json",
+                        )
+                    source_pin.assert_not_called()
+                    geometry.assert_not_called()
+
+    def test_start_end_binding_drift_fails_and_removes_generated_output(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            root = Path(directory_name)
+            pin_path, monolithic, _ = _make_pinned_monolithic_fixture(root)
+            output = root / "weights.npy"
+            receipt_path = root / "weights.json"
+            start = _fake_implementation_binding()
+            end = _fake_implementation_binding(revision="e" * 40)
+            with mock.patch(
+                "reference.drivaerml.volume_weights._require_frozen_runtime"
+            ), mock.patch(
+                "reference.drivaerml.volume_weights._capture_implementation_binding",
+                side_effect=(start, end),
+            ), mock.patch(
+                "reference.drivaerml.volume_weights._compute_volume_weight_artifacts",
+                side_effect=_fake_artifacts,
+            ), self.assertRaisesRegex(
+                DrivAerVolumeWeightError, "binding changed during generation"
+            ):
+                generate_pinned_volume_weights(
+                    pin_path,
+                    root,
+                    "run_44",
+                    output,
+                    receipt_path,
+                    monolithic_vtu=monolithic,
+                    source_verification_chunk_bytes=4,
+                )
+            self.assertFalse(output.exists())
+            self.assertFalse(receipt_path.exists())
+
+    def test_preexisting_targets_are_preserved_and_rejected_before_preflight(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            root = Path(directory_name)
+            output = root / "weights.npy"
+            receipt = root / "weights.json"
+            for existing, other, expected in (
+                (output, receipt, "output already exists"),
+                (receipt, output, "receipt already exists"),
+            ):
+                output.unlink(missing_ok=True)
+                receipt.unlink(missing_ok=True)
+                existing.write_bytes(b"must-be-preserved")
+                with self.subTest(existing=existing.name), mock.patch(
+                    "reference.drivaerml.volume_weights._require_frozen_runtime"
+                ) as runtime, mock.patch(
+                    "reference.drivaerml.volume_weights.load_native_source_pin"
+                ) as source_pin, self.assertRaisesRegex(
+                    DrivAerVolumeWeightError, expected
+                ):
+                    generate_pinned_volume_weights(
+                        root / "missing-pin.json",
+                        root,
+                        "run_1",
+                        output,
+                        receipt,
+                    )
+                self.assertEqual(existing.read_bytes(), b"must-be-preserved")
+                self.assertFalse(other.exists())
+                runtime.assert_not_called()
+                source_pin.assert_not_called()
+
+    def test_strict_writer_never_overwrites_and_cleans_failed_publication(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            root = Path(directory_name)
+            output = root / "weights.npy"
+            output.write_bytes(b"existing")
+            with self.assertRaisesRegex(
+                DrivAerVolumeWeightError, "output already exists"
+            ):
+                write_volume_weights_npy(
+                    np.asarray([1.0]), output, replace_existing=False
+                )
+            self.assertEqual(output.read_bytes(), b"existing")
+
+            output.unlink()
+            with mock.patch(
+                "reference.drivaerml.volume_weights.sha256_file",
+                side_effect=OSError("synthetic hash failure"),
+            ), self.assertRaisesRegex(OSError, "synthetic hash failure"):
+                write_volume_weights_npy(
+                    np.asarray([1.0]), output, replace_existing=False
+                )
+            self.assertFalse(output.exists())
+
+    def test_dirty_end_binding_fails_and_removes_generated_output(self) -> None:
+        with tempfile.TemporaryDirectory() as directory_name:
+            root = Path(directory_name)
+            pin_path, monolithic, _ = _make_pinned_monolithic_fixture(root)
+            output = root / "weights.npy"
+            receipt_path = root / "weights.json"
+            with mock.patch(
+                "reference.drivaerml.volume_weights._require_frozen_runtime"
+            ), mock.patch(
+                "reference.drivaerml.volume_weights._capture_implementation_binding",
+                side_effect=(
+                    _fake_implementation_binding(),
+                    DrivAerVolumeWeightError("clean Git worktree required"),
+                ),
+            ), mock.patch(
+                "reference.drivaerml.volume_weights._compute_volume_weight_artifacts",
+                side_effect=_fake_artifacts,
+            ), self.assertRaisesRegex(DrivAerVolumeWeightError, "clean Git"):
+                generate_pinned_volume_weights(
+                    pin_path,
+                    root,
+                    "run_44",
+                    output,
+                    receipt_path,
+                    monolithic_vtu=monolithic,
+                    source_verification_chunk_bytes=4,
+                )
+            self.assertFalse(output.exists())
+            self.assertFalse(receipt_path.exists())
 
 
 class DrivAerMLVolumeWeightOptionalDependencyTests(unittest.TestCase):
+    def test_warning_and_error_events_fail_even_with_zero_error_code(self) -> None:
+        if volume_weights_module.vtk is None:
+            self.skipTest("optional VTK is unavailable")
+        class FakeAlgorithm:
+            def __init__(self) -> None:
+                self.observers: dict[int, tuple[str, object]] = {}
+                self.next_id = 1
+
+            def AddObserver(self, event: str, callback: object) -> int:
+                observer_id = self.next_id
+                self.next_id += 1
+                self.observers[observer_id] = (event, callback)
+                return observer_id
+
+            def RemoveObserver(self, observer_id: int) -> None:
+                self.observers.pop(observer_id)
+
+            def GetErrorCode(self) -> int:
+                return 0
+
+            def emit(self, requested: str) -> None:
+                for event, callback in tuple(self.observers.values()):
+                    if event == requested:
+                        callback(self, event, "synthetic VTK diagnostic")  # type: ignore[operator]
+
+        for event in ("WarningEvent", "ErrorEvent"):
+            with self.subTest(event=event):
+                algorithm = FakeAlgorithm()
+                with self.assertRaisesRegex(
+                    DrivAerVolumeWeightError,
+                    rf"test stage emitted VTK {event}.*synthetic VTK diagnostic",
+                ):
+                    volume_weights_module._run_vtk_algorithm_stage(
+                        algorithm,
+                        "test stage",
+                        lambda: algorithm.emit(event),
+                    )
+                self.assertEqual(algorithm.observers, {})
+
+    def test_global_vtk_diagnostic_fails_and_output_window_is_restored(self) -> None:
+        vtk_module = volume_weights_module.vtk
+        if vtk_module is None:
+            self.skipTest("optional VTK is unavailable")
+
+        class QuietAlgorithm:
+            def __init__(self) -> None:
+                self.observers: dict[int, tuple[str, object]] = {}
+                self.next_id = 1
+
+            def AddObserver(self, event: str, callback: object) -> int:
+                observer_id = self.next_id
+                self.next_id += 1
+                self.observers[observer_id] = (event, callback)
+                return observer_id
+
+            def RemoveObserver(self, observer_id: int) -> None:
+                self.observers.pop(observer_id)
+
+            def GetErrorCode(self) -> int:
+                return 0
+
+        previous = vtk_module.vtkOutputWindow.GetInstance()
+        algorithm = QuietAlgorithm()
+
+        def child_warning() -> None:
+            vtk_module.vtkOutputWindow.GetInstance().DisplayWarningText(
+                "warning emitted by a child vtkCell\n"
+            )
+
+        with self.assertRaisesRegex(
+            DrivAerVolumeWeightError,
+            r"global stage emitted VTK global diagnostic.*child vtkCell",
+        ):
+            volume_weights_module._run_vtk_algorithm_stage(
+                algorithm, "global stage", child_warning
+            )
+        self.assertEqual(algorithm.observers, {})
+        self.assertIs(vtk_module.vtkOutputWindow.GetInstance(), previous)
+
+        def child_error_then_exception() -> None:
+            vtk_module.vtkOutputWindow.GetInstance().DisplayErrorText(
+                "child error before exception\n"
+            )
+            raise RuntimeError("synthetic operation failure")
+
+        with self.assertRaisesRegex(
+            DrivAerVolumeWeightError,
+            r"exception stage emitted VTK global diagnostic.*child error",
+        ):
+            volume_weights_module._run_vtk_algorithm_stage(
+                algorithm, "exception stage", child_error_then_exception
+            )
+        self.assertIs(vtk_module.vtkOutputWindow.GetInstance(), previous)
+
     def test_vtk_source_identity_mismatch_fails_closed(self) -> None:
         fake_vtk = mock.Mock()
         fake_vtk.vtkVersion.GetVTKVersion.return_value = REQUIRED_VTK_VERSION
         fake_vtk.vtkVersion.GetVTKSourceVersion.return_value = (
-            "vtk version 9.5.2-custom"
+            f"{volume_weights_module.REQUIRED_VTK_SOURCE_VERSION}-custom"
         )
         with mock.patch.object(
             volume_weights_module, "vtk", fake_vtk

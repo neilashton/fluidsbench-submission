@@ -1,15 +1,22 @@
 from __future__ import annotations
 
+import copy
+import hashlib
 import json
+import math
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
+
+import numpy as np
 
 from scripts.aggregate_drivaerml_volume_weights import (
     DEFAULT_COPY_CHUNK_SIZE,
     DEFAULT_SOURCE_VERIFICATION_CHUNK_BYTES,
     PINNED_ALGORITHM,
     PINNED_ALGORITHM_SHA256,
+    PINNED_ENVIRONMENT_BINDING,
     PINNED_VERSIONS,
     RECEIPT_SCHEMA,
     RECEIPT_SCHEMA_VERSION,
@@ -18,6 +25,7 @@ from scripts.aggregate_drivaerml_volume_weights import (
     sha256_file,
     write_evidence,
 )
+from reference.drivaerml.volume_weights import implementation_file_records
 
 
 CASE_IDS = ("run_1", "run_44")
@@ -38,6 +46,18 @@ class DrivAerMLVolumeWeightAggregateTests(unittest.TestCase):
         self.pin = self._make_pin()
         self.pin_path = self.root / "native-source-pin.json"
         _write_json(self.pin_path, self.pin)
+        self.implementation_binding = {
+            "git_revision": "c" * 40,
+            "worktree_clean": True,
+            "files": implementation_file_records(),
+        }
+        committed_patcher = mock.patch(
+            "scripts.aggregate_drivaerml_volume_weights."
+            "_committed_implementation_file_records",
+            return_value=copy.deepcopy(self.implementation_binding["files"]),
+        )
+        committed_patcher.start()
+        self.addCleanup(committed_patcher.stop)
         self.receipt_paths: list[Path] = []
         for position, case_id in enumerate(CASE_IDS):
             path = self.root / f"{case_id}-volume-weight-receipt.json"
@@ -98,11 +118,21 @@ class DrivAerMLVolumeWeightAggregateTests(unittest.TestCase):
         run_number = int(case_id.removeprefix("run_"))
         pinned = self.pin["cases"][position]  # type: ignore[index]
         cell_count = 10 + 2 * position
+        interior = (4.0 + position) / (cell_count - 2)
+        values = np.asarray(
+            [0.1, *([interior] * (cell_count - 2)), 0.9], dtype="<f8"
+        )
+        cell_types = bytes([10] * (cell_count - 1) + [42])
+        total = math.fsum([float(np.sum(values, dtype=np.float64))])
+        output_path = self.root / f"volume_cell_volume_{run_number}.npy"
+        np.save(output_path, values, allow_pickle=False)
         return {
             "schema": RECEIPT_SCHEMA,
             "schema_version": RECEIPT_SCHEMA_VERSION,
             "status": "candidate_exact_native_source_verified_before_vtk",
             "case_id": case_id,
+            "implementation_binding": copy.deepcopy(self.implementation_binding),
+            "environment_binding": copy.deepcopy(PINNED_ENVIRONMENT_BINDING),
             "native_source_binding": {
                 "pin": {
                     "sha256": sha256_file(self.pin_path),
@@ -140,11 +170,47 @@ class DrivAerMLVolumeWeightAggregateTests(unittest.TestCase):
                 "dtype": "<f8",
                 "shape": [cell_count],
                 "size_bytes": 128 + 8 * cell_count,
-                "sha256": chr(ord("a") + position) * 64,
+                "sha256": sha256_file(output_path),
                 "cell_count": cell_count,
-                "volume_sum_m3": 5.0 + position,
+                "volume_sum_m3": total,
                 "volume_min_m3": 0.1,
-                "volume_max_m3": 1.0,
+                "volume_max_m3": 0.9,
+                "per_vtk_cell_type": [
+                    {
+                        "vtk_cell_type_id": 10,
+                        "vtk_cell_type_name": "vtkTetra",
+                        "cell_count": cell_count - 1,
+                        "volume_sum_m3": total - 0.9,
+                        "volume_min_m3": 0.1,
+                        "volume_max_m3": interior,
+                    },
+                    {
+                        "vtk_cell_type_id": 42,
+                        "vtk_cell_type_name": "vtkPolyhedron",
+                        "cell_count": 1,
+                        "volume_sum_m3": 0.9,
+                        "volume_min_m3": 0.9,
+                        "volume_max_m3": 0.9,
+                    },
+                ],
+            },
+            "native_cell_types": {
+                "dtype": "uint8",
+                "shape": [cell_count],
+                "order": "zero_based_raw_vtk_cell_order",
+                "payload_sha256": hashlib.sha256(cell_types).hexdigest(),
+                "histogram": [
+                    {
+                        "vtk_cell_type_id": 10,
+                        "vtk_cell_type_name": "vtkTetra",
+                        "cell_count": cell_count - 1,
+                    },
+                    {
+                        "vtk_cell_type_id": 42,
+                        "vtk_cell_type_name": "vtkPolyhedron",
+                        "cell_count": 1,
+                    },
+                ],
             },
             "versions": dict(PINNED_VERSIONS),
             "algorithm": PINNED_ALGORITHM,
@@ -195,7 +261,41 @@ class DrivAerMLVolumeWeightAggregateTests(unittest.TestCase):
         self.assertEqual(evidence["aggregate"]["cell_count"], 22)
         self.assertEqual(evidence["aggregate"]["output_size_bytes"], 432)
         self.assertEqual(evidence["aggregate"]["volume_sum_m3"], 11.0)
+        self.assertEqual(
+            [
+                (row["vtk_cell_type_id"], row["cell_count"], row["case_count"])
+                for row in evidence["aggregate"]["per_vtk_cell_type"]
+            ],
+            [(10, 20, 2), (42, 2, 2)],
+        )
+        expected_type_manifest = [
+            {
+                "case_id": case_id,
+                "payload_sha256": self._receipt(position)["native_cell_types"][
+                    "payload_sha256"
+                ],
+            }
+            for position, case_id in enumerate(CASE_IDS)
+        ]
+        self.assertEqual(
+            evidence["aggregate"][
+                "native_cell_type_payload_manifest_sha256"
+            ],
+            hashlib.sha256(
+                json.dumps(
+                    expected_type_manifest,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest(),
+        )
         self.assertEqual(evidence["algorithm"]["sha256"], PINNED_ALGORITHM_SHA256)
+        self.assertEqual(
+            evidence["implementation_binding"], self.implementation_binding
+        )
+        self.assertEqual(
+            evidence["environment_binding"], PINNED_ENVIRONMENT_BINDING
+        )
         self.assertEqual(
             evidence["source"]["native_source_pin"]["sha256"],
             sha256_file(self.pin_path),
@@ -322,6 +422,68 @@ class DrivAerMLVolumeWeightAggregateTests(unittest.TestCase):
         with self.assertRaisesRegex(VolumeWeightAggregateError, "required CellData"):
             self._aggregate()
 
+    def test_implementation_binding_is_exact_current_clean_and_identical(self) -> None:
+        mutations = (
+            ("extra", True, "keys differ from schema"),
+            ("git_revision", "unresolved", "resolved 40-hex"),
+            ("worktree_clean", False, "recorded clean"),
+        )
+        for key, value, message in mutations:
+            with self.subTest(key=key):
+                receipt = self._make_receipt("run_1", 0)
+                receipt["implementation_binding"][key] = value
+                self._rewrite(0, receipt)
+                with self.assertRaisesRegex(VolumeWeightAggregateError, message):
+                    self._aggregate()
+
+        receipt = self._make_receipt("run_1", 0)
+        receipt["implementation_binding"]["files"][0]["sha256"] = "f" * 64
+        self._rewrite(0, receipt)
+        with self.assertRaisesRegex(
+            VolumeWeightAggregateError, "differs from the current frozen"
+        ):
+            self._aggregate()
+
+        receipt = self._make_receipt("run_1", 0)
+        receipt["implementation_binding"]["files"][0]["path"] = (
+            "reference/drivaerml/not-the-source.py"
+        )
+        self._rewrite(0, receipt)
+        with self.assertRaisesRegex(
+            VolumeWeightAggregateError, "differs from the current frozen"
+        ):
+            self._aggregate()
+
+        receipt = self._make_receipt("run_1", 0)
+        self._rewrite(0, receipt)
+        second = self._make_receipt("run_44", 1)
+        second["implementation_binding"] = {
+            **self.implementation_binding,
+            "git_revision": "d" * 40,
+        }
+        self._rewrite(1, second)
+        with self.assertRaisesRegex(VolumeWeightAggregateError, "identical"):
+            self._aggregate()
+
+    def test_environment_binding_is_exact(self) -> None:
+        receipt = self._make_receipt("run_1", 0)
+        receipt["environment_binding"]["vtk_wheel"]["sha256"] = "f" * 64
+        self._rewrite(0, receipt)
+        with self.assertRaisesRegex(VolumeWeightAggregateError, "environment binding"):
+            self._aggregate()
+
+    def test_recorded_revision_blobs_must_match_receipt_hashes(self) -> None:
+        mismatched = copy.deepcopy(self.implementation_binding["files"])
+        mismatched[0]["sha256"] = "f" * 64
+        with mock.patch(
+            "scripts.aggregate_drivaerml_volume_weights."
+            "_committed_implementation_file_records",
+            return_value=mismatched,
+        ), self.assertRaisesRegex(
+            VolumeWeightAggregateError, "differ from git show"
+        ):
+            self._aggregate()
+
     def test_output_dtype_shape_size_hash_and_positive_statistics_are_strict(self) -> None:
         mutations = (
             ("dtype", ">f8", "dtype must be <f8"),
@@ -339,6 +501,66 @@ class DrivAerMLVolumeWeightAggregateTests(unittest.TestCase):
                 self._rewrite(0, receipt)
                 with self.assertRaisesRegex(VolumeWeightAggregateError, message):
                     self._aggregate()
+
+    def test_cell_type_histogram_hash_and_per_type_statistics_are_strict(self) -> None:
+        mutations = (
+            (
+                lambda receipt: receipt["native_cell_types"].__setitem__(
+                    "payload_sha256", "not-a-hash"
+                ),
+                "cell-type payload SHA-256.*lowercase SHA-256",
+            ),
+            (
+                lambda receipt: receipt["native_cell_types"]["histogram"][0].__setitem__(
+                    "vtk_cell_type_id", 11
+                ),
+                "unsupported VTK cell type 11",
+            ),
+            (
+                lambda receipt: receipt["native_cell_types"]["histogram"][0].__setitem__(
+                    "cell_count", 1
+                ),
+                "histogram/count are inconsistent",
+            ),
+            (
+                lambda receipt: receipt["output"]["per_vtk_cell_type"][0].__setitem__(
+                    "cell_count", 1
+                ),
+                "differs from input histogram",
+            ),
+            (
+                lambda receipt: receipt["output"]["per_vtk_cell_type"][0].__setitem__(
+                    "volume_sum_m3", 99.0
+                ),
+                "per-type volume sum is inconsistent",
+            ),
+        )
+        for mutate, message in mutations:
+            with self.subTest(message=message):
+                receipt = self._make_receipt("run_1", 0)
+                mutate(receipt)
+                self._rewrite(0, receipt)
+                with self.assertRaisesRegex(VolumeWeightAggregateError, message):
+                    self._aggregate()
+
+    def test_actual_npy_bytes_and_statistics_are_replayed(self) -> None:
+        output = self.root / "volume_cell_volume_1.npy"
+        with output.open("r+b") as stream:
+            stream.seek(-1, 2)
+            final = stream.read(1)
+            stream.seek(-1, 2)
+            stream.write(bytes([final[0] ^ 1]))
+        with self.assertRaisesRegex(VolumeWeightAggregateError, "bytes differ"):
+            self._aggregate()
+
+        receipt = self._make_receipt("run_1", 0)
+        values = np.load(output, allow_pickle=False)
+        values[1] += 0.01
+        np.save(output, values, allow_pickle=False)
+        receipt["output"]["sha256"] = sha256_file(output)
+        self._rewrite(0, receipt)
+        with self.assertRaisesRegex(VolumeWeightAggregateError, "statistics differ"):
+            self._aggregate()
 
     def test_production_default_rejects_nonofficial_pin(self) -> None:
         with self.assertRaisesRegex(

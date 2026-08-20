@@ -1,0 +1,14 @@
+-r requirements.txt
+
+# Interpreter requirement: Python 3.12.13 exactly. A requirements file cannot
+# install or constrain the interpreter itself; the pinned generator rejects a
+# different Python patch release before scanning native source data.
+#
+# This environment is deliberately separate from
+# requirements-drivaerml-evaluator.txt. The fixed surface, Cp, and velocity
+# evidence remains bound to VTK 9.5.2; the replacement physical-volume-weight
+# candidate uses VTK 9.6.0's mixed dispatch: type-specific Verdict routines for
+# tetrahedra/hexahedra/wedges/pyramids and signed-tetra triangulation for
+# polyhedra.
+numpy==2.2.6
+vtk==9.6.0

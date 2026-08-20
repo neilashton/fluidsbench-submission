@@ -9,6 +9,7 @@ import tempfile
 import unittest
 from dataclasses import replace
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
@@ -298,6 +299,41 @@ class SyntheticCase:
             expected_entity_count=self.entity_count,
         )
         self.volume_weight_path = volume_weight_path
+        native_cell_types = {
+            "dtype": "uint8",
+            "shape": [self.entity_count],
+            "order": "zero_based_raw_vtk_cell_order",
+            "payload_sha256": _sha256_bytes(bytes([10]) * self.entity_count),
+            "histogram": [
+                {
+                    "vtk_cell_type_id": 10,
+                    "vtk_cell_type_name": "vtkTetra",
+                    "cell_count": self.entity_count,
+                }
+            ],
+        }
+        per_vtk_cell_type = (
+            {
+                "vtk_cell_type_id": 10,
+                "vtk_cell_type_name": "vtkTetra",
+                "cell_count": self.entity_count,
+                "volume_sum_m3": self.unbound_volume_weights.volume_sum_m3,
+                "volume_min_m3": self.unbound_volume_weights.volume_min_m3,
+                "volume_max_m3": self.unbound_volume_weights.volume_max_m3,
+            },
+        )
+        type_manifest_sha256 = _sha256_bytes(
+            json.dumps(
+                [
+                    {
+                        "case_id": "run_1",
+                        "payload_sha256": native_cell_types["payload_sha256"],
+                    }
+                ],
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        )
         self.volume_weights = replace(
             self.unbound_volume_weights,
             binding_status=SOURCE_BOUND_VOLUME_WEIGHT_STATUS,
@@ -306,6 +342,14 @@ class SyntheticCase:
             aggregate_sha256="c" * 64,
             aggregate_complete=True,
             algorithm_sha256="d" * 64,
+            native_cell_types=native_cell_types,
+            per_vtk_cell_type=per_vtk_cell_type,
+            aggregate_native_cell_type_payload_manifest_sha256=(
+                type_manifest_sha256
+            ),
+            aggregate_per_vtk_cell_type=(
+                {**per_vtk_cell_type[0], "case_count": 1},
+            ),
         )
 
         raw = np.arange(self.entity_count, dtype=np.float64)
@@ -480,6 +524,16 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
             aggregate_volume_weight_receipts,
             write_evidence,
         )
+        from reference.drivaerml.volume_weights import implementation_file_records
+        from reference.drivaerml.volume_weights import PINNED_ENVIRONMENT_BINDING
+
+        committed_patcher = mock.patch(
+            "scripts.aggregate_drivaerml_volume_weights."
+            "_committed_implementation_file_records",
+            return_value=implementation_file_records(),
+        )
+        committed_patcher.start()
+        self.addCleanup(committed_patcher.stop)
 
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -490,6 +544,12 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
                 "schema_version": RECEIPT_SCHEMA_VERSION,
                 "status": "candidate_exact_native_source_verified_before_vtk",
                 "case_id": "run_1",
+                "implementation_binding": {
+                    "git_revision": "c" * 40,
+                    "worktree_clean": True,
+                    "files": implementation_file_records(),
+                },
+                "environment_binding": PINNED_ENVIRONMENT_BINDING,
                 "native_source_binding": {
                     "pin": {
                         "sha256": fixture.source_contract.pin_sha256,
@@ -528,6 +588,31 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
                     "volume_sum_m3": weights.volume_sum_m3,
                     "volume_min_m3": weights.volume_min_m3,
                     "volume_max_m3": weights.volume_max_m3,
+                    "per_vtk_cell_type": [
+                        {
+                            "vtk_cell_type_id": 10,
+                            "vtk_cell_type_name": "vtkTetra",
+                            "cell_count": weights.entity_count,
+                            "volume_sum_m3": weights.volume_sum_m3,
+                            "volume_min_m3": weights.volume_min_m3,
+                            "volume_max_m3": weights.volume_max_m3,
+                        }
+                    ],
+                },
+                "native_cell_types": {
+                    "dtype": "uint8",
+                    "shape": [weights.entity_count],
+                    "order": "zero_based_raw_vtk_cell_order",
+                    "payload_sha256": _sha256_bytes(
+                        bytes([10]) * weights.entity_count
+                    ),
+                    "histogram": [
+                        {
+                            "vtk_cell_type_id": 10,
+                            "vtk_cell_type_name": "vtkTetra",
+                            "cell_count": weights.entity_count,
+                        }
+                    ],
                 },
                 "versions": dict(PINNED_VERSIONS),
                 "algorithm": PINNED_ALGORITHM,
@@ -581,6 +666,23 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
             )
             self.assertTrue(bound.aggregate_complete)
             self.assertEqual(bound.aggregate_sha256, aggregate_sha256)
+            self.assertEqual(
+                bound.native_cell_types, receipt["native_cell_types"]
+            )
+            self.assertEqual(
+                list(bound.per_vtk_cell_type),
+                receipt["output"]["per_vtk_cell_type"],
+            )
+            self.assertEqual(
+                bound.aggregate_native_cell_type_payload_manifest_sha256,
+                aggregate["aggregate"][
+                    "native_cell_type_payload_manifest_sha256"
+                ],
+            )
+            self.assertEqual(
+                list(bound.aggregate_per_vtk_cell_type),
+                aggregate["aggregate"]["per_vtk_cell_type"],
+            )
 
             aggregate["aggregate"]["cell_count"] += 1
             write_evidence(aggregate_path, aggregate)

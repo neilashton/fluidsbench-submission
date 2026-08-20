@@ -29,6 +29,7 @@ REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
 SURFACE_MANIFEST_SHA = "a" * 64
 VOLUME_AGGREGATE_SHA = "b" * 64
 VOLUME_ALGORITHM_SHA = "c" * 64
+VOLUME_CELL_TYPE_MANIFEST_SHA = "e" * 64
 PROFILE_SHA_PLACEHOLDER = "d" * 64
 
 
@@ -458,12 +459,49 @@ class DatasetFixture:
                     "volume_max_m3": 2.0,
                     "dtype": "<f8",
                     "role": "fixed_external_input_not_regenerated",
-                    "binding_status": "source_bound_v2_receipt_and_aggregate_membership_verified",
+                    "binding_status": "source_bound_receipt_v3_aggregate_v2_membership_verified",
                     "native_source_pin_sha256": self.pin_sha,
                     "receipt_sha256": ("2" if case_index == 1 else "3") * 64,
                     "aggregate_sha256": VOLUME_AGGREGATE_SHA,
                     "aggregate_complete": True,
                     "algorithm_sha256": VOLUME_ALGORITHM_SHA,
+                    "native_cell_types": {
+                        "dtype": "uint8",
+                        "shape": [2],
+                        "order": "zero_based_raw_vtk_cell_order",
+                        "payload_sha256": ("8" if case_index == 1 else "9") * 64,
+                        "histogram": [
+                            {
+                                "vtk_cell_type_id": 10,
+                                "vtk_cell_type_name": "vtkTetra",
+                                "cell_count": 2,
+                            }
+                        ],
+                    },
+                    "per_vtk_cell_type": [
+                        {
+                            "vtk_cell_type_id": 10,
+                            "vtk_cell_type_name": "vtkTetra",
+                            "cell_count": 2,
+                            "volume_sum_m3": 3.0,
+                            "volume_min_m3": 1.0,
+                            "volume_max_m3": 2.0,
+                        }
+                    ],
+                    "aggregate_native_cell_type_payload_manifest_sha256": (
+                        VOLUME_CELL_TYPE_MANIFEST_SHA
+                    ),
+                    "aggregate_per_vtk_cell_type": [
+                        {
+                            "vtk_cell_type_id": 10,
+                            "vtk_cell_type_name": "vtkTetra",
+                            "case_count": 2,
+                            "cell_count": 4,
+                            "volume_sum_m3": 6.0,
+                            "volume_min_m3": 1.0,
+                            "volume_max_m3": 2.0,
+                        }
+                    ],
                 },
                 "volume_native_arrays": {
                     "pMeanTrim": {"name": "pMeanTrim", "association": "CellData", "number_of_components": 1, "tuple_count": 2, "scalar_count": 2, "finite": True, "units": "m^2/s^2", "raw_id_start": 0, "raw_id_stop": 2, "payload_sha256": "4" * 64},

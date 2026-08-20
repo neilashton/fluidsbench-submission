@@ -65,7 +65,7 @@ OFFICIAL_NATIVE_SOURCE_PIN_SHA256 = (
 OFFICIAL_REPOSITORY_ID = "neashton/drivaerml"
 OFFICIAL_REPOSITORY_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
 SOURCE_BOUND_VOLUME_WEIGHT_STATUS = (
-    "source_bound_v2_receipt_and_aggregate_membership_verified"
+    "source_bound_receipt_v3_aggregate_v2_membership_verified"
 )
 UNBOUND_VOLUME_WEIGHT_STATUS = "unbound_low_level_fixture_not_evaluator_eligible"
 
@@ -111,6 +111,10 @@ class FixedVolumeWeights:
     aggregate_sha256: str | None = None
     aggregate_complete: bool = False
     algorithm_sha256: str | None = None
+    native_cell_types: dict[str, object] | None = None
+    per_vtk_cell_type: tuple[dict[str, object], ...] = ()
+    aggregate_native_cell_type_payload_manifest_sha256: str | None = None
+    aggregate_per_vtk_cell_type: tuple[dict[str, object], ...] = ()
 
     def assert_source_unchanged(self, *, context: str) -> None:
         try:
@@ -139,6 +143,14 @@ class FixedVolumeWeights:
             "aggregate_sha256": self.aggregate_sha256,
             "aggregate_complete": self.aggregate_complete,
             "algorithm_sha256": self.algorithm_sha256,
+            "native_cell_types": self.native_cell_types,
+            "per_vtk_cell_type": list(self.per_vtk_cell_type),
+            "aggregate_native_cell_type_payload_manifest_sha256": (
+                self.aggregate_native_cell_type_payload_manifest_sha256
+            ),
+            "aggregate_per_vtk_cell_type": list(
+                self.aggregate_per_vtk_cell_type
+            ),
         }
 
 
@@ -439,7 +451,7 @@ def audit_source_bound_volume_weight_file(
     allow_incomplete_pilot_aggregate: bool = False,
     validation_chunk_entities: int = 1_000_000,
 ) -> FixedVolumeWeights:
-    """Audit weights through their exact source-bound v2 receipt and aggregate.
+    """Audit weights through exact source-bound v3 receipts and their v2 aggregate.
 
     Every receipt in the aggregate is replayed through the strict aggregate
     validator rather than trusted.  The supplied aggregate must equal that
@@ -499,9 +511,9 @@ def audit_source_bound_volume_weight_file(
         )
 
     # Reuse the generator's independent strict all-receipt replay. It validates
-    # exact v2 schemas, source-pin byte bindings, pinned dependency versions and
-    # algorithm, path-free names, every output record, receipt hashes, coverage,
-    # order, and aggregate totals.
+    # exact receipt-v3/aggregate-v2 schemas, source-pin byte bindings, pinned
+    # dependency versions and algorithm, path-free names, every output record,
+    # receipt hashes, coverage, order, and aggregate totals.
     try:
         from scripts.aggregate_drivaerml_volume_weights import (
             PINNED_ALGORITHM_SHA256,
@@ -594,6 +606,16 @@ def audit_source_bound_volume_weight_file(
         aggregate_sha256=aggregate_sha256,
         aggregate_complete=complete,
         algorithm_sha256=PINNED_ALGORITHM_SHA256,
+        native_cell_types=record["native_cell_types"],
+        per_vtk_cell_type=tuple(output["per_vtk_cell_type"]),
+        aggregate_native_cell_type_payload_manifest_sha256=(
+            replay["aggregate"][
+                "native_cell_type_payload_manifest_sha256"
+            ]
+        ),
+        aggregate_per_vtk_cell_type=tuple(
+            replay["aggregate"]["per_vtk_cell_type"]
+        ),
     )
 
 
@@ -1033,9 +1055,28 @@ def _validate_case_sources(
         or volume_weights.receipt_sha256 is None
         or volume_weights.aggregate_sha256 is None
         or volume_weights.algorithm_sha256 is None
+        or volume_weights.native_cell_types is None
+        or not volume_weights.per_vtk_cell_type
+        or volume_weights.aggregate_native_cell_type_payload_manifest_sha256
+        is None
+        or not volume_weights.aggregate_per_vtk_cell_type
     ):
         raise DrivAerCandidateEvaluatorError(
             "fixed volume weights are not eligible source-bound evaluator inputs"
+        )
+    if (
+        volume_weights.native_cell_types.get("dtype") != "uint8"
+        or volume_weights.native_cell_types.get("shape") != [volume_count]
+        or volume_weights.native_cell_types.get("order")
+        != "zero_based_raw_vtk_cell_order"
+        or sum(
+            int(row["cell_count"])
+            for row in volume_weights.per_vtk_cell_type
+        )
+        != volume_count
+    ):
+        raise DrivAerCandidateEvaluatorError(
+            "fixed volume-weight native cell-type binding is inconsistent"
         )
     if not volume_weights.aggregate_complete and not allow_incomplete_volume_weight_pilot:
         raise DrivAerCandidateEvaluatorError(

@@ -115,8 +115,8 @@
         "primary_weighting": "one_per_native_cell",
         "secondary_weighting": "benchmark_computed_cell_volume_pending_frozen_publication",
         "candidate_secondary_weight_status": {
-          "status": "blocked_run_1_vtk_cellsizefilter_negative_wedge_owner_algorithm_decision_pending",
-          "candidate_algorithm": "VTK_9.5.2_vtkCellSizeFilter_volume_only",
+          "status": "vtk_9_6_replacement_candidate_passed_isolated_wedge_full_native_validation_pending",
+          "candidate_algorithm": "VTK_9.6.0_vtkCellSizeFilter_volume_only_mixed_native_type_dispatch",
           "accepted_weight_artifact_exists": false,
           "owner_scientific_decision_required": true,
           "diagnostic_evidence": [
@@ -124,6 +124,11 @@
               "file": "evidence/volume-weight-vtk-run_1-failure-diagnostic.json",
               "sha256": "aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e",
               "status": "candidate_algorithm_rejected_fail_closed_no_weight_array_published"
+            },
+            {
+              "file": "evidence/volume-weight-vtk96-run_1-wedge-probe.json",
+              "sha256": "2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6",
+              "status": "replacement_candidate_isolated_probe_only_full_native_validation_pending"
             },
             {
               "file": "evidence/volume-cell-types-run_1-pilot.json",
@@ -293,7 +298,7 @@
       "official_splits": "complete",
       "pinned_native_files": "complete",
       "surface_area_weights": "all_484_candidate_order_count_hash_and_value_audit_passed_owner_release_approval_pending",
-      "volume_cell_weights": "blocked_run_1_vtk_cellsizefilter_negative_wedge_owner_algorithm_decision_pending_no_weight_array_published",
+      "volume_cell_weights": "vtk_9_6_replacement_candidate_passed_isolated_run_1_wedge_full_run_1_run_44_all_case_publication_and_owner_approval_pending_no_weight_array_published",
       "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
       "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
       "cp_probes": "all_484_candidate_mapping_and_cp_equation_replay_complete_with_875_explicit_invalid_rows_owner_resolution_and_visual_signoff_pending",

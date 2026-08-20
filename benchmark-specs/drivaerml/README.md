@@ -74,6 +74,13 @@ The latter verifies all 978 pinned segments and 68,949,662,110 native cells,
 including exact field shape/order, finite values, complete coverage, and two
 independent chunk partitions. It is not a model result or physics-null
 baseline. Deterministic physical-volume weights remain an activation gate.
+The original VTK 9.5.2 candidate failed closed on one signed `run_1` wedge.
+An isolated VTK 9.6.0 replacement-candidate probe now returns a positive signed
+candidate volume for that exact cell without absolute values, masking, or an
+epsilon substitution, while orientation controls remain negative. This does
+not by itself establish the authoritative physical-volume convention. Full
+native `run_1`/`run_44` validation and owner approval are still pending; no
+accepted volume-weight array is published.
 
 The all-484 Cp candidate sweep retains every one of the 101,156 case/probe rows:
 100,281 are valid and 875 are explicitly invalid. Its mapping, named-STL
@@ -84,6 +91,11 @@ official scoring support and cannot make a submission eligible.
 
 The prescribed 1, 2, 5, and 10 mm profile study can be checked with
 [`proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md`](proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md).
+The prediction-based maintainer command described there verifies complete
+native chunk manifests, streams the pinned multipart `UMeanTrim` truth, and
+constructs the loss tensor itself. Reduced case pilots always remain
+ineligible; only the exact ordered 484-case scope can reach owner-review
+eligibility.
 Activation evidence still requires complete all-case velocity mappings and
 genuine predictions from at least three distinct trained model artifacts. Those
 model predictions are not currently available and remain an owner input; no
@@ -96,4 +108,7 @@ two-part/three-part dry run is provided under
 [`examples/drivaerml-candidate-native-chunks/`](../../examples/drivaerml-candidate-native-chunks/);
 it is an ineligible transport and packaging fixture, not an official
 DrivAerML submission. Candidate native-volume support generation uses the exact
-receipt-compatible runtime Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2.
+receipt-compatible runtime Python 3.12.13 and NumPy 2.2.6. Surface, Cp, and
+velocity evidence remains pinned to VTK 9.5.2, while the physical-volume-weight
+replacement candidate uses the separate VTK 9.6.0 environment in
+[`requirements-drivaerml-volume-weights.txt`](../../requirements-drivaerml-volume-weights.txt).

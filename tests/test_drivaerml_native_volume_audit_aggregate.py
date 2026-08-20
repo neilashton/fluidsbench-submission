@@ -7,6 +7,26 @@ import math
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
+
+import numpy as np
+
+from reference.drivaerml.volume_weights import (
+    PINNED_ENVIRONMENT_BINDING,
+    RECEIPT_SCHEMA,
+    RECEIPT_SCHEMA_VERSION,
+    implementation_file_records,
+)
+from scripts.aggregate_drivaerml_volume_weights import (
+    DEFAULT_COPY_CHUNK_SIZE,
+    DEFAULT_SOURCE_VERIFICATION_CHUNK_BYTES,
+    OFFICIAL_REVISION,
+    PINNED_ALGORITHM,
+    PINNED_ALGORITHM_SHA256,
+    PINNED_VERSIONS,
+    aggregate_volume_weight_receipts,
+    write_evidence as write_weight_evidence,
+)
 
 from scripts.aggregate_drivaerml_native_volume_audits import (
     AGGREGATE_SCHEMA,
@@ -104,6 +124,14 @@ class NativeVolumeAuditFixture:
                         "source_boundary_sha256": boundary_sha,
                     },
                     "volume": {
+                        "assembly": (
+                            "byte concatenation of parts in listed order, with no "
+                            "delimiter or transformation"
+                        ),
+                        "identity_contract": (
+                            "ordered (path,size_bytes,lfs_sha256) tuples; no "
+                            "assembled-file SHA-256 is asserted"
+                        ),
                         "logical_path_after_assembly": logical_path,
                         "part_count": part_count,
                         "parts": [
@@ -124,9 +152,9 @@ class NativeVolumeAuditFixture:
             "schema_version": 1,
             "repository": {
                 "provider": "Hugging Face Hub",
-                "repo_id": "synthetic/drivaerml",
+                "repo_id": "neashton/drivaerml",
                 "repo_type": "dataset",
-                "revision": "a" * 40,
+                "revision": OFFICIAL_REVISION,
             },
             "case_scope": {
                 "case_count": 2,
@@ -158,8 +186,8 @@ class NativeVolumeAuditFixture:
         return {
             "pin": {
                 "sha256": self.pin_sha256,
-                "repository_id": "synthetic/drivaerml",
-                "repository_revision": "a" * 40,
+                "repository_id": "neashton/drivaerml",
+                "repository_revision": OFFICIAL_REVISION,
             },
             "case_id": case_id,
             "logical_volume": {
@@ -196,6 +224,32 @@ class NativeVolumeAuditFixture:
             "volume_sum_m3": total,
             "volume_min_m3": 1.0e-6,
             "volume_max_m3": 2.0e-6,
+            "per_vtk_cell_type": [
+                {
+                    "vtk_cell_type_id": 10,
+                    "vtk_cell_type_name": "vtkTetra",
+                    "cell_count": count,
+                    "volume_sum_m3": total,
+                    "volume_min_m3": 1.0e-6,
+                    "volume_max_m3": 2.0e-6,
+                }
+            ],
+        }
+
+    def _native_cell_types(self, case_id: str) -> dict[str, object]:
+        count = self.case_counts[case_id]
+        return {
+            "dtype": "uint8",
+            "shape": [count],
+            "order": "zero_based_raw_vtk_cell_order",
+            "payload_sha256": _sha256_bytes(bytes([10]) * count),
+            "histogram": [
+                {
+                    "vtk_cell_type_id": 10,
+                    "vtk_cell_type_name": "vtkTetra",
+                    "cell_count": count,
+                }
+            ],
         }
 
     def _make_weight_aggregate(self) -> dict[str, object]:
@@ -207,11 +261,28 @@ class NativeVolumeAuditFixture:
                 ),
                 "native_source_binding": self._source_binding(case_id),
                 "output": self._weight_output(case_id),
-                "reader_audit": {},
+                "native_cell_types": self._native_cell_types(case_id),
+                "reader_audit": {
+                    "disabled_point_array_count": 1,
+                    "disabled_point_arrays": ["syntheticPointArray"],
+                    "disabled_cell_array_count": 3,
+                    "disabled_cell_arrays": [
+                        "pMeanTrim",
+                        "UMeanTrim",
+                        "syntheticCellArray",
+                    ],
+                },
             }
             for case_id in CASE_IDS
         ]
         outputs = [case["output"] for case in cases]
+        type_manifest = [
+            {
+                "case_id": case["case_id"],
+                "payload_sha256": case["native_cell_types"]["payload_sha256"],
+            }
+            for case in cases
+        ]
         return {
             "schema": WEIGHT_AGGREGATE_SCHEMA,
             "mode": "complete",
@@ -226,8 +297,8 @@ class NativeVolumeAuditFixture:
             "source": {
                 "dataset": {
                     "provider": "Hugging Face Hub",
-                    "repo_id": "synthetic/drivaerml",
-                    "revision": "a" * 40,
+                    "repo_id": "neashton/drivaerml",
+                    "revision": OFFICIAL_REVISION,
                 },
                 "native_source_pin": {
                     "schema": "drivaerml-fluidsbench-public-native-source-pin-v1",
@@ -237,8 +308,23 @@ class NativeVolumeAuditFixture:
                     "exact_ordered_part_segment_size_and_sha256_verified_before_vtk"
                 ),
             },
-            "dependencies": {},
-            "algorithm": {},
+            "dependencies": dict(PINNED_VERSIONS),
+            "implementation_binding": {
+                "git_revision": "c" * 40,
+                "worktree_clean": True,
+                "files": implementation_file_records(),
+            },
+            "environment_binding": copy.deepcopy(PINNED_ENVIRONMENT_BINDING),
+            "algorithm": {
+                "sha256": PINNED_ALGORITHM_SHA256,
+                "settings": PINNED_ALGORITHM,
+                "execution": {
+                    "copy_chunk_size": DEFAULT_COPY_CHUNK_SIZE,
+                    "source_verification_chunk_bytes": (
+                        DEFAULT_SOURCE_VERIFICATION_CHUNK_BYTES
+                    ),
+                },
+            },
             "aggregate": {
                 "cell_count": sum(output["cell_count"] for output in outputs),
                 "source_vtu_size_bytes": sum(
@@ -258,6 +344,30 @@ class NativeVolumeAuditFixture:
                 "all_outputs_dtype": "<f8",
                 "all_outputs_one_dimensional": True,
                 "all_values_strictly_positive_finite": True,
+                "native_cell_type_payload_manifest_sha256": hashlib.sha256(
+                    json.dumps(
+                        type_manifest, sort_keys=True, separators=(",", ":")
+                    ).encode("utf-8")
+                ).hexdigest(),
+                "per_vtk_cell_type": [
+                    {
+                        "vtk_cell_type_id": 10,
+                        "vtk_cell_type_name": "vtkTetra",
+                        "case_count": len(cases),
+                        "cell_count": sum(
+                            output["cell_count"] for output in outputs
+                        ),
+                        "volume_sum_m3": math.fsum(
+                            output["volume_sum_m3"] for output in outputs
+                        ),
+                        "volume_min_m3": min(
+                            output["volume_min_m3"] for output in outputs
+                        ),
+                        "volume_max_m3": max(
+                            output["volume_max_m3"] for output in outputs
+                        ),
+                    }
+                ],
             },
             "cases": cases,
         }
@@ -411,8 +521,8 @@ class NativeVolumeAuditFixture:
             "status": "passed_candidate_evaluator_case_audit",
             "case_id": case_id,
             "public_source": {
-                "repository_id": "synthetic/drivaerml",
-                "immutable_revision": "a" * 40,
+                "repository_id": "neashton/drivaerml",
+                "immutable_revision": OFFICIAL_REVISION,
                 "logical_path": case["volume"]["logical_path_after_assembly"],
                 "logical_size_bytes": case["volume"]["total_size_bytes"],
                 "multipart_part_count": case["volume"]["part_count"],
@@ -540,6 +650,185 @@ class DrivAerMLNativeVolumeAuditAggregateTests(unittest.TestCase):
         self.assertEqual(first.read_bytes(), second.read_bytes())
         self.assertNotIn(b"\n ", first.read_bytes())
 
+    def test_v3_weight_receipts_flow_through_v2_aggregate_and_native_audit(self) -> None:
+        """Exercise the producer/consumer schema boundary with real NPY bytes."""
+
+        self.fixture.case_counts = {
+            "run_1": REFERENCE_CHUNK_CELLS + 1,
+            "run_44": REFERENCE_CHUNK_CELLS + 2,
+        }
+        values_by_case = {
+            case_id: np.full(count, 1.0e-6, dtype="<f8")
+            for case_id, count in self.fixture.case_counts.items()
+        }
+        for values in values_by_case.values():
+            values[-1] = 2.0e-6
+        self.fixture.weight_sums = {
+            case_id: float(np.sum(values, dtype=np.float64))
+            for case_id, values in values_by_case.items()
+        }
+        implementation = implementation_file_records()
+        generator_receipts: list[Path] = []
+        for case_id, values in values_by_case.items():
+            run_number = int(case_id.removeprefix("run_"))
+            npy_path = self.root / f"volume_cell_volume_{run_number}.npy"
+            np.save(npy_path, values, allow_pickle=False)
+            receipt = {
+                "schema": RECEIPT_SCHEMA,
+                "schema_version": RECEIPT_SCHEMA_VERSION,
+                "status": "candidate_exact_native_source_verified_before_vtk",
+                "case_id": case_id,
+                "implementation_binding": {
+                    "git_revision": "c" * 40,
+                    "worktree_clean": True,
+                    "files": implementation,
+                },
+                "environment_binding": copy.deepcopy(PINNED_ENVIRONMENT_BINDING),
+                "native_source_binding": self.fixture._source_binding(case_id),
+                "output": {
+                    "file": npy_path.name,
+                    "dtype": "<f8",
+                    "shape": [len(values)],
+                    "size_bytes": npy_path.stat().st_size,
+                    "sha256": sha256_file(npy_path),
+                    "cell_count": len(values),
+                    "volume_sum_m3": float(np.sum(values, dtype=np.float64)),
+                    "volume_min_m3": float(np.min(values)),
+                    "volume_max_m3": float(np.max(values)),
+                    "per_vtk_cell_type": [
+                        {
+                            "vtk_cell_type_id": 10,
+                            "vtk_cell_type_name": "vtkTetra",
+                            "cell_count": len(values),
+                            "volume_sum_m3": float(
+                                np.sum(values, dtype=np.float64)
+                            ),
+                            "volume_min_m3": float(np.min(values)),
+                            "volume_max_m3": float(np.max(values)),
+                        }
+                    ],
+                },
+                "native_cell_types": {
+                    "dtype": "uint8",
+                    "shape": [len(values)],
+                    "order": "zero_based_raw_vtk_cell_order",
+                    "payload_sha256": _sha256_bytes(
+                        bytes([10]) * len(values)
+                    ),
+                    "histogram": [
+                        {
+                            "vtk_cell_type_id": 10,
+                            "vtk_cell_type_name": "vtkTetra",
+                            "cell_count": len(values),
+                        }
+                    ],
+                },
+                "versions": dict(PINNED_VERSIONS),
+                "algorithm": PINNED_ALGORITHM,
+                "execution": {
+                    "copy_chunk_size": DEFAULT_COPY_CHUNK_SIZE,
+                    "source_verification_chunk_bytes": (
+                        DEFAULT_SOURCE_VERIFICATION_CHUNK_BYTES
+                    ),
+                },
+                "reader_audit": {
+                    "disabled_point_array_count": 1,
+                    "disabled_point_arrays": ["syntheticPointArray"],
+                    "disabled_cell_array_count": 3,
+                    "disabled_cell_arrays": [
+                        "pMeanTrim",
+                        "UMeanTrim",
+                        "syntheticCellArray",
+                    ],
+                },
+            }
+            receipt_path = self.root / f"{case_id}-weight-receipt.json"
+            _write_json(receipt_path, receipt)
+            generator_receipts.append(receipt_path)
+
+        with mock.patch(
+            "scripts.aggregate_drivaerml_volume_weights."
+            "_committed_implementation_file_records",
+            return_value=implementation,
+        ):
+            aggregate = aggregate_volume_weight_receipts(
+                native_source_pin_path=self.fixture.pin_path,
+                receipt_paths=tuple(generator_receipts),
+                official_case_ids=CASE_IDS,
+                expected_pin_sha256=self.fixture.pin_sha256,
+            )
+        self.assertEqual(aggregate["schema"], WEIGHT_AGGREGATE_SCHEMA)
+        self.assertEqual(
+            set(aggregate),
+            {
+                "schema",
+                "mode",
+                "status",
+                "complete",
+                "public_evidence_eligible",
+                "activation_status",
+                "case_count",
+                "official_case_count",
+                "omitted_official_case_count",
+                "case_order",
+                "source",
+                "dependencies",
+                "implementation_binding",
+                "environment_binding",
+                "algorithm",
+                "aggregate",
+                "cases",
+            },
+        )
+        write_weight_evidence(self.fixture.weight_aggregate_path, aggregate)
+        self.fixture.weight_aggregate = aggregate
+        for position, case_id in enumerate(CASE_IDS):
+            case_receipt = self.fixture._make_receipt(case_id)
+            output = aggregate["cases"][position]["output"]
+            case_receipt["volume_weights"] = {
+                "path": str(self.root / output["file"]),
+                "sha256": output["sha256"],
+                "dtype": "<f8",
+                "cell_count": output["cell_count"],
+                "sum_m3": output["volume_sum_m3"],
+                "minimum_m3": output["volume_min_m3"],
+                "maximum_m3": output["volume_max_m3"],
+                "role": "fixed_same_order_cell_volume_secondary_weights",
+                "status": "audited",
+            }
+            self.rewrite(position, case_receipt)
+
+        evidence = self.aggregate(list(reversed(self.fixture.receipt_paths)))
+        self.assertEqual(
+            evidence["totals"]["native_cell_count"],
+            sum(self.fixture.case_counts.values()),
+        )
+        self.assertEqual(
+            [row["volume_weights"]["status"] for row in evidence["cases"]],
+            ["audited_against_source_bound_volume_weight_evidence"] * 2,
+        )
+        self.assertEqual(
+            [
+                row["volume_weights"]["native_cell_types"]["shape"]
+                for row in evidence["cases"]
+            ],
+            [[REFERENCE_CHUNK_CELLS + 1], [REFERENCE_CHUNK_CELLS + 2]],
+        )
+        self.assertEqual(
+            evidence["totals"]["volume_weight_per_vtk_cell_type"][0][
+                "cell_count"
+            ],
+            sum(self.fixture.case_counts.values()),
+        )
+        self.assertEqual(
+            evidence["totals"][
+                "volume_weight_native_cell_type_payload_manifest_sha256"
+            ],
+            aggregate["aggregate"][
+                "native_cell_type_payload_manifest_sha256"
+            ],
+        )
+
     def test_equal_cell_primary_pilot_is_explicit_path_free_and_weight_ineligible(self) -> None:
         case_id = "run_1"
         count = self.fixture.case_counts[case_id]
@@ -635,9 +924,13 @@ class DrivAerMLNativeVolumeAuditAggregateTests(unittest.TestCase):
         partial["public_evidence_eligible"] = False
         partial["case_count"] = 1
         partial["omitted_official_case_count"] = 1
-        partial["pilot_warning"] = "incomplete subset; not public"
+        partial["pilot_warning"] = (
+            "incomplete subset; not a public scoring-support manifest or "
+            "activation artifact"
+        )
         partial["cases"] = partial["cases"][:1]
         output = partial["cases"][0]["output"]
+        native_cell_types = partial["cases"][0]["native_cell_types"]
         case = self.fixture._case_pin("run_1")
         partial["aggregate"].update(
             {
@@ -647,6 +940,26 @@ class DrivAerMLNativeVolumeAuditAggregateTests(unittest.TestCase):
                 "volume_sum_m3": output["volume_sum_m3"],
                 "volume_min_m3": output["volume_min_m3"],
                 "volume_max_m3": output["volume_max_m3"],
+                "native_cell_type_payload_manifest_sha256": hashlib.sha256(
+                    json.dumps(
+                        [
+                            {
+                                "case_id": "run_1",
+                                "payload_sha256": native_cell_types[
+                                    "payload_sha256"
+                                ],
+                            }
+                        ],
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ).encode("utf-8")
+                ).hexdigest(),
+                "per_vtk_cell_type": [
+                    {
+                        **output["per_vtk_cell_type"][0],
+                        "case_count": 1,
+                    }
+                ],
             }
         )
         _write_json(self.fixture.weight_aggregate_path, partial)
@@ -694,7 +1007,7 @@ class DrivAerMLNativeVolumeAuditAggregateTests(unittest.TestCase):
             (
                 "weight hash",
                 lambda value: value["volume_weights"].update(sha256="e" * 64),
-                "differs from v2 weight evidence",
+                "differs from source-bound weight evidence",
             ),
         )
         for label, mutate, message in mutations:
@@ -755,6 +1068,63 @@ class DrivAerMLNativeVolumeAuditAggregateTests(unittest.TestCase):
             NativeVolumeAuditAggregateError, "absolute path"
         ):
             write_evidence(self.root / "must-not-write.json", evidence)
+
+    def test_weight_aggregate_v2_bindings_are_validated_exactly(self) -> None:
+        mutations = (
+            (
+                "implementation revision",
+                lambda value: value["implementation_binding"].update(
+                    git_revision="unresolved"
+                ),
+                "Git revision must be resolved",
+            ),
+            (
+                "implementation file order",
+                lambda value: value["implementation_binding"]["files"].reverse(),
+                "file order/set is not frozen",
+            ),
+            (
+                "environment wheel",
+                lambda value: value["environment_binding"]["vtk_wheel"].update(
+                    sha256="f" * 64
+                ),
+                "environment binding is not the frozen identity",
+            ),
+            (
+                "dependency",
+                lambda value: value["dependencies"].update(vtk="9.5.2"),
+                "dependency versions are not frozen",
+            ),
+            (
+                "algorithm",
+                lambda value: value["algorithm"].update(sha256="f" * 64),
+                "algorithm settings are not frozen",
+            ),
+            (
+                "execution",
+                lambda value: value["algorithm"]["execution"].update(
+                    copy_chunk_size=17
+                ),
+                "execution settings are not frozen",
+            ),
+            (
+                "reader audit",
+                lambda value: value["cases"][0]["reader_audit"].update(
+                    disabled_cell_arrays=["syntheticCellArray"],
+                    disabled_cell_array_count=1,
+                ),
+                "did not disable required CellData arrays",
+            ),
+        )
+        for label, mutate, message in mutations:
+            with self.subTest(label=label):
+                aggregate = self.fixture._make_weight_aggregate()
+                mutate(aggregate)
+                _write_json(self.fixture.weight_aggregate_path, aggregate)
+                with self.assertRaisesRegex(
+                    NativeVolumeAuditAggregateError, message
+                ):
+                    self.aggregate()
 
 
 if __name__ == "__main__":

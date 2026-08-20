@@ -1,9 +1,11 @@
 """Strict DrivAerML velocity-profile resolution-convergence evidence.
 
 The candidate scientific contract compares the final profile loss on nested
-2, 5, and 10 mm grids with a 1 mm reference grid.  This module consumes only
-already-computed case-line losses: it does not manufacture predictions or
-silently discard cases, lines, spacings, or methods.
+2, 5, and 10 mm grids with a 1 mm reference grid.  Every candidate grid must
+pass its loss and method-order gates before the retained 10 mm grid is eligible
+for owner review.  This module consumes only already-computed case-line losses:
+it does not manufacture predictions or silently discard cases, lines, spacings,
+or methods.
 
 Input losses are a rectangular array indexed as
 ``[method][case][profile][spacing]``.  The associated orders are declared once
@@ -56,6 +58,14 @@ CASE_MACRO_RELATIVE_LIMIT = 0.01
 CASE_LINE_RELATIVE_LIMIT = 0.02
 METHOD_ORDER_MINIMUM = 0.99
 MAX_INPUT_BYTES = 128 * 1024 * 1024
+OFFICIAL_UNAVAILABLE_RUNS = frozenset(
+    {167, 211, 218, 221, 248, 282, 291, 295, 316, 325, 329, 364, 370, 376, 403, 473}
+)
+OFFICIAL_CASE_ORDER = tuple(
+    f"run_{run_number}"
+    for run_number in range(1, 501)
+    if run_number not in OFFICIAL_UNAVAILABLE_RUNS
+)
 DEFAULT_CONTRACT_PROPOSAL = (
     Path(__file__).resolve().parents[2]
     / "benchmark-specs"
@@ -704,16 +714,33 @@ def evaluate_profile_convergence(
     activation_spacing_passed = bool(
         by_spacing[ACTIVATION_CANDIDATE_SPACING_MM]["passed"]
     )
+    all_candidate_spacings_passed = all(
+        bool(result["passed"]) for result in spacing_results
+    )
     method_requirements_passed = bool(method_summary["requirements_passed"])
-    activation_eligible = activation_spacing_passed and method_requirements_passed
+    complete_official_case_scope = tuple(case_order) == OFFICIAL_CASE_ORDER
+    activation_eligible = (
+        all_candidate_spacings_passed
+        and method_requirements_passed
+        and complete_official_case_scope
+    )
     passing_spacings = [
         int(result["spacing_mm"])
         for result in spacing_results
         if bool(result["passed"])
     ]
     coarsest_passing = max(passing_spacings) if passing_spacings else None
+    blocking_reasons: list[str] = []
+    if not complete_official_case_scope:
+        blocking_reasons.append("incomplete_official_484_case_scope")
+    if not method_requirements_passed:
+        blocking_reasons.append("incomplete_or_unpinned_genuine_method_set")
+    if not all_candidate_spacings_passed:
+        blocking_reasons.append("resolution_threshold_or_method_order_failure")
     if activation_eligible:
         status = "eligible_for_owner_activation_review"
+    elif not complete_official_case_scope:
+        status = "ineligible_incomplete_official_484_case_scope"
     elif not method_requirements_passed:
         status = "ineligible_incomplete_or_unpinned_genuine_method_set"
     else:
@@ -729,6 +756,7 @@ def evaluate_profile_convergence(
         "schema_version": SCHEMA_VERSION,
         "study_id": study_id,
         "status": status,
+        "blocking_reasons": blocking_reasons,
         "profile_resolution_activation_eligible": activation_eligible,
         "does_not_activate_scoring_contract": True,
         "owner_scientific_approval_claimed": False,
@@ -738,6 +766,8 @@ def evaluate_profile_convergence(
         "scope": {
             "case_order": case_order,
             "case_count": len(case_order),
+            "required_official_case_count": len(OFFICIAL_CASE_ORDER),
+            "complete_official_case_order": complete_official_case_scope,
             "profile_order": list(PROFILE_ORDER),
             "profile_count": len(PROFILE_ORDER),
             "spacings_mm": list(SPACINGS_MM),
@@ -756,7 +786,20 @@ def evaluate_profile_convergence(
         "selection": {
             "activation_candidate_spacing_mm": ACTIVATION_CANDIDATE_SPACING_MM,
             "activation_candidate_passed": activation_spacing_passed,
+            "all_prescribed_candidate_spacings_passed": (
+                all_candidate_spacings_passed
+            ),
+            "failed_candidate_spacings_mm": [
+                int(result["spacing_mm"])
+                for result in spacing_results
+                if not bool(result["passed"])
+            ],
             "coarsest_passing_candidate_spacing_mm": coarsest_passing,
+            "owner_activation_review_rule": (
+                "every prescribed 2, 5, and 10 mm comparison against the "
+                "1 mm reference must pass its loss thresholds and method-order "
+                "gate before the retained 10 mm grid is eligible"
+            ),
             "failure_rule": (
                 "diagnostic remains unranked until a new contract version globally "
                 "adopts the coarsest finer passing grid"
@@ -799,6 +842,8 @@ __all__ = [
     "ACTIVATION_CANDIDATE_SPACING_MM",
     "DEFAULT_CONTRACT_PROPOSAL",
     "INPUT_SCHEMA",
+    "OFFICIAL_CASE_ORDER",
+    "OFFICIAL_UNAVAILABLE_RUNS",
     "OUTPUT_SCHEMA",
     "PROFILE_ORDER",
     "ProfileConvergenceError",

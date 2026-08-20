@@ -26,10 +26,15 @@ hashes are required for eligibility. The checker validates those declarations
 structurally; scientific authenticity and approval still require owner review.
 
 The checker writes complete aggregate, case-macro, and case-line comparisons
-for 2, 5, and 10 mm against 1 mm, plus Kendall tau-b method-order evidence. It
+for 2, 5, and 10 mm against 1 mm, plus Kendall tau-b method-order evidence.
+Every one of the 2, 5, and 10 mm comparison blocks must pass both the loss
+thresholds and method-order gate before the retained 10 mm grid is eligible for
+owner review; a passing 10 mm block cannot hide a failed 2 or 5 mm block. It
 returns exit code 0 for an eligible candidate study, 1 for valid but ineligible
 evidence, and 2 for malformed or contract-drifted input. Even an exit-code-0
-result explicitly remains non-activating pending owner approval.
+result explicitly remains non-activating pending owner approval. Exit code 0
+also requires the exact ordered 484-case public release. A reduced case list is
+a pilot and returns exit code 1 even when every numerical threshold passes.
 
 Minimal top-level shape:
 
@@ -52,3 +57,45 @@ Minimal top-level shape:
 
 Use `reference.drivaerml.profile_convergence.method_set_sha256(methods)` to
 derive the method-set pin; do not hand-edit it after losses have been produced.
+
+## Construct losses from native predictions
+
+Maintainers should normally construct the loss tensor from the actual artifacts
+rather than authoring it by hand:
+
+```bash
+.venv/bin/python \
+  scripts/evaluate_drivaerml_profile_resolution_from_predictions.py \
+  --input native-prediction-study.json \
+  --mappings-root /path/to/validated/velocity-assignment-receipts \
+  --dataset-root /path/to/pinned/drivaerml \
+  --output profile-resolution-evidence.json
+```
+
+The input schema is
+`drivaerml-profile-resolution-native-prediction-study-v1`. It contains the same
+ordered `method_set` and `case_order`, plus one ordered native prediction-chunk
+manifest for every method and case. Relative manifest paths resolve from the
+study file. The command strictly replays the 1, 2, 5, and 10 mm containing-cell
+artifacts, verifies every prediction chunk and exact raw-cell coverage, verifies
+the pinned multipart VTU bytes, streams the complete native `CellData
+UMeanTrim[3]` truth payload, and retains only mapped values in memory. It fails
+before opening the study, prediction manifests, mappings, or native source
+unless the runtime is exactly Python 3.12.13 and NumPy 2.2.6, then records that
+runtime, execution limits, source-file hashes, and Git state in the evidence.
+VTK is not required by this command because it streams the inline XML payload
+directly.
+
+The exact public case order is the immutable 484-case native-source order.
+Pilot studies may use a reduced ordered subset for implementation checks, but
+their output is explicitly ineligible for owner review. Declarations do not
+prove that trained checkpoints are scientifically genuine; model/checkpoint
+provenance and owner attestation remain required inputs.
+
+The current real-data command is bounded in memory but is not yet a resumable
+all-case executor: it runs the ordered cases in one process and writes the
+aggregate evidence only after the final case. A late preemption therefore
+requires a complete rerun. Before the genuine all-484, five-method study is
+treated as production-hardened, add immutable per-case worker receipts and a
+strict restartable aggregate replay; this remains execution hardening, not
+completed scientific evidence.

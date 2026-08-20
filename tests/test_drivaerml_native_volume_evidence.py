@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -28,6 +29,17 @@ EXPECTED_FAILURE_SHA256 = (
 
 def sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def sha256_git_blob(revision: str, path: str) -> str:
+    payload = subprocess.run(
+        ("git", "show", f"{revision}:{path}"),
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    ).stdout
+    return hashlib.sha256(payload).hexdigest()
 
 
 class DrivAerNativeVolumeEvidenceTests(unittest.TestCase):
@@ -140,13 +152,16 @@ class DrivAerNativeVolumeEvidenceTests(unittest.TestCase):
         self.assertEqual(runtime["python"], "3.12.13")
         self.assertEqual(runtime["numpy"], "2.2.6")
         self.assertFalse(runtime["vtk_used_by_this_audit"])
+        revision = provenance["implementation"]["git_revision"]
         for source in provenance["implementation"]["case_generator_snapshot"][
             "files"
         ]:
-            self.assertEqual(sha256_file(ROOT / source["file"]), source["sha256"])
+            self.assertEqual(
+                sha256_git_blob(revision, source["file"]), source["sha256"]
+            )
         aggregator = provenance["implementation"]["strict_aggregator"]
         self.assertEqual(
-            sha256_file(ROOT / aggregator["file"]), aggregator["sha256"]
+            sha256_git_blob(revision, aggregator["file"]), aggregator["sha256"]
         )
         self.assertTrue(
             provenance["execution"][
