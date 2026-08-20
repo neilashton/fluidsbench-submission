@@ -93,6 +93,11 @@ REPORT_ONLY_DIAGNOSTIC_METRIC_IDS = (
     "velocity_profile_experimental_subset_uinf_rmse",
     "cp_panel_macro_rmse",
 )
+NONSPATIAL_METRIC_IDS = (
+    *RANKED_FORCE_METRIC_IDS,
+    *REPORT_ONLY_FORCE_METRIC_IDS,
+    *DIAGNOSTIC_METRIC_IDS,
+)
 
 _FIELD_LAYOUT = {
     "surface_pressure": {
@@ -2219,6 +2224,147 @@ def schema_v3_case_metrics_candidate_adapter(
     }
     _assert_no_absolute_paths(result)
     return result
+
+
+def validate_schema_v3_candidate_nonspatial_metrics(
+    document: Mapping[str, object],
+) -> dict[str, object]:
+    """Validate DrivAerML schema-v3 nonspatial values and their reductions.
+
+    Generic schema-v3 validation can verify spatial sufficient statistics but
+    cannot infer dataset-specific force and AutoCFD5 reductions.  This helper
+    makes that projection fail closed: every force metric must be present for
+    every case, each diagnostic must be present for either every case or no
+    case, no undeclared nonspatial metric is accepted, and every dataset value
+    is recomputed from the per-case values.
+
+    The returned digest covers only the ordered case IDs and their exact
+    nonspatial values.  A maintainer-owned native-evaluator recomputation
+    receipt binds this digest and the complete case-metrics file before an
+    official result can be accepted.
+    """
+
+    root = _mapping(document, "schema-v3 case metrics")
+    if root.get("dataset_id") != "drivaerml":
+        raise DrivAerDatasetScorerError(
+            "schema-v3 nonspatial validation only accepts dataset_id='drivaerml'"
+        )
+    raw_cases = root.get("cases")
+    if not isinstance(raw_cases, list) or not raw_cases:
+        raise DrivAerDatasetScorerError(
+            "schema-v3 DrivAerML cases must be a non-empty array"
+        )
+    if root.get("case_count") != len(raw_cases):
+        raise DrivAerDatasetScorerError(
+            "schema-v3 DrivAerML case_count differs from cases"
+        )
+    aggregate = _mapping(root.get("metric_values"), "schema-v3 metric_values")
+    known = set(NONSPATIAL_METRIC_IDS)
+    required_force = set((*RANKED_FORCE_METRIC_IDS, *REPORT_ONLY_FORCE_METRIC_IDS))
+    per_metric: dict[str, list[float]] = {
+        metric_id: [] for metric_id in NONSPATIAL_METRIC_IDS
+    }
+    canonical_cases: list[dict[str, object]] = []
+    seen_case_ids: set[str] = set()
+    for index, raw_case in enumerate(raw_cases):
+        case = _mapping(raw_case, f"schema-v3 cases[{index}]")
+        case_id = _case_id(case.get("case_id"), f"schema-v3 cases[{index}].case_id")
+        if case_id in seen_case_ids:
+            raise DrivAerDatasetScorerError(
+                f"schema-v3 DrivAerML cases contain duplicate {case_id}"
+            )
+        seen_case_ids.add(case_id)
+        values = _mapping(
+            case.get("nonspatial_metric_values"),
+            f"schema-v3 {case_id} nonspatial_metric_values",
+        )
+        observed = set(values)
+        if not required_force.issubset(observed):
+            raise DrivAerDatasetScorerError(
+                f"schema-v3 {case_id} nonspatial metrics are missing force IDs: "
+                f"{sorted(required_force - observed)}"
+            )
+        if not observed.issubset(known):
+            raise DrivAerDatasetScorerError(
+                f"schema-v3 {case_id} contains undeclared DrivAerML nonspatial "
+                f"metrics: {sorted(observed - known)}"
+            )
+        canonical_values: dict[str, float] = {}
+        for metric_id in NONSPATIAL_METRIC_IDS:
+            if metric_id not in values:
+                continue
+            value = _finite(
+                values[metric_id],
+                f"schema-v3 {case_id} nonspatial_metric_values.{metric_id}",
+                nonnegative=True,
+            )
+            per_metric[metric_id].append(value)
+            canonical_values[metric_id] = value
+        canonical_cases.append(
+            {"case_id": case_id, "nonspatial_metric_values": canonical_values}
+        )
+
+    case_count = len(raw_cases)
+    for metric_id in DIAGNOSTIC_METRIC_IDS:
+        count = len(per_metric[metric_id])
+        if count not in {0, case_count}:
+            raise DrivAerDatasetScorerError(
+                f"schema-v3 diagnostic {metric_id!r} must be present for every "
+                "case or omitted for every case"
+            )
+    present_ids = tuple(
+        metric_id for metric_id in NONSPATIAL_METRIC_IDS if per_metric[metric_id]
+    )
+    aggregate_ids = set(aggregate) & known
+    if aggregate_ids != set(present_ids):
+        raise DrivAerDatasetScorerError(
+            "schema-v3 aggregate DrivAerML nonspatial metric IDs differ from "
+            f"the complete per-case values (missing={sorted(set(present_ids) - aggregate_ids)}, "
+            f"unexpected={sorted(aggregate_ids - set(present_ids))})"
+        )
+
+    expected_values: dict[str, float] = {}
+    for metric_id in (*RANKED_FORCE_METRIC_IDS, "field_integrated_clf_rmse", "field_integrated_clr_rmse"):
+        values = per_metric[metric_id]
+        expected_values[metric_id] = math.sqrt(
+            math.fsum(value * value for value in values) / case_count
+        )
+    expected_values["field_integrated_lift_closure_max_abs"] = max(
+        per_metric["field_integrated_lift_closure_max_abs"]
+    )
+    for metric_id in DIAGNOSTIC_METRIC_IDS:
+        values = per_metric[metric_id]
+        if values:
+            expected_values[metric_id] = math.fsum(values) / case_count
+    for metric_id in present_ids:
+        submitted = _finite(
+            aggregate[metric_id],
+            f"schema-v3 aggregate metric_values.{metric_id}",
+            nonnegative=True,
+        )
+        if not _same_float(submitted, expected_values[metric_id]):
+            raise DrivAerDatasetScorerError(
+                f"schema-v3 aggregate metric_values.{metric_id} differs from "
+                "the DrivAerML per-case reduction"
+            )
+
+    payload = {
+        "schema": "drivaerml-schema-v3-nonspatial-values-v1",
+        "metric_ids": list(present_ids),
+        "cases": canonical_cases,
+    }
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("utf-8")
+    return {
+        "case_count": case_count,
+        "metric_ids": list(present_ids),
+        "nonspatial_values_sha256": hashlib.sha256(encoded).hexdigest(),
+    }
 
 
 def _assert_no_absolute_paths(value: object, context: str = "root") -> None:

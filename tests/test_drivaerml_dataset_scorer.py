@@ -19,6 +19,7 @@ from reference.drivaerml.dataset_scorer import (
     DrivAerDatasetScorerError,
     evaluate_candidate_dataset,
     schema_v3_case_metrics_candidate_adapter,
+    validate_schema_v3_candidate_nonspatial_metrics,
     write_candidate_dataset_evidence,
 )
 
@@ -915,6 +916,51 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
                     candidate_support_release_id="official-support-v1",
                     candidate_support_manifest_sha256="e" * 64,
                 )
+
+    def test_schema_v3_nonspatial_values_are_semantically_bound(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = DatasetFixture(Path(directory))
+            adapter = schema_v3_case_metrics_candidate_adapter(
+                fixture.evaluate(),
+                submission_id="synthetic-drivaerml-binding",
+                candidate_support_release_id="drivaerml-candidate-support-v1",
+                candidate_support_manifest_sha256="e" * 64,
+            )
+            first = validate_schema_v3_candidate_nonspatial_metrics(adapter)
+            second = validate_schema_v3_candidate_nonspatial_metrics(
+                copy.deepcopy(adapter)
+            )
+            self.assertEqual(first, second)
+            self.assertEqual(first["case_count"], 2)
+            self.assertEqual(len(first["nonspatial_values_sha256"]), 64)
+
+            tampered = copy.deepcopy(adapter)
+            tampered["cases"][0]["nonspatial_metric_values"][
+                "field_integrated_cd_rmse"
+            ] += 0.25
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "field_integrated_cd_rmse differs from the DrivAerML per-case reduction",
+            ):
+                validate_schema_v3_candidate_nonspatial_metrics(tampered)
+
+            partial = copy.deepcopy(adapter)
+            del partial["cases"][0]["nonspatial_metric_values"][
+                "velocity_profile_uinf_rmse"
+            ]
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "must be present for every case or omitted for every case",
+            ):
+                validate_schema_v3_candidate_nonspatial_metrics(partial)
+
+            invented = copy.deepcopy(adapter)
+            invented["cases"][0]["nonspatial_metric_values"]["invented"] = 1.0
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "contains undeclared DrivAerML nonspatial metrics",
+            ):
+                validate_schema_v3_candidate_nonspatial_metrics(invented)
 
     def test_incomplete_diagnostic_support_is_never_subset_reduced(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -25,6 +25,10 @@ from reference.scores import (
     legacy_aero_scores,
 )
 from reference.weightings import evaluator_weighting
+from reference.drivaerml.dataset_scorer import (
+    DrivAerDatasetScorerError,
+    validate_schema_v3_candidate_nonspatial_metrics,
+)
 
 try:
     from jsonschema import Draft202012Validator, FormatChecker
@@ -1216,6 +1220,14 @@ def validate_v3_case_metrics(
                 f"metric_values.{metric_id} must equal the macro-average of its submitted "
                 "per-case values"
             )
+    if submission.get("dataset_id") == "drivaerml":
+        try:
+            validate_schema_v3_candidate_nonspatial_metrics(case_metrics)
+        except DrivAerDatasetScorerError as error:
+            add(
+                f"{declaration['file']} DrivAerML nonspatial validation failed: "
+                f"{error}"
+            )
     return case_metrics
 
 
@@ -1841,6 +1853,8 @@ def validate_v3_prediction_metadata(
     split_case_ids: list[str],
     *,
     contributor_stage: bool,
+    case_metrics: dict[str, Any] | None = None,
+    dataset_spec: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Validate optional prediction declarations/checks without downloading artifacts."""
 
@@ -1874,8 +1888,28 @@ def validate_v3_prediction_metadata(
             if case_ids is not None and case_ids != split_case_ids:
                 add(f"{label} complete_split case_ids must match the exact benchmark split")
 
+    if submission.get("dataset_id") == "drivaerml":
+        complete_scored_artifacts = [
+            artifact
+            for artifact in artifacts
+            if isinstance(artifact, dict)
+            and artifact.get("kind") == "scored_predictions"
+            and artifact.get("coverage", {}).get("kind") == "complete_split"
+        ]
+        if len(complete_scored_artifacts) != 1:
+            add(
+                "DrivAerML requires exactly one revision-pinned complete_split "
+                "scored_predictions artifact"
+            )
+
     checks_path = directory / "prediction-artifact-checks.json"
     if not checks_path.exists():
+        if submission.get("dataset_id") == "drivaerml" and not contributor_stage:
+            add(
+                "DrivAerML requires a maintainer-owned "
+                "prediction-artifact-checks.json native-evaluator "
+                "recomputation receipt before final validation"
+            )
         return None
     if contributor_stage:
         add("contributors must not add prediction-artifact-checks.json")
@@ -1972,7 +2006,204 @@ def validate_v3_prediction_metadata(
                     f"prediction check {artifact_id!r} performed metric recomputation "
                     "requires a complete_split prediction artifact"
                 )
+    if submission.get("dataset_id") == "drivaerml":
+        _validate_drivaerml_native_evaluator_recomputation(
+            add,
+            submission=submission,
+            split_case_ids=split_case_ids,
+            checks=checks,
+            case_metrics=case_metrics,
+            dataset_spec=dataset_spec,
+        )
     return checks
+
+
+def _validate_drivaerml_native_evaluator_recomputation(
+    add: Any,
+    *,
+    submission: dict[str, Any],
+    split_case_ids: list[str],
+    checks: dict[str, Any],
+    case_metrics: dict[str, Any] | None,
+    dataset_spec: dict[str, Any] | None,
+) -> None:
+    """Bind DrivAerML nonspatial values to a maintainer evaluator replay."""
+
+    receipt = checks.get("dataset_evaluator_recomputation")
+    if not isinstance(receipt, dict):
+        add(
+            "prediction-artifact-checks.json requires "
+            "dataset_evaluator_recomputation for DrivAerML"
+        )
+        return
+    if case_metrics is None:
+        add(
+            "DrivAerML dataset_evaluator_recomputation requires valid "
+            "case-metrics evidence"
+        )
+        return
+    try:
+        nonspatial = validate_schema_v3_candidate_nonspatial_metrics(case_metrics)
+    except DrivAerDatasetScorerError as error:
+        add(
+            "DrivAerML dataset_evaluator_recomputation cannot bind invalid "
+            f"nonspatial values: {error}"
+        )
+        return
+
+    expected_identity = {
+        "dataset_id": "drivaerml",
+        "status": "complete_native_evaluator_recomputation",
+        "evaluator_reference_version": submission.get("evaluation", {}).get(
+            "reference_version"
+        ),
+        "case_count": len(split_case_ids),
+        "case_metrics_sha256": submission.get("case_metrics", {}).get("sha256"),
+        "nonspatial_metric_ids": nonspatial["metric_ids"],
+        "nonspatial_values_sha256": nonspatial["nonspatial_values_sha256"],
+    }
+    for key, expected in expected_identity.items():
+        if receipt.get(key) != expected:
+            add(
+                "prediction-artifact-checks.json "
+                f"dataset_evaluator_recomputation.{key} must equal {expected!r}"
+            )
+
+    scoring_support = (
+        dataset_spec.get("scoring_support")
+        if isinstance(dataset_spec, dict)
+        else None
+    )
+    evaluator_binding = (
+        scoring_support.get("dataset_evaluator_binding")
+        if isinstance(scoring_support, dict)
+        else None
+    )
+    if not isinstance(evaluator_binding, dict):
+        add(
+            "DrivAerML final validation requires a benchmark-owned "
+            "scoring_support.dataset_evaluator_binding"
+        )
+    elif evaluator_binding.get("status") != "frozen":
+        add(
+            "DrivAerML final validation requires "
+            "scoring_support.dataset_evaluator_binding.status='frozen'; "
+            "the candidate evaluator revision is not frozen"
+        )
+    else:
+        frozen_reference_version = evaluator_binding.get(
+            "evaluator_reference_version"
+        )
+        frozen_code_revision = evaluator_binding.get("evaluator_code_revision")
+        valid_code_revision = (
+            isinstance(frozen_code_revision, str)
+            and len(frozen_code_revision) in {40, 64}
+            and all(
+                character in "0123456789abcdef"
+                for character in frozen_code_revision
+            )
+        )
+        if (
+            not isinstance(frozen_reference_version, str)
+            or not frozen_reference_version
+            or not valid_code_revision
+        ):
+            add(
+                "DrivAerML frozen dataset_evaluator_binding requires a non-empty "
+                "evaluator_reference_version and an immutable 40- or 64-character "
+                "lowercase hexadecimal evaluator_code_revision"
+            )
+        else:
+            if frozen_reference_version != submission.get("evaluation", {}).get(
+                "reference_version"
+            ):
+                add(
+                    "DrivAerML frozen dataset_evaluator_binding reference version "
+                    "must match submission evaluation.reference_version"
+                )
+            if receipt.get("evaluator_reference_version") != frozen_reference_version:
+                add(
+                    "prediction-artifact-checks.json "
+                    "dataset_evaluator_recomputation.evaluator_reference_version "
+                    "must match the benchmark-owned frozen evaluator binding"
+                )
+            if receipt.get("evaluator_code_revision") != frozen_code_revision:
+                add(
+                    "prediction-artifact-checks.json "
+                    "dataset_evaluator_recomputation.evaluator_code_revision must "
+                    "match the benchmark-owned frozen evaluator binding"
+                )
+
+    declared = {
+        artifact.get("artifact_id"): artifact
+        for artifact in submission.get("prediction_artifacts", [])
+        if isinstance(artifact, dict)
+        and isinstance(artifact.get("artifact_id"), str)
+    }
+    expected_artifact_ids = sorted(
+        artifact_id
+        for artifact_id, artifact in declared.items()
+        if artifact.get("kind") == "scored_predictions"
+        and artifact.get("coverage", {}).get("kind") == "complete_split"
+    )
+    if len(expected_artifact_ids) != 1:
+        add(
+            "DrivAerML native-evaluator recomputation requires exactly one "
+            "complete_split scored_predictions artifact"
+        )
+    if receipt.get("prediction_artifact_ids") != expected_artifact_ids:
+        add(
+            "prediction-artifact-checks.json "
+            "dataset_evaluator_recomputation.prediction_artifact_ids must list "
+            "every complete_split scored_predictions artifact exactly once in "
+            "artifact_id order"
+        )
+
+    checks_by_id = {
+        check.get("artifact_id"): check
+        for check in checks.get("checks", [])
+        if isinstance(check, dict) and isinstance(check.get("artifact_id"), str)
+    }
+    for artifact_id in expected_artifact_ids:
+        check = checks_by_id.get(artifact_id)
+        if not isinstance(check, dict):
+            add(
+                f"DrivAerML native-evaluator receipt is missing prediction check "
+                f"{artifact_id!r}"
+            )
+            continue
+        required = {
+            "status": "metrics_recomputed",
+            "metric_recomputation": "performed",
+            "checked_case_count": len(split_case_ids),
+            "recomputed_case_count": len(split_case_ids),
+            "expected_case_count": len(split_case_ids),
+        }
+        for key, expected in required.items():
+            if check.get(key) != expected:
+                add(
+                    f"DrivAerML prediction check {artifact_id!r} {key} must "
+                    f"equal {expected!r}"
+                )
+
+
+def validate_drivaerml_maintainer_receipt_hash(
+    add: Any,
+    directory: Path,
+    validation: dict[str, Any],
+) -> None:
+    """Require the approval record to hash the maintainer replay receipt."""
+
+    checks_path = directory / "prediction-artifact-checks.json"
+    expected = sha256_file(checks_path) if checks_path.is_file() else None
+    if (
+        not isinstance(validation.get("prediction_artifact_checks_sha256"), str)
+        or validation.get("prediction_artifact_checks_sha256") != expected
+    ):
+        add(
+            "maintainer-validation.json prediction_artifact_checks_sha256 "
+            "must bind the DrivAerML native-evaluator recomputation receipt"
+        )
 
 
 def validate_evaluation_evidence(
@@ -2267,6 +2498,10 @@ def validate_open_reproducibility(
         for key, expected in validation_v3_bindings.items():
             if validation.get(key) != expected:
                 add(f"maintainer-validation.json {key} must match submission metadata")
+        if submission.get("dataset_id") == "drivaerml":
+            validate_drivaerml_maintainer_receipt_hash(
+                add, directory, validation
+            )
 
 
 def validate_profiles(
@@ -2578,7 +2813,7 @@ def validate_submission_file(
             dataset_spec,
             spec_split,
         )
-        validate_v3_case_metrics(
+        case_metrics = validate_v3_case_metrics(
             add,
             path.parent,
             submission,
@@ -2600,6 +2835,8 @@ def validate_submission_file(
             submission,
             split_case_ids,
             contributor_stage=contributor_stage,
+            case_metrics=case_metrics,
+            dataset_spec=dataset_spec,
         )
     evidence = validate_evaluation_evidence(add, path.parent, submission)
     validate_open_reproducibility(

@@ -67,11 +67,13 @@ The candidate evaluator's all-484 native-surface force replay is recorded in
 passing implementation evidence does not constitute owner approval or open
 submissions.
 
-The path-free two-case native-volume implementation pilot is recorded in
-[`evidence/native-volume-run1-run44-equal-cell-primary-pilot.json`](evidence/native-volume-run1-run44-equal-cell-primary-pilot.json).
-It covers one two-part and one three-part VTU and the equal-cell primary
-reduction only; deterministic physical-volume weights and all-case volume
-coverage remain activation gates.
+The path-free native-volume evidence now includes both the original two-case
+implementation pilot and the strict
+[`all-484 equal-cell primary audit`](evidence/native-volume-equal-cell-primary-all484.json).
+The latter verifies all 978 pinned segments and 68,949,662,110 native cells,
+including exact field shape/order, finite values, complete coverage, and two
+independent chunk partitions. It is not a model result or physics-null
+baseline. Deterministic physical-volume weights remain an activation gate.
 
 The all-484 Cp candidate sweep retains every one of the 101,156 case/probe rows:
 100,281 are valid and 875 are explicitly invalid. Its mapping, named-STL

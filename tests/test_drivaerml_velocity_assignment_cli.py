@@ -11,6 +11,7 @@ from unittest import mock
 
 from reference.drivaerml.velocity_assignments import (
     NO_CLOSURE_CELL_REASON,
+    QUERY_CACHE_KEY_ID,
     REQUIRED_VTK_VERSION,
     VelocityAssignmentError,
     vtk_available,
@@ -351,6 +352,16 @@ class DrivAerMLVelocityAssignmentCLIVTKTests(unittest.TestCase):
             self.assertEqual(
                 [row["nominal_spacing_mm"] for row in first_receipt["artifacts"]],
                 [1, 2, 5, 10],
+            )
+            self.assertEqual(
+                first_receipt["execution"]["containing_cell_query_cache"],
+                {
+                    "enabled": True,
+                    "key_id": QUERY_CACHE_KEY_ID,
+                    "total_rows": 67_384,
+                    "unique_query_keys": 39_362,
+                    "cache_hits": 28_022,
+                },
             )
 
             for summary in first_receipt["artifacts"]:

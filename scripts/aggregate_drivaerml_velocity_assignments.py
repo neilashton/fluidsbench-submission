@@ -17,6 +17,7 @@ import json
 import math
 import os
 import re
+import struct
 import sys
 import tempfile
 from pathlib import Path
@@ -38,6 +39,7 @@ from reference.drivaerml.velocity_assignments import (  # noqa: E402
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
     OWNER_INVALID_REASONS,
+    QUERY_CACHE_KEY_ID,
     TOLERANCE_REPLAY_M,
     assignment_evidence_sha256,
     candidate_kernel_settings,
@@ -111,6 +113,7 @@ ROW_FIELDS = [
 _CASE_RE = re.compile(r"run_([1-9][0-9]*)\Z")
 _SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 _WINDOWS_ABSOLUTE_RE = re.compile(r"[A-Za-z]:[\\/]")
+_QUERY_CACHE_KEY = struct.Struct(">dddd")
 
 
 class VelocityAssignmentAggregateError(ValueError):
@@ -373,6 +376,44 @@ def _expected_samples_by_resolution(definition: Any) -> dict[int, tuple[Any, ...
             )
         result[spacing_mm] = tuple(samples)
     return result
+
+
+def _expected_query_cache_audit(
+    expected_samples: Mapping[int, Sequence[Any]],
+) -> dict[str, int | str]:
+    """Derive exact cross-resolution cache counts from official sample grids."""
+
+    keys: set[bytes] = set()
+    total_rows = 0
+    for spacing_mm, _, _ in RESOLUTIONS:
+        samples = expected_samples.get(spacing_mm)
+        if samples is None or len(samples) != EXPECTED_SAMPLE_COUNTS[spacing_mm]:
+            raise VelocityAssignmentAggregateError(
+                f"exact {spacing_mm} mm registry samples are unavailable for "
+                "query-cache validation"
+            )
+        for sample in samples:
+            point = sample.point_m
+            keys.add(
+                _QUERY_CACHE_KEY.pack(
+                    float(point[0]),
+                    float(point[1]),
+                    float(point[2]),
+                    float(POINT_IN_CELL_CLOSURE_TOLERANCE_M),
+                )
+            )
+        total_rows += len(samples)
+    unique_query_keys = len(keys)
+    if unique_query_keys < 1 or unique_query_keys > total_rows:
+        raise VelocityAssignmentAggregateError(
+            "derived containing-cell query-cache counts are invalid"
+        )
+    return {
+        "key_id": QUERY_CACHE_KEY_ID,
+        "total_rows": total_rows,
+        "unique_query_keys": unique_query_keys,
+        "cache_hits": total_rows - unique_query_keys,
+    }
 
 
 def _validate_registry_binding(
@@ -1002,6 +1043,8 @@ def _validate_case_receipt(
     pin_sha256: str,
     registry_binding: dict[str, object],
     expected_samples: dict[int, tuple[Any, ...]],
+    expected_query_cache_audit: Mapping[str, int | str],
+    allow_missing_query_cache_audit: bool,
 ) -> dict[str, object]:
     if case_directory.is_symlink() or not case_directory.is_dir():
         raise VelocityAssignmentAggregateError(
@@ -1047,15 +1090,23 @@ def _validate_case_receipt(
     geometry = _validate_geometry(receipt["geometry"], case_id)
     kernel = _validate_kernel(receipt["kernel"], f"{case_id} kernel")
     _validate_false_claims(receipt["claims"], f"{case_id} claims")
+    raw_execution = _mapping(receipt["execution"], f"{case_id} execution")
+    query_cache_present = "containing_cell_query_cache" in raw_execution
+    if not query_cache_present and not allow_missing_query_cache_audit:
+        raise VelocityAssignmentAggregateError(
+            f"{case_id} complete-mode receipt is missing the containing-cell "
+            "query-cache audit"
+        )
+    execution_keys = {
+        "io_chunk_bytes",
+        "validation_chunk_cells",
+        "resolution_order_mm",
+        "geometric_tolerance_m",
+    }
+    if query_cache_present:
+        execution_keys.add("containing_cell_query_cache")
     execution = _exact_keys(
-        receipt["execution"],
-        {
-            "io_chunk_bytes",
-            "validation_chunk_cells",
-            "resolution_order_mm",
-            "geometric_tolerance_m",
-        },
-        f"{case_id} execution",
+        receipt["execution"], execution_keys, f"{case_id} execution"
     )
     _integer(execution["io_chunk_bytes"], "io_chunk_bytes", minimum=1)
     _integer(execution["validation_chunk_cells"], "validation_chunk_cells", minimum=1)
@@ -1068,6 +1119,36 @@ def _validate_case_receipt(
         POINT_IN_CELL_CLOSURE_TOLERANCE_M,
         "geometric_tolerance_m",
     )
+    query_cache_audit: dict[str, object] | None = None
+    if query_cache_present:
+        audit = _exact_keys(
+            execution["containing_cell_query_cache"],
+            {"enabled", "key_id", "total_rows", "unique_query_keys", "cache_hits"},
+            f"{case_id} containing-cell query-cache audit",
+        )
+        total_rows = _integer(audit["total_rows"], "total_rows", minimum=1)
+        unique_keys = _integer(
+            audit["unique_query_keys"], "unique_query_keys", minimum=1
+        )
+        cache_hits = _integer(audit["cache_hits"], "cache_hits", minimum=0)
+        if (
+            audit["enabled"] is not True
+            or audit["key_id"] != QUERY_CACHE_KEY_ID
+            or total_rows != expected_query_cache_audit["total_rows"]
+            or unique_keys != expected_query_cache_audit["unique_query_keys"]
+            or cache_hits != expected_query_cache_audit["cache_hits"]
+        ):
+            raise VelocityAssignmentAggregateError(
+                f"{case_id} containing-cell query-cache audit differs from the "
+                "exact registry-derived query keys"
+            )
+        query_cache_audit = {
+            "enabled": True,
+            "key_id": QUERY_CACHE_KEY_ID,
+            "total_rows": total_rows,
+            "unique_query_keys": unique_keys,
+            "cache_hits": cache_hits,
+        }
     coverage = _exact_keys(
         receipt["coverage"],
         {
@@ -1155,6 +1236,7 @@ def _validate_case_receipt(
             "cell_count": geometry["declared_cell_count"],
             "ordered_verified_segment_count": len(pinned_case.volume_parts),
         },
+        "containing_cell_query_cache": query_cache_audit,
         "resolutions": resolution_rows,
     }
 
@@ -1221,6 +1303,7 @@ def aggregate_velocity_assignments(
         expected_pin_sha256=expected_pin_sha256,
     )
     expected_samples = _expected_samples_by_resolution(definition)
+    expected_query_cache_audit = _expected_query_cache_audit(expected_samples)
     discovered = _discover_case_directories(
         Path(receipts_root).expanduser().resolve()
     )
@@ -1248,6 +1331,10 @@ def aggregate_velocity_assignments(
     total_points = 0
     total_cells = 0
     total_segments = 0
+    cache_audit_receipt_count = 0
+    cache_audit_total_rows = 0
+    cache_audit_unique_query_keys = 0
+    cache_audit_hits = 0
     all_invalid_reasons: collections.Counter[str] = collections.Counter()
     for case_id in expected_cases:
         case = _validate_case_receipt(
@@ -1257,12 +1344,20 @@ def aggregate_velocity_assignments(
             pin_sha256=pin_sha256,
             registry_binding=registry_binding,
             expected_samples=expected_samples,
+            expected_query_cache_audit=expected_query_cache_audit,
+            allow_missing_query_cache_audit=bool(pilot),
         )
         cases.append(case)
         geometry = case["geometry"]
         total_points += int(geometry["point_count"])
         total_cells += int(geometry["cell_count"])
         total_segments += int(geometry["ordered_verified_segment_count"])
+        cache_audit = case["containing_cell_query_cache"]
+        if cache_audit is not None:
+            cache_audit_receipt_count += 1
+            cache_audit_total_rows += int(cache_audit["total_rows"])
+            cache_audit_unique_query_keys += int(cache_audit["unique_query_keys"])
+            cache_audit_hits += int(cache_audit["cache_hits"])
         for resolution in case["resolutions"]:
             spacing_mm = int(resolution["nominal_spacing_mm"])
             totals = totals_by_resolution[spacing_mm]
@@ -1320,6 +1415,23 @@ def aggregate_velocity_assignments(
             "geometry_point_count_sum": total_points,
             "geometry_cell_count_sum": total_cells,
             "ordered_verified_segment_count": total_segments,
+            "containing_cell_query_cache": {
+                "key_id": QUERY_CACHE_KEY_ID,
+                "expected_per_case": {
+                    "total_rows": expected_query_cache_audit["total_rows"],
+                    "unique_query_keys": expected_query_cache_audit[
+                        "unique_query_keys"
+                    ],
+                    "cache_hits": expected_query_cache_audit["cache_hits"],
+                },
+                "audited_receipt_count": cache_audit_receipt_count,
+                "missing_pre_cache_pilot_receipt_count": (
+                    len(cases) - cache_audit_receipt_count
+                ),
+                "total_rows": cache_audit_total_rows,
+                "unique_query_keys_sum": cache_audit_unique_query_keys,
+                "cache_hits": cache_audit_hits,
+            },
             "explicit_assignment_row_count": sum(
                 values["sample_count"] for values in totals_by_resolution.values()
             ),

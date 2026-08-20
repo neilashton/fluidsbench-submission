@@ -35,6 +35,12 @@ prediction packaging, case metrics, profile packaging, discretization records,
 evaluation evidence, and local validation against every applicable repository
 JSON Schema. Its transport bytes are JSON, not VTK.
 
+The driver performs those schema checks as part of the one command. The
+fictional dataset ID is deliberately not registered with the normal
+`scripts/validate_submission.py` official-dataset validator, so that validator
+will reject this teaching package. This keeps the real closed DrivAerML
+contract fail-closed rather than creating a synthetic acceptance path.
+
 ## Real run_1/run_44 pilot
 
 `real_reference_driver.py` is a small fail-closed orchestrator for exactly:

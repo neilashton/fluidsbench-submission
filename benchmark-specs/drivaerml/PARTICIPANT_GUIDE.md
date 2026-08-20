@@ -85,9 +85,11 @@ AutoCFD5 velocity profiles and Cp probes. This ensures truth and predictions use
 the same geometry, raw IDs, force convention, validity masks, and reductions.
 
 The current candidate definitions contain 16 velocity lines and 209 unique Cp
-probes. Their geometric all-case mappings, resolution study, visual review,
-and immutable release are still activation blockers; contributors must not
-invent their own replacements for official scoring.
+probes. All-case velocity mappings and their resolution study are still
+pending. The candidate Cp sweep covers all 484 cases, but retains 875 explicit
+invalid rows and is awaiting owner visual review and disposition. Neither
+candidate mapping is immutable scoring support; contributors must not invent
+their own replacements for official scoring.
 
 ## 5. Install and run the candidate tools
 
@@ -120,6 +122,11 @@ full-versus-chunked invariance, and schema-v3 prediction/case-metric artifact
 validation. Its small transport payloads are JSON, not VTK; it does not claim a
 real DrivAerML reconstruction, result, or official scoring support.
 
+The command performs the fixture's schema-v3 checks itself. Its deliberately
+unregistered `synthetic-drivaerml-shaped` namespace is not accepted by the
+repository's official-dataset semantic validator. That validator must remain
+fail-closed for real DrivAerML packages until the owner activates the contract.
+
 For a real case, first create or obtain candidate surface and volume prediction
 manifests. The zero-field generator is a transport test only, never a model or
 published baseline:
@@ -139,7 +146,8 @@ physical-volume weights or pilot aggregate exist because the candidate volume
 algorithm has not passed the strict positive-finite gate. Do not substitute
 locally generated weights. Once an owner-approved pilot is published, evaluate
 the real native case with its receipt and aggregate; the explicit pilot switch
-below is valid only while the all-484 aggregate remains incomplete:
+below is valid only while the all-484 physical-volume-weight aggregate remains
+incomplete:
 
 ```bash
 .venv-drivaerml/bin/python scripts/evaluate_drivaerml_candidate_case.py \
@@ -181,9 +189,21 @@ generates scientific support, or creates a submission.
 The candidate tools produce deterministic local evaluation evidence, not an
 official `submission.json`. Once the owner publishes immutable official
 scoring support and opens DrivAerML submissions, package the selected split,
-model/checkpoint provenance, case evidence, profiles, and optional prediction
-locations through the repository's normal schema-v3 contributor process. The
-official evaluator release IDs and hashes must match exactly.
+model/checkpoint provenance, case evidence, profiles, and a revision-pinned
+complete-split scored-prediction artifact through the repository's normal
+schema-v3 contributor process. The official evaluator release IDs and hashes
+must match exactly.
+
+Contributors declare a revision-pinned, complete-split `scored_predictions`
+artifact but do not create `prediction-artifact-checks.json`. A maintainer must
+replay the native evaluator over that artifact and add the check: it binds the
+exact case-metrics file, ordered force/velocity/Cp values, evaluator version
+and code revision, and complete case count. Final validation also requires that
+revision to match the benchmark-owned frozen evaluator binding exactly; the
+candidate binding is deliberately still pending and has no frozen revision.
+The later approval record hashes that maintainer-owned check. A
+participant-edited scalar or receipt therefore fails validation. No genuine
+full-split DrivAerML receipt exists yet.
 
 Until then, use this workflow for implementation feedback and reproducibility
 review only. Do not describe a candidate dry run as an accepted submission,

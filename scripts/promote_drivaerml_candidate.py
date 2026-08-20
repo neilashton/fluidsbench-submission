@@ -588,11 +588,23 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "closed_reason": (
             "The participant contract and official splits are published, but ranking remains closed until "
             "deterministic volume weights, all-case velocity replay, Cp failure resolution and visual review, "
-            "physics-null baselines, genuine-model sensitivity analysis, schema-v3 nonspatial-result binding, "
+            "physics-null baselines, genuine-model sensitivity analysis, one genuine maintainer "
+            "native-evaluator recomputation receipt, "
             "force-replay review, and immutable evaluator/scoring-support owner approval are complete."
         ),
         "candidate_evidence_index_file": "evidence/README.md",
         "candidate_evidence_manifest_file": "evidence/manifest.json",
+        "dataset_evaluator_binding": {
+            "status": "pending_frozen_release",
+            "repository_url": "https://github.com/neilashton/fluidsbench-submission",
+            "evaluator_reference_version": EVALUATOR_VERSION,
+            "evaluator_code_revision": None,
+            "activation_rule": (
+                "set status=frozen and publish the exact immutable evaluator Git "
+                "revision only after the production evaluator is scientifically "
+                "approved; final maintainer receipts must match both values exactly"
+            ),
+        },
         "source_release": {
             "provider": "Hugging Face Hub",
             "repository": "neashton/drivaerml",
@@ -614,7 +626,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "inference_may_be_chunked": True,
             "chunk_metrics_must_use_additive_sufficient_statistics": True,
             "complete_case_and_entity_coverage_required": True,
-            "full_prediction_artifact_required": False,
+            "full_prediction_artifact_required": True,
             "case_aggregation": "calculate_each_complete_case_then_macro_average_cases_equally",
             "vector_error": "componentwise_difference_then_euclidean_norm_not_difference_of_magnitudes",
         },
@@ -650,11 +662,16 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                 "primary_weighting": "one_per_native_cell",
                 "secondary_weighting": "benchmark_computed_cell_volume_pending_frozen_publication",
                 "candidate_secondary_weight_status": {
-                    "status": "blocked_real_pilot_positive_finite_gate_not_passed",
+                    "status": "blocked_run_1_vtk_cellsizefilter_negative_wedge_owner_algorithm_decision_pending",
                     "candidate_algorithm": "VTK_9.5.2_vtkCellSizeFilter_volume_only",
                     "accepted_weight_artifact_exists": False,
                     "owner_scientific_decision_required": True,
                     "diagnostic_evidence": [
+                        {
+                            "file": "evidence/volume-weight-vtk-run_1-failure-diagnostic.json",
+                            "sha256": "aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e",
+                            "status": "candidate_algorithm_rejected_fail_closed_no_weight_array_published",
+                        },
                         {
                             "file": "evidence/volume-cell-types-run_1-pilot.json",
                             "sha256": "63f4c794807fd4d327d2e5017db585b41047c758e1ca9eeb4d22f2010817092e",
@@ -668,11 +685,22 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                     ],
                 },
                 "candidate_primary_validation_evidence": {
+                    "file": "evidence/native-volume-equal-cell-primary-all484.json",
+                    "sha256": "bda42a125ffb4d6484756e77ac7e495974f39d4bce3e663154322e9e560827c7",
+                    "provenance_file": "evidence/native-volume-equal-cell-primary-all484-provenance.json",
+                    "provenance_sha256": "b5ffe2234bb1597cf041ff5d97458f3d0d6e81db7a30591a7e26f51ebc032fde",
+                    "status": "all_484_equal_cell_primary_audit_passed_not_scoring_support",
+                    "case_count": 484,
+                    "verified_segment_count": 978,
+                    "native_cell_count": 68949662110,
+                    "physical_volume_secondary_exercised": False,
+                    "complete_all_484_cases": True,
+                    "owner_scientific_approval": False,
+                },
+                "candidate_primary_pilot_evidence": {
                     "file": "evidence/native-volume-run1-run44-equal-cell-primary-pilot.json",
                     "sha256": "d009b6ac708fa320d21492b4cc44fc846b61e99b445836b5dedc704a934592d7",
-                    "status": "two_case_equal_cell_primary_pilot_only",
-                    "physical_volume_secondary_exercised": False,
-                    "complete_all_484_cases": False,
+                    "status": "superseded_scope_pilot_retained_for_two_part_three_part_implementation_reference",
                 },
             },
             {
@@ -781,19 +809,19 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
             "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
             "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
-            "submit scalar metrics, per-case evidence, profile display chunks, and optional prediction artifact locations through the current FluidsBench schema",
+            "submit scalar metrics, per-case evidence, profile display chunks, and one revision-pinned complete-split scored-prediction artifact through the current FluidsBench schema; maintainers independently add the native-evaluator recomputation receipt",
         ],
         "activation_gates": {
             "official_splits": "complete",
             "pinned_native_files": "complete",
             "surface_area_weights": "all_484_candidate_order_count_hash_and_value_audit_passed_owner_release_approval_pending",
-            "volume_cell_weights": "blocked_real_pilot_positive_finite_gate_not_passed_owner_algorithm_decision_pending",
+            "volume_cell_weights": "blocked_run_1_vtk_cellsizefilter_negative_wedge_owner_algorithm_decision_pending_no_weight_array_published",
             "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
             "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
             "cp_probes": "all_484_candidate_mapping_and_cp_equation_replay_complete_with_875_explicit_invalid_rows_owner_resolution_and_visual_signoff_pending",
             "physics_null_baselines": "pending",
             "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
-            "schema_v3_nonspatial_result_binding": "candidate_adapter_exists_but_force_velocity_and_cp_values_require_dataset_specific_validation_or_hash_bound_maintainer_receipt_before_activation",
+            "schema_v3_nonspatial_result_binding": "candidate_fail_closed_reductions_hash_bound_maintainer_native_evaluator_receipt_and_benchmark_owned_pending_immutable_revision_gate_implemented_tests_pass_genuine_full_split_receipt_frozen_revision_and_owner_approval_pending",
             "independent_participant_dry_run": "pending",
             "owner_evaluator_approval": "pending",
         },
@@ -805,7 +833,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "resolve_and_approve_all_875_explicit_cp_mapping_failures_and_visual_atlas",
             "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
             "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
-            "approve_dataset_specific_schema_v3_nonspatial_result_validation_or_hash_bound_maintainer_receipt",
+            "approve_the_candidate_schema_v3_nonspatial_validation_and_hash_bound_maintainer_receipt_then_issue_one_genuine_full_split_receipt",
             "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions",
         ],
     }

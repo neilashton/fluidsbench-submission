@@ -20,6 +20,27 @@
       "public_scoring_support_eligible": false
     },
     {
+      "file": "native-volume-equal-cell-primary-all484.json",
+      "sha256": "bda42a125ffb4d6484756e77ac7e495974f39d4bce3e663154322e9e560827c7",
+      "scope": "all_484_cases",
+      "role": "multipart_native_volume_fields_raw_order_coverage_and_equal_cell_primary_invariance_audit",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "native-volume-equal-cell-primary-all484-provenance.json",
+      "sha256": "b5ffe2234bb1597cf041ff5d97458f3d0d6e81db7a30591a7e26f51ebc032fde",
+      "scope": "all_484_cases",
+      "role": "path_free_code_runtime_launcher_and_external_case_receipt_identity_binding_for_equal_cell_primary_audit",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "volume-weight-vtk-run_1-failure-diagnostic.json",
+      "sha256": "aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e",
+      "scope": "run_1_pilot",
+      "role": "candidate_vtk_physical_volume_weight_fail_closed_rejection_diagnostic",
+      "public_scoring_support_eligible": false
+    },
+    {
       "file": "cp-mapping-all484-hardened.json",
       "sha256": "634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81",
       "scope": "all_484_cases",

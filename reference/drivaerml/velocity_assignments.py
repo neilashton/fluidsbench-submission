@@ -25,6 +25,7 @@ import json
 import math
 import platform
 import re
+import struct
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
 
@@ -57,6 +58,9 @@ KERNEL_ID = "drivaerml-native-containing-cell-candidate-v2"
 REPLAY_SCHEMA = "drivaerml-velocity-cell-tolerance-replay-candidate-v1"
 DEFAULT_VALIDATION_CHUNK_SIZE = 1_000_000
 TOLERANCE_REPLAY_M = (0.5e-6, 1.0e-6, 2.0e-6)
+QUERY_CACHE_KEY_ID = "ieee754-binary64-big-endian-exact-xyz-tolerance-v1"
+_QUERY_CACHE_KEY = struct.Struct(">dddd")
+_CACHE_MISS = object()
 
 # Integer values are stable VTK public constants and keep static settings
 # inspectable even when the optional VTK wheel is absent.
@@ -432,7 +436,10 @@ class NativeContainingCellKernel:
         grid: Any,
         *,
         validation_chunk_size: int = DEFAULT_VALIDATION_CHUNK_SIZE,
+        query_cache_enabled: bool = True,
     ) -> None:
+        if not isinstance(query_cache_enabled, bool):
+            raise VelocityAssignmentError("query_cache_enabled must be a boolean")
         _, self.cell_count = _validate_native_grid(
             grid, chunk_size=validation_chunk_size
         )
@@ -442,6 +449,58 @@ class NativeContainingCellKernel:
         self.locator.BuildLocator()
         if self.locator.GetDataSet() is not grid:
             raise VelocityAssignmentError("VTK locator did not retain the native grid")
+        self.query_cache_enabled = query_cache_enabled
+        self._query_cache: dict[
+            bytes, tuple[tuple[int, ...], tuple[int, ...]]
+        ] = {}
+        self._query_keys_seen: set[bytes] = set()
+        self._query_total_rows = 0
+        self._query_evaluation_count = 0
+
+    @staticmethod
+    def _exact_query_key(
+        point_m: tuple[float, float, float], tolerance_m: float
+    ) -> bytes:
+        """Encode the exact binary64 XYZ/tolerance values without rounding."""
+
+        return _QUERY_CACHE_KEY.pack(
+            float(point_m[0]),
+            float(point_m[1]),
+            float(point_m[2]),
+            float(tolerance_m),
+        )
+
+    def query_cache_audit(self) -> dict[str, object]:
+        """Return deterministic counters without exposing local cache contents."""
+
+        cache_hits = self._query_total_rows - self._query_evaluation_count
+        if cache_hits < 0:  # Defensive invariant; unreachable through public calls.
+            raise VelocityAssignmentError("containing-cell query counters are invalid")
+        return {
+            "enabled": self.query_cache_enabled,
+            "key_id": QUERY_CACHE_KEY_ID,
+            "total_rows": self._query_total_rows,
+            "unique_query_keys": len(self._query_keys_seen),
+            "cache_hits": cache_hits,
+        }
+
+    def _query_closure_candidates(
+        self,
+        point_m: tuple[float, float, float],
+        tolerance_m: float,
+    ) -> tuple[tuple[int, ...], tuple[int, ...]]:
+        key = self._exact_query_key(point_m, tolerance_m)
+        self._query_total_rows += 1
+        self._query_keys_seen.add(key)
+        if self.query_cache_enabled:
+            cached = self._query_cache.get(key, _CACHE_MISS)
+            if cached is not _CACHE_MISS:
+                return cached  # type: ignore[return-value]
+        self._query_evaluation_count += 1
+        result = self._closure_candidates(point_m, tolerance_m)
+        if self.query_cache_enabled:
+            self._query_cache[key] = result
+        return result
 
     def _closure_candidates(
         self,
@@ -541,7 +600,7 @@ class NativeContainingCellKernel:
         owner_invalid = _validated_invalid_reasons(records, invalid_reasons)
         result: list[VelocityCellAssignmentEvidence] = []
         for sample in records:
-            candidates, evaluation_failures = self._closure_candidates(
+            candidates, evaluation_failures = self._query_closure_candidates(
                 sample.point_m, tolerance
             )
             key = _sample_key(sample)
@@ -703,6 +762,7 @@ __all__ = [
     "NO_CLOSURE_CELL_REASON",
     "NativeContainingCellKernel",
     "OWNER_INVALID_REASONS",
+    "QUERY_CACHE_KEY_ID",
     "REPLAY_SCHEMA",
     "REQUIRED_VTK_VERSION",
     "SUPPORTED_CELL_TYPES",

@@ -497,6 +497,7 @@ def generate_pinned_velocity_assignments(
     try:
         from reference.drivaerml.velocity_assignments import (
             NativeContainingCellKernel,
+            QUERY_CACHE_KEY_ID,
             candidate_kernel_receipt,
         )
 
@@ -624,6 +625,22 @@ def generate_pinned_velocity_assignments(
             )
             del assignments, samples, artifact
 
+        query_cache_audit = kernel.query_cache_audit()
+        expected_total_rows = sum(EXPECTED_SAMPLE_COUNTS.values())
+        if (
+            query_cache_audit["enabled"] is not True
+            or query_cache_audit["key_id"] != QUERY_CACHE_KEY_ID
+            or query_cache_audit["total_rows"] != expected_total_rows
+            or not isinstance(query_cache_audit["unique_query_keys"], int)
+            or query_cache_audit["unique_query_keys"] < 1
+            or query_cache_audit["unique_query_keys"] > expected_total_rows
+            or query_cache_audit["cache_hits"]
+            != expected_total_rows - query_cache_audit["unique_query_keys"]
+        ):
+            raise VelocityAssignmentCLIError(
+                "cross-resolution containing-cell query-cache audit is inconsistent"
+            )
+
         receipt: dict[str, object] = {
             "schema": RECEIPT_SCHEMA,
             "schema_version": 1,
@@ -638,6 +655,7 @@ def generate_pinned_velocity_assignments(
                 "validation_chunk_cells": validation_size,
                 "resolution_order_mm": [row[0] for row in RESOLUTIONS],
                 "geometric_tolerance_m": POINT_IN_CELL_CLOSURE_TOLERANCE_M,
+                "containing_cell_query_cache": query_cache_audit,
             },
             "artifacts": artifact_summaries,
             "coverage": {

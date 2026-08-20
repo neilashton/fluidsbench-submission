@@ -51,6 +51,29 @@ official leaderboard results.
   Git commit. See
   [`evidence/native-volume-run1-run44-equal-cell-primary-pilot.json`](evidence/native-volume-run1-run44-equal-cell-primary-pilot.json)
   (SHA-256 `d009b6ac708fa320d21492b4cc44fc846b61e99b445836b5dedc704a934592d7`).
+- The same fail-closed native-volume audit then passed all 484 pinned cases:
+  474 two-part and 10 three-part VTUs, all 978 verified segments,
+  22,932,775,011,362 source bytes, and 68,949,662,110 native cells. It retained
+  exact `CellData` association, tuple/component counts, finite values, declared
+  units, raw-cell order, and complete duplicate-free coverage. Its two chunk
+  partitions agreed within `2.22e-16` for additive statistics and `5.69e-14`
+  for metrics. The all-zero prediction is an invariance fixture, not a model or
+  physics-null result, and the audit does not exercise physical-volume weights.
+  See [`evidence/native-volume-equal-cell-primary-all484.json`](evidence/native-volume-equal-cell-primary-all484.json)
+  (SHA-256 `bda42a125ffb4d6484756e77ac7e495974f39d4bce3e663154322e9e560827c7`)
+  and its path-free
+  [`provenance manifest`](evidence/native-volume-equal-cell-primary-all484-provenance.json)
+  (SHA-256 `b5ffe2234bb1597cf041ff5d97458f3d0d6e81db7a30591a7e26f51ebc032fde`).
+- The VTK 9.5.2 physical-volume candidate was run fail-closed on the exact
+  pinned `run_1` source. It preserved all 147,449,586 raw cell IDs and found no
+  non-finite or zero values, but raw cell ID 124,707,859 was a `vtkWedge` with
+  volume `-9.740389723427085e-13 m^3`. The strict positivity gate rejected the
+  run; no weight array or success receipt was published, and no absolute-value,
+  masking, or epsilon fallback was applied. The source snapshot, environment,
+  external-log hash, and result are bound in
+  [`evidence/volume-weight-vtk-run_1-failure-diagnostic.json`](evidence/volume-weight-vtk-run_1-failure-diagnostic.json)
+  (SHA-256 `aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e`).
+  This completes a rejection diagnostic, not the physical-volume scoring gate.
 - The hardened Cp candidate sweep covered all 484 cases and retained all
   101,156 case/probe rows: 100,281 valid and 875 explicitly invalid. Its source
   inventory covers 364,568,214 raw STL facets, and the 488-page external review
@@ -65,21 +88,32 @@ official leaderboard results.
    algorithm that produces it), with per-case counts, positive/finite checks,
    aggregate QA, hashes, dependency versions, and chunk-invariance golden tests.
    The current VTK 9.5.2 `vtkCellSizeFilter` volume-only candidate has not passed
-   the strict one-positive-finite-volume-per-native-cell gate on the real pilot;
-   no physical-volume weight artifact is accepted. The mixed-cell inventories in
+   the strict one-positive-finite-volume-per-native-cell gate on `run_1`: its
+   sole invalid value was the negative `vtkWedge` volume recorded above. No
+   physical-volume weight artifact is accepted. The mixed-cell inventories in
    [`evidence/README.md`](evidence/README.md) are diagnostic-only. An
-   owner-approved algorithm or fallback remains a scientific decision.
-2. Complete the all-case native array audit: association, tuple and component
-   counts, finite values, units, pressure gauge, wall-shear sign convention,
-   stable IDs, exclusions, and exact correspondence to the surface-area arrays.
+   owner-approved, scientifically justified algorithm and raw-order mapping
+   remain a scientific decision; the rejected value must not be silently
+   absolutized, masked, or replaced by an epsilon.
+2. Obtain owner scientific approval of the completed candidate all-case native
+   array evidence. The all-484 volume replay now covers association, tuple and
+   component counts, finite values, declared units, stable raw IDs, complete
+   coverage, and chunk invariance. The all-484 surface force replay separately
+   binds native surface fields and fixed-area ordering. Owner approval of the
+   pressure gauge, wall-shear sign, exclusion policy, and the combined evidence
+   remains pending.
 3. Promote the implemented and tested candidate dataset loader/evaluator into a
    frozen production evaluator. Before activation, it must incorporate an
-   accepted physical-volume weight definition, complete the all-case native
-   replay, publish full-case versus chunked golden evidence, bind every
+   accepted physical-volume weight definition, bind every
    schema-v3 nonspatial metric value to dataset-specific validation, and publish
    a normalized immutable scoring-support digest. The current candidate covers
    native VTP, reconstructed VTU, fixed area inputs, fields, forces, and
-   diagnostic profiles, but those remaining production gates are not complete.
+   diagnostic profiles; its all-case equal-cell volume replay and chunk golden
+   evidence are complete. Final validation now fails closed unless the
+   maintainer receipt matches a benchmark-owned frozen evaluator version and
+   immutable Git revision; that binding remains deliberately pending with no
+   revision while the evaluator is still a candidate. The remaining production
+   gates are not complete.
 4. Obtain dataset-owner scientific review of the completed all-484 force replay
    and its tolerance choices. The numerical replay, mirror checks, axle-load
    closure, fixed-area audit, and chunk-invariance evidence are complete at the

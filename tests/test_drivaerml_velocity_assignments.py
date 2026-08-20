@@ -19,6 +19,7 @@ from reference.drivaerml.velocity_assignments import (
     EVALUATE_POSITION_FAILURE_REASON_PREFIX,
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
+    QUERY_CACHE_KEY_ID,
     REQUIRED_NUMPY_VERSION,
     REQUIRED_PYTHON_VERSION,
     REQUIRED_VTK_VERSION,
@@ -350,6 +351,121 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
             [("second_cell_first", 7), ("first_cell_second", 3)],
         )
         self.assertEqual([row.raw_vtk_cell_id for row in assignments], [1, 0])
+
+    def test_cached_and_uncached_assignments_and_hashes_are_identical(self) -> None:
+        samples = (
+            self.sample("inside_first", 0, (0.5, 0.5, 0.5)),
+            self.sample("inside_duplicate", 0, (0.5, 0.5, 0.5)),
+            self.sample("outside_first", 0, (-2.0, 0.5, 0.5)),
+            self.sample("outside_duplicate", 0, (-2.0, 0.5, 0.5)),
+        )
+        cached_kernel = NativeContainingCellKernel(
+            self.two_hex_grid(), query_cache_enabled=True
+        )
+        uncached_kernel = NativeContainingCellKernel(
+            self.two_hex_grid(), query_cache_enabled=False
+        )
+        cached = cached_kernel.assign(
+            samples,
+            case_id="synthetic_cached",
+            source_sha256=SOURCE_HASHES,
+        )
+        uncached = uncached_kernel.assign(
+            samples,
+            case_id="synthetic_cached",
+            source_sha256=SOURCE_HASHES,
+        )
+        self.assertEqual(cached, uncached)
+        self.assertEqual(
+            assignment_evidence_sha256(cached),
+            assignment_evidence_sha256(uncached),
+        )
+        self.assertEqual(
+            cached_kernel.query_cache_audit(),
+            {
+                "enabled": True,
+                "key_id": QUERY_CACHE_KEY_ID,
+                "total_rows": 4,
+                "unique_query_keys": 2,
+                "cache_hits": 2,
+            },
+        )
+        self.assertEqual(
+            uncached_kernel.query_cache_audit(),
+            {
+                "enabled": False,
+                "key_id": QUERY_CACHE_KEY_ID,
+                "total_rows": 4,
+                "unique_query_keys": 2,
+                "cache_hits": 0,
+            },
+        )
+
+    def test_cache_retains_failure_rows_and_uses_exact_xyz_tolerance_keys(self) -> None:
+        exact = (0.5, 0.5, 0.5)
+        adjacent = (math.nextafter(0.5, math.inf), 0.5, 0.5)
+        samples = (
+            self.sample("exact_first", 0, exact),
+            self.sample("exact_duplicate", 0, exact),
+            self.sample("adjacent_binary64", 0, adjacent),
+        )
+        cached_kernel = NativeContainingCellKernel(self.two_hex_grid())
+        with patch.object(
+            cached_kernel,
+            "_closure_candidates",
+            return_value=((0,), (1,)),
+        ) as cached_query:
+            cached = cached_kernel.assign(
+                samples,
+                case_id="synthetic_failure_cache",
+                source_sha256=SOURCE_HASHES,
+            )
+            cached_kernel.assign(
+                (self.sample("different_tolerance", 0, exact),),
+                case_id="synthetic_failure_cache",
+                source_sha256=SOURCE_HASHES,
+                tolerance_m=2.0e-6,
+            )
+        self.assertEqual(cached_query.call_count, 3)
+        self.assertTrue(all(not row.valid for row in cached))
+        self.assertTrue(all(row.raw_vtk_cell_id is None for row in cached))
+        self.assertTrue(all(row.candidate_count == 1 for row in cached))
+        self.assertTrue(
+            all(
+                row.reason == EVALUATE_POSITION_FAILURE_REASON_PREFIX + "1"
+                for row in cached
+            )
+        )
+        self.assertEqual(
+            cached_kernel.query_cache_audit(),
+            {
+                "enabled": True,
+                "key_id": QUERY_CACHE_KEY_ID,
+                "total_rows": 4,
+                "unique_query_keys": 3,
+                "cache_hits": 1,
+            },
+        )
+
+        uncached_kernel = NativeContainingCellKernel(
+            self.two_hex_grid(), query_cache_enabled=False
+        )
+        with patch.object(
+            uncached_kernel,
+            "_closure_candidates",
+            return_value=((0,), (1,)),
+        ) as uncached_query:
+            uncached = uncached_kernel.assign(
+                samples,
+                case_id="synthetic_failure_cache",
+                source_sha256=SOURCE_HASHES,
+            )
+        self.assertEqual(uncached_query.call_count, 3)
+        self.assertEqual(cached, uncached)
+        self.assertEqual(
+            assignment_evidence_sha256(cached),
+            assignment_evidence_sha256(uncached),
+        )
 
     def test_invalid_rows_are_retained_with_owner_reasons(self) -> None:
         kernel = NativeContainingCellKernel(self.two_hex_grid())

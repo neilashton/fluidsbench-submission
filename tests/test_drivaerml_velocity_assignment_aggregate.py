@@ -18,6 +18,7 @@ from reference.drivaerml.autocfd5 import (
 from reference.drivaerml.velocity_assignments import (
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
+    QUERY_CACHE_KEY_ID,
     assignment_evidence_sha256,
     candidate_kernel_settings,
 )
@@ -375,6 +376,13 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
                 "validation_chunk_cells": 7,
                 "resolution_order_mm": [1, 2, 5, 10],
                 "geometric_tolerance_m": POINT_IN_CELL_CLOSURE_TOLERANCE_M,
+                "containing_cell_query_cache": {
+                    "enabled": True,
+                    "key_id": QUERY_CACHE_KEY_ID,
+                    "total_rows": 64,
+                    "unique_query_keys": 64,
+                    "cache_hits": 0,
+                },
             },
             "artifacts": summaries,
             "coverage": {
@@ -443,6 +451,22 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
         self.assertFalse(first["case_scope"]["complete_484_public_case_set"])
         self.assertEqual(first["case_scope"]["explicit_pilot_case_ids"], [CASE_ID])
         self.assertEqual(first["totals"]["explicit_assignment_row_count"], 64)
+        self.assertEqual(
+            first["totals"]["containing_cell_query_cache"],
+            {
+                "key_id": QUERY_CACHE_KEY_ID,
+                "expected_per_case": {
+                    "total_rows": 64,
+                    "unique_query_keys": 64,
+                    "cache_hits": 0,
+                },
+                "audited_receipt_count": 1,
+                "missing_pre_cache_pilot_receipt_count": 0,
+                "total_rows": 64,
+                "unique_query_keys_sum": 64,
+                "cache_hits": 0,
+            },
+        )
         for spacing_mm in (1, 2, 5, 10):
             totals = first["totals"]["by_resolution_mm"][str(spacing_mm)]
             self.assertEqual(totals["sample_count"], 16)
@@ -520,6 +544,86 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
             "all 484 public receipt directories are not exact",
         ):
             aggregate_velocity_assignments(receipts_root=empty)
+
+    def test_missing_cache_audit_is_only_accepted_in_explicit_pilot_mode(self) -> None:
+        receipt_path = self.case_root / "receipt.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        del receipt["execution"]["containing_cell_query_cache"]
+        _write_json(receipt_path, receipt)
+
+        pilot = self._aggregate()
+        self.assertEqual(pilot["mode"], "explicit_non_public_pilot")
+        self.assertEqual(
+            pilot["totals"]["containing_cell_query_cache"],
+            {
+                "key_id": QUERY_CACHE_KEY_ID,
+                "expected_per_case": {
+                    "total_rows": 64,
+                    "unique_query_keys": 64,
+                    "cache_hits": 0,
+                },
+                "audited_receipt_count": 0,
+                "missing_pre_cache_pilot_receipt_count": 1,
+                "total_rows": 0,
+                "unique_query_keys_sum": 0,
+                "cache_hits": 0,
+            },
+        )
+
+        with self._patch_small_samples(), mock.patch.object(
+            aggregate_module, "OFFICIAL_CASE_IDS", (CASE_ID,)
+        ), mock.patch.object(
+            aggregate_module, "OFFICIAL_NATIVE_SOURCE_PIN_SHA256", None
+        ):
+            with self.assertRaisesRegex(
+                VelocityAssignmentAggregateError,
+                "complete-mode receipt is missing.*query-cache audit",
+            ):
+                aggregate_velocity_assignments(
+                    receipts_root=self.receipts_root,
+                    native_source_pin=self.pin_path,
+                    autocfd5_profile=PROFILE,
+                    official_case_ids=(CASE_ID,),
+                    expected_pin_sha256=None,
+                )
+
+    def test_query_cache_audit_counts_are_strict(self) -> None:
+        receipt_path = self.case_root / "receipt.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt["execution"]["containing_cell_query_cache"]["cache_hits"] = 1
+        _write_json(receipt_path, receipt)
+        with self.assertRaisesRegex(
+            VelocityAssignmentAggregateError,
+            "query-cache audit differs from the exact registry-derived query keys",
+        ):
+            self._aggregate()
+
+    def test_official_query_cache_counts_are_derived_from_exact_grids(self) -> None:
+        expected_samples = aggregate_module._expected_samples_by_resolution(
+            self.definition
+        )
+        self.assertEqual(
+            aggregate_module._expected_query_cache_audit(expected_samples),
+            {
+                "key_id": QUERY_CACHE_KEY_ID,
+                "total_rows": 67_384,
+                "unique_query_keys": 39_362,
+                "cache_hits": 28_022,
+            },
+        )
+
+    def test_self_consistent_forged_query_cache_counts_fail(self) -> None:
+        receipt_path = self.case_root / "receipt.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        audit = receipt["execution"]["containing_cell_query_cache"]
+        audit["unique_query_keys"] = 1
+        audit["cache_hits"] = audit["total_rows"] - 1
+        _write_json(receipt_path, receipt)
+        with self.assertRaisesRegex(
+            VelocityAssignmentAggregateError,
+            "query-cache audit differs from the exact registry-derived query keys",
+        ):
+            self._aggregate()
 
     def test_rehashed_duplicate_and_invalid_raw_id_rows_fail(self) -> None:
         self._mutate_artifact(
