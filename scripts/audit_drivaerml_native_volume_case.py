@@ -4,9 +4,7 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
-import math
 import platform
 import sys
 import time
@@ -29,14 +27,6 @@ from reference.drivaerml.source import (  # noqa: E402
 )
 
 
-def sha256_file(path: Path, *, chunk_bytes: int = 64 * 1024 * 1024) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        while block := stream.read(chunk_bytes):
-            digest.update(block)
-    return digest.hexdigest()
-
-
 def _relative_difference(left: float, right: float) -> float:
     scale = max(abs(left), abs(right), np.finfo(np.float64).tiny)
     return abs(left - right) / scale
@@ -50,67 +40,54 @@ def compare_metric_passes(left: object, right: object) -> dict[str, object]:
         or left.source_payload.payload_sha256 != right.source_payload.payload_sha256
     ):
         raise ValueError("metric passes do not refer to the same complete native field")
-    additive: dict[str, dict[str, dict[str, float]]] = {}
+    additive: dict[str, dict[str, float]] = {}
     maximum_relative = 0.0
     maximum_metric_absolute = 0.0
-    for weighting in ("uniform", "physical"):
-        left_sums = getattr(left.statistics, weighting)
-        right_sums = getattr(right.statistics, weighting)
-        if left_sums.entity_count != right_sums.entity_count:
-            raise ValueError("metric partitions have different entity coverage")
-        weighting_rows: dict[str, dict[str, float]] = {}
-        for name in (
-            "absolute_error",
-            "squared_error",
-            "squared_truth",
-            "total_weight",
-        ):
-            left_value = float(getattr(left_sums, name))
-            right_value = float(getattr(right_sums, name))
-            relative = _relative_difference(left_value, right_value)
-            maximum_relative = max(maximum_relative, relative)
-            weighting_rows[name] = {
-                "absolute_difference": abs(left_value - right_value),
-                "relative_difference": relative,
-            }
-        additive[weighting] = weighting_rows
-        left_metrics = left.statistics.metric_values()[weighting]
-        right_metrics = right.statistics.metric_values()[weighting]
-        maximum_metric_absolute = max(
-            maximum_metric_absolute,
-            *(abs(left_metrics[name] - right_metrics[name]) for name in left_metrics),
-        )
+    left_sums = left.statistics.uniform
+    right_sums = right.statistics.uniform
+    if left_sums.entity_count != right_sums.entity_count:
+        raise ValueError("metric partitions have different entity coverage")
+    for name in (
+        "absolute_error",
+        "squared_error",
+        "squared_truth",
+        "total_weight",
+    ):
+        left_value = float(getattr(left_sums, name))
+        right_value = float(getattr(right_sums, name))
+        relative = _relative_difference(left_value, right_value)
+        maximum_relative = max(maximum_relative, relative)
+        additive[name] = {
+            "absolute_difference": abs(left_value - right_value),
+            "relative_difference": relative,
+        }
+    left_metrics = left.statistics.metric_values()["uniform"]
+    right_metrics = right.statistics.metric_values()["uniform"]
+    maximum_metric_absolute = max(
+        abs(left_metrics[name] - right_metrics[name]) for name in left_metrics
+    )
     return {
         "same_source_payload_sha256": True,
         "same_complete_entity_coverage": True,
-        "additive_sums": additive,
+        "equal_native_cell_additive_sums": additive,
         "maximum_additive_relative_difference": maximum_relative,
         "maximum_metric_absolute_difference": maximum_metric_absolute,
     }
 
 
-def audit_weights(path: Path, expected_count: int) -> tuple[np.ndarray, dict[str, object]]:
-    values = np.load(path, mmap_mode="r", allow_pickle=False)
-    if values.shape != (expected_count,) or values.dtype != np.dtype("<f8"):
-        raise ValueError("volume weights must be same-order little-endian float64")
-    partial_sums: list[float] = []
-    minimum = math.inf
-    maximum = -math.inf
-    for start in range(0, expected_count, 1_000_000):
-        chunk = np.asarray(values[start : start + 1_000_000])
-        if not np.all(np.isfinite(chunk)) or np.any(chunk <= 0.0):
-            raise ValueError("every native volume weight must be positive and finite")
-        partial_sums.append(float(np.sum(chunk, dtype=np.float64)))
-        minimum = min(minimum, float(np.min(chunk)))
-        maximum = max(maximum, float(np.max(chunk)))
-    return values, {
-        "path": str(path),
-        "sha256": sha256_file(path),
-        "dtype": values.dtype.str,
-        "cell_count": expected_count,
-        "sum_m3": math.fsum(partial_sums),
-        "minimum_m3": minimum,
-        "maximum_m3": maximum,
+def equal_native_cell_metric_pass(metric_pass: object) -> dict[str, object]:
+    """Serialize only the frozen one-weight-per-native-cell statistic stream."""
+
+    statistics = metric_pass.statistics
+    return {
+        "field_name": metric_pass.field_name,
+        "chunk_entities": metric_pass.chunk_entities,
+        "source_payload_sha256": metric_pass.source_payload.payload_sha256,
+        "source_payload_bytes": metric_pass.source_payload.decoded_payload_bytes,
+        "entity_count": statistics.entity_count,
+        "component_count": statistics.component_count,
+        "metrics": statistics.metric_values()["uniform"],
+        "additive_sums": asdict(statistics.uniform),
     }
 
 
@@ -120,7 +97,6 @@ def main() -> None:
     parser.add_argument("--pin", type=Path, required=True)
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--monolithic-vtu", type=Path, required=True)
-    parser.add_argument("--volume-weights", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--reference-chunk-cells", type=int, default=1_000_003)
     parser.add_argument("--comparison-chunk-cells", type=int, default=777_779)
@@ -159,20 +135,6 @@ def main() -> None:
         if vtk_index.dataset_type != "UnstructuredGrid" or len(vtk_index.pieces) != 1:
             raise ValueError("native volume must be one UnstructuredGrid Piece")
         piece = vtk_index.pieces[0]
-        if args.volume_weights is None:
-            weights = None
-            weight_receipt: dict[str, object] = {
-                "role": "unit_weights_for_equal_native_cell_primary_pilot",
-                "status": "physical_secondary_not_exercised",
-            }
-        else:
-            weights, weight_receipt = audit_weights(
-                args.volume_weights, piece.number_of_cells
-            )
-            weight_receipt["role"] = "fixed_same_order_cell_volume_secondary_weights"
-            weight_receipt["status"] = "audited"
-        weight_audit_finished_at = time.time()
-
         field_audits: dict[str, object] = {}
         metric_passes: dict[str, object] = {}
         requirements = {
@@ -196,7 +158,7 @@ def main() -> None:
                 array,
                 units=units,
                 predictions=None,
-                physical_weights=weights,
+                physical_weights=None,
                 reference_chunk_entities=args.reference_chunk_cells,
                 comparison_chunk_entities=args.comparison_chunk_cells,
                 encoded_chunk_size=args.io_chunk_bytes,
@@ -212,14 +174,14 @@ def main() -> None:
                 raise ValueError("complete-case metrics depend on the chunk partition")
             metric_passes[name] = {
                 "prediction_role": "all_zero_invariance_fixture_not_a_published_baseline",
-                "reference_partition": reference.to_json(),
-                "comparison_partition": comparison.to_json(),
+                "reference_partition": equal_native_cell_metric_pass(reference),
+                "comparison_partition": equal_native_cell_metric_pass(comparison),
                 "invariance": invariance,
             }
         field_audit_finished_at = time.time()
 
     receipt = {
-        "schema": "drivaerml-native-volume-case-audit-v1",
+        "schema": "drivaerml-native-volume-case-audit-v2",
         "status": "passed_candidate_evaluator_case_audit",
         "case_id": args.case_id,
         "public_source": {
@@ -248,7 +210,12 @@ def main() -> None:
             "expected_raw_id_interval": [0, piece.number_of_cells],
             "validation": "each metric pass finalized exact gap-free duplicate-free coverage",
         },
-        "volume_weights": weight_receipt,
+        "volume_weighting": {
+            "weighting": "one_per_native_cell",
+            "entity_count": piece.number_of_cells,
+            "total_weight": float(piece.number_of_cells),
+            "geometric_cell_volume_weights_used": False,
+        },
         "metrics": metric_passes,
         "chunk_invariance_tolerances": {
             "maximum_additive_relative_difference": args.invariance_relative_tolerance,
@@ -259,11 +226,8 @@ def main() -> None:
             "numpy": np.__version__,
             "segment_verification_seconds": indexed_at - started,
             "xml_index_seconds": index_finished_at - indexed_at,
-            "volume_weight_audit_seconds": (
-                weight_audit_finished_at - index_finished_at
-            ),
-            "field_audit_and_dual_metric_seconds": (
-                field_audit_finished_at - weight_audit_finished_at
+            "field_audit_and_equal_cell_metric_seconds": (
+                field_audit_finished_at - index_finished_at
             ),
             "total_seconds": time.time() - started,
         },

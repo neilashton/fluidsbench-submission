@@ -15,8 +15,6 @@ if str(ROOT) not in sys.path:
 
 from reference.drivaerml.evaluator import (  # noqa: E402
     DrivAerCandidateEvaluatorError,
-    OFFICIAL_NATIVE_SOURCE_CONTRACT,
-    audit_source_bound_volume_weight_file,
     evaluate_candidate_case,
     validate_native_source_contract,
     write_candidate_case_evidence,
@@ -70,34 +68,6 @@ def parse_args() -> argparse.Namespace:
         help="Open and concatenate the pinned .part files without materializing a VTU.",
     )
     parser.add_argument("--surface-area-npy", type=Path, required=True)
-    parser.add_argument("--volume-weight-npy", type=Path, required=True)
-    parser.add_argument(
-        "--volume-weight-receipt",
-        type=Path,
-        action="append",
-        required=True,
-        help=(
-            "One receipt from the aggregate; repeat to supply every receipt in "
-            "that aggregate (484 for a complete production aggregate)."
-        ),
-    )
-    parser.add_argument("--volume-weight-aggregate", type=Path, required=True)
-    parser.add_argument(
-        "--pilot-volume-weight-aggregate-sha256",
-        help=(
-            "Predeclared SHA-256 of an owner-produced partial pilot aggregate; "
-            "valid only with --allow-incomplete-volume-weight-pilot. Production "
-            "uses the hash frozen in the evaluator source contract."
-        ),
-    )
-    parser.add_argument(
-        "--allow-incomplete-volume-weight-pilot",
-        action="store_true",
-        help=(
-            "Explicitly permit a partial non-public pilot aggregate. Evidence "
-            "remains ineligible for activation or production scoring."
-        ),
-    )
     parser.add_argument("--surface-prediction-manifest", type=Path, required=True)
     parser.add_argument("--volume-prediction-manifest", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -115,27 +85,6 @@ def parse_args() -> argparse.Namespace:
 
 
 def run(args: argparse.Namespace) -> dict[str, object]:
-    if args.allow_incomplete_volume_weight_pilot:
-        aggregate_sha256 = args.pilot_volume_weight_aggregate_sha256
-        if aggregate_sha256 is None:
-            raise DrivAerCandidateEvaluatorError(
-                "a pilot aggregate requires "
-                "--pilot-volume-weight-aggregate-sha256"
-            )
-    else:
-        if args.pilot_volume_weight_aggregate_sha256 is not None:
-            raise DrivAerCandidateEvaluatorError(
-                "--pilot-volume-weight-aggregate-sha256 is valid only with "
-                "--allow-incomplete-volume-weight-pilot"
-            )
-        aggregate_sha256 = (
-            OFFICIAL_NATIVE_SOURCE_CONTRACT.volume_weight_aggregate_sha256
-        )
-        if aggregate_sha256 is None:
-            raise DrivAerCandidateEvaluatorError(
-                "production candidate evaluation remains closed because the "
-                "complete volume-weight aggregate hash is not frozen"
-            )
     pin = load_native_source_pin(args.native_source_pin)
     validate_native_source_contract(pin)
     case = pin.case(args.case_id)
@@ -167,18 +116,6 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             raise DrivAerCandidateEvaluatorError(
                 "native DrivAerML volume must contain exactly one Piece"
             )
-        weights = audit_source_bound_volume_weight_file(
-            case,
-            args.volume_weight_npy,
-            native_source_pin=pin,
-            receipt_jsons=args.volume_weight_receipt,
-            aggregate_json=args.volume_weight_aggregate,
-            expected_aggregate_sha256=aggregate_sha256,
-            expected_entity_count=vtk_index.pieces[0].number_of_cells,
-            allow_incomplete_pilot_aggregate=(
-                args.allow_incomplete_volume_weight_pilot
-            ),
-        )
         evaluation = evaluate_candidate_case(
             case_id=args.case_id,
             native_source_pin=pin,
@@ -186,16 +123,12 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             fixed_surface_areas=areas,
             volume_stream=stream,
             volume_vtk_index=vtk_index,
-            fixed_volume_weights=weights,
             surface_prediction_manifest=args.surface_prediction_manifest,
             volume_prediction_manifest=args.volume_prediction_manifest,
             maximum_prediction_chunk_rows=args.maximum_prediction_chunk_rows,
             hash_chunk_bytes=args.io_chunk_bytes,
             validation_block_rows=args.maximum_prediction_chunk_rows,
             encoded_chunk_bytes=args.io_chunk_bytes,
-            allow_incomplete_volume_weight_pilot=(
-                args.allow_incomplete_volume_weight_pilot
-            ),
         )
     return write_candidate_case_evidence(evaluation, args.output)
 

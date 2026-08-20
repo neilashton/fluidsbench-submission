@@ -325,7 +325,7 @@ The raw component errors are fixed as follows:
   case area-weighted relative L2 defined in `SCIENTIFIC_CONTRACT.md`;
 - volume velocity and pressure: arithmetic mean over cases of the complete
   case equal-native-cell relative L2, preserving the current repository-wide
-  volume default; publish the cell-volume-weighted result beside it;
+  volume default; no geometric cell-volume secondary is required;
 - field-integrated `Cd`, `Cl`, and `CmPitch`: separate equal-case RMSEs of the
   coefficients integrated from the submitted surface fields using the constant
   AutoCFD convention `A_ref=2.17 m^2`, `L_ref=2.78618 m`,

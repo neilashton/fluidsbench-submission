@@ -10,6 +10,14 @@ from scripts.validate_submission import sha256_file
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_ROOT = ROOT / "benchmark-specs" / "drivaerml"
+REMOVED_PHYSICAL_VOLUME_METRIC_IDS = {
+    "volume_velocity_physical_rel_l2",
+    "volume_pressure_physical_rel_l2",
+    "drivaerml_volume_velocity_physical_mae",
+    "drivaerml_volume_velocity_physical_rmse",
+    "drivaerml_volume_pressure_physical_mae",
+    "drivaerml_volume_pressure_physical_rmse",
+}
 
 
 def load_json(path: Path) -> dict:
@@ -27,7 +35,7 @@ class DrivAerMLContractTests(unittest.TestCase):
     def test_candidate_is_concrete_but_closed(self) -> None:
         self.assertEqual(
             self.specification["dataset_version"],
-            "drivaerml-native-v1-candidate",
+            "drivaerml-native-v2-candidate",
         )
         support = self.specification["scoring_support"]
         self.assertEqual(support["status"], "owner_review_required")
@@ -36,6 +44,24 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertEqual(
             support["source_release"]["revision"],
             "7a5c0948ce27be709b1116a3a190f806e7a8f79f",
+        )
+        self.assertEqual(
+            self.specification["evaluation_reference_version"],
+            "drivaerml-evaluator-v2-candidate",
+        )
+        self.assertEqual(
+            support["dataset_evaluator_binding"]["evaluator_reference_version"],
+            "drivaerml-evaluator-v2-candidate",
+        )
+        self.assertEqual(
+            support["activation_gates"]["volume_field_weighting"],
+            "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
+        )
+        self.assertFalse(
+            any(
+                "volume" in decision and "weight" in decision
+                for decision in support["owner_decisions_required"]
+            )
         )
 
     def test_candidate_evidence_manifest_is_hash_complete_and_nonactivating(self) -> None:
@@ -88,7 +114,7 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertTrue(set(owner["super_scarce_train"]).issubset(owner["scarce_train"]))
         self.assertTrue(set(owner["scarce_train"]).issubset(owner["medium_train"]))
 
-    def test_native_cell_support_and_dual_weighting_are_explicit(self) -> None:
+    def test_native_cell_support_uses_surface_areas_and_equal_volume_cells(self) -> None:
         supports = {
             item["id"]: item
             for item in self.specification["scoring_support"]["public_supports"]
@@ -104,10 +130,31 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertEqual(volume["association"], "CellData")
         self.assertEqual(volume["arrays"], ["UMeanTrim", "pMeanTrim"])
         self.assertIn("optional .02.part", volume["transport_parts"])
-        self.assertEqual(volume["primary_weighting"], "one_per_native_cell")
-        self.assertIn("pending", volume["secondary_weighting"])
+        self.assertEqual(volume["weighting"], "one_per_native_cell")
+        self.assertFalse(volume["geometric_cell_volume_weights_required"])
+        self.assertNotIn("primary_weighting", volume)
+        self.assertNotIn("secondary_weighting", volume)
+        all_case_evidence = volume["candidate_primary_validation_evidence"]
+        self.assertEqual(
+            all_case_evidence["file"],
+            "evidence/native-volume-equal-cell-primary-all484.json",
+        )
+        self.assertTrue(all_case_evidence["equal_native_cell_weighting_exercised"])
+        self.assertTrue(all_case_evidence["complete_all_484_cases"])
+        self.assertEqual(
+            all_case_evidence["artifact_schema"],
+            "drivaerml-native-volume-equal-cell-primary-all-case-audit-v1",
+        )
+        self.assertTrue(all_case_evidence["legacy_unit_weight_vocabulary"])
+        self.assertEqual(
+            all_case_evidence["current_tool_aggregate_schema"],
+            "drivaerml-native-volume-equal-cell-all-case-audit-v2",
+        )
+        self.assertIn("explicit_normalization", all_case_evidence["normalization_status"])
 
         metrics = {item["id"]: item for item in self.specification["metrics"]}
+        self.assertEqual(len(metrics), 32)
+        self.assertTrue(REMOVED_PHYSICAL_VOLUME_METRIC_IDS.isdisjoint(metrics))
         self.assertEqual(metrics["surface_pressure_rel_l2"]["weighting"], "surface_face_area")
         self.assertEqual(
             metrics["surface_pressure_equal_entity_rel_l2"]["weighting"],
@@ -115,8 +162,8 @@ class DrivAerMLContractTests(unittest.TestCase):
         )
         self.assertEqual(metrics["volume_velocity_rel_l2"]["weighting"], "volume_cells_equal")
         self.assertEqual(
-            metrics["volume_velocity_physical_rel_l2"]["weighting"],
-            "cell_volume",
+            metrics["drivaerml_volume_velocity_equal_entity_rmse"]["weighting"],
+            "volume_cells_equal",
         )
 
     def test_force_contract_uses_constant_reference_and_field_integration(self) -> None:
@@ -228,6 +275,24 @@ class DrivAerMLContractTests(unittest.TestCase):
             [15, 16],
         )
         expected_metrics = {item["id"] for item in self.specification["metrics"]}
+        self.assertEqual(len(expected_metrics), 32)
+        self.assertTrue(
+            REMOVED_PHYSICAL_VOLUME_METRIC_IDS.isdisjoint(expected_metrics)
+        )
+        self.assertEqual(dataset["submission_format"], "drivaerml_native_candidate_v2")
+        manifest_metric_ids = {
+            definition["id"] for definition in manifest["metric_definitions"]
+        }
+        self.assertTrue(
+            {
+                "drivaerml_volume_velocity_physical_mae",
+                "drivaerml_volume_velocity_physical_rmse",
+                "drivaerml_volume_pressure_physical_mae",
+                "drivaerml_volume_pressure_physical_rmse",
+            }.isdisjoint(manifest_metric_ids)
+        )
+        self.assertIn("volume_velocity_physical_rel_l2", manifest_metric_ids)
+        self.assertIn("volume_pressure_physical_rel_l2", manifest_metric_ids)
         for submission_path in sorted((ROOT / "submissions" / "drivaerml").glob("*/submission.json")):
             submission = load_json(submission_path)
             with self.subTest(submission_id=submission["submission_id"]):

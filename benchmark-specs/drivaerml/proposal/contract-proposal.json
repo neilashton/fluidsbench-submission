@@ -115,15 +115,8 @@
         ],
         "coordinate": "benchmark_computed_cell_center",
         "coordinate_is_identity": false,
-        "physical_weight": "cell_volume",
-        "physical_weight_publication": "required_in_fluidsbench_scoring_support",
-        "physical_weight_contract_must_pin": [
-          "polyhedron_volume_algorithm_and_version",
-          "orientation_or_absolute_volume_convention",
-          "numeric_tolerance",
-          "positive_and_finite_checks",
-          "per_case_aggregate_qa"
-        ],
+        "metric_weighting": "one_per_native_cell",
+        "geometric_cell_volume_weights_required": false,
         "required_arrays": [
           {
             "target_id": "volume_velocity",
@@ -153,20 +146,35 @@
       "nonfinite_truth_coordinate_or_required_weight": "hard_benchmark_support_error_never_drop_or_impute",
       "physical_measure_relative_l2": {
         "required": true,
+        "domains": [
+          "surface_pressure",
+          "surface_wall_shear"
+        ],
         "role": "continuum_norm_view",
         "equation": "100*sqrt(sum_i(w_i*||prediction_i-truth_i||_2^2)/sum_i(w_i*||truth_i||_2^2))"
       },
       "equal_entity_relative_l2": {
         "required": true,
+        "domains": [
+          "surface_pressure",
+          "surface_wall_shear",
+          "volume_velocity",
+          "volume_pressure"
+        ],
         "role": "resolution_weighted_and_literature_continuity_view",
         "equation": "100*sqrt(sum_i(||prediction_i-truth_i||_2^2)/sum_i(||truth_i||_2^2))"
       },
       "absolute_diagnostics": {
         "required": true,
-        "weightings": [
-          "physical_measure",
-          "equal_entity"
-        ],
+        "weightings_by_domain": {
+          "surface": [
+            "physical_measure",
+            "equal_entity"
+          ],
+          "volume": [
+            "equal_entity"
+          ]
+        },
         "scalar_entity_error": "abs(prediction_i-truth_i)",
         "vector_entity_error": "euclidean_norm(prediction_i-truth_i)",
         "mae_equation": "sum_i(w_i*entity_error_i)/sum_i(w_i)",
@@ -181,7 +189,7 @@
       },
       "ranking_priority": {
         "status": "selected_for_owner_approved_composite_pending_baseline_sensitivity_review",
-        "current_repository_volume_default": "equal_entity_primary_physical_measure_secondary",
+        "current_repository_volume_default": "equal_entity_only",
         "surface_composite_default": "physical_area_primary_equal_entity_secondary",
         "proposal_overrides_repository_default": false
       },
@@ -941,7 +949,7 @@
   },
   "activation_blockers": [
     "all_case_vtk_array_association_tuple_component_finiteness_units_gauge_sign_and_provenance_inventory",
-    "immutable_surface_and_volume_stable_id_coordinate_and_weight_support_with_pinned_geometry_algorithms_tolerances_and_qa",
+  "immutable_surface_stable_id_coordinate_and_area_weight_support_plus_volume_equal_cell_identity_with_pinned_tolerances_and_qa",
     "owner_approved_exclusion_policy_and_mask_if_needed",
     "golden_scalar_and_vector_reductions_with_chunk_invariance_tests",
     "all_484_case_explicit_force_formula_replay_and_chunk_invariance_against_constant_reference_truth",

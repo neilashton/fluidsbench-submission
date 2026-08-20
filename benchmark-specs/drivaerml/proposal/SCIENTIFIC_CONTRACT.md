@@ -15,12 +15,11 @@ finite-volume-aligned candidate consisting of all VTU `CellData` volume cells.
 The owner must still confirm that the volume arrays are the un-interpolated
 solver carrier before activation. Models may resample, interpolate, or use point
 representations internally, but their predictions must be returned once for
-every frozen canonical entity. The benchmark reports both physical-measure and
-equal-entity errors, calculated per case and then macro-averaged. The proposed
-composite selects physical-area weighting for surface fields and the existing
-repository equal-cell default for volume fields, while reporting the
-cell-volume-weighted view beside it; activation remains conditional on the
-declared baseline/model sensitivity study. AB-UPT and GeoTransolver are
+every frozen canonical entity. Surface fields report physical-area and
+equal-polygon errors; volume fields use the repository's equal-native-cell
+definition only. All errors are calculated per case and then macro-averaged.
+Activation remains conditional on the declared baseline/model sensitivity
+study. AB-UPT and GeoTransolver are
 preserved as explicitly different literature tracks because they do not use the
 same volume support. No profile, cut, force integration, exclusion mask, or
 overall composite becomes official until its complete definition and a golden
@@ -93,12 +92,11 @@ VTU exactly; similarly named unparted alternatives are not canonical.
 - Entities: every finite-volume cell, in raw VTK cell order.
 - Stable ID: `(run_<N>, raw_vtk_cell_id)`.
 - Interchange coordinate: cell centre computed by the benchmark loader.
-- Physical weight: cell volume computed by the approved FluidsBench loader from
-  the exact pinned mesh and published in the scoring support.
+- Metric weight: one equal weight per raw native cell. No geometric cell-volume
+  array is required or accepted as a submission input.
 - Before activation, the owner must confirm the CellData provenance. The support
-  must also pin the polyhedron-volume algorithm and version, orientation/absolute
-  volume convention, numeric tolerance, positivity/finiteness checks, and
-  per-case aggregate QA.
+  must pin tuple counts, component counts, finiteness, raw order, and exact
+  duplicate-free coverage for every case.
 
 Coordinates are audit information, not identity. A submission cannot align
 entities by nearest-neighbour coordinate matching. Chunk boundaries are also not
@@ -153,13 +151,13 @@ E_{2,1}=100\sqrt{\frac{\sum_i \lVert\hat y_i-y_i\rVert_2^2}
                               {\sum_i \lVert y_i\rVert_2^2}}.
 \]
 
-- `w_i` is polygon area on the surface and cell volume in the flow domain.
-- The physical-measure result is the continuum-norm view.
-- The equal-entity result is mandatory and reported beside it. It captures the
-  resolution-weighted view and provides continuity with unweighted literature.
-- Physical-measure and equal-entity MAE and RMSE are mandatory diagnostics,
-  particularly for pressure fields whose relative denominator can be small or
-  gauge-sensitive.
+- On the surface, `w_i` is the fixed published polygon area; the equal-polygon
+  view sets every `w_i=1` and is a mandatory secondary result.
+- In the volume, every native cell has `w_i=1`; there is no physical-volume
+  secondary result.
+- Surface area/equal-polygon and volume equal-cell MAE and RMSE are mandatory
+  diagnostics, particularly for pressure fields whose relative denominator can
+  be small or gauge-sensitive.
 - Every case-level relative-L2 truth denominator must be finite and strictly
   positive. A zero or nonfinite denominator is a benchmark-support error; the
   case may not be silently omitted, pooled, or replaced by zero.
@@ -167,8 +165,7 @@ E_{2,1}=100\sqrt{\frac{\sum_i \lVert\hat y_i-y_i\rVert_2^2}
   error. Any nonfinite truth value, coordinate, or required weight is a hard
   benchmark-support error.
 
-For either `w_i` equal to the physical weight or one, the absolute diagnostics
-are
+For the applicable surface or volume weight above, the absolute diagnostics are
 
 \[
 \operatorname{MAE}_w=\frac{\sum_iw_i\lVert\hat y_i-y_i\rVert_2}{\sum_iw_i},
@@ -192,22 +189,14 @@ wall-shear vector.
   tolerance. Until that numeric replay is published, chunk invariance is an
   activation claim rather than a completed implementation.
 
-The physical and equal-entity results answer different questions and neither may
-be omitted. The owner-approved composite remains inactive until reference
-baselines establish its distributions and the declared sensitivity review
-confirms that one ranking is stable enough to publish. The former prototype
-error caps were not promoted into the active candidate.
-
-FluidsBench's current generic rule nominates the equal-cell volume result as
-primary, whereas a physical weighting approximates a continuum-domain norm and
-equal-cell weighting deliberately emphasizes refined mesh regions. This
-proposal requires both and does not override that repository-wide policy. A
-physical-volume velocity norm can be dominated by the nearly uniform far field,
-while a relative pressure norm can have a small denominator there. The baseline
-sensitivity review must show both views and the absolute diagnostics before the
-maintainers approve any ranking or dataset-specific exception. Any near-body or
-wake-only score would require a separate owner-published geometric region; no
-hidden crop is permitted.
+The surface area and equal-polygon results answer different questions and
+neither may be omitted. Volume scoring intentionally follows the existing
+equal-cell default, which emphasizes refined mesh regions and avoids introducing
+an additional geometry-derived support. The owner-approved composite remains
+inactive until reference baselines establish its distributions and the declared
+sensitivity review confirms that the ranking is stable enough to publish. Any
+near-body or wake-only score would require a separate owner-published geometric
+region; no hidden crop is permitted.
 
 ## Case splits
 
@@ -403,9 +392,11 @@ more reviewed pull requests supply and owner-approve all of the following:
 1. an all-case VTK inventory proving required array association, tuple count,
    component count, finiteness, units, pressure gauge, wall-shear sign, and the
    provenance of CellData versus PointData;
-2. stable surface and volume entity IDs, exact coordinates, surface areas, and
-   volume-cell weights bound to the immutable source files, with pinned geometry
-   algorithms, tolerances, and QA checks;
+2. stable native surface and volume entity IDs, complete duplicate-free raw-cell
+   order and coverage evidence for equal-cell volume scoring, and fixed surface
+   coordinates and areas bound to the immutable source files, with the
+   surface-area algorithm, tolerances, and QA checks pinned; no geometric
+   volume-cell weights or volume-weight algorithm are required;
 3. a declared exclusion policy and, if needed, a public stable-ID mask;
 4. golden calculations for scalar and vector field reductions, including
    chunk-invariance tests, plus the reference profile locator and all-case

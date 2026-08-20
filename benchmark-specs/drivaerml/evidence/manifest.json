@@ -1,6 +1,6 @@
 {
-  "schema": "drivaerml-candidate-evidence-manifest-v1",
-  "schema_version": 1,
+  "schema": "drivaerml-candidate-evidence-manifest-v2",
+  "schema_version": 2,
   "status": "candidate_evidence_not_scoring_support",
   "official_submission_scoring_enabled": false,
   "owner_scientific_approval": false,
@@ -37,14 +37,14 @@
       "file": "volume-weight-vtk-run_1-failure-diagnostic.json",
       "sha256": "aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e",
       "scope": "run_1_pilot",
-      "role": "candidate_vtk_physical_volume_weight_fail_closed_rejection_diagnostic",
+      "role": "superseded_historical_geometric_volume_weight_rejection_diagnostic_no_contract_role",
       "public_scoring_support_eligible": false
     },
     {
       "file": "volume-weight-vtk96-run_1-wedge-probe.json",
       "sha256": "2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6",
       "scope": "isolated_run_1_raw_cell_124707859",
-      "role": "vtk96_replacement_candidate_exact_wedge_and_signed_control_probe",
+      "role": "superseded_historical_vtk96_exact_wedge_probe_no_contract_role",
       "public_scoring_support_eligible": false
     },
     {

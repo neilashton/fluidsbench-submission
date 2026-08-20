@@ -184,6 +184,18 @@ class DrivAerMLVelocityAssignmentCLIVTKTests(unittest.TestCase):
         grid.SetPoints(points)
         grid.InsertNextCell(vtk.VTK_HEXAHEDRON, 8, list(range(8)))
 
+        point_values = vtk.vtkFloatArray()
+        point_values.SetName("UMeanTrim")
+        point_values.SetNumberOfComponents(3)
+        point_values.SetNumberOfTuples(grid.GetNumberOfPoints())
+        point_values.Fill(3.0)
+        grid.GetPointData().AddArray(point_values)
+        cell_values = vtk.vtkFloatArray()
+        cell_values.SetName("pMeanTrim")
+        cell_values.SetNumberOfTuples(grid.GetNumberOfCells())
+        cell_values.Fill(7.0)
+        grid.GetCellData().AddArray(cell_values)
+
         writer = vtk.vtkXMLUnstructuredGridWriter()
         writer.SetFileName(str(path))
         writer.SetInputData(grid)
@@ -344,6 +356,15 @@ class DrivAerMLVelocityAssignmentCLIVTKTests(unittest.TestCase):
             )
             self.assertEqual(first_receipt["geometry"]["declared_cell_count"], 1)
             self.assertEqual(first_receipt["geometry"]["vtk_loaded_cell_count"], 1)
+            self.assertEqual(
+                first_receipt["geometry"]["reader_audit"],
+                {
+                    "disabled_point_array_count": 1,
+                    "disabled_point_arrays": ["UMeanTrim"],
+                    "disabled_cell_array_count": 1,
+                    "disabled_cell_arrays": ["pMeanTrim"],
+                },
+            )
             self.assertFalse(first_receipt["geometry"]["remeshing"])
             self.assertFalse(first_receipt["geometry"]["reordering"])
             self.assertEqual(
@@ -441,7 +462,7 @@ class DrivAerMLVelocityAssignmentCLIVTKTests(unittest.TestCase):
             self.assertFalse(output.exists())
 
     def test_path_replacement_during_vtk_read_is_rejected_and_vtk_uses_fd(self) -> None:
-        from reference.drivaerml.volume_weights import read_geometry_only_vtu
+        from reference.drivaerml.native_volume_geometry import read_geometry_only_vtu
 
         with tempfile.TemporaryDirectory() as directory_name:
             root = Path(directory_name)
@@ -466,7 +487,7 @@ class DrivAerMLVelocityAssignmentCLIVTKTests(unittest.TestCase):
                 return read_geometry_only_vtu(source)
 
             with mock.patch(
-                "reference.drivaerml.volume_weights.read_geometry_only_vtu",
+                "reference.drivaerml.native_volume_geometry.read_geometry_only_vtu",
                 side_effect=replace_path_then_read,
             ):
                 with self.assertRaisesRegex(

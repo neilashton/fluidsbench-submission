@@ -12,11 +12,11 @@ The same file identities and non-activation status are available to tooling in
 | Artifact | SHA-256 | Scope and eligibility |
 | --- | --- | --- |
 | [`force-replay-all484.json`](force-replay-all484.json) | `631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17` | Passing candidate evaluator replay for all 484 cases, including fixed-area audit and chunk invariance. Dataset-owner scientific approval remains pending; this does not activate scoring. |
-| [`native-volume-run1-run44-equal-cell-primary-pilot.json`](native-volume-run1-run44-equal-cell-primary-pilot.json) | `d009b6ac708fa320d21492b4cc44fc846b61e99b445836b5dedc704a934592d7` | Two-case implementation evidence for multipart reconstruction, native fields, raw order, complete coverage, and equal-cell primary metric invariance. It excludes physical-volume weights, covers only `run_1` and `run_44`, and is not scoring support. |
-| [`native-volume-equal-cell-primary-all484.json`](native-volume-equal-cell-primary-all484.json) | `bda42a125ffb4d6484756e77ac7e495974f39d4bce3e663154322e9e560827c7` | Passing all-484 audit of 978 pinned VTU segments, native `CellData`, tuple/component counts, finite values, declared units, raw-cell order and complete duplicate-free coverage. Two chunk partitions agree within `2.22e-16` for additive statistics and `5.69e-14` for metrics. This is equal-cell primary evidence only, not a physical-volume-weight artifact, physics-null baseline, model result, or scoring support. |
+| [`native-volume-run1-run44-equal-cell-primary-pilot.json`](native-volume-run1-run44-equal-cell-primary-pilot.json) | `d009b6ac708fa320d21492b4cc44fc846b61e99b445836b5dedc704a934592d7` | Two-case implementation evidence for multipart reconstruction, native fields, raw order, complete coverage, and equal-cell metric invariance. It covers only `run_1` and `run_44` and is not scoring support. |
+| [`native-volume-equal-cell-primary-all484.json`](native-volume-equal-cell-primary-all484.json) | `bda42a125ffb4d6484756e77ac7e495974f39d4bce3e663154322e9e560827c7` | Passing all-484 audit of 978 pinned VTU segments, native `CellData`, tuple/component counts, finite values, declared units, raw-cell order and complete duplicate-free coverage. Two chunk partitions agree within `2.22e-16` for additive statistics and `5.69e-14` for metrics. This directly exercises the equal-native-cell volume contract; it is not a physics-null baseline, model result, or scoring support. |
 | [`native-volume-equal-cell-primary-all484-provenance.json`](native-volume-equal-cell-primary-all484-provenance.json) | `b5ffe2234bb1597cf041ff5d97458f3d0d6e81db7a30591a7e26f51ebc032fde` | Path-free provenance for the all-484 audit: exact committed generator revision and source hashes, Python/NumPy runtime, launcher hash, scheduler scope, aggregate hash, and a canonical digest over all 484 external case-receipt identities. It does not turn the audit into scoring support or bundle the 10.7 MB receipt set. |
-| [`volume-weight-vtk-run_1-failure-diagnostic.json`](volume-weight-vtk-run_1-failure-diagnostic.json) | `aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e` | Hash-bound fail-closed record for the rejected VTK 9.5.2 physical-volume candidate on `run_1`. Cell count and raw order were preserved, but raw cell ID 124,707,859 was a `vtkWedge` with volume `-9.740389723427085e-13 m^3`; no array or success receipt was published. This is rejection evidence, not scoring support. |
-| [`volume-weight-vtk96-run_1-wedge-probe.json`](volume-weight-vtk96-run_1-wedge-probe.json) | `2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6` | Isolated replacement-candidate probe of that exact six-point `run_1` wedge under VTK 9.6.0. It binds the VTK source tag/commit, source-file and wheel identities, obtains the same positive signed candidate volume from `vtkCellSizeFilter` and direct Verdict evaluation, and retains negative orientation/folded-cell controls. It does not establish the authoritative physical-volume convention and is not a full native-case run, weight artifact, owner decision, or scoring support. |
+| [`volume-weight-vtk-run_1-failure-diagnostic.json`](volume-weight-vtk-run_1-failure-diagnostic.json) | `aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e` | Superseded historical record for a rejected geometric cell-volume experiment. Geometric volume weights are not part of the equal-native-cell contract; this file has no scoring or activation role. |
+| [`volume-weight-vtk96-run_1-wedge-probe.json`](volume-weight-vtk96-run_1-wedge-probe.json) | `2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6` | Superseded historical isolated-cell experiment under VTK 9.6.0. Geometric volume weights are not part of the equal-native-cell contract; this file has no scoring or activation role. |
 | [`cp-mapping-all484-hardened.json`](cp-mapping-all484-hardened.json) | `634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81` | Complete candidate sweep over 484 cases and all 101,156 case/probe rows. It retains 100,281 valid rows and all 875 invalid rows with explicit reasons. Owner visual sign-off is false and public-scoring eligibility is false. |
 | [`cp-stl-inventory-all484-hardened.json`](cp-stl-inventory-all484-hardened.json) | `cd4e1788a633196524b11f9d5f8868df05b71b11fed7fdf86892678c9cf41676` | Complete candidate named-STL inventory for 484 cases: 364,568,214 raw facets, 23,716 named solids, and 68,902,520,476 source bytes. It is deliberately separate from the native-source pin and is not scoring support. |
 | [`cp-owner-review-atlas-all484-hardened.manifest.json`](cp-owner-review-atlas-all484-hardened.manifest.json) | `6a72536911010bdb741586018d1a13887f19756e135e8d35e6ea2da4b9fc7c4c` | Compact manifest for the external 488-page candidate review atlas. It covers all 484 cases and retains all 101,156 rows, including 875 invalid rows and 999 review-flagged rows. The external PDF is hash-bound as `e133fa14b6150c6f60590d19ba9b590072da0b758a19383976739c0f0fce654e`; neither visual sign-off nor scientific approval is claimed, and this does not activate scoring. |
@@ -27,23 +27,10 @@ The same file identities and non-activation status are available to tooling in
 
 ## Current blockers
 
-No accepted deterministic physical-volume weight array or aggregate exists.
-The VTK 9.5.2 `vtkCellSizeFilter` volume-only candidate did not pass the
-strict requirement for one positive finite value per native cell on `run_1`.
-It preserved all 147,449,586 cells and exact raw IDs and found no non-finite or
-zero values, but it produced one negative signed volume for a `vtkWedge`. The
-hash-bound failure diagnostic records the exact algorithm, environment, source
-snapshot, invalid cell, and external-log identity. It also records that no
-array or success receipt was published and that no absolute value, mask, or
-epsilon replacement was applied. The cell-type files above describe the mixed
-meshes only; they do not validate a weight algorithm. The VTK 9.6.0 replacement
-candidate fixes that isolated wedge while signed controls remain negative, but
-it has not yet passed full native `run_1`/`run_44`, polyhedron-path, all-case,
-publication, or owner-review gates. Selecting and approving a scientifically
-justified algorithm and raw-order mapping remains an outstanding owner decision;
-an OpenFOAM-native `V()` comparison should be used if the original meshes are
-available, otherwise the mixed VTK 9.6 dispatch convention needs explicit owner
-approval.
+The owner selected equal-native-cell volume scoring on 2026-08-20. Geometric
+cell-volume generation is therefore not an activation gate. The retained VTK
+experiments above are historical provenance only and must not be interpreted as
+current scoring support.
 
 The all-case Cp candidate sweep, source inventory, truth replay, and review
 atlas are now hash-bound above. They do not resolve the 875 explicit invalid
@@ -62,17 +49,21 @@ were produced by `scripts/audit_drivaerml_native_volume_case.py` and
 strictly revalidated all 484 case receipts and was reproduced byte-for-byte.
 Its companion provenance file binds the exact Git revision, runtime, launcher,
 and the ordered hashes of the external case receipts.
+Those retained artifacts use the earlier v1 receipt vocabulary, in which the
+unit-weight declaration was named `volume_weights`; their bound generating
+revision remains the reproducibility source. The current v2 tools accept only
+the unambiguous `volume_weighting: one_per_native_cell` schema and do not accept
+or generate geometric volume arrays.
 The Cp files were
 produced by the candidate Cp builder, strict aggregator, and
 `scripts/build_drivaerml_cp_owner_review_atlas.py`; the cell-type files were
-produced by `scripts/audit_drivaerml_volume_cell_types.py`. The physical-volume
-failure diagnostic records an execution of the hash-bound
+produced by `scripts/audit_drivaerml_volume_cell_types.py`. The superseded
+physical-volume failure diagnostic records an execution of the hash-bound
 `reference/drivaerml/volume_weights.py` snapshot. Its 1,128-byte stderr log is
 external and is bound by SHA-256 in the diagnostic; no generated weight array
 or success receipt exists. The VTK 9.6.0 record similarly binds a compact
 external probe, its script, exact NumPy and VTK wheels, and the upstream VTK
-tag/commit; it deliberately records only an isolated-cell result and no weight
-array.
+tag/commit. Neither historical experiment has a role in the current contract.
 
 Current candidate source readers include retained-descriptor identity checks,
 but compact aggregate JSON cannot by itself demonstrate that runtime mechanism.

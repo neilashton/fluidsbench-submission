@@ -1,10 +1,9 @@
 {
-  "schema": "drivaerml-run1-run44-reference-inputs-v1",
+  "schema": "drivaerml-run1-run44-reference-inputs-v2",
   "cases": [
     {
       "case_id": "run_1",
       "surface_area_npy": "inputs/run_1/boundary_cell_area_1.npy",
-      "volume_weight_npy": "inputs/run_1/volume_cell_volume_1.npy",
       "surface_prediction_manifest": "predictions/run_1/surface_native_cells/manifest.json",
       "volume_prediction_manifest": "predictions/run_1/volume_native_cells/manifest.json",
       "cp_support_json": "diagnostics/run_1/cp-support.json",
@@ -14,7 +13,6 @@
     {
       "case_id": "run_44",
       "surface_area_npy": "inputs/run_44/boundary_cell_area_44.npy",
-      "volume_weight_npy": "inputs/run_44/volume_cell_volume_44.npy",
       "surface_prediction_manifest": "predictions/run_44/surface_native_cells/manifest.json",
       "volume_prediction_manifest": "predictions/run_44/volume_native_cells/manifest.json",
       "cp_support_json": "diagnostics/run_44/cp-support.json",

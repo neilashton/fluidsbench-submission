@@ -13,9 +13,9 @@ import json
 import math
 import os
 import tempfile
-from dataclasses import asdict, dataclass, field, replace
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import BinaryIO, Iterator, Sequence
+from typing import BinaryIO, Iterator
 
 import numpy as np
 
@@ -35,7 +35,6 @@ from .prediction_chunks import (
     iter_prediction_chunks,
     load_prediction_chunk_manifest,
 )
-from .retained_file import RetainedFileError, RetainedVerifiedFile
 from .source import (
     InlineBinaryDecodeError,
     NativeCaseRecord,
@@ -54,7 +53,7 @@ from .surface_forces import (
 )
 
 
-CANDIDATE_EVIDENCE_SCHEMA = "drivaerml-candidate-case-evaluation-v1"
+CANDIDATE_EVIDENCE_SCHEMA = "drivaerml-candidate-case-evaluation-v2"
 CANDIDATE_STATUS = "candidate_evaluator_evidence_not_official_submission"
 DEFAULT_MAX_PREDICTION_CHUNK_ROWS = 1_000_000
 DEFAULT_ENCODED_CHUNK_BYTES = 8 * 1024 * 1024
@@ -64,10 +63,6 @@ OFFICIAL_NATIVE_SOURCE_PIN_SHA256 = (
 )
 OFFICIAL_REPOSITORY_ID = "neashton/drivaerml"
 OFFICIAL_REPOSITORY_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
-SOURCE_BOUND_VOLUME_WEIGHT_STATUS = (
-    "source_bound_receipt_v3_aggregate_v2_membership_verified"
-)
-UNBOUND_VOLUME_WEIGHT_STATUS = "unbound_low_level_fixture_not_evaluator_eligible"
 
 
 class DrivAerCandidateEvaluatorError(ValueError):
@@ -81,7 +76,6 @@ class NativeSourceContract:
     pin_sha256: str
     repository_id: str
     repository_revision: str
-    volume_weight_aggregate_sha256: str | None = None
 
 
 OFFICIAL_NATIVE_SOURCE_CONTRACT = NativeSourceContract(
@@ -89,69 +83,6 @@ OFFICIAL_NATIVE_SOURCE_CONTRACT = NativeSourceContract(
     repository_id=OFFICIAL_REPOSITORY_ID,
     repository_revision=OFFICIAL_REPOSITORY_REVISION,
 )
-
-
-@dataclass(frozen=True)
-class FixedVolumeWeights:
-    """Hash-bound positive native-cell volumes in raw cell order."""
-
-    values_m3: np.ndarray
-    source_path: Path
-    sha256: str
-    case_id: str
-    source_volume_part_sha256: tuple[str, ...]
-    entity_count: int
-    volume_sum_m3: float
-    volume_min_m3: float
-    volume_max_m3: float
-    _retained_file: RetainedVerifiedFile = field(repr=False, compare=False)
-    binding_status: str = UNBOUND_VOLUME_WEIGHT_STATUS
-    native_source_pin_sha256: str | None = None
-    receipt_sha256: str | None = None
-    aggregate_sha256: str | None = None
-    aggregate_complete: bool = False
-    algorithm_sha256: str | None = None
-    native_cell_types: dict[str, object] | None = None
-    per_vtk_cell_type: tuple[dict[str, object], ...] = ()
-    aggregate_native_cell_type_payload_manifest_sha256: str | None = None
-    aggregate_per_vtk_cell_type: tuple[dict[str, object], ...] = ()
-
-    def assert_source_unchanged(self, *, context: str) -> None:
-        try:
-            self._retained_file.assert_unchanged(context=context)
-        except RetainedFileError as error:
-            raise DrivAerCandidateEvaluatorError(str(error)) from error
-
-    def close(self) -> None:
-        self._retained_file.close()
-
-    def audit_record(self) -> dict[str, object]:
-        return {
-            "source_file": self.source_path.name,
-            "sha256": self.sha256,
-            "case_id": self.case_id,
-            "source_volume_part_sha256": list(self.source_volume_part_sha256),
-            "entity_count": self.entity_count,
-            "volume_sum_m3": self.volume_sum_m3,
-            "volume_min_m3": self.volume_min_m3,
-            "volume_max_m3": self.volume_max_m3,
-            "dtype": "<f8",
-            "role": "fixed_external_input_not_regenerated",
-            "binding_status": self.binding_status,
-            "native_source_pin_sha256": self.native_source_pin_sha256,
-            "receipt_sha256": self.receipt_sha256,
-            "aggregate_sha256": self.aggregate_sha256,
-            "aggregate_complete": self.aggregate_complete,
-            "algorithm_sha256": self.algorithm_sha256,
-            "native_cell_types": self.native_cell_types,
-            "per_vtk_cell_type": list(self.per_vtk_cell_type),
-            "aggregate_native_cell_type_payload_manifest_sha256": (
-                self.aggregate_native_cell_type_payload_manifest_sha256
-            ),
-            "aggregate_per_vtk_cell_type": list(
-                self.aggregate_per_vtk_cell_type
-            ),
-        }
 
 
 @dataclass(frozen=True)
@@ -175,7 +106,7 @@ class CandidateCaseEvaluation:
     surface_area_audit: dict[str, object]
     volume_part_sha256: tuple[str, ...]
     volume_vtk_audit: dict[str, object]
-    volume_weight_audit: dict[str, object]
+    volume_weighting_audit: dict[str, object]
     surface_prediction_manifest_sha256: str
     volume_prediction_manifest_sha256: str
     surface_prediction_chunk_sha256: tuple[str, ...]
@@ -194,7 +125,7 @@ class CandidateCaseEvaluation:
     def to_json(self) -> dict[str, object]:
         return {
             "schema": CANDIDATE_EVIDENCE_SCHEMA,
-            "schema_version": 1,
+            "schema_version": 2,
             "status": CANDIDATE_STATUS,
             "official_submission": False,
             "case_id": self.case_id,
@@ -207,7 +138,7 @@ class CandidateCaseEvaluation:
                 "surface_area": self.surface_area_audit,
                 "volume_part_sha256": list(self.volume_part_sha256),
                 "volume_vtk": self.volume_vtk_audit,
-                "volume_weights": self.volume_weight_audit,
+                "volume_weighting": self.volume_weighting_audit,
                 "volume_native_arrays": self.volume_native_array_audits,
             },
             "prediction_inputs": {
@@ -296,327 +227,10 @@ def validate_native_source_contract(
     return actual_sha
 
 
-def _reject_duplicate_json_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
-    result: dict[str, object] = {}
-    for key, value in pairs:
-        if key in result:
-            raise DrivAerCandidateEvaluatorError(
-                f"JSON contains duplicate key {key!r}"
-            )
-        result[key] = value
-    return result
-
-
-def _load_json_object(path: Path | str, label: str) -> tuple[Path, dict[str, object]]:
-    source = Path(path).expanduser().resolve()
-    if not source.is_file() or source.is_symlink():
-        raise DrivAerCandidateEvaluatorError(
-            f"{label} must be a regular non-symlink file"
-        )
-    try:
-        value = json.loads(
-            source.read_text(encoding="utf-8"),
-            object_pairs_hook=_reject_duplicate_json_keys,
-        )
-    except DrivAerCandidateEvaluatorError:
-        raise
-    except (OSError, UnicodeError, json.JSONDecodeError) as error:
-        raise DrivAerCandidateEvaluatorError(
-            f"cannot load valid {label} JSON"
-        ) from error
-    if not isinstance(value, dict):
-        raise DrivAerCandidateEvaluatorError(f"{label} must be a JSON object")
-    return source, value
-
-
 def _positive_integer(value: object, label: str) -> int:
     if not isinstance(value, int) or isinstance(value, bool) or value < 1:
         raise DrivAerCandidateEvaluatorError(f"{label} must be a positive integer")
     return value
-
-
-def audit_fixed_volume_weight_file(
-    case: NativeCaseRecord,
-    path: Path | str,
-    *,
-    expected_sha256: str,
-    expected_entity_count: int,
-    validation_chunk_entities: int = 1_000_000,
-) -> FixedVolumeWeights:
-    """Audit a frozen little-endian float64 volume array without regenerating it."""
-
-    if not isinstance(case, NativeCaseRecord):
-        raise DrivAerCandidateEvaluatorError("case must be a NativeCaseRecord")
-    count = _positive_integer(expected_entity_count, "expected_entity_count")
-    block_rows = _positive_integer(
-        validation_chunk_entities, "validation_chunk_entities"
-    )
-    if (
-        not isinstance(expected_sha256, str)
-        or len(expected_sha256) != 64
-        or any(character not in "0123456789abcdef" for character in expected_sha256)
-    ):
-        raise DrivAerCandidateEvaluatorError(
-            "expected_sha256 must be a lowercase SHA-256 digest"
-        )
-    source = Path(path).resolve()
-    if not source.is_file():
-        raise DrivAerCandidateEvaluatorError(
-            f"volume-weight file does not exist: {source}"
-        )
-    if source.suffix.lower() != ".npy":
-        raise DrivAerCandidateEvaluatorError("volume weights must use the .npy suffix")
-    try:
-        retained = RetainedVerifiedFile.open(
-            source, label="fixed volume-weight NPY"
-        )
-        digest = retained.sha256()
-    except RetainedFileError as error:
-        raise DrivAerCandidateEvaluatorError(str(error)) from error
-    if digest != expected_sha256:
-        retained.close()
-        raise DrivAerCandidateEvaluatorError("volume-weight SHA-256 mismatch")
-    try:
-        values = np.load(
-            retained.descriptor_path(), mmap_mode="r", allow_pickle=False
-        )
-        retained.assert_unchanged(context="while NumPy opened the memory map")
-    except (OSError, ValueError, RetainedFileError) as error:
-        retained.close()
-        raise DrivAerCandidateEvaluatorError(
-            f"cannot read fixed volume-weight NPY: {error}"
-        ) from error
-    if values.dtype != np.dtype("<f8"):
-        retained.close()
-        raise DrivAerCandidateEvaluatorError(
-            "fixed volume weights must use little-endian float64"
-        )
-    if values.shape != (count,):
-        retained.close()
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight count differs from the native volume cell count"
-        )
-    partial_sums: list[float] = []
-    minimum = math.inf
-    maximum = -math.inf
-    for start in range(0, count, block_rows):
-        stop = min(start + block_rows, count)
-        block = np.asarray(values[start:stop])
-        if not np.all(np.isfinite(block)):
-            retained.close()
-            raise DrivAerCandidateEvaluatorError("volume weights must be finite")
-        if np.any(block <= 0.0):
-            retained.close()
-            raise DrivAerCandidateEvaluatorError(
-                "volume weights must be strictly positive"
-            )
-        partial_sums.append(float(np.sum(block, dtype=np.float64)))
-        minimum = min(minimum, float(np.min(block)))
-        maximum = max(maximum, float(np.max(block)))
-    total = math.fsum(partial_sums)
-    if not math.isfinite(total) or total <= 0.0:
-        retained.close()
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight sum must be finite and positive"
-        )
-    try:
-        retained.assert_unchanged(context="while validating every volume weight")
-    except RetainedFileError as error:
-        retained.close()
-        raise DrivAerCandidateEvaluatorError(str(error)) from error
-    return FixedVolumeWeights(
-        values_m3=values,
-        source_path=source,
-        sha256=digest,
-        case_id=case.case_id,
-        source_volume_part_sha256=tuple(part.sha256 for part in case.volume_parts),
-        entity_count=count,
-        volume_sum_m3=total,
-        volume_min_m3=minimum,
-        volume_max_m3=maximum,
-        _retained_file=retained,
-    )
-
-
-def audit_source_bound_volume_weight_file(
-    case: NativeCaseRecord,
-    path: Path | str,
-    *,
-    native_source_pin: NativeSourcePin,
-    receipt_jsons: Sequence[Path | str],
-    aggregate_json: Path | str,
-    expected_aggregate_sha256: str,
-    expected_entity_count: int,
-    source_contract: NativeSourceContract = OFFICIAL_NATIVE_SOURCE_CONTRACT,
-    allow_incomplete_pilot_aggregate: bool = False,
-    validation_chunk_entities: int = 1_000_000,
-) -> FixedVolumeWeights:
-    """Audit weights through exact source-bound v3 receipts and their v2 aggregate.
-
-    Every receipt in the aggregate is replayed through the strict aggregate
-    validator rather than trusted.  The supplied aggregate must equal that
-    complete normalized replay, and its bytes are bound by a predeclared
-    SHA-256. Partial aggregates require an explicit pilot-only opt-in and
-    remain ineligible for a frozen production evaluator.
-    """
-
-    if not isinstance(allow_incomplete_pilot_aggregate, bool):
-        raise DrivAerCandidateEvaluatorError(
-            "allow_incomplete_pilot_aggregate must be Boolean"
-        )
-    pin_sha256 = validate_native_source_contract(native_source_pin, source_contract)
-    if native_source_pin.case(case.case_id) is not case:
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight case is not owned by the supplied native-source pin"
-        )
-    aggregate_path, aggregate = _load_json_object(
-        aggregate_json, "volume-weight aggregate"
-    )
-    aggregate_sha256 = _sha256_file(aggregate_path)
-    if aggregate_sha256 != _sha256_digest(
-        expected_aggregate_sha256, "expected_aggregate_sha256"
-    ):
-        raise DrivAerCandidateEvaluatorError("volume-weight aggregate SHA-256 mismatch")
-
-    if isinstance(receipt_jsons, (str, bytes, Path)) or not isinstance(
-        receipt_jsons, Sequence
-    ):
-        raise DrivAerCandidateEvaluatorError(
-            "receipt_jsons must be a non-empty sequence of receipt paths"
-        )
-    receipt_paths = tuple(
-        _load_json_object(value, "volume-weight receipt")[0]
-        for value in receipt_jsons
-    )
-    if not receipt_paths or len(receipt_paths) != len(set(receipt_paths)):
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight receipt paths must be non-empty and unique"
-        )
-    raw_records = aggregate.get("cases")
-    if not isinstance(raw_records, list) or not raw_records:
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight aggregate cases must be a non-empty array"
-        )
-    aggregate_case_ids: list[str] = []
-    for index, record in enumerate(raw_records):
-        if not isinstance(record, dict) or not isinstance(record.get("case_id"), str):
-            raise DrivAerCandidateEvaluatorError(
-                f"volume-weight aggregate case {index} has no valid case_id"
-            )
-        aggregate_case_ids.append(record["case_id"])
-    mode = aggregate.get("mode")
-    if mode not in {"complete", "partial_pilot"}:
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight aggregate mode must be complete or partial_pilot"
-        )
-
-    # Reuse the generator's independent strict all-receipt replay. It validates
-    # exact receipt-v3/aggregate-v2 schemas, source-pin byte bindings, pinned
-    # dependency versions and algorithm, path-free names, every output record,
-    # receipt hashes, coverage, order, and aggregate totals.
-    try:
-        from scripts.aggregate_drivaerml_volume_weights import (
-            PINNED_ALGORITHM_SHA256,
-            aggregate_volume_weight_receipts,
-        )
-
-        official_case_ids = tuple(item.case_id for item in native_source_pin.cases)
-        replay = aggregate_volume_weight_receipts(
-            native_source_pin_path=native_source_pin.source_path,
-            receipt_paths=receipt_paths,
-            pilot_case_ids=(
-                tuple(aggregate_case_ids) if mode == "partial_pilot" else None
-            ),
-            official_case_ids=official_case_ids,
-            expected_pin_sha256=pin_sha256,
-        )
-    except (ImportError, ValueError) as error:
-        raise DrivAerCandidateEvaluatorError(
-            f"source-bound volume-weight receipt replay failed: {error}"
-        ) from error
-    if aggregate != replay:
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight aggregate differs from the strict all-receipt replay"
-        )
-    complete = aggregate.get("complete") is True
-    if complete:
-        frozen_aggregate_sha256 = source_contract.volume_weight_aggregate_sha256
-        if frozen_aggregate_sha256 is None:
-            raise DrivAerCandidateEvaluatorError(
-                "the complete volume-weight aggregate hash is not frozen in the "
-                "evaluator contract"
-            )
-        if aggregate_sha256 != _sha256_digest(
-            frozen_aggregate_sha256,
-            "source contract volume_weight_aggregate_sha256",
-        ):
-            raise DrivAerCandidateEvaluatorError(
-                "complete volume-weight aggregate differs from the evaluator contract"
-            )
-        if (
-            aggregate.get("mode") != "complete"
-            or aggregate.get("status")
-            != "complete_all_official_cases_candidate_evidence"
-            or aggregate.get("public_evidence_eligible") is not True
-            or aggregate.get("case_count") != len(native_source_pin.cases)
-            or aggregate.get("omitted_official_case_count") != 0
-        ):
-            raise DrivAerCandidateEvaluatorError(
-                "complete volume-weight aggregate has inconsistent scope/status"
-            )
-    elif not allow_incomplete_pilot_aggregate:
-        raise DrivAerCandidateEvaluatorError(
-            "production candidate evaluation requires a complete volume-weight aggregate"
-        )
-    matching = [
-        record for record in replay["cases"] if record.get("case_id") == case.case_id
-    ]
-    if len(matching) != 1:
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight aggregate does not contain the requested case receipt"
-        )
-    record = matching[0]
-    output = record["output"]
-    if Path(path).name != output["file"]:
-        raise DrivAerCandidateEvaluatorError(
-            "volume-weight NPY basename differs from its source-bound receipt"
-        )
-    weights = audit_fixed_volume_weight_file(
-        case,
-        path,
-        expected_sha256=output["sha256"],
-        expected_entity_count=expected_entity_count,
-        validation_chunk_entities=validation_chunk_entities,
-    )
-    for key, actual in (
-        ("cell_count", weights.entity_count),
-        ("volume_sum_m3", weights.volume_sum_m3),
-        ("volume_min_m3", weights.volume_min_m3),
-        ("volume_max_m3", weights.volume_max_m3),
-    ):
-        if output[key] != actual:
-            raise DrivAerCandidateEvaluatorError(
-                f"volume-weight NPY {key} differs from its source-bound receipt"
-            )
-    return replace(
-        weights,
-        binding_status=SOURCE_BOUND_VOLUME_WEIGHT_STATUS,
-        native_source_pin_sha256=pin_sha256,
-        receipt_sha256=record["receipt_sha256"],
-        aggregate_sha256=aggregate_sha256,
-        aggregate_complete=complete,
-        algorithm_sha256=PINNED_ALGORITHM_SHA256,
-        native_cell_types=record["native_cell_types"],
-        per_vtk_cell_type=tuple(output["per_vtk_cell_type"]),
-        aggregate_native_cell_type_payload_manifest_sha256=(
-            replay["aggregate"][
-                "native_cell_type_payload_manifest_sha256"
-            ]
-        ),
-        aggregate_per_vtk_cell_type=tuple(
-            replay["aggregate"]["per_vtk_cell_type"]
-        ),
-    )
 
 
 def _manifest(
@@ -675,22 +289,29 @@ def _field_metric_values(
     statistics: FinalizedFieldStatistics,
     *,
     physical_first: bool,
+    include_secondary: bool = True,
 ) -> dict[str, float]:
     primary = statistics.physical if physical_first else statistics.uniform
     secondary = statistics.uniform if physical_first else statistics.physical
     primary_label = "area" if physical_first else "equal_entity"
     secondary_label = "equal_entity" if physical_first else "physical"
-    return {
+    result = {
         f"{prefix}_rel_l2": primary.relative_l2_percent(),
-        (
-            f"{prefix}_"
-            f"{'equal_entity' if physical_first else 'physical'}_rel_l2"
-        ): secondary.relative_l2_percent(),
         f"drivaerml_{prefix}_{primary_label}_mae": primary.mae(),
         f"drivaerml_{prefix}_{primary_label}_rmse": primary.rmse(),
-        f"drivaerml_{prefix}_{secondary_label}_mae": secondary.mae(),
-        f"drivaerml_{prefix}_{secondary_label}_rmse": secondary.rmse(),
     }
+    if include_secondary:
+        result.update(
+            {
+                (
+                    f"{prefix}_"
+                    f"{'equal_entity' if physical_first else 'physical'}_rel_l2"
+                ): secondary.relative_l2_percent(),
+                f"drivaerml_{prefix}_{secondary_label}_mae": secondary.mae(),
+                f"drivaerml_{prefix}_{secondary_label}_rmse": secondary.rmse(),
+            }
+        )
+    return result
 
 
 def _relative_l2_evidence(
@@ -700,10 +321,11 @@ def _relative_l2_evidence(
     physical_first: bool,
     physical_dataset_weighting: str,
     uniform_dataset_weighting: str,
+    include_secondary: bool = True,
 ) -> dict[str, dict[str, float | int | str]]:
     primary = statistics.physical if physical_first else statistics.uniform
     secondary = statistics.uniform if physical_first else statistics.physical
-    return {
+    result = {
         metric_id: primary.relative_l2_evidence(
             weighting="support_weights" if physical_first else "uniform",
             dataset_weighting=(
@@ -711,27 +333,33 @@ def _relative_l2_evidence(
                 if physical_first
                 else uniform_dataset_weighting
             ),
-        ),
-        (
-            f"{metric_id.rsplit('_rel_l2', 1)[0]}_"
-            f"{'equal_entity' if physical_first else 'physical'}_rel_l2"
-        ): secondary.relative_l2_evidence(
+        )
+    }
+    if include_secondary:
+        result[
+            (
+                f"{metric_id.rsplit('_rel_l2', 1)[0]}_"
+                f"{'equal_entity' if physical_first else 'physical'}_rel_l2"
+            )
+        ] = secondary.relative_l2_evidence(
             weighting="uniform" if physical_first else "support_weights",
             dataset_weighting=(
                 uniform_dataset_weighting
                 if physical_first
                 else physical_dataset_weighting
             ),
-        ),
-    }
+        )
+    return result
 
 
 def _additive_sums(
     statistics: FinalizedFieldStatistics,
+    *,
+    include_physical: bool = True,
 ) -> dict[str, dict[str, float | int]]:
     return {
         weighting: asdict(getattr(statistics, weighting))
-        for weighting in ("uniform", "physical")
+        for weighting in (("uniform", "physical") if include_physical else ("uniform",))
     }
 
 
@@ -845,7 +473,6 @@ class _VolumePredictionSink:
         array: VTKDataArrayIndex,
         manifest: PredictionChunkManifest,
         field_name: str,
-        physical_weights: np.ndarray,
         hash_chunk_bytes: int,
         validation_block_rows: int,
     ) -> None:
@@ -858,7 +485,6 @@ class _VolumePredictionSink:
         self.components = array.number_of_components
         self.tuple_bytes = self.dtype.itemsize * self.components
         self.field_name = field_name
-        self.physical_weights = physical_weights
         self.pending = bytearray()
         self.cursor = 0
         self.accumulator = StreamingFieldAccumulator(
@@ -893,9 +519,11 @@ class _VolumePredictionSink:
         if self.components == 1:
             truth = truth[:, 0]
         prediction = chunk.field(self.field_name)
-        weights = self.physical_weights[
-            descriptor.raw_cell_id_start : descriptor.raw_cell_id_stop
-        ]
+        # DrivAerML volume fields use one equal weight per native cell.  The
+        # generic accumulator still accepts a weight vector because surface
+        # fields use fixed polygon areas; no geometric cell-volume array is
+        # constructed or consumed here.
+        weights = np.ones(descriptor.row_count, dtype=np.float64)
         self.accumulator.add_chunk(
             chunk.raw_cell_id,
             truth,
@@ -938,7 +566,6 @@ def _evaluate_volume_field(
     vtk_index: VTKXMLIndex,
     array: VTKDataArrayIndex,
     manifest: PredictionChunkManifest,
-    weights: FixedVolumeWeights,
     *,
     hash_chunk_bytes: int,
     validation_block_rows: int,
@@ -951,7 +578,6 @@ def _evaluate_volume_field(
         array=array,
         manifest=manifest,
         field_name=array.name,
-        physical_weights=weights.values_m3,
         hash_chunk_bytes=hash_chunk_bytes,
         validation_block_rows=validation_block_rows,
     )
@@ -985,14 +611,8 @@ def _validate_case_sources(
     areas: FixedSurfaceAreas,
     volume_stream: SegmentedReader,
     vtk_index: VTKXMLIndex,
-    volume_weights: FixedVolumeWeights,
-    *,
-    source_pin_sha256: str,
-    source_contract: NativeSourceContract,
-    allow_incomplete_volume_weight_pilot: bool,
 ) -> int:
     areas.assert_source_unchanged(context="before candidate evaluation")
-    volume_weights.assert_source_unchanged(context="before candidate evaluation")
     if surface.boundary_sha256 != case.boundary.sha256:
         raise DrivAerCandidateEvaluatorError(
             "loaded boundary SHA-256 differs from the native-source pin"
@@ -1040,64 +660,6 @@ def _validate_case_sources(
     volume_count = vtk_index.pieces[0].number_of_cells
     if volume_count < 1:
         raise DrivAerCandidateEvaluatorError("native volume contains no cells")
-    if (
-        volume_weights.case_id != case.case_id
-        or volume_weights.entity_count != volume_count
-        or volume_weights.source_volume_part_sha256
-        != tuple(part.sha256 for part in case.volume_parts)
-    ):
-        raise DrivAerCandidateEvaluatorError(
-            "fixed volume weights differ from the native-source case binding"
-        )
-    if (
-        volume_weights.binding_status != SOURCE_BOUND_VOLUME_WEIGHT_STATUS
-        or volume_weights.native_source_pin_sha256 != source_pin_sha256
-        or volume_weights.receipt_sha256 is None
-        or volume_weights.aggregate_sha256 is None
-        or volume_weights.algorithm_sha256 is None
-        or volume_weights.native_cell_types is None
-        or not volume_weights.per_vtk_cell_type
-        or volume_weights.aggregate_native_cell_type_payload_manifest_sha256
-        is None
-        or not volume_weights.aggregate_per_vtk_cell_type
-    ):
-        raise DrivAerCandidateEvaluatorError(
-            "fixed volume weights are not eligible source-bound evaluator inputs"
-        )
-    if (
-        volume_weights.native_cell_types.get("dtype") != "uint8"
-        or volume_weights.native_cell_types.get("shape") != [volume_count]
-        or volume_weights.native_cell_types.get("order")
-        != "zero_based_raw_vtk_cell_order"
-        or sum(
-            int(row["cell_count"])
-            for row in volume_weights.per_vtk_cell_type
-        )
-        != volume_count
-    ):
-        raise DrivAerCandidateEvaluatorError(
-            "fixed volume-weight native cell-type binding is inconsistent"
-        )
-    if not volume_weights.aggregate_complete and not allow_incomplete_volume_weight_pilot:
-        raise DrivAerCandidateEvaluatorError(
-            "production candidate evaluation requires the complete 484-case "
-            "volume-weight aggregate"
-        )
-    if volume_weights.aggregate_complete:
-        frozen_aggregate_sha256 = source_contract.volume_weight_aggregate_sha256
-        if frozen_aggregate_sha256 is None:
-            raise DrivAerCandidateEvaluatorError(
-                "the complete volume-weight aggregate hash is not frozen in the "
-                "evaluator contract"
-            )
-        if volume_weights.aggregate_sha256 != _sha256_digest(
-            frozen_aggregate_sha256,
-            "source contract volume_weight_aggregate_sha256",
-        ):
-            raise DrivAerCandidateEvaluatorError(
-                "fixed volume weights use a different complete aggregate than the "
-                "evaluator contract"
-            )
     if pin.case(case.case_id) is not case:
         # NativeSourcePin.case returns the exact immutable record held by the pin.
         raise DrivAerCandidateEvaluatorError("case record is not owned by the source pin")
@@ -1112,7 +674,6 @@ def evaluate_candidate_case(
     fixed_surface_areas: FixedSurfaceAreas,
     volume_stream: SegmentedReader,
     volume_vtk_index: VTKXMLIndex,
-    fixed_volume_weights: FixedVolumeWeights,
     surface_prediction_manifest: PredictionChunkManifest | Path | str,
     volume_prediction_manifest: PredictionChunkManifest | Path | str,
     maximum_prediction_chunk_rows: int = DEFAULT_MAX_PREDICTION_CHUNK_ROWS,
@@ -1120,17 +681,12 @@ def evaluate_candidate_case(
     validation_block_rows: int = DEFAULT_VALIDATION_BLOCK_ROWS,
     encoded_chunk_bytes: int = DEFAULT_ENCODED_CHUNK_BYTES,
     source_contract: NativeSourceContract = OFFICIAL_NATIVE_SOURCE_CONTRACT,
-    allow_incomplete_volume_weight_pilot: bool = False,
 ) -> CandidateCaseEvaluation:
     """Evaluate one exact candidate case without materializing predictions."""
 
     if not isinstance(native_source_pin, NativeSourcePin):
         raise DrivAerCandidateEvaluatorError(
             "native_source_pin must be a validated NativeSourcePin"
-        )
-    if not isinstance(allow_incomplete_volume_weight_pilot, bool):
-        raise DrivAerCandidateEvaluatorError(
-            "allow_incomplete_volume_weight_pilot must be Boolean"
         )
     source_pin_sha256 = validate_native_source_contract(
         native_source_pin, source_contract
@@ -1151,12 +707,6 @@ def evaluate_candidate_case(
         fixed_surface_areas,
         volume_stream,
         volume_vtk_index,
-        fixed_volume_weights,
-        source_pin_sha256=source_pin_sha256,
-        source_contract=source_contract,
-        allow_incomplete_volume_weight_pilot=(
-            allow_incomplete_volume_weight_pilot
-        ),
     )
     surface_manifest = _manifest(surface_prediction_manifest)
     volume_manifest = _manifest(volume_prediction_manifest)
@@ -1206,7 +756,6 @@ def evaluate_candidate_case(
             volume_vtk_index,
             pressure_array,
             volume_manifest,
-            fixed_volume_weights,
             hash_chunk_bytes=hash_rows,
             validation_block_rows=validation_rows,
             encoded_chunk_bytes=encoded_bytes,
@@ -1216,7 +765,6 @@ def evaluate_candidate_case(
             volume_vtk_index,
             velocity_array,
             volume_manifest,
-            fixed_volume_weights,
             hash_chunk_bytes=hash_rows,
             validation_block_rows=validation_rows,
             encoded_chunk_bytes=encoded_bytes,
@@ -1257,12 +805,18 @@ def evaluate_candidate_case(
         )
         metric_values.update(
             _field_metric_values(
-                "volume_pressure", volume_pressure.statistics, physical_first=False
+                "volume_pressure",
+                volume_pressure.statistics,
+                physical_first=False,
+                include_secondary=False,
             )
         )
         metric_values.update(
             _field_metric_values(
-                "volume_velocity", volume_velocity.statistics, physical_first=False
+                "volume_velocity",
+                volume_velocity.statistics,
+                physical_first=False,
+                include_secondary=False,
             )
         )
         sufficient_statistics: dict[
@@ -1291,8 +845,9 @@ def evaluate_candidate_case(
                 "volume_pressure_rel_l2",
                 volume_pressure.statistics,
                 physical_first=False,
-                physical_dataset_weighting="cell_volume",
+                physical_dataset_weighting="not_applicable_equal_native_cell_only",
                 uniform_dataset_weighting="volume_cells_equal",
+                include_secondary=False,
             )
         )
         sufficient_statistics.update(
@@ -1300,8 +855,9 @@ def evaluate_candidate_case(
                 "volume_velocity_rel_l2",
                 volume_velocity.statistics,
                 physical_first=False,
-                physical_dataset_weighting="cell_volume",
+                physical_dataset_weighting="not_applicable_equal_native_cell_only",
                 uniform_dataset_weighting="volume_cells_equal",
+                include_secondary=False,
             )
         )
     except DrivAerAccumulatorError as error:
@@ -1311,9 +867,6 @@ def evaluate_candidate_case(
         raise DrivAerCandidateEvaluatorError(
             "native-source pin changed during candidate evaluation"
         )
-    fixed_volume_weights.assert_source_unchanged(
-        context="while candidate volume metrics were reduced"
-    )
     fixed_surface_areas.assert_source_unchanged(
         context="while candidate surface metrics were reduced"
     )
@@ -1348,7 +901,12 @@ def evaluate_candidate_case(
             "cell_count": volume_count,
             "source_size_bytes": volume_vtk_index.source_size_bytes,
         },
-        volume_weight_audit=fixed_volume_weights.audit_record(),
+        volume_weighting_audit={
+            "weighting": "one_per_native_cell",
+            "entity_count": volume_count,
+            "total_weight": float(volume_count),
+            "geometric_cell_volume_weights_used": False,
+        },
         surface_prediction_manifest_sha256=surface_manifest_sha256,
         volume_prediction_manifest_sha256=volume_manifest_sha256,
         surface_prediction_chunk_sha256=tuple(
@@ -1367,7 +925,11 @@ def evaluate_candidate_case(
         metric_values=metric_values,
         metric_sufficient_statistics=sufficient_statistics,
         additive_sums={
-            name: _additive_sums(value) for name, value in statistics.items()
+            name: _additive_sums(
+                value,
+                include_physical=not name.startswith("volume_"),
+            )
+            for name, value in statistics.items()
         },
         force_coefficients=coefficients,
         execution={
@@ -1434,13 +996,9 @@ __all__ = [
     "DEFAULT_MAX_PREDICTION_CHUNK_ROWS",
     "CandidateCaseEvaluation",
     "DrivAerCandidateEvaluatorError",
-    "FixedVolumeWeights",
     "NativeSourceContract",
     "OFFICIAL_NATIVE_SOURCE_CONTRACT",
     "OFFICIAL_NATIVE_SOURCE_PIN_SHA256",
-    "SOURCE_BOUND_VOLUME_WEIGHT_STATUS",
-    "audit_fixed_volume_weight_file",
-    "audit_source_bound_volume_weight_file",
     "evaluate_candidate_case",
     "validate_native_source_contract",
     "write_candidate_case_evidence",

@@ -123,6 +123,29 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 submission["case_metrics"]["sha256"],
                 self.sha256(output / "metrics" / "cases.json"),
             )
+            prediction_manifest_path = output / "predictions" / "manifest.json"
+            prediction_artifacts = submission["prediction_artifacts"]
+            self.assertEqual(len(prediction_artifacts), 1)
+            self.assertEqual(
+                prediction_artifacts[0]["manifest_file"],
+                "predictions/manifest.json",
+            )
+            self.assertEqual(
+                prediction_artifacts[0]["manifest_sha256"],
+                self.sha256(prediction_manifest_path),
+            )
+            self.assertEqual(
+                prediction_artifacts[0]["support_manifest_sha256"],
+                self.sha256(output / "support" / "manifest.json"),
+            )
+            prediction_manifest = json.loads(
+                prediction_manifest_path.read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                prediction_artifacts[0]["artifact_id"],
+                prediction_manifest["artifact_id"],
+            )
+            self.assertEqual(prediction_manifest["kind"], "scored_predictions")
             self.assertIn(
                 "v3/submission.schema.json", receipt["schema_checks"]
             )
@@ -142,9 +165,30 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 set(metrics["metric_values"]),
                 {
                     "volume_pressure_rel_l2",
-                    "volume_pressure_physical_rel_l2",
                     "volume_velocity_rel_l2",
-                    "volume_velocity_physical_rel_l2",
+                },
+            )
+            synthetic_support = support["supports"][0]
+            self.assertEqual(
+                synthetic_support["location_definition"]["weight_rule"],
+                {"kind": "uniform"},
+            )
+            self.assertEqual(
+                {
+                    binding["metric_id"]: (
+                        binding["weighting"], binding["dataset_weighting"]
+                    )
+                    for binding in synthetic_support["metric_bindings"]
+                },
+                {
+                    "volume_pressure_rel_l2": (
+                        "uniform",
+                        "volume_cells_equal",
+                    ),
+                    "volume_velocity_rel_l2": (
+                        "uniform",
+                        "volume_cells_equal",
+                    ),
                 },
             )
 
@@ -220,7 +264,15 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
         )
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("run_1 and run_44", completed.stdout)
-        self.assertIn("--volume-weight-receipt", completed.stdout)
+        self.assertIn("--case-inputs", completed.stdout)
+        for obsolete_option in (
+            "--volume-weight-npy",
+            "--volume-weight-receipt",
+            "--volume-weight-aggregate",
+            "--pilot-volume-weight-aggregate-sha256",
+            "--allow-incomplete-volume-weight-pilot",
+        ):
+            self.assertNotIn(obsolete_option, completed.stdout)
         self.assertIn("never writes ``submission.json``", completed.stdout)
 
     def _real_driver_fixture(self, root: Path) -> tuple[Path, SimpleNamespace]:
@@ -241,10 +293,6 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             + "\n",
             encoding="utf-8",
         )
-        aggregate = root / "aggregate.json"
-        aggregate.write_text("{}\n", encoding="utf-8")
-        receipt = root / "receipt.json"
-        receipt.write_text("{}\n", encoding="utf-8")
         dataset = root / "dataset"
         dataset.mkdir()
         args = SimpleNamespace(
@@ -252,10 +300,6 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             native_source_pin=input_file,
             dataset_root=dataset,
             autocfd5_profile=input_file,
-            volume_weight_aggregate=aggregate,
-            volume_weight_receipt=[receipt],
-            pilot_volume_weight_aggregate_sha256=self.sha256(aggregate),
-            allow_incomplete_volume_weight_pilot=True,
             output=root / "result",
             maximum_prediction_chunk_rows=17,
             io_chunk_bytes=4096,
@@ -340,7 +384,28 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            _, args = self._real_driver_fixture(root)
+            config, args = self._real_driver_fixture(root)
+            self.assertEqual(
+                self.real_driver.INPUT_SCHEMA,
+                "drivaerml-run1-run44-reference-inputs-v2",
+            )
+            self.assertEqual(
+                json.loads(config.read_text(encoding="utf-8"))["schema"],
+                self.real_driver.INPUT_SCHEMA,
+            )
+            self.assertEqual(
+                self.real_driver.CASE_INPUT_KEYS,
+                {
+                    "case_id",
+                    "surface_area_npy",
+                    "surface_prediction_manifest",
+                    "volume_prediction_manifest",
+                    "cp_support_json",
+                    "velocity_mapping_json",
+                    "velocity_receipt_json",
+                },
+            )
+            self.assertNotIn("volume_weight", config.read_text(encoding="utf-8"))
             with (
                 patch.object(
                     self.real_driver,
@@ -373,6 +438,21 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             )
             self.assertFalse(receipt["official_submission"])
             self.assertFalse(receipt["downloads_performed"])
+            self.assertEqual(
+                receipt["schema"], "drivaerml-run1-run44-reference-evidence-v2"
+            )
+            self.assertEqual(receipt["schema_version"], 2)
+            self.assertEqual(receipt["volume_weighting"], "one_per_native_cell")
+            self.assertFalse(receipt["geometric_cell_volume_weights_used"])
+            self.assertEqual(
+                receipt["case_input_config_sha256"], self.sha256(config)
+            )
+            for obsolete_field in (
+                "volume_weight_aggregate_sha256",
+                "volume_weight_receipt_sha256",
+                "pilot_incomplete_volume_weight_aggregate",
+            ):
+                self.assertNotIn(obsolete_field, receipt)
             self.assertTrue(
                 all(
                     case["cross_evaluator_prediction_identity_verified"]
@@ -381,6 +461,79 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             )
             self.assertTrue((args.output / "validation-receipt.json").is_file())
             self.assertFalse((args.output / "submission.json").exists())
+
+    def test_real_driver_rejects_case_input_config_mutation(self) -> None:
+        class FakePin:
+            def case(self, case_id):
+                count = {"run_1": 2, "run_44": 3}[case_id]
+                return SimpleNamespace(
+                    volume_parts=tuple(object() for _ in range(count))
+                )
+
+            def resolve(self, case_id, dataset_root):
+                return SimpleNamespace(case_id=case_id, dataset_root=dataset_root)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config, args = self._real_driver_fixture(root)
+            mutated = False
+
+            def fake_core(run_args):
+                nonlocal mutated
+                run_args.output.parent.mkdir(parents=True, exist_ok=True)
+                run_args.output.write_text(
+                    json.dumps(
+                        self._fake_real_evidence("core", run_args.case_id)
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                if not mutated:
+                    config.write_text(
+                        config.read_text(encoding="utf-8") + "\n",
+                        encoding="utf-8",
+                    )
+                    mutated = True
+                return {
+                    "sha256": self.sha256(run_args.output),
+                    "byte_size": run_args.output.stat().st_size,
+                }
+
+            def fake_diagnostic(run_args):
+                run_args.output.parent.mkdir(parents=True, exist_ok=True)
+                run_args.output.write_text(
+                    json.dumps(
+                        self._fake_real_evidence("diagnostic", run_args.case_id)
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                return {
+                    "sha256": self.sha256(run_args.output),
+                    "byte_size": run_args.output.stat().st_size,
+                }
+
+            with (
+                patch.object(
+                    self.real_driver,
+                    "load_native_source_pin",
+                    return_value=FakePin(),
+                ),
+                patch.object(self.real_driver, "validate_native_source_contract"),
+                patch.object(self.real_driver, "_run_core_case", fake_core),
+                patch.object(
+                    self.real_driver,
+                    "_run_diagnostic_case",
+                    fake_diagnostic,
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    self.real_driver.RealReferenceDriverError,
+                    "case-input config changed after it was parsed",
+                ):
+                    self.real_driver.run(args)
+            self.assertTrue(mutated)
+            self.assertFalse(args.output.exists())
 
     def test_real_driver_rejects_wrong_case_set_before_evaluation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

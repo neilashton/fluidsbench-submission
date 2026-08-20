@@ -32,11 +32,15 @@ class DrivAerMLCandidateCLITests(unittest.TestCase):
         self.assertIn("--multipart", completed.stdout)
         self.assertIn("--surface-prediction-manifest", completed.stdout)
         self.assertIn("--volume-prediction-manifest", completed.stdout)
-        self.assertIn("--volume-weight-receipt", completed.stdout)
-        self.assertIn("--volume-weight-aggregate", completed.stdout)
-        self.assertIn("--pilot-volume-weight-aggregate-sha256", completed.stdout)
-        self.assertIn("--allow-incomplete-volume-weight-pilot", completed.stdout)
-        self.assertNotIn("--volume-weight-sha256", completed.stdout)
+        for obsolete_option in (
+            "--volume-weight-npy",
+            "--volume-weight-receipt",
+            "--volume-weight-aggregate",
+            "--pilot-volume-weight-aggregate-sha256",
+            "--allow-incomplete-volume-weight-pilot",
+            "--volume-weight-sha256",
+        ):
+            self.assertNotIn(obsolete_option, completed.stdout)
 
     def test_diagnostic_boundary_reader_rejects_path_replacement_without_redirect(
         self,

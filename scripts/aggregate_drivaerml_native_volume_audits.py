@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Aggregate strict DrivAerML native-volume case-audit evidence.
+"""Aggregate strict equal-native-cell DrivAerML volume-audit evidence.
 
-The default scope is every case in the immutable native-source pin.  Explicit
-``--case`` arguments permit a bounded pilot, but receipts and the supplied
-volume-weight aggregate must still cover that selected set exactly once.
+The all-case mode covers every case in the immutable native-source pin.  The
+pilot mode requires an explicit, ordered subset.  Both modes validate exactly
+one unit weight per native volume cell; geometric cell-volume weights are not
+part of this scoring contract.
 """
 
 from __future__ import annotations
@@ -30,31 +31,15 @@ from reference.drivaerml.source import (  # noqa: E402
     NativeSourcePin,
     load_native_source_pin,
 )
-from reference.drivaerml.volume_weights import (  # noqa: E402
-    ALLOWED_NATIVE_CELL_TYPES as WEIGHT_ALLOWED_NATIVE_CELL_TYPES,
-    DEFAULT_COPY_CHUNK_SIZE as WEIGHT_COPY_CHUNK_SIZE,
-    DEFAULT_SOURCE_VERIFICATION_CHUNK_BYTES as WEIGHT_SOURCE_VERIFICATION_CHUNK_BYTES,
-    IMPLEMENTATION_RELATIVE_PATHS as WEIGHT_IMPLEMENTATION_RELATIVE_PATHS,
-    PINNED_ENVIRONMENT_BINDING as WEIGHT_ENVIRONMENT_BINDING,
-)
-from scripts.aggregate_drivaerml_volume_weights import (  # noqa: E402
-    PINNED_ALGORITHM as WEIGHT_ALGORITHM,
-    PINNED_ALGORITHM_SHA256 as WEIGHT_ALGORITHM_SHA256,
-    PINNED_VERSIONS as WEIGHT_DEPENDENCY_VERSIONS,
-)
-
-
 DEFAULT_NATIVE_SOURCE_PIN = (
     ROOT / "benchmark-specs" / "drivaerml" / "proposal" / "native-source-pin.json"
 )
-CASE_AUDIT_SCHEMA = "drivaerml-native-volume-case-audit-v1"
-WEIGHT_AGGREGATE_SCHEMA = "drivaerml-volume-cell-weight-receipt-aggregate-v2"
-AGGREGATE_SCHEMA = "drivaerml-native-volume-audit-aggregate-v1"
-PRIMARY_PILOT_AGGREGATE_SCHEMA = (
-    "drivaerml-native-volume-equal-cell-primary-pilot-aggregate-v1"
+CASE_AUDIT_SCHEMA = "drivaerml-native-volume-case-audit-v2"
+EQUAL_CELL_PILOT_AGGREGATE_SCHEMA = (
+    "drivaerml-native-volume-equal-cell-pilot-aggregate-v2"
 )
-PRIMARY_ALL_CASE_AUDIT_SCHEMA = (
-    "drivaerml-native-volume-equal-cell-primary-all-case-audit-v1"
+EQUAL_CELL_ALL_CASE_AUDIT_SCHEMA = (
+    "drivaerml-native-volume-equal-cell-all-case-audit-v2"
 )
 REFERENCE_CHUNK_CELLS = 1_000_003
 COMPARISON_CHUNK_CELLS = 777_779
@@ -189,15 +174,6 @@ def _relative_public_path(value: object, label: str) -> str:
     ):
         raise NativeVolumeAuditAggregateError(
             f"{label} must be a normalized relative public path"
-        )
-    return result
-
-
-def _safe_basename(value: object, label: str, *, suffix: str) -> str:
-    result = _relative_public_path(value, label)
-    if "/" in result or not result.endswith(suffix):
-        raise NativeVolumeAuditAggregateError(
-            f"{label} must be a basename ending in {suffix}"
         )
     return result
 
@@ -756,7 +732,6 @@ def _validate_metric_pass(
     cell_count: int,
     payload_sha256: str,
     payload_bytes: int,
-    volume_sum_m3: float,
 ) -> dict[str, object]:
     metric_pass = _exact_keys(
         value,
@@ -783,38 +758,17 @@ def _validate_metric_pass(
         raise NativeVolumeAuditAggregateError(
             f"{case_id} {field_name} metric pass source/count/partition binding is invalid"
         )
-    additive = _exact_keys(
+    sums = _validate_additive_sums(
         metric_pass["additive_sums"],
-        {"uniform", "physical"},
-        f"{case_id} {field_name} additive sums",
+        cell_count=cell_count,
+        expected_total_weight=float(cell_count),
+        label=f"{case_id} {field_name} equal-native-cell sums",
     )
-    sums = {
-        "uniform": _validate_additive_sums(
-            additive["uniform"],
-            cell_count=cell_count,
-            expected_total_weight=float(cell_count),
-            label=f"{case_id} {field_name} uniform sums",
-        ),
-        "physical": _validate_additive_sums(
-            additive["physical"],
-            cell_count=cell_count,
-            expected_total_weight=volume_sum_m3,
-            label=f"{case_id} {field_name} physical sums",
-        ),
-    }
-    metrics = _exact_keys(
+    normalized_metrics = _validate_metric_summary(
         metric_pass["metrics"],
-        {"uniform", "physical"},
-        f"{case_id} {field_name} metric values",
+        sums=sums,
+        label=f"{case_id} {field_name} equal-native-cell metrics",
     )
-    normalized_metrics = {
-        weighting: _validate_metric_summary(
-            metrics[weighting],
-            sums=sums[weighting],
-            label=f"{case_id} {field_name} {weighting} metrics",
-        )
-        for weighting in ("uniform", "physical")
-    }
     return {
         "chunk_entities": chunk_cells,
         "metrics": normalized_metrics,
@@ -842,7 +796,7 @@ def _validate_invariance(
         {
             "same_source_payload_sha256",
             "same_complete_entity_coverage",
-            "additive_sums",
+            "equal_native_cell_additive_sums",
             "maximum_additive_relative_difference",
             "maximum_metric_absolute_difference",
         },
@@ -856,50 +810,40 @@ def _validate_invariance(
             f"{case_id} {field_name} invariance lacks identical source/coverage"
         )
     recorded = _exact_keys(
-        invariance["additive_sums"],
-        {"uniform", "physical"},
-        f"{case_id} {field_name} invariance additive sums",
+        invariance["equal_native_cell_additive_sums"],
+        {"absolute_error", "squared_error", "squared_truth", "total_weight"},
+        f"{case_id} {field_name} equal-native-cell invariance additive sums",
     )
     maximum_relative = 0.0
-    for weighting in ("uniform", "physical"):
-        rows = _exact_keys(
-            recorded[weighting],
-            {"absolute_error", "squared_error", "squared_truth", "total_weight"},
-            f"{case_id} {field_name} {weighting} invariance",
+    for name in ("absolute_error", "squared_error", "squared_truth", "total_weight"):
+        difference = _exact_keys(
+            recorded[name],
+            {"absolute_difference", "relative_difference"},
+            f"{case_id} {field_name} equal-native-cell {name} difference",
         )
-        for name in ("absolute_error", "squared_error", "squared_truth", "total_weight"):
-            difference = _exact_keys(
-                rows[name],
-                {"absolute_difference", "relative_difference"},
-                f"{case_id} {field_name} {weighting} {name} difference",
+        left = float(reference["additive_sums"][name])
+        right = float(comparison["additive_sums"][name])
+        absolute = abs(left - right)
+        relative = _relative_difference(left, right)
+        recorded_absolute = _finite(
+            difference["absolute_difference"],
+            f"{case_id} recorded absolute difference",
+            nonnegative=True,
+        )
+        recorded_relative = _finite(
+            difference["relative_difference"],
+            f"{case_id} recorded relative difference",
+            nonnegative=True,
+        )
+        if not _close(recorded_absolute, absolute) or not _close(
+            recorded_relative, relative
+        ):
+            raise NativeVolumeAuditAggregateError(
+                f"{case_id} {field_name} recorded additive invariance is incorrect"
             )
-            left = float(reference["additive_sums"][weighting][name])
-            right = float(comparison["additive_sums"][weighting][name])
-            absolute = abs(left - right)
-            relative = _relative_difference(left, right)
-            recorded_absolute = _finite(
-                difference["absolute_difference"],
-                f"{case_id} recorded absolute difference",
-                nonnegative=True,
-            )
-            recorded_relative = _finite(
-                difference["relative_difference"],
-                f"{case_id} recorded relative difference",
-                nonnegative=True,
-            )
-            if not _close(recorded_absolute, absolute) or not _close(
-                recorded_relative, relative
-            ):
-                raise NativeVolumeAuditAggregateError(
-                    f"{case_id} {field_name} recorded additive invariance is incorrect"
-                )
-            maximum_relative = max(maximum_relative, relative)
+        maximum_relative = max(maximum_relative, relative)
     maximum_metric = max(
-        abs(
-            float(reference["metrics"][weighting][name])
-            - float(comparison["metrics"][weighting][name])
-        )
-        for weighting in ("uniform", "physical")
+        abs(float(reference["metrics"][name]) - float(comparison["metrics"][name]))
         for name in ("relative_l2_percent", "mae", "rmse")
     )
     reported_relative = _finite(
@@ -933,7 +877,6 @@ def _validate_metric_fixture(
     components: int,
     field_audit: Mapping[str, Any],
     cell_count: int,
-    volume_sum_m3: float,
     relative_tolerance: float,
     metric_tolerance: float,
 ) -> tuple[float, float]:
@@ -959,7 +902,6 @@ def _validate_metric_fixture(
         cell_count=cell_count,
         payload_sha256=field_audit["payload_sha256"],
         payload_bytes=field_audit["decoded_payload_bytes"],
-        volume_sum_m3=volume_sum_m3,
     )
     comparison = _validate_metric_pass(
         fixture["comparison_partition"],
@@ -970,7 +912,6 @@ def _validate_metric_fixture(
         cell_count=cell_count,
         payload_sha256=field_audit["payload_sha256"],
         payload_bytes=field_audit["decoded_payload_bytes"],
-        volume_sum_m3=volume_sum_m3,
     )
     return _validate_invariance(
         fixture["invariance"],
@@ -983,878 +924,47 @@ def _validate_metric_fixture(
     )
 
 
-def _validate_weight_source_binding(
-    value: object,
-    *,
-    pin: NativeSourcePin,
-    pin_sha256: str,
-    case: NativeCaseRecord,
-) -> None:
-    binding = _exact_keys(
-        value,
-        {"pin", "case_id", "logical_volume", "verification"},
-        f"{case.case_id} weight native_source_binding",
-    )
-    pin_binding = _exact_keys(
-        binding["pin"],
-        {"sha256", "repository_id", "repository_revision"},
-        f"{case.case_id} weight pin binding",
-    )
-    if (
-        pin_binding["sha256"] != pin_sha256
-        or pin_binding["repository_id"] != pin.repository_id
-        or pin_binding["repository_revision"] != pin.repository_revision
-        or binding["case_id"] != case.case_id
-    ):
-        raise NativeVolumeAuditAggregateError(
-            f"{case.case_id} weight source pin/case binding is inconsistent"
-        )
-    logical = _exact_keys(
-        binding["logical_volume"],
-        {"path", "size_bytes", "ordered_verified_segments"},
-        f"{case.case_id} weight logical volume",
-    )
-    if (
-        logical["path"] != case.volume_logical_path.as_posix()
-        or logical["size_bytes"] != case.volume_total_size_bytes
-    ):
-        raise NativeVolumeAuditAggregateError(
-            f"{case.case_id} weight logical volume is not pinned"
-        )
-    segments = logical["ordered_verified_segments"]
-    if not isinstance(segments, list) or len(segments) != len(case.volume_parts):
-        raise NativeVolumeAuditAggregateError(
-            f"{case.case_id} weight source segments are incomplete"
-        )
-    for index, (raw, part) in enumerate(zip(segments, case.volume_parts, strict=True)):
-        row = _exact_keys(
-            raw,
-            {"part_index", "size_bytes", "sha256"},
-            f"{case.case_id} weight source segment {index}",
-        )
-        verified_index = _integer(
-            row["part_index"], f"{case.case_id} weight segment {index} index"
-        )
-        verified_size = _integer(
-            row["size_bytes"],
-            f"{case.case_id} weight segment {index} size",
-            minimum=1,
-        )
-        verified_sha256 = _sha256(
-            row["sha256"], f"{case.case_id} weight segment {index} SHA-256"
-        )
-        if (
-            verified_index != index
-            or verified_size != part.size_bytes
-            or verified_sha256 != part.sha256
-        ):
-            raise NativeVolumeAuditAggregateError(
-                f"{case.case_id} weight source segment {index} is not pinned"
-            )
-    if dict(_mapping(binding["verification"], "weight verification")) != {
-        "method": "exact_ordered_segment_size_and_sha256",
-        "timing": "completed_before_vtk_geometry_reader",
-        "vtk_input": "retained_verified_file_descriptor",
-        "post_vtk_fstat": "unchanged",
-    }:
-        raise NativeVolumeAuditAggregateError(
-            f"{case.case_id} weight source verification is not exact"
-        )
-
-
-def _validate_weight_output(
-    value: object,
-    *,
-    case_id: str,
-    native_cell_type_histogram: Sequence[Mapping[str, object]],
-) -> dict[str, object]:
-    output = _exact_keys(
-        value,
-        {
-            "file",
-            "dtype",
-            "shape",
-            "cell_count",
-            "size_bytes",
-            "sha256",
-            "volume_sum_m3",
-            "volume_min_m3",
-            "volume_max_m3",
-            "per_vtk_cell_type",
-        },
-        f"{case_id} weight output",
-    )
-    count = _integer(output["cell_count"], f"{case_id} weight cell_count", minimum=1)
-    if output["dtype"] != "<f8" or output["shape"] != [count]:
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} weight dtype/shape/count is invalid"
-        )
-    size = _integer(output["size_bytes"], f"{case_id} weight size", minimum=1)
-    if size != 128 + 8 * count:
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} weight NPY size/count is invalid"
-        )
-    total = _positive(output["volume_sum_m3"], f"{case_id} weight sum")
-    minimum = _positive(output["volume_min_m3"], f"{case_id} weight minimum")
-    maximum = _positive(output["volume_max_m3"], f"{case_id} weight maximum")
-    if minimum > maximum or not minimum * count <= total <= maximum * count:
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} weight sum/minimum/maximum is inconsistent"
-        )
-    per_type = _validate_weight_per_type_output(
-        output["per_vtk_cell_type"],
-        case_id=case_id,
-        histogram=native_cell_type_histogram,
-        overall_sum=total,
-        overall_minimum=minimum,
-        overall_maximum=maximum,
-    )
-    return {
-        "file": _safe_basename(
-            output["file"], f"{case_id} weight file", suffix=".npy"
-        ),
-        "dtype": "<f8",
-        "cell_count": count,
-        "size_bytes": size,
-        "sha256": _sha256(output["sha256"], f"{case_id} weight SHA-256"),
-        "volume_sum_m3": total,
-        "volume_min_m3": minimum,
-        "volume_max_m3": maximum,
-        "per_vtk_cell_type": per_type,
-    }
-
-
-def _validate_weight_native_cell_types(
-    value: object,
-    *,
-    case_id: str,
-    expected_cell_count: int,
-) -> dict[str, object]:
-    audit = _exact_keys(
-        value,
-        {"dtype", "shape", "order", "payload_sha256", "histogram"},
-        f"{case_id} weight native_cell_types",
-    )
-    if (
-        audit["dtype"] != "uint8"
-        or audit["shape"] != [expected_cell_count]
-        or audit["order"] != "zero_based_raw_vtk_cell_order"
-    ):
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} native cell-type dtype/shape/order is invalid"
-        )
-    raw_histogram = audit["histogram"]
-    if not isinstance(raw_histogram, list) or not raw_histogram:
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} native cell-type histogram must be non-empty"
-        )
-    histogram: list[dict[str, object]] = []
-    previous_type_id = -1
-    for index, raw_row in enumerate(raw_histogram):
-        row = _exact_keys(
-            raw_row,
-            {"vtk_cell_type_id", "vtk_cell_type_name", "cell_count"},
-            f"{case_id} native cell-type histogram row {index}",
-        )
-        type_id = _integer(
-            row["vtk_cell_type_id"],
-            f"{case_id} native cell-type histogram row {index} ID",
-            minimum=1,
-        )
-        expected_name = WEIGHT_ALLOWED_NATIVE_CELL_TYPES.get(type_id)
-        if type_id <= previous_type_id or expected_name is None:
-            raise NativeVolumeAuditAggregateError(
-                f"{case_id} native cell-type histogram IDs are not supported/increasing"
-            )
-        if row["vtk_cell_type_name"] != expected_name:
-            raise NativeVolumeAuditAggregateError(
-                f"{case_id} native cell-type name differs from its frozen ID"
-            )
-        count = _integer(
-            row["cell_count"],
-            f"{case_id} native cell-type histogram row {index} count",
-            minimum=1,
-        )
-        histogram.append(
-            {
-                "vtk_cell_type_id": type_id,
-                "vtk_cell_type_name": expected_name,
-                "cell_count": count,
-            }
-        )
-        previous_type_id = type_id
-    if sum(int(row["cell_count"]) for row in histogram) != expected_cell_count:
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} native cell-type histogram/count is inconsistent"
-        )
-    return {
-        "dtype": "uint8",
-        "shape": [expected_cell_count],
-        "order": "zero_based_raw_vtk_cell_order",
-        "payload_sha256": _sha256(
-            audit["payload_sha256"],
-            f"{case_id} native cell-type payload SHA-256",
-        ),
-        "histogram": histogram,
-    }
-
-
-def _validate_weight_per_type_output(
-    value: object,
-    *,
-    case_id: str,
-    histogram: Sequence[Mapping[str, object]],
-    overall_sum: float,
-    overall_minimum: float,
-    overall_maximum: float,
-) -> list[dict[str, object]]:
-    if not isinstance(value, list) or len(value) != len(histogram):
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} per-type volume-weight coverage is not exact"
-        )
-    result: list[dict[str, object]] = []
-    for index, (raw_row, type_row) in enumerate(
-        zip(value, histogram, strict=True)
-    ):
-        row = _exact_keys(
-            raw_row,
-            {
-                "vtk_cell_type_id",
-                "vtk_cell_type_name",
-                "cell_count",
-                "volume_sum_m3",
-                "volume_min_m3",
-                "volume_max_m3",
-            },
-            f"{case_id} per-type volume-weight row {index}",
-        )
-        for name in ("vtk_cell_type_id", "vtk_cell_type_name", "cell_count"):
-            if row[name] != type_row[name]:
-                raise NativeVolumeAuditAggregateError(
-                    f"{case_id} per-type volume weights differ from the histogram"
-                )
-        count = int(type_row["cell_count"])
-        volume_sum = _positive(
-            row["volume_sum_m3"], f"{case_id} per-type volume sum"
-        )
-        volume_minimum = _positive(
-            row["volume_min_m3"], f"{case_id} per-type volume minimum"
-        )
-        volume_maximum = _positive(
-            row["volume_max_m3"], f"{case_id} per-type volume maximum"
-        )
-        tolerance = max(
-            abs(volume_sum),
-            abs(volume_minimum * count),
-            abs(volume_maximum * count),
-        ) * 1.0e-12
-        if (
-            volume_minimum > volume_maximum
-            or volume_sum < volume_minimum * count - tolerance
-            or volume_sum > volume_maximum * count + tolerance
-        ):
-            raise NativeVolumeAuditAggregateError(
-                f"{case_id} per-type volume statistics are inconsistent"
-            )
-        result.append(
-            {
-                "vtk_cell_type_id": type_row["vtk_cell_type_id"],
-                "vtk_cell_type_name": type_row["vtk_cell_type_name"],
-                "cell_count": count,
-                "volume_sum_m3": volume_sum,
-                "volume_min_m3": volume_minimum,
-                "volume_max_m3": volume_maximum,
-            }
-        )
-    summed = math.fsum(float(row["volume_sum_m3"]) for row in result)
-    tolerance = max(abs(summed), abs(overall_sum)) * 1.0e-12
-    if (
-        abs(summed - overall_sum) > tolerance
-        or min(float(row["volume_min_m3"]) for row in result) != overall_minimum
-        or max(float(row["volume_max_m3"]) for row in result) != overall_maximum
-    ):
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} per-type volume statistics differ from the full output"
-        )
-    return result
-
-
-def _validate_weight_implementation_binding(value: object) -> None:
-    binding = _exact_keys(
-        value,
-        {"git_revision", "worktree_clean", "files"},
-        "volume-weight aggregate implementation_binding",
-    )
-    revision = _string(
-        binding["git_revision"], "volume-weight implementation Git revision"
-    )
-    if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight implementation Git revision must be resolved 40-hex"
-        )
-    if binding["worktree_clean"] is not True:
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight implementation worktree must be recorded clean"
-        )
-    raw_files = binding["files"]
-    if not isinstance(raw_files, list) or len(raw_files) != len(
-        WEIGHT_IMPLEMENTATION_RELATIVE_PATHS
-    ):
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight implementation file coverage is not exact"
-        )
-    paths: list[str] = []
-    for index, raw_file in enumerate(raw_files):
-        file_record = _exact_keys(
-            raw_file,
-            {"path", "sha256"},
-            f"volume-weight implementation file {index}",
-        )
-        paths.append(
-            _relative_public_path(
-                file_record["path"],
-                f"volume-weight implementation file {index} path",
-            )
-        )
-        _sha256(
-            file_record["sha256"],
-            f"volume-weight implementation file {index} SHA-256",
-        )
-    if tuple(paths) != WEIGHT_IMPLEMENTATION_RELATIVE_PATHS:
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight implementation file order/set is not frozen"
-        )
-
-
-def _validate_weight_environment_binding(value: object) -> None:
-    binding = _exact_keys(
-        value,
-        WEIGHT_ENVIRONMENT_BINDING,
-        "volume-weight aggregate environment_binding",
-    )
-    if dict(binding) != WEIGHT_ENVIRONMENT_BINDING:
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight environment binding is not the frozen identity"
-        )
-
-
-def _validate_weight_dependencies_and_algorithm(
-    dependencies_value: object,
-    algorithm_value: object,
-) -> None:
-    dependencies = _exact_keys(
-        dependencies_value,
-        WEIGHT_DEPENDENCY_VERSIONS,
-        "volume-weight aggregate dependencies",
-    )
-    if dict(dependencies) != WEIGHT_DEPENDENCY_VERSIONS:
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight dependency versions are not frozen"
-        )
-    algorithm = _exact_keys(
-        algorithm_value,
-        {"sha256", "settings", "execution"},
-        "volume-weight aggregate algorithm",
-    )
-    if (
-        _sha256(algorithm["sha256"], "volume-weight algorithm SHA-256")
-        != WEIGHT_ALGORITHM_SHA256
-        or algorithm["settings"] != WEIGHT_ALGORITHM
-    ):
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight algorithm settings are not frozen"
-        )
-    execution = _exact_keys(
-        algorithm["execution"],
-        {"copy_chunk_size", "source_verification_chunk_bytes"},
-        "volume-weight aggregate algorithm execution",
-    )
-    if dict(execution) != {
-        "copy_chunk_size": WEIGHT_COPY_CHUNK_SIZE,
-        "source_verification_chunk_bytes": (
-            WEIGHT_SOURCE_VERIFICATION_CHUNK_BYTES
-        ),
-    }:
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight algorithm execution settings are not frozen"
-        )
-
-
-def _validate_weight_reader_audit(value: object, *, case_id: str) -> None:
-    audit = _exact_keys(
-        value,
-        {
-            "disabled_point_array_count",
-            "disabled_point_arrays",
-            "disabled_cell_array_count",
-            "disabled_cell_arrays",
-        },
-        f"{case_id} weight reader_audit",
-    )
-    for association in ("point", "cell"):
-        arrays = audit[f"disabled_{association}_arrays"]
-        if (
-            not isinstance(arrays, list)
-            or any(not isinstance(name, str) or not name for name in arrays)
-            or len(arrays) != len(set(arrays))
-        ):
-            raise NativeVolumeAuditAggregateError(
-                f"{case_id} disabled {association} arrays must be unique strings"
-            )
-        count = _integer(
-            audit[f"disabled_{association}_array_count"],
-            f"{case_id} disabled {association} array count",
-        )
-        if count != len(arrays):
-            raise NativeVolumeAuditAggregateError(
-                f"{case_id} disabled {association} array count is inconsistent"
-            )
-    if not {"pMeanTrim", "UMeanTrim"}.issubset(audit["disabled_cell_arrays"]):
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} geometry reader did not disable required CellData arrays"
-        )
-
-
-def _expected_weight_aggregate_per_type(
-    cases: Sequence[Mapping[str, object]],
-) -> list[dict[str, object]]:
-    accumulators: dict[int, dict[str, object]] = {}
-    for case in cases:
-        seen: set[int] = set()
-        for row in case["per_vtk_cell_type"]:
-            type_id = int(row["vtk_cell_type_id"])
-            if type_id in seen:
-                raise NativeVolumeAuditAggregateError(
-                    "one case repeats a per-type volume-weight row"
-                )
-            seen.add(type_id)
-            accumulator = accumulators.setdefault(
-                type_id,
-                {
-                    "vtk_cell_type_id": type_id,
-                    "vtk_cell_type_name": row["vtk_cell_type_name"],
-                    "case_count": 0,
-                    "cell_count": 0,
-                    "volume_sums": [],
-                    "volume_min_m3": math.inf,
-                    "volume_max_m3": -math.inf,
-                },
-            )
-            if accumulator["vtk_cell_type_name"] != row["vtk_cell_type_name"]:
-                raise NativeVolumeAuditAggregateError(
-                    "per-type volume-weight names differ between cases"
-                )
-            accumulator["case_count"] = int(accumulator["case_count"]) + 1
-            accumulator["cell_count"] = int(accumulator["cell_count"]) + int(
-                row["cell_count"]
-            )
-            accumulator["volume_sums"].append(float(row["volume_sum_m3"]))
-            accumulator["volume_min_m3"] = min(
-                float(accumulator["volume_min_m3"]),
-                float(row["volume_min_m3"]),
-            )
-            accumulator["volume_max_m3"] = max(
-                float(accumulator["volume_max_m3"]),
-                float(row["volume_max_m3"]),
-            )
-    return [
-        {
-            "vtk_cell_type_id": type_id,
-            "vtk_cell_type_name": accumulators[type_id]["vtk_cell_type_name"],
-            "case_count": accumulators[type_id]["case_count"],
-            "cell_count": accumulators[type_id]["cell_count"],
-            "volume_sum_m3": math.fsum(accumulators[type_id]["volume_sums"]),
-            "volume_min_m3": accumulators[type_id]["volume_min_m3"],
-            "volume_max_m3": accumulators[type_id]["volume_max_m3"],
-        }
-        for type_id in sorted(accumulators)
-    ]
-
-
-def _validate_weight_aggregate_per_type(
-    value: object,
-    *,
-    expected: Sequence[Mapping[str, object]],
-) -> list[dict[str, object]]:
-    if not isinstance(value, list) or len(value) != len(expected):
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight aggregate per-type coverage is not exact"
-        )
-    normalized: list[dict[str, object]] = []
-    keys = {
-        "vtk_cell_type_id",
-        "vtk_cell_type_name",
-        "case_count",
-        "cell_count",
-        "volume_sum_m3",
-        "volume_min_m3",
-        "volume_max_m3",
-    }
-    for index, (raw_row, expected_row) in enumerate(
-        zip(value, expected, strict=True)
-    ):
-        row = _exact_keys(
-            raw_row, keys, f"volume-weight aggregate per-type row {index}"
-        )
-        for name in keys:
-            actual = row[name]
-            expected_value = expected_row[name]
-            if isinstance(expected_value, float):
-                matches = isinstance(actual, (int, float)) and not isinstance(
-                    actual, bool
-                ) and _close(float(actual), expected_value)
-            else:
-                matches = actual == expected_value
-            if not matches:
-                raise NativeVolumeAuditAggregateError(
-                    f"volume-weight aggregate per-type {name} is inconsistent"
-                )
-        normalized.append(dict(expected_row))
-    return normalized
-
-
-def _load_weight_aggregate(
-    path: Path,
-    *,
-    pin: NativeSourcePin,
-    pin_sha256: str,
-    selected_cases: tuple[NativeCaseRecord, ...],
-) -> tuple[
-    str,
-    dict[str, dict[str, object]],
-    dict[str, object],
-]:
-    digest = sha256_file(path)
-    document = _read_json(path, "volume-weight aggregate evidence")
-    _assert_no_absolute_paths(document, "volume-weight aggregate")
-    required_root = {
-        "schema",
-        "mode",
-        "status",
-        "complete",
-        "public_evidence_eligible",
-        "activation_status",
-        "case_count",
-        "official_case_count",
-        "omitted_official_case_count",
-        "case_order",
-        "source",
-        "dependencies",
-        "implementation_binding",
-        "environment_binding",
-        "algorithm",
-        "aggregate",
-        "cases",
-    }
-    if document.get("mode") == "partial_pilot":
-        required_root.add("pilot_warning")
-    _exact_keys(document, required_root, "volume-weight aggregate")
-    if (
-        document["schema"] != WEIGHT_AGGREGATE_SCHEMA
-        or document["activation_status"] != "does_not_activate_scoring_contract"
-        or document["case_order"] != "native_source_pin_increasing_run_number"
-    ):
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight aggregate schema/status/order is invalid"
-        )
-    source = _exact_keys(
-        document["source"],
-        {"dataset", "native_source_pin", "assembled_vtu_identity"},
-        "volume-weight aggregate source",
-    )
-    dataset = _exact_keys(
-        source["dataset"],
-        {"provider", "repo_id", "revision"},
-        "weight dataset",
-    )
-    source_pin = _exact_keys(
-        source["native_source_pin"],
-        {"schema", "sha256"},
-        "weight source pin",
-    )
-    if (
-        dataset.get("provider") != "Hugging Face Hub"
-        or dataset.get("repo_id") != pin.repository_id
-        or dataset.get("revision") != pin.repository_revision
-        or source_pin.get("schema")
-        != "drivaerml-fluidsbench-public-native-source-pin-v1"
-        or source_pin.get("sha256") != pin_sha256
-        or source["assembled_vtu_identity"]
-        != "exact_ordered_part_segment_size_and_sha256_verified_before_vtk"
-    ):
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight aggregate is bound to a different native source"
-        )
-    _validate_weight_implementation_binding(document["implementation_binding"])
-    _validate_weight_environment_binding(document["environment_binding"])
-    _validate_weight_dependencies_and_algorithm(
-        document["dependencies"], document["algorithm"]
-    )
-    selected_ids = tuple(case.case_id for case in selected_cases)
-    all_pin_ids = tuple(case.case_id for case in pin.cases)
-    full_scope = selected_ids == all_pin_ids
-    expected_mode = "complete" if full_scope else "partial_pilot"
-    expected_status = (
-        "complete_all_official_cases_candidate_evidence"
-        if full_scope
-        else "incomplete_non_public_pilot"
-    )
-    if (
-        document["mode"] != expected_mode
-        or document["status"] != expected_status
-        or document["complete"] is not full_scope
-        or document["public_evidence_eligible"] is not full_scope
-        or document["case_count"] != len(selected_ids)
-        or document["official_case_count"] != len(pin.cases)
-        or document["omitted_official_case_count"]
-        != len(pin.cases) - len(selected_ids)
-    ):
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight aggregate scope/status flags are inconsistent"
-        )
-    if not full_scope and document.get("pilot_warning") != (
-        "incomplete subset; not a public scoring-support manifest or "
-        "activation artifact"
-    ):
-        raise NativeVolumeAuditAggregateError(
-            "partial volume-weight aggregate pilot warning is not exact"
-        )
-    raw_cases = document["cases"]
-    if not isinstance(raw_cases, list):
-        raise NativeVolumeAuditAggregateError("volume-weight cases must be an array")
-    by_case: dict[str, dict[str, object]] = {}
-    for raw in raw_cases:
-        row = _exact_keys(
-            raw,
-            {
-                "case_id",
-                "receipt_sha256",
-                "native_source_binding",
-                "output",
-                "reader_audit",
-                "native_cell_types",
-            },
-            "volume-weight case",
-        )
-        case_id = _string(row["case_id"], "volume-weight case_id")
-        if case_id in by_case:
-            raise NativeVolumeAuditAggregateError(
-                f"duplicate volume-weight case {case_id}"
-            )
-        try:
-            case = pin.case(case_id)
-        except NativeSourceError as error:
-            raise NativeVolumeAuditAggregateError(str(error)) from error
-        _sha256(row["receipt_sha256"], f"{case_id} weight receipt SHA-256")
-        _validate_weight_source_binding(
-            row["native_source_binding"],
-            pin=pin,
-            pin_sha256=pin_sha256,
-            case=case,
-        )
-        _validate_weight_reader_audit(row["reader_audit"], case_id=case_id)
-        output_mapping = _mapping(row["output"], f"{case_id} weight output")
-        cell_count = _integer(
-            output_mapping.get("cell_count"),
-            f"{case_id} weight cell_count",
-            minimum=1,
-        )
-        native_cell_types = _validate_weight_native_cell_types(
-            row["native_cell_types"],
-            case_id=case_id,
-            expected_cell_count=cell_count,
-        )
-        by_case[case_id] = _validate_weight_output(
-            row["output"],
-            case_id=case_id,
-            native_cell_type_histogram=native_cell_types["histogram"],
-        )
-        by_case[case_id]["native_cell_types"] = native_cell_types
-    if tuple(by_case) != selected_ids:
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight aggregate cases must exactly match selected audit cases"
-        )
-    aggregate = _exact_keys(
-        document["aggregate"],
-        {
-            "cell_count",
-            "source_vtu_size_bytes",
-            "output_size_bytes",
-            "volume_sum_m3",
-            "volume_min_m3",
-            "volume_max_m3",
-            "all_outputs_dtype",
-            "all_outputs_one_dimensional",
-            "all_values_strictly_positive_finite",
-            "native_cell_type_payload_manifest_sha256",
-            "per_vtk_cell_type",
-        },
-        "volume-weight aggregate totals",
-    )
-    if (
-        aggregate["all_outputs_dtype"] != "<f8"
-        or aggregate["all_outputs_one_dimensional"] is not True
-        or aggregate["all_values_strictly_positive_finite"] is not True
-    ):
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight aggregate output guarantees are invalid"
-        )
-    expected = {
-        "cell_count": sum(int(row["cell_count"]) for row in by_case.values()),
-        "source_vtu_size_bytes": sum(
-            case.volume_total_size_bytes for case in selected_cases
-        ),
-        "output_size_bytes": sum(int(row["size_bytes"]) for row in by_case.values()),
-        "volume_sum_m3": math.fsum(
-            float(row["volume_sum_m3"]) for row in by_case.values()
-        ),
-        "volume_min_m3": min(
-            float(row["volume_min_m3"]) for row in by_case.values()
-        ),
-        "volume_max_m3": max(
-            float(row["volume_max_m3"]) for row in by_case.values()
-        ),
-    }
-    for name, expected_value in expected.items():
-        actual = aggregate.get(name)
-        if isinstance(expected_value, float):
-            if not isinstance(actual, (int, float)) or not _close(
-                float(actual), expected_value
-            ):
-                raise NativeVolumeAuditAggregateError(
-                    f"volume-weight aggregate {name} is inconsistent"
-                )
-        elif actual != expected_value:
-            raise NativeVolumeAuditAggregateError(
-                f"volume-weight aggregate {name} is inconsistent"
-            )
-    expected_per_type = _expected_weight_aggregate_per_type(list(by_case.values()))
-    per_type = _validate_weight_aggregate_per_type(
-        aggregate["per_vtk_cell_type"], expected=expected_per_type
-    )
-    type_manifest = [
-        {
-            "case_id": case_id,
-            "payload_sha256": by_case[case_id]["native_cell_types"][
-                "payload_sha256"
-            ],
-        }
-        for case_id in selected_ids
-    ]
-    expected_manifest_sha256 = hashlib.sha256(
-        json.dumps(
-            type_manifest, sort_keys=True, separators=(",", ":")
-        ).encode("utf-8")
-    ).hexdigest()
-    if (
-        _sha256(
-            aggregate["native_cell_type_payload_manifest_sha256"],
-            "volume-weight aggregate cell-type manifest SHA-256",
-        )
-        != expected_manifest_sha256
-    ):
-        raise NativeVolumeAuditAggregateError(
-            "volume-weight aggregate cell-type manifest digest is inconsistent"
-        )
-    return digest, by_case, {
-        "native_cell_type_payload_manifest_sha256": expected_manifest_sha256,
-        "per_vtk_cell_type": per_type,
-    }
-
-
-def _validate_case_weight_audit(
-    value: object,
-    *,
-    case_id: str,
-    expected: Mapping[str, object],
-) -> dict[str, object]:
-    audit = _exact_keys(
-        value,
-        {
-            "path",
-            "sha256",
-            "dtype",
-            "cell_count",
-            "sum_m3",
-            "minimum_m3",
-            "maximum_m3",
-            "role",
-            "status",
-        },
-        f"{case_id} volume_weights",
-    )
-    if (
-        audit["role"] != "fixed_same_order_cell_volume_secondary_weights"
-        or audit["status"] != "audited"
-        or audit["dtype"] != "<f8"
-    ):
-        raise NativeVolumeAuditAggregateError(
-            f"{case_id} did not audit the fixed source-bound volume weights"
-        )
-    path_name = Path(_string(audit["path"], f"{case_id} weight path")).name
-    comparisons = {
-        "file": path_name,
-        "sha256": _sha256(audit["sha256"], f"{case_id} audited weight SHA-256"),
-        "cell_count": _integer(
-            audit["cell_count"], f"{case_id} audited weight count", minimum=1
-        ),
-        "volume_sum_m3": _positive(audit["sum_m3"], f"{case_id} audited weight sum"),
-        "volume_min_m3": _positive(
-            audit["minimum_m3"], f"{case_id} audited weight minimum"
-        ),
-        "volume_max_m3": _positive(
-            audit["maximum_m3"], f"{case_id} audited weight maximum"
-        ),
-    }
-    for name, actual in comparisons.items():
-        expected_value = expected[name]
-        if isinstance(actual, float):
-            matches = _close(actual, float(expected_value))
-        else:
-            matches = actual == expected_value
-        if not matches:
-            raise NativeVolumeAuditAggregateError(
-                f"{case_id} audited weight {name} differs from "
-                "source-bound weight evidence"
-            )
-    return {
-        "file": expected["file"],
-        "dtype": "<f8",
-        "cell_count": expected["cell_count"],
-        "size_bytes": expected["size_bytes"],
-        "sha256": expected["sha256"],
-        "volume_sum_m3": expected["volume_sum_m3"],
-        "volume_min_m3": expected["volume_min_m3"],
-        "volume_max_m3": expected["volume_max_m3"],
-        "native_cell_types": expected["native_cell_types"],
-        "per_vtk_cell_type": expected["per_vtk_cell_type"],
-        "status": "audited_against_source_bound_volume_weight_evidence",
-    }
-
-
-def _validate_equal_cell_primary_weight_audit(
+def _validate_equal_cell_weighting(
     value: object,
     *,
     case_id: str,
     cell_count: int,
 ) -> dict[str, object]:
-    audit = _exact_keys(
+    weighting = _exact_keys(
         value,
-        {"role", "status"},
-        f"{case_id} equal-cell pilot weights",
+        {
+            "weighting",
+            "entity_count",
+            "total_weight",
+            "geometric_cell_volume_weights_used",
+        },
+        f"{case_id} volume_weighting",
     )
-    if audit != {
-        "role": "unit_weights_for_equal_native_cell_primary_pilot",
-        "status": "physical_secondary_not_exercised",
-    }:
+    entity_count = _integer(
+        weighting["entity_count"],
+        f"{case_id} volume weighting entity_count",
+        minimum=1,
+    )
+    total_weight = _finite(
+        weighting["total_weight"],
+        f"{case_id} volume weighting total_weight",
+        nonnegative=True,
+    )
+    if (
+        weighting["weighting"] != "one_per_native_cell"
+        or entity_count != cell_count
+        or not isinstance(weighting["total_weight"], float)
+        or total_weight != float(cell_count)
+        or weighting["geometric_cell_volume_weights_used"] is not False
+    ):
         raise NativeVolumeAuditAggregateError(
-            f"{case_id} equal-cell pilot weight declaration is not exact"
+            f"{case_id} volume weighting must declare exactly one weight per native cell"
         )
     return {
         "weighting": "one_per_native_cell",
-        "cell_count": cell_count,
-        "volume_sum_m3": float(cell_count),
-        "status": "equal_cell_primary_only_physical_secondary_not_exercised",
+        "entity_count": cell_count,
+        "total_weight": float(cell_count),
+        "geometric_cell_volume_weights_used": False,
     }
 
 
@@ -1866,8 +976,7 @@ def _validate_runtime(value: object, case_id: str) -> None:
             "numpy",
             "segment_verification_seconds",
             "xml_index_seconds",
-            "volume_weight_audit_seconds",
-            "field_audit_and_dual_metric_seconds",
+            "field_audit_and_equal_cell_metric_seconds",
             "total_seconds",
         },
         f"{case_id} runtime",
@@ -1877,8 +986,7 @@ def _validate_runtime(value: object, case_id: str) -> None:
     for name in (
         "segment_verification_seconds",
         "xml_index_seconds",
-        "volume_weight_audit_seconds",
-        "field_audit_and_dual_metric_seconds",
+        "field_audit_and_equal_cell_metric_seconds",
         "total_seconds",
     ):
         _finite(runtime[name], f"{case_id} runtime {name}", nonnegative=True)
@@ -1890,7 +998,6 @@ def _validate_case_receipt(
     receipt_sha256: str,
     pin: NativeSourcePin,
     case: NativeCaseRecord,
-    expected_weight: Mapping[str, object] | None,
 ) -> dict[str, object]:
     _exact_keys(
         receipt,
@@ -1904,7 +1011,7 @@ def _validate_case_receipt(
             "units",
             "raw_cell_order",
             "coverage",
-            "volume_weights",
+            "volume_weighting",
             "metrics",
             "chunk_invariance_tolerances",
             "runtime",
@@ -1926,22 +1033,11 @@ def _validate_case_receipt(
         logical_size_bytes=case.volume_total_size_bytes,
     )
     cell_count = int(vtk["piece"]["number_of_cells"])
-    if expected_weight is None:
-        weights = _validate_equal_cell_primary_weight_audit(
-            receipt["volume_weights"],
-            case_id=case.case_id,
-            cell_count=cell_count,
-        )
-    else:
-        weights = _validate_case_weight_audit(
-            receipt["volume_weights"],
-            case_id=case.case_id,
-            expected=expected_weight,
-        )
-    if weights["cell_count"] != cell_count:
-        raise NativeVolumeAuditAggregateError(
-            f"{case.case_id} VTK and volume-weight cell counts differ"
-        )
+    volume_weighting = _validate_equal_cell_weighting(
+        receipt["volume_weighting"],
+        case_id=case.case_id,
+        cell_count=cell_count,
+    )
     if receipt["units"] != {
         "coordinates": "m",
         "pMeanTrim": "m^2/s^2",
@@ -2022,7 +1118,6 @@ def _validate_case_receipt(
             components=requirements[name][0],
             field_audit=fields[name],
             cell_count=cell_count,
-            volume_sum_m3=float(weights["volume_sum_m3"]),
             relative_tolerance=relative_tolerance,
             metric_tolerance=metric_tolerance,
         )
@@ -2035,7 +1130,7 @@ def _validate_case_receipt(
         "source": source,
         "vtk": vtk,
         "required_cell_data": fields,
-        "volume_weights": weights,
+        "volume_weighting": volume_weighting,
         "chunk_invariance": {
             "prediction_role": ZERO_PREDICTION_ROLE,
             "not_a_physics_null_baseline": True,
@@ -2055,20 +1150,14 @@ def _validate_case_receipt(
     }
 
 
-def _aggregate_native_volume_primary(
+def _aggregate_native_volume_equal_cell(
     *,
     native_source_pin_path: Path,
     receipt_paths: Sequence[Path],
     selected_case_ids: Sequence[str] | None,
     require_complete_scope: bool,
 ) -> dict[str, object]:
-    """Validate path-free equal-cell native-volume evidence without weights.
-
-    This deliberately cannot represent a completed physical-volume secondary
-    audit. It records native-source, CellData, raw-order, coverage, and
-    chunk-invariance evidence while the independent deterministic volume-weight
-    gate remains unresolved.
-    """
+    """Validate path-free one-weight-per-native-cell volume evidence."""
 
     pin_path = Path(native_source_pin_path)
     pin_sha256 = sha256_file(pin_path)
@@ -2084,11 +1173,11 @@ def _aggregate_native_volume_primary(
     complete_scope = len(selected) == len(pin.cases)
     if require_complete_scope and not complete_scope:
         raise NativeVolumeAuditAggregateError(
-            "equal-cell primary all-case audit must cover the complete native-source pin"
+            "equal-cell all-case audit must cover the complete native-source pin"
         )
     if not require_complete_scope and complete_scope:
         raise NativeVolumeAuditAggregateError(
-            "equal-cell primary pilot mode must remain an incomplete selected subset"
+            "equal-cell pilot mode must remain an incomplete selected subset"
         )
     selected_ids = tuple(case.case_id for case in selected)
 
@@ -2096,7 +1185,7 @@ def _aggregate_native_volume_primary(
     for raw_path in receipt_paths:
         path = Path(raw_path)
         digest = sha256_file(path)
-        receipt = _read_json(path, "native-volume equal-cell primary receipt")
+        receipt = _read_json(path, "native-volume equal-cell receipt")
         case_id = _string(receipt.get("case_id"), "case-audit case_id")
         if case_id in receipts:
             raise NativeVolumeAuditAggregateError(
@@ -2111,12 +1200,11 @@ def _aggregate_native_volume_primary(
             receipt_sha256=digest,
             pin=pin,
             case=pin.case(case_id),
-            expected_weight=None,
         )
     if set(receipts) != set(selected_ids):
         missing = [case_id for case_id in selected_ids if case_id not in receipts]
         raise NativeVolumeAuditAggregateError(
-            "native-volume equal-cell primary receipts must cover selected cases "
+            "native-volume equal-cell receipts must cover selected cases "
             f"exactly once (missing={missing})"
         )
 
@@ -2129,29 +1217,23 @@ def _aggregate_native_volume_primary(
         )
     evidence: dict[str, object] = {
         "schema": (
-            PRIMARY_ALL_CASE_AUDIT_SCHEMA
+            EQUAL_CELL_ALL_CASE_AUDIT_SCHEMA
             if require_complete_scope
-            else PRIMARY_PILOT_AGGREGATE_SCHEMA
+            else EQUAL_CELL_PILOT_AGGREGATE_SCHEMA
         ),
-        "schema_version": 1,
+        "schema_version": 2,
         "status": (
-            "passed_all_case_equal_cell_primary_audit"
+            "passed_all_case_equal_native_cell_audit"
             if require_complete_scope
-            else "passed_incomplete_equal_cell_primary_pilot"
+            else "passed_incomplete_equal_native_cell_pilot"
         ),
         "activation_status": "does_not_activate_scoring_contract",
-        "public_scoring_support_eligible": False,
-        (
-            "audit_warning"
+        "scope_note": (
+            "all native cases were audited for transport, fields, raw-cell "
+            "coverage, and chunk invariance using one weight per native cell"
             if require_complete_scope
-            else "pilot_warning"
-        ): (
-            "all native cases were audited for equal-cell primary transport, "
-            "fields, coverage, and chunk invariance; deterministic physical "
-            "volume weights and the secondary weighting are not claimed"
-            if require_complete_scope
-            else "selected-case implementation evidence only; deterministic "
-            "physical volume weights and all-case volume coverage are not claimed"
+            else "selected-case implementation evidence only; all-case native-source "
+            "pin coverage is not claimed"
         ),
         "scope": {
             "selected_case_count": len(records),
@@ -2169,8 +1251,8 @@ def _aggregate_native_volume_primary(
             "purpose": "native_transport_fields_coverage_and_chunk_invariance",
             "physics_null_baseline": False,
             "model_quality_claim": False,
-            "volume_weighting_exercised": "equal_native_cell_primary_only",
-            "physical_volume_secondary_exercised": False,
+            "volume_weighting": "one_per_native_cell",
+            "geometric_cell_volume_weights_used": False,
         },
         "totals": {
             "case_count": len(records),
@@ -2214,7 +1296,7 @@ def _aggregate_native_volume_primary(
     return evidence
 
 
-def aggregate_native_volume_primary_pilot(
+def aggregate_native_volume_equal_cell_pilot(
     *,
     native_source_pin_path: Path,
     receipt_paths: Sequence[Path],
@@ -2222,7 +1304,7 @@ def aggregate_native_volume_primary_pilot(
 ) -> dict[str, object]:
     """Validate an explicitly incomplete equal-cell selected-case pilot."""
 
-    return _aggregate_native_volume_primary(
+    return _aggregate_native_volume_equal_cell(
         native_source_pin_path=native_source_pin_path,
         receipt_paths=receipt_paths,
         selected_case_ids=selected_case_ids,
@@ -2230,14 +1312,14 @@ def aggregate_native_volume_primary_pilot(
     )
 
 
-def aggregate_native_volume_primary_all_case_audit(
+def aggregate_native_volume_equal_cell_all_case_audit(
     *,
     native_source_pin_path: Path,
     receipt_paths: Sequence[Path],
 ) -> dict[str, object]:
     """Validate complete all-pin equal-cell native-volume audit evidence."""
 
-    return _aggregate_native_volume_primary(
+    return _aggregate_native_volume_equal_cell(
         native_source_pin_path=native_source_pin_path,
         receipt_paths=receipt_paths,
         selected_case_ids=None,
@@ -2276,154 +1358,6 @@ def _aggregate_field_ranges(
             for component in range(component_count)
         ],
     }
-
-
-def aggregate_native_volume_audits(
-    *,
-    native_source_pin_path: Path,
-    volume_weight_aggregate_path: Path,
-    receipt_paths: Sequence[Path],
-    selected_case_ids: Sequence[str] | None = None,
-) -> dict[str, object]:
-    """Validate exact selected-case coverage and return path-free evidence."""
-
-    pin_path = Path(native_source_pin_path)
-    pin_sha256 = sha256_file(pin_path)
-    try:
-        pin = load_native_source_pin(pin_path)
-    except NativeSourceError as error:
-        raise NativeVolumeAuditAggregateError(str(error)) from error
-    if sha256_file(pin_path) != pin_sha256:
-        raise NativeVolumeAuditAggregateError(
-            "native-source pin changed while being loaded"
-        )
-    selected = _selected_cases(pin, selected_case_ids)
-    selected_ids = tuple(case.case_id for case in selected)
-    (
-        weight_aggregate_sha256,
-        weight_cases,
-        weight_aggregate_cell_types,
-    ) = _load_weight_aggregate(
-        Path(volume_weight_aggregate_path),
-        pin=pin,
-        pin_sha256=pin_sha256,
-        selected_cases=selected,
-    )
-
-    receipts: dict[str, dict[str, object]] = {}
-    for raw_path in receipt_paths:
-        path = Path(raw_path)
-        digest = sha256_file(path)
-        receipt = _read_json(path, "native-volume case-audit receipt")
-        case_id = _string(receipt.get("case_id"), "case-audit case_id")
-        if case_id in receipts:
-            raise NativeVolumeAuditAggregateError(
-                f"duplicate native-volume audit receipt for {case_id}"
-            )
-        if case_id not in selected_ids:
-            raise NativeVolumeAuditAggregateError(
-                f"unexpected native-volume audit receipt for {case_id}"
-            )
-        receipts[case_id] = _validate_case_receipt(
-            receipt,
-            receipt_sha256=digest,
-            pin=pin,
-            case=pin.case(case_id),
-            expected_weight=weight_cases[case_id],
-        )
-    if set(receipts) != set(selected_ids):
-        missing = [case_id for case_id in selected_ids if case_id not in receipts]
-        extra = [case_id for case_id in receipts if case_id not in selected_ids]
-        raise NativeVolumeAuditAggregateError(
-            "native-volume audit receipts must cover selected cases exactly once "
-            f"(missing={missing}, extra={extra})"
-        )
-    records = [receipts[case_id] for case_id in selected_ids]
-    two_part = sum(row["source"]["multipart_part_count"] == 2 for row in records)
-    three_part = sum(row["source"]["multipart_part_count"] == 3 for row in records)
-    evidence: dict[str, object] = {
-        "schema": AGGREGATE_SCHEMA,
-        "schema_version": 1,
-        "status": "passed_candidate_native_volume_audit_aggregate",
-        "activation_status": "does_not_activate_scoring_contract",
-        "scope": {
-            "selected_case_count": len(records),
-            "native_source_pin_case_count": len(pin.cases),
-            "complete_native_source_pin_scope": len(records) == len(pin.cases),
-            "case_order": "native_source_pin_order",
-        },
-        "source": {
-            "native_source_pin_sha256": pin_sha256,
-            "repository_id": pin.repository_id,
-            "immutable_revision": pin.repository_revision,
-            "volume_weight_aggregate_sha256": weight_aggregate_sha256,
-        },
-        "fixture_semantics": {
-            "prediction_role": ZERO_PREDICTION_ROLE,
-            "purpose": "transport_and_chunk_invariance_validation_only",
-            "physics_null_baseline": False,
-            "model_quality_claim": False,
-        },
-        "totals": {
-            "case_count": len(records),
-            "two_part_case_count": two_part,
-            "three_part_case_count": three_part,
-            "verified_segment_count": sum(
-                row["source"]["multipart_part_count"] for row in records
-            ),
-            "logical_volume_size_bytes": sum(
-                row["source"]["logical_size_bytes"] for row in records
-            ),
-            "native_point_count": sum(
-                row["vtk"]["piece"]["number_of_points"] for row in records
-            ),
-            "native_cell_count": sum(
-                row["vtk"]["piece"]["number_of_cells"] for row in records
-            ),
-            "volume_weight_size_bytes": sum(
-                row["volume_weights"]["size_bytes"] for row in records
-            ),
-            "volume_sum_m3": math.fsum(
-                row["volume_weights"]["volume_sum_m3"] for row in records
-            ),
-            "volume_weight_native_cell_type_payload_manifest_sha256": (
-                weight_aggregate_cell_types[
-                    "native_cell_type_payload_manifest_sha256"
-                ]
-            ),
-            "volume_weight_per_vtk_cell_type": weight_aggregate_cell_types[
-                "per_vtk_cell_type"
-            ],
-            "decoded_payload_bytes": {
-                name: sum(
-                    row["required_cell_data"][name]["decoded_payload_bytes"]
-                    for row in records
-                )
-                for name in ("pMeanTrim", "UMeanTrim")
-            },
-            "field_ranges": {
-                name: _aggregate_field_ranges(records, name)
-                for name in ("pMeanTrim", "UMeanTrim")
-            },
-            "maximum_additive_relative_difference": max(
-                row["chunk_invariance"][
-                    "maximum_additive_relative_difference"
-                ]
-                for row in records
-            ),
-            "maximum_metric_absolute_difference": max(
-                row["chunk_invariance"]["maximum_metric_absolute_difference"]
-                for row in records
-            ),
-        },
-        "cases": records,
-    }
-    if two_part + three_part != len(records):
-        raise NativeVolumeAuditAggregateError(
-            "selected cases contain an unsupported multipart count"
-        )
-    _assert_no_absolute_paths(evidence)
-    return evidence
 
 
 def write_evidence(path: Path, evidence: Mapping[str, object]) -> None:
@@ -2468,16 +1402,15 @@ def main() -> int:
         default=DEFAULT_NATIVE_SOURCE_PIN,
     )
     mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--volume-weight-aggregate", type=Path)
     mode.add_argument(
-        "--primary-only-pilot",
+        "--equal-cell-pilot",
         action="store_true",
         help="publish an explicitly incomplete equal-cell selected-case pilot",
     )
     mode.add_argument(
-        "--primary-only-all-case-audit",
+        "--equal-cell-all-case-audit",
         action="store_true",
-        help="publish complete all-pin equal-cell audit without physical weights",
+        help="publish a complete all-pin equal-native-cell audit",
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
@@ -2488,31 +1421,24 @@ def main() -> int:
     parser.add_argument("receipts", type=Path, nargs="+")
     args = parser.parse_args()
     try:
-        if args.primary_only_pilot:
+        if args.equal_cell_pilot:
             if not args.case:
                 raise NativeVolumeAuditAggregateError(
-                    "--primary-only-pilot requires explicit --case selections"
+                    "--equal-cell-pilot requires explicit --case selections"
                 )
-            evidence = aggregate_native_volume_primary_pilot(
+            evidence = aggregate_native_volume_equal_cell_pilot(
                 native_source_pin_path=args.native_source_pin,
                 receipt_paths=args.receipts,
                 selected_case_ids=args.case,
             )
-        elif args.primary_only_all_case_audit:
+        elif args.equal_cell_all_case_audit:
             if args.case:
                 raise NativeVolumeAuditAggregateError(
-                    "--primary-only-all-case-audit does not accept --case"
+                    "--equal-cell-all-case-audit does not accept --case"
                 )
-            evidence = aggregate_native_volume_primary_all_case_audit(
+            evidence = aggregate_native_volume_equal_cell_all_case_audit(
                 native_source_pin_path=args.native_source_pin,
                 receipt_paths=args.receipts,
-            )
-        else:
-            evidence = aggregate_native_volume_audits(
-                native_source_pin_path=args.native_source_pin,
-                volume_weight_aggregate_path=args.volume_weight_aggregate,
-                receipt_paths=args.receipts,
-                selected_case_ids=args.case,
             )
         write_evidence(args.output, evidence)
     except NativeVolumeAuditAggregateError as error:
@@ -2534,20 +1460,17 @@ if __name__ == "__main__":
 
 
 __all__ = [
-    "AGGREGATE_SCHEMA",
-    "PRIMARY_PILOT_AGGREGATE_SCHEMA",
-    "PRIMARY_ALL_CASE_AUDIT_SCHEMA",
     "CASE_AUDIT_SCHEMA",
     "COMPARISON_CHUNK_CELLS",
+    "EQUAL_CELL_ALL_CASE_AUDIT_SCHEMA",
+    "EQUAL_CELL_PILOT_AGGREGATE_SCHEMA",
     "MAX_ADDITIVE_RELATIVE_DIFFERENCE",
     "MAX_METRIC_ABSOLUTE_DIFFERENCE",
     "NativeVolumeAuditAggregateError",
     "REFERENCE_CHUNK_CELLS",
-    "WEIGHT_AGGREGATE_SCHEMA",
     "ZERO_PREDICTION_ROLE",
-    "aggregate_native_volume_audits",
-    "aggregate_native_volume_primary_pilot",
-    "aggregate_native_volume_primary_all_case_audit",
+    "aggregate_native_volume_equal_cell_all_case_audit",
+    "aggregate_native_volume_equal_cell_pilot",
     "main",
     "sha256_file",
     "write_evidence",

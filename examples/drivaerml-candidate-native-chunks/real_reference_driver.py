@@ -47,8 +47,8 @@ from scripts.evaluate_drivaerml_candidate_diagnostics import (  # noqa: E402
 )
 
 
-INPUT_SCHEMA = "drivaerml-run1-run44-reference-inputs-v1"
-OUTPUT_SCHEMA = "drivaerml-run1-run44-reference-evidence-v1"
+INPUT_SCHEMA = "drivaerml-run1-run44-reference-inputs-v2"
+OUTPUT_SCHEMA = "drivaerml-run1-run44-reference-evidence-v2"
 OUTPUT_STATUS = "candidate_pilot_evidence_not_official_submission"
 REQUIRED_CASE_PART_COUNTS = {"run_1": 2, "run_44": 3}
 PREDICTION_SUPPORT_IDS = ("surface_native_cells", "volume_native_cells")
@@ -56,7 +56,6 @@ CASE_INPUT_KEYS = frozenset(
     {
         "case_id",
         "surface_area_npy",
-        "volume_weight_npy",
         "surface_prediction_manifest",
         "volume_prediction_manifest",
         "cp_support_json",
@@ -74,7 +73,6 @@ class RealReferenceDriverError(ValueError):
 class RealCaseInputs:
     case_id: str
     surface_area_npy: Path
-    volume_weight_npy: Path
     surface_prediction_manifest: Path
     volume_prediction_manifest: Path
     cp_support_json: Path
@@ -247,13 +245,17 @@ def _config_file(config_directory: Path, value: object, label: str) -> Path:
     return _regular_file(path, label)
 
 
-def load_case_inputs(path: Path | str) -> tuple[Path, tuple[RealCaseInputs, ...]]:
+def load_case_inputs(
+    path: Path | str,
+) -> tuple[Path, str, tuple[RealCaseInputs, ...]]:
     """Load a closed two-case config and preflight every declared input file."""
 
     source = _regular_file(path, "case-input config")
     try:
+        source_bytes = source.read_bytes()
+        source_sha256 = hashlib.sha256(source_bytes).hexdigest()
         document = json.loads(
-            source.read_text(encoding="utf-8"),
+            source_bytes.decode("utf-8"),
             object_pairs_hook=_reject_duplicate_keys,
         )
     except RealReferenceDriverError:
@@ -289,7 +291,11 @@ def load_case_inputs(path: Path | str) -> tuple[Path, tuple[RealCaseInputs, ...]
         parsed[case_id] = RealCaseInputs(case_id=case_id, **values)
     if set(parsed) != set(REQUIRED_CASE_PART_COUNTS):
         raise RealReferenceDriverError("case-input config must cover run_1 and run_44")
-    return source, tuple(parsed[case_id] for case_id in REQUIRED_CASE_PART_COUNTS)
+    return (
+        source,
+        source_sha256,
+        tuple(parsed[case_id] for case_id in REQUIRED_CASE_PART_COUNTS),
+    )
 
 
 def _positive_integer(text: str) -> int:
@@ -308,20 +314,6 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--native-source-pin", type=Path, required=True)
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--autocfd5-profile", type=Path, default=DEFAULT_PROFILE)
-    parser.add_argument("--volume-weight-aggregate", type=Path, required=True)
-    parser.add_argument(
-        "--volume-weight-receipt",
-        type=Path,
-        action="append",
-        required=True,
-        help="repeat for every receipt represented by the supplied aggregate",
-    )
-    parser.add_argument("--pilot-volume-weight-aggregate-sha256")
-    parser.add_argument(
-        "--allow-incomplete-volume-weight-pilot",
-        action="store_true",
-        help="explicitly permit a partial candidate-only pilot aggregate",
-    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--maximum-prediction-chunk-rows",
@@ -340,14 +332,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return _parser().parse_args(argv)
 
 
-def _preflight(args: argparse.Namespace) -> tuple[Any, Path, tuple[RealCaseInputs, ...], list[Path]]:
-    config_path, cases = load_case_inputs(args.case_inputs)
+def _preflight(
+    args: argparse.Namespace,
+) -> tuple[Any, Path, str, tuple[RealCaseInputs, ...]]:
+    config_path, config_sha256, cases = load_case_inputs(args.case_inputs)
     pin_path = _regular_file(args.native_source_pin, "native-source pin")
-    aggregate_path = _regular_file(args.volume_weight_aggregate, "volume-weight aggregate")
-    receipt_paths = [
-        _regular_file(path, f"volume-weight receipt[{index}]")
-        for index, path in enumerate(args.volume_weight_receipt)
-    ]
     profile_path = _regular_file(args.autocfd5_profile, "AutoCFD5 profile")
     dataset_root = Path(args.dataset_root).expanduser().resolve()
     if not dataset_root.is_dir():
@@ -355,25 +344,6 @@ def _preflight(args: argparse.Namespace) -> tuple[Any, Path, tuple[RealCaseInput
     output = Path(args.output).expanduser().resolve()
     if output.exists():
         raise RealReferenceDriverError(f"output must not already exist: {output}")
-    if args.allow_incomplete_volume_weight_pilot:
-        digest = args.pilot_volume_weight_aggregate_sha256
-        if (
-            not isinstance(digest, str)
-            or len(digest) != 64
-            or any(character not in "0123456789abcdef" for character in digest)
-        ):
-            raise RealReferenceDriverError(
-                "an incomplete pilot requires a lowercase SHA-256 via "
-                "--pilot-volume-weight-aggregate-sha256"
-            )
-        if _sha256_file(aggregate_path) != digest:
-            raise RealReferenceDriverError("pilot aggregate SHA-256 mismatch")
-    elif args.pilot_volume_weight_aggregate_sha256 is not None:
-        raise RealReferenceDriverError(
-            "--pilot-volume-weight-aggregate-sha256 requires "
-            "--allow-incomplete-volume-weight-pilot"
-        )
-
     pin = load_native_source_pin(pin_path)
     validate_native_source_contract(pin)
     for case_id, expected_parts in REQUIRED_CASE_PART_COUNTS.items():
@@ -385,16 +355,14 @@ def _preflight(args: argparse.Namespace) -> tuple[Any, Path, tuple[RealCaseInput
     args.native_source_pin = pin_path
     args.dataset_root = dataset_root
     args.autocfd5_profile = profile_path
-    args.volume_weight_aggregate = aggregate_path
-    args.volume_weight_receipt = receipt_paths
     args.output = output
-    return pin, config_path, cases, receipt_paths
+    return pin, config_path, config_sha256, cases
 
 
 def run(args: argparse.Namespace) -> dict[str, object]:
     """Run both evaluator paths in a staged directory, then publish evidence."""
 
-    pin, config_path, cases, receipt_paths = _preflight(args)
+    pin, config_path, config_sha256, cases = _preflight(args)
     output: Path = args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
@@ -414,15 +382,6 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                     monolithic_vtu=None,
                     multipart=True,
                     surface_area_npy=case_inputs.surface_area_npy,
-                    volume_weight_npy=case_inputs.volume_weight_npy,
-                    volume_weight_receipt=receipt_paths,
-                    volume_weight_aggregate=args.volume_weight_aggregate,
-                    pilot_volume_weight_aggregate_sha256=(
-                        args.pilot_volume_weight_aggregate_sha256
-                    ),
-                    allow_incomplete_volume_weight_pilot=(
-                        args.allow_incomplete_volume_weight_pilot
-                    ),
                     surface_prediction_manifest=(
                         case_inputs.surface_prediction_manifest
                     ),
@@ -501,9 +460,13 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                     },
                 }
             )
+        if _sha256_file(config_path) != config_sha256:
+            raise RealReferenceDriverError(
+                "case-input config changed after it was parsed"
+            )
         receipt: dict[str, object] = {
             "schema": OUTPUT_SCHEMA,
-            "schema_version": 1,
+            "schema_version": 2,
             "status": OUTPUT_STATUS,
             "official_submission": False,
             "scoring_contract_active": False,
@@ -512,16 +475,9 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "downloads_performed": False,
             "fabricated_scientific_results": False,
             "native_source_pin_sha256": _sha256_file(args.native_source_pin),
-            "case_input_config_sha256": _sha256_file(config_path),
-            "volume_weight_aggregate_sha256": _sha256_file(
-                args.volume_weight_aggregate
-            ),
-            "volume_weight_receipt_sha256": [
-                _sha256_file(path) for path in receipt_paths
-            ],
-            "pilot_incomplete_volume_weight_aggregate": (
-                args.allow_incomplete_volume_weight_pilot
-            ),
+            "case_input_config_sha256": config_sha256,
+            "volume_weighting": "one_per_native_cell",
+            "geometric_cell_volume_weights_used": False,
             "cases": case_results,
         }
         receipt_path = staging / "validation-receipt.json"
@@ -538,6 +494,10 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         )
         if output.exists():
             raise RealReferenceDriverError(f"output appeared during run: {output}")
+        if _sha256_file(config_path) != config_sha256:
+            raise RealReferenceDriverError(
+                "case-input config changed before evidence publication"
+            )
         os.replace(staging, output)
     return receipt
 

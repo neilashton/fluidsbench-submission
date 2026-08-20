@@ -39,7 +39,7 @@ For each evaluated case:
 
 Surface pressure and wall shear are kinematic quantities in `m^2/s^2`.
 Volume pressure is in `m^2/s^2`, velocity is in `m/s`, coordinates are in
-metres, surface weights are in `m^2`, and volume weights are in `m^3`.
+metres, and fixed surface weights are in `m^2`.
 
 ## 3. Use bounded native-cell chunks correctly
 
@@ -73,8 +73,8 @@ chunk-local relative-L2, MAE, or RMSE values.
 
 The primary surface metrics use the fixed published same-order polygon areas;
 equal-polygon metrics are mandatory secondary values. The primary volume
-metrics weight native cells equally; deterministic cell-volume-weighted
-metrics are mandatory secondary values. The evaluator audits, but never
+metrics weight every native cell equally; no geometric cell-volume array or
+volume-weighted secondary metric is required. The evaluator audits, but never
 regenerates, the fixed surface-area inputs.
 
 ## 4. Let the evaluator derive engineering diagnostics
@@ -95,13 +95,16 @@ their own replacements for official scoring.
 
 ## 5. Install and run the candidate tools
 
-The generic repository checks use `requirements.txt`. Native DrivAerML
-geometry evidence uses the exact optional stack in
+The generic repository checks use `requirements.txt`. The VTK-based DrivAerML
+surface, force, Cp, and velocity geometry workflows use the exact optional stack in
 [`requirements-drivaerml-evaluator.txt`](../../requirements-drivaerml-evaluator.txt):
-Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2. The strict scientific-support
-generators check their declared versions before reading native geometry; a
-different Python patch release is not receipt-compatible. This VTK 9.5.2 stack
-continues to bind the surface, Cp, and velocity evidence.
+Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2. Those VTK geometry generators check
+their declared versions; a different Python patch release is not compatible
+with their evidence receipts. The bounded XML equal-cell volume audit does not
+invoke VTK or compute cell volumes: it records its Python/NumPy runtime for
+provenance, while the strict aggregate validates the v2 schema and source
+identities. Use the exact optional stack when reproducing the complete candidate
+evidence workflow.
 
 ```bash
 python3.12 --version  # must print: Python 3.12.13
@@ -111,16 +114,6 @@ python3.12 -m venv .venv-drivaerml
   'import platform,numpy,vtk; print(platform.python_version(), numpy.__version__, vtk.vtkVersion.GetVTKVersion())'
 # must print: 3.12.13 2.2.6 9.5.2
 ```
-
-Physical-volume weights are benchmark-owned fixed inputs, not arrays that a
-participant should regenerate. Their replacement candidate is tested in the
-separate
-[`requirements-drivaerml-volume-weights.txt`](../../requirements-drivaerml-volume-weights.txt)
-environment, pinned to the same Python and NumPy versions but VTK 9.6.0. The
-original VTK 9.5.2 candidate failed closed on one `run_1` wedge; VTK 9.6.0 has
-passed only an isolated exact-cell probe so far. Until the full native pilot,
-all-case generation, publication, and owner approval pass, no locally generated
-weight is submission-eligible.
 
 Run the small two-part/three-part teaching fixture with one command:
 
@@ -153,14 +146,9 @@ published baseline:
   --output-root /tmp/drivaerml-run1-zero
 ```
 
-The following command documents the fail-closed real-case interface, but it
-cannot currently be completed with accepted real support: no valid source-bound
-physical-volume weights or pilot aggregate exist. The VTK 9.6.0 replacement
-candidate has passed an isolated exact-wedge test but has not yet passed the
-full native `run_1`/`run_44` gate. Do not substitute locally generated weights.
-Once an owner-approved pilot is published, evaluate the real native case with
-its receipt and aggregate; the explicit pilot switch below is valid only while
-the all-484 physical-volume-weight aggregate remains incomplete:
+The real-case interface consumes the actual native surface and reconstructed
+volume plus prediction manifests. Volume errors are accumulated with one equal
+weight per raw native cell:
 
 ```bash
 .venv-drivaerml/bin/python scripts/evaluate_drivaerml_candidate_case.py \
@@ -169,28 +157,17 @@ the all-484 physical-volume-weight aggregate remains incomplete:
   --dataset-root /path/to/drivaerml \
   --monolithic-vtu /path/to/drivaerml/run_1/volume_1.vtu \
   --surface-area-npy /path/to/run_1/boundary_cell_area_1.npy \
-  --volume-weight-npy /path/to/run_1/volume_cell_volume_1.npy \
-  --volume-weight-receipt /path/to/run_1/volume-weight-receipt.json \
-  --volume-weight-receipt /path/to/run_44/volume-weight-receipt.json \
-  --volume-weight-aggregate /path/to/volume-weights-pilot-aggregate.json \
-  --pilot-volume-weight-aggregate-sha256 SHA256_OF_OWNER_PILOT_AGGREGATE \
-  --allow-incomplete-volume-weight-pilot \
   --surface-prediction-manifest /path/to/surface/manifest.json \
   --volume-prediction-manifest /path/to/volume/manifest.json \
   --output /tmp/run_1-candidate-evidence.json
 ```
 
 Use `--multipart` instead of `--monolithic-vtu` when the pinned part files are
-present below `--dataset-root`. Production evaluation is deliberately
-fail-closed until the complete 484-case aggregate hash is frozen in the
-evaluator contract; participants must never substitute their own weight array,
-receipt, or aggregate. Supply `--volume-weight-receipt` once for every case in
-the referenced aggregate (two times for this pilot and 484 times for the future
-complete aggregate).
+present below `--dataset-root`. The evaluator verifies raw native-cell coverage
+and accumulates equal-cell sufficient statistics directly; participants do not
+supply a geometric volume-weight file.
 
-The real two-case driver is an implemented interface that is currently blocked
-until valid owner-approved volume weights and a hash-bound pilot aggregate are
-available. At that point, copy the example configuration and run
+For the real two-case pilot, copy the example configuration and run
 [`real_reference_driver.py`](../../examples/drivaerml-candidate-native-chunks/real_reference_driver.py).
 It admits exactly pinned `run_1` and `run_44`, always uses their two- and
 three-part streams respectively, calls the same core and diagnostic evaluator

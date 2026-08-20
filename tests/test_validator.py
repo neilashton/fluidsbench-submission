@@ -1452,7 +1452,7 @@ class ValidatorTests(unittest.TestCase):
                 "dataset_id": "drivaerml",
                 "split_id": "full",
                 "evaluation": {
-                    "reference_version": "drivaerml-evaluator-v1-candidate"
+                    "reference_version": "drivaerml-evaluator-v2-candidate"
                 },
                 "case_metrics": {
                     "file": "metrics/cases.json",

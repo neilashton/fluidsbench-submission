@@ -25,6 +25,12 @@ FAILURE_EVIDENCE = (
 EXPECTED_FAILURE_SHA256 = (
     "aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e"
 )
+VTK96_PROBE_EVIDENCE = (
+    BENCHMARK / "evidence" / "volume-weight-vtk96-run_1-wedge-probe.json"
+)
+EXPECTED_VTK96_PROBE_SHA256 = (
+    "2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6"
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -108,6 +114,10 @@ class DrivAerNativeVolumeEvidenceTests(unittest.TestCase):
         )
         self.assertEqual(entry["sha256"], EXPECTED_SHA256)
         self.assertEqual(entry["scope"], "all_484_cases")
+        self.assertEqual(
+            entry["role"],
+            "multipart_native_volume_fields_raw_order_coverage_and_equal_cell_primary_invariance_audit",
+        )
         self.assertFalse(entry["public_scoring_support_eligible"])
 
         support = next(
@@ -125,8 +135,11 @@ class DrivAerNativeVolumeEvidenceTests(unittest.TestCase):
             binding["provenance_sha256"], EXPECTED_PROVENANCE_SHA256
         )
         self.assertTrue(binding["complete_all_484_cases"])
-        self.assertFalse(binding["physical_volume_secondary_exercised"])
+        self.assertTrue(binding["equal_native_cell_weighting_exercised"])
         self.assertFalse(binding["owner_scientific_approval"])
+        self.assertEqual(support["weighting"], "one_per_native_cell")
+        self.assertFalse(support["geometric_cell_volume_weights_required"])
+        self.assertNotIn("candidate_secondary_weight_status", support)
 
     def test_all_case_provenance_binds_code_runtime_and_receipts(self) -> None:
         provenance = json.loads(PROVENANCE.read_text(encoding="utf-8"))
@@ -184,7 +197,9 @@ class DrivAerNativeVolumeEvidenceTests(unittest.TestCase):
         self.assertEqual(entry["sha256"], EXPECTED_PROVENANCE_SHA256)
         self.assertFalse(entry["public_scoring_support_eligible"])
 
-    def test_rejected_physical_weight_candidate_is_bound_fail_closed(self) -> None:
+    def test_historical_vtk_weight_artifacts_are_superseded_without_contract_role(
+        self,
+    ) -> None:
         evidence = json.loads(FAILURE_EVIDENCE.read_text(encoding="utf-8"))
         manifest = json.loads(
             (BENCHMARK / "evidence" / "manifest.json").read_text(encoding="utf-8")
@@ -226,22 +241,45 @@ class DrivAerNativeVolumeEvidenceTests(unittest.TestCase):
             if item["file"] == FAILURE_EVIDENCE.name
         )
         self.assertEqual(entry["sha256"], EXPECTED_FAILURE_SHA256)
+        self.assertEqual(
+            entry["role"],
+            "superseded_historical_geometric_volume_weight_rejection_diagnostic_no_contract_role",
+        )
         self.assertFalse(entry["public_scoring_support_eligible"])
+
+        vtk96_entry = next(
+            item
+            for item in manifest["artifacts"]
+            if item["file"] == VTK96_PROBE_EVIDENCE.name
+        )
+        self.assertEqual(
+            sha256_file(VTK96_PROBE_EVIDENCE), EXPECTED_VTK96_PROBE_SHA256
+        )
+        self.assertEqual(vtk96_entry["sha256"], EXPECTED_VTK96_PROBE_SHA256)
+        self.assertEqual(
+            vtk96_entry["role"],
+            "superseded_historical_vtk96_exact_wedge_probe_no_contract_role",
+        )
+        self.assertFalse(vtk96_entry["public_scoring_support_eligible"])
 
         support = next(
             item
             for item in specification["scoring_support"]["public_supports"]
             if item["id"] == "volume_native_cells"
         )
-        status = support["candidate_secondary_weight_status"]
-        diagnostic = next(
-            item
-            for item in status["diagnostic_evidence"]
-            if item["file"] == f"evidence/{FAILURE_EVIDENCE.name}"
+        self.assertEqual(support["weighting"], "one_per_native_cell")
+        self.assertFalse(support["geometric_cell_volume_weights_required"])
+        self.assertNotIn("candidate_secondary_weight_status", support)
+        self.assertNotIn(FAILURE_EVIDENCE.name, json.dumps(support, sort_keys=True))
+        self.assertNotIn(VTK96_PROBE_EVIDENCE.name, json.dumps(support, sort_keys=True))
+        self.assertFalse(
+            any(
+                "volume" in decision and "weight" in decision
+                for decision in specification["scoring_support"][
+                    "owner_decisions_required"
+                ]
+            )
         )
-        self.assertEqual(diagnostic["sha256"], EXPECTED_FAILURE_SHA256)
-        self.assertFalse(status["accepted_weight_artifact_exists"])
-        self.assertTrue(status["owner_scientific_decision_required"])
 
 
 if __name__ == "__main__":

@@ -67,6 +67,9 @@ class DrivAerMLDummyPredictionTests(unittest.TestCase):
             self.assertFalse(first_receipt["official_submission"])
             self.assertFalse(first_receipt["reads_native_truth"])
             self.assertFalse(first_receipt["claims_model_quality"])
+            encoded_receipt = json.dumps(first_receipt, sort_keys=True)
+            self.assertNotIn("volume_weight", encoded_receipt)
+            self.assertNotIn("cell_volume", encoded_receipt)
 
             archive_path = (
                 first
@@ -109,6 +112,22 @@ class DrivAerMLDummyPredictionTests(unittest.TestCase):
             }
             for support_id, (entity_count, component_shapes) in expectations.items():
                 manifest_path = root / support_id / "manifest.json"
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                self.assertEqual(
+                    manifest["field_components"],
+                    {
+                        field_name: component_shape[0]
+                        for field_name, component_shape in component_shapes.items()
+                    },
+                )
+                self.assertNotIn(
+                    "volume_weight",
+                    json.dumps(manifest, sort_keys=True),
+                )
+                self.assertNotIn(
+                    "cell_volume",
+                    json.dumps(manifest, sort_keys=True),
+                )
                 validation = validate_prediction_chunks(
                     manifest_path,
                     validation_block_rows=2,
@@ -148,6 +167,10 @@ class DrivAerMLDummyPredictionTests(unittest.TestCase):
                 (root / "receipt.json").read_text(encoding="utf-8")
             )
             self.assertEqual(stored_receipt, receipt)
+            self.assertEqual(
+                set(stored_receipt["supports"]),
+                {"surface_native_cells", "volume_native_cells"},
+            )
             self.assertNotIn(b"\n ", (root / "receipt.json").read_bytes())
 
     def test_invalid_arguments_and_existing_output_are_rejected(self) -> None:

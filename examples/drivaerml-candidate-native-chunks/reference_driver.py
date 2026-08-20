@@ -182,7 +182,7 @@ def _assert_closed_real_drivaerml_candidate(candidate_spec: object) -> None:
 
 
 def _case_source_arrays(case: DemoCase) -> dict[str, np.ndarray]:
-    """Return deterministic source truth and positive weights for a demo case."""
+    """Return deterministic source truth for an equal-cell demo case."""
 
     raw_ids = np.arange(case.entity_count, dtype=np.int64)
     index = raw_ids.astype(np.float64)
@@ -195,7 +195,6 @@ def _case_source_arrays(case: DemoCase) -> dict[str, np.ndarray]:
             0.5 - 0.07 * index,
         )
     )
-    volumes = 0.5 + 0.03 * index + 0.01 * phase
     coordinates = np.column_stack(
         (0.25 * index, np.full(case.entity_count, phase), -0.1 * index)
     )
@@ -203,7 +202,6 @@ def _case_source_arrays(case: DemoCase) -> dict[str, np.ndarray]:
         "raw_ids": raw_ids,
         "pressure_truth": pressure_truth,
         "velocity_truth": velocity_truth,
-        "volumes": volumes,
         "coordinates": coordinates,
     }
 
@@ -239,7 +237,6 @@ def _transport_payload(case: DemoCase, arrays: dict[str, np.ndarray]) -> dict[st
         "warning": "synthetic JSON teaching payload; not VTK and not DrivAerML data",
         "case_id": case.case_id,
         "raw_cell_ids": arrays["raw_ids"].tolist(),
-        "cell_volumes": arrays["volumes"].tolist(),
         "pMeanTrim_truth": arrays["pressure_truth"].tolist(),
         "UMeanTrim_truth": arrays["velocity_truth"].tolist(),
         "coordinates": arrays["coordinates"].tolist(),
@@ -298,7 +295,7 @@ def _compare_sums(
     whole: FinalizedFieldStatistics,
 ) -> dict[str, Any]:
     absolute_differences: dict[str, float] = {}
-    for weighting in ("uniform", "physical"):
+    for weighting in ("uniform",):
         chunk_sums = getattr(chunked, weighting)
         whole_sums = getattr(whole, weighting)
         for field in (
@@ -340,14 +337,14 @@ def _accumulate_field(
     raw_ids = arrays["raw_ids"]
     truth = arrays[truth_key]
     prediction = arrays[prediction_key]
-    volumes = arrays["volumes"]
+    equal_weights = np.ones(case.entity_count, dtype=np.float64)
 
     chunk_statistics = [
         field_chunk_statistics(
             raw_ids[start:stop],
             truth[start:stop],
             prediction[start:stop],
-            volumes[start:stop],
+            equal_weights[start:stop],
         )
         for start, stop in case.chunk_ranges
     ]
@@ -363,7 +360,7 @@ def _accumulate_field(
         case.entity_count,
         component_count=component_count,
     )
-    whole.add_chunk(raw_ids, truth, prediction, volumes)
+    whole.add_chunk(raw_ids, truth, prediction, equal_weights)
     whole_result = whole.finalize()
     invariance = _compare_sums(chunked_result, whole_result)
     return chunked_result, invariance
@@ -382,17 +379,9 @@ def _metric_evidence(
             weighting="uniform",
             dataset_weighting="volume_cells_equal",
         ),
-        "volume_pressure_physical_rel_l2": pressure.physical.relative_l2_evidence(
-            weighting="support_weights",
-            dataset_weighting="cell_volume",
-        ),
         "volume_velocity_rel_l2": velocity.uniform.relative_l2_evidence(
             weighting="uniform",
             dataset_weighting="volume_cells_equal",
-        ),
-        "volume_velocity_physical_rel_l2": velocity.physical.relative_l2_evidence(
-            weighting="support_weights",
-            dataset_weighting="cell_volume",
         ),
     }
 
@@ -465,22 +454,10 @@ def _support_definition() -> dict[str, Any]:
                 "volume_cells_equal",
             ),
             (
-                "volume_pressure_physical_rel_l2",
-                "volume_pressure",
-                "support_weights",
-                "cell_volume",
-            ),
-            (
                 "volume_velocity_rel_l2",
                 "volume_velocity",
                 "uniform",
                 "volume_cells_equal",
-            ),
-            (
-                "volume_velocity_physical_rel_l2",
-                "volume_velocity",
-                "support_weights",
-                "cell_volume",
             ),
         )
     ]
@@ -493,11 +470,7 @@ def _support_definition() -> dict[str, Any]:
             "artifact_role": "ground_truth_table",
             "support_id_rule": {"kind": "artifact_field", "field": "support_id"},
             "coordinate_fields": ["x", "y", "z"],
-            "weight_rule": {
-                "kind": "artifact_field",
-                "artifact_role": "ground_truth_table",
-                "field": "cell_volume",
-            },
+            "weight_rule": {"kind": "uniform"},
             "ordering": "support_id_ascending",
         },
         "quantities": [
@@ -824,6 +797,29 @@ def _write_submission_package(
                 "sha256": sha256_file(case_metrics_path),
                 "case_count": len(CASES),
             },
+            "prediction_artifacts": [
+                {
+                    "artifact_id": "drivaerml-synthetic-complete-predictions-v1",
+                    "kind": "scored_predictions",
+                    "repository_url": (
+                        "https://huggingface.co/datasets/example/"
+                        "synthetic-drivaerml-shaped-predictions"
+                    ),
+                    "revision": "0" * 40,
+                    "manifest_file": "predictions/manifest.json",
+                    "manifest_sha256": sha256_file(prediction_manifest_path),
+                    "format": "fluidsbench-prediction-artifact-v1",
+                    "support_release_id": RELEASE_ID,
+                    "support_manifest_sha256": sha256_file(support_manifest_path),
+                    "split_id": SPLIT_ID,
+                    "coverage": {
+                        "kind": "complete_split",
+                        "case_count": len(CASES),
+                        "expected_case_count": len(CASES),
+                    },
+                    "license_spdx": "CC-BY-4.0",
+                }
+            ],
             "metric_values": case_metrics["metric_values"],
             "profile_data": {
                 "format": "fluidsbench-profile-chunks-v1",
@@ -887,7 +883,6 @@ def run_demo(output: Path) -> dict[str, Any]:
             "raw_ids": np.asarray(decoded["raw_cell_ids"], dtype=np.int64),
             "pressure_truth": np.asarray(decoded["pMeanTrim_truth"], dtype=np.float64),
             "velocity_truth": np.asarray(decoded["UMeanTrim_truth"], dtype=np.float64),
-            "volumes": np.asarray(decoded["cell_volumes"], dtype=np.float64),
             "coordinates": np.asarray(decoded["coordinates"], dtype=np.float64),
         }
         arrays.update(_synthetic_model_outputs(case, arrays["raw_ids"]))
@@ -915,7 +910,6 @@ def run_demo(output: Path) -> dict[str, Any]:
                 "x": coordinates[:, 0].tolist(),
                 "y": coordinates[:, 1].tolist(),
                 "z": coordinates[:, 2].tolist(),
-                "cell_volume": arrays["volumes"].tolist(),
                 "pMeanTrim_truth": arrays["pressure_truth"].tolist(),
                 "UMeanTrim_x_truth": arrays["velocity_truth"][:, 0].tolist(),
                 "UMeanTrim_y_truth": arrays["velocity_truth"][:, 1].tolist(),
@@ -1125,7 +1119,7 @@ def run_demo(output: Path) -> dict[str, Any]:
         "claims": {
             "uses_real_drivaerml_data": False,
             "validates_native_vtp_or_vtu_parsing": False,
-            "validates_real_volume_cell_weights": False,
+            "requires_geometric_volume_cell_weights": False,
             "covers_surface_forces_or_autocfd5_profiles": False,
             "schema_v3_dummy_submission_generated": True,
             "official_drivaerml_submission_generated": False,

@@ -1,8 +1,11 @@
 -r requirements.txt
 
-# Interpreter requirement: Python 3.12.13 exactly. A requirements file cannot
-# install or constrain the interpreter itself; the strict generators reject
-# every other Python patch release before scanning native source data.
+# VTK geometry-evidence interpreter requirement: Python 3.12.13 exactly. A
+# requirements file cannot install or constrain the interpreter itself; the
+# surface, force, Cp, and velocity geometry generators reject every other
+# Python patch release. The streaming XML equal-cell volume audit does not use
+# VTK or compute cell volumes; it records the Python/NumPy runtime instead of
+# enforcing this interpreter patch itself.
 #
 # Exact optional stack used to generate and replay DrivAerML native-cell
 # geometry evidence. Keep this separate from the repository-wide validator

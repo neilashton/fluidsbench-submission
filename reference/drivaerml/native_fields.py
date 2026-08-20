@@ -395,7 +395,9 @@ def evaluate_inline_native_cell_data(
 
     Passing ``predictions=None`` selects an explicit all-zero pilot prediction;
     passing ``physical_weights=None`` selects unit weights.  Real evaluation
-    supplies same-order memory-mapped prediction and volume/area arrays.
+    supplies same-order predictions.  Surface workflows may also supply the
+    fixed same-order polygon areas; native volume evaluation deliberately uses
+    unit weights and does not supply a geometric cell-volume array.
     """
 
     if array.association != "CellData" or array.piece_index < 0:

@@ -7,20 +7,16 @@ import os
 import struct
 import tempfile
 import unittest
-from dataclasses import replace
 from pathlib import Path
-from unittest import mock
 
 import numpy as np
 
 from reference.drivaerml.evaluator import (
+    CANDIDATE_EVIDENCE_SCHEMA,
     CANDIDATE_STATUS,
     DrivAerCandidateEvaluatorError,
     NativeSourceContract,
-    SOURCE_BOUND_VOLUME_WEIGHT_STATUS,
     _evaluate_surface_chunks,
-    audit_fixed_volume_weight_file,
-    audit_source_bound_volume_weight_file,
     evaluate_candidate_case,
     write_candidate_case_evidence,
 )
@@ -275,7 +271,6 @@ class SyntheticCase:
             pin_sha256=_sha256_file(pin_path),
             repository_id="neashton/drivaerml",
             repository_revision="7a5c0948ce27be709b1116a3a190f806e7a8f79f",
-            volume_weight_aggregate_sha256="c" * 64,
         )
         self.case = self.pin.case("run_1")
         self.resolved = self.pin.resolve("run_1", root)
@@ -284,72 +279,6 @@ class SyntheticCase:
             area_path,
             expected_area_sha256=area_sha,
             source_boundary_sha256=boundary_sha,
-        )
-
-        volume_weight_path = root / "volume_cell_volume_1.npy"
-        np.save(
-            volume_weight_path,
-            np.asarray([0.4, 0.7, 1.1, 1.6, 2.3], dtype="<f8"),
-            allow_pickle=False,
-        )
-        self.unbound_volume_weights = audit_fixed_volume_weight_file(
-            self.case,
-            volume_weight_path,
-            expected_sha256=_sha256_file(volume_weight_path),
-            expected_entity_count=self.entity_count,
-        )
-        self.volume_weight_path = volume_weight_path
-        native_cell_types = {
-            "dtype": "uint8",
-            "shape": [self.entity_count],
-            "order": "zero_based_raw_vtk_cell_order",
-            "payload_sha256": _sha256_bytes(bytes([10]) * self.entity_count),
-            "histogram": [
-                {
-                    "vtk_cell_type_id": 10,
-                    "vtk_cell_type_name": "vtkTetra",
-                    "cell_count": self.entity_count,
-                }
-            ],
-        }
-        per_vtk_cell_type = (
-            {
-                "vtk_cell_type_id": 10,
-                "vtk_cell_type_name": "vtkTetra",
-                "cell_count": self.entity_count,
-                "volume_sum_m3": self.unbound_volume_weights.volume_sum_m3,
-                "volume_min_m3": self.unbound_volume_weights.volume_min_m3,
-                "volume_max_m3": self.unbound_volume_weights.volume_max_m3,
-            },
-        )
-        type_manifest_sha256 = _sha256_bytes(
-            json.dumps(
-                [
-                    {
-                        "case_id": "run_1",
-                        "payload_sha256": native_cell_types["payload_sha256"],
-                    }
-                ],
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode("utf-8")
-        )
-        self.volume_weights = replace(
-            self.unbound_volume_weights,
-            binding_status=SOURCE_BOUND_VOLUME_WEIGHT_STATUS,
-            native_source_pin_sha256=self.source_contract.pin_sha256,
-            receipt_sha256="b" * 64,
-            aggregate_sha256="c" * 64,
-            aggregate_complete=True,
-            algorithm_sha256="d" * 64,
-            native_cell_types=native_cell_types,
-            per_vtk_cell_type=per_vtk_cell_type,
-            aggregate_native_cell_type_payload_manifest_sha256=(
-                type_manifest_sha256
-            ),
-            aggregate_per_vtk_cell_type=(
-                {**per_vtk_cell_type[0], "case_count": 1},
-            ),
         )
 
         raw = np.arange(self.entity_count, dtype=np.float64)
@@ -417,7 +346,6 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
             fixed_surface_areas=fixture.surface_areas,
             volume_stream=stream,
             volume_vtk_index=index,
-            fixed_volume_weights=fixture.volume_weights,
             surface_prediction_manifest=surface_manifest,
             volume_prediction_manifest=volume_manifest,
             maximum_prediction_chunk_rows=maximum_rows,
@@ -435,7 +363,27 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
             full = self.evaluate(fixture, *full_manifests)
             chunked = self.evaluate(fixture, *chunk_manifests)
 
-            self.assertEqual(len(full.metric_values), 24)
+            self.assertEqual(len(full.metric_values), 18)
+            volume_metric_ids = {
+                metric_id
+                for metric_id in full.metric_values
+                if metric_id.startswith("volume_")
+                or metric_id.startswith("drivaerml_volume_")
+            }
+            self.assertEqual(
+                volume_metric_ids,
+                {
+                    "volume_pressure_rel_l2",
+                    "drivaerml_volume_pressure_equal_entity_mae",
+                    "drivaerml_volume_pressure_equal_entity_rmse",
+                    "volume_velocity_rel_l2",
+                    "drivaerml_volume_velocity_equal_entity_mae",
+                    "drivaerml_volume_velocity_equal_entity_rmse",
+                },
+            )
+            self.assertFalse(
+                any("physical" in metric_id for metric_id in volume_metric_ids)
+            )
             self.assertEqual(full.case_id, "run_1")
             self.assertEqual(full.surface_entity_count, 5)
             self.assertEqual(full.volume_entity_count, 5)
@@ -472,6 +420,25 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
                     "dataset_weighting"
                 ],
                 "volume_cells_equal",
+            )
+            self.assertEqual(
+                set(full.additive_sums["surface_pressure"]),
+                {"uniform", "physical"},
+            )
+            self.assertEqual(
+                set(full.additive_sums["surface_wall_shear"]),
+                {"uniform", "physical"},
+            )
+            self.assertEqual(set(full.additive_sums["volume_pressure"]), {"uniform"})
+            self.assertEqual(set(full.additive_sums["volume_velocity"]), {"uniform"})
+            self.assertEqual(
+                full.volume_weighting_audit,
+                {
+                    "weighting": "one_per_native_cell",
+                    "entity_count": 5,
+                    "total_weight": 5.0,
+                    "geometric_cell_volume_weights_used": False,
+                },
             )
             self.assertEqual(
                 full.volume_native_array_audits["UMeanTrim"]["tuple_count"], 5
@@ -513,197 +480,6 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
                 )
             bad_areas.close()
 
-    def test_source_bound_weights_require_exact_all_receipt_replay(self) -> None:
-        from scripts.aggregate_drivaerml_volume_weights import (
-            DEFAULT_COPY_CHUNK_SIZE,
-            DEFAULT_SOURCE_VERIFICATION_CHUNK_BYTES,
-            PINNED_ALGORITHM,
-            PINNED_VERSIONS,
-            RECEIPT_SCHEMA,
-            RECEIPT_SCHEMA_VERSION,
-            aggregate_volume_weight_receipts,
-            write_evidence,
-        )
-        from reference.drivaerml.volume_weights import implementation_file_records
-        from reference.drivaerml.volume_weights import PINNED_ENVIRONMENT_BINDING
-
-        committed_patcher = mock.patch(
-            "scripts.aggregate_drivaerml_volume_weights."
-            "_committed_implementation_file_records",
-            return_value=implementation_file_records(),
-        )
-        committed_patcher.start()
-        self.addCleanup(committed_patcher.stop)
-
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            fixture = SyntheticCase(root)
-            weights = fixture.unbound_volume_weights
-            receipt = {
-                "schema": RECEIPT_SCHEMA,
-                "schema_version": RECEIPT_SCHEMA_VERSION,
-                "status": "candidate_exact_native_source_verified_before_vtk",
-                "case_id": "run_1",
-                "implementation_binding": {
-                    "git_revision": "c" * 40,
-                    "worktree_clean": True,
-                    "files": implementation_file_records(),
-                },
-                "environment_binding": PINNED_ENVIRONMENT_BINDING,
-                "native_source_binding": {
-                    "pin": {
-                        "sha256": fixture.source_contract.pin_sha256,
-                        "repository_id": fixture.source_contract.repository_id,
-                        "repository_revision": (
-                            fixture.source_contract.repository_revision
-                        ),
-                    },
-                    "case_id": "run_1",
-                    "logical_volume": {
-                        "path": "run_1/volume_1.vtu",
-                        "size_bytes": fixture.case.volume_total_size_bytes,
-                        "ordered_verified_segments": [
-                            {
-                                "part_index": part.part_index,
-                                "size_bytes": part.size_bytes,
-                                "sha256": part.sha256,
-                            }
-                            for part in fixture.case.volume_parts
-                        ],
-                    },
-                    "verification": {
-                        "method": "exact_ordered_segment_size_and_sha256",
-                        "timing": "completed_before_vtk_geometry_reader",
-                        "vtk_input": "retained_verified_file_descriptor",
-                        "post_vtk_fstat": "unchanged",
-                    },
-                },
-                "output": {
-                    "file": fixture.volume_weight_path.name,
-                    "dtype": "<f8",
-                    "shape": [weights.entity_count],
-                    "size_bytes": fixture.volume_weight_path.stat().st_size,
-                    "sha256": weights.sha256,
-                    "cell_count": weights.entity_count,
-                    "volume_sum_m3": weights.volume_sum_m3,
-                    "volume_min_m3": weights.volume_min_m3,
-                    "volume_max_m3": weights.volume_max_m3,
-                    "per_vtk_cell_type": [
-                        {
-                            "vtk_cell_type_id": 10,
-                            "vtk_cell_type_name": "vtkTetra",
-                            "cell_count": weights.entity_count,
-                            "volume_sum_m3": weights.volume_sum_m3,
-                            "volume_min_m3": weights.volume_min_m3,
-                            "volume_max_m3": weights.volume_max_m3,
-                        }
-                    ],
-                },
-                "native_cell_types": {
-                    "dtype": "uint8",
-                    "shape": [weights.entity_count],
-                    "order": "zero_based_raw_vtk_cell_order",
-                    "payload_sha256": _sha256_bytes(
-                        bytes([10]) * weights.entity_count
-                    ),
-                    "histogram": [
-                        {
-                            "vtk_cell_type_id": 10,
-                            "vtk_cell_type_name": "vtkTetra",
-                            "cell_count": weights.entity_count,
-                        }
-                    ],
-                },
-                "versions": dict(PINNED_VERSIONS),
-                "algorithm": PINNED_ALGORITHM,
-                "execution": {
-                    "copy_chunk_size": DEFAULT_COPY_CHUNK_SIZE,
-                    "source_verification_chunk_bytes": (
-                        DEFAULT_SOURCE_VERIFICATION_CHUNK_BYTES
-                    ),
-                },
-                "reader_audit": {
-                    "disabled_point_array_count": 1,
-                    "disabled_point_arrays": ["syntheticPointArray"],
-                    "disabled_cell_array_count": 3,
-                    "disabled_cell_arrays": [
-                        "pMeanTrim",
-                        "UMeanTrim",
-                        "syntheticCellArray",
-                    ],
-                },
-            }
-            receipt_path = root / "run_1-volume-weight-receipt.json"
-            receipt_path.write_text(
-                json.dumps(receipt, sort_keys=True, separators=(",", ":")) + "\n",
-                encoding="utf-8",
-            )
-            aggregate = aggregate_volume_weight_receipts(
-                native_source_pin_path=fixture.pin.source_path,
-                receipt_paths=(receipt_path,),
-                official_case_ids=("run_1",),
-                expected_pin_sha256=fixture.source_contract.pin_sha256,
-            )
-            aggregate_path = root / "volume-weight-aggregate.json"
-            write_evidence(aggregate_path, aggregate)
-            aggregate_sha256 = _sha256_file(aggregate_path)
-            source_contract = replace(
-                fixture.source_contract,
-                volume_weight_aggregate_sha256=aggregate_sha256,
-            )
-            bound = audit_source_bound_volume_weight_file(
-                fixture.case,
-                fixture.volume_weight_path,
-                native_source_pin=fixture.pin,
-                receipt_jsons=(receipt_path,),
-                aggregate_json=aggregate_path,
-                expected_aggregate_sha256=aggregate_sha256,
-                expected_entity_count=fixture.entity_count,
-                source_contract=source_contract,
-            )
-            self.assertEqual(
-                bound.binding_status, SOURCE_BOUND_VOLUME_WEIGHT_STATUS
-            )
-            self.assertTrue(bound.aggregate_complete)
-            self.assertEqual(bound.aggregate_sha256, aggregate_sha256)
-            self.assertEqual(
-                bound.native_cell_types, receipt["native_cell_types"]
-            )
-            self.assertEqual(
-                list(bound.per_vtk_cell_type),
-                receipt["output"]["per_vtk_cell_type"],
-            )
-            self.assertEqual(
-                bound.aggregate_native_cell_type_payload_manifest_sha256,
-                aggregate["aggregate"][
-                    "native_cell_type_payload_manifest_sha256"
-                ],
-            )
-            self.assertEqual(
-                list(bound.aggregate_per_vtk_cell_type),
-                aggregate["aggregate"]["per_vtk_cell_type"],
-            )
-
-            aggregate["aggregate"]["cell_count"] += 1
-            write_evidence(aggregate_path, aggregate)
-            tampered_sha256 = _sha256_file(aggregate_path)
-            with self.assertRaisesRegex(
-                DrivAerCandidateEvaluatorError, "strict all-receipt replay"
-            ):
-                audit_source_bound_volume_weight_file(
-                    fixture.case,
-                    fixture.volume_weight_path,
-                    native_source_pin=fixture.pin,
-                    receipt_jsons=(receipt_path,),
-                    aggregate_json=aggregate_path,
-                    expected_aggregate_sha256=tampered_sha256,
-                    expected_entity_count=fixture.entity_count,
-                    source_contract=replace(
-                        source_contract,
-                        volume_weight_aggregate_sha256=tampered_sha256,
-                    ),
-                )
-
     def test_compact_evidence_is_deterministic_and_truthfully_candidate_only(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -718,6 +494,11 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
             self.assertEqual(first_receipt["sha256"], second_receipt["sha256"])
             self.assertNotIn(b"\n ", first.read_bytes())
             payload = json.loads(first.read_text(encoding="utf-8"))
+            self.assertEqual(payload["schema"], CANDIDATE_EVIDENCE_SCHEMA)
+            self.assertEqual(
+                payload["schema"], "drivaerml-candidate-case-evaluation-v2"
+            )
+            self.assertEqual(payload["schema_version"], 2)
             self.assertEqual(payload["status"], CANDIDATE_STATUS)
             self.assertFalse(payload["official_submission"])
             self.assertTrue(
@@ -726,10 +507,30 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
                 ]
             )
             self.assertEqual(
-                payload["source"]["volume_weights"]["dtype"], "<f8"
+                payload["source"]["volume_weighting"],
+                {
+                    "weighting": "one_per_native_cell",
+                    "entity_count": 5,
+                    "total_weight": 5.0,
+                    "geometric_cell_volume_weights_used": False,
+                },
+            )
+            self.assertNotIn("volume_weights", payload["source"])
+            self.assertEqual(
+                set(payload["additive_sums"]["surface_pressure"]),
+                {"uniform", "physical"},
+            )
+            self.assertEqual(
+                set(payload["additive_sums"]["volume_pressure"]), {"uniform"}
+            )
+            self.assertNotIn(
+                "volume_pressure_physical_rel_l2", payload["metric_values"]
+            )
+            self.assertNotIn(
+                "volume_velocity_physical_rel_l2", payload["metric_values"]
             )
 
-    def test_case_support_count_chunk_limit_and_weight_binding_reject(self) -> None:
+    def test_case_support_count_and_chunk_limit_reject(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fixture = SyntheticCase(root)
@@ -764,42 +565,6 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
             ):
                 self.evaluate(fixture, surface, volume, maximum_rows=2)
 
-            bad_weights = replace(fixture.volume_weights, case_id="run_2")
-            stream = open_verified_multipart(fixture.resolved)
-            self.addCleanup(stream.close)
-            index = index_inline_binary_vtk_xml(stream)
-            with self.assertRaisesRegex(
-                DrivAerCandidateEvaluatorError, "fixed volume weights differ"
-            ):
-                evaluate_candidate_case(
-                    case_id="run_1",
-                    native_source_pin=fixture.pin,
-                    native_surface=fixture.surface,
-                    fixed_surface_areas=fixture.surface_areas,
-                    volume_stream=stream,
-                    volume_vtk_index=index,
-                    fixed_volume_weights=bad_weights,
-                    surface_prediction_manifest=surface,
-                    volume_prediction_manifest=volume,
-                    source_contract=fixture.source_contract,
-                )
-
-            with self.assertRaisesRegex(
-                DrivAerCandidateEvaluatorError, "not eligible source-bound"
-            ):
-                evaluate_candidate_case(
-                    case_id="run_1",
-                    native_source_pin=fixture.pin,
-                    native_surface=fixture.surface,
-                    fixed_surface_areas=fixture.surface_areas,
-                    volume_stream=stream,
-                    volume_vtk_index=index,
-                    fixed_volume_weights=fixture.unbound_volume_weights,
-                    surface_prediction_manifest=surface,
-                    volume_prediction_manifest=volume,
-                    source_contract=fixture.source_contract,
-                )
-
     def test_prediction_hash_and_verified_volume_stream_reject(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -826,25 +591,15 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
                     fixed_surface_areas=fixture.surface_areas,
                     volume_stream=object(),  # type: ignore[arg-type]
                     volume_vtk_index=index,
-                    fixed_volume_weights=fixture.volume_weights,
                     surface_prediction_manifest=surface,
                     volume_prediction_manifest=volume,
                     source_contract=fixture.source_contract,
                 )
 
-    def test_fixed_weight_and_area_mutation_after_audit_fails_closed(self) -> None:
+    def test_fixed_area_mutation_after_audit_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             fixture = SyntheticCase(root)
-
-            with fixture.volume_weight_path.open("ab") as destination:
-                destination.write(b"changed-after-volume-weight-audit")
-            with self.assertRaisesRegex(
-                DrivAerCandidateEvaluatorError, "changed after volume-weight audit"
-            ):
-                fixture.volume_weights.assert_source_unchanged(
-                    context="after volume-weight audit"
-                )
 
             area_path = root / "run_1" / "boundary_cell_area_1.npy"
             replacement = root / "replacement-area.npy"

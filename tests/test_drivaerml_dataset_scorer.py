@@ -27,9 +27,6 @@ from reference.drivaerml.dataset_scorer import (
 REPOSITORY = "neashton/drivaerml"
 REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
 SURFACE_MANIFEST_SHA = "a" * 64
-VOLUME_AGGREGATE_SHA = "b" * 64
-VOLUME_ALGORITHM_SHA = "c" * 64
-VOLUME_CELL_TYPE_MANIFEST_SHA = "e" * 64
 PROFILE_SHA_PLACEHOLDER = "d" * 64
 
 
@@ -324,20 +321,25 @@ class DatasetFixture:
             # Surface primary is physical; volume pressure primary is uniform.
             uniform_rel = primary if prefix == "volume_pressure" else primary + 1.0
             physical_rel = primary if prefix.startswith("surface") else primary + 1.0
-            result[prefix] = {
+            weighting_sums = {
                 "uniform": {"absolute_error": 2.0 + case_index, "squared_error": uniform_rel**2, "squared_truth": 10000.0, "entity_count": 2, "total_weight": 2.0},
-                "physical": {"absolute_error": 3.0 + case_index, "squared_error": physical_rel**2, "squared_truth": 10000.0, "entity_count": 2, "total_weight": 3.0},
             }
+            if prefix.startswith("surface"):
+                weighting_sums["physical"] = {
+                    "absolute_error": 3.0 + case_index,
+                    "squared_error": physical_rel**2,
+                    "squared_truth": 10000.0,
+                    "entity_count": 2,
+                    "total_weight": 3.0,
+                }
+            result[prefix] = weighting_sums
         # The first case is the non-axis-aligned vector golden: errors
         # (3,4,0) and (0,0,12) give per-entity norms 5 and 12.
         if case_index == 1:
             velocity_uniform = {"absolute_error": 17.0, "squared_error": 169.0, "squared_truth": 10000.0, "entity_count": 2, "total_weight": 2.0}
         else:
             velocity_uniform = {"absolute_error": 10.0, "squared_error": 50.0, "squared_truth": 10000.0, "entity_count": 2, "total_weight": 2.0}
-        result["volume_velocity"] = {
-            "uniform": velocity_uniform,
-            "physical": {"absolute_error": 12.0, "squared_error": 80.0, "squared_truth": 10000.0, "entity_count": 2, "total_weight": 3.0},
-        }
+        result["volume_velocity"] = {"uniform": velocity_uniform}
         return result
 
     def _metrics(self, sums: dict[str, dict[str, dict[str, float | int]]]):
@@ -346,14 +348,23 @@ class DatasetFixture:
         for prefix, weighting_sums in sums.items():
             surface = prefix.startswith("surface")
             primary_weighting = "physical" if surface else "uniform"
-            secondary_weighting = "uniform" if surface else "physical"
             primary_label = "area" if surface else "equal_entity"
-            secondary_label = "equal_entity" if surface else "physical"
-            secondary_rel_id = f"{prefix}_{'equal_entity' if surface else 'physical'}_rel_l2"
-            for metric_id, weighting, dataset_weighting in (
-                (f"{prefix}_rel_l2", primary_weighting, "surface_face_area" if surface else "volume_cells_equal"),
-                (secondary_rel_id, secondary_weighting, "surface_entities_equal" if surface else "cell_volume"),
-            ):
+            relative_metrics = [
+                (
+                    f"{prefix}_rel_l2",
+                    primary_weighting,
+                    "surface_face_area" if surface else "volume_cells_equal",
+                )
+            ]
+            if surface:
+                relative_metrics.append(
+                    (
+                        f"{prefix}_equal_entity_rel_l2",
+                        "uniform",
+                        "surface_entities_equal",
+                    )
+                )
+            for metric_id, weighting, dataset_weighting in relative_metrics:
                 source = weighting_sums[weighting]
                 values[metric_id] = 100.0 * math.sqrt(source["squared_error"] / source["squared_truth"])
                 statistics[metric_id] = {
@@ -365,7 +376,10 @@ class DatasetFixture:
                     "entity_count": 2,
                     "total_weight": source["total_weight"],
                 }
-            for label, weighting in ((primary_label, primary_weighting), (secondary_label, secondary_weighting)):
+            reductions = [(primary_label, primary_weighting)]
+            if surface:
+                reductions.append(("equal_entity", "uniform"))
+            for label, weighting in reductions:
                 source = weighting_sums[weighting]
                 values[f"drivaerml_{prefix}_{label}_mae"] = source["absolute_error"] / source["total_weight"]
                 values[f"drivaerml_{prefix}_{label}_rmse"] = math.sqrt(source["squared_error"] / source["total_weight"])
@@ -400,8 +414,8 @@ class DatasetFixture:
         force_vector = [force["Cd"] * q_area, force["Cs"] * q_area, force["Cl"] * q_area]
         moment_vector = [0.0, force["CmPitch"] * q_area * 2.78618, 0.0]
         return {
-            "schema": "drivaerml-candidate-case-evaluation-v1",
-            "schema_version": 1,
+            "schema": "drivaerml-candidate-case-evaluation-v2",
+            "schema_version": 2,
             "status": "candidate_evaluator_evidence_not_official_submission",
             "official_submission": False,
             "case_id": case_id,
@@ -448,60 +462,11 @@ class DatasetFixture:
                 },
                 "volume_part_sha256": list(parts),
                 "volume_vtk": {"dataset_type": "UnstructuredGrid", "piece_count": 1, "cell_count": 2, "source_size_bytes": 5},
-                "volume_weights": {
-                    "source_file": f"volume_cell_volume_{case_index}.npy",
-                    "sha256": ("0" if case_index == 1 else "1") * 64,
-                    "case_id": case_id,
-                    "source_volume_part_sha256": list(parts),
+                "volume_weighting": {
+                    "weighting": "one_per_native_cell",
                     "entity_count": 2,
-                    "volume_sum_m3": 3.0,
-                    "volume_min_m3": 1.0,
-                    "volume_max_m3": 2.0,
-                    "dtype": "<f8",
-                    "role": "fixed_external_input_not_regenerated",
-                    "binding_status": "source_bound_receipt_v3_aggregate_v2_membership_verified",
-                    "native_source_pin_sha256": self.pin_sha,
-                    "receipt_sha256": ("2" if case_index == 1 else "3") * 64,
-                    "aggregate_sha256": VOLUME_AGGREGATE_SHA,
-                    "aggregate_complete": True,
-                    "algorithm_sha256": VOLUME_ALGORITHM_SHA,
-                    "native_cell_types": {
-                        "dtype": "uint8",
-                        "shape": [2],
-                        "order": "zero_based_raw_vtk_cell_order",
-                        "payload_sha256": ("8" if case_index == 1 else "9") * 64,
-                        "histogram": [
-                            {
-                                "vtk_cell_type_id": 10,
-                                "vtk_cell_type_name": "vtkTetra",
-                                "cell_count": 2,
-                            }
-                        ],
-                    },
-                    "per_vtk_cell_type": [
-                        {
-                            "vtk_cell_type_id": 10,
-                            "vtk_cell_type_name": "vtkTetra",
-                            "cell_count": 2,
-                            "volume_sum_m3": 3.0,
-                            "volume_min_m3": 1.0,
-                            "volume_max_m3": 2.0,
-                        }
-                    ],
-                    "aggregate_native_cell_type_payload_manifest_sha256": (
-                        VOLUME_CELL_TYPE_MANIFEST_SHA
-                    ),
-                    "aggregate_per_vtk_cell_type": [
-                        {
-                            "vtk_cell_type_id": 10,
-                            "vtk_cell_type_name": "vtkTetra",
-                            "case_count": 2,
-                            "cell_count": 4,
-                            "volume_sum_m3": 6.0,
-                            "volume_min_m3": 1.0,
-                            "volume_max_m3": 2.0,
-                        }
-                    ],
+                    "total_weight": 2.0,
+                    "geometric_cell_volume_weights_used": False,
                 },
                 "volume_native_arrays": {
                     "pMeanTrim": {"name": "pMeanTrim", "association": "CellData", "number_of_components": 1, "tuple_count": 2, "scalar_count": 2, "finite": True, "units": "m^2/s^2", "raw_id_start": 0, "raw_id_stop": 2, "payload_sha256": "4" * 64},
@@ -777,6 +742,56 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
             self.assertFalse(evidence["eligibility"]["composite_score_available"])
             self.assertNotIn("overall_score", values)
             self.assertEqual(evidence["status"], CANDIDATE_DATASET_STATUS)
+            self.assertEqual(
+                evidence["schema"],
+                "drivaerml-candidate-dataset-evaluation-v2",
+            )
+            self.assertEqual(evidence["schema_version"], 2)
+            self.assertFalse(
+                any("physical" in metric_id for metric_id in ALL_FIELD_METRIC_IDS)
+            )
+            self.assertEqual(
+                {
+                    metric_id
+                    for metric_id in ALL_FIELD_METRIC_IDS
+                    if "volume_" in metric_id
+                },
+                {
+                    "volume_pressure_rel_l2",
+                    "drivaerml_volume_pressure_equal_entity_mae",
+                    "drivaerml_volume_pressure_equal_entity_rmse",
+                    "volume_velocity_rel_l2",
+                    "drivaerml_volume_velocity_equal_entity_mae",
+                    "drivaerml_volume_velocity_equal_entity_rmse",
+                },
+            )
+            source_contract = evidence["source_contract"]
+            self.assertEqual(
+                source_contract["volume_weighting"], "one_per_native_cell"
+            )
+            self.assertFalse(
+                source_contract["geometric_cell_volume_weights_used"]
+            )
+            for removed_key in (
+                "volume_weight_aggregate_sha256",
+                "volume_weight_algorithm_sha256",
+                "volume_weight_native_cell_type_payload_manifest_sha256",
+                "volume_weight_per_vtk_cell_type",
+                "volume_weight_aggregate_predeclared_in_submission_spec",
+            ):
+                self.assertNotIn(removed_key, source_contract)
+            first_source = evidence["cases"][0]["source_support"]
+            self.assertEqual(
+                first_source["volume_weighting"],
+                {
+                    "weighting": "one_per_native_cell",
+                    "entity_count": 2,
+                    "total_weight": 2.0,
+                    "geometric_cell_volume_weights_used": False,
+                },
+            )
+            self.assertNotIn("volume_weight_sha256", first_source)
+            self.assertNotIn("volume_weight_receipt_sha256", first_source)
 
             first = Path(directory) / "first.json"
             second = Path(directory) / "second.json"
@@ -784,6 +799,77 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
             two = write_candidate_dataset_evidence(fixture.evaluate(), second)
             self.assertEqual(first.read_bytes(), second.read_bytes())
             self.assertEqual(one["sha256"], two["sha256"])
+
+    def test_equal_native_cell_volume_contract_is_exact_and_versioned(self) -> None:
+        mutations = (
+            ("legacy schema", lambda value: value.update({"schema": "drivaerml-candidate-case-evaluation-v1", "schema_version": 1}), "schema/status mismatch"),
+            ("wrong weighting", lambda value: value["source"]["volume_weighting"].update({"weighting": "cell_volume"}), "volume weighting mismatch"),
+            ("wrong count", lambda value: value["source"]["volume_weighting"].update({"entity_count": 1}), "volume weighting mismatch"),
+            ("non-float total", lambda value: value["source"]["volume_weighting"].update({"total_weight": 2}), "volume weighting mismatch"),
+            ("geometric weights", lambda value: value["source"]["volume_weighting"].update({"geometric_cell_volume_weights_used": True}), "volume weighting mismatch"),
+            ("algorithm identity", lambda value: value["source"]["volume_weighting"].update({"algorithm_sha256": "a" * 64}), "volume_weighting keys differ"),
+        )
+        for label, mutate, error in mutations:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as directory:
+                fixture = DatasetFixture(Path(directory))
+                path = fixture.core_dir / "run_1.json"
+                document = json.loads(path.read_text(encoding="utf-8"))
+                mutate(document)
+                _write_json(path, document)
+                with self.assertRaisesRegex(DrivAerDatasetScorerError, error):
+                    fixture.evaluate()
+
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = DatasetFixture(Path(directory))
+            path = fixture.core_dir / "run_1.json"
+            document = json.loads(path.read_text(encoding="utf-8"))
+            document["source"]["volume_weights"] = document["source"].pop(
+                "volume_weighting"
+            )
+            _write_json(path, document)
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError, "source keys differ"
+            ):
+                fixture.evaluate()
+
+        legacy_physical_mutations = (
+            (
+                "metric value",
+                lambda value: value["metric_values"].update(
+                    {"volume_pressure_physical_rel_l2": 1.0}
+                ),
+                "metric_values keys differ",
+            ),
+            (
+                "additive sums",
+                lambda value: value["additive_sums"]["volume_pressure"].update(
+                    {"physical": copy.deepcopy(value["additive_sums"]["volume_pressure"]["uniform"])}
+                ),
+                "additive_sums.volume_pressure keys differ",
+            ),
+            (
+                "sufficient statistics",
+                lambda value: value["metric_sufficient_statistics"].update(
+                    {
+                        "volume_pressure_physical_rel_l2": copy.deepcopy(
+                            value["metric_sufficient_statistics"][
+                                "volume_pressure_rel_l2"
+                            ]
+                        )
+                    }
+                ),
+                "metric_sufficient_statistics keys differ",
+            ),
+        )
+        for label, mutate, error in legacy_physical_mutations:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as directory:
+                fixture = DatasetFixture(Path(directory))
+                path = fixture.core_dir / "run_1.json"
+                document = json.loads(path.read_text(encoding="utf-8"))
+                mutate(document)
+                _write_json(path, document)
+                with self.assertRaisesRegex(DrivAerDatasetScorerError, error):
+                    fixture.evaluate()
 
     def test_exact_split_coverage_rejects_wrong_missing_extra_and_duplicate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -24,12 +24,21 @@ SUBMISSIONS_ROOT = ROOT / "submissions" / "drivaerml"
 MANIFEST_PATH = ROOT / "leaderboard" / "manifest.json"
 
 DATASET_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
-DATASET_VERSION = "drivaerml-native-v1-candidate"
-EVALUATOR_VERSION = "drivaerml-evaluator-v1-candidate"
+DATASET_VERSION = "drivaerml-native-v2-candidate"
+EVALUATOR_VERSION = "drivaerml-evaluator-v2-candidate"
 SPLIT_MANIFEST_SHA256 = "032a2e9f88926d9218a1943b51e650135cc78683cad6b0a38f3cf4f9dfba647d"
 SOURCE_PIN_SHA256 = "4fc9077f8f23f4994c98f4d0e7a17aef7b998de4c996638e3a8a616b6d923fdd"
 SURFACE_AREA_MANIFEST_SHA256 = "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
 FORCE_TABLE_SHA256 = "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865"
+
+RETIRED_DRIVAER_PHYSICAL_VOLUME_METRIC_IDS = frozenset(
+    {
+        "drivaerml_volume_velocity_physical_mae",
+        "drivaerml_volume_velocity_physical_rmse",
+        "drivaerml_volume_pressure_physical_mae",
+        "drivaerml_volume_pressure_physical_rmse",
+    }
+)
 
 DRIVAER_DIMENSIONAL_CATALOG = (
     {
@@ -246,25 +255,11 @@ def build_metrics() -> list[dict[str, Any]]:
                 weighting="volume_cells_equal",
             ),
             metric(
-                "volume_velocity_physical_rel_l2",
-                unit="%",
-                equation=RELATIVE_L2_EQUATION,
-                aggregation="per_geometry_then_macro_average",
-                weighting="cell_volume",
-            ),
-            metric(
                 "volume_pressure_rel_l2",
                 unit="%",
                 equation=RELATIVE_L2_EQUATION,
                 aggregation="per_geometry_then_macro_average",
                 weighting="volume_cells_equal",
-            ),
-            metric(
-                "volume_pressure_physical_rel_l2",
-                unit="%",
-                equation=RELATIVE_L2_EQUATION,
-                aggregation="per_geometry_then_macro_average",
-                weighting="cell_volume",
             ),
         ]
     )
@@ -275,9 +270,7 @@ def build_metrics() -> list[dict[str, Any]]:
         ("surface_wall_shear", "m^2/s^2", "area", "surface_face_area"),
         ("surface_wall_shear", "m^2/s^2", "equal_entity", "surface_entities_equal"),
         ("volume_velocity", "m/s", "equal_entity", "volume_cells_equal"),
-        ("volume_velocity", "m/s", "physical", "cell_volume"),
         ("volume_pressure", "m^2/s^2", "equal_entity", "volume_cells_equal"),
-        ("volume_pressure", "m^2/s^2", "physical", "cell_volume"),
     ]
     for field_id, unit, token, weighting in absolute_fields:
         prefix = f"drivaerml_{field_id}_{token}"
@@ -587,7 +580,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "submissions_open": False,
         "closed_reason": (
             "The participant contract and official splits are published, but ranking remains closed until "
-            "deterministic volume weights, all-case velocity replay, Cp failure resolution and visual review, "
+            "all-case velocity replay, Cp failure resolution and visual review, "
             "physics-null baselines, genuine-model sensitivity analysis, one genuine maintainer "
             "native-evaluator recomputation receipt, "
             "force-replay review, and immutable evaluator/scoring-support owner approval are complete."
@@ -659,46 +652,22 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                 "arrays": ["UMeanTrim", "pMeanTrim"],
                 "array_components": {"UMeanTrim": 3, "pMeanTrim": 1},
                 "array_units": {"UMeanTrim": "m/s", "pMeanTrim": "m^2/s^2"},
-                "primary_weighting": "one_per_native_cell",
-                "secondary_weighting": "benchmark_computed_cell_volume_pending_frozen_publication",
-                "candidate_secondary_weight_status": {
-                    "status": "vtk_9_6_replacement_candidate_passed_isolated_wedge_full_native_validation_pending",
-                    "candidate_algorithm": "VTK_9.6.0_vtkCellSizeFilter_volume_only_mixed_native_type_dispatch",
-                    "accepted_weight_artifact_exists": False,
-                    "owner_scientific_decision_required": True,
-                    "diagnostic_evidence": [
-                        {
-                            "file": "evidence/volume-weight-vtk-run_1-failure-diagnostic.json",
-                            "sha256": "aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e",
-                            "status": "candidate_algorithm_rejected_fail_closed_no_weight_array_published",
-                        },
-                        {
-                            "file": "evidence/volume-weight-vtk96-run_1-wedge-probe.json",
-                            "sha256": "2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6",
-                            "status": "replacement_candidate_isolated_probe_only_full_native_validation_pending",
-                        },
-                        {
-                            "file": "evidence/volume-cell-types-run_1-pilot.json",
-                            "sha256": "63f4c794807fd4d327d2e5017db585b41047c758e1ca9eeb4d22f2010817092e",
-                            "status": "diagnostic_only_not_a_volume_weight_definition",
-                        },
-                        {
-                            "file": "evidence/volume-cell-types-run_44-pilot.json",
-                            "sha256": "4f3a1cc6bf1c4010daf4a94c2bdf56cc9fb4a684e8cb2610dce6f00bcf482f71",
-                            "status": "diagnostic_only_not_a_volume_weight_definition",
-                        },
-                    ],
-                },
+                "weighting": "one_per_native_cell",
+                "geometric_cell_volume_weights_required": False,
                 "candidate_primary_validation_evidence": {
                     "file": "evidence/native-volume-equal-cell-primary-all484.json",
                     "sha256": "bda42a125ffb4d6484756e77ac7e495974f39d4bce3e663154322e9e560827c7",
                     "provenance_file": "evidence/native-volume-equal-cell-primary-all484-provenance.json",
                     "provenance_sha256": "b5ffe2234bb1597cf041ff5d97458f3d0d6e81db7a30591a7e26f51ebc032fde",
+                    "artifact_schema": "drivaerml-native-volume-equal-cell-primary-all-case-audit-v1",
+                    "legacy_unit_weight_vocabulary": True,
+                    "current_tool_aggregate_schema": "drivaerml-native-volume-equal-cell-all-case-audit-v2",
+                    "normalization_status": "bound_historical_equal_cell_evidence_current_v2_tools_require_regeneration_or_explicit_normalization",
                     "status": "all_484_equal_cell_primary_audit_passed_not_scoring_support",
                     "case_count": 484,
                     "verified_segment_count": 978,
                     "native_cell_count": 68949662110,
-                    "physical_volume_secondary_exercised": False,
+                    "equal_native_cell_weighting_exercised": True,
                     "complete_all_484_cases": True,
                     "owner_scientific_approval": False,
                 },
@@ -747,8 +716,6 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                 "components": 3,
                 "primary_metric": "volume_velocity_rel_l2",
                 "primary_weighting": "volume_cells_equal",
-                "secondary_metric": "volume_velocity_physical_rel_l2",
-                "secondary_weighting": "cell_volume",
             },
             {
                 "target_id": "volume_pressure",
@@ -757,15 +724,12 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                 "components": 1,
                 "primary_metric": "volume_pressure_rel_l2",
                 "primary_weighting": "volume_cells_equal",
-                "secondary_metric": "volume_pressure_physical_rel_l2",
-                "secondary_weighting": "cell_volume",
             },
         ],
         "relative_l2_policy": {
             "surface_primary": "surface_face_area",
             "surface_secondary": "equal_native_polygon",
-            "volume_primary": "equal_native_cell",
-            "volume_secondary": "physical_cell_volume",
+            "volume": "equal_native_cell_only",
             "chunk_rule": "sum_case_numerators_denominators_counts_and_weights_across_chunks_then_apply_one_nonlinear_reduction",
             "forbidden_chunk_rule": "average_chunk_local_metric_values",
         },
@@ -820,7 +784,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "official_splits": "complete",
             "pinned_native_files": "complete",
             "surface_area_weights": "all_484_candidate_order_count_hash_and_value_audit_passed_owner_release_approval_pending",
-            "volume_cell_weights": "vtk_9_6_replacement_candidate_passed_isolated_run_1_wedge_full_run_1_run_44_all_case_publication_and_owner_approval_pending_no_weight_array_published",
+            "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
             "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
             "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
             "cp_probes": "all_484_candidate_mapping_and_cp_equation_replay_complete_with_875_explicit_invalid_rows_owner_resolution_and_visual_signoff_pending",
@@ -831,7 +795,6 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "owner_evaluator_approval": "pending",
         },
         "owner_decisions_required": [
-            "publish_volume_cell_weights_and_frozen_geometry_algorithm",
             "approve_all_case_native_array_inventory_and_exclusion_policy",
             "approve_all_484_case_force_replay_and_chunk_invariance",
             "approve_velocity_assignment_and_resolution_convergence",
@@ -1018,8 +981,12 @@ def update_manifest(specification: dict[str, Any], profile: dict[str, Any]) -> N
         catalog["coefficient_errors"], DRIVAER_COEFFICIENT_CATALOG
     )
     definitions = manifest["metric_definitions"]
-    positions = {definition["id"]: index for index, definition in enumerate(definitions)}
-    existing_ids = set(positions)
+    definitions[:] = [
+        definition
+        for definition in definitions
+        if definition.get("id") not in RETIRED_DRIVAER_PHYSICAL_VOLUME_METRIC_IDS
+    ]
+    existing_ids = {definition["id"] for definition in definitions}
     for metric_spec in specification["metrics"]:
         metric_id = metric_spec["id"]
         if metric_id in existing_ids:
@@ -1057,7 +1024,7 @@ def update_manifest(specification: dict[str, Any], profile: dict[str, Any]) -> N
             "latest_submitted_at_date_among_prototype_fixture_rows_not_a_contract_or_scientific_evidence_update"
         ),
     }
-    dataset["submission_format"] = "drivaerml_native_candidate_v1"
+    dataset["submission_format"] = "drivaerml_native_candidate_v2"
     dataset["metrics"] = {
         "dimensional_fields": [
             entry["id"] for entry in DRIVAER_DIMENSIONAL_CATALOG
@@ -1159,8 +1126,6 @@ def migrated_metric_values(old: dict[str, Any]) -> dict[str, float]:
         result[metric_id] = value(old, metric_id, None, default)
     result["surface_pressure_equal_entity_rel_l2"] = value(old, "surface_pressure_equal_entity_rel_l2", "surface_pressure_rel_l2", 5.0)
     result["surface_wall_shear_equal_entity_rel_l2"] = value(old, "surface_wall_shear_equal_entity_rel_l2", "surface_wall_shear_rel_l2", 8.0)
-    result["volume_velocity_physical_rel_l2"] = value(old, "volume_velocity_physical_rel_l2", "volume_velocity_rel_l2", 6.0)
-    result["volume_pressure_physical_rel_l2"] = value(old, "volume_pressure_physical_rel_l2", "volume_pressure_rel_l2", 7.0)
 
     old_absolute = {
         "surface_pressure": ("surface_pressure_mae", "surface_pressure_rmse", 25.0, 35.0),
@@ -1171,8 +1136,8 @@ def migrated_metric_values(old: dict[str, Any]) -> dict[str, float]:
     tokens = {
         "surface_pressure": ("area", "equal_entity"),
         "surface_wall_shear": ("area", "equal_entity"),
-        "volume_velocity": ("equal_entity", "physical"),
-        "volume_pressure": ("equal_entity", "physical"),
+        "volume_velocity": ("equal_entity",),
+        "volume_pressure": ("equal_entity",),
     }
     for field_id, (old_mae, old_rmse, default_mae, default_rmse) in old_absolute.items():
         for token in tokens[field_id]:

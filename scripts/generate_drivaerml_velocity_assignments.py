@@ -258,7 +258,9 @@ def _native_source_binding(
             # Crucially, its geometry reader does not reopen ``source``: it
             # receives an fd-filesystem alias checked to resolve to the retained
             # verified device/inode, and is invoked only after segment checks.
-            from reference.drivaerml.volume_weights import read_geometry_only_vtu
+            from reference.drivaerml.native_volume_geometry import (
+                read_geometry_only_vtu,
+            )
 
             vtk_source = verified_stream.single_file_descriptor_path()
             grid, reader_audit = read_geometry_only_vtu(vtk_source)
