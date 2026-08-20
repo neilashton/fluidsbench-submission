@@ -1,8 +1,10 @@
 # DrivAerML scientific-contract proposal
 
-This directory is a non-activating proposal for dataset-owner and FluidsBench
-review. It deliberately does not modify the current prototype
-`../submission-spec.json`, its dummy case IDs, or historical submissions.
+This directory preserves the reviewed scientific proposal and its audit
+evidence. The participant-facing decisions have since been promoted into the
+closed candidate [`../submission-spec.json`](../submission-spec.json), while
+the files here remain non-activating source evidence: they do not by themselves
+open submissions, activate the composite, or make historical dummy rows real.
 
 The proposed benchmark is defined by a frozen raw-data support, not by the
 representation preferred by a particular model:
@@ -40,8 +42,8 @@ Files:
   the golden native-polygon force and pitch-moment replay for `Cd`, `Cl`,
   `Clf`, and `Clr` in run 1;
 - [`AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md`](AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md):
-  the non-activating AutoCFD4/5 profile, pressure-probe, resolution, reduction,
-  and overall-score proposal;
+  the review source for the active-candidate AutoCFD4/5 profile,
+  pressure-probe, resolution, reduction, and overall-score definitions;
 - `autocfd_cp_taps_nominal.csv`: the 209 unique nominal AutoCFD pressure taps;
 - `autocfd_cp_panel_membership.csv`: their AutoCFD plot-panel ordering,
   including intentional reuse between panels;
@@ -61,6 +63,7 @@ Files:
   support-file identities for the 484 public cases (the named case-STL pin is
   an explicit remaining activation gate).
 
-The proposal must remain closed until the blockers in
-`SCIENTIFIC_CONTRACT.md` are resolved and the dataset owner approves one
-immutable scoring-support release.
+The active candidate must remain closed until the blockers in
+`SCIENTIFIC_CONTRACT.md` and [`../ACTIVATION_CHECKLIST.md`](../ACTIVATION_CHECKLIST.md)
+are resolved and the dataset owner approves one immutable scoring-support
+release.

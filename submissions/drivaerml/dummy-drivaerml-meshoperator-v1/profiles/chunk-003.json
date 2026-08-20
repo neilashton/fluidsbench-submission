@@ -2,22 +2,18 @@
   "schema_version": "1.0",
   "cases": [
     {
-      "case_id": "drivaerml_geometry_test_0091",
+      "case_id": "run_470",
       "series": [
         {
           "panel_id": "pressure_profiles",
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            43.0
           ],
           "prediction": [
             0.644773,
-            -0.078839,
-            -0.2874845,
             -0.118581
           ]
         },
@@ -26,88 +22,406 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            22.0
           ],
           "prediction": [
-            0.6790564,
-            0.1508196,
-            -0.0825258,
-            0.0223486
+            0.6792564,
+            0.0225486
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_0_15",
+          "station_id": "sidewall_z_150mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            27.0
           ],
           "prediction": [
-            0.6587709,
-            -0.1774661,
-            -0.5492227,
-            -0.1484383
+            0.6591709,
+            -0.1480383
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_left_wheelhouse_y_neg_0_6",
+          "station_id": "front_wheelhouse_y_neg_600mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            11.0
           ],
           "prediction": [
-            0.7683337,
-            0.1197084,
-            0.1787464,
-            0.0350147
+            0.7689337,
+            0.0356147
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_y_neg_750mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.645573,
+            -0.117781
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_z_115_155mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            4.0
+          ],
+          "prediction": [
+            0.6800564,
+            0.0233486
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "a_pillar",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6599709,
+            -0.1472383
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_150mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.7697337,
+            0.0364147
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_500mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.646373,
+            -0.116981
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_symmetry",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            6.0
+          ],
+          "prediction": [
+            0.6808564,
+            0.0241486
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_y_negative",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.6607709,
+            -0.1464383
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "underbody_off_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.7705337,
+            0.0372147
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.647173,
+            -0.116181
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rear_window_and_trunk",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6816564,
+            0.0249486
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "side_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            20.0
+          ],
+          "prediction": [
+            0.6615709,
+            -0.1456383
           ]
         },
         {
           "panel_id": "velocity_profiles",
-          "station_id": "wake_x_1_00l",
+          "station_id": "autocfd5_v1",
           "quantity_id": "velocity_ratio",
           "coordinate": [
-            0.05,
-            0.25,
-            0.5,
-            0.75
+            0.0,
+            2.0
           ],
           "prediction": [
             0.502886,
-            0.6837518,
-            0.8847138,
             1.0153391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.503086,
+            1.0155391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.503286,
+            1.0157391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.503486,
+            1.0159391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.503686,
+            1.0161391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.503886,
+            1.0163391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.504086,
+            1.0165391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.504286,
+            1.0167391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.504486,
+            1.0169391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.504686,
+            1.0171391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.504886,
+            1.0173391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.505086,
+            1.0175391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_l1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            6.5
+          ],
+          "prediction": [
+            0.505286,
+            1.0177391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000876107
+          ],
+          "prediction": [
+            0.505486,
+            1.0179391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000877067
+          ],
+          "prediction": [
+            0.505686,
+            1.0181391
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000591286
+          ],
+          "prediction": [
+            0.505886,
+            1.0183391
           ]
         }
       ]
     },
     {
-      "case_id": "drivaerml_geometry_test_0092",
+      "case_id": "run_477",
       "series": [
         {
           "panel_id": "pressure_profiles",
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            43.0
           ],
           "prediction": [
             0.6444622,
-            -0.0789146,
-            -0.2876483,
             -0.1186734
           ]
         },
@@ -116,88 +430,406 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            22.0
           ],
           "prediction": [
-            0.6719619,
-            0.1485355,
-            -0.0842003,
-            0.0212344
+            0.6721619,
+            0.0214344
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_0_15",
+          "station_id": "sidewall_z_150mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            27.0
           ],
           "prediction": [
-            0.6558088,
-            -0.1785472,
-            -0.5517522,
-            -0.1494063
+            0.6562088,
+            -0.1490063
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_left_wheelhouse_y_neg_0_6",
+          "station_id": "front_wheelhouse_y_neg_600mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            11.0
           ],
           "prediction": [
-            0.7839634,
-            0.1236631,
-            0.1837638,
-            0.0374449
+            0.7845634,
+            0.0380449
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_y_neg_750mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.6452622,
+            -0.1178734
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_z_115_155mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            4.0
+          ],
+          "prediction": [
+            0.6729619,
+            0.0222344
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "a_pillar",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6570088,
+            -0.1482063
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_150mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.7853634,
+            0.0388449
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_500mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.6460622,
+            -0.1170734
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_symmetry",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            6.0
+          ],
+          "prediction": [
+            0.6737619,
+            0.0230344
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_y_negative",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.6578088,
+            -0.1474063
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "underbody_off_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.7861634,
+            0.0396449
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.6468622,
+            -0.1162734
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rear_window_and_trunk",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6745619,
+            0.0238344
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "side_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            20.0
+          ],
+          "prediction": [
+            0.6586088,
+            -0.1466063
           ]
         },
         {
           "panel_id": "velocity_profiles",
-          "station_id": "wake_x_1_00l",
+          "station_id": "autocfd5_v1",
           "quantity_id": "velocity_ratio",
           "coordinate": [
-            0.05,
-            0.25,
-            0.5,
-            0.75
+            0.0,
+            2.0
           ],
           "prediction": [
             0.501254,
-            0.6816302,
-            0.8820482,
             1.0123199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501454,
+            1.0125199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501654,
+            1.0127199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501854,
+            1.0129199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.502054,
+            1.0131199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.502254,
+            1.0133199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502454,
+            1.0135199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502654,
+            1.0137199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502854,
+            1.0139199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.503054,
+            1.0141199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.503254,
+            1.0143199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.503454,
+            1.0145199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_l1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            6.5
+          ],
+          "prediction": [
+            0.503654,
+            1.0147199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000876107
+          ],
+          "prediction": [
+            0.503854,
+            1.0149199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000877067
+          ],
+          "prediction": [
+            0.504054,
+            1.0151199
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000591286
+          ],
+          "prediction": [
+            0.504254,
+            1.0153199
           ]
         }
       ]
     },
     {
-      "case_id": "drivaerml_geometry_test_0093",
+      "case_id": "run_480",
       "series": [
         {
           "panel_id": "pressure_profiles",
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            43.0
           ],
           "prediction": [
             0.6454686,
-            -0.0786698,
-            -0.2871179,
             -0.1183742
           ]
         },
@@ -206,88 +838,406 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            22.0
           ],
           "prediction": [
-            0.6696023,
-            0.1477759,
-            -0.0847572,
-            0.0208638
+            0.6698023,
+            0.0210638
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_0_15",
+          "station_id": "sidewall_z_150mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            27.0
           ],
           "prediction": [
-            0.653781,
-            -0.1792873,
-            -0.553484,
-            -0.1500689
+            0.654181,
+            -0.1496689
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_left_wheelhouse_y_neg_0_6",
+          "station_id": "front_wheelhouse_y_neg_600mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            11.0
           ],
           "prediction": [
-            0.769184,
-            0.1199236,
-            0.1790194,
-            0.0351469
+            0.769784,
+            0.0357469
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_y_neg_750mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.6462686,
+            -0.1175742
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_z_115_155mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            4.0
+          ],
+          "prediction": [
+            0.6706023,
+            0.0218638
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "a_pillar",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.654981,
+            -0.1488689
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_150mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.770584,
+            0.0365469
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_500mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.6470686,
+            -0.1167742
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_symmetry",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            6.0
+          ],
+          "prediction": [
+            0.6714023,
+            0.0226638
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_y_negative",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.655781,
+            -0.1480689
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "underbody_off_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.771384,
+            0.0373469
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.6478686,
+            -0.1159742
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rear_window_and_trunk",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6722023,
+            0.0234638
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "side_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            20.0
+          ],
+          "prediction": [
+            0.656581,
+            -0.1472689
           ]
         },
         {
           "panel_id": "velocity_profiles",
-          "station_id": "wake_x_1_00l",
+          "station_id": "autocfd5_v1",
           "quantity_id": "velocity_ratio",
           "coordinate": [
-            0.05,
-            0.25,
-            0.5,
-            0.75
+            0.0,
+            2.0
           ],
           "prediction": [
             0.500378,
-            0.6804914,
-            0.8806174,
             1.0106993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.500578,
+            1.0108993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.500778,
+            1.0110993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.500978,
+            1.0112993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501178,
+            1.0114993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501378,
+            1.0116993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.501578,
+            1.0118993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.501778,
+            1.0120993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.501978,
+            1.0122993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502178,
+            1.0124993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502378,
+            1.0126993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502578,
+            1.0128993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_l1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            6.5
+          ],
+          "prediction": [
+            0.502778,
+            1.0130993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000876107
+          ],
+          "prediction": [
+            0.502978,
+            1.0132993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000877067
+          ],
+          "prediction": [
+            0.503178,
+            1.0134993
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000591286
+          ],
+          "prediction": [
+            0.503378,
+            1.0136993
           ]
         }
       ]
     },
     {
-      "case_id": "drivaerml_geometry_test_0094",
+      "case_id": "run_485",
       "series": [
         {
           "panel_id": "pressure_profiles",
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            43.0
           ],
           "prediction": [
             0.646956,
-            -0.078308,
-            -0.286334,
             -0.117932
           ]
         },
@@ -296,88 +1246,406 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            22.0
           ],
           "prediction": [
-            0.6753617,
-            0.1496301,
-            -0.0833979,
-            0.0217683
+            0.6755617,
+            0.0219683
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_0_15",
+          "station_id": "sidewall_z_150mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            27.0
           ],
           "prediction": [
-            0.6520113,
-            -0.1799332,
-            -0.5549952,
-            -0.1506473
+            0.6524113,
+            -0.1502473
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_left_wheelhouse_y_neg_0_6",
+          "station_id": "front_wheelhouse_y_neg_600mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            11.0
           ],
           "prediction": [
-            0.7847787,
-            0.1238694,
-            0.1840255,
-            0.0375717
+            0.7853787,
+            0.0381717
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_y_neg_750mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.647756,
+            -0.117132
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_z_115_155mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            4.0
+          ],
+          "prediction": [
+            0.6763617,
+            0.0227683
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "a_pillar",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6532113,
+            -0.1494473
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_150mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.7861787,
+            0.0389717
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_500mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.648556,
+            -0.116332
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_symmetry",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            6.0
+          ],
+          "prediction": [
+            0.6771617,
+            0.0235683
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_y_negative",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.6540113,
+            -0.1486473
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "underbody_off_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.7869787,
+            0.0397717
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.649356,
+            -0.115532
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rear_window_and_trunk",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6779617,
+            0.0243683
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "side_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            20.0
+          ],
+          "prediction": [
+            0.6548113,
+            -0.1478473
           ]
         },
         {
           "panel_id": "velocity_profiles",
-          "station_id": "wake_x_1_00l",
+          "station_id": "autocfd5_v1",
           "quantity_id": "velocity_ratio",
           "coordinate": [
-            0.05,
-            0.25,
-            0.5,
-            0.75
+            0.0,
+            2.0
           ],
           "prediction": [
             0.505376,
-            0.6869888,
-            0.8887808,
             1.0199456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.505576,
+            1.0201456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.505776,
+            1.0203456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.505976,
+            1.0205456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.506176,
+            1.0207456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.506376,
+            1.0209456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.506576,
+            1.0211456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.506776,
+            1.0213456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.506976,
+            1.0215456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.507176,
+            1.0217456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.507376,
+            1.0219456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.507576,
+            1.0221456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_l1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            6.5
+          ],
+          "prediction": [
+            0.507776,
+            1.0223456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000876107
+          ],
+          "prediction": [
+            0.507976,
+            1.0225456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000877067
+          ],
+          "prediction": [
+            0.508176,
+            1.0227456
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000591286
+          ],
+          "prediction": [
+            0.508376,
+            1.0229456
           ]
         }
       ]
     },
     {
-      "case_id": "drivaerml_geometry_test_0095",
+      "case_id": "run_489",
       "series": [
         {
           "panel_id": "pressure_profiles",
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            43.0
           ],
           "prediction": [
             0.6327924,
-            -0.0817532,
-            -0.2937986,
             -0.1221428
           ]
         },
@@ -386,88 +1654,406 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            22.0
           ],
           "prediction": [
-            0.679786,
-            0.1510545,
-            -0.0823536,
-            0.0224632
+            0.679986,
+            0.0226632
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_0_15",
+          "station_id": "sidewall_z_150mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            27.0
           ],
           "prediction": [
-            0.6531734,
-            -0.1795091,
-            -0.5540028,
-            -0.1502675
+            0.6535734,
+            -0.1498675
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_left_wheelhouse_y_neg_0_6",
+          "station_id": "front_wheelhouse_y_neg_600mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            11.0
           ],
           "prediction": [
-            0.7800187,
-            0.122665,
-            0.1824975,
-            0.0368316
+            0.7806187,
+            0.0374316
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_y_neg_750mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.6335924,
+            -0.1213428
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_z_115_155mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            4.0
+          ],
+          "prediction": [
+            0.680786,
+            0.0234632
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "a_pillar",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6543734,
+            -0.1490675
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_150mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.7814187,
+            0.0382316
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_500mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.6343924,
+            -0.1205428
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_symmetry",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            6.0
+          ],
+          "prediction": [
+            0.681586,
+            0.0242632
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_y_negative",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.6551734,
+            -0.1482675
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "underbody_off_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.7822187,
+            0.0390316
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.6351924,
+            -0.1197428
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rear_window_and_trunk",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.682386,
+            0.0250632
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "side_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            20.0
+          ],
+          "prediction": [
+            0.6559734,
+            -0.1474675
           ]
         },
         {
           "panel_id": "velocity_profiles",
-          "station_id": "wake_x_1_00l",
+          "station_id": "autocfd5_v1",
           "quantity_id": "velocity_ratio",
           "coordinate": [
-            0.05,
-            0.25,
-            0.5,
-            0.75
+            0.0,
+            2.0
           ],
           "prediction": [
             0.498806,
-            0.6784478,
-            0.8780498,
             1.0077911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.499006,
+            1.0079911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.499206,
+            1.0081911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.499406,
+            1.0083911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.499606,
+            1.0085911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.499806,
+            1.0087911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.500006,
+            1.0089911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.500206,
+            1.0091911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.500406,
+            1.0093911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.500606,
+            1.0095911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.500806,
+            1.0097911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.501006,
+            1.0099911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_l1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            6.5
+          ],
+          "prediction": [
+            0.501206,
+            1.0101911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000876107
+          ],
+          "prediction": [
+            0.501406,
+            1.0103911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000877067
+          ],
+          "prediction": [
+            0.501606,
+            1.0105911
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000591286
+          ],
+          "prediction": [
+            0.501806,
+            1.0107911
           ]
         }
       ]
     },
     {
-      "case_id": "drivaerml_geometry_test_0096",
+      "case_id": "run_495",
       "series": [
         {
           "panel_id": "pressure_profiles",
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            43.0
           ],
           "prediction": [
             0.632859,
-            -0.081737,
-            -0.2937635,
             -0.122123
           ]
         },
@@ -476,88 +2062,406 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            22.0
           ],
           "prediction": [
-            0.6685156,
-            0.147426,
-            -0.0850137,
-            0.0206932
+            0.6687156,
+            0.0208932
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_0_15",
+          "station_id": "sidewall_z_150mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            27.0
           ],
           "prediction": [
-            0.6565683,
-            -0.17827,
-            -0.5511036,
-            -0.1491581
+            0.6569683,
+            -0.1487581
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_left_wheelhouse_y_neg_0_6",
+          "station_id": "front_wheelhouse_y_neg_600mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            11.0
           ],
           "prediction": [
-            0.7694382,
-            0.1199879,
-            0.179101,
-            0.0351864
+            0.7700382,
+            0.0357864
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_y_neg_750mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.633659,
+            -0.121323
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_z_115_155mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            4.0
+          ],
+          "prediction": [
+            0.6695156,
+            0.0216932
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "a_pillar",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6577683,
+            -0.1479581
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_150mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.7708382,
+            0.0365864
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_500mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.634459,
+            -0.120523
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_symmetry",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            6.0
+          ],
+          "prediction": [
+            0.6703156,
+            0.0224932
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_y_negative",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.6585683,
+            -0.1471581
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "underbody_off_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.7716382,
+            0.0373864
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.635259,
+            -0.119723
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rear_window_and_trunk",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6711156,
+            0.0232932
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "side_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            20.0
+          ],
+          "prediction": [
+            0.6593683,
+            -0.1463581
           ]
         },
         {
           "panel_id": "velocity_profiles",
-          "station_id": "wake_x_1_00l",
+          "station_id": "autocfd5_v1",
           "quantity_id": "velocity_ratio",
           "coordinate": [
-            0.05,
-            0.25,
-            0.5,
-            0.75
+            0.0,
+            2.0
           ],
           "prediction": [
             0.500726,
-            0.6809438,
-            0.8811858,
             1.0113431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.500926,
+            1.0115431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501126,
+            1.0117431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501326,
+            1.0119431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501526,
+            1.0121431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.501726,
+            1.0123431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.501926,
+            1.0125431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502126,
+            1.0127431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502326,
+            1.0129431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502526,
+            1.0131431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502726,
+            1.0133431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.502926,
+            1.0135431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_l1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            6.5
+          ],
+          "prediction": [
+            0.503126,
+            1.0137431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000876107
+          ],
+          "prediction": [
+            0.503326,
+            1.0139431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000877067
+          ],
+          "prediction": [
+            0.503526,
+            1.0141431
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000591286
+          ],
+          "prediction": [
+            0.503726,
+            1.0143431
           ]
         }
       ]
     },
     {
-      "case_id": "drivaerml_geometry_test_0097",
+      "case_id": "run_497",
       "series": [
         {
           "panel_id": "pressure_profiles",
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            43.0
           ],
           "prediction": [
             0.6337322,
-            -0.0815246,
-            -0.2933033,
             -0.1218634
           ]
         },
@@ -566,67 +2470,389 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            22.0
           ],
           "prediction": [
-            0.671046,
-            0.1482407,
-            -0.0844164,
-            0.0210906
+            0.671246,
+            0.0212906
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_0_15",
+          "station_id": "sidewall_z_150mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            27.0
           ],
           "prediction": [
-            0.6542898,
-            -0.1791016,
-            -0.5530494,
-            -0.1499027
+            0.6546898,
+            -0.1495027
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_left_wheelhouse_y_neg_0_6",
+          "station_id": "front_wheelhouse_y_neg_600mm",
           "quantity_id": "cp",
           "coordinate": [
-            0.05,
-            0.3,
-            0.55,
-            0.85
+            1.0,
+            11.0
           ],
           "prediction": [
-            0.7781954,
-            0.1222037,
-            0.1819121,
-            0.0365481
+            0.7787954,
+            0.0371481
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_y_neg_750mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.6345322,
+            -0.1210634
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_wheelhouse_z_115_155mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            4.0
+          ],
+          "prediction": [
+            0.672046,
+            0.0220906
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "a_pillar",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.6554898,
+            -0.1487027
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_150mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.7795954,
+            0.0379481
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rearend_z_500mm",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            10.0
+          ],
+          "prediction": [
+            0.6353322,
+            -0.1202634
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_symmetry",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            6.0
+          ],
+          "prediction": [
+            0.672846,
+            0.0228906
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "c_pillar_y_negative",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.6562898,
+            -0.1479027
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "underbody_off_centerline",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            13.0
+          ],
+          "prediction": [
+            0.7803954,
+            0.0387481
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "front_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            11.0
+          ],
+          "prediction": [
+            0.6361322,
+            -0.1194634
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "rear_window_and_trunk",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            8.0
+          ],
+          "prediction": [
+            0.673646,
+            0.0236906
+          ]
+        },
+        {
+          "panel_id": "pressure_profiles",
+          "station_id": "side_window",
+          "quantity_id": "cp",
+          "coordinate": [
+            1.0,
+            20.0
+          ],
+          "prediction": [
+            0.6570898,
+            -0.1471027
           ]
         },
         {
           "panel_id": "velocity_profiles",
-          "station_id": "wake_x_1_00l",
+          "station_id": "autocfd5_v1",
           "quantity_id": "velocity_ratio",
           "coordinate": [
-            0.05,
-            0.25,
-            0.5,
-            0.75
+            0.0,
+            2.0
           ],
           "prediction": [
             0.505646,
-            0.6873398,
-            0.8892218,
             1.0204451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.505846,
+            1.0206451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.506046,
+            1.0208451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.506246,
+            1.0210451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.506446,
+            1.0212451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_v6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            2.0
+          ],
+          "prediction": [
+            0.506646,
+            1.0214451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.506846,
+            1.0216451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.507046,
+            1.0218451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.507246,
+            1.0220451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u4",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.507446,
+            1.0222451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u5",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.507646,
+            1.0224451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_u6",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            3.0
+          ],
+          "prediction": [
+            0.507846,
+            1.0226451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_l1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            6.5
+          ],
+          "prediction": [
+            0.508046,
+            1.0228451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r1",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000876107
+          ],
+          "prediction": [
+            0.508246,
+            1.0230451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r2",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000877067
+          ],
+          "prediction": [
+            0.508446,
+            1.0232451
+          ]
+        },
+        {
+          "panel_id": "velocity_profiles",
+          "station_id": "autocfd5_r3",
+          "quantity_id": "velocity_ratio",
+          "coordinate": [
+            0.0,
+            0.300000591286
+          ],
+          "prediction": [
+            0.508646,
+            1.0234451
           ]
         }
       ]

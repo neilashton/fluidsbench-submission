@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-abf839beb336/drivaerml/rear_separation/drivaerml-transformer",
+  "claim_id": "prototype-dev-2026-07-15-13947764cae0/drivaerml/rear_separation/drivaerml-transformer",
   "release": {
-    "id": "prototype-dev-2026-07-15-abf839beb336",
+    "id": "prototype-dev-2026-07-15-13947764cae0",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-19T13:59:56Z",
+    "published_at": "2026-08-20T06:21:43Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 77.27250000000001,
-    "ranked_value": 77.3,
-    "display_value": "77.3",
+    "value": 0.0,
+    "ranked_value": 0.0,
+    "display_value": "0.0",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "abf839beb336e15d0912896100dcb67c077437fe417d46d53a79d25448647264",
+      "feed_sha256": "13947764cae073e93b9b764fbeec914bd0f580ae08140c705b63166bd1b74509",
       "row_index": 21
     },
     "source_submission": {
       "path": "submissions/drivaerml/drivaerml-transformer/submission.json",
-      "sha256": "73ff2dbcc131b45a9a66e6cfa229ab28452f06c5ab8101fce9a3b8e8d497c294"
+      "sha256": "58d629cb859f8e8d99f5401af141007cf95728cb98d076ae89c998ad7460201d"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaerml/drivaerml-transformer/evaluation-evidence.json",
-      "sha256": "5f6ff74c5275f31fad1dcaa757fb72bf0866d71fc9cf4d67d4a9eef4bfb09715"
+      "sha256": "eb0cc62bbf6612f4658f85042b632f85b2873731e3547057b5e0bf44b92e606d"
     },
     "profile_index": {
       "path": "submissions/drivaerml/drivaerml-transformer/profiles/index.json",
-      "sha256": "f059259fb28fe08bb31c73614ace5d9b3618a31fffdf1a9bc87d6a9548b40068"
+      "sha256": "e3cf77d1fa741a348afa9309dcab26e00091702899189d4ab373710acce76398"
     }
   }
 }

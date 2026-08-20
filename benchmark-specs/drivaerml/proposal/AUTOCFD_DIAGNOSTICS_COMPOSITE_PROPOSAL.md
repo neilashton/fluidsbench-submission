@@ -1,7 +1,7 @@
 # AutoCFD diagnostics and composite proposal for DrivAerML
 
-Status: **owner decisions recorded; implementation-validation proposal; not an
-active benchmark contract**
+Status: **review source promoted into the active closed candidate; profile
+support, baselines, and official ranking still require activation validation**
 
 Prepared: 2026-08-19
 

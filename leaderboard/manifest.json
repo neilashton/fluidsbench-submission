@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-08-19T13:59:56Z",
+  "generated_at": "2026-08-20T06:21:43Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-07-15-abf839beb336",
+    "id": "prototype-dev-2026-07-15-13947764cae0",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-08-19T13:59:56Z",
+    "generated_at": "2026-08-20T06:21:43Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "abf839beb336e15d0912896100dcb67c077437fe417d46d53a79d25448647264",
+    "feed_sha256": "13947764cae073e93b9b764fbeec914bd0f580ae08140c705b63166bd1b74509",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,7 +51,7 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "401a36ef48625fb409b194e7af2c1bc796533d76ff170cf66a3fd428cd141629",
+      "index_sha256": "c0bac92929b6452fdae1ed101b8694f479b6eb0ecefaf4945ca0ee54c46588d8",
       "record_count": 72,
       "eligible_record_count": 0
     }
@@ -900,7 +900,8 @@
         ],
         "coefficient_errors": [
           "c_drag",
-          "c_lift"
+          "c_lift",
+          "c_pitch"
         ]
       },
       "splits": [
@@ -969,7 +970,7 @@
           "description": "Image-derived low-speed wake and rear-separation out-of-distribution split."
         }
       ],
-      "submission_format": "legacy_external_aero",
+      "submission_format": "drivaerml_native_candidate_v1",
       "metric_ids": [
         "overall_score",
         "field_score",
@@ -983,51 +984,49 @@
         "volume_velocity_physical_rel_l2",
         "volume_pressure_rel_l2",
         "volume_pressure_physical_rel_l2",
-        "surface_pressure_rel_l1",
-        "surface_wall_shear_rel_l1",
-        "volume_velocity_rel_l1",
-        "volume_pressure_rel_l1",
-        "velocity_profile_r2",
-        "cp_cut_r2",
-        "surface_pressure_mae",
-        "surface_wall_shear_mae",
-        "volume_velocity_mae",
-        "volume_pressure_mae",
-        "surface_pressure_rmse",
-        "surface_wall_shear_rmse",
-        "volume_velocity_rmse",
-        "volume_pressure_rmse",
-        "cd_r2",
-        "cl_r2",
-        "c_drag_mae",
-        "c_lift_mae"
+        "drivaerml_surface_pressure_area_mae",
+        "drivaerml_surface_pressure_area_rmse",
+        "drivaerml_surface_pressure_equal_entity_mae",
+        "drivaerml_surface_pressure_equal_entity_rmse",
+        "drivaerml_surface_wall_shear_area_mae",
+        "drivaerml_surface_wall_shear_area_rmse",
+        "drivaerml_surface_wall_shear_equal_entity_mae",
+        "drivaerml_surface_wall_shear_equal_entity_rmse",
+        "drivaerml_volume_velocity_equal_entity_mae",
+        "drivaerml_volume_velocity_equal_entity_rmse",
+        "drivaerml_volume_velocity_physical_mae",
+        "drivaerml_volume_velocity_physical_rmse",
+        "drivaerml_volume_pressure_equal_entity_mae",
+        "drivaerml_volume_pressure_equal_entity_rmse",
+        "drivaerml_volume_pressure_physical_mae",
+        "drivaerml_volume_pressure_physical_rmse",
+        "field_integrated_cd_rmse",
+        "field_integrated_cl_rmse",
+        "field_integrated_cmpitch_rmse",
+        "field_integrated_clf_rmse",
+        "field_integrated_clr_rmse",
+        "field_integrated_lift_closure_max_abs",
+        "velocity_profile_uinf_rmse",
+        "velocity_profile_experimental_subset_uinf_rmse",
+        "cp_probe_rmse",
+        "cp_panel_macro_rmse"
       ],
       "metric_definition_overrides": {
         "surface_pressure_rel_l2": {
-          "label": "Surface pressure rel. L2 (area-weighted)",
-          "description": "Area-weighted relative L2 error for surface pressure; each scored point, face, or polygon is weighted by the corresponding benchmark-supplied area. Lower is better."
-        },
-        "surface_pressure_rel_l1": {
-          "description": "Area-weighted relative L1 error for surface pressure. Lower is better."
-        },
-        "surface_pressure_mae": {
-          "description": "Area-weighted mean absolute error for surface pressure. Lower is better."
-        },
-        "surface_pressure_rmse": {
-          "description": "Area-weighted root-mean-square error for surface pressure. Lower is better."
+          "label": "Surface p rel. L2 (area-weighted)",
+          "description": "Per-case area-weighted relative L2 of native CellData pMeanTrim, then equal-case mean. Kinematic pressure is in m^2/s^2."
         },
         "surface_wall_shear_rel_l2": {
-          "label": "Surface wall shear rel. L2 (area-weighted)",
-          "description": "Area-weighted relative L2 error for surface wall shear; each scored point, face, or polygon is weighted by the corresponding benchmark-supplied area. Lower is better."
+          "label": "Surface WSS rel. L2 (area-weighted)",
+          "description": "Per-case area-weighted relative L2 of the native three-component wallShearStressMeanTrim vector, then equal-case mean."
         },
-        "surface_wall_shear_rel_l1": {
-          "description": "Area-weighted relative L1 error for surface wall shear. Lower is better."
+        "volume_velocity_rel_l2": {
+          "label": "Volume velocity rel. L2 (equal-cell)",
+          "description": "Per-case equal-native-cell relative L2 of the three-component UMeanTrim vector, then equal-case mean."
         },
-        "surface_wall_shear_mae": {
-          "description": "Area-weighted mean absolute error for surface wall shear. Lower is better."
-        },
-        "surface_wall_shear_rmse": {
-          "description": "Area-weighted root-mean-square error for surface wall shear. Lower is better."
+        "volume_pressure_rel_l2": {
+          "label": "Volume p rel. L2 (equal-cell)",
+          "description": "Per-case equal-native-cell relative L2 of CellData pMeanTrim, then equal-case mean."
         }
       },
       "ranking": {
@@ -1040,13 +1039,14 @@
       "diagnostic_panels": [
         {
           "id": "pressure_profiles",
-          "title": "Pressure-coefficient profiles",
-          "description": "Reference and submitted pressure-coefficient traces at the selected station.",
-          "data_key": "cp_cuts",
+          "title": "AutoCFD5 pressure-coefficient profiles",
+          "description": "Display panels use 217 ordered memberships; the ranked metric deduplicates them to 209 probes per case.",
+          "data_key": "cp_profiles",
+          "profile_definition_id": "drivaerml-autocfd5-v8-candidate",
+          "coordinate_unit": "",
           "x_keys": [
-            "x",
-            "x_over_c",
-            "x_over_l"
+            "panel_point_index",
+            "x"
           ],
           "quantities": [
             {
@@ -1062,38 +1062,127 @@
           "stations": [
             {
               "id": "upperbody_centerline",
-              "label": "Upper-body centreline (y = 0 m)",
-              "x_label": "x/L along upper-body centreline",
-              "description": "Upper-body pressure-probe trace used in the DrivAerML validation study (Figure 17a).",
-              "basis": "published_validation_trace",
-              "source_url": "https://arxiv.org/abs/2408.11969"
+              "label": "Upper-body centreline",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 43 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
               "id": "underbody_centerline",
-              "label": "Underbody centreline (y = 0 m)",
-              "x_label": "x/L along underbody centreline",
-              "description": "Underbody pressure-probe trace used in the DrivAerML validation study (Figure 17b).",
-              "basis": "published_validation_trace",
-              "source_url": "https://arxiv.org/abs/2408.11969"
+              "label": "Underbody Centerline",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 22 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
-              "id": "sidewall_z_0_15",
-              "label": "Sidewall (z = 0.15 m)",
-              "x_label": "x/L along sidewall trace",
-              "description": "Sidewall pressure-probe trace used in the DrivAerML supplementary validation (Figure 22a).",
-              "basis": "published_validation_trace",
-              "source_url": "https://arxiv.org/abs/2408.11969"
+              "id": "sidewall_z_150mm",
+              "label": "Sidewall z = 150mm",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 27 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
-              "id": "front_left_wheelhouse_y_neg_0_6",
-              "label": "Front-left wheelhouse (y = -0.6 m)",
-              "x_label": "s/L along wheelhouse trace",
-              "description": "Front-left wheelhouse pressure-probe trace used in the DrivAerML supplementary validation (Figure 22b).",
-              "basis": "published_validation_trace",
-              "source_url": "https://arxiv.org/abs/2408.11969"
+              "id": "front_wheelhouse_y_neg_600mm",
+              "label": "Wheelhouse y = -600mm",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 11 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "front_wheelhouse_y_neg_750mm",
+              "label": "Wheelhouse y = -750mm",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 11 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "front_wheelhouse_z_115_155mm",
+              "label": "Wheelhouse z = 115mm & 155mm",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 4 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "a_pillar",
+              "label": "A-Pillar",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 8 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "rearend_z_150mm",
+              "label": "Rearend z = 150mm",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 10 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "rearend_z_500mm",
+              "label": "Rearend z = 500mm",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 10 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "c_pillar_symmetry",
+              "label": "C-Pillar (Symmetry)",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 6 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "c_pillar_y_negative",
+              "label": "C-Pillar",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 13 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "underbody_off_centerline",
+              "label": "Underbody Off-Centerline",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 13 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "front_window",
+              "label": "Front Window",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 11 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "rear_window_and_trunk",
+              "label": "Rear Window & Trunk",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 8 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "side_window",
+              "label": "Side Window",
+              "x_label": "AutoCFD5 panel point index",
+              "description": "Pinned AutoCFD5 v8 panel sequence with 20 membership rows.",
+              "basis": "pinned_autocfd5_v8_probe_registry",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             }
           ],
           "required": true,
+          "allow_unlisted_stations": false,
           "required_series_fields": [
             "case_id",
             "station_id"
@@ -1102,62 +1191,160 @@
         },
         {
           "id": "velocity_profiles",
-          "title": "Velocity profiles",
-          "description": "Reference and submitted normalized velocity traces at the selected station.",
+          "title": "AutoCFD5 velocity profiles",
+          "description": "Sixteen fixed lines scored on the pinned 10 mm grid using arc-length trapezoidal RMSE of |U|/Uinf.",
           "data_key": "velocity_profiles",
+          "profile_definition_id": "drivaerml-autocfd5-v8-candidate",
+          "coordinate_unit": "m",
           "x_keys": [
-            "x",
-            "offset",
-            "distance"
+            "distance_m",
+            "distance",
+            "x"
           ],
           "quantities": [
             {
               "id": "velocity_ratio",
-              "label": "Velocity",
-              "y_label": "Normalized velocity",
+              "label": "|U|/Uinf",
+              "y_label": "Velocity magnitude / freestream",
               "y_keys": [
-                "u_over_u_inf",
-                "velocity_ratio"
+                "velocity_ratio",
+                "u_over_u_inf"
               ],
               "unit": ""
             }
           ],
           "stations": [
             {
-              "id": "prototype_0_25l",
-              "label": "0.25L",
-              "x_label": "Profile coordinate",
-              "description": "Prototype velocity profile at 0.25 reference lengths.",
-              "basis": "fluidsbench_benchmark_trace",
-              "source_url": "https://fluidsbench.github.io/"
+              "id": "autocfd5_v1",
+              "label": "AutoCFD5 V1",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
-              "id": "prototype_0_50l",
-              "label": "0.50L",
-              "x_label": "Profile coordinate",
-              "description": "Prototype velocity profile at 0.50 reference lengths.",
-              "basis": "fluidsbench_benchmark_trace",
-              "source_url": "https://fluidsbench.github.io/"
+              "id": "autocfd5_v2",
+              "label": "AutoCFD5 V2",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
-              "id": "prototype_1_00l",
-              "label": "1.00L",
-              "x_label": "Profile coordinate",
-              "description": "Prototype velocity profile at 1.00 reference lengths.",
-              "basis": "fluidsbench_benchmark_trace",
-              "source_url": "https://fluidsbench.github.io/"
+              "id": "autocfd5_v3",
+              "label": "AutoCFD5 V3",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
-              "id": "wake_x_1_00l",
-              "label": "Wake at 1.00L",
-              "x_label": "Profile coordinate",
-              "description": "Vehicle wake profile at x/L = 1.00.",
-              "basis": "fluidsbench_benchmark_trace",
-              "source_url": "https://fluidsbench.org/datasets/"
+              "id": "autocfd5_v4",
+              "label": "AutoCFD5 V4",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_v5",
+              "label": "AutoCFD5 V5",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_v6",
+              "label": "AutoCFD5 V6",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_u1",
+              "label": "AutoCFD5 U1",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_u2",
+              "label": "AutoCFD5 U2",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_u3",
+              "label": "AutoCFD5 U3",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_u4",
+              "label": "AutoCFD5 U4",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_u5",
+              "label": "AutoCFD5 U5",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_u6",
+              "label": "AutoCFD5 U6",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_l1",
+              "label": "AutoCFD5 L1",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 651 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_r1",
+              "label": "AutoCFD5 R1",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 31 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_r2",
+              "label": "AutoCFD5 R2",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 31 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+            },
+            {
+              "id": "autocfd5_r3",
+              "label": "AutoCFD5 R3",
+              "x_label": "Distance along line, m",
+              "description": "Pinned 10 mm AutoCFD5 line with 31 samples.",
+              "basis": "pinned_autocfd5_v8_velocity_line",
+              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             }
           ],
-          "required": false,
-          "allow_unlisted_stations": true,
+          "required": true,
+          "allow_unlisted_stations": false,
           "required_series_fields": [
             "case_id",
             "station_id"
@@ -1167,128 +1354,314 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions are currently closed.",
+        "closed_reason": "The participant contract and official splits are published, but ranking remains closed until volume weights, all-case force/profile replay, physics-null baselines, sensitivity analysis, and owner approval are frozen.",
+        "source_release": {
+          "provider": "Hugging Face Hub",
+          "repository": "neashton/drivaerml",
+          "revision": "7a5c0948ce27be709b1116a3a190f806e7a8f79f",
+          "public_case_count": 484,
+          "native_source_pin": {
+            "file": "proposal/native-source-pin.json",
+            "sha256": "4fc9077f8f23f4994c98f4d0e7a17aef7b998de4c996638e3a8a616b6d923fdd"
+          },
+          "owner_split_manifest": {
+            "file": "proposal/owner-published-splits.json",
+            "sha256": "032a2e9f88926d9218a1943b51e650135cc78683cad6b0a38f3cf4f9dfba647d"
+          },
+          "proposal_contract": {
+            "file": "proposal/contract-proposal.json",
+            "sha256": "bc14dbb19e07dc79d94c08a4ffc0bae3cb3e8b832a1b4e27622817e5452435e8"
+          }
+        },
+        "case_file_binding": {
+          "case_id_pattern": "^run_([1-9][0-9]*)$",
+          "case_id_variable": "<case_id>",
+          "run_number_variable": "<run_number>",
+          "example": {
+            "case_id": "run_11",
+            "run_number": 11
+          }
+        },
         "coverage_contract": {
-          "dimensionality": "3D surface and 3D flow domain",
-          "rule": "complete_original_public_release_entities",
+          "dimensionality": "3D native surface and 3D native finite-volume domain",
+          "rule": "every_required_native_CellData_tuple_exactly_once",
           "inference_may_be_chunked": true,
           "chunk_metrics_must_use_additive_sufficient_statistics": true,
           "complete_case_and_entity_coverage_required": true,
           "full_prediction_artifact_required": false,
-          "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
-          "public_ground_truth": "Ground-truth fields are in the public dataset release."
+          "case_aggregation": "calculate_each_complete_case_then_macro_average_cases_equally",
+          "vector_error": "componentwise_difference_then_euclidean_norm_not_difference_of_magnitudes"
         },
         "public_supports": [
           {
-            "id": "surface-native",
-            "public_file": "run_<case>/boundary_<case>.vtp",
+            "id": "surface_native_cells",
+            "public_file": "<case_id>/boundary_<run_number>.vtp",
             "format": "VTK PolyData",
-            "domain": "three_dimensional_vehicle_surface",
             "association": "CellData",
-            "entities": "all_native_polygons",
+            "entities": "all_native_polygons_in_raw_VTK_cell_order",
+            "stable_id": [
+              "case_id",
+              "zero_based_raw_vtk_cell_id"
+            ],
             "arrays": [
-              "CpMeanTrim",
               "pMeanTrim",
-              "pPrime2MeanTrim",
               "wallShearStressMeanTrim"
             ],
-            "physical_weight": "polygon_area",
-            "verification": "confirmed_from_public_file"
+            "array_components": {
+              "pMeanTrim": 1,
+              "wallShearStressMeanTrim": 3
+            },
+            "array_units": {
+              "pMeanTrim": "m^2/s^2",
+              "wallShearStressMeanTrim": "m^2/s^2"
+            },
+            "physical_weight_file": "<case_id>/boundary_cell_area_<run_number>.npy",
+            "physical_weight_dtype": "little_endian_float32",
+            "physical_weight_association": "one_positive_finite_area_per_native_polygon_in_identical_order",
+            "physical_weight_manifest": {
+              "path": "surface_cell_areas/manifest.json",
+              "sha256": "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
+            }
           },
           {
-            "id": "flow-domain-native",
-            "public_file": "run_<case>/volume_<case>.vtu reconstructed from .00.part and .01.part",
+            "id": "volume_native_cells",
+            "logical_public_file": "<case_id>/volume_<run_number>.vtu",
+            "transport_parts": "resolve the exact ordered .00.part, .01.part, and optional .02.part list from proposal/native-source-pin.json",
+            "transport_assembly": "byte_concatenate_pinned_parts_in_part_index_order_with_no_delimiter_or_transformation",
+            "part_count_policy": "474 cases have two parts and 10 pinned cases have three; never assume exactly two",
             "format": "VTK UnstructuredGrid",
-            "domain": "three_dimensional_flow_domain",
             "association": "CellData",
-            "entities": "all_native_volume_cells_after_reconstruction",
+            "entities": "all_native_finite_volume_cells_in_raw_VTK_cell_order",
+            "stable_id": [
+              "case_id",
+              "zero_based_raw_vtk_cell_id"
+            ],
             "arrays": [
               "UMeanTrim",
               "pMeanTrim"
             ],
-            "available_cell_arrays": [
-              "CpMeanTrim",
-              "CptMeanTrim",
-              "magUMeanNormTrim",
-              "microDragMeanTrim",
-              "nutMeanTrim",
-              "pMeanTrim",
-              "pPrime2MeanTrim",
-              "UMeanTrim",
-              "UPrime2MeanTrim",
-              "turbulenceProperties:RMeanTrim"
+            "array_components": {
+              "UMeanTrim": 3,
+              "pMeanTrim": 1
+            },
+            "array_units": {
+              "UMeanTrim": "m/s",
+              "pMeanTrim": "m^2/s^2"
+            },
+            "primary_weighting": "one_per_native_cell",
+            "secondary_weighting": "benchmark_computed_cell_volume_pending_frozen_publication"
+          },
+          {
+            "id": "field_integrated_force_truth",
+            "authoritative_public_file": "force_mom_constref_all.csv",
+            "sha256": "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865",
+            "per_case_mirror": "<case_id>/force_mom_constref_<run_number>.csv",
+            "per_case_mirror_policy": "accepted_as_a_convenience_only_after_exact_row_replay_against_the_authoritative_aggregate",
+            "exact_header": [
+              "run",
+              "cd",
+              "cl",
+              "clf",
+              "clr",
+              "cs"
             ],
-            "physical_weight": "cell_volume",
-            "verification": "confirmed_from_reconstructed_public_file"
+            "ranked_targets": {
+              "Cd": "cd",
+              "Cl": "cl",
+              "CmPitch": "casewise_(clf-clr)/2"
+            },
+            "report_only_targets": {
+              "Clf": "clf",
+              "Clr": "clr"
+            }
+          }
+        ],
+        "scored_field_bindings": [
+          {
+            "target_id": "surface_pressure",
+            "support_id": "surface_native_cells",
+            "array": "pMeanTrim",
+            "components": 1,
+            "primary_metric": "surface_pressure_rel_l2",
+            "primary_weighting": "surface_face_area",
+            "secondary_metric": "surface_pressure_equal_entity_rel_l2",
+            "secondary_weighting": "surface_entities_equal"
+          },
+          {
+            "target_id": "surface_wall_shear",
+            "support_id": "surface_native_cells",
+            "array": "wallShearStressMeanTrim",
+            "components": 3,
+            "primary_metric": "surface_wall_shear_rel_l2",
+            "primary_weighting": "surface_face_area",
+            "secondary_metric": "surface_wall_shear_equal_entity_rel_l2",
+            "secondary_weighting": "surface_entities_equal"
+          },
+          {
+            "target_id": "volume_velocity",
+            "support_id": "volume_native_cells",
+            "array": "UMeanTrim",
+            "components": 3,
+            "primary_metric": "volume_velocity_rel_l2",
+            "primary_weighting": "volume_cells_equal",
+            "secondary_metric": "volume_velocity_physical_rel_l2",
+            "secondary_weighting": "cell_volume"
+          },
+          {
+            "target_id": "volume_pressure",
+            "support_id": "volume_native_cells",
+            "array": "pMeanTrim",
+            "components": 1,
+            "primary_metric": "volume_pressure_rel_l2",
+            "primary_weighting": "volume_cells_equal",
+            "secondary_metric": "volume_pressure_physical_rel_l2",
+            "secondary_weighting": "cell_volume"
           }
         ],
         "relative_l2_policy": {
-          "surface_or_curve_primary": "physical_measure_weighted",
-          "surface_or_curve_secondary": "equal_native_entity",
-          "flow_domain_primary": "equal_native_entity",
-          "flow_domain_secondary": "physical_measure_weighted",
-          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
-          "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
-          "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+          "surface_primary": "surface_face_area",
+          "surface_secondary": "equal_native_polygon",
+          "volume_primary": "equal_native_cell",
+          "volume_secondary": "physical_cell_volume",
+          "chunk_rule": "sum_case_numerators_denominators_counts_and_weights_across_chunks_then_apply_one_nonlinear_reduction",
+          "forbidden_chunk_rule": "average_chunk_local_metric_values"
+        },
+        "force_integration": {
+          "source_fields": [
+            "surface pMeanTrim",
+            "surface wallShearStressMeanTrim"
+          ],
+          "freestream_velocity_m_per_s": 38.889,
+          "density_kg_per_m3": 1.0,
+          "reference_area_m2": 2.17,
+          "reference_length_m": 2.78618,
+          "centre_of_rotation_m": [
+            1.40009,
+            0.0,
+            -0.3176
+          ],
+          "drag_axis": "+x",
+          "lift_axis": "+z",
+          "pitch_axis": "+y",
+          "body_force_equation": "rho_inf*sum_f(pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f))",
+          "body_moment_equation": "rho_inf*sum_f(cross(C_f-CoR,pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f)))",
+          "face_area_and_centre_convention": "OpenFOAM_v2212_primitiveMeshTools_makeFaceCentresAndAreas",
+          "ranked_reduction": "separate_equal_case_RMSE_for_Cd_Cl_and_CmPitch",
+          "dependent_axle_loads": {
+            "Clf": "Cl/2+CmPitch",
+            "Clr": "Cl/2-CmPitch",
+            "composite_weight": 0.0
+          }
+        },
+        "profile_definition": {
+          "file": "autocfd5-profiles-v8.json",
+          "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
+          "status": "candidate_support_pending_all_case_validation"
+        },
+        "participant_process": [
+          "select one official split and use only its train list for fitting and training statistics",
+          "load every required boundary VTP CellData tuple and its same-order public area array",
+          "reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling",
+          "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
+          "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
+          "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the frozen evaluator",
+          "submit scalar metrics, per-case evidence, profile display chunks, and optional prediction artifact locations through the current FluidsBench schema"
+        ],
+        "activation_gates": {
+          "official_splits": "complete",
+          "pinned_native_files": "complete",
+          "surface_area_weights": "published_candidate_requires_final_replay",
+          "volume_cell_weights": "pending_publication_and_golden_replay",
+          "force_evaluator": "run_1_passed_all_484_pending",
+          "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
+          "cp_probes": "definition_complete_all_case_mapping_and_visual_signoff_pending",
+          "physics_null_baselines": "pending",
+          "composite_sensitivity_and_bootstrap": "pending",
+          "owner_evaluator_approval": "pending"
         },
         "owner_decisions_required": [
-          "pin_exact_public_release_files_revisions_and_hashes",
-          "confirm_array_names_entity_associations_masks_and_order",
-          "publish_authoritative_physical_weights_and_stable_entity_ids",
-          "approve_public_ground_truth_case_set_and_split_bindings",
-          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
+          "publish_volume_cell_weights_and_frozen_geometry_algorithm",
+          "approve_all_case_native_array_inventory_and_exclusion_policy",
+          "approve_all_484_case_force_replay_and_chunk_invariance",
+          "approve_velocity_assignment_and_resolution_convergence",
+          "approve_cp_probe_mapping_support_and_visual_atlas",
+          "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
+          "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions"
         ]
       },
       "overall_score_composite": {
         "metric_id": "overall_score",
         "operation": "weighted_component_scores",
+        "status": "pending_reference_baselines",
+        "allow_negative_scores": true,
+        "component_skill_equation": "100*(1-E_j/B_j)",
         "components": [
           {
             "metric_id": "surface_pressure_rel_l2",
             "weight": 0.15,
-            "transform": "bounded_error",
-            "cap": 15.0
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.surface_pressure_rel_l2",
+            "baseline_status": "pending_all_case_evaluator_replay"
           },
           {
             "metric_id": "surface_wall_shear_rel_l2",
             "weight": 0.1,
-            "transform": "bounded_error",
-            "cap": 20.0
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.surface_wall_shear_rel_l2",
+            "baseline_status": "pending_all_case_evaluator_replay"
           },
           {
             "metric_id": "volume_velocity_rel_l2",
             "weight": 0.15,
-            "transform": "bounded_error",
-            "cap": 12.0
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.volume_velocity_rel_l2",
+            "baseline_status": "pending_all_case_evaluator_replay"
           },
           {
             "metric_id": "volume_pressure_rel_l2",
             "weight": 0.1,
-            "transform": "bounded_error",
-            "cap": 15.0
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.volume_pressure_rel_l2",
+            "baseline_status": "pending_all_case_evaluator_replay"
           },
           {
-            "metric_id": "cd_r2",
+            "metric_id": "field_integrated_cd_rmse",
             "weight": 0.15,
-            "transform": "bounded_quality"
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.field_integrated_cd_rmse",
+            "baseline_status": "pending_all_case_evaluator_replay"
           },
           {
-            "metric_id": "cl_r2",
-            "weight": 0.1,
-            "transform": "bounded_quality"
+            "metric_id": "field_integrated_cl_rmse",
+            "weight": 0.05,
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.field_integrated_cl_rmse",
+            "baseline_status": "pending_all_case_evaluator_replay"
           },
           {
-            "metric_id": "velocity_profile_r2",
+            "metric_id": "field_integrated_cmpitch_rmse",
+            "weight": 0.05,
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.field_integrated_cmpitch_rmse",
+            "baseline_status": "pending_all_case_evaluator_replay"
+          },
+          {
+            "metric_id": "velocity_profile_uinf_rmse",
             "weight": 0.15,
-            "transform": "bounded_quality"
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.velocity_profile_uinf_rmse",
+            "baseline_status": "pending_all_case_evaluator_replay"
           },
           {
-            "metric_id": "cp_cut_r2",
+            "metric_id": "cp_probe_rmse",
             "weight": 0.1,
-            "transform": "bounded_quality"
+            "transform": "physics_null_skill",
+            "baseline_id": "drivaerml.physics_null.cp_probe_rmse",
+            "baseline_status": "pending_all_case_evaluator_replay"
           }
         ],
-        "tolerance": 1e-06
+        "tolerance": 1e-06,
+        "activation_rule": "set status=active and publish one finite positive baseline_error per component only after frozen evaluator replay and sensitivity review"
       },
       "component_score_groups": {
         "operation": "normalized_weighted_component_scores",
@@ -1305,19 +1678,26 @@
           {
             "metric_id": "force_score",
             "component_metric_ids": [
-              "cd_r2",
-              "cl_r2"
+              "field_integrated_cd_rmse",
+              "field_integrated_cl_rmse",
+              "field_integrated_cmpitch_rmse"
             ]
           },
           {
             "metric_id": "diagnostic_score",
             "component_metric_ids": [
-              "velocity_profile_r2",
-              "cp_cut_r2"
+              "velocity_profile_uinf_rmse",
+              "cp_probe_rmse"
             ]
           }
         ],
         "tolerance": 1e-06
+      },
+      "profile_definition": {
+        "id": "drivaerml-autocfd5-v8-candidate",
+        "file": "autocfd5-profiles-v8.json",
+        "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
+        "status": "candidate_support_pending_all_case_validation"
       }
     },
     {
@@ -5903,6 +6283,422 @@
       "comparison_group": "relative-l1",
       "comparison_group_label": "Relative L1",
       "column_group_label": "Relative"
+    },
+    {
+      "id": "drivaerml_surface_pressure_area_mae",
+      "label": "DrivAerML surface pressure area mae",
+      "description": "DrivAerML candidate contract metric using surface_face_area. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_surface_pressure_area_rmse",
+      "label": "DrivAerML surface pressure area rmse",
+      "description": "DrivAerML candidate contract metric using surface_face_area. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_surface_pressure_equal_entity_mae",
+      "label": "DrivAerML surface pressure equal entity mae",
+      "description": "DrivAerML candidate contract metric using surface_entities_equal. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_surface_pressure_equal_entity_rmse",
+      "label": "DrivAerML surface pressure equal entity rmse",
+      "description": "DrivAerML candidate contract metric using surface_entities_equal. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_surface_wall_shear_area_mae",
+      "label": "DrivAerML surface wall shear area mae",
+      "description": "DrivAerML candidate contract metric using surface_face_area. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_surface_wall_shear_area_rmse",
+      "label": "DrivAerML surface wall shear area rmse",
+      "description": "DrivAerML candidate contract metric using surface_face_area. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_surface_wall_shear_equal_entity_mae",
+      "label": "DrivAerML surface wall shear equal entity mae",
+      "description": "DrivAerML candidate contract metric using surface_entities_equal. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_surface_wall_shear_equal_entity_rmse",
+      "label": "DrivAerML surface wall shear equal entity rmse",
+      "description": "DrivAerML candidate contract metric using surface_entities_equal. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_volume_velocity_equal_entity_mae",
+      "label": "DrivAerML volume velocity equal entity mae",
+      "description": "DrivAerML candidate contract metric using volume_cells_equal. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m/s",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_volume_velocity_equal_entity_rmse",
+      "label": "DrivAerML volume velocity equal entity rmse",
+      "description": "DrivAerML candidate contract metric using volume_cells_equal. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m/s",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_volume_velocity_physical_mae",
+      "label": "DrivAerML volume velocity physical mae",
+      "description": "DrivAerML candidate contract metric using cell_volume. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m/s",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_volume_velocity_physical_rmse",
+      "label": "DrivAerML volume velocity physical rmse",
+      "description": "DrivAerML candidate contract metric using cell_volume. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m/s",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_volume_pressure_equal_entity_mae",
+      "label": "DrivAerML volume pressure equal entity mae",
+      "description": "DrivAerML candidate contract metric using volume_cells_equal. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_volume_pressure_equal_entity_rmse",
+      "label": "DrivAerML volume pressure equal entity rmse",
+      "description": "DrivAerML candidate contract metric using volume_cells_equal. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_volume_pressure_physical_mae",
+      "label": "DrivAerML volume pressure physical mae",
+      "description": "DrivAerML candidate contract metric using cell_volume. Lower is better.",
+      "group": "absolute-mae",
+      "group_label": "Absolute MAE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2}{\\sum_i w_i}",
+      "comparison_group": "absolute-mae",
+      "comparison_group_label": "Absolute MAE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "drivaerml_volume_pressure_physical_rmse",
+      "label": "DrivAerML volume pressure physical rmse",
+      "description": "DrivAerML candidate contract metric using cell_volume. Lower is better.",
+      "group": "absolute-rmse",
+      "group_label": "Absolute RMSE",
+      "column_group": "absolute",
+      "unit": "m^2/s^2",
+      "digits": 3,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{\\sum_i w_i\\lVert\\hat{\\mathbf{y}}_i-\\mathbf{y}_i\\rVert_2^2}{\\sum_i w_i}}",
+      "comparison_group": "absolute-rmse",
+      "comparison_group_label": "Absolute RMSE",
+      "column_group_label": "Absolute"
+    },
+    {
+      "id": "field_integrated_cd_rmse",
+      "label": "Field-integrated C_D RMSE",
+      "description": "DrivAerML candidate contract metric using cases_equal. Lower is better.",
+      "group": "force-errors",
+      "group_label": "Integral force / moment errors",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_c(\\hat{y}_c-y_c)^2}",
+      "comparison_group": "force-errors",
+      "comparison_group_label": "Integral force / moment errors",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "field_integrated_cl_rmse",
+      "label": "Field-integrated C_L RMSE",
+      "description": "DrivAerML candidate contract metric using cases_equal. Lower is better.",
+      "group": "force-errors",
+      "group_label": "Integral force / moment errors",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_c(\\hat{y}_c-y_c)^2}",
+      "comparison_group": "force-errors",
+      "comparison_group_label": "Integral force / moment errors",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "field_integrated_cmpitch_rmse",
+      "label": "Field-integrated C_M,pitch RMSE",
+      "description": "DrivAerML candidate contract metric using cases_equal. Lower is better.",
+      "group": "force-errors",
+      "group_label": "Integral force / moment errors",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_c(\\hat{y}_c-y_c)^2}",
+      "comparison_group": "force-errors",
+      "comparison_group_label": "Integral force / moment errors",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "field_integrated_clf_rmse",
+      "label": "Field-integrated C_Lf RMSE",
+      "description": "DrivAerML candidate contract metric using cases_equal. Lower is better.",
+      "group": "force-errors",
+      "group_label": "Integral force / moment errors",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_c(\\hat{y}_c-y_c)^2}",
+      "comparison_group": "force-errors",
+      "comparison_group_label": "Integral force / moment errors",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "field_integrated_clr_rmse",
+      "label": "Field-integrated C_Lr RMSE",
+      "description": "DrivAerML candidate contract metric using cases_equal. Lower is better.",
+      "group": "force-errors",
+      "group_label": "Integral force / moment errors",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\sqrt{\\frac{1}{N}\\sum_c(\\hat{y}_c-y_c)^2}",
+      "comparison_group": "force-errors",
+      "comparison_group_label": "Integral force / moment errors",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "field_integrated_lift_closure_max_abs",
+      "label": "Lift closure max. error",
+      "description": "DrivAerML candidate contract metric using maximum_case_residual. Lower is better.",
+      "group": "force-errors",
+      "group_label": "Integral force / moment errors",
+      "column_group": "integral",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\max_c\\lvert\\hat{C}_{L,c}-(\\hat{C}_{Lf,c}+\\hat{C}_{Lr,c})\\rvert",
+      "comparison_group": "force-errors",
+      "comparison_group_label": "Integral force / moment errors",
+      "column_group_label": "Integral forces / moments"
+    },
+    {
+      "id": "velocity_profile_uinf_rmse",
+      "label": "AutoCFD5 velocity-profile RMSE",
+      "description": "DrivAerML candidate contract metric using trapezoidal_arc_length_within_line. Lower is better.",
+      "group": "profile-errors",
+      "group_label": "Profile errors",
+      "column_group": "diagnostics",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{16}\\sum_l\\sqrt{\\frac{\\int_l(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_l ds}}",
+      "comparison_group": "profile-errors",
+      "comparison_group_label": "Profile errors",
+      "column_group_label": "Diagnostics"
+    },
+    {
+      "id": "velocity_profile_experimental_subset_uinf_rmse",
+      "label": "Experimental-line velocity RMSE",
+      "description": "DrivAerML candidate contract metric using trapezoidal_arc_length_within_line. Lower is better.",
+      "group": "profile-errors",
+      "group_label": "Profile errors",
+      "column_group": "diagnostics",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{11}\\sum_{l\\in E}\\sqrt{\\frac{\\int_l(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_l ds}}",
+      "comparison_group": "profile-errors",
+      "comparison_group_label": "Profile errors",
+      "column_group_label": "Diagnostics"
+    },
+    {
+      "id": "cp_probe_rmse",
+      "label": "AutoCFD5 Cp-probe RMSE",
+      "description": "DrivAerML candidate contract metric using 209_unique_probes_equal. Lower is better.",
+      "group": "profile-errors",
+      "group_label": "Profile errors",
+      "column_group": "diagnostics",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_c\\sqrt{\\frac{1}{209}\\sum_{i=1}^{209}(\\hat{C}_{p,ci}-C_{p,ci})^2}",
+      "comparison_group": "profile-errors",
+      "comparison_group_label": "Profile errors",
+      "column_group_label": "Diagnostics"
+    },
+    {
+      "id": "cp_panel_macro_rmse",
+      "label": "AutoCFD5 Cp-panel macro RMSE",
+      "description": "DrivAerML candidate contract metric using panel_membership_rows_equal. Lower is better.",
+      "group": "profile-errors",
+      "group_label": "Profile errors",
+      "column_group": "diagnostics",
+      "unit": "",
+      "digits": 5,
+      "direction": "lower",
+      "kind": "error",
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{15}\\sum_p\\sqrt{\\frac{1}{n_p}\\sum_{i\\in p}(\\hat{C}_{p,ci}-C_{p,ci})^2}",
+      "comparison_group": "profile-errors",
+      "comparison_group_label": "Profile errors",
+      "column_group_label": "Diagnostics"
     }
   ],
   "submission_schema_version": "1.0"

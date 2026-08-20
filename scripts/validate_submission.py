@@ -301,12 +301,29 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
     if unknown:
         add(f"metric_values contains unknown metrics: {', '.join(unknown)}")
     definitions = {definition["id"]: definition for definition in manifest["metric_definitions"]}
+    composite = dataset.get("overall_score_composite")
+    component_groups = dataset.get("component_score_groups")
+    negative_score_ids: set[str] = set()
+    if isinstance(composite, dict) and composite.get("allow_negative_scores") is True:
+        target_metric_id = composite.get("metric_id")
+        if isinstance(target_metric_id, str):
+            negative_score_ids.add(target_metric_id)
+        if isinstance(component_groups, dict):
+            negative_score_ids.update(
+                group.get("metric_id")
+                for group in component_groups.get("groups", [])
+                if isinstance(group, dict) and isinstance(group.get("metric_id"), str)
+            )
     for metric_id, value in values.items():
         if not is_number(value):
             add(f"metric_values.{metric_id} must be a finite number")
             continue
         definition = definitions.get(metric_id, {})
-        if definition.get("kind") in {"error", "score"} and value < 0:
+        if (
+            definition.get("kind") in {"error", "score"}
+            and value < 0
+            and metric_id not in negative_score_ids
+        ):
             add(f"metric_values.{metric_id} cannot be negative")
         if definition.get("kind") == "score" and value > 100:
             add(f"metric_values.{metric_id} cannot exceed 100")
@@ -323,7 +340,6 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
                 add(f"metric_values.{aggregate['metric_id']} must equal the declared source-metric mean")
 
     expected_scores = None
-    composite = dataset.get("overall_score_composite")
     if isinstance(composite, dict):
         components = composite.get("components")
         component_ids = (
@@ -332,6 +348,25 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
             else []
         )
         target_metric_id = composite.get("metric_id")
+        composite_status = composite.get("status", "active")
+        if composite_status not in {"active", "pending_reference_baselines"}:
+            add("dataset overall_score_composite has an unsupported status")
+        physics_null_components = [
+            component
+            for component in components or []
+            if isinstance(component, dict)
+            and component.get("transform") == "physics_null_skill"
+        ]
+        if physics_null_components and composite.get("allow_negative_scores") is not True:
+            add("dataset physics-null composite must allow negative scores")
+        for component in physics_null_components:
+            if not isinstance(component.get("baseline_id"), str) or not component["baseline_id"]:
+                add("dataset physics-null component requires a baseline_id")
+            baseline_error = component.get("baseline_error")
+            if composite_status == "active" and (
+                not is_number(baseline_error) or baseline_error <= 0
+            ):
+                add("active dataset physics-null component requires a positive baseline_error")
         if (
             composite.get("operation") != "weighted_component_scores"
             or not isinstance(components, list)
@@ -342,7 +377,7 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
             or any(not isinstance(metric_id, str) or metric_id not in expected_ids for metric_id in component_ids)
         ):
             add("dataset overall_score_composite does not reference a valid target and component metric set")
-        elif all(
+        elif composite_status == "active" and all(
             isinstance(metric_id, str) and is_number(values.get(metric_id))
             for metric_id in component_ids
         ):
@@ -358,7 +393,6 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
                     values[target_metric_id], expected, rel_tol=0.0, abs_tol=tolerance
                 ):
                     add(f"metric_values.{target_metric_id} does not match its declared composite equation")
-    component_groups = dataset.get("component_score_groups")
     score_tolerance = 1e-6
     if isinstance(component_groups, dict):
         groups = component_groups.get("groups")
@@ -394,7 +428,11 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
             add("dataset component_score_groups requires overall_score_composite")
         elif not is_number(score_tolerance) or score_tolerance < 0:
             add("dataset component_score_groups requires a non-negative tolerance")
-        elif all(is_number(values.get(metric_id)) for metric_id in grouped_component_ids):
+        elif (
+            isinstance(composite, dict)
+            and composite.get("status", "active") == "active"
+            and all(is_number(values.get(metric_id)) for metric_id in grouped_component_ids)
+        ):
             try:
                 expected_scores = composite_component_group_scores(
                     values,
@@ -2355,7 +2393,14 @@ def validate_profiles(
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} coordinate and prediction lengths differ")
                 if len(coordinates) < panel.get("minimum_points", 2):
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} has too few points")
-                expected_sample_count = panel.get("sample_count")
+                station_sample_counts = panel.get("station_sample_counts", {})
+                expected_sample_count = (
+                    station_sample_counts.get(station_id)
+                    if isinstance(station_sample_counts, dict)
+                    else None
+                )
+                if expected_sample_count is None:
+                    expected_sample_count = panel.get("sample_count")
                 if (
                     not prototype_fixture
                     and isinstance(expected_sample_count, int)
@@ -2371,7 +2416,14 @@ def validate_profiles(
                 elif any(right <= left for left, right in zip(coordinates, coordinates[1:])):
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} coordinates must be strictly increasing")
                 else:
-                    interval = panel.get("coordinate_interval")
+                    station_intervals = panel.get("station_coordinate_intervals", {})
+                    interval = (
+                        station_intervals.get(station_id)
+                        if isinstance(station_intervals, dict)
+                        else None
+                    )
+                    if interval is None:
+                        interval = panel.get("coordinate_interval")
                     if (
                         isinstance(interval, list)
                         and len(interval) == 2
@@ -2389,7 +2441,15 @@ def validate_profiles(
                                 f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} "
                                 f"coordinate must end at {end}"
                             )
-                        if panel.get("coordinate_spacing") == "uniform":
+                        station_spacings = panel.get("station_coordinate_spacings", {})
+                        spacing = (
+                            station_spacings.get(station_id)
+                            if isinstance(station_spacings, dict)
+                            else None
+                        )
+                        if spacing is None:
+                            spacing = panel.get("coordinate_spacing")
+                        if spacing == "uniform":
                             denominator = len(coordinates) - 1
                             if any(
                                 not math.isclose(

@@ -624,6 +624,102 @@ class ValidatorTests(unittest.TestCase):
                 validate_profiles(errors.append, directory, submission, dataset_spec, split_entry)
             self.assertEqual(errors, [])
 
+    def test_declared_station_profile_sample_count_is_required(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            temporary_root = Path(temporary)
+            directory = temporary_root / "submissions" / "dataset" / "model"
+            profiles = directory / "profiles"
+            split_path = temporary_root / "benchmark-specs" / "dataset" / "splits" / "full.json"
+            write_json(
+                split_path,
+                {
+                    "schema_version": "1.0",
+                    "dataset_id": "dataset",
+                    "split_id": "full",
+                    "case_set_id": "standard",
+                    "case_id_status": "official",
+                    "case_count": 1,
+                    "case_ids": ["case-001"],
+                },
+            )
+            chunk_path = profiles / "chunk-000.json"
+            write_json(
+                chunk_path,
+                {
+                    "schema_version": "1.0",
+                    "cases": [
+                        {
+                            "case_id": "case-001",
+                            "series": [
+                                {
+                                    "panel_id": "profiles",
+                                    "station_id": "long",
+                                    "quantity_id": "value",
+                                    "coordinate": [0.0, 0.5, 1.0],
+                                    "prediction": [1.0, 1.0, 1.0],
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+            index_path = profiles / "index.json"
+            write_json(
+                index_path,
+                {
+                    "schema_version": "1.0",
+                    "submission_id": "model",
+                    "dataset_id": "dataset",
+                    "split_id": "full",
+                    "case_set_id": "standard",
+                    "case_count": 1,
+                    "chunks": [
+                        {
+                            "file": "chunk-000.json",
+                            "case_ids": ["case-001"],
+                            "sha256": sha256_file(chunk_path),
+                        }
+                    ],
+                },
+            )
+            submission = {
+                "submission_id": "model",
+                "dataset_id": "dataset",
+                "split_id": "full",
+                "case_set_id": "standard",
+                "split_sha256": sha256_file(split_path),
+                "profile_data": {
+                    "index_file": "profiles/index.json",
+                    "case_count": 1,
+                    "case_set_id": "standard",
+                },
+            }
+            dataset_spec = {
+                "profile_panels": [
+                    {
+                        "id": "profiles",
+                        "required": True,
+                        "minimum_points": 2,
+                        "station_ids": ["long"],
+                        "quantity_ids": ["value"],
+                        "station_sample_counts": {"long": 4},
+                        "station_coordinate_intervals": {"long": [0.0, 1.0]},
+                        "station_coordinate_spacings": {"long": "uniform"},
+                    }
+                ]
+            }
+            split_entry = {
+                "index_file": "splits/full.json",
+                "sha256": sha256_file(split_path),
+                "case_set_id": "standard",
+                "case_id_status": "official",
+                "case_count": 1,
+            }
+            errors: list[str] = []
+            with patch("scripts.validate_submission.ROOT", temporary_root):
+                validate_profiles(errors.append, directory, submission, dataset_spec, split_entry)
+            self.assertIn("must contain exactly 4 points", "\n".join(errors))
+
     def test_non_finite_profile_value_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             destination = Path(temporary) / "transolver"

@@ -4,7 +4,7 @@
   "status": "owner_policy_recorded_activation_validation_required",
   "submissions_open": false,
   "non_activating": true,
-  "purpose": "Candidate scientific contract; this file does not replace the active prototype submission specification.",
+  "purpose": "Reviewed source proposal promoted into the active closed candidate submission specification; this evidence file does not itself open submissions or activate ranking.",
   "prepared_date": "2026-08-19",
   "source_release": {
     "repository": "neashton/drivaerml",
@@ -581,7 +581,7 @@
           "every_case_macro_limit": 0.01,
           "every_case_line_limit": 0.02,
           "method_order_statistic": "kendall_tau_b",
-          "method_order_ranking_quantity": "final_E_profile_not_eight_component_overall_score",
+          "method_order_ranking_quantity": "final_E_profile_not_nine_component_overall_score",
           "method_order_minimum": 0.99,
           "score_tie_absolute_tolerance": 1e-12,
           "method_set": "pinned_before_study_including_physics_null_nearest_training_design_vector_control_and_at_least_three_distinct_trained_model_checkpoints",

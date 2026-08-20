@@ -41,7 +41,7 @@ def arithmetic_mean(values: Mapping[str, float], metric_ids: Sequence[str]) -> f
 def _transformed_components(
     values: Mapping[str, float], declaration: Mapping[str, Any]
 ) -> dict[str, tuple[float, float]]:
-    """Return ``metric_id -> (weight, bounded 0--100 score)``."""
+    """Return ``metric_id -> (weight, transformed component score)``."""
 
     if declaration.get("operation") != "weighted_component_scores":
         raise ValueError("unsupported overall-score composite operation")
@@ -73,6 +73,15 @@ def _transformed_components(
             if "cap" in component:
                 raise ValueError("bounded-quality components must not declare an error cap")
             component_score = 100.0 * _clamp(source_value, 0.0, 1.0)
+        elif transform == "physics_null_skill":
+            if source_value < 0.0:
+                raise ValueError("physics-null skill requires a non-negative error metric")
+            baseline_error = float(component.get("baseline_error"))
+            if not math.isfinite(baseline_error) or baseline_error <= 0.0:
+                raise ValueError(
+                    "physics-null skill requires a finite positive baseline_error"
+                )
+            component_score = 100.0 * (1.0 - source_value / baseline_error)
         else:
             raise ValueError("unsupported overall-score component transform")
         result[metric_id] = (weight, component_score)
@@ -90,19 +99,21 @@ def _require_normalized_weights(components: Mapping[str, tuple[float, float]]) -
 
 
 def composite_overall_score(values: Mapping[str, float], declaration: Mapping[str, Any]) -> float:
-    """Evaluate a dataset-declared, weighted 0--100 composite score.
+    """Evaluate a dataset-declared weighted composite score.
 
     ``bounded_error`` components convert an error ``e`` with published cap
     ``c`` to ``clip(100 * (1 - e / c), 0, 100)``. ``bounded_quality``
     components convert a quality value such as R2 to
-    ``100 * clip(q, 0, 1)``. Component weights must be non-negative and sum
-    to one.
+    ``100 * clip(q, 0, 1)``. ``physics_null_skill`` converts an error ``e``
+    using a frozen physics-null error ``b`` to ``100 * (1 - e / b)``. The
+    latter is deliberately not clipped: methods worse than the null baseline
+    retain negative skill. Component weights must be non-negative and sum to
+    one.
     """
 
     components = _transformed_components(values, declaration)
     _require_normalized_weights(components)
-    weighted_score = sum(weight * score for weight, score in components.values())
-    return _clamp(weighted_score, 0.0, 100.0)
+    return sum(weight * score for weight, score in components.values())
 
 
 def composite_component_group_scores(
@@ -155,14 +166,12 @@ def composite_component_group_scores(
         group_weight = sum(components[metric_id][0] for metric_id in component_metric_ids)
         if group_weight <= 0.0:
             raise ValueError("component-score group weights must sum to a positive value")
-        results[target_metric_id] = _clamp(
+        results[target_metric_id] = (
             sum(
                 components[metric_id][0] * components[metric_id][1]
                 for metric_id in component_metric_ids
             )
-            / group_weight,
-            0.0,
-            100.0,
+            / group_weight
         )
 
     if len(grouped_component_ids) != len(set(grouped_component_ids)):

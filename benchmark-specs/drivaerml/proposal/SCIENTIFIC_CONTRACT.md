@@ -195,8 +195,8 @@ wall-shear vector.
 The physical and equal-entity results answer different questions and neither may
 be omitted. The owner-approved composite remains inactive until reference
 baselines establish its distributions and the declared sensitivity review
-confirms that one ranking is stable enough to publish. The present prototype
-error caps and composite are not proposed for promotion.
+confirms that one ranking is stable enough to publish. The former prototype
+error caps were not promoted into the active candidate.
 
 FluidsBench's current generic rule nominates the equal-cell volume result as
 primary, whereas a physical weighting approximates a continuum-domain norm and
@@ -382,23 +382,23 @@ explicitly not a substitute for the pending all-case native-field replay.
 - Any exclusion must be published in the scoring support with `case_id`, raw
   entity ID, coordinates, reason, construction version, and source identity.
   The same frozen mask applies to every submission.
-- The present prototype profile and Cp-cut station names do not include a full
-  extraction and ground-truth contract and are not supported by AB-UPT or
-  GeoTransolver scoring. Do not score those placeholders. They may be replaced
-  by the separately versioned AutoCFD proposal below only after its exact
-  coordinates, tolerance, extraction, ordering, quantities, truth hashes, and
-  validation support are published and activated.
+- The former prototype profile and Cp-cut station names did not include a full
+  extraction and ground-truth contract and were not supported by AB-UPT or
+  GeoTransolver scoring. They have been replaced in the active candidate by the
+  separately versioned AutoCFD vocabulary below, but remain unranked until its
+  exact case-specific mapping, truth hashes, and validation support are
+  published and activated.
 - The exact nominal AutoCFD4/5 pressure taps and velocity lines, together with
   fixed proposed FluidsBench sampling, reduction, and composite semantics, are
   now recorded in `AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md` and its five CSV
-  registries. They remain non-activating because the case-specific surrogate
-  mapping, resolution-convergence audit, truth release, and validation gates
-  listed there are not yet complete.
+  registries. They are active candidate definitions but remain non-rankable
+  because the case-specific surrogate mapping, resolution-convergence audit,
+  truth release, and validation gates listed there are not yet complete.
 
 ## Approval blockers
 
-FluidsBench must not activate this proposal until one pull request supplies and
-owner-approves all of the following:
+FluidsBench must not open submissions or activate official ranking until one or
+more reviewed pull requests supply and owner-approve all of the following:
 
 1. an all-case VTK inventory proving required array association, tuple count,
    component count, finiteness, units, pressure gauge, wall-shear sign, and the
