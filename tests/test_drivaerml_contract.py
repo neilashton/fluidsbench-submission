@@ -84,6 +84,28 @@ class DrivAerMLContractTests(unittest.TestCase):
                 self.assertEqual(artifact["sha256"], sha256_file(path))
                 self.assertFalse(artifact["public_scoring_support_eligible"])
 
+    def test_runtime_and_candidate_evidence_status_docs_are_truthful(self) -> None:
+        guide = (DATASET_ROOT / "PARTICIPANT_GUIDE.md").read_text(encoding="utf-8")
+        requirements = (ROOT / "requirements-drivaerml-evaluator.txt").read_text(
+            encoding="utf-8"
+        )
+        scientific_contract = (
+            DATASET_ROOT / "proposal" / "SCIENTIFIC_CONTRACT.md"
+        ).read_text(encoding="utf-8")
+
+        for text in (guide, requirements):
+            self.assertIn("Velocity-assignment generation rejects", text)
+            self.assertIn("Force replay records", text)
+            self.assertNotIn("generators reject every other", text)
+        self.assertIn("completed candidate numerical evidence", scientific_contract)
+        self.assertIn("completed candidate all-484 native-field", scientific_contract)
+        self.assertNotIn(
+            "pending all-case native-field replay", scientific_contract
+        )
+        self.assertNotIn(
+            "chunk invariance is an activation claim", scientific_contract
+        )
+
     def test_official_split_indexes_are_exact_owner_manifest_partitions(self) -> None:
         owner = load_json(DATASET_ROOT / "proposal" / "owner-published-splits.json")
         all_public_cases = set(owner["full_train"] + owner["full_val"] + owner["full_test"])

@@ -25,12 +25,18 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from reference.drivaerml.retained_file import (  # noqa: E402
+    RetainedFileError,
+    RetainedVerifiedFile,
+)
 from reference.drivaerml.source import (  # noqa: E402
     NativeCaseRecord,
     NativeSourceError,
     NativeSourcePin,
     load_native_source_pin,
 )
+
+
 DEFAULT_NATIVE_SOURCE_PIN = (
     ROOT / "benchmark-specs" / "drivaerml" / "proposal" / "native-source-pin.json"
 )
@@ -75,21 +81,35 @@ def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
-def _read_json(path: Path, label: str) -> dict[str, Any]:
+def _read_json_with_sha256(
+    path: Path,
+    label: str,
+) -> tuple[dict[str, Any], str]:
+    """Parse and hash exactly one retained byte read of a JSON receipt."""
+
+    unresolved = Path(path).expanduser()
     try:
-        value = json.loads(
-            path.read_text(encoding="utf-8"),
-            object_pairs_hook=_reject_duplicate_keys,
-        )
+        with RetainedVerifiedFile.open(unresolved, label=label) as retained:
+            payload = retained.handle.read()
+            digest = hashlib.sha256(payload).hexdigest()
+            value = json.loads(
+                payload.decode("utf-8"),
+                object_pairs_hook=_reject_duplicate_keys,
+            )
+            retained.assert_unchanged(
+                context="while its bytes were read and parsed"
+            )
     except NativeVolumeAuditAggregateError:
         raise
+    except RetainedFileError as error:
+        raise NativeVolumeAuditAggregateError(str(error)) from error
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise NativeVolumeAuditAggregateError(
-            f"cannot read valid {label} JSON: {path}"
+            f"cannot read valid {label} JSON: {unresolved}"
         ) from error
     if not isinstance(value, dict):
         raise NativeVolumeAuditAggregateError(f"{label} must be a JSON object")
-    return value
+    return value, digest
 
 
 def _mapping(value: object, label: str) -> Mapping[str, Any]:
@@ -1184,8 +1204,9 @@ def _aggregate_native_volume_equal_cell(
     receipts: dict[str, dict[str, object]] = {}
     for raw_path in receipt_paths:
         path = Path(raw_path)
-        digest = sha256_file(path)
-        receipt = _read_json(path, "native-volume equal-cell receipt")
+        receipt, digest = _read_json_with_sha256(
+            path, "native-volume equal-cell receipt"
+        )
         case_id = _string(receipt.get("case_id"), "case-audit case_id")
         if case_id in receipts:
             raise NativeVolumeAuditAggregateError(

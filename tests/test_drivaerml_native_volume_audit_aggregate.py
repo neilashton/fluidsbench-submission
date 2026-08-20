@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from reference.drivaerml.accumulators import (
     AdditiveFieldSums,
@@ -17,6 +19,7 @@ from scripts.audit_drivaerml_native_volume_case import (
     compare_metric_passes,
     equal_native_cell_metric_pass,
 )
+import scripts.aggregate_drivaerml_native_volume_audits as aggregate_module
 
 from scripts.aggregate_drivaerml_native_volume_audits import (
     CASE_AUDIT_SCHEMA,
@@ -387,6 +390,61 @@ class DrivAerMLNativeVolumeAuditAggregateTests(unittest.TestCase):
         write_evidence(first, evidence)
         write_evidence(second, self.all_case())
         self.assertEqual(first.read_bytes(), second.read_bytes())
+
+    def test_receipt_sha_and_validation_do_not_use_independent_path_reads(self) -> None:
+        real_sha256_file = aggregate_module.sha256_file
+        receipt_path = self.fixture.receipt_paths[0]
+        independent_receipt_hash_called = False
+
+        def mutate_after_independent_hash(path, *args, **kwargs):
+            nonlocal independent_receipt_hash_called
+            digest = real_sha256_file(path, *args, **kwargs)
+            if Path(path) == receipt_path:
+                independent_receipt_hash_called = True
+                changed = self.fixture.make_receipt("run_1")
+                changed["runtime"]["total_seconds"] = 7.0
+                _write_json(receipt_path, changed)
+            return digest
+
+        with patch.object(
+            aggregate_module,
+            "sha256_file",
+            side_effect=mutate_after_independent_hash,
+        ):
+            evidence = self.all_case()
+
+        self.assertFalse(independent_receipt_hash_called)
+        run_1 = next(row for row in evidence["cases"] if row["case_id"] == "run_1")
+        self.assertEqual(run_1["receipt_sha256"], _sha256(receipt_path.read_bytes()))
+
+    def test_receipt_path_replacement_during_parse_fails_closed(self) -> None:
+        receipt_path = self.fixture.receipt_paths[0]
+        replacement_path = self.root / "replacement-receipt.json"
+        changed = self.fixture.make_receipt("run_1")
+        changed["runtime"]["total_seconds"] = 7.0
+        _write_json(replacement_path, changed)
+        real_json_loads = json.loads
+        replaced = False
+
+        def replace_path_while_parsing(payload, *args, **kwargs):
+            nonlocal replaced
+            if not replaced:
+                os.replace(replacement_path, receipt_path)
+                replaced = True
+            return real_json_loads(payload, *args, **kwargs)
+
+        with patch.object(
+            aggregate_module.json,
+            "loads",
+            side_effect=replace_path_while_parsing,
+        ), self.assertRaisesRegex(
+            NativeVolumeAuditAggregateError,
+            "changed while its bytes were read and parsed",
+        ):
+            aggregate_module._read_json_with_sha256(
+                receipt_path, "native-volume equal-cell receipt"
+            )
+        self.assertTrue(replaced)
 
     def test_selected_pilot_is_explicitly_incomplete(self) -> None:
         evidence = aggregate_native_volume_equal_cell_pilot(

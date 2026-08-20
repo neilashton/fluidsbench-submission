@@ -95,16 +95,19 @@ their own replacements for official scoring.
 
 ## 5. Install and run the candidate tools
 
-The generic repository checks use `requirements.txt`. The VTK-based DrivAerML
-surface, force, Cp, and velocity geometry workflows use the exact optional stack in
+The generic repository checks use `requirements.txt`. The exact recommended
+stack for the complete VTK-based DrivAerML evidence workflow is defined in
 [`requirements-drivaerml-evaluator.txt`](../../requirements-drivaerml-evaluator.txt):
-Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2. Those VTK geometry generators check
-their declared versions; a different Python patch release is not compatible
-with their evidence receipts. The bounded XML equal-cell volume audit does not
-invoke VTK or compute cell volumes: it records its Python/NumPy runtime for
-provenance, while the strict aggregate validates the v2 schema and source
-identities. Use the exact optional stack when reproducing the complete candidate
-evidence workflow.
+Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2. Runtime enforcement differs by
+workflow. Velocity-assignment generation rejects a Python, NumPy, or VTK
+version mismatch. The native-surface and Cp readers reject a VTK version other
+than 9.5.2, and their evidence records the dependency identities available to
+each path. Force replay records its Python, NumPy, and VTK versions but does not
+reject a different Python patch or NumPy version. The bounded XML equal-cell
+volume audit does not invoke VTK or compute cell volumes; it records its
+Python/NumPy runtime for provenance, while the strict aggregate validates the
+v2 schema and source identities. Use the exact recommended stack when
+reproducing the complete candidate evidence workflow.
 
 ```bash
 python3.12 --version  # must print: Python 3.12.13

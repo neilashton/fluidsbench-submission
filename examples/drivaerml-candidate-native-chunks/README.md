@@ -58,7 +58,8 @@ cases always use the verified ordered multipart stream. The driver consumes
 the immutable source pin, Neil's fixed surface-area arrays, participant
 prediction chunks, Cp support, and the 10 mm velocity mapping/receipt. Volume
 fields use one equal weight per native cell; no geometric cell-volume array is
-required. It downloads and generates nothing. Copy
+required. It downloads and generates nothing. Run it from a clean Git checkout
+so the receipt can bind the entire evaluator to one revision. Copy
 `real-case-inputs.example.json`, replace its paths, and run:
 
 ```bash

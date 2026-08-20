@@ -184,10 +184,12 @@ wall-shear vector.
 - With chunked evaluation, sum the additive numerators, denominators, counts,
   and weights across all chunks before applying a square root or division. Never
   average chunk-local norms.
-- The activation release must additionally pin the binary64 accumulator,
-  raw-entity/block merge order, and full-case-versus-chunked acceptance
-  tolerance. Until that numeric replay is published, chunk invariance is an
-  activation claim rather than a completed implementation.
+- The completed candidate numerical evidence uses binary64 accumulation, pins
+  the raw-entity/block merge order and acceptance tolerances, and publishes
+  full-case-versus-chunked replays across all 484 cases. This completes the
+  candidate chunk-invariance implementation evidence; activation still requires
+  owner approval and incorporation into the frozen evaluator and immutable
+  scoring-support release.
 
 The surface area and equal-polygon results answer different questions and
 neither may be omitted. Volume scoring intentionally follows the existing
@@ -351,16 +353,19 @@ A full native-field replay for run 1 gives
 `CmPitch=-0.080062755339`, `Clf=-0.045371649575`, and
 `Clr=0.114753861103`. Absolute differences from the pinned rounded truth are
 `4.33e-8`, `1.53e-9`, `4.25e-10`, and `3.89e-8` for
-`Cd/Cl/Clf/Clr`, respectively. Activation requires every one of those four
-released coefficients to agree within absolute `1e-6` in every public case,
-plus the declared chunk-invariance replay. Per-case `geo_ref_<run>.csv`
+`Cd/Cl/Clf/Clr`, respectively. The completed candidate all-484 native-field
+replay passed the absolute `1e-6` tolerance for `Cd`, `Cl`, derived `CmPitch`,
+`Clf`, and `Clr` in every public case; its largest full-case-versus-chunked
+difference was `8.33e-17`. Per-case `geo_ref_<run>.csv`
 identities beyond the constant fields above are needed only to activate the
 separately reported geometry-specific-reference diagnostic. Do not call a
 scale-free force R-squared calculation a fully specified coefficient
-calculation. The compact replay evidence is in
-`run-1-force-axle-replay-summary.json`; the separate all-484 definition and
-reference-translation check is in `force-definition-audit-all484.json` and is
-explicitly not a substitute for the pending all-case native-field replay.
+calculation. The completed candidate replay is hash-bound in
+[`../evidence/force-replay-all484.json`](../evidence/force-replay-all484.json).
+The compact `run-1-force-axle-replay-summary.json` and separate
+`force-definition-audit-all484.json` remain supporting records. This completes
+the candidate numerical force evidence but does not confer owner approval or
+replace the pending frozen evaluator and immutable scoring-support release.
 
 ## Validity, exclusions, profiles, and cuts
 

@@ -14,6 +14,8 @@ import argparse
 import hashlib
 import json
 import os
+import platform
+import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -21,15 +23,20 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Sequence
 
+import numpy as np
+
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 if str(REPOSITORY_ROOT) not in sys.path:
     sys.path.insert(0, str(REPOSITORY_ROOT))
 
 from reference.drivaerml.diagnostic_evaluator import (  # noqa: E402
+    CANDIDATE_SCHEMA as DIAGNOSTIC_EVIDENCE_SCHEMA,
     DrivAerDiagnosticEvaluatorError,
+    EXPECTED_PROFILE_SHA256,
 )
 from reference.drivaerml.evaluator import (  # noqa: E402
+    CANDIDATE_EVIDENCE_SCHEMA as CORE_EVIDENCE_SCHEMA,
     DrivAerCandidateEvaluatorError,
     validate_native_source_contract,
 )
@@ -48,10 +55,21 @@ from scripts.evaluate_drivaerml_candidate_diagnostics import (  # noqa: E402
 
 
 INPUT_SCHEMA = "drivaerml-run1-run44-reference-inputs-v2"
-OUTPUT_SCHEMA = "drivaerml-run1-run44-reference-evidence-v2"
+OUTPUT_SCHEMA = "drivaerml-run1-run44-reference-evidence-v3"
 OUTPUT_STATUS = "candidate_pilot_evidence_not_official_submission"
+EVALUATOR_REFERENCE_VERSION = "drivaerml-evaluator-v2-candidate"
+REPOSITORY_URL = "https://github.com/neilashton/fluidsbench-submission"
 REQUIRED_CASE_PART_COUNTS = {"run_1": 2, "run_44": 3}
 PREDICTION_SUPPORT_IDS = ("surface_native_cells", "volume_native_cells")
+IMPLEMENTATION_FILES = (
+    "examples/drivaerml-candidate-native-chunks/real_reference_driver.py",
+    "reference/drivaerml/evaluator.py",
+    "reference/drivaerml/diagnostic_evaluator.py",
+    "scripts/evaluate_drivaerml_candidate_case.py",
+    "scripts/evaluate_drivaerml_candidate_diagnostics.py",
+    "benchmark-specs/drivaerml/submission-spec.json",
+    "requirements-drivaerml-evaluator.txt",
+)
 CASE_INPUT_KEYS = frozenset(
     {
         "case_id",
@@ -87,6 +105,16 @@ class _PredictionEvidenceIdentity:
     entity_count: int
 
 
+@dataclass(frozen=True)
+class _PreflightResult:
+    pin: Any
+    config_path: Path
+    config_sha256: str
+    native_source_pin_sha256: str
+    autocfd5_profile_sha256: str
+    cases: tuple[RealCaseInputs, ...]
+
+
 def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict[str, object]:
     result: dict[str, object] = {}
     for key, value in pairs:
@@ -102,6 +130,110 @@ def _sha256_file(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
         while block := source.read(chunk_bytes):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _implementation_identities() -> dict[str, str]:
+    """Hash every repository file that defines this orchestration path."""
+
+    return {
+        relative_path: _sha256_file(
+            _regular_file(REPOSITORY_ROOT / relative_path, relative_path)
+        )
+        for relative_path in IMPLEMENTATION_FILES
+    }
+
+
+def _repository_identity() -> dict[str, object]:
+    """Record the local Git revision without making Git a runtime requirement."""
+
+    def invoke(arguments: list[str]) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", "-C", str(REPOSITORY_ROOT), *arguments],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+    try:
+        revision_result = invoke(["rev-parse", "--verify", "HEAD"])
+        status_result = invoke(
+            ["status", "--porcelain=v1", "--untracked-files=no"]
+        )
+    except OSError:
+        return {
+            "git_metadata_available": False,
+            "git_revision": None,
+            "tracked_worktree_clean": None,
+        }
+    revision = revision_result.stdout.strip()
+    if (
+        revision_result.returncode != 0
+        or status_result.returncode != 0
+        or len(revision) != 40
+        or any(character not in "0123456789abcdef" for character in revision)
+    ):
+        return {
+            "git_metadata_available": False,
+            "git_revision": None,
+            "tracked_worktree_clean": None,
+        }
+    return {
+        "git_metadata_available": True,
+        "git_revision": revision,
+        "tracked_worktree_clean": status_result.stdout == "",
+    }
+
+
+def _require_unchanged(
+    identities: dict[Path, tuple[str, str]], *, phase: str
+) -> None:
+    """Fail if a preflight input changed before evidence publication."""
+
+    for path, (label, expected_sha256) in identities.items():
+        if _sha256_file(path) != expected_sha256:
+            raise RealReferenceDriverError(f"{label} changed {phase}")
+
+
+def _require_repository_identity_unchanged(
+    expected: dict[str, object], *, phase: str
+) -> None:
+    if _repository_identity() != expected:
+        raise RealReferenceDriverError(
+            f"repository revision or tracked state changed {phase}"
+        )
+
+
+def _require_clean_evidence_repository(identity: dict[str, object]) -> None:
+    if not identity.get("git_metadata_available"):
+        raise RealReferenceDriverError(
+            "real candidate evidence requires an identifiable Git checkout"
+        )
+    if identity.get("tracked_worktree_clean") is not True:
+        raise RealReferenceDriverError(
+            "real candidate evidence requires a clean tracked Git worktree"
+        )
+
+
+def _validate_candidate_evaluator_binding() -> None:
+    path = REPOSITORY_ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json"
+    try:
+        document = json.loads(
+            path.read_text(encoding="utf-8"),
+            object_pairs_hook=_reject_duplicate_keys,
+        )
+        observed = document["scoring_support"]["dataset_evaluator_binding"][
+            "evaluator_reference_version"
+        ]
+    except RealReferenceDriverError:
+        raise
+    except (KeyError, OSError, UnicodeError, json.JSONDecodeError, TypeError) as error:
+        raise RealReferenceDriverError(
+            "cannot load the candidate evaluator binding from submission-spec.json"
+        ) from error
+    if observed != EVALUATOR_REFERENCE_VERSION:
+        raise RealReferenceDriverError(
+            "candidate evaluator reference version differs from submission-spec.json"
+        )
 
 
 def _sha256(value: object, label: str) -> str:
@@ -223,6 +355,81 @@ def _prediction_evidence_identities(
     return result
 
 
+def _validated_case_provenance(
+    core_document: dict[str, Any],
+    diagnostic_document: dict[str, Any],
+    *,
+    case_id: str,
+    native_source_pin_sha256: str,
+    autocfd5_profile_sha256: str,
+) -> str:
+    """Verify generated evidence used the preflight pin and profile."""
+
+    if (
+        core_document.get("schema") != CORE_EVIDENCE_SCHEMA
+        or core_document.get("schema_version") != 2
+    ):
+        raise RealReferenceDriverError(
+            f"{case_id} core evidence schema differs from the candidate evaluator"
+        )
+    if (
+        diagnostic_document.get("schema") != DIAGNOSTIC_EVIDENCE_SCHEMA
+        or diagnostic_document.get("schema_version") != 1
+    ):
+        raise RealReferenceDriverError(
+            f"{case_id} diagnostic evidence schema differs from the candidate evaluator"
+        )
+    source = _mapping(core_document.get("source"), f"{case_id} core source")
+    observed_pin = _sha256(
+        source.get("native_source_pin_sha256"),
+        f"{case_id} core native-source pin SHA-256",
+    )
+    if observed_pin != native_source_pin_sha256:
+        raise RealReferenceDriverError(
+            f"{case_id} core evidence used a different native-source pin"
+        )
+    surface_native = _mapping(
+        source.get("surface_native"), f"{case_id} core native surface"
+    )
+    vtk_version = surface_native.get("vtk_version")
+    if not isinstance(vtk_version, str) or not vtk_version:
+        raise RealReferenceDriverError(
+            f"{case_id} core evidence has no VTK runtime version"
+        )
+
+    mapping_inputs = _mapping(
+        diagnostic_document.get("mapping_inputs"),
+        f"{case_id} diagnostic mapping_inputs",
+    )
+    for input_id in ("cp_support", "velocity_10mm"):
+        mapping_input = _mapping(
+            mapping_inputs.get(input_id),
+            f"{case_id} diagnostic {input_id}",
+        )
+        observed_profile = _sha256(
+            mapping_input.get("profile_sha256"),
+            f"{case_id} diagnostic {input_id} profile SHA-256",
+        )
+        if observed_profile != autocfd5_profile_sha256:
+            raise RealReferenceDriverError(
+                f"{case_id} diagnostic evidence used a different AutoCFD5 profile"
+            )
+    return vtk_version
+
+
+def _runtime_identity(vtk_versions: set[str]) -> dict[str, str]:
+    if len(vtk_versions) != 1:
+        raise RealReferenceDriverError(
+            "core evidence did not report one consistent VTK runtime version"
+        )
+    return {
+        "python": platform.python_version(),
+        "numpy": np.__version__,
+        "vtk": next(iter(vtk_versions)),
+        "byte_order": sys.byteorder,
+    }
+
+
 def _regular_file(path: Path | str, label: str) -> Path:
     candidate = Path(path).expanduser()
     try:
@@ -334,10 +541,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def _preflight(
     args: argparse.Namespace,
-) -> tuple[Any, Path, str, tuple[RealCaseInputs, ...]]:
+) -> _PreflightResult:
     config_path, config_sha256, cases = load_case_inputs(args.case_inputs)
     pin_path = _regular_file(args.native_source_pin, "native-source pin")
     profile_path = _regular_file(args.autocfd5_profile, "AutoCFD5 profile")
+    pin_sha256 = _sha256_file(pin_path)
+    profile_sha256 = _sha256_file(profile_path)
+    if profile_sha256 != EXPECTED_PROFILE_SHA256:
+        raise RealReferenceDriverError(
+            "AutoCFD5 profile SHA-256 differs from the candidate evaluator profile"
+        )
     dataset_root = Path(args.dataset_root).expanduser().resolve()
     if not dataset_root.is_dir():
         raise RealReferenceDriverError("dataset root must be an existing directory")
@@ -345,7 +558,11 @@ def _preflight(
     if output.exists():
         raise RealReferenceDriverError(f"output must not already exist: {output}")
     pin = load_native_source_pin(pin_path)
-    validate_native_source_contract(pin)
+    validated_pin_sha256 = validate_native_source_contract(pin)
+    if validated_pin_sha256 != pin_sha256:
+        raise RealReferenceDriverError(
+            "native-source pin changed while it was loaded and validated"
+        )
     for case_id, expected_parts in REQUIRED_CASE_PART_COUNTS.items():
         if len(pin.case(case_id).volume_parts) != expected_parts:
             raise RealReferenceDriverError(
@@ -356,13 +573,45 @@ def _preflight(
     args.dataset_root = dataset_root
     args.autocfd5_profile = profile_path
     args.output = output
-    return pin, config_path, config_sha256, cases
+    return _PreflightResult(
+        pin=pin,
+        config_path=config_path,
+        config_sha256=config_sha256,
+        native_source_pin_sha256=pin_sha256,
+        autocfd5_profile_sha256=profile_sha256,
+        cases=cases,
+    )
 
 
 def run(args: argparse.Namespace) -> dict[str, object]:
     """Run both evaluator paths in a staged directory, then publish evidence."""
 
-    pin, config_path, config_sha256, cases = _preflight(args)
+    preflight = _preflight(args)
+    pin = preflight.pin
+    implementation_sha256 = _implementation_identities()
+    _validate_candidate_evaluator_binding()
+    repository_identity = _repository_identity()
+    _require_clean_evidence_repository(repository_identity)
+    retained_inputs: dict[Path, tuple[str, str]] = {
+        preflight.config_path: ("case-input config", preflight.config_sha256),
+        args.native_source_pin: (
+            "native-source pin",
+            preflight.native_source_pin_sha256,
+        ),
+        args.autocfd5_profile: (
+            "AutoCFD5 profile",
+            preflight.autocfd5_profile_sha256,
+        ),
+    }
+    retained_inputs.update(
+        {
+            (REPOSITORY_ROOT / relative_path).resolve(): (
+                f"implementation file {relative_path}",
+                digest,
+            )
+            for relative_path, digest in implementation_sha256.items()
+        }
+    )
     output: Path = args.output
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(
@@ -370,7 +619,8 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     ) as staging_text:
         staging = Path(staging_text)
         case_results: list[dict[str, object]] = []
-        for case_inputs in cases:
+        vtk_versions: set[str] = set()
+        for case_inputs in preflight.cases:
             case_directory = staging / "cases" / case_inputs.case_id
             core_output = case_directory / "core-evaluation.json"
             diagnostic_output = case_directory / "diagnostic-evaluation.json"
@@ -427,6 +677,19 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                 case_id=case_inputs.case_id,
                 label=f"{case_inputs.case_id} diagnostic evidence",
             )
+            vtk_versions.add(
+                _validated_case_provenance(
+                    core_document,
+                    diagnostic_document,
+                    case_id=case_inputs.case_id,
+                    native_source_pin_sha256=(
+                        preflight.native_source_pin_sha256
+                    ),
+                    autocfd5_profile_sha256=(
+                        preflight.autocfd5_profile_sha256
+                    ),
+                )
+            )
             core_prediction_identities = _prediction_evidence_identities(
                 core_document,
                 case_id=case_inputs.case_id,
@@ -460,13 +723,13 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                     },
                 }
             )
-        if _sha256_file(config_path) != config_sha256:
-            raise RealReferenceDriverError(
-                "case-input config changed after it was parsed"
-            )
+        _require_unchanged(retained_inputs, phase="after it was parsed")
+        _require_repository_identity_unchanged(
+            repository_identity, phase="after evaluation"
+        )
         receipt: dict[str, object] = {
             "schema": OUTPUT_SCHEMA,
-            "schema_version": 2,
+            "schema_version": 3,
             "status": OUTPUT_STATUS,
             "official_submission": False,
             "scoring_contract_active": False,
@@ -474,8 +737,19 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "independent_participant_dry_run": False,
             "downloads_performed": False,
             "fabricated_scientific_results": False,
-            "native_source_pin_sha256": _sha256_file(args.native_source_pin),
-            "case_input_config_sha256": config_sha256,
+            "complete_484_case_split_evaluated": False,
+            "public_scoring_support_eligible": False,
+            "native_source_pin_sha256": preflight.native_source_pin_sha256,
+            "autocfd5_profile_sha256": preflight.autocfd5_profile_sha256,
+            "case_input_config_sha256": preflight.config_sha256,
+            "evaluator_binding": {
+                "repository_url": REPOSITORY_URL,
+                "reference_version": EVALUATOR_REFERENCE_VERSION,
+                "frozen_release": False,
+                "implementation_files_sha256": implementation_sha256,
+                "repository": repository_identity,
+            },
+            "runtime": _runtime_identity(vtk_versions),
             "volume_weighting": "one_per_native_cell",
             "geometric_cell_volume_weights_used": False,
             "cases": case_results,
@@ -494,10 +768,10 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         )
         if output.exists():
             raise RealReferenceDriverError(f"output appeared during run: {output}")
-        if _sha256_file(config_path) != config_sha256:
-            raise RealReferenceDriverError(
-                "case-input config changed before evidence publication"
-            )
+        _require_unchanged(retained_inputs, phase="before evidence publication")
+        _require_repository_identity_unchanged(
+            repository_identity, phase="before evidence publication"
+        )
         os.replace(staging, output)
     return receipt
 

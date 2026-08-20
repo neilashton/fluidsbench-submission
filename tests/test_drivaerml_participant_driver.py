@@ -25,6 +25,11 @@ REAL_DRIVER_PATH = (
     / "drivaerml-candidate-native-chunks"
     / "real_reference_driver.py"
 )
+CLEAN_REPOSITORY_IDENTITY = {
+    "git_metadata_available": True,
+    "git_revision": "a" * 40,
+    "tracked_worktree_clean": True,
+}
 
 
 def load_module(path: Path, name: str):
@@ -278,6 +283,15 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
     def _real_driver_fixture(self, root: Path) -> tuple[Path, SimpleNamespace]:
         input_file = root / "input.dat"
         input_file.write_bytes(b"fixture")
+        profile_file = root / "autocfd5-profiles-v8.json"
+        profile_file.write_bytes(
+            (
+                ROOT
+                / "benchmark-specs"
+                / "drivaerml"
+                / "autocfd5-profiles-v8.json"
+            ).read_bytes()
+        )
         cases = []
         for case_id in ("run_1", "run_44"):
             row = {"case_id": case_id}
@@ -299,7 +313,7 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             case_inputs=config,
             native_source_pin=input_file,
             dataset_root=dataset,
-            autocfd5_profile=input_file,
+            autocfd5_profile=profile_file,
             output=root / "result",
             maximum_prediction_chunk_rows=17,
             io_chunk_bytes=4096,
@@ -311,6 +325,8 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
         kind: str,
         case_id: str,
         *,
+        native_source_pin_sha256: str,
+        autocfd5_profile_sha256: str,
         diagnostic_manifest_mismatch: bool = False,
     ) -> dict[str, object]:
         identities: dict[str, dict[str, object]] = {}
@@ -335,11 +351,27 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             }
         if kind == "core":
             return {
+                "schema": "drivaerml-candidate-case-evaluation-v2",
+                "schema_version": 2,
                 "case_id": case_id,
+                "source": {
+                    "native_source_pin_sha256": native_source_pin_sha256,
+                    "surface_native": {"vtk_version": "9.5.2"},
+                },
                 "prediction_inputs": identities,
             }
         return {
+            "schema": "drivaerml-autocfd5-case-diagnostics-candidate-v1",
+            "schema_version": 1,
             "case_id": case_id,
+            "mapping_inputs": {
+                "cp_support": {
+                    "profile_sha256": autocfd5_profile_sha256,
+                },
+                "velocity_10mm": {
+                    "profile_sha256": autocfd5_profile_sha256,
+                },
+            },
             "sparse_gather_evidence": {
                 "surface_prediction": {
                     **identities["surface_native_cells"],
@@ -371,7 +403,21 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             def run(args):
                 args.output.parent.mkdir(parents=True, exist_ok=True)
                 args.output.write_text(
-                    json.dumps(self._fake_real_evidence(kind, args.case_id)) + "\n",
+                    json.dumps(
+                        self._fake_real_evidence(
+                            kind,
+                            args.case_id,
+                            native_source_pin_sha256=self.sha256(
+                                args.native_source_pin
+                            ),
+                            autocfd5_profile_sha256=(
+                                self.real_driver.EXPECTED_PROFILE_SHA256
+                                if kind == "core"
+                                else self.sha256(args.autocfd5_profile)
+                            ),
+                        )
+                    )
+                    + "\n",
                     encoding="utf-8",
                 )
                 calls.append((kind, args.case_id, args.multipart))
@@ -409,10 +455,19 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             with (
                 patch.object(
                     self.real_driver,
+                    "_repository_identity",
+                    return_value=CLEAN_REPOSITORY_IDENTITY,
+                ),
+                patch.object(
+                    self.real_driver,
                     "load_native_source_pin",
                     return_value=FakePin(),
                 ),
-                patch.object(self.real_driver, "validate_native_source_contract"),
+                patch.object(
+                    self.real_driver,
+                    "validate_native_source_contract",
+                    return_value=self.sha256(args.native_source_pin),
+                ),
                 patch.object(
                     self.real_driver, "_run_core_case", fake_evaluator("core")
                 ),
@@ -439,14 +494,55 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             self.assertFalse(receipt["official_submission"])
             self.assertFalse(receipt["downloads_performed"])
             self.assertEqual(
-                receipt["schema"], "drivaerml-run1-run44-reference-evidence-v2"
+                receipt["schema"], "drivaerml-run1-run44-reference-evidence-v3"
             )
-            self.assertEqual(receipt["schema_version"], 2)
+            self.assertEqual(receipt["schema_version"], 3)
             self.assertEqual(receipt["volume_weighting"], "one_per_native_cell")
             self.assertFalse(receipt["geometric_cell_volume_weights_used"])
             self.assertEqual(
                 receipt["case_input_config_sha256"], self.sha256(config)
             )
+            self.assertEqual(
+                receipt["autocfd5_profile_sha256"],
+                self.real_driver.EXPECTED_PROFILE_SHA256,
+            )
+            self.assertEqual(
+                receipt["evaluator_binding"]["reference_version"],
+                "drivaerml-evaluator-v2-candidate",
+            )
+            self.assertFalse(receipt["evaluator_binding"]["frozen_release"])
+            self.assertEqual(
+                receipt["runtime"],
+                {
+                    "python": self.real_driver.platform.python_version(),
+                    "numpy": self.real_driver.np.__version__,
+                    "vtk": "9.5.2",
+                    "byte_order": sys.byteorder,
+                },
+            )
+            self.assertEqual(
+                receipt["evaluator_binding"]["repository_url"],
+                "https://github.com/neilashton/fluidsbench-submission",
+            )
+            self.assertFalse(receipt["complete_484_case_split_evaluated"])
+            self.assertFalse(receipt["public_scoring_support_eligible"])
+            self.assertEqual(
+                set(
+                    receipt["evaluator_binding"][
+                        "implementation_files_sha256"
+                    ]
+                ),
+                set(self.real_driver.IMPLEMENTATION_FILES),
+            )
+            for relative_path, digest in receipt["evaluator_binding"][
+                "implementation_files_sha256"
+            ].items():
+                self.assertEqual(digest, self.sha256(ROOT / relative_path))
+            repository = receipt["evaluator_binding"]["repository"]
+            self.assertTrue(repository["git_metadata_available"])
+            self.assertRegex(repository["git_revision"], r"^[0-9a-f]{40}$")
+            self.assertEqual(repository, CLEAN_REPOSITORY_IDENTITY)
+            self.assertIsInstance(repository["tracked_worktree_clean"], bool)
             for obsolete_field in (
                 "volume_weight_aggregate_sha256",
                 "volume_weight_receipt_sha256",
@@ -461,6 +557,30 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             )
             self.assertTrue((args.output / "validation-receipt.json").is_file())
             self.assertFalse((args.output / "submission.json").exists())
+
+    def test_real_driver_requires_clean_identifiable_git_checkout(self) -> None:
+        for identity, message in (
+            (
+                {
+                    "git_metadata_available": False,
+                    "git_revision": None,
+                    "tracked_worktree_clean": None,
+                },
+                "identifiable Git checkout",
+            ),
+            (
+                {
+                    "git_metadata_available": True,
+                    "git_revision": "a" * 40,
+                    "tracked_worktree_clean": False,
+                },
+                "clean tracked Git worktree",
+            ),
+        ):
+            with self.subTest(message=message), self.assertRaisesRegex(
+                self.real_driver.RealReferenceDriverError, message
+            ):
+                self.real_driver._require_clean_evidence_repository(identity)
 
     def test_real_driver_rejects_case_input_config_mutation(self) -> None:
         class FakePin:
@@ -483,7 +603,16 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 run_args.output.parent.mkdir(parents=True, exist_ok=True)
                 run_args.output.write_text(
                     json.dumps(
-                        self._fake_real_evidence("core", run_args.case_id)
+                        self._fake_real_evidence(
+                            "core",
+                            run_args.case_id,
+                            native_source_pin_sha256=self.sha256(
+                                run_args.native_source_pin
+                            ),
+                            autocfd5_profile_sha256=(
+                                self.real_driver.EXPECTED_PROFILE_SHA256
+                            ),
+                        )
                     )
                     + "\n",
                     encoding="utf-8",
@@ -503,7 +632,16 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 run_args.output.parent.mkdir(parents=True, exist_ok=True)
                 run_args.output.write_text(
                     json.dumps(
-                        self._fake_real_evidence("diagnostic", run_args.case_id)
+                        self._fake_real_evidence(
+                            "diagnostic",
+                            run_args.case_id,
+                            native_source_pin_sha256=self.sha256(
+                                run_args.native_source_pin
+                            ),
+                            autocfd5_profile_sha256=self.sha256(
+                                run_args.autocfd5_profile
+                            ),
+                        )
                     )
                     + "\n",
                     encoding="utf-8",
@@ -516,10 +654,19 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             with (
                 patch.object(
                     self.real_driver,
+                    "_repository_identity",
+                    return_value=CLEAN_REPOSITORY_IDENTITY,
+                ),
+                patch.object(
+                    self.real_driver,
                     "load_native_source_pin",
                     return_value=FakePin(),
                 ),
-                patch.object(self.real_driver, "validate_native_source_contract"),
+                patch.object(
+                    self.real_driver,
+                    "validate_native_source_contract",
+                    return_value=self.sha256(args.native_source_pin),
+                ),
                 patch.object(self.real_driver, "_run_core_case", fake_core),
                 patch.object(
                     self.real_driver,
@@ -548,6 +695,94 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             ):
                 self.real_driver.load_case_inputs(config)
 
+    def test_real_driver_rejects_native_source_pin_mutation(self) -> None:
+        class FakePin:
+            def case(self, case_id):
+                count = {"run_1": 2, "run_44": 3}[case_id]
+                return SimpleNamespace(
+                    volume_parts=tuple(object() for _ in range(count))
+                )
+
+            def resolve(self, case_id, dataset_root):
+                return SimpleNamespace(case_id=case_id, dataset_root=dataset_root)
+
+        mutated = False
+
+        def fake_evaluator(kind):
+            def run(run_args):
+                nonlocal mutated
+                run_args.output.parent.mkdir(parents=True, exist_ok=True)
+                pin_sha256 = self.sha256(run_args.native_source_pin)
+                profile_sha256 = (
+                    self.real_driver.EXPECTED_PROFILE_SHA256
+                    if kind == "core"
+                    else self.sha256(run_args.autocfd5_profile)
+                )
+                run_args.output.write_text(
+                    json.dumps(
+                        self._fake_real_evidence(
+                            kind,
+                            run_args.case_id,
+                            native_source_pin_sha256=pin_sha256,
+                            autocfd5_profile_sha256=profile_sha256,
+                        )
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+                if (
+                    kind == "diagnostic"
+                    and run_args.case_id == "run_44"
+                    and not mutated
+                ):
+                    run_args.native_source_pin.write_bytes(b"mutated pin")
+                    mutated = True
+                return {
+                    "sha256": self.sha256(run_args.output),
+                    "byte_size": run_args.output.stat().st_size,
+                }
+
+            return run
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            _, args = self._real_driver_fixture(root)
+            initial_pin_sha256 = self.sha256(args.native_source_pin)
+            with (
+                patch.object(
+                    self.real_driver,
+                    "_repository_identity",
+                    return_value=CLEAN_REPOSITORY_IDENTITY,
+                ),
+                patch.object(
+                    self.real_driver,
+                    "load_native_source_pin",
+                    return_value=FakePin(),
+                ),
+                patch.object(
+                    self.real_driver,
+                    "validate_native_source_contract",
+                    return_value=initial_pin_sha256,
+                ),
+                patch.object(
+                    self.real_driver,
+                    "_run_core_case",
+                    fake_evaluator("core"),
+                ),
+                patch.object(
+                    self.real_driver,
+                    "_run_diagnostic_case",
+                    fake_evaluator("diagnostic"),
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    self.real_driver.RealReferenceDriverError,
+                    "native-source pin changed after it was parsed",
+                ):
+                    self.real_driver.run(args)
+            self.assertTrue(mutated)
+            self.assertFalse(args.output.exists())
+
     def test_real_driver_rejects_cross_evaluator_prediction_mismatch(self) -> None:
         class FakePin:
             def case(self, case_id):
@@ -567,6 +802,14 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                         self._fake_real_evidence(
                             kind,
                             args.case_id,
+                            native_source_pin_sha256=self.sha256(
+                                args.native_source_pin
+                            ),
+                            autocfd5_profile_sha256=(
+                                self.real_driver.EXPECTED_PROFILE_SHA256
+                                if kind == "core"
+                                else self.sha256(args.autocfd5_profile)
+                            ),
                             diagnostic_manifest_mismatch=mismatch,
                         )
                     )
@@ -586,10 +829,19 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             with (
                 patch.object(
                     self.real_driver,
+                    "_repository_identity",
+                    return_value=CLEAN_REPOSITORY_IDENTITY,
+                ),
+                patch.object(
+                    self.real_driver,
                     "load_native_source_pin",
                     return_value=FakePin(),
                 ),
-                patch.object(self.real_driver, "validate_native_source_contract"),
+                patch.object(
+                    self.real_driver,
+                    "validate_native_source_contract",
+                    return_value=self.sha256(args.native_source_pin),
+                ),
                 patch.object(
                     self.real_driver,
                     "_run_core_case",
@@ -620,7 +872,19 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
         def fake_core(args):
             args.output.parent.mkdir(parents=True, exist_ok=True)
             args.output.write_text(
-                json.dumps(self._fake_real_evidence("core", args.case_id)) + "\n",
+                json.dumps(
+                    self._fake_real_evidence(
+                        "core",
+                        args.case_id,
+                        native_source_pin_sha256=self.sha256(
+                            args.native_source_pin
+                        ),
+                        autocfd5_profile_sha256=(
+                            self.real_driver.EXPECTED_PROFILE_SHA256
+                        ),
+                    )
+                )
+                + "\n",
                 encoding="utf-8",
             )
             return {
@@ -633,7 +897,16 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 raise self.real_driver.RealReferenceDriverError("injected failure")
             args.output.write_text(
                 json.dumps(
-                    self._fake_real_evidence("diagnostic", args.case_id)
+                    self._fake_real_evidence(
+                        "diagnostic",
+                        args.case_id,
+                        native_source_pin_sha256=self.sha256(
+                            args.native_source_pin
+                        ),
+                        autocfd5_profile_sha256=self.sha256(
+                            args.autocfd5_profile
+                        ),
+                    )
                 )
                 + "\n",
                 encoding="utf-8",
@@ -649,10 +922,19 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             with (
                 patch.object(
                     self.real_driver,
+                    "_repository_identity",
+                    return_value=CLEAN_REPOSITORY_IDENTITY,
+                ),
+                patch.object(
+                    self.real_driver,
                     "load_native_source_pin",
                     return_value=FakePin(),
                 ),
-                patch.object(self.real_driver, "validate_native_source_contract"),
+                patch.object(
+                    self.real_driver,
+                    "validate_native_source_contract",
+                    return_value=self.sha256(args.native_source_pin),
+                ),
                 patch.object(self.real_driver, "_run_core_case", fake_core),
                 patch.object(
                     self.real_driver, "_run_diagnostic_case", fake_diagnostic
