@@ -4,8 +4,8 @@
   "dataset_id": "drivaerml",
   "split_id": "medium",
   "reference_version": "drivaerml-evaluator-v3-candidate",
-  "code_revision": "prototype-dummy-data",
-  "generated_at": "2025-06-13T00:00:00Z",
+  "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+  "generated_at": "2026-08-21T00:00:00Z",
   "status": "prototype_dummy_data",
   "metric_values": {
     "overall_score": 0.0,
@@ -20,12 +20,12 @@
     "volume_pressure_rel_l2": 10.54,
     "drivaerml_surface_pressure_area_mae": 48.0,
     "drivaerml_surface_pressure_area_rmse": 66.7,
-    "drivaerml_surface_pressure_equal_entity_mae": 48.0,
-    "drivaerml_surface_pressure_equal_entity_rmse": 66.7,
+    "drivaerml_surface_pressure_equal_entity_mae": 46.08,
+    "drivaerml_surface_pressure_equal_entity_rmse": 64.032,
     "drivaerml_surface_wall_shear_area_mae": 1.3,
     "drivaerml_surface_wall_shear_area_rmse": 1.91,
-    "drivaerml_surface_wall_shear_equal_entity_mae": 1.3,
-    "drivaerml_surface_wall_shear_equal_entity_rmse": 1.91,
+    "drivaerml_surface_wall_shear_equal_entity_mae": 1.248,
+    "drivaerml_surface_wall_shear_equal_entity_rmse": 1.8336,
     "drivaerml_volume_velocity_equal_entity_mae": 2.84,
     "drivaerml_volume_velocity_equal_entity_rmse": 4.06,
     "drivaerml_volume_pressure_equal_entity_mae": 54.5,
@@ -36,11 +36,11 @@
     "field_integrated_clf_rmse": 0.01024,
     "field_integrated_clr_rmse": 0.01024,
     "field_integrated_lift_closure_max_abs": 1e-07,
-    "velocity_profile_uinf_rmse": 0.30822070014844877,
-    "velocity_profile_experimental_subset_uinf_rmse": 0.30822070014844877,
-    "cp_cut_rmse": 0.25
+    "velocity_profile_uinf_rmse": 0.100057034171,
+    "velocity_profile_experimental_subset_uinf_rmse": 0.10330132136,
+    "cp_cut_rmse": 0.08467856932
   },
-  "profile_index_sha256": "1c0757b6c25b788ba8e27da8a143dbc547f049c63e796b6e3137077a24bd2cd7",
-  "notes": "Structural dummy evidence for the closed DrivAerML candidate; not computed from public fields and not scientifically rankable.",
-  "command": "not-applicable (illustrative dummy data)"
+  "profile_index_sha256": "67e586a937f7367b8a7dc99437684add99d8c31768e0e127e90696b52a7d3091",
+  "notes": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+  "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py"
 }

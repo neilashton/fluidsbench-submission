@@ -75,9 +75,37 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 self.assertTrue(
                     case["inference_chunks"]["independent_of_transport_part_boundaries"]
                 )
-                self.assertTrue(case["full_case_vs_chunked"]["pressure"]["passed"])
-                self.assertTrue(case["full_case_vs_chunked"]["velocity"]["passed"])
+                self.assertEqual(
+                    set(case["full_case_vs_chunked"]),
+                    {
+                        "surface_pressure",
+                        "surface_wall_shear",
+                        "volume_pressure",
+                        "volume_velocity",
+                    },
+                )
+                self.assertTrue(
+                    all(
+                        result["passed"]
+                        for result in case["full_case_vs_chunked"].values()
+                    )
+                )
             self.assertFalse(receipt["claims"]["uses_real_drivaerml_data"])
+            self.assertTrue(
+                receipt["claims"]["includes_synthetic_surface_field_payloads"]
+            )
+            self.assertTrue(
+                receipt["claims"]["includes_synthetic_force_coefficient_payloads"]
+            )
+            self.assertTrue(
+                receipt["claims"]["includes_all_twenty_candidate_profile_shapes"]
+            )
+            self.assertFalse(
+                receipt["claims"]["validates_real_surface_force_integration"]
+            )
+            self.assertFalse(
+                receipt["claims"]["validates_official_autocfd5_or_cp_extraction"]
+            )
             self.assertTrue(
                 receipt["claims"]["schema_v3_dummy_submission_generated"]
             )
@@ -161,6 +189,14 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             metrics = json.loads(
                 (output / "metrics" / "cases.json").read_text(encoding="utf-8")
             )
+            candidate_spec = json.loads(
+                (
+                    ROOT
+                    / "benchmark-specs"
+                    / "drivaerml"
+                    / "submission-spec.json"
+                ).read_text(encoding="utf-8")
+            )
             self.assertEqual(metrics["case_count"], 2)
             self.assertEqual(
                 [case["case_id"] for case in metrics["cases"]],
@@ -169,32 +205,141 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             self.assertEqual(
                 set(metrics["metric_values"]),
                 {
-                    "volume_pressure_rel_l2",
-                    "volume_velocity_rel_l2",
+                    metric["id"]
+                    for metric in candidate_spec["metrics"]
+                    if metric["kind"] != "score"
                 },
             )
-            synthetic_support = support["supports"][0]
+            support_map = {item["id"]: item for item in support["supports"]}
             self.assertEqual(
-                synthetic_support["location_definition"]["weight_rule"],
+                set(support_map),
+                {"surface_native_cells", "volume_native_cells"},
+            )
+            surface_support = support_map["surface_native_cells"]
+            volume_support = support_map["volume_native_cells"]
+            self.assertEqual(
+                surface_support["location_definition"]["weight_rule"],
+                {
+                    "kind": "artifact_field",
+                    "artifact_role": "ground_truth_table",
+                    "field": "surface_area",
+                },
+            )
+            self.assertEqual(
+                volume_support["location_definition"]["weight_rule"],
                 {"kind": "uniform"},
             )
+            binding_map = {
+                binding["metric_id"]: (
+                    binding["weighting"], binding["dataset_weighting"]
+                )
+                for definition in support["supports"]
+                for binding in definition["metric_bindings"]
+            }
+            self.assertEqual(len(binding_map), 18)
             self.assertEqual(
+                binding_map["surface_pressure_rel_l2"],
+                ("support_weights", "surface_face_area"),
+            )
+            self.assertEqual(
+                binding_map["surface_pressure_equal_entity_rel_l2"],
+                ("uniform", "surface_entities_equal"),
+            )
+            self.assertEqual(
+                binding_map["volume_velocity_rel_l2"],
+                ("uniform", "volume_cells_equal"),
+            )
+            vector_mae_binding = next(
+                binding
+                for binding in volume_support["metric_bindings"]
+                if binding["metric_id"]
+                == "drivaerml_volume_velocity_equal_entity_mae"
+            )
+            self.assertEqual(
+                vector_mae_binding["reference_rule"],
                 {
-                    binding["metric_id"]: (
-                        binding["weighting"], binding["dataset_weighting"]
-                    )
-                    for binding in synthetic_support["metric_bindings"]
+                    "id": "per_entity_euclidean_error",
+                    "version": "drivaerml-candidate-v1",
                 },
-                {
-                    "volume_pressure_rel_l2": (
-                        "uniform",
-                        "volume_cells_equal",
-                    ),
-                    "volume_velocity_rel_l2": (
-                        "uniform",
-                        "volume_cells_equal",
-                    ),
-                },
+            )
+            for case in metrics["cases"]:
+                case_supports = {
+                    item["support_id"]: item for item in case["supports"]
+                }
+                self.assertEqual(set(case_supports), set(support_map))
+                for support_id, case_support in case_supports.items():
+                    declared = {
+                        binding["metric_id"]
+                        for binding in support_map[support_id]["metric_bindings"]
+                    }
+                    self.assertEqual(set(case_support["metric_values"]), declared)
+                coefficients = case["force_coefficients"]
+                self.assertEqual(
+                    set(coefficients),
+                    {"cd", "cl", "cm_pitch", "clf", "clr"},
+                )
+                self.assertAlmostEqual(
+                    coefficients["clf"],
+                    coefficients["cl"] / 2.0 + coefficients["cm_pitch"],
+                )
+                self.assertAlmostEqual(
+                    coefficients["clr"],
+                    coefficients["cl"] / 2.0 - coefficients["cm_pitch"],
+                )
+                self.assertEqual(
+                    set(case["nonspatial_metric_values"]),
+                    set(self.driver.FORCE_METRIC_IDS)
+                    | set(self.driver.DIAGNOSTIC_METRIC_IDS),
+                )
+
+            profile_chunk = json.loads(
+                (output / "profiles" / "chunk-000.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            expected_series = [
+                (panel["id"], station_id, panel["quantity_ids"][0])
+                for panel in candidate_spec["profile_panels"]
+                for station_id in panel["station_ids"]
+            ]
+            velocity_panel = next(
+                panel
+                for panel in candidate_spec["profile_panels"]
+                if panel["id"] == "velocity_profiles"
+            )
+            for case in profile_chunk["cases"]:
+                self.assertEqual(
+                    [
+                        (
+                            series["panel_id"],
+                            series["station_id"],
+                            series["quantity_id"],
+                        )
+                        for series in case["series"]
+                    ],
+                    expected_series,
+                )
+                for series in case["series"]:
+                    if series["panel_id"] == "velocity_profiles":
+                        self.assertEqual(
+                            len(series["coordinate"]),
+                            velocity_panel["station_sample_counts"][
+                                series["station_id"]
+                            ],
+                        )
+            ground_truth_manifest = json.loads(
+                (output / "profiles" / "ground-truth-manifest.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(
+                ground_truth_manifest["artifact"]["sha256"],
+                self.sha256(output / "profiles" / "ground-truth.json"),
+            )
+            self.assertEqual(
+                receipt["candidate_nonspatial_validation"]["metric_ids"],
+                list(self.driver.FORCE_METRIC_IDS)
+                + list(self.driver.DIAGNOSTIC_METRIC_IDS),
             )
 
     def test_synthetic_driver_adversarially_requires_real_candidate_closed(self) -> None:

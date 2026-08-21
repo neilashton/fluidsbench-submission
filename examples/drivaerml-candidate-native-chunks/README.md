@@ -6,8 +6,9 @@ contract or represents owner approval.
 ## One-command synthetic package
 
 `reference_driver.py` is a tiny teaching fixture. It uses no VTP, VTU,
-DrivAerML truth, real model, fixed area array, or geometric volume array. After
-installing the candidate requirements, one driver command creates and
+DrivAerML truth, real model, real fixed-area array, or geometric volume array.
+It generates its own positive surface areas and equal-weight volume cells.
+After installing the candidate requirements, one driver command creates and
 schema-validates a complete dummy schema-v3 package, including
 `submission.json`:
 
@@ -29,12 +30,17 @@ submission ID, dataset ID, and scoring-support release ID begin with
 `synthetic-` and remain distinct from the real dataset; other identifiers
 follow their field-specific schema vocabulary.
 
-The fixture demonstrates ordered two-part and three-part byte transport,
-raw-cell IDs, independently bounded inference chunks, complete duplicate-free
-coverage, additive sufficient statistics, full-case/chunked invariance, keyed
-prediction packaging, case metrics, profile packaging, discretization records,
+The fixture demonstrates ordered two-part and three-part byte transport;
+separate native-surface-shaped and native-volume-shaped prediction tables;
+complete duplicate-free raw-ID chunk coverage; area-weighted and equal-polygon
+surface reductions; equal-cell volume reductions; the DrivAerML per-entity
+vector-error rule; coherent five-coefficient force payloads; all four Cp cuts
+and all sixteen AutoCFD5 velocity-line payload shapes; and all 27 current
+non-score candidate metrics. It also exercises discretization records,
 evaluation evidence, and local validation against every applicable repository
-JSON Schema. Its transport bytes are JSON, not VTK.
+JSON Schema. Its transport bytes and support tables are JSON, not VTK, and the
+profile and force values are deterministic synthetic examples rather than
+validated physical extraction or integration results.
 
 The driver performs those schema checks as part of the one command. The
 fictional dataset ID is deliberately not registered with the normal
