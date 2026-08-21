@@ -55,7 +55,7 @@ REQUIRED_PYTHON_VERSION = "3.12.13"
 REQUIRED_NUMPY_VERSION = "2.2.6"
 REQUIRED_VTK_VERSION = "9.5.2"
 REQUIRED_VTK_SOURCE_VERSION = "vtk version 9.5.2"
-KERNEL_ID = "drivaerml-native-containing-cell-candidate-v4"
+KERNEL_ID = "drivaerml-native-containing-cell-candidate-v6"
 REPLAY_SCHEMA = "drivaerml-velocity-cell-tolerance-replay-candidate-v1"
 DEFAULT_VALIDATION_CHUNK_SIZE = 1_000_000
 TOLERANCE_REPLAY_M = (0.5e-6, 1.0e-6, 2.0e-6)
@@ -204,14 +204,25 @@ def candidate_kernel_settings() -> dict[str, object]:
         },
         "closure": {
             "cell_wrapper": "vtkGenericCell",
+            "cell_wrapper_lifecycle": (
+                "fresh_vtkGenericCell_per_raw_cell_evaluation"
+            ),
             "method": "EvaluatePosition",
-            "acceptance": "inside_return_code_1_or_sqrt(dist2)<=absolute_tolerance_m",
+            "acceptance": (
+                "inside_return_code_1_with_dist2_exactly_zero_or_"
+                "outside_return_code_0_with_sqrt(dist2)<=absolute_tolerance_m"
+            ),
             "distance": "Euclidean_closest_point_distance_in_metres",
             "evaluate_failure_conditions": [
                 "return_code_minus_1",
                 "non_finite_numeric_output",
                 "negative_squared_distance",
+                "inside_return_with_nonzero_squared_distance",
             ],
+            "mutable_output_initialization": (
+                "quiet_NaN_for_all_floating_outputs_and_zero_for_sub_id_"
+                "before_every_cell"
+            ),
             "evaluate_error_action": (
                 "retain_the_sample_as_invalid_and_record_sorted_failed_raw_cell_ids"
             ),
@@ -476,13 +487,12 @@ class NativeContainingCellKernel:
             raise VelocityAssignmentError(
                 "VTK cell-tree locator did not retain the pinned build settings"
             )
-        # Assignment is deliberately serial.  Reuse the VTK wrappers and the
-        # point-count-specific mutable buffers across candidates: constructing
-        # them inside the native-cell loop is disproportionately expensive on
-        # the 147--163 million-cell pilot meshes and has no bearing on the
-        # locator, closure, or raw-ID tie-break semantics.
+        # Assignment is deliberately serial.  Reuse the broad-phase ID list and
+        # point-count-specific output buffers, but never reuse vtkGenericCell:
+        # real vtkPolyhedron materialization retains internal state that is not
+        # reliably cleared when one wrapper is overwritten with another raw
+        # native cell.
         self._broad_ids = vtk.vtkIdList()
-        self._generic_cell = vtk.vtkGenericCell()
         self._evaluation_scratch: dict[
             int,
             tuple[
@@ -573,7 +583,7 @@ class NativeContainingCellKernel:
                 raise VelocityAssignmentError(
                     f"VTK locator returned invalid raw cell ID {raw_id}"
                 )
-            cell = self._generic_cell
+            cell = vtk.vtkGenericCell()
             self.grid.GetCell(raw_id, cell)
             cell_type = int(cell.GetCellType())
             if cell_type not in _SUPPORTED_CELL_TYPE_IDS:
@@ -592,16 +602,16 @@ class NativeContainingCellKernel:
                 )
                 self._evaluation_scratch[cell_point_count] = scratch
             closest, sub_id, parametric, distance_squared, weights = scratch
-            # Match a freshly allocated EvaluatePosition call exactly.  Real
-            # native cell implementations do not all overwrite every mutable
-            # output on every return path; in particular, a failure sentinel
-            # must not leak into the following cell that reuses this buffer.
-            closest[0] = closest[1] = closest[2] = 0.0
+            # Poison every floating output before reuse.  Real native cell
+            # implementations do not all overwrite every output on every
+            # return path.  NaN makes an unwritten output fail closed instead of
+            # disguising it as a valid zero-distance closure candidate.
+            closest[0] = closest[1] = closest[2] = math.nan
             sub_id.set(0)
-            parametric[0] = parametric[1] = parametric[2] = 0.0
-            distance_squared.set(0.0)
+            parametric[0] = parametric[1] = parametric[2] = math.nan
+            distance_squared.set(math.nan)
             for weight_index in range(cell_point_count):
-                weights[weight_index] = 0.0
+                weights[weight_index] = math.nan
             status = int(
                 cell.EvaluatePosition(
                     point_m,
@@ -631,6 +641,7 @@ class NativeContainingCellKernel:
             if (
                 not all(math.isfinite(float(value)) for value in numeric_outputs)
                 or distance2 < 0.0
+                or (status == 1 and distance2 != 0.0)
             ):
                 # Some vtkPolyhedron failure paths return status 0 while leaving
                 # vtkCellLocator's negative distance sentinel in place.  Treat

@@ -45,7 +45,7 @@ SYNTHETIC_ASSIGNMENT_SHA256 = (
 )
 FULL_GRID_SHA256 = "46ffdde32e4892562d7e80e41a5727d50db22420efde26f17aa0db363b43a9f0"
 KERNEL_SETTINGS_SHA256 = (
-    "6944413760826de20c783acfe110728318b04185cb07feaa44c7fa54bc90089b"
+    "0bd2511f30c9d8ce743a043e27b734212355a1d3ac1916d02453c88fab13dd62"
 )
 
 if VTK_READY:
@@ -351,12 +351,11 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
         )
         self.assertEqual(grid.GetCellData().GetNumberOfArrays(), 0)
 
-    def test_serial_vtk_query_objects_are_reused_with_exact_weight_lengths(self) -> None:
+    def test_serial_queries_reuse_buffers_but_not_generic_cell_state(self) -> None:
         kernel = NativeContainingCellKernel(
             self.mixed_grid(), query_cache_enabled=False
         )
         broad_ids_identity = id(kernel._broad_ids)
-        generic_cell_identity = id(kernel._generic_cell)
         samples = (
             self.sample("tetra_first", 0, (0.1, 0.1, 0.1)),
             self.sample("tetra_second", 0, (0.2, 0.2, 0.2)),
@@ -365,19 +364,24 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
             self.sample("pyramid", 0, (6.5, 0.5, 0.2)),
             self.sample("polyhedron", 0, (8.5, 0.5, 0.5)),
         )
-        assignments = kernel.assign(
-            samples,
-            case_id="synthetic_scratch_reuse",
-            source_sha256=SOURCE_HASHES,
-        )
+        with patch.object(
+            velocity_assignments_module.vtk,
+            "vtkGenericCell",
+            wraps=vtk.vtkGenericCell,
+        ) as cell_factory:
+            assignments = kernel.assign(
+                samples,
+                case_id="synthetic_scratch_reuse",
+                source_sha256=SOURCE_HASHES,
+            )
         self.assertTrue(all(row.valid for row in assignments))
         self.assertEqual(id(kernel._broad_ids), broad_ids_identity)
-        self.assertEqual(id(kernel._generic_cell), generic_cell_identity)
+        self.assertEqual(cell_factory.call_count, len(samples))
         self.assertEqual(set(kernel._evaluation_scratch), {4, 5, 6, 8})
         for point_count, scratch in kernel._evaluation_scratch.items():
             self.assertEqual(len(scratch[-1]), point_count)
 
-    def test_reused_evaluate_position_outputs_are_reset_before_each_cell(self) -> None:
+    def test_reused_outputs_are_poisoned_to_detect_partial_vtk_writes(self) -> None:
         kernel = NativeContainingCellKernel(
             self.two_hex_grid(), query_cache_enabled=False
         )
@@ -433,17 +437,21 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
         cell = NoOutputCell()
         kernel.locator = OneCellLocator()
         kernel.grid = OneCellGrid()
-        kernel._generic_cell = cell
-        candidates, failures = kernel._closure_candidates(
-            (0.5, 0.5, 0.5), 1.0e-6
-        )
+        with patch.object(
+            velocity_assignments_module.vtk,
+            "vtkGenericCell",
+            return_value=cell,
+        ):
+            candidates, failures = kernel._closure_candidates(
+                (0.5, 0.5, 0.5), 1.0e-6
+            )
 
-        self.assertEqual(candidates, (0,))
-        self.assertEqual(failures, ())
-        self.assertEqual(
-            cell.observed,
-            ((0.0, 0.0, 0.0), 0, (0.0, 0.0, 0.0), 0.0, (0.0,) * 8),
-        )
+        self.assertEqual(candidates, ())
+        self.assertEqual(failures, (0,))
+        self.assertEqual(cell.observed[1], 0)
+        for values in (cell.observed[0], cell.observed[2], cell.observed[4]):
+            self.assertTrue(all(math.isnan(value) for value in values))
+        self.assertTrue(math.isnan(cell.observed[3]))
 
     def test_malformed_evaluate_position_outputs_are_retained_as_failures(self) -> None:
         kernel = NativeContainingCellKernel(
@@ -477,26 +485,41 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
                 _point: object,
                 output_closest: list[float],
                 _output_sub_id: object,
-                _output_parametric: list[float],
+                output_parametric: list[float],
                 output_distance_squared: object,
-                _output_weights: list[float],
+                output_weights: list[float],
             ) -> int:
+                output_closest[:] = [0.0, 0.0, 0.0]
+                output_parametric[:] = [0.5, 0.5, 0.5]
+                output_weights[:] = [0.125] * 8
                 if self.mode == "negative_distance":
                     output_distance_squared.set(-1.0)
                 elif self.mode == "nonfinite_output":
+                    output_distance_squared.set(0.0)
                     output_closest[0] = math.nan
+                elif self.mode == "inside_nonzero_distance":
+                    output_distance_squared.set(1.0e-20)
+                    return 1
                 else:  # pragma: no cover - closed by the subtest inputs.
                     raise AssertionError(self.mode)
                 return 0
 
         kernel.locator = OneCellLocator()
         kernel.grid = OneCellGrid()
-        for mode in ("negative_distance", "nonfinite_output"):
+        for mode in (
+            "negative_distance",
+            "nonfinite_output",
+            "inside_nonzero_distance",
+        ):
             with self.subTest(mode=mode):
-                kernel._generic_cell = MalformedOutputCell(mode)
-                candidates, failures = kernel._closure_candidates(
-                    (0.5, 0.5, 0.5), 1.0e-6
-                )
+                with patch.object(
+                    velocity_assignments_module.vtk,
+                    "vtkGenericCell",
+                    return_value=MalformedOutputCell(mode),
+                ):
+                    candidates, failures = kernel._closure_candidates(
+                        (0.5, 0.5, 0.5), 1.0e-6
+                    )
                 self.assertEqual(candidates, ())
                 self.assertEqual(failures, (0,))
 

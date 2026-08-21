@@ -109,7 +109,7 @@ PINNED_KERNEL_VERSIONS = {
     "vtk_source": "vtk version 9.5.2",
 }
 PINNED_KERNEL_SETTINGS_SHA256 = (
-    "6944413760826de20c783acfe110728318b04185cb07feaa44c7fa54bc90089b"
+    "0bd2511f30c9d8ce743a043e27b734212355a1d3ac1916d02453c88fab13dd62"
 )
 EXPECTED_ROW_FIELDS = [
     "profile_id",
@@ -1751,7 +1751,7 @@ def _validate_velocity_kernel(value: object) -> None:
     expected_hash = hashlib.sha256(_canonical_json(expected_settings)).hexdigest()
     if expected_hash != PINNED_KERNEL_SETTINGS_SHA256:
         raise DrivAerDiagnosticEvaluatorError(
-            "local velocity candidate-v4 settings differ from the frozen hash"
+            "local velocity candidate-v6 settings differ from the frozen hash"
         )
     if (
         kernel["kernel_id"] != KERNEL_ID
