@@ -819,12 +819,12 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                     "transport": "verified_ordered_multipart_byte_stream",
                     "cross_evaluator_prediction_identity_verified": True,
                     "core_evidence": {
-                        "file": core_output.relative_to(staging).as_posix(),
                         **core_identity,
+                        "file": core_output.relative_to(staging).as_posix(),
                     },
                     "diagnostic_evidence": {
-                        "file": diagnostic_output.relative_to(staging).as_posix(),
                         **diagnostic_identity,
+                        "file": diagnostic_output.relative_to(staging).as_posix(),
                     },
                 }
             )

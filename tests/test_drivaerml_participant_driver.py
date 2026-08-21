@@ -456,6 +456,10 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 )
                 calls.append((kind, args.case_id, args.multipart))
                 return {
+                    # The core writer currently returns its output basename.
+                    # Exercise both child identities defensively so neither can
+                    # override the driver's rooted, case-specific relative path.
+                    "file": args.output.name,
                     "sha256": self.sha256(args.output),
                     "byte_size": args.output.stat().st_size,
                 }
@@ -530,6 +534,21 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 [case["pinned_volume_part_count"] for case in receipt["cases"]],
                 [2, 3],
             )
+            child_evidence_files = [
+                case[evidence_kind]["file"]
+                for case in receipt["cases"]
+                for evidence_kind in ("core_evidence", "diagnostic_evidence")
+            ]
+            self.assertEqual(
+                child_evidence_files,
+                [
+                    "cases/run_1/core-evaluation.json",
+                    "cases/run_1/diagnostic-evaluation.json",
+                    "cases/run_44/core-evaluation.json",
+                    "cases/run_44/diagnostic-evaluation.json",
+                ],
+            )
+            self.assertEqual(len(set(child_evidence_files)), 4)
             self.assertFalse(receipt["official_submission"])
             self.assertFalse(receipt["downloads_performed"])
             self.assertEqual(
