@@ -207,6 +207,21 @@ Validate one directory:
 python3 scripts/validate_submission.py --contributor-stage submissions/ahmedml/my-model-v1
 ```
 
+Dataset owners may exercise a closed schema-v3 candidate before activation
+only when the dataset specification pins an exact
+`scoring_support.candidate_manifest` (status, release ID, repository file,
+public URL, and SHA-256):
+
+```bash
+python3 scripts/validate_submission.py --candidate-dry-run submissions/<dataset-id>/<package-id>
+```
+
+This mode requires `scoring_support.status=candidate`,
+`submissions_open=false`, and a candidate support manifest. It rejects approval
+and maintainer-owned metadata and reports only non-approving candidate
+validity. Normal and `--contributor-stage` validation continue to require an
+official, open, owner-approved scoring-support release.
+
 Validate every source submission and verify that generated feeds are synchronized:
 
 ```bash

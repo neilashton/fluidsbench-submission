@@ -25,6 +25,10 @@ from reference.scores import (
     legacy_aero_scores,
 )
 from reference.weightings import evaluator_weighting
+from reference.drivaerml.dataset_scorer import (
+    DrivAerDatasetScorerError,
+    validate_schema_v3_candidate_nonspatial_metrics,
+)
 
 try:
     from jsonschema import Draft202012Validator, FormatChecker
@@ -301,12 +305,29 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
     if unknown:
         add(f"metric_values contains unknown metrics: {', '.join(unknown)}")
     definitions = {definition["id"]: definition for definition in manifest["metric_definitions"]}
+    composite = dataset.get("overall_score_composite")
+    component_groups = dataset.get("component_score_groups")
+    negative_score_ids: set[str] = set()
+    if isinstance(composite, dict) and composite.get("allow_negative_scores") is True:
+        target_metric_id = composite.get("metric_id")
+        if isinstance(target_metric_id, str):
+            negative_score_ids.add(target_metric_id)
+        if isinstance(component_groups, dict):
+            negative_score_ids.update(
+                group.get("metric_id")
+                for group in component_groups.get("groups", [])
+                if isinstance(group, dict) and isinstance(group.get("metric_id"), str)
+            )
     for metric_id, value in values.items():
         if not is_number(value):
             add(f"metric_values.{metric_id} must be a finite number")
             continue
         definition = definitions.get(metric_id, {})
-        if definition.get("kind") in {"error", "score"} and value < 0:
+        if (
+            definition.get("kind") in {"error", "score"}
+            and value < 0
+            and metric_id not in negative_score_ids
+        ):
             add(f"metric_values.{metric_id} cannot be negative")
         if definition.get("kind") == "score" and value > 100:
             add(f"metric_values.{metric_id} cannot exceed 100")
@@ -323,7 +344,6 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
                 add(f"metric_values.{aggregate['metric_id']} must equal the declared source-metric mean")
 
     expected_scores = None
-    composite = dataset.get("overall_score_composite")
     if isinstance(composite, dict):
         components = composite.get("components")
         component_ids = (
@@ -332,6 +352,25 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
             else []
         )
         target_metric_id = composite.get("metric_id")
+        composite_status = composite.get("status", "active")
+        if composite_status not in {"active", "pending_reference_baselines"}:
+            add("dataset overall_score_composite has an unsupported status")
+        physics_null_components = [
+            component
+            for component in components or []
+            if isinstance(component, dict)
+            and component.get("transform") == "physics_null_skill"
+        ]
+        if physics_null_components and composite.get("allow_negative_scores") is not True:
+            add("dataset physics-null composite must allow negative scores")
+        for component in physics_null_components:
+            if not isinstance(component.get("baseline_id"), str) or not component["baseline_id"]:
+                add("dataset physics-null component requires a baseline_id")
+            baseline_error = component.get("baseline_error")
+            if composite_status == "active" and (
+                not is_number(baseline_error) or baseline_error <= 0
+            ):
+                add("active dataset physics-null component requires a positive baseline_error")
         if (
             composite.get("operation") != "weighted_component_scores"
             or not isinstance(components, list)
@@ -342,7 +381,7 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
             or any(not isinstance(metric_id, str) or metric_id not in expected_ids for metric_id in component_ids)
         ):
             add("dataset overall_score_composite does not reference a valid target and component metric set")
-        elif all(
+        elif composite_status == "active" and all(
             isinstance(metric_id, str) and is_number(values.get(metric_id))
             for metric_id in component_ids
         ):
@@ -358,7 +397,6 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
                     values[target_metric_id], expected, rel_tol=0.0, abs_tol=tolerance
                 ):
                     add(f"metric_values.{target_metric_id} does not match its declared composite equation")
-    component_groups = dataset.get("component_score_groups")
     score_tolerance = 1e-6
     if isinstance(component_groups, dict):
         groups = component_groups.get("groups")
@@ -394,7 +432,11 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
             add("dataset component_score_groups requires overall_score_composite")
         elif not is_number(score_tolerance) or score_tolerance < 0:
             add("dataset component_score_groups requires a non-negative tolerance")
-        elif all(is_number(values.get(metric_id)) for metric_id in grouped_component_ids):
+        elif (
+            isinstance(composite, dict)
+            and composite.get("status", "active") == "active"
+            and all(is_number(values.get(metric_id)) for metric_id in grouped_component_ids)
+        ):
             try:
                 expected_scores = composite_component_group_scores(
                     values,
@@ -423,10 +465,13 @@ def scoring_support_manifest_path(
     add: Any,
     dataset_spec: dict[str, Any],
     submission: dict[str, Any],
+    *,
+    binding: dict[str, Any] | None = None,
 ) -> Path | None:
     """Locate the repository copy of the benchmark-owned scoring-support manifest."""
 
-    binding = dataset_spec.get("scoring_support")
+    if binding is None:
+        binding = dataset_spec.get("scoring_support")
     if not isinstance(binding, dict):
         add("schema v3 requires scoring_support in the benchmark specification")
         return None
@@ -462,19 +507,60 @@ def validate_v3_scoring_support(
     submission: dict[str, Any],
     dataset_spec: dict[str, Any],
     split_spec_entry: dict[str, Any],
+    *,
+    candidate_dry_run: bool = False,
 ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
-    """Validate and load the fixed public spatial scoring support used by schema v3."""
+    """Validate and load the fixed spatial scoring support used by schema v3.
+
+    Normal validation accepts only an open, owner-approved official release.
+    ``candidate_dry_run`` is a separate non-approving path which accepts only a
+    closed owner-review candidate and its explicitly nested candidate manifest.
+    It never falls back from one lifecycle state to the other.
+    """
 
     declared = submission["scoring_support"]
     owner_binding = dataset_spec.get("scoring_support", {})
     owner_status = owner_binding.get("status")
     submissions_open = owner_binding.get("submissions_open")
-    if owner_status != "official" or submissions_open is not True:
-        reason = owner_binding.get("closed_reason") or "dataset-owner approval is incomplete"
-        add(
-            "schema v3 submissions are closed for this dataset's scoring support: "
-            f"status={owner_status!r}, submissions_open={submissions_open!r}; {reason}"
-        )
+    if candidate_dry_run:
+        if owner_status not in {"candidate", "owner_review_required"}:
+            add(
+                "candidate dry-run requires benchmark scoring_support.status "
+                "to be 'candidate' or 'owner_review_required', never official"
+            )
+        if submissions_open is not False:
+            add("candidate dry-run requires scoring_support.submissions_open=false")
+        if declared.get("status") != "candidate":
+            add("candidate dry-run requires submission scoring_support.status='candidate'")
+        candidate_binding = owner_binding.get("candidate_manifest")
+        if not isinstance(candidate_binding, dict):
+            add(
+                "candidate dry-run requires benchmark "
+                "scoring_support.candidate_manifest"
+            )
+            candidate_binding = {}
+        if candidate_binding.get("status") != "candidate":
+            add(
+                "benchmark scoring_support.candidate_manifest.status must be "
+                "'candidate'"
+            )
+        for forbidden in ("owner_approval", "publication_validation"):
+            if forbidden in owner_binding or forbidden in candidate_binding:
+                add(
+                    "candidate dry-run benchmark metadata must not contain "
+                    f"{forbidden}"
+                )
+        active_binding = candidate_binding
+        expected_manifest_status = "candidate"
+    else:
+        if owner_status != "official" or submissions_open is not True:
+            reason = owner_binding.get("closed_reason") or "dataset-owner approval is incomplete"
+            add(
+                "schema v3 submissions are closed for this dataset's scoring support: "
+                f"status={owner_status!r}, submissions_open={submissions_open!r}; {reason}"
+            )
+        active_binding = owner_binding
+        expected_manifest_status = "official"
     required_owner_fields = (
         "release_id",
         "manifest_file",
@@ -484,12 +570,16 @@ def validate_v3_scoring_support(
     missing_owner_fields = [
         key
         for key in required_owner_fields
-        if not isinstance(owner_binding.get(key), str) or not owner_binding[key].strip()
+        if not isinstance(active_binding.get(key), str) or not active_binding[key].strip()
     ]
     if missing_owner_fields:
+        prefix = (
+            "benchmark candidate scoring_support is incomplete; missing: "
+            if candidate_dry_run
+            else "benchmark scoring_support is incomplete; missing: "
+        )
         add(
-            "benchmark scoring_support is incomplete; missing: "
-            f"{', '.join(missing_owner_fields)}"
+            f"{prefix}{', '.join(missing_owner_fields)}"
         )
     owner_approval = owner_binding.get("owner_approval")
     if owner_status == "official" and (
@@ -501,12 +591,21 @@ def validate_v3_scoring_support(
     ):
         add("official benchmark scoring_support requires complete dataset-owner approval metadata")
     for key in ("release_id", "manifest_url", "manifest_sha256"):
-        if declared.get(key) != owner_binding.get(key):
-            add(f"scoring_support.{key} must match the benchmark specification")
-    if declared.get("status") != owner_status:
+        if declared.get(key) != active_binding.get(key):
+            qualifier = " candidate" if candidate_dry_run else ""
+            add(
+                f"scoring_support.{key} must match the benchmark{qualifier} "
+                "manifest binding"
+            )
+    if not candidate_dry_run and declared.get("status") != owner_status:
         add("scoring_support.status must match the benchmark specification")
 
-    manifest_path = scoring_support_manifest_path(add, dataset_spec, submission)
+    manifest_path = scoring_support_manifest_path(
+        add,
+        dataset_spec,
+        submission,
+        binding=active_binding,
+    )
     if manifest_path is None:
         return None, None
     if not manifest_path.is_file():
@@ -535,8 +634,14 @@ def validate_v3_scoring_support(
     for key, expected in manifest_identities.items():
         if support_manifest.get(key) != expected:
             add(f"scoring-support manifest {key} must equal {expected!r}")
-    if support_manifest.get("status") != "official":
-        add("schema v3 submissions require an official scoring-support manifest")
+    if support_manifest.get("status") != expected_manifest_status:
+        add(
+            "candidate dry-run requires a candidate scoring-support manifest"
+            if candidate_dry_run
+            else "schema v3 submissions require an official scoring-support manifest"
+        )
+    if candidate_dry_run and "owner_approval" in support_manifest:
+        add("candidate scoring-support manifest must not contain owner_approval")
     if owner_status == "official" and support_manifest.get("owner_approval") != owner_approval:
         add("scoring-support manifest owner_approval must match the benchmark specification")
 
@@ -1178,6 +1283,14 @@ def validate_v3_case_metrics(
                 f"metric_values.{metric_id} must equal the macro-average of its submitted "
                 "per-case values"
             )
+    if submission.get("dataset_id") == "drivaerml":
+        try:
+            validate_schema_v3_candidate_nonspatial_metrics(case_metrics)
+        except DrivAerDatasetScorerError as error:
+            add(
+                f"{declaration['file']} DrivAerML nonspatial validation failed: "
+                f"{error}"
+            )
     return case_metrics
 
 
@@ -1803,6 +1916,9 @@ def validate_v3_prediction_metadata(
     split_case_ids: list[str],
     *,
     contributor_stage: bool,
+    candidate_dry_run: bool = False,
+    case_metrics: dict[str, Any] | None = None,
+    dataset_spec: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Validate optional prediction declarations/checks without downloading artifacts."""
 
@@ -1839,8 +1955,13 @@ def validate_v3_prediction_metadata(
     checks_path = directory / "prediction-artifact-checks.json"
     if not checks_path.exists():
         return None
-    if contributor_stage:
-        add("contributors must not add prediction-artifact-checks.json")
+    if contributor_stage or candidate_dry_run:
+        add(
+            "candidate dry-run packages must not contain "
+            "prediction-artifact-checks.json"
+            if candidate_dry_run
+            else "contributors must not add prediction-artifact-checks.json"
+        )
         return None
     try:
         checks = load_json(checks_path)
@@ -1934,7 +2055,212 @@ def validate_v3_prediction_metadata(
                     f"prediction check {artifact_id!r} performed metric recomputation "
                     "requires a complete_split prediction artifact"
                 )
+    if (
+        submission.get("dataset_id") == "drivaerml"
+        and "dataset_evaluator_recomputation" in checks
+    ):
+        _validate_drivaerml_native_evaluator_recomputation(
+            add,
+            submission=submission,
+            split_case_ids=split_case_ids,
+            checks=checks,
+            case_metrics=case_metrics,
+            dataset_spec=dataset_spec,
+        )
     return checks
+
+
+def _validate_drivaerml_native_evaluator_recomputation(
+    add: Any,
+    *,
+    submission: dict[str, Any],
+    split_case_ids: list[str],
+    checks: dict[str, Any],
+    case_metrics: dict[str, Any] | None,
+    dataset_spec: dict[str, Any] | None,
+) -> None:
+    """Bind DrivAerML nonspatial values to a maintainer evaluator replay."""
+
+    receipt = checks.get("dataset_evaluator_recomputation")
+    if not isinstance(receipt, dict):
+        add(
+            "prediction-artifact-checks.json requires "
+            "dataset_evaluator_recomputation for DrivAerML"
+        )
+        return
+    if case_metrics is None:
+        add(
+            "DrivAerML dataset_evaluator_recomputation requires valid "
+            "case-metrics evidence"
+        )
+        return
+    try:
+        nonspatial = validate_schema_v3_candidate_nonspatial_metrics(case_metrics)
+    except DrivAerDatasetScorerError as error:
+        add(
+            "DrivAerML dataset_evaluator_recomputation cannot bind invalid "
+            f"nonspatial values: {error}"
+        )
+        return
+
+    expected_identity = {
+        "dataset_id": "drivaerml",
+        "status": "complete_native_evaluator_recomputation",
+        "evaluator_reference_version": submission.get("evaluation", {}).get(
+            "reference_version"
+        ),
+        "case_count": len(split_case_ids),
+        "case_metrics_sha256": submission.get("case_metrics", {}).get("sha256"),
+        "nonspatial_metric_ids": nonspatial["metric_ids"],
+        "nonspatial_values_sha256": nonspatial["nonspatial_values_sha256"],
+    }
+    for key, expected in expected_identity.items():
+        if receipt.get(key) != expected:
+            add(
+                "prediction-artifact-checks.json "
+                f"dataset_evaluator_recomputation.{key} must equal {expected!r}"
+            )
+
+    scoring_support = (
+        dataset_spec.get("scoring_support")
+        if isinstance(dataset_spec, dict)
+        else None
+    )
+    evaluator_binding = (
+        scoring_support.get("dataset_evaluator_binding")
+        if isinstance(scoring_support, dict)
+        else None
+    )
+    if not isinstance(evaluator_binding, dict):
+        add(
+            "DrivAerML final validation requires a benchmark-owned "
+            "scoring_support.dataset_evaluator_binding"
+        )
+    elif evaluator_binding.get("status") != "frozen":
+        add(
+            "DrivAerML final validation requires "
+            "scoring_support.dataset_evaluator_binding.status='frozen'; "
+            "the candidate evaluator revision is not frozen"
+        )
+    else:
+        frozen_reference_version = evaluator_binding.get(
+            "evaluator_reference_version"
+        )
+        frozen_code_revision = evaluator_binding.get("evaluator_code_revision")
+        valid_code_revision = (
+            isinstance(frozen_code_revision, str)
+            and len(frozen_code_revision) in {40, 64}
+            and all(
+                character in "0123456789abcdef"
+                for character in frozen_code_revision
+            )
+        )
+        if (
+            not isinstance(frozen_reference_version, str)
+            or not frozen_reference_version
+            or not valid_code_revision
+        ):
+            add(
+                "DrivAerML frozen dataset_evaluator_binding requires a non-empty "
+                "evaluator_reference_version and an immutable 40- or 64-character "
+                "lowercase hexadecimal evaluator_code_revision"
+            )
+        else:
+            if frozen_reference_version != submission.get("evaluation", {}).get(
+                "reference_version"
+            ):
+                add(
+                    "DrivAerML frozen dataset_evaluator_binding reference version "
+                    "must match submission evaluation.reference_version"
+                )
+            if receipt.get("evaluator_reference_version") != frozen_reference_version:
+                add(
+                    "prediction-artifact-checks.json "
+                    "dataset_evaluator_recomputation.evaluator_reference_version "
+                    "must match the benchmark-owned frozen evaluator binding"
+                )
+            if receipt.get("evaluator_code_revision") != frozen_code_revision:
+                add(
+                    "prediction-artifact-checks.json "
+                    "dataset_evaluator_recomputation.evaluator_code_revision must "
+                    "match the benchmark-owned frozen evaluator binding"
+                )
+
+    declared = {
+        artifact.get("artifact_id"): artifact
+        for artifact in submission.get("prediction_artifacts", [])
+        if isinstance(artifact, dict)
+        and isinstance(artifact.get("artifact_id"), str)
+    }
+    expected_artifact_ids = sorted(
+        artifact_id
+        for artifact_id, artifact in declared.items()
+        if artifact.get("kind") == "scored_predictions"
+        and artifact.get("coverage", {}).get("kind") == "complete_split"
+    )
+    if len(expected_artifact_ids) != 1:
+        add(
+            "DrivAerML native-evaluator recomputation requires exactly one "
+            "complete_split scored_predictions artifact"
+        )
+    if receipt.get("prediction_artifact_ids") != expected_artifact_ids:
+        add(
+            "prediction-artifact-checks.json "
+            "dataset_evaluator_recomputation.prediction_artifact_ids must list "
+            "every complete_split scored_predictions artifact exactly once in "
+            "artifact_id order"
+        )
+
+    checks_by_id = {
+        check.get("artifact_id"): check
+        for check in checks.get("checks", [])
+        if isinstance(check, dict) and isinstance(check.get("artifact_id"), str)
+    }
+    for artifact_id in expected_artifact_ids:
+        check = checks_by_id.get(artifact_id)
+        if not isinstance(check, dict):
+            add(
+                f"DrivAerML native-evaluator receipt is missing prediction check "
+                f"{artifact_id!r}"
+            )
+            continue
+        required = {
+            "status": "metrics_recomputed",
+            "metric_recomputation": "performed",
+            "checked_case_count": len(split_case_ids),
+            "recomputed_case_count": len(split_case_ids),
+            "expected_case_count": len(split_case_ids),
+        }
+        for key, expected in required.items():
+            if check.get(key) != expected:
+                add(
+                    f"DrivAerML prediction check {artifact_id!r} {key} must "
+                    f"equal {expected!r}"
+                )
+
+
+def validate_drivaerml_maintainer_receipt_hash(
+    add: Any,
+    directory: Path,
+    validation: dict[str, Any],
+) -> None:
+    """Bind optional DrivAerML prediction checks when maintainers add them."""
+
+    checks_path = directory / "prediction-artifact-checks.json"
+    declared = validation.get("prediction_artifact_checks_sha256")
+    if not checks_path.is_file():
+        if declared is not None:
+            add(
+                "maintainer-validation.json prediction_artifact_checks_sha256 "
+                "must be absent when prediction-artifact-checks.json is absent"
+            )
+        return
+    expected = sha256_file(checks_path)
+    if not isinstance(declared, str) or declared != expected:
+        add(
+            "maintainer-validation.json prediction_artifact_checks_sha256 "
+            "must bind the optional DrivAerML prediction-artifact checks"
+        )
 
 
 def validate_evaluation_evidence(
@@ -2045,6 +2371,7 @@ def validate_open_reproducibility(
     split_spec_entry: dict[str, Any],
     *,
     contributor_stage: bool,
+    candidate_dry_run: bool = False,
 ) -> None:
     """Validate declared open artifacts and submitted data without executing a model."""
 
@@ -2070,6 +2397,19 @@ def validate_open_reproducibility(
             add("contributors must leave approval absent; maintainers add it only after submitted-data validation")
         if (directory / "maintainer-validation.json").exists():
             add("contributors must not add maintainer-validation.json")
+
+    if candidate_dry_run:
+        if evidence_status != "submitted_evaluation":
+            add(
+                "candidate dry-run packages require "
+                "evaluation-evidence.status=submitted_evaluation"
+            )
+        if submission_schema_version != "3.0":
+            add("candidate dry-run packages require submission schema_version=3.0")
+        if approval is not None:
+            add("candidate dry-run packages must not contain approval metadata")
+        if (directory / "maintainer-validation.json").exists():
+            add("candidate dry-run packages must not contain maintainer-validation.json")
 
     if evidence_status == "prototype_dummy_data":
         if approval_status != "prototype":
@@ -2132,7 +2472,7 @@ def validate_open_reproducibility(
                 "evaluation.code_revision must equal the full "
                 "reproducibility.code.commit"
             )
-    if dataset_spec.get("status") != "official":
+    if dataset_spec.get("status") != "official" and not candidate_dry_run:
         add("submitted_evaluation evidence requires an official dataset specification")
 
     ground_truth = manifest.get("data_release", {}).get("profile_ground_truth", {})
@@ -2229,6 +2569,10 @@ def validate_open_reproducibility(
         for key, expected in validation_v3_bindings.items():
             if validation.get(key) != expected:
                 add(f"maintainer-validation.json {key} must match submission metadata")
+        if submission.get("dataset_id") == "drivaerml":
+            validate_drivaerml_maintainer_receipt_hash(
+                add, directory, validation
+            )
 
 
 def validate_profiles(
@@ -2355,7 +2699,14 @@ def validate_profiles(
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} coordinate and prediction lengths differ")
                 if len(coordinates) < panel.get("minimum_points", 2):
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} has too few points")
-                expected_sample_count = panel.get("sample_count")
+                station_sample_counts = panel.get("station_sample_counts", {})
+                expected_sample_count = (
+                    station_sample_counts.get(station_id)
+                    if isinstance(station_sample_counts, dict)
+                    else None
+                )
+                if expected_sample_count is None:
+                    expected_sample_count = panel.get("sample_count")
                 if (
                     not prototype_fixture
                     and isinstance(expected_sample_count, int)
@@ -2371,7 +2722,14 @@ def validate_profiles(
                 elif any(right <= left for left, right in zip(coordinates, coordinates[1:])):
                     add(f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} coordinates must be strictly increasing")
                 else:
-                    interval = panel.get("coordinate_interval")
+                    station_intervals = panel.get("station_coordinate_intervals", {})
+                    interval = (
+                        station_intervals.get(station_id)
+                        if isinstance(station_intervals, dict)
+                        else None
+                    )
+                    if interval is None:
+                        interval = panel.get("coordinate_interval")
                     if (
                         isinstance(interval, list)
                         and len(interval) == 2
@@ -2389,7 +2747,15 @@ def validate_profiles(
                                 f"{case.get('case_id')}/{panel_id}/{station_id}/{quantity_id} "
                                 f"coordinate must end at {end}"
                             )
-                        if panel.get("coordinate_spacing") == "uniform":
+                        station_spacings = panel.get("station_coordinate_spacings", {})
+                        spacing = (
+                            station_spacings.get(station_id)
+                            if isinstance(station_spacings, dict)
+                            else None
+                        )
+                        if spacing is None:
+                            spacing = panel.get("coordinate_spacing")
+                        if spacing == "uniform":
                             denominator = len(coordinates) - 1
                             if any(
                                 not math.isclose(
@@ -2437,6 +2803,7 @@ def validate_submission_file(
     manifest: dict[str, Any] | None = None,
     *,
     contributor_stage: bool = False,
+    candidate_dry_run: bool = False,
 ) -> tuple[list[str], dict[str, int]]:
     errors: list[str] = []
     stats = {"cases": 0, "series": 0}
@@ -2445,12 +2812,19 @@ def validate_submission_file(
     def add(message: str) -> None:
         errors.append(f"{prefix}: {message}")
 
+    if contributor_stage and candidate_dry_run:
+        add("--contributor-stage and --candidate-dry-run are mutually exclusive")
+        return errors, stats
+
     try:
         submission = load_json(path)
     except (OSError, json.JSONDecodeError) as error:
         add(f"cannot read submission JSON: {error}")
         return errors, stats
     submission_schema_version = submission.get("schema_version")
+    if candidate_dry_run and submission_schema_version != "3.0":
+        add("candidate dry-run validation accepts only schema_version='3.0'")
+        return errors, stats
     schema_directory = {"1.0": "v1", "2.0": "v2", "3.0": "v3"}.get(submission_schema_version)
     if schema_directory is None:
         add("schema_version must be '1.0', '2.0', or '3.0'")
@@ -2463,6 +2837,17 @@ def validate_submission_file(
         add(error)
     if errors:
         return errors, stats
+
+    if candidate_dry_run:
+        if "approval" in submission:
+            add("candidate dry-run packages must not contain approval metadata")
+        for filename in (
+            "maintainer-validation.json",
+            "prediction-artifact-checks.json",
+            "maintainer-replay.json",
+        ):
+            if (path.parent / filename).exists():
+                add(f"candidate dry-run packages must not contain {filename}")
 
     if manifest is None:
         manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
@@ -2482,6 +2867,15 @@ def validate_submission_file(
     if dataset_spec.get("dataset_id") != submission["dataset_id"]:
         add("benchmark specification dataset_id does not match submission.json")
         return errors, stats
+    if candidate_dry_run and dataset_spec.get("status") not in {
+        "candidate",
+        "candidate_scoring_contract",
+        "owner_review_required",
+    }:
+        add(
+            "candidate dry-run requires an explicitly candidate or "
+            "owner-review-required dataset specification, never an official one"
+        )
     if dataset_spec.get("ranking") != dataset.get("ranking"):
         add("benchmark specification ranking policy does not match the leaderboard manifest")
     spec_split = next((item for item in dataset_spec["splits"] if item["id"] == split["id"]), None)
@@ -2517,8 +2911,9 @@ def validate_submission_file(
             submission,
             dataset_spec,
             spec_split,
+            candidate_dry_run=candidate_dry_run,
         )
-        validate_v3_case_metrics(
+        case_metrics = validate_v3_case_metrics(
             add,
             path.parent,
             submission,
@@ -2540,6 +2935,9 @@ def validate_submission_file(
             submission,
             split_case_ids,
             contributor_stage=contributor_stage,
+            candidate_dry_run=candidate_dry_run,
+            case_metrics=case_metrics,
+            dataset_spec=dataset_spec,
         )
     evidence = validate_evaluation_evidence(add, path.parent, submission)
     validate_open_reproducibility(
@@ -2551,6 +2949,7 @@ def validate_submission_file(
         dataset_spec,
         spec_split,
         contributor_stage=contributor_stage,
+        candidate_dry_run=candidate_dry_run,
     )
     stats = validate_profiles(add, path.parent, submission, dataset_spec, spec_split)
     return errors, stats
@@ -2560,8 +2959,13 @@ def validate_many(
     paths: list[Path] | None = None,
     *,
     contributor_stage: bool = False,
+    candidate_dry_run: bool = False,
     manifest: dict[str, Any] | None = None,
 ) -> tuple[list[str], dict[str, int]]:
+    if contributor_stage and candidate_dry_run:
+        return [
+            "--contributor-stage and --candidate-dry-run are mutually exclusive"
+        ], {"submissions": 0, "cases": 0, "series": 0}
     files = submission_files(paths)
     if not files:
         return ["no submission.json files found"], {"submissions": 0, "cases": 0, "series": 0}
@@ -2570,7 +2974,12 @@ def validate_many(
     totals = {"submissions": len(files), "cases": 0, "series": 0}
     seen_ids: dict[str, Path] = {}
     for path in files:
-        current_errors, stats = validate_submission_file(path, manifest, contributor_stage=contributor_stage)
+        current_errors, stats = validate_submission_file(
+            path,
+            manifest,
+            contributor_stage=contributor_stage,
+            candidate_dry_run=candidate_dry_run,
+        )
         errors.extend(current_errors)
         totals["cases"] += stats["cases"]
         totals["series"] += stats["series"]
@@ -2585,13 +2994,22 @@ def validate_many(
     return errors, totals
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="*", type=Path, help="submission directories or submission.json files")
-    parser.add_argument(
+    lifecycle_mode = parser.add_mutually_exclusive_group()
+    lifecycle_mode.add_argument(
         "--contributor-stage",
         action="store_true",
         help="reject maintainer approval/validation metadata in contributor-authored packages",
+    )
+    lifecycle_mode.add_argument(
+        "--candidate-dry-run",
+        action="store_true",
+        help=(
+            "validate a closed schema-v3 candidate contract without granting "
+            "official acceptance or approval"
+        ),
     )
     parser.add_argument(
         "--prediction-check",
@@ -2601,17 +3019,29 @@ def main() -> int:
             "remote artifacts"
         ),
     )
-    args = parser.parse_args()
-    errors, totals = validate_many(args.paths or None, contributor_stage=args.contributor_stage)
+    args = parser.parse_args(argv)
+    errors, totals = validate_many(
+        args.paths or None,
+        contributor_stage=args.contributor_stage,
+        candidate_dry_run=args.candidate_dry_run,
+    )
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)
         print(f"Validation failed with {len(errors)} error(s).", file=sys.stderr)
         return 1
-    message = (
-        f"PASS {totals['submissions']} submission(s), {totals['cases']} test cases, "
-        f"and {totals['series']} profile series."
-    )
+    if args.candidate_dry_run:
+        message = (
+            "CANDIDATE DRY-RUN VALID: "
+            f"{totals['submissions']} package(s), {totals['cases']} test cases, "
+            f"and {totals['series']} profile series. This is not official "
+            "acceptance, approval, or leaderboard eligibility."
+        )
+    else:
+        message = (
+            f"PASS {totals['submissions']} submission(s), {totals['cases']} test cases, "
+            f"and {totals['series']} profile series."
+        )
     if args.prediction_check == "metadata":
         message += " Prediction-artifact metadata checked; no remote artifacts were downloaded."
     print(message)

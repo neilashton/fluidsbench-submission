@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-abf839beb336/drivaerml/high_drag/drivaerml-oformer",
+  "claim_id": "prototype-dev-2026-07-15-68bb62dfbc5f/drivaerml/high_drag/drivaerml-oformer",
   "release": {
-    "id": "prototype-dev-2026-07-15-abf839beb336",
+    "id": "prototype-dev-2026-07-15-68bb62dfbc5f",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-19T13:59:56Z",
+    "published_at": "2026-08-21T12:07:44Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 75.63166666666666,
-    "ranked_value": 75.6,
-    "display_value": "75.6",
+    "value": 0.0,
+    "ranked_value": 0.0,
+    "display_value": "0.0",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "abf839beb336e15d0912896100dcb67c077437fe417d46d53a79d25448647264",
+      "feed_sha256": "68bb62dfbc5f217f024150da467005957f19329bba1b84643fb1b3a4dafe2784",
       "row_index": 19
     },
     "source_submission": {
       "path": "submissions/drivaerml/drivaerml-oformer/submission.json",
-      "sha256": "4388b4ad5f6450cc4ae0116d965f9ed1adcc12012bf7c8ad20f296c860792499"
+      "sha256": "2b0297b8f3b5f27f04a7424ffde5689a788a4a0f04dfeb6b563c77a55f8f223d"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaerml/drivaerml-oformer/evaluation-evidence.json",
-      "sha256": "d2515f2467d098c67a9f68577f0322293144f8b0f38f8a57f4f4aa56ab08cf4c"
+      "sha256": "6a98e742f01e7c5d78ba5311fb1e5cc4e482858955902ceef4381f6ba7f23b87"
     },
     "profile_index": {
       "path": "submissions/drivaerml/drivaerml-oformer/profiles/index.json",
-      "sha256": "914a95302291d5f24885df435397725eb401993a48d80c3205f392b840982952"
+      "sha256": "ec2e4ace7948b412fb866b37fc7e512d1cfeb3d905062ba8bb61d35f0821ad60"
     }
   }
 }

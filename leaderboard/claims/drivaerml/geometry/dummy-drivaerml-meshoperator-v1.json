@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-abf839beb336/drivaerml/geometry/dummy-drivaerml-meshoperator-v1",
+  "claim_id": "prototype-dev-2026-07-15-68bb62dfbc5f/drivaerml/geometry/dummy-drivaerml-meshoperator-v1",
   "release": {
-    "id": "prototype-dev-2026-07-15-abf839beb336",
+    "id": "prototype-dev-2026-07-15-68bb62dfbc5f",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-19T13:59:56Z",
+    "published_at": "2026-08-21T12:07:44Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 89.75166666666667,
-    "ranked_value": 89.8,
-    "display_value": "89.8",
+    "value": 0.0,
+    "ranked_value": 0.0,
+    "display_value": "0.0",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "abf839beb336e15d0912896100dcb67c077437fe417d46d53a79d25448647264",
+      "feed_sha256": "68bb62dfbc5f217f024150da467005957f19329bba1b84643fb1b3a4dafe2784",
       "row_index": 24
     },
     "source_submission": {
       "path": "submissions/drivaerml/dummy-drivaerml-meshoperator-v1/submission.json",
-      "sha256": "8cdf2d637f426f51340d1a6cd50166a17057e9375f6fda511be620b3d2fcdda7"
+      "sha256": "00b5ccb25e76cd726d2eb1a3cdb80795aaa7bb5a9bcd0264637b6850d22b1d9e"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaerml/dummy-drivaerml-meshoperator-v1/evaluation-evidence.json",
-      "sha256": "9ce868708fad04ecb3fcf4dbd07d913dbe7d9fa2a8959c759dc416a4611dd4f3"
+      "sha256": "235f1d60930a19a402fded8d15c3b4ed2273703faa358542dacb318b7c0dfd61"
     },
     "profile_index": {
       "path": "submissions/drivaerml/dummy-drivaerml-meshoperator-v1/profiles/index.json",
-      "sha256": "795f83355d0c82c6608a05b8887237cd3c47e6d3e143765336e8e8b483e627cd"
+      "sha256": "da8eee3393ee1e9c61922e58217b1c0c04bdd0ec41ae4a291dbefe40a3b709e6"
     }
   }
 }

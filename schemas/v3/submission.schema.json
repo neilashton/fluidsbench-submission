@@ -383,7 +383,7 @@
       "required": ["status", "release_id", "manifest_url", "manifest_sha256"],
       "properties": {
         "status": {
-          "const": "official"
+          "enum": ["candidate", "official"]
         },
         "release_id": {
           "$ref": "#/$defs/safe_id"
@@ -567,5 +567,19 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "scoring_support": {
+            "properties": { "status": { "const": "candidate" } },
+            "required": ["status"]
+          }
+        },
+        "required": ["scoring_support"]
+      },
+      "then": { "not": { "required": ["approval"] } }
+    }
+  ]
 }

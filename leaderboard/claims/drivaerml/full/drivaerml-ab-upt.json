@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-abf839beb336/drivaerml/full/drivaerml-ab-upt",
+  "claim_id": "prototype-dev-2026-07-15-68bb62dfbc5f/drivaerml/full/drivaerml-ab-upt",
   "release": {
-    "id": "prototype-dev-2026-07-15-abf839beb336",
+    "id": "prototype-dev-2026-07-15-68bb62dfbc5f",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-19T13:59:56Z",
+    "published_at": "2026-08-21T12:07:44Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 80.00416666666666,
-    "ranked_value": 80.0,
-    "display_value": "80.0",
+    "value": 0.0,
+    "ranked_value": 0.0,
+    "display_value": "0.0",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -30,8 +30,8 @@
     "method": "competition",
     "rank": 1,
     "ranked_result_count": 2,
-    "tied": false,
-    "tie_count": 1
+    "tied": true,
+    "tie_count": 2
   },
   "eligibility": {
     "academic_citation": false,
@@ -44,20 +44,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "abf839beb336e15d0912896100dcb67c077437fe417d46d53a79d25448647264",
+      "feed_sha256": "68bb62dfbc5f217f024150da467005957f19329bba1b84643fb1b3a4dafe2784",
       "row_index": 15
     },
     "source_submission": {
       "path": "submissions/drivaerml/drivaerml-ab-upt/submission.json",
-      "sha256": "87173f504fa3875a0abc032b0c8e6359181da340e8d98b8ccc3e017623135901"
+      "sha256": "0497974da9e7dff2f147440dfe555729c331d3aa00553d4dbe2cf055d029357f"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaerml/drivaerml-ab-upt/evaluation-evidence.json",
-      "sha256": "4c27cdc591d2c6653de98bbbe8fc615ae97d3c3af65b6407dbf439e2441b6268"
+      "sha256": "ce70db186f651549ac91b6c8cc1f05ebc5e2ba9b5ad0883019e461704c4d8af9"
     },
     "profile_index": {
       "path": "submissions/drivaerml/drivaerml-ab-upt/profiles/index.json",
-      "sha256": "a90ee3324feb43af5c606b914821327ea68d171361e232bdc8134a4146b4a51c"
+      "sha256": "b5bff19b251cff28086f03bb0a67998cc48eeb8da87cf49d9b3bd6f999dfc664"
     }
   }
 }
