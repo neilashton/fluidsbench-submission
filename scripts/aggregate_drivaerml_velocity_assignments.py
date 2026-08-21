@@ -83,7 +83,7 @@ PINNED_VERSIONS = {
 }
 PINNED_KERNEL_SETTINGS = candidate_kernel_settings()
 PINNED_KERNEL_SETTINGS_SHA256 = (
-    "882371d517217698b8ba04d073aec8be171ec78d0bce8456abf4864043cb9ab0"
+    "0f90cf2bd07db98cdfe07e4f2a5e70ef69a4ac3be8f07ad18e3c07d617a2a678"
 )
 FALSE_CASE_CLAIMS = {
     "resolution_convergence": False,

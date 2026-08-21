@@ -3,8 +3,9 @@
 This module implements the proposed AutoCFD5 containing-cell semantics without
 changing the native ``vtkUnstructuredGrid``.  Raw cell IDs are the zero-based
 indices accepted by ``vtkUnstructuredGrid.GetCell``.  A
-``vtkStaticCellLocator`` supplies a broad phase using an explicitly expanded
-point bound; every returned cell is then evaluated with
+``vtkCellTreeLocator`` supplies a broad phase using an explicitly expanded
+point bound and exact native-cell axis-aligned-bounds intersection; every
+returned cell is then evaluated with
 ``vtkGenericCell.EvaluatePosition``.  A cell is a closure candidate when VTK
 reports the point inside or its finite Euclidean closest-point distance is no
 larger than the absolute tolerance.  All closure candidates are retained for
@@ -54,7 +55,7 @@ REQUIRED_PYTHON_VERSION = "3.12.13"
 REQUIRED_NUMPY_VERSION = "2.2.6"
 REQUIRED_VTK_VERSION = "9.5.2"
 REQUIRED_VTK_SOURCE_VERSION = "vtk version 9.5.2"
-KERNEL_ID = "drivaerml-native-containing-cell-candidate-v2"
+KERNEL_ID = "drivaerml-native-containing-cell-candidate-v3"
 REPLAY_SCHEMA = "drivaerml-velocity-cell-tolerance-replay-candidate-v1"
 DEFAULT_VALIDATION_CHUNK_SIZE = 1_000_000
 TOLERANCE_REPLAY_M = (0.5e-6, 1.0e-6, 2.0e-6)
@@ -186,11 +187,20 @@ def candidate_kernel_settings() -> dict[str, object]:
             ],
         },
         "candidate_discovery": {
-            "class": "vtkStaticCellLocator",
+            "class": "vtkCellTreeLocator",
             "method": "FindCellsWithinBounds",
-            "query": "point_axis_aligned_bounds_expanded_by_absolute_tolerance",
+            "query": (
+                "exact_native_cell_axis_aligned_bounds_intersection_with_"
+                "point_bounds_expanded_by_absolute_tolerance"
+            ),
             "query_bounds_order": ["xmin", "xmax", "ymin", "ymax", "zmin", "zmax"],
             "deduplicate_raw_cell_ids": True,
+            "settings": {
+                "automatic": True,
+                "number_of_cells_per_node": 8,
+                "number_of_build_buckets": 6,
+                "cache_cell_bounds": True,
+            },
         },
         "closure": {
             "cell_wrapper": "vtkGenericCell",
@@ -444,11 +454,24 @@ class NativeContainingCellKernel:
             grid, chunk_size=validation_chunk_size
         )
         self.grid = grid
-        self.locator = vtk.vtkStaticCellLocator()
+        self.locator = vtk.vtkCellTreeLocator()
+        self.locator.SetAutomatic(True)
+        self.locator.SetNumberOfCellsPerNode(8)
+        self.locator.SetNumberOfBuckets(6)
+        self.locator.SetCacheCellBounds(True)
         self.locator.SetDataSet(grid)
         self.locator.BuildLocator()
         if self.locator.GetDataSet() is not grid:
             raise VelocityAssignmentError("VTK locator did not retain the native grid")
+        if (
+            not bool(self.locator.GetAutomatic())
+            or int(self.locator.GetNumberOfCellsPerNode()) != 8
+            or int(self.locator.GetNumberOfBuckets()) != 6
+            or not bool(self.locator.GetCacheCellBounds())
+        ):
+            raise VelocityAssignmentError(
+                "VTK cell-tree locator did not retain the pinned build settings"
+            )
         # Assignment is deliberately serial.  Reuse the VTK wrappers and the
         # point-count-specific mutable buffers across candidates: constructing
         # them inside the native-cell loop is disproportionately expensive on

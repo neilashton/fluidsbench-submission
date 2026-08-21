@@ -45,7 +45,7 @@ SYNTHETIC_ASSIGNMENT_SHA256 = (
 )
 FULL_GRID_SHA256 = "46ffdde32e4892562d7e80e41a5727d50db22420efde26f17aa0db363b43a9f0"
 KERNEL_SETTINGS_SHA256 = (
-    "882371d517217698b8ba04d073aec8be171ec78d0bce8456abf4864043cb9ab0"
+    "0f90cf2bd07db98cdfe07e4f2a5e70ef69a4ac3be8f07ad18e3c07d617a2a678"
 )
 
 if VTK_READY:
@@ -151,6 +151,32 @@ class DrivAerMLVelocityGridDefinitionTests(unittest.TestCase):
         settings = candidate_kernel_settings()
         self.assertEqual(settings["kernel_id"], KERNEL_ID)
         self.assertIn("candidate_pending", settings["status"])
+        self.assertEqual(
+            settings["candidate_discovery"],
+            {
+                "class": "vtkCellTreeLocator",
+                "method": "FindCellsWithinBounds",
+                "query": (
+                    "exact_native_cell_axis_aligned_bounds_intersection_with_"
+                    "point_bounds_expanded_by_absolute_tolerance"
+                ),
+                "query_bounds_order": [
+                    "xmin",
+                    "xmax",
+                    "ymin",
+                    "ymax",
+                    "zmin",
+                    "zmax",
+                ],
+                "deduplicate_raw_cell_ids": True,
+                "settings": {
+                    "automatic": True,
+                    "number_of_cells_per_node": 8,
+                    "number_of_build_buckets": 6,
+                    "cache_cell_bounds": True,
+                },
+            },
+        )
         self.assertEqual(
             settings["selection"]["candidate_count"],
             "number_of_distinct_cells_passing_closure_predicate",
@@ -350,6 +376,30 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
         self.assertEqual(set(kernel._evaluation_scratch), {4, 5, 6, 8})
         for point_count, scratch in kernel._evaluation_scratch.items():
             self.assertEqual(len(scratch[-1]), point_count)
+
+    def test_cell_tree_broad_phase_uses_exact_native_cell_aabb_candidates(self) -> None:
+        kernel = NativeContainingCellKernel(self.mixed_grid())
+        assignment = kernel.assign(
+            (self.sample("tetra_only", 0, (0.1, 0.1, 0.1)),),
+            case_id="synthetic_exact_aabb",
+            source_sha256=SOURCE_HASHES,
+        )[0]
+        self.assertTrue(kernel.locator.IsA("vtkCellTreeLocator"))
+        self.assertTrue(kernel.locator.GetAutomatic())
+        self.assertEqual(kernel.locator.GetNumberOfCellsPerNode(), 8)
+        self.assertEqual(kernel.locator.GetNumberOfBuckets(), 6)
+        self.assertTrue(kernel.locator.GetCacheCellBounds())
+        self.assertEqual(
+            [
+                kernel._broad_ids.GetId(index)
+                for index in range(kernel._broad_ids.GetNumberOfIds())
+            ],
+            [0],
+        )
+        self.assertTrue(assignment.valid)
+        self.assertEqual(assignment.raw_vtk_cell_id, 0)
+        self.assertEqual(assignment.candidate_count, 1)
+        self.assertEqual(set(kernel._evaluation_scratch), {4})
 
     def test_shared_face_enumerates_both_and_selects_smallest_raw_id(self) -> None:
         kernel = NativeContainingCellKernel(self.two_hex_grid())
