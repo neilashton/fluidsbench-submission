@@ -45,7 +45,7 @@ SYNTHETIC_ASSIGNMENT_SHA256 = (
 )
 FULL_GRID_SHA256 = "46ffdde32e4892562d7e80e41a5727d50db22420efde26f17aa0db363b43a9f0"
 KERNEL_SETTINGS_SHA256 = (
-    "0f90cf2bd07db98cdfe07e4f2a5e70ef69a4ac3be8f07ad18e3c07d617a2a678"
+    "6944413760826de20c783acfe110728318b04185cb07feaa44c7fa54bc90089b"
 )
 
 if VTK_READY:
@@ -376,6 +376,129 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
         self.assertEqual(set(kernel._evaluation_scratch), {4, 5, 6, 8})
         for point_count, scratch in kernel._evaluation_scratch.items():
             self.assertEqual(len(scratch[-1]), point_count)
+
+    def test_reused_evaluate_position_outputs_are_reset_before_each_cell(self) -> None:
+        kernel = NativeContainingCellKernel(
+            self.two_hex_grid(), query_cache_enabled=False
+        )
+        kernel._closure_candidates((0.5, 0.5, 0.5), 1.0e-6)
+        closest, sub_id, parametric, distance_squared, weights = (
+            kernel._evaluation_scratch[8]
+        )
+        closest[:] = [math.nan, math.inf, -math.inf]
+        sub_id.set(23)
+        parametric[:] = [-math.inf, math.nan, math.inf]
+        distance_squared.set(-7.0)
+        weights[:] = [math.nan] * 8
+
+        class OneCellLocator:
+            @staticmethod
+            def FindCellsWithinBounds(_bounds: object, ids: object) -> None:
+                ids.InsertNextId(0)
+
+        class NoOutputCell:
+            observed: tuple[object, ...] | None = None
+
+            @staticmethod
+            def GetCellType() -> int:
+                return vtk.VTK_HEXAHEDRON
+
+            @staticmethod
+            def GetNumberOfPoints() -> int:
+                return 8
+
+            def EvaluatePosition(
+                self,
+                _point: object,
+                output_closest: list[float],
+                output_sub_id: object,
+                output_parametric: list[float],
+                output_distance_squared: object,
+                output_weights: list[float],
+            ) -> int:
+                self.observed = (
+                    tuple(output_closest),
+                    output_sub_id.get(),
+                    tuple(output_parametric),
+                    output_distance_squared.get(),
+                    tuple(output_weights),
+                )
+                return 1
+
+        class OneCellGrid:
+            @staticmethod
+            def GetCell(_raw_id: int, _cell: object) -> None:
+                return None
+
+        cell = NoOutputCell()
+        kernel.locator = OneCellLocator()
+        kernel.grid = OneCellGrid()
+        kernel._generic_cell = cell
+        candidates, failures = kernel._closure_candidates(
+            (0.5, 0.5, 0.5), 1.0e-6
+        )
+
+        self.assertEqual(candidates, (0,))
+        self.assertEqual(failures, ())
+        self.assertEqual(
+            cell.observed,
+            ((0.0, 0.0, 0.0), 0, (0.0, 0.0, 0.0), 0.0, (0.0,) * 8),
+        )
+
+    def test_malformed_evaluate_position_outputs_are_retained_as_failures(self) -> None:
+        kernel = NativeContainingCellKernel(
+            self.two_hex_grid(), query_cache_enabled=False
+        )
+
+        class OneCellLocator:
+            @staticmethod
+            def FindCellsWithinBounds(_bounds: object, ids: object) -> None:
+                ids.InsertNextId(0)
+
+        class OneCellGrid:
+            @staticmethod
+            def GetCell(_raw_id: int, _cell: object) -> None:
+                return None
+
+        class MalformedOutputCell:
+            def __init__(self, mode: str) -> None:
+                self.mode = mode
+
+            @staticmethod
+            def GetCellType() -> int:
+                return vtk.VTK_HEXAHEDRON
+
+            @staticmethod
+            def GetNumberOfPoints() -> int:
+                return 8
+
+            def EvaluatePosition(
+                self,
+                _point: object,
+                output_closest: list[float],
+                _output_sub_id: object,
+                _output_parametric: list[float],
+                output_distance_squared: object,
+                _output_weights: list[float],
+            ) -> int:
+                if self.mode == "negative_distance":
+                    output_distance_squared.set(-1.0)
+                elif self.mode == "nonfinite_output":
+                    output_closest[0] = math.nan
+                else:  # pragma: no cover - closed by the subtest inputs.
+                    raise AssertionError(self.mode)
+                return 0
+
+        kernel.locator = OneCellLocator()
+        kernel.grid = OneCellGrid()
+        for mode in ("negative_distance", "nonfinite_output"):
+            with self.subTest(mode=mode):
+                kernel._generic_cell = MalformedOutputCell(mode)
+                candidates, failures = kernel._closure_candidates(
+                    (0.5, 0.5, 0.5), 1.0e-6
+                )
+                self.assertEqual(candidates, ())
+                self.assertEqual(failures, (0,))
 
     def test_cell_tree_broad_phase_uses_exact_native_cell_aabb_candidates(self) -> None:
         kernel = NativeContainingCellKernel(self.mixed_grid())

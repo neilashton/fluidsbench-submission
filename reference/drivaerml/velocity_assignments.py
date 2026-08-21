@@ -55,7 +55,7 @@ REQUIRED_PYTHON_VERSION = "3.12.13"
 REQUIRED_NUMPY_VERSION = "2.2.6"
 REQUIRED_VTK_VERSION = "9.5.2"
 REQUIRED_VTK_SOURCE_VERSION = "vtk version 9.5.2"
-KERNEL_ID = "drivaerml-native-containing-cell-candidate-v3"
+KERNEL_ID = "drivaerml-native-containing-cell-candidate-v4"
 REPLAY_SCHEMA = "drivaerml-velocity-cell-tolerance-replay-candidate-v1"
 DEFAULT_VALIDATION_CHUNK_SIZE = 1_000_000
 TOLERANCE_REPLAY_M = (0.5e-6, 1.0e-6, 2.0e-6)
@@ -207,7 +207,11 @@ def candidate_kernel_settings() -> dict[str, object]:
             "method": "EvaluatePosition",
             "acceptance": "inside_return_code_1_or_sqrt(dist2)<=absolute_tolerance_m",
             "distance": "Euclidean_closest_point_distance_in_metres",
-            "evaluate_error_return_code": -1,
+            "evaluate_failure_conditions": [
+                "return_code_minus_1",
+                "non_finite_numeric_output",
+                "negative_squared_distance",
+            ],
             "evaluate_error_action": (
                 "retain_the_sample_as_invalid_and_record_sorted_failed_raw_cell_ids"
             ),
@@ -624,16 +628,17 @@ class NativeContainingCellKernel:
                 )
             distance2 = float(distance_squared)
             numeric_outputs = (*closest, *parametric, *weights, distance2)
-            if not all(math.isfinite(float(value)) for value in numeric_outputs):
-                raise VelocityAssignmentError(
-                    "vtkGenericCell.EvaluatePosition returned non-finite geometry "
-                    f"for raw VTK cell ID {raw_id}"
-                )
-            if distance2 < 0.0:
-                raise VelocityAssignmentError(
-                    "vtkGenericCell.EvaluatePosition returned a negative squared "
-                    f"distance for raw VTK cell ID {raw_id}"
-                )
+            if (
+                not all(math.isfinite(float(value)) for value in numeric_outputs)
+                or distance2 < 0.0
+            ):
+                # Some vtkPolyhedron failure paths return status 0 while leaving
+                # vtkCellLocator's negative distance sentinel in place.  Treat
+                # malformed numeric outputs exactly like the documented -1
+                # return: retain the raw ID and conservatively invalidate the
+                # complete sample instead of aborting or accepting the cell.
+                evaluation_failures.append(raw_id)
+                continue
             if status == 1 or distance2 <= tolerance_squared:
                 accepted.append(raw_id)
         return tuple(accepted), tuple(evaluation_failures)
