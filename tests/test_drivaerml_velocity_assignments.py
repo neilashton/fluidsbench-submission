@@ -325,6 +325,32 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
         )
         self.assertEqual(grid.GetCellData().GetNumberOfArrays(), 0)
 
+    def test_serial_vtk_query_objects_are_reused_with_exact_weight_lengths(self) -> None:
+        kernel = NativeContainingCellKernel(
+            self.mixed_grid(), query_cache_enabled=False
+        )
+        broad_ids_identity = id(kernel._broad_ids)
+        generic_cell_identity = id(kernel._generic_cell)
+        samples = (
+            self.sample("tetra_first", 0, (0.1, 0.1, 0.1)),
+            self.sample("tetra_second", 0, (0.2, 0.2, 0.2)),
+            self.sample("hex", 0, (2.5, 0.5, 0.5)),
+            self.sample("wedge", 0, (4.2, 0.2, 0.5)),
+            self.sample("pyramid", 0, (6.5, 0.5, 0.2)),
+            self.sample("polyhedron", 0, (8.5, 0.5, 0.5)),
+        )
+        assignments = kernel.assign(
+            samples,
+            case_id="synthetic_scratch_reuse",
+            source_sha256=SOURCE_HASHES,
+        )
+        self.assertTrue(all(row.valid for row in assignments))
+        self.assertEqual(id(kernel._broad_ids), broad_ids_identity)
+        self.assertEqual(id(kernel._generic_cell), generic_cell_identity)
+        self.assertEqual(set(kernel._evaluation_scratch), {4, 5, 6, 8})
+        for point_count, scratch in kernel._evaluation_scratch.items():
+            self.assertEqual(len(scratch[-1]), point_count)
+
     def test_shared_face_enumerates_both_and_selects_smallest_raw_id(self) -> None:
         kernel = NativeContainingCellKernel(self.two_hex_grid())
         assignments = kernel.assign(

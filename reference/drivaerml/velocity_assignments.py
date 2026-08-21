@@ -449,6 +449,23 @@ class NativeContainingCellKernel:
         self.locator.BuildLocator()
         if self.locator.GetDataSet() is not grid:
             raise VelocityAssignmentError("VTK locator did not retain the native grid")
+        # Assignment is deliberately serial.  Reuse the VTK wrappers and the
+        # point-count-specific mutable buffers across candidates: constructing
+        # them inside the native-cell loop is disproportionately expensive on
+        # the 147--163 million-cell pilot meshes and has no bearing on the
+        # locator, closure, or raw-ID tie-break semantics.
+        self._broad_ids = vtk.vtkIdList()
+        self._generic_cell = vtk.vtkGenericCell()
+        self._evaluation_scratch: dict[
+            int,
+            tuple[
+                list[float],
+                Any,
+                list[float],
+                Any,
+                list[float],
+            ],
+        ] = {}
         self.query_cache_enabled = query_cache_enabled
         self._query_cache: dict[
             bytes, tuple[tuple[int, ...], tuple[int, ...]]
@@ -515,7 +532,8 @@ class NativeContainingCellKernel:
             point_m[2] - tolerance_m,
             point_m[2] + tolerance_m,
         ]
-        broad_ids = vtk.vtkIdList()
+        broad_ids = self._broad_ids
+        broad_ids.Reset()
         self.locator.FindCellsWithinBounds(bounds, broad_ids)
         raw_ids = sorted(
             {int(broad_ids.GetId(index)) for index in range(broad_ids.GetNumberOfIds())}
@@ -528,7 +546,7 @@ class NativeContainingCellKernel:
                 raise VelocityAssignmentError(
                     f"VTK locator returned invalid raw cell ID {raw_id}"
                 )
-            cell = vtk.vtkGenericCell()
+            cell = self._generic_cell
             self.grid.GetCell(raw_id, cell)
             cell_type = int(cell.GetCellType())
             if cell_type not in _SUPPORTED_CELL_TYPE_IDS:
@@ -536,11 +554,17 @@ class NativeContainingCellKernel:
                     f"unsupported native cell type {cell_type} at raw VTK cell ID {raw_id}"
                 )
             cell_point_count = int(cell.GetNumberOfPoints())
-            closest = [0.0, 0.0, 0.0]
-            sub_id = vtk.reference(0)
-            parametric = [0.0, 0.0, 0.0]
-            distance_squared = vtk.reference(0.0)
-            weights = [0.0] * cell_point_count
+            scratch = self._evaluation_scratch.get(cell_point_count)
+            if scratch is None:
+                scratch = (
+                    [0.0, 0.0, 0.0],
+                    vtk.reference(0),
+                    [0.0, 0.0, 0.0],
+                    vtk.reference(0.0),
+                    [0.0] * cell_point_count,
+                )
+                self._evaluation_scratch[cell_point_count] = scratch
+            closest, sub_id, parametric, distance_squared, weights = scratch
             status = int(
                 cell.EvaluatePosition(
                     point_m,
