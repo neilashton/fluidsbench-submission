@@ -82,6 +82,10 @@ from .velocity_assignments import (
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
     OWNER_INVALID_REASONS,
+    POLYHEDRON_GEOMETRY_CACHE_MAX_ENTRIES,
+    POLYHEDRON_GEOMETRY_CACHE_MAX_TRIANGLES,
+    POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE,
+    QUERY_CACHE_KEY_ID,
     assignment_evidence_sha256,
     candidate_kernel_settings,
 )
@@ -1859,6 +1863,176 @@ def _validate_velocity_coverage(
         )
 
 
+def _validate_velocity_execution(value: object) -> None:
+    """Validate the candidate-v7 bounded deterministic runtime audits."""
+
+    execution = _exact_keys(
+        value,
+        {
+            "io_chunk_bytes",
+            "validation_chunk_cells",
+            "resolution_order_mm",
+            "geometric_tolerance_m",
+            "containing_cell_query_cache",
+            "polyhedron_geometry_cache",
+            "polyhedron_evaluation",
+        },
+        "velocity execution",
+    )
+    if (
+        _positive_integer(execution["io_chunk_bytes"], "io_chunk_bytes") < 1
+        or _positive_integer(
+            execution["validation_chunk_cells"], "validation_chunk_cells"
+        )
+        < 1
+        or execution["resolution_order_mm"] != [1, 2, 5, 10]
+        or execution["geometric_tolerance_m"]
+        != POINT_IN_CELL_CLOSURE_TOLERANCE_M
+    ):
+        raise DrivAerDiagnosticEvaluatorError(
+            "velocity receipt execution declaration is not exact"
+        )
+
+    query_cache = _exact_keys(
+        execution["containing_cell_query_cache"],
+        {"enabled", "key_id", "total_rows", "unique_query_keys", "cache_hits"},
+        "velocity containing-cell query-cache audit",
+    )
+    total_rows = _positive_integer(query_cache["total_rows"], "total_rows")
+    unique_queries = _positive_integer(
+        query_cache["unique_query_keys"], "unique_query_keys"
+    )
+    query_hits = _integer(query_cache["cache_hits"], "cache_hits")
+    expected_rows = 37_416 + 18_716 + 7_496 + VELOCITY_SAMPLE_COUNT
+    expected_unique_queries = 39_362
+    if (
+        query_cache["enabled"] is not True
+        or query_cache["key_id"] != QUERY_CACHE_KEY_ID
+        or total_rows != expected_rows
+        or unique_queries != expected_unique_queries
+        or query_hits != expected_rows - expected_unique_queries
+    ):
+        raise DrivAerDiagnosticEvaluatorError(
+            "velocity containing-cell query-cache audit is inconsistent"
+        )
+
+    geometry_cache = _exact_keys(
+        execution["polyhedron_geometry_cache"],
+        {
+            "policy",
+            "maximum_entries",
+            "maximum_emitted_triangles",
+            "current_entries",
+            "current_emitted_triangles",
+            "peak_entries",
+            "peak_emitted_triangles",
+            "cache_hits",
+            "cache_misses",
+            "evictions",
+            "oversized_entry_bypasses",
+            "fail_closed_preparations",
+            "vtk_objects_cached",
+        },
+        "velocity polyhedron geometry-cache audit",
+    )
+    maximum_entries = _positive_integer(
+        geometry_cache["maximum_entries"], "maximum_entries"
+    )
+    maximum_triangles = _positive_integer(
+        geometry_cache["maximum_emitted_triangles"],
+        "maximum_emitted_triangles",
+    )
+    current_entries = _integer(
+        geometry_cache["current_entries"], "current_entries"
+    )
+    current_triangles = _integer(
+        geometry_cache["current_emitted_triangles"],
+        "current_emitted_triangles",
+    )
+    peak_entries = _integer(geometry_cache["peak_entries"], "peak_entries")
+    peak_triangles = _integer(
+        geometry_cache["peak_emitted_triangles"], "peak_emitted_triangles"
+    )
+    cache_hits = _integer(geometry_cache["cache_hits"], "cache_hits")
+    cache_misses = _integer(geometry_cache["cache_misses"], "cache_misses")
+    evictions = _integer(geometry_cache["evictions"], "evictions")
+    oversized_bypasses = _integer(
+        geometry_cache["oversized_entry_bypasses"], "oversized_entry_bypasses"
+    )
+    preparation_failures = _integer(
+        geometry_cache["fail_closed_preparations"], "fail_closed_preparations"
+    )
+    if (
+        geometry_cache["policy"] != "deterministic_least_recently_used"
+        or geometry_cache["vtk_objects_cached"] is not False
+        or maximum_entries != POLYHEDRON_GEOMETRY_CACHE_MAX_ENTRIES
+        or maximum_triangles != POLYHEDRON_GEOMETRY_CACHE_MAX_TRIANGLES
+        or current_entries > maximum_entries
+        or peak_entries < current_entries
+        or peak_entries > maximum_entries
+        or current_triangles > maximum_triangles
+        or peak_triangles < current_triangles
+        or peak_triangles > maximum_triangles
+        or oversized_bypasses > cache_misses
+        or evictions > cache_misses - oversized_bypasses
+        or current_entries != cache_misses - oversized_bypasses - evictions
+        or preparation_failures > cache_misses
+    ):
+        raise DrivAerDiagnosticEvaluatorError(
+            "velocity polyhedron geometry-cache audit is inconsistent"
+        )
+
+    evaluation = _exact_keys(
+        execution["polyhedron_evaluation"],
+        {
+            "scope",
+            "broad_phase_polyhedron_visit_count",
+            "boundary_count",
+            "inside_count",
+            "outside_count",
+            "ambiguous_count",
+            "winding_classified_count",
+            "minimum_winding_classification_margin_steradian",
+            "classification_absolute_tolerance_steradian",
+        },
+        "velocity polyhedron evaluation audit",
+    )
+    visits = _integer(
+        evaluation["broad_phase_polyhedron_visit_count"],
+        "broad_phase_polyhedron_visit_count",
+    )
+    boundary = _integer(evaluation["boundary_count"], "boundary_count")
+    inside = _integer(evaluation["inside_count"], "inside_count")
+    outside = _integer(evaluation["outside_count"], "outside_count")
+    ambiguous = _integer(evaluation["ambiguous_count"], "ambiguous_count")
+    winding = _integer(
+        evaluation["winding_classified_count"], "winding_classified_count"
+    )
+    margin = _optional_finite(
+        evaluation["minimum_winding_classification_margin_steradian"],
+        "minimum_winding_classification_margin_steradian",
+        nonnegative=True,
+    )
+    if (
+        evaluation["scope"]
+        != "broad_phase_polyhedron_visits_for_uncached_exact_xyz_tolerance_queries"
+        or evaluation["classification_absolute_tolerance_steradian"]
+        != POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE
+        or visits != boundary + inside + outside + ambiguous
+        or visits != cache_hits + cache_misses
+        or winding != inside + outside
+        or ambiguous < preparation_failures
+        or (winding == 0) != (margin is None)
+        or (
+            margin is not None
+            and margin > POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE
+        )
+    ):
+        raise DrivAerDiagnosticEvaluatorError(
+            "velocity polyhedron evaluation audit is inconsistent"
+        )
+
+
 def _load_velocity_mapping(
     artifact_path: Path,
     receipt_path: Path,
@@ -1919,29 +2093,7 @@ def _load_velocity_mapping(
     )
     cell_count = _validate_velocity_geometry(receipt_root["geometry"], case_id)
     _validate_velocity_kernel(receipt_root["kernel"])
-    execution = _exact_keys(
-        receipt_root["execution"],
-        {
-            "io_chunk_bytes",
-            "validation_chunk_cells",
-            "resolution_order_mm",
-            "geometric_tolerance_m",
-        },
-        "velocity execution",
-    )
-    if (
-        _positive_integer(execution["io_chunk_bytes"], "io_chunk_bytes") < 1
-        or _positive_integer(
-            execution["validation_chunk_cells"], "validation_chunk_cells"
-        )
-        < 1
-        or execution["resolution_order_mm"] != [1, 2, 5, 10]
-        or execution["geometric_tolerance_m"]
-        != POINT_IN_CELL_CLOSURE_TOLERANCE_M
-    ):
-        raise DrivAerDiagnosticEvaluatorError(
-            "velocity receipt execution declaration is not exact"
-        )
+    _validate_velocity_execution(receipt_root["execution"])
     receipt_coverage = _exact_keys(
         receipt_root["coverage"],
         {

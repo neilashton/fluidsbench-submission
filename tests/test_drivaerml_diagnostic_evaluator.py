@@ -50,6 +50,10 @@ from reference.drivaerml.velocity_assignments import (
     CELL_EVALUATION_FAILURE_REASON_PREFIX,
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
+    POLYHEDRON_GEOMETRY_CACHE_MAX_ENTRIES,
+    POLYHEDRON_GEOMETRY_CACHE_MAX_TRIANGLES,
+    POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE,
+    QUERY_CACHE_KEY_ID,
     assignment_evidence_sha256,
     candidate_kernel_settings,
 )
@@ -507,6 +511,46 @@ class DiagnosticFixture:
                 "validation_chunk_cells": 10,
                 "resolution_order_mm": [1, 2, 5, 10],
                 "geometric_tolerance_m": POINT_IN_CELL_CLOSURE_TOLERANCE_M,
+                "containing_cell_query_cache": {
+                    "enabled": True,
+                    "key_id": QUERY_CACHE_KEY_ID,
+                    "total_rows": 67384,
+                    "unique_query_keys": 39362,
+                    "cache_hits": 28022,
+                },
+                "polyhedron_geometry_cache": {
+                    "policy": "deterministic_least_recently_used",
+                    "maximum_entries": POLYHEDRON_GEOMETRY_CACHE_MAX_ENTRIES,
+                    "maximum_emitted_triangles": (
+                        POLYHEDRON_GEOMETRY_CACHE_MAX_TRIANGLES
+                    ),
+                    "current_entries": 0,
+                    "current_emitted_triangles": 0,
+                    "peak_entries": 0,
+                    "peak_emitted_triangles": 0,
+                    "cache_hits": 0,
+                    "cache_misses": 0,
+                    "evictions": 0,
+                    "oversized_entry_bypasses": 0,
+                    "fail_closed_preparations": 0,
+                    "vtk_objects_cached": False,
+                },
+                "polyhedron_evaluation": {
+                    "scope": (
+                        "broad_phase_polyhedron_visits_for_uncached_exact_xyz_"
+                        "tolerance_queries"
+                    ),
+                    "broad_phase_polyhedron_visit_count": 0,
+                    "boundary_count": 0,
+                    "inside_count": 0,
+                    "outside_count": 0,
+                    "ambiguous_count": 0,
+                    "winding_classified_count": 0,
+                    "minimum_winding_classification_margin_steradian": None,
+                    "classification_absolute_tolerance_steradian": (
+                        POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE
+                    ),
+                },
             },
             "artifacts": summaries,
             "coverage": {
@@ -981,6 +1025,104 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                         autocfd5_profile=PROFILE,
                         case_id=CASE_ID,
                     )
+
+    def test_velocity_receipt_requires_consistent_v7_runtime_audits(self) -> None:
+        mutations = (
+            (
+                "missing audit",
+                lambda execution: execution.pop("polyhedron_evaluation"),
+                "velocity execution keys differ from schema",
+            ),
+            (
+                "query count",
+                lambda execution: execution[
+                    "containing_cell_query_cache"
+                ].__setitem__("total_rows", 67_385),
+                "query-cache audit is inconsistent",
+            ),
+            (
+                "cache cap",
+                lambda execution: execution[
+                    "polyhedron_geometry_cache"
+                ].__setitem__("maximum_entries", 8_191),
+                "geometry-cache audit is inconsistent",
+            ),
+            (
+                "cache accounting",
+                lambda execution: execution[
+                    "polyhedron_geometry_cache"
+                ].__setitem__("current_entries", 1),
+                "geometry-cache audit is inconsistent",
+            ),
+            (
+                "evaluation accounting",
+                lambda execution: execution[
+                    "polyhedron_evaluation"
+                ].__setitem__("broad_phase_polyhedron_visit_count", 1),
+                "evaluation audit is inconsistent",
+            ),
+            (
+                "classification margin",
+                lambda execution: execution[
+                    "polyhedron_evaluation"
+                ].__setitem__(
+                    "minimum_winding_classification_margin_steradian", 0.0
+                ),
+                "evaluation audit is inconsistent",
+            ),
+        )
+        for label, mutate, message in mutations:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as directory:
+                fixture = DiagnosticFixture(Path(directory))
+                receipt = json.loads(fixture.receipt_path.read_text(encoding="utf-8"))
+                mutate(receipt["execution"])
+                _write_json(fixture.receipt_path, receipt)
+                with self.assertRaisesRegex(
+                    DrivAerDiagnosticEvaluatorError, message
+                ):
+                    load_strict_velocity_10mm_mapping(
+                        fixture.velocity_path,
+                        fixture.receipt_path,
+                        autocfd5_profile=PROFILE,
+                        case_id=CASE_ID,
+                    )
+
+    def test_velocity_receipt_accepts_observed_v7_runtime_audits(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = DiagnosticFixture(Path(directory))
+            receipt = json.loads(fixture.receipt_path.read_text(encoding="utf-8"))
+            receipt["execution"]["polyhedron_geometry_cache"].update(
+                {
+                    "cache_hits": 4520,
+                    "cache_misses": 157,
+                    "current_emitted_triangles": 3656,
+                    "current_entries": 157,
+                    "peak_emitted_triangles": 3656,
+                    "peak_entries": 157,
+                }
+            )
+            receipt["execution"]["polyhedron_evaluation"].update(
+                {
+                    "broad_phase_polyhedron_visit_count": 4677,
+                    "boundary_count": 1735,
+                    "inside_count": 1771,
+                    "outside_count": 1171,
+                    "winding_classified_count": 2942,
+                    "minimum_winding_classification_margin_steradian": (
+                        0.0009999999998383515
+                    ),
+                }
+            )
+            _write_json(fixture.receipt_path, receipt)
+            mapping = load_strict_velocity_10mm_mapping(
+                fixture.velocity_path,
+                fixture.receipt_path,
+                autocfd5_profile=PROFILE,
+                case_id=CASE_ID,
+            )
+            self.assertEqual(
+                mapping.receipt_sha256, _sha256(fixture.receipt_path)
+            )
 
     def test_unmapped_prediction_chunk_is_still_hashed_and_consumed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
