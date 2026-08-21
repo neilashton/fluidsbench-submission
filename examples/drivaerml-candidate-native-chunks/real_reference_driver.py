@@ -34,6 +34,8 @@ from reference.drivaerml.diagnostic_evaluator import (  # noqa: E402
     CANDIDATE_SCHEMA as DIAGNOSTIC_EVIDENCE_SCHEMA,
     DrivAerDiagnosticEvaluatorError,
     EXPECTED_PROFILE_SHA256,
+    load_strict_cp_case_support,
+    load_strict_velocity_10mm_mapping,
 )
 from reference.drivaerml.evaluator import (  # noqa: E402
     CANDIDATE_EVIDENCE_SCHEMA as CORE_EVIDENCE_SCHEMA,
@@ -41,7 +43,10 @@ from reference.drivaerml.evaluator import (  # noqa: E402
     validate_native_source_contract,
 )
 from reference.drivaerml.native_surface import DrivAerNativeSurfaceError  # noqa: E402
-from reference.drivaerml.prediction_chunks import PredictionChunkError  # noqa: E402
+from reference.drivaerml.prediction_chunks import (  # noqa: E402
+    PredictionChunkError,
+    load_prediction_chunk_manifest,
+)
 from reference.drivaerml.source import (  # noqa: E402
     NativeSourceError,
     load_native_source_pin,
@@ -111,6 +116,7 @@ class _PreflightResult:
     config_path: Path
     config_sha256: str
     native_source_pin_sha256: str
+    autocfd5_profile_path: Path
     autocfd5_profile_sha256: str
     cases: tuple[RealCaseInputs, ...]
 
@@ -578,9 +584,103 @@ def _preflight(
         config_path=config_path,
         config_sha256=config_sha256,
         native_source_pin_sha256=pin_sha256,
+        autocfd5_profile_path=profile_path,
         autocfd5_profile_sha256=profile_sha256,
         cases=cases,
     )
+
+
+def _preflight_case_inputs(
+    preflight: _PreflightResult,
+) -> dict[Path, tuple[str, str]]:
+    """Validate every compact case input before any native-field evaluation.
+
+    The core evaluator reads multi-gigabyte native fields.  Validate both
+    cases' small Cp receipts first, then their velocity mappings and prediction
+    manifest metadata, so a stale later-case artifact cannot waste an earlier
+    case's core pass.  Prediction NPZ payloads remain lazily verified by the
+    evaluators themselves.
+    """
+
+    retained: dict[Path, tuple[str, str]] = {}
+    cp_supports: dict[str, Any] = {}
+    velocity_mappings: dict[str, Any] = {}
+
+    # Deliberately finish the Cp pass for every case before inspecting other
+    # metadata: this is the cheapest strict check and caught the stale pilot
+    # input that motivated the all-case preflight.
+    for inputs in preflight.cases:
+        case = preflight.pin.case(inputs.case_id)
+        support = load_strict_cp_case_support(
+            inputs.cp_support_json,
+            autocfd5_profile=preflight.autocfd5_profile_path,
+            case_id=inputs.case_id,
+            expected_boundary_sha256=case.boundary.sha256,
+        )
+        cp_supports[inputs.case_id] = support
+        retained[support.path] = (
+            f"{inputs.case_id} Cp support",
+            support.sha256,
+        )
+
+    for inputs in preflight.cases:
+        case = preflight.pin.case(inputs.case_id)
+        mapping = load_strict_velocity_10mm_mapping(
+            inputs.velocity_mapping_json,
+            inputs.velocity_receipt_json,
+            autocfd5_profile=preflight.autocfd5_profile_path,
+            case_id=inputs.case_id,
+            expected_source_pin_sha256=preflight.native_source_pin_sha256,
+            expected_source_part_sha256=tuple(
+                part.sha256 for part in case.volume_parts
+            ),
+        )
+        velocity_mappings[inputs.case_id] = mapping
+        retained[mapping.artifact_path] = (
+            f"{inputs.case_id} 10 mm velocity mapping",
+            mapping.artifact_sha256,
+        )
+        retained[mapping.receipt_path] = (
+            f"{inputs.case_id} velocity receipt",
+            mapping.receipt_sha256,
+        )
+
+    for inputs in preflight.cases:
+        case = preflight.pin.case(inputs.case_id)
+        cp_support = cp_supports[inputs.case_id]
+        velocity_mapping = velocity_mappings[inputs.case_id]
+        if cp_support.boundary_polygon_count != case.surface_cell_area.element_count:
+            raise RealReferenceDriverError(
+                f"{inputs.case_id} Cp support polygon count differs from the "
+                "pinned surface-cell count"
+            )
+        for path, expected_support_id, expected_count in (
+            (
+                inputs.surface_prediction_manifest,
+                "surface_native_cells",
+                cp_support.boundary_polygon_count,
+            ),
+            (
+                inputs.volume_prediction_manifest,
+                "volume_native_cells",
+                velocity_mapping.native_cell_count,
+            ),
+        ):
+            manifest = load_prediction_chunk_manifest(path)
+            if (
+                manifest.case_id != inputs.case_id
+                or manifest.support_id != expected_support_id
+                or manifest.total_row_count != expected_count
+            ):
+                raise RealReferenceDriverError(
+                    f"{inputs.case_id} {expected_support_id} prediction manifest "
+                    "identity/count differs from the strict native support"
+                )
+            retained[manifest.path] = (
+                f"{inputs.case_id} {expected_support_id} prediction manifest",
+                manifest.sha256,
+            )
+    return retained
 
 
 def run(args: argparse.Namespace) -> dict[str, object]:
@@ -611,6 +711,11 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             )
             for relative_path, digest in implementation_sha256.items()
         }
+    )
+    retained_inputs.update(_preflight_case_inputs(preflight))
+    _require_unchanged(retained_inputs, phase="during all-case preflight")
+    _require_repository_identity_unchanged(
+        repository_identity, phase="during all-case preflight"
     )
     output: Path = args.output
     output.parent.mkdir(parents=True, exist_ok=True)

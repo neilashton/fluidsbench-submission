@@ -321,6 +321,40 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
         return config, args
 
     @staticmethod
+    def _fake_preflight_pin():
+        records = {}
+        for case_id, part_count, surface_count, volume_count in (
+            ("run_1", 2, 11, 13),
+            ("run_44", 3, 17, 19),
+        ):
+            records[case_id] = SimpleNamespace(
+                boundary=SimpleNamespace(
+                    sha256=hashlib.sha256(
+                        f"{case_id}/boundary".encode("utf-8")
+                    ).hexdigest()
+                ),
+                surface_cell_area=SimpleNamespace(element_count=surface_count),
+                native_cell_count=volume_count,
+                volume_parts=tuple(
+                    SimpleNamespace(
+                        sha256=hashlib.sha256(
+                            f"{case_id}/part/{index}".encode("utf-8")
+                        ).hexdigest()
+                    )
+                    for index in range(part_count)
+                ),
+            )
+
+        class FakePin:
+            def case(self, case_id):
+                return records[case_id]
+
+            def resolve(self, case_id, dataset_root):
+                return SimpleNamespace(case_id=case_id, dataset_root=dataset_root)
+
+        return FakePin()
+
+    @staticmethod
     def _fake_real_evidence(
         kind: str,
         case_id: str,
@@ -469,6 +503,11 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                     return_value=self.sha256(args.native_source_pin),
                 ),
                 patch.object(
+                    self.real_driver,
+                    "_preflight_case_inputs",
+                    return_value={},
+                ),
+                patch.object(
                     self.real_driver, "_run_core_case", fake_evaluator("core")
                 ),
                 patch.object(
@@ -557,6 +596,294 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             )
             self.assertTrue((args.output / "validation-receipt.json").is_file())
             self.assertFalse((args.output / "submission.json").exists())
+
+    def test_real_driver_preflights_every_cp_support_before_core(self) -> None:
+        for bad_case, expected_cp_calls in (
+            ("run_1", ["run_1"]),
+            ("run_44", ["run_1", "run_44"]),
+        ):
+            with self.subTest(bad_case=bad_case), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                _, args = self._real_driver_fixture(root)
+                cp_calls: list[str] = []
+
+                def fake_cp_loader(path, *, case_id, **kwargs):
+                    cp_calls.append(case_id)
+                    if case_id == bad_case:
+                        raise self.real_driver.DrivAerDiagnosticEvaluatorError(
+                            f"bad {case_id} Cp support"
+                        )
+                    resolved = Path(path).resolve()
+                    return SimpleNamespace(
+                        path=resolved,
+                        sha256=self.sha256(resolved),
+                    )
+
+                with (
+                    patch.object(
+                        self.real_driver,
+                        "_repository_identity",
+                        return_value=CLEAN_REPOSITORY_IDENTITY,
+                    ),
+                    patch.object(
+                        self.real_driver,
+                        "load_native_source_pin",
+                        return_value=self._fake_preflight_pin(),
+                    ),
+                    patch.object(
+                        self.real_driver,
+                        "validate_native_source_contract",
+                        return_value=self.sha256(args.native_source_pin),
+                    ),
+                    patch.object(
+                        self.real_driver,
+                        "load_strict_cp_case_support",
+                        side_effect=fake_cp_loader,
+                    ),
+                    patch.object(self.real_driver, "_run_core_case") as core,
+                    patch.object(
+                        self.real_driver, "_run_diagnostic_case"
+                    ) as diagnostic,
+                ):
+                    with self.assertRaisesRegex(
+                        self.real_driver.DrivAerDiagnosticEvaluatorError,
+                        f"bad {bad_case} Cp support",
+                    ):
+                        self.real_driver.run(args)
+                self.assertEqual(cp_calls, expected_cp_calls)
+                core.assert_not_called()
+                diagnostic.assert_not_called()
+                self.assertFalse(args.output.exists())
+
+    def test_real_driver_preflights_later_velocity_support_before_core(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            _, args = self._real_driver_fixture(root)
+            pin = self._fake_preflight_pin()
+            cp_calls: list[str] = []
+            velocity_calls: list[str] = []
+
+            def fake_cp_loader(path, *, case_id, **kwargs):
+                cp_calls.append(case_id)
+                resolved = Path(path).resolve()
+                return SimpleNamespace(
+                    path=resolved,
+                    sha256=self.sha256(resolved),
+                    boundary_polygon_count=(
+                        pin.case(case_id).surface_cell_area.element_count
+                    ),
+                )
+
+            def fake_velocity_loader(
+                artifact_path, receipt_path, *, case_id, **kwargs
+            ):
+                velocity_calls.append(case_id)
+                if case_id == "run_44":
+                    raise self.real_driver.DrivAerDiagnosticEvaluatorError(
+                        "bad run_44 velocity support"
+                    )
+                artifact = Path(artifact_path).resolve()
+                receipt = Path(receipt_path).resolve()
+                return SimpleNamespace(
+                    artifact_path=artifact,
+                    artifact_sha256=self.sha256(artifact),
+                    receipt_path=receipt,
+                    receipt_sha256=self.sha256(receipt),
+                    native_cell_count=pin.case(case_id).native_cell_count,
+                )
+
+            with (
+                patch.object(
+                    self.real_driver,
+                    "_repository_identity",
+                    return_value=CLEAN_REPOSITORY_IDENTITY,
+                ),
+                patch.object(
+                    self.real_driver,
+                    "load_native_source_pin",
+                    return_value=pin,
+                ),
+                patch.object(
+                    self.real_driver,
+                    "validate_native_source_contract",
+                    return_value=self.sha256(args.native_source_pin),
+                ),
+                patch.object(
+                    self.real_driver,
+                    "load_strict_cp_case_support",
+                    side_effect=fake_cp_loader,
+                ),
+                patch.object(
+                    self.real_driver,
+                    "load_strict_velocity_10mm_mapping",
+                    side_effect=fake_velocity_loader,
+                ),
+                patch.object(self.real_driver, "_run_core_case") as core,
+                patch.object(
+                    self.real_driver, "_run_diagnostic_case"
+                ) as diagnostic,
+            ):
+                with self.assertRaisesRegex(
+                    self.real_driver.DrivAerDiagnosticEvaluatorError,
+                    "bad run_44 velocity support",
+                ):
+                    self.real_driver.run(args)
+            self.assertEqual(cp_calls, ["run_1", "run_44"])
+            self.assertEqual(velocity_calls, ["run_1", "run_44"])
+            core.assert_not_called()
+            diagnostic.assert_not_called()
+            self.assertFalse(args.output.exists())
+
+    def test_real_driver_compact_preflight_binds_mapping_and_manifest_counts(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config, args = self._real_driver_fixture(root)
+            config_document = json.loads(config.read_text(encoding="utf-8"))
+            for row in config_document["cases"]:
+                for key in self.real_driver.CASE_INPUT_KEYS - {"case_id"}:
+                    case_input = root / f"{row['case_id']}-{key}.dat"
+                    case_input.write_bytes(
+                        f"{row['case_id']}/{key}".encode("utf-8")
+                    )
+                    row[key] = case_input.name
+            config.write_text(
+                json.dumps(config_document, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            pin = self._fake_preflight_pin()
+            pin_sha256 = self.sha256(args.native_source_pin)
+            with (
+                patch.object(
+                    self.real_driver,
+                    "load_native_source_pin",
+                    return_value=pin,
+                ),
+                patch.object(
+                    self.real_driver,
+                    "validate_native_source_contract",
+                    return_value=pin_sha256,
+                ),
+            ):
+                preflight = self.real_driver._preflight(args)
+
+            cp_calls: list[str] = []
+            velocity_calls: list[str] = []
+            expected_manifests = [
+                (
+                    case_id,
+                    support_id,
+                    (
+                        pin.case(case_id).surface_cell_area.element_count
+                        if support_id == "surface_native_cells"
+                        else pin.case(case_id).native_cell_count
+                    ),
+                )
+                for case_id in ("run_1", "run_44")
+                for support_id in (
+                    "surface_native_cells",
+                    "volume_native_cells",
+                )
+            ]
+            manifest_calls: list[tuple[str, str, int]] = []
+
+            def fake_cp_loader(
+                path, *, autocfd5_profile, case_id, expected_boundary_sha256
+            ):
+                cp_calls.append(case_id)
+                self.assertEqual(
+                    Path(autocfd5_profile), preflight.autocfd5_profile_path
+                )
+                self.assertEqual(
+                    expected_boundary_sha256, pin.case(case_id).boundary.sha256
+                )
+                resolved = Path(path).resolve()
+                return SimpleNamespace(
+                    path=resolved,
+                    sha256=self.sha256(resolved),
+                    boundary_polygon_count=(
+                        pin.case(case_id).surface_cell_area.element_count
+                    ),
+                )
+
+            def fake_velocity_loader(
+                artifact_path,
+                receipt_path,
+                *,
+                autocfd5_profile,
+                case_id,
+                expected_source_pin_sha256,
+                expected_source_part_sha256,
+            ):
+                velocity_calls.append(case_id)
+                self.assertEqual(
+                    Path(autocfd5_profile), preflight.autocfd5_profile_path
+                )
+                self.assertEqual(expected_source_pin_sha256, pin_sha256)
+                self.assertEqual(
+                    expected_source_part_sha256,
+                    tuple(part.sha256 for part in pin.case(case_id).volume_parts),
+                )
+                artifact = Path(artifact_path).resolve()
+                receipt = Path(receipt_path).resolve()
+                return SimpleNamespace(
+                    artifact_path=artifact,
+                    artifact_sha256=self.sha256(artifact),
+                    receipt_path=receipt,
+                    receipt_sha256=self.sha256(receipt),
+                    native_cell_count=pin.case(case_id).native_cell_count,
+                )
+
+            def fake_manifest_loader(path):
+                case_id, support_id, count = expected_manifests[len(manifest_calls)]
+                manifest_calls.append((case_id, support_id, count))
+                resolved = Path(path).resolve()
+                return SimpleNamespace(
+                    path=resolved,
+                    sha256=self.sha256(resolved),
+                    case_id=case_id,
+                    support_id=support_id,
+                    total_row_count=count,
+                )
+
+            with (
+                patch.object(
+                    self.real_driver,
+                    "load_strict_cp_case_support",
+                    side_effect=fake_cp_loader,
+                ),
+                patch.object(
+                    self.real_driver,
+                    "load_strict_velocity_10mm_mapping",
+                    side_effect=fake_velocity_loader,
+                ),
+                patch.object(
+                    self.real_driver,
+                    "load_prediction_chunk_manifest",
+                    side_effect=fake_manifest_loader,
+                ),
+            ):
+                retained = self.real_driver._preflight_case_inputs(preflight)
+
+            self.assertEqual(cp_calls, ["run_1", "run_44"])
+            self.assertEqual(velocity_calls, ["run_1", "run_44"])
+            self.assertEqual(manifest_calls, expected_manifests)
+            expected_retained_paths = {
+                getattr(case, field)
+                for case in preflight.cases
+                for field in (
+                    "cp_support_json",
+                    "velocity_mapping_json",
+                    "velocity_receipt_json",
+                    "surface_prediction_manifest",
+                    "volume_prediction_manifest",
+                )
+            }
+            self.assertEqual(
+                set(retained),
+                expected_retained_paths,
+            )
+            for path, (_, digest) in retained.items():
+                self.assertEqual(digest, self.sha256(path))
 
     def test_real_driver_requires_clean_identifiable_git_checkout(self) -> None:
         for identity, message in (
@@ -667,6 +994,11 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                     "validate_native_source_contract",
                     return_value=self.sha256(args.native_source_pin),
                 ),
+                patch.object(
+                    self.real_driver,
+                    "_preflight_case_inputs",
+                    return_value={},
+                ),
                 patch.object(self.real_driver, "_run_core_case", fake_core),
                 patch.object(
                     self.real_driver,
@@ -766,6 +1098,11 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 ),
                 patch.object(
                     self.real_driver,
+                    "_preflight_case_inputs",
+                    return_value={},
+                ),
+                patch.object(
+                    self.real_driver,
                     "_run_core_case",
                     fake_evaluator("core"),
                 ),
@@ -841,6 +1178,11 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                     self.real_driver,
                     "validate_native_source_contract",
                     return_value=self.sha256(args.native_source_pin),
+                ),
+                patch.object(
+                    self.real_driver,
+                    "_preflight_case_inputs",
+                    return_value={},
                 ),
                 patch.object(
                     self.real_driver,
@@ -934,6 +1276,11 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                     self.real_driver,
                     "validate_native_source_contract",
                     return_value=self.sha256(args.native_source_pin),
+                ),
+                patch.object(
+                    self.real_driver,
+                    "_preflight_case_inputs",
+                    return_value={},
                 ),
                 patch.object(self.real_driver, "_run_core_case", fake_core),
                 patch.object(
