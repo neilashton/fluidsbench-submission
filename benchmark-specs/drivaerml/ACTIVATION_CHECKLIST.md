@@ -146,7 +146,22 @@ official leaderboard results.
    determinism. It does not cover the remaining 482 cases, the required
    0.5/1/2 micrometre replay, prediction convergence, or method ordering. The
    candidate `1e-3` steradian polyhedron-
-   classification tolerance remains pending owner scientific approval. The
+   classification tolerance now has explicit fail-closed semantics: boundary
+   distance is tested first, winding totals within `1e-3` of `0` or `4*pi` are
+   outside or inside respectively, and every intermediate or non-finite result
+   is unresolved. It remains pending the all-case replay and owner scientific
+   approval. Before convergence can be owner-review eligible, publish one
+   immutable 1 mm master validity mask covering all 18,109,344
+   case/line/sample keys, derive the 2, 5, and 10 mm masks only by strides 2,
+   5, and 10, and publish included, excluded, and unresolved counts and hashes.
+   Only `inside_morphed_solid` and `outside_released_fluid_domain` may be owner
+   exclusions; every other sample must map, every required line must retain
+   positive included arc length, and unresolved rows must be zero. The current
+   mask binding is empty/pending, so no pilot `no_native_cell...` or cell-
+   evaluation failure is an approved exclusion. Bind the mask SHA-256 into the
+   evaluator evidence and version the profile-display schema so excluded rows
+   carry explicit validity and reason fields rather than fabricated numeric
+   placeholders. The
    candidate prediction-based reducer now verifies complete native chunk manifests,
    streams pinned multipart `UMeanTrim` truth, separates geometric assignment
    invariance from loss/method-order convergence, and refuses owner-review

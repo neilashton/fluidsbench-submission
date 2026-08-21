@@ -48,6 +48,17 @@ For every selected case:
    pressure error will be the equal-case mean of RMSE across 209 unique probes;
    probes repeated between display panels count only once in that ranked value.
 
+Velocity validity is benchmark-owned support. Only coordinates confirmed to be
+inside the morphed solid or outside the released fluid domain may be excluded.
+Every other coordinate must map deterministically to a native volume cell or
+the affected line, and therefore that case's ranked velocity component, is
+unavailable. Every row remains explicit: the evaluator never snaps, silently
+omits, interpolates, extrapolates, or bridges across an excluded point. The
+candidate `1e-3` steradian polyhedron test is an angular numerical tolerance,
+separate from the `1e-6 m` boundary tolerance; intermediate solid-angle results
+fail closed. The all-case mask, tolerance replay, and owner approval are still
+pending.
+
 The primary leaderboard definition has nine components: four global fields,
 three independently ranked field-integrated coefficients, the velocity profiles,
 and the Cp probes. Each component uses unclipped physics-null skill
@@ -88,8 +99,8 @@ The prescribed 1, 2, 5, and 10 mm profile study can be checked with
 The prediction-based maintainer command described there verifies complete
 native chunk manifests, streams the pinned multipart `UMeanTrim` truth, and
 constructs the loss tensor itself. Reduced case pilots always remain
-ineligible; only the exact ordered 484-case scope can reach owner-review
-eligibility.
+ineligible; owner-review eligibility additionally requires the exact ordered
+484-case scope and the pending immutable owner validity-mask binding.
 Activation evidence still requires complete all-case velocity mappings and
 genuine predictions from at least three distinct trained model artifacts. Those
 model predictions are not currently available and remain an owner input; no

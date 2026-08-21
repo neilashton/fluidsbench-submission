@@ -859,10 +859,19 @@ def validate_velocity_assignment_evidence(
     *,
     expected_case_ids: Sequence[str],
     expected_tolerance_m: float = POINT_IN_CELL_CLOSURE_TOLERANCE_M,
+    allow_incomplete_audit: bool = False,
 ) -> dict[str, tuple[VelocityCellAssignmentEvidence, ...]]:
-    """Require complete case/sample evidence and positive support for each line."""
+    """Require exact rows and, by default, a valid mapping for every sample.
+
+    ``allow_incomplete_audit`` retains the historical masked-support checks for
+    non-ranking discovery evidence.  It is not permission to score before a
+    hash-bound owner validity mask distinguishes approved exclusions from
+    unresolved mapping failures.
+    """
 
     cases = _case_ids(expected_case_ids)
+    if not isinstance(allow_incomplete_audit, bool):
+        raise AutoCFD5Error("allow_incomplete_audit must be Boolean")
     tolerance = _finite(expected_tolerance_m, "expected_tolerance_m")
     if tolerance <= 0.0:
         raise AutoCFD5Error("expected_tolerance_m must be positive")
@@ -901,6 +910,14 @@ def validate_velocity_assignment_evidence(
         raise AutoCFD5Error(
             "velocity assignment evidence must cover every expected case/sample "
             f"exactly once (missing={missing}, unexpected={unexpected})"
+        )
+
+    invalid_keys = [key for key, value in by_key.items() if not value.valid]
+    if invalid_keys and not allow_incomplete_audit:
+        raise AutoCFD5Error(
+            "ranked velocity evidence cannot contain unresolved invalid mappings "
+            "before an immutable owner validity mask is bound "
+            f"(count={len(invalid_keys)})"
         )
 
     samples_by_line: dict[str, list[VelocitySampleDefinition]] = {}
@@ -1059,7 +1076,12 @@ def velocity_profile_rmse(
     truth_ratio: Any,
     valid: Any,
 ) -> float:
-    """Return arc-length trapezoidal RMSE without bridging invalid gaps."""
+    """Return a low-level masked RMSE without bridging invalid gaps.
+
+    Ranked use requires the Boolean mask to come from the immutable owner
+    validity support.  A raw locator failure must not be converted into a false
+    entry merely to obtain a partial score.
+    """
 
     try:
         distance = np.asarray(distance_m, dtype=np.float64)

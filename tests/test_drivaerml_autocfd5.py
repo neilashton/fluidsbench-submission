@@ -246,7 +246,7 @@ class DrivAerMLAutoCFD5Tests(unittest.TestCase):
                 expected_case_ids=("run_44",),
             )
 
-    def test_velocity_invalid_rows_are_not_omitted_or_gap_bridged(self) -> None:
+    def test_invalid_velocity_rows_fail_ranked_validation(self) -> None:
         assignments = [
             self._velocity_assignment("run_1", position)
             for position in range(VELOCITY_SAMPLE_COUNT)
@@ -256,11 +256,27 @@ class DrivAerMLAutoCFD5Tests(unittest.TestCase):
             assignments[position] = self._velocity_assignment(
                 "run_1", position, valid=False
             )
+        with self.assertRaisesRegex(
+            AutoCFD5Error, "cannot contain unresolved invalid mappings"
+        ):
+            validate_velocity_assignment_evidence(
+                assignments,
+                self.definition,
+                expected_case_ids=("run_1",),
+            )
         with self.assertRaisesRegex(AutoCFD5Error, "no positive contributing"):
             validate_velocity_assignment_evidence(
                 assignments,
                 self.definition,
                 expected_case_ids=("run_1",),
+                allow_incomplete_audit=True,
+            )
+        with self.assertRaisesRegex(AutoCFD5Error, "must be Boolean"):
+            validate_velocity_assignment_evidence(
+                assignments,
+                self.definition,
+                expected_case_ids=("run_1",),
+                allow_incomplete_audit=1,  # type: ignore[arg-type]
             )
 
         distance = np.asarray([0.0, 1.0, 2.0, 3.0, 4.0])

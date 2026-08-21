@@ -140,14 +140,16 @@ class DrivAerMLProfileConvergenceTests(unittest.TestCase):
             "ineligible_incomplete_official_484_case_scope",
         )
 
-    def test_complete_passing_study_is_activation_review_eligible(self) -> None:
+    def test_complete_passing_study_still_requires_owner_mask(self) -> None:
         result = evaluate_profile_convergence(
             _document(case_order=OFFICIAL_CASE_ORDER)
         )
 
         self.assertEqual(result["schema"], OUTPUT_SCHEMA)
-        self.assertTrue(result["profile_resolution_activation_eligible"])
-        self.assertEqual(result["status"], "eligible_for_owner_activation_review")
+        self.assertFalse(result["profile_resolution_activation_eligible"])
+        self.assertEqual(result["status"], "blocked_owner_validity_mask_not_bound")
+        self.assertIn("owner_validity_mask_not_bound", result["blocking_reasons"])
+        self.assertFalse(result["scope"]["owner_validity_mask_bound"])
         self.assertTrue(result["does_not_activate_scoring_contract"])
         self.assertFalse(result["owner_scientific_approval_claimed"])
         self.assertEqual(
@@ -393,10 +395,13 @@ class DrivAerMLProfileConvergenceTests(unittest.TestCase):
                 return_code = cli_main(
                     ["--input", str(input_path), "--output", str(output_path)]
                 )
-            self.assertEqual(return_code, 0)
+            self.assertEqual(return_code, 1)
             self.assertEqual(standard_error.getvalue(), "")
             result = json.loads(output_path.read_text(encoding="utf-8"))
-            self.assertTrue(result["profile_resolution_activation_eligible"])
+            self.assertFalse(result["profile_resolution_activation_eligible"])
+            self.assertIn(
+                "owner_validity_mask_not_bound", result["blocking_reasons"]
+            )
             self.assertRegex(result["input"]["file_byte_sha256"], r"^[0-9a-f]{64}$")
 
             ineligible = _document(

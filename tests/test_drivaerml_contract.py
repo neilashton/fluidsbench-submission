@@ -257,6 +257,71 @@ class DrivAerMLContractTests(unittest.TestCase):
             ],
         )
 
+    def test_velocity_validity_policy_is_owner_bound_and_fail_closed(self) -> None:
+        support_binding = self.specification["scoring_support"][
+            "profile_definition"
+        ]
+        policy = support_binding["velocity_validity_policy"]
+        self.assertEqual(
+            policy["id"], "drivaerml-autocfd5-velocity-validity-v1"
+        )
+        self.assertEqual(
+            self.specification["profile_definition"][
+                "velocity_validity_policy_id"
+            ],
+            policy["id"],
+        )
+        self.assertEqual(policy["authority"], "dataset_owner")
+        self.assertFalse(policy["participant_may_modify"])
+        self.assertEqual(
+            policy["mask_binding"],
+            {
+                "status": "pending_immutable_owner_release_no_exclusions_approved",
+                "file": None,
+                "sha256": None,
+            },
+        )
+        self.assertEqual(
+            policy["allowed_owner_exclusion_reasons"],
+            ["inside_morphed_solid", "outside_released_fluid_domain"],
+        )
+        scope = policy["mask_scope"]
+        self.assertEqual(scope["master_row_count"], 484 * 37416)
+        self.assertEqual(scope["ranked_row_count"], 484 * 3756)
+        self.assertEqual(
+            scope["study_grid_derivation"],
+            {"1_mm": 1, "2_mm": 2, "5_mm": 5, "10_mm": 10},
+        )
+        self.assertIn("gap_bridging", policy["forbidden_operations"])
+        self.assertIn("participant_defined_mask", policy["forbidden_operations"])
+        polyhedron = policy["polyhedron_classification"]
+        self.assertEqual(polyhedron["absolute_tolerance_steradian"], 1.0e-3)
+        self.assertEqual(polyhedron["spatial_boundary_tolerance_m"], 1.0e-6)
+        self.assertIn("pending", polyhedron["status"])
+
+        proposal = load_json(DATASET_ROOT / "proposal" / "contract-proposal.json")
+        velocity = proposal["deferred_contracts"]["profiles_and_cp_cuts"][
+            "velocity_profiles"
+        ]
+        self.assertEqual(velocity["validity_policy_id"], policy["id"])
+        self.assertEqual(
+            velocity["owner_mask_status"], policy["mask_binding"]["status"]
+        )
+        self.assertIn(
+            "unavailable", velocity["unresolved_mapping_failure_rule"]
+        )
+        metrics = {row["id"]: row for row in self.specification["metrics"]}
+        self.assertIn(
+            "zero_unresolved_nonexcluded_samples",
+            metrics["velocity_profile_uinf_rmse"]["availability"],
+        )
+        self.assertIn(
+            "zero_unresolved_nonexcluded_samples",
+            metrics["velocity_profile_experimental_subset_uinf_rmse"][
+                "availability"
+            ],
+        )
+
     def test_all_case_cp_candidate_evidence_is_bound_but_not_scoring_support(self) -> None:
         candidate = self.specification["scoring_support"]["profile_definition"][
             "candidate_cp_validation_evidence"

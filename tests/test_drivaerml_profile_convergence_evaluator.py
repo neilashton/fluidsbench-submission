@@ -289,7 +289,7 @@ class DrivAerMLNativeProfileConvergenceTests(unittest.TestCase):
                 assignment_evidence_sha256=_assignment_sha256(row_tuple),
             )
 
-    def test_arc_weighted_loss_uses_valid_edges_and_never_bridges_gap(self) -> None:
+    def test_partial_loss_is_rejected_without_bound_owner_mask(self) -> None:
         resolutions = []
         for resolution in self.mappings.resolutions:
             rows = list(resolution.rows)
@@ -340,29 +340,16 @@ class DrivAerMLNativeProfileConvergenceTests(unittest.TestCase):
                 expected_total_row_count=NATIVE_CELL_COUNT,
             )
 
-            losses, audit = case_profile_losses(
-                mappings,
-                definition=self.definition,
-                native_truth=truth,
-                prediction=prediction,
-            )
-
-            np.testing.assert_allclose(losses, 0.1, rtol=0.0, atol=2.0e-15)
-            self.assertEqual(len(audit["line_support"]), 64)
-            self.assertTrue(
-                all(row["no_invalid_gap_bridging"] for row in audit["line_support"])
-            )
-            v1_rows = [
-                row for row in audit["line_support"] if row["profile_id"] == "V1"
-            ]
-            self.assertEqual(len(v1_rows), 4)
-            self.assertTrue(all(row["invalid_sample_count"] == 1 for row in v1_rows))
-            self.assertTrue(
-                all(
-                    row["contributing_edge_count"] == row["sample_count"] - 3
-                    for row in v1_rows
+            with self.assertRaisesRegex(
+                NativeProfileConvergenceError,
+                "unresolved velocity mapping rows while no immutable owner validity mask",
+            ):
+                case_profile_losses(
+                    mappings,
+                    definition=self.definition,
+                    native_truth=truth,
+                    prediction=prediction,
                 )
-            )
 
     def test_positive_arc_support_is_fail_closed(self) -> None:
         resolutions = []
@@ -409,7 +396,7 @@ class DrivAerMLNativeProfileConvergenceTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(
                 NativeProfileConvergenceError,
-                "V1 1 mm has no positive contributing arc length",
+                "unresolved velocity mapping rows while no immutable owner validity mask",
             ):
                 case_profile_losses(
                     invalid,
@@ -488,6 +475,10 @@ class DrivAerMLNativeProfileConvergenceTests(unittest.TestCase):
             )
             self.assertIn(
                 "incomplete_official_484_case_scope",
+                result["blocking_reasons"],
+            )
+            self.assertIn(
+                "owner_validity_mask_not_bound",
                 result["blocking_reasons"],
             )
             self.assertEqual(result["claims"], FALSE_CLAIMS)

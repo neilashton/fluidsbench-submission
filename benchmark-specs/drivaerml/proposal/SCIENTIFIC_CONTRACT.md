@@ -376,6 +376,12 @@ replace the pending frozen evaluator and immutable scoring-support release.
 - Any exclusion must be published in the scoring support with `case_id`, raw
   entity ID, coordinates, reason, construction version, and source identity.
   The same frozen mask applies to every submission.
+- For AutoCFD5 velocity coordinates, the only permitted owner exclusions are
+  `inside_morphed_solid` and `outside_released_fluid_domain`. A failed or
+  ambiguous containing-cell query is not an exclusion. Every non-excluded
+  coordinate must map to one deterministic raw native cell ID or the affected
+  line is unavailable. Owner-excluded points and their adjacent edges contribute
+  nothing, and an evaluator must never bridge the resulting gap.
 - The former prototype profile and Cp-cut station names did not include a full
   extraction and ground-truth contract and were not supported by AB-UPT or
   GeoTransolver scoring. They have been replaced in the active candidate by the

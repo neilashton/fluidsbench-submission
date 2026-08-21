@@ -655,10 +655,11 @@ def case_profile_losses(
 ) -> tuple[list[list[float]], dict[str, object]]:
     """Compute all 16 x four losses for one method/case.
 
-    Invalid rows are retained as false mask entries.  Only an edge whose two
-    endpoints are valid contributes, and each case/line/resolution must retain
-    positive contributing arc length.  Failure of that support condition is a
-    hard error rather than an omitted line or an imputed result.
+    The current candidate has no hash-bound owner validity mask.  Consequently
+    every requested row must map: a raw invalid row is unresolved and cannot be
+    converted into a partial ranked convergence loss.  Once a non-empty owner
+    mask is published, it requires an explicit versioned binding that separates
+    approved exclusions from locator failures before masked arcs can be ranked.
     """
 
     if validated_geometry is None:
@@ -673,6 +674,20 @@ def case_profile_losses(
                 "prevalidated geometry record is not exact for this case"
             )
         geometry = dict(validated_geometry)
+    invalid_rows = [
+        (resolution.spacing_mm, row.profile_id, row.sample_index, row.reason)
+        for resolution in case.resolutions
+        for row in resolution.rows
+        if not row.valid
+    ]
+    if invalid_rows:
+        spacing_mm, profile_id, sample_index, reason = invalid_rows[0]
+        raise NativeProfileConvergenceError(
+            f"{case.case_id} contains {len(invalid_rows)} unresolved velocity "
+            "mapping rows while no immutable owner validity mask is bound; "
+            "partial profile convergence is forbidden "
+            f"(first={spacing_mm} mm/{profile_id}/{sample_index}: {reason})"
+        )
     required_ids = case.required_raw_cell_ids()
     if len(required_ids) == 0:
         raise NativeProfileConvergenceError(
@@ -1346,11 +1361,15 @@ def finalize_profile_convergence_evidence(
     method_requirements_passed = bool(
         convergence["method_set"]["requirements_passed"]
     )
+    owner_validity_mask_bound = bool(
+        convergence["scope"]["owner_validity_mask_bound"]
+    )
     combined_eligible = (
         geometry_invariant
         and numerical_loss_convergence_passed
         and complete_official_scope
         and method_requirements_passed
+        and owner_validity_mask_bound
     )
     blocking_reasons: list[str] = []
     if not complete_official_scope:
@@ -1363,6 +1382,8 @@ def finalize_profile_convergence_evidence(
         )
     if not numerical_loss_convergence_passed:
         blocking_reasons.append("profile_loss_or_method_order_convergence_failed")
+    if not owner_validity_mask_bound:
+        blocking_reasons.append("owner_validity_mask_not_bound")
     if combined_eligible:
         status = "eligible_for_owner_review_not_active"
     elif not complete_official_scope:
@@ -1371,8 +1392,10 @@ def finalize_profile_convergence_evidence(
         status = "ineligible_nested_geometric_assignment_changed"
     elif not method_requirements_passed:
         status = "blocked_missing_or_unpinned_genuine_method_predictions"
-    else:
+    elif not numerical_loss_convergence_passed:
         status = "ineligible_profile_loss_or_method_order_convergence_failed"
+    else:
+        status = "blocked_owner_validity_mask_not_bound"
     result = {
         "schema": CONSTRUCTED_EVIDENCE_SCHEMA,
         "schema_version": SCHEMA_VERSION,
@@ -1396,8 +1419,14 @@ def finalize_profile_convergence_evidence(
             "bounded_memory_prediction_access": True,
             "bounded_memory_case_access_supported": True,
             "complete_prediction_manifests_exhausted": True,
-            "invalid_gap_rule": (
-                "edge_contributes_only_when_both_endpoints_valid"
+            "validity_policy_id": (
+                "drivaerml-autocfd5-velocity-validity-v1"
+            ),
+            "owner_mask_status": (
+                "pending_immutable_owner_release_no_exclusions_approved"
+            ),
+            "invalid_mapping_action": (
+                "reject_partial_convergence_until_hash_bound_owner_mask_exists"
             ),
             "loss_input_canonical_json_sha256": canonical_sha256(loss_input),
         },

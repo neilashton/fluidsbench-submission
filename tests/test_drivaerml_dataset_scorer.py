@@ -570,7 +570,7 @@ class DatasetFixture:
                     "case_equal_line_mean_rmse": velocity_value,
                     "quantity": "magnitude(UMeanTrim)/Uinf",
                     "Uinf_m_per_s": 38.889,
-                    "arc_rule": "trapezoidal_squared_error_over_complete_line_arc_length",
+                    "arc_rule": "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging",
                     "aggregation": "equal_case_equal_line_macro_average",
                     "weighting": "trapezoidal_arc_length_within_line",
                 },
@@ -584,7 +584,7 @@ class DatasetFixture:
                     "case_equal_experimental_line_mean_rmse": velocity_value,
                     "quantity": "magnitude(UMeanTrim)/Uinf",
                     "Uinf_m_per_s": 38.889,
-                    "arc_rule": "trapezoidal_squared_error_over_complete_line_arc_length",
+                    "arc_rule": "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging",
                     "aggregation": "equal_case_equal_experimental_line_macro_average",
                     "weighting": "trapezoidal_arc_length_within_line",
                 },
@@ -962,6 +962,32 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
             _write_json(path, diagnostic)
             with self.assertRaisesRegex(DrivAerDatasetScorerError, "prediction identity mismatch"):
                 fixture.evaluate()
+
+        for metric_id, key, forged in (
+            (
+                "velocity_profile_uinf_rmse",
+                "quantity",
+                "interpolated_velocity/Uinf",
+            ),
+            (
+                "velocity_profile_experimental_subset_uinf_rmse",
+                "arc_rule",
+                "average_available_points",
+            ),
+        ):
+            with self.subTest(
+                metric_id=metric_id, key=key
+            ), tempfile.TemporaryDirectory() as directory:
+                fixture = DatasetFixture(Path(directory))
+                path = fixture.diagnostic_dir / "run_2.json"
+                diagnostic = json.loads(path.read_text())
+                diagnostic["metrics"][metric_id][key] = forged
+                _write_json(path, diagnostic)
+                with self.assertRaisesRegex(
+                    DrivAerDatasetScorerError,
+                    "canonical metric contract mismatch",
+                ):
+                    fixture.evaluate()
 
         with tempfile.TemporaryDirectory() as directory:
             fixture = DatasetFixture(Path(directory))

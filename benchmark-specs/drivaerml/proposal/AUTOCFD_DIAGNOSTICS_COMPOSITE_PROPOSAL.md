@@ -129,13 +129,19 @@ candidate-count semantics are not yet frozen: activation requires a published,
 hashed reference evaluator plus golden all-case assignment and tolerance
 replays. The rules above are therefore proposed selection semantics, not a
 claim that an executable locator is already released.
-Samples inside the morphed solid or outside the released fluid domain are
-marked by an owner-published validity mask; there is no snapping or
-extrapolation, and a submitter may not create or alter that mask. The scoring
-support publishes XYZ, distance from the line start, validity/reason, source
-raw cell ID, candidate count, geometric tolerance, value, and hashes for every
-case. A separately reported PointData-interpolated trace is a sensitivity
-diagnostic only.
+Only samples confirmed to be inside the morphed solid or outside the released
+fluid domain may be excluded, and they must be marked by a hash-bound,
+owner-published validity mask. A submitter may not create or alter that mask.
+`no_native_cell_within_closure_tolerance`, a failed native-cell evaluation, or
+an ambiguous polyhedron solid-angle result is an unresolved mapping failure,
+not an automatic exclusion. Every non-excluded sample must select one
+deterministic raw VTK cell ID; otherwise its line and the case's complete ranked
+velocity component are unavailable pending a support correction. There is no
+snapping, interpolation, extrapolation, or silent omission. The scoring support
+publishes XYZ, distance from the line start, owner inclusion/reason, mapping
+status/reason, source raw cell ID, candidate count, geometric tolerance, value,
+and hashes for every case. A separately reported PointData-interpolated trace
+is a sensitivity diagnostic only.
 
 For profile reduction, let `q=|U|/U_inf`, `e_k=q_pred,k-q_true,k`, and
 `ds_k=s_(k+1)-s_k`. For case `c` and line `l`, let `A_cl` contain only edges
@@ -144,9 +150,11 @@ whose two endpoints are valid, and calculate
 `R_cl = sqrt(sum_(k in A_cl) ds_k*(e_k^2+e_(k+1)^2)/2 /
              sum_(k in A_cl) ds_k)`.
 
-Never bridge an invalid gap. Every case/line must retain positive contributing
-length; otherwise the profile component remains unranked pending an
-owner-reviewed support correction. The ranked profile error is
+Only owner-excluded endpoints may be removed from `A_cl`; an unresolved mapping
+failure makes the line unavailable rather than silently shortening it. Never
+bridge an excluded gap. Every case/line must retain positive contributing
+length after the owner mask is applied; otherwise the profile component remains
+unranked pending an owner-reviewed support correction. The ranked profile error is
 `E_profile = mean_c(mean_l(R_cl))`, with all 16 lines and cases weighted
 equally. This is an RMSE of an already freestream-normalized quantity, not an
 RMSE divided by a second data-dependent normalizer.

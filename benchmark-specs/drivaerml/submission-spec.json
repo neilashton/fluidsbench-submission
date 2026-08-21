@@ -34,7 +34,7 @@
       },
       "proposal_contract": {
         "file": "proposal/contract-proposal.json",
-        "sha256": "d76a17737de00716231ea480b58de99f85bea6edcaaf290f5a7a725b21050ffb"
+        "sha256": "e8b6836bf1acc8190629a2a9d30ed07958511f906660a3bd23b051d843f7be34"
       }
     },
     "case_file_binding": {
@@ -244,6 +244,71 @@
       "file": "autocfd5-profiles-v8.json",
       "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
       "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+      "velocity_validity_policy": {
+        "id": "drivaerml-autocfd5-velocity-validity-v1",
+        "status": "candidate_policy_defined_owner_mask_pending",
+        "authority": "dataset_owner",
+        "participant_may_modify": false,
+        "mask_scope": {
+          "case_count": 484,
+          "line_count": 16,
+          "master_spacing_m": 0.001,
+          "master_samples_per_case": 37416,
+          "master_row_count": 18109344,
+          "ranked_spacing_m": 0.01,
+          "ranked_samples_per_case": 3756,
+          "ranked_row_count": 1817904,
+          "row_key": [
+            "case_id",
+            "profile_id",
+            "master_sample_index"
+          ],
+          "study_grid_derivation": {
+            "1_mm": 1,
+            "2_mm": 2,
+            "5_mm": 5,
+            "10_mm": 10
+          }
+        },
+        "mask_binding": {
+          "status": "pending_immutable_owner_release_no_exclusions_approved",
+          "file": null,
+          "sha256": null
+        },
+        "allowed_owner_exclusion_reasons": [
+          "inside_morphed_solid",
+          "outside_released_fluid_domain"
+        ],
+        "mapping_failures_are_not_automatic_exclusions": [
+          "no_native_cell_within_closure_tolerance",
+          "native_cell_closure_evaluation_failed_for_broad_phase_cells:<sorted_raw_ids>",
+          "ambiguous_polyhedron_solid_angle_classification"
+        ],
+        "included_sample_rule": "every_non_excluded_sample_must_select_one_deterministic_raw_vtk_cell_id",
+        "unresolved_sample_rule": "an_unmapped_non_excluded_sample_makes_its_line_and_case_ranked_velocity_component_unavailable",
+        "excluded_sample_rule": "retain_the_row_explicitly_but_give_the_point_and_its_adjacent_edges_zero_metric_support",
+        "arc_rule": "a_trapezoidal_edge_contributes_only_when_both_adjacent_endpoints_are_owner_included_and_mapped",
+        "line_minimum_support": "at_least_one_positive_length_owner_included_mapped_adjacent_edge",
+        "case_availability": "all_16_required_line_metrics_must_be_available",
+        "forbidden_operations": [
+          "silent_omission",
+          "snapping",
+          "interpolation",
+          "extrapolation",
+          "gap_bridging",
+          "participant_defined_mask"
+        ],
+        "polyhedron_classification": {
+          "status": "candidate_selected_all_case_replay_and_owner_approval_pending",
+          "spatial_boundary_test_precedes_winding": true,
+          "spatial_boundary_tolerance_m": 1e-06,
+          "absolute_solid_angle_target_inside_steradian": 12.566370614359172,
+          "absolute_solid_angle_target_outside_steradian": 0.0,
+          "absolute_tolerance_steradian": 0.001,
+          "intermediate_or_nonfinite_action": "retain_explicit_unresolved_invalid_row_no_cell_assignment"
+        },
+        "activation_requirement": "publish_and_hash_the_complete_owner_mask_and_all_case_assignments_with_zero_unresolved_non_excluded_samples"
+      },
       "candidate_cp_validation_evidence": {
         "file": "evidence/cp-mapping-all484-hardened.json",
         "sha256": "634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81",
@@ -661,18 +726,20 @@
       "unit": "",
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{16}\\sum_l\\sqrt{\\frac{\\int_l(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_l ds}}",
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{16}\\sum_l\\sqrt{\\frac{\\int_{A_{cl}}(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_{A_{cl}} ds}}",
       "aggregation": "equal_case_equal_line_macro_average",
-      "weighting": "trapezoidal_arc_length_within_line"
+      "weighting": "trapezoidal_arc_length_within_line",
+      "availability": "all_16_lines_available_for_every_case_after_owner_mask_and_zero_unresolved_nonexcluded_samples"
     },
     {
       "id": "velocity_profile_experimental_subset_uinf_rmse",
       "unit": "",
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{11}\\sum_{l\\in E}\\sqrt{\\frac{\\int_l(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_l ds}}",
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{11}\\sum_{l\\in E}\\sqrt{\\frac{\\int_{A_{cl}}(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_{A_{cl}} ds}}",
       "aggregation": "equal_case_equal_experimental_line_macro_average",
-      "weighting": "trapezoidal_arc_length_within_line"
+      "weighting": "trapezoidal_arc_length_within_line",
+      "availability": "all_11_experimental_lines_available_for_every_case_after_owner_mask_and_zero_unresolved_nonexcluded_samples"
     },
     {
       "id": "cp_probe_rmse",
@@ -697,7 +764,8 @@
     "id": "drivaerml-autocfd5-v8-candidate",
     "file": "autocfd5-profiles-v8.json",
     "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
-    "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending"
+    "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+    "velocity_validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1"
   },
   "profile_panels": [
     {

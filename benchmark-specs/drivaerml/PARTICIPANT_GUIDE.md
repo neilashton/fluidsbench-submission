@@ -93,6 +93,17 @@ invalid rows and is awaiting owner visual review and disposition. Neither
 candidate mapping is immutable scoring support; contributors must not invent
 their own replacements for official scoring.
 
+Participants submit the complete native `UMeanTrim` field and do not create or
+modify velocity-profile validity masks. The frozen evaluator will apply the
+owner-published mask and containing-cell assignments. Only
+`inside_morphed_solid` and `outside_released_fluid_domain` are permitted owner
+exclusion reasons. An unresolved containing-cell or cell-evaluation failure is
+not an automatic exclusion: it makes the required line unavailable until the
+support is corrected. Owner-excluded coordinates remain explicit and remove
+only their point and adjacent trapezoidal edges; gaps are never bridged. No
+mask has yet been approved, so the current candidate evaluator conservatively
+makes a velocity result unavailable when a mapping row is invalid.
+
 ## 5. Install and run the candidate tools
 
 The generic repository checks use `requirements.txt`. The exact recommended

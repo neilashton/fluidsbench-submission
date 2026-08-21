@@ -3024,7 +3024,7 @@ def evaluate_loaded_case_diagnostics(
         "case_equal_line_mean_rmse": None,
         "quantity": "magnitude(UMeanTrim)/Uinf",
         "Uinf_m_per_s": U_INF_M_PER_S,
-        "arc_rule": "trapezoidal_squared_error_over_complete_line_arc_length",
+        "arc_rule": "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging",
         "aggregation": "equal_case_equal_line_macro_average",
         "weighting": "trapezoidal_arc_length_within_line",
     }
@@ -3038,7 +3038,7 @@ def evaluate_loaded_case_diagnostics(
         "case_equal_experimental_line_mean_rmse": None,
         "quantity": "magnitude(UMeanTrim)/Uinf",
         "Uinf_m_per_s": U_INF_M_PER_S,
-        "arc_rule": "trapezoidal_squared_error_over_complete_line_arc_length",
+        "arc_rule": "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging",
         "aggregation": "equal_case_equal_experimental_line_macro_average",
         "weighting": "trapezoidal_arc_length_within_line",
     }

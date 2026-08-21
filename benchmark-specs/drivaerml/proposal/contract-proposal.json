@@ -556,10 +556,19 @@
           0.000002
         ],
         "face_tie_break": "smallest_raw_vtk_cell_id",
-        "invalid_gap_rule": "trapezoid_edge_contributes_only_if_both_endpoints_valid_no_gap_bridging",
-        "minimum_case_line_support": "positive_contributing_arc_length",
+        "validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1",
+        "owner_mask_status": "pending_immutable_owner_release_no_exclusions_approved",
+        "allowed_owner_exclusion_reasons": [
+          "inside_morphed_solid",
+          "outside_released_fluid_domain"
+        ],
+        "unresolved_mapping_failure_rule": "unmapped_nonexcluded_sample_makes_case_line_and_complete_ranked_case_velocity_component_unavailable",
+        "invalid_gap_rule": "only_owner_excluded_endpoints_may_be_removed_and_trapezoid_edge_contributes_only_if_both_endpoints_owner_included_and_mapped_no_gap_bridging",
+        "minimum_case_line_support": "positive_owner_included_mapped_contributing_arc_length",
+        "polyhedron_solid_angle_absolute_tolerance_steradian": 0.001,
+        "polyhedron_ambiguous_action": "retain_explicit_unresolved_invalid_row_no_cell_assignment",
         "case_line_error_id": "velocity_profile_uinf_rmse",
-        "case_line_error_equation": "sqrt(sum_valid_edges(ds_k*(e_k^2+e_kplus1^2)/2)/sum_valid_edges(ds_k)), where e=norm(U_pred)/U_inf-norm(U_truth)/U_inf",
+        "case_line_error_equation": "sqrt(sum_owner_included_mapped_edges(ds_k*(e_k^2+e_kplus1^2)/2)/sum_owner_included_mapped_edges(ds_k)), where e=norm(U_pred)/U_inf-norm(U_truth)/U_inf",
         "ranked_error_equation": "mean_cases(mean_16_lines(case_line_error))",
         "experimental_subset_report_equation": "mean_cases(mean_11_declared_experimental_parity_lines(case_line_error))",
         "scoring_spacing_m": 0.01,

@@ -1526,12 +1526,18 @@ def _validate_diagnostic_case(
         or velocity["metric_id"] != "velocity_profile_uinf_rmse"
         or velocity["required_line_count"] != len(contract.profile_velocity_line_ids)
         or velocity["required_sample_count"] != contract.profile_velocity_sample_count
+        or velocity["quantity"] != "magnitude(UMeanTrim)/Uinf"
+        or velocity["arc_rule"]
+        != "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging"
         or velocity["aggregation"] != "equal_case_equal_line_macro_average"
         or velocity["weighting"] != "trapezoidal_arc_length_within_line"
         or not _same_float(_finite(velocity["Uinf_m_per_s"], f"{case_id} velocity Uinf"), u_inf)
         or experimental_velocity["metric_id"] != "velocity_profile_experimental_subset_uinf_rmse"
         or experimental_velocity["required_line_count"] != len(contract.profile_experimental_velocity_line_ids)
         or experimental_velocity["required_profile_ids"] != list(contract.profile_experimental_velocity_line_ids)
+        or experimental_velocity["quantity"] != "magnitude(UMeanTrim)/Uinf"
+        or experimental_velocity["arc_rule"]
+        != "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging"
         or experimental_velocity["aggregation"] != "equal_case_equal_experimental_line_macro_average"
         or experimental_velocity["weighting"] != "trapezoidal_arc_length_within_line"
         or not _same_float(_finite(experimental_velocity["Uinf_m_per_s"], f"{case_id} experimental velocity Uinf"), u_inf)

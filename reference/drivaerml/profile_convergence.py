@@ -254,6 +254,37 @@ def _contract_binding(path: str | Path) -> dict[str, object]:
             raise ProfileConvergenceError(
                 f"contract proposal has unexpected {key!r}; checker refuses drift"
             )
+    validity_expected = {
+        "validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1",
+        "owner_mask_status": (
+            "pending_immutable_owner_release_no_exclusions_approved"
+        ),
+        "allowed_owner_exclusion_reasons": [
+            "inside_morphed_solid",
+            "outside_released_fluid_domain",
+        ],
+        "unresolved_mapping_failure_rule": (
+            "unmapped_nonexcluded_sample_makes_case_line_and_complete_ranked_"
+            "case_velocity_component_unavailable"
+        ),
+        "invalid_gap_rule": (
+            "only_owner_excluded_endpoints_may_be_removed_and_trapezoid_edge_"
+            "contributes_only_if_both_endpoints_owner_included_and_mapped_no_"
+            "gap_bridging"
+        ),
+        "minimum_case_line_support": (
+            "positive_owner_included_mapped_contributing_arc_length"
+        ),
+        "polyhedron_solid_angle_absolute_tolerance_steradian": 0.001,
+        "polyhedron_ambiguous_action": (
+            "retain_explicit_unresolved_invalid_row_no_cell_assignment"
+        ),
+    }
+    for key, expected_value in validity_expected.items():
+        if velocity.get(key) != expected_value:
+            raise ProfileConvergenceError(
+                f"contract proposal has unexpected {key!r}; checker refuses drift"
+            )
     if velocity.get("line_count") != 16 or velocity.get("ranked_line_count") != 16:
         raise ProfileConvergenceError(
             "contract proposal must rank all 16 velocity-profile lines"
@@ -270,6 +301,8 @@ def _contract_binding(path: str | Path) -> dict[str, object]:
         "reference_spacing_mm": REFERENCE_SPACING_MM,
         "candidate_spacings_mm": list(SPACINGS_MM[1:]),
         "activation_candidate_spacing_mm": ACTIVATION_CANDIDATE_SPACING_MM,
+        "validity_policy_id": velocity["validity_policy_id"],
+        "owner_mask_status": velocity["owner_mask_status"],
     }
 
 
@@ -719,10 +752,14 @@ def evaluate_profile_convergence(
     )
     method_requirements_passed = bool(method_summary["requirements_passed"])
     complete_official_case_scope = tuple(case_order) == OFFICIAL_CASE_ORDER
+    owner_validity_mask_bound = (
+        contract["owner_mask_status"] == "immutable_owner_release_bound"
+    )
     activation_eligible = (
         all_candidate_spacings_passed
         and method_requirements_passed
         and complete_official_case_scope
+        and owner_validity_mask_bound
     )
     passing_spacings = [
         int(result["spacing_mm"])
@@ -737,14 +774,18 @@ def evaluate_profile_convergence(
         blocking_reasons.append("incomplete_or_unpinned_genuine_method_set")
     if not all_candidate_spacings_passed:
         blocking_reasons.append("resolution_threshold_or_method_order_failure")
+    if not owner_validity_mask_bound:
+        blocking_reasons.append("owner_validity_mask_not_bound")
     if activation_eligible:
         status = "eligible_for_owner_activation_review"
     elif not complete_official_case_scope:
         status = "ineligible_incomplete_official_484_case_scope"
     elif not method_requirements_passed:
         status = "ineligible_incomplete_or_unpinned_genuine_method_set"
-    else:
+    elif not all_candidate_spacings_passed:
         status = "ineligible_resolution_threshold_failure"
+    else:
+        status = "blocked_owner_validity_mask_not_bound"
 
     input_binding: dict[str, object] = {
         "canonical_json_sha256": canonical_input_sha,
@@ -772,6 +813,7 @@ def evaluate_profile_convergence(
             "profile_count": len(PROFILE_ORDER),
             "spacings_mm": list(SPACINGS_MM),
             "complete_rectangular_coverage": True,
+            "owner_validity_mask_bound": owner_validity_mask_bound,
         },
         "method_set": method_summary,
         "thresholds": {
