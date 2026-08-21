@@ -15,6 +15,10 @@ The same file identities and non-activation status are available to tooling in
 | [`native-volume-run1-run44-equal-cell-primary-pilot.json`](native-volume-run1-run44-equal-cell-primary-pilot.json) | `d009b6ac708fa320d21492b4cc44fc846b61e99b445836b5dedc704a934592d7` | Two-case implementation evidence for multipart reconstruction, native fields, raw order, complete coverage, and equal-cell metric invariance. It covers only `run_1` and `run_44` and is not scoring support. |
 | [`native-volume-equal-cell-primary-all484.json`](native-volume-equal-cell-primary-all484.json) | `bda42a125ffb4d6484756e77ac7e495974f39d4bce3e663154322e9e560827c7` | Passing all-484 audit of 978 pinned VTU segments, native `CellData`, tuple/component counts, finite values, declared units, raw-cell order and complete duplicate-free coverage. Two chunk partitions agree within `2.22e-16` for additive statistics and `5.69e-14` for metrics. This directly exercises the equal-native-cell volume contract; it is not a physics-null baseline, model result, or scoring support. |
 | [`native-volume-equal-cell-primary-all484-provenance.json`](native-volume-equal-cell-primary-all484-provenance.json) | `b5ffe2234bb1597cf041ff5d97458f3d0d6e81db7a30591a7e26f51ebc032fde` | Path-free provenance for the all-484 audit: exact committed generator revision and source hashes, Python/NumPy runtime, launcher hash, scheduler scope, aggregate hash, and a canonical digest over all 484 external case-receipt identities. It does not turn the audit into scoring support or bundle the 10.7 MB receipt set. |
+| [`velocity-mapping-run1-run44-candidate-v7-pilot.json`](velocity-mapping-run1-run44-candidate-v7-pilot.json) | `91a7bb4cb7b7c6167c3577f62745021409c93cebc6b2685a57cdfe1debc06d76` | Explicit non-public candidate-v7 containing-cell geometry pilot for `run_1` and `run_44`. The compact aggregate accounts for all 134,768 requested rows at 1, 2, 5, and 10 mm, including 4,489 invalid rows, and hash-binds the complete duplicate-free external row-level mapping files. It is not an all-case tolerance replay, prediction convergence result, model-ordering result, validity mask, or scoring support. |
+| [`velocity-run1-run44-candidate-v7-pilot-provenance.json`](velocity-run1-run44-candidate-v7-pilot-provenance.json) | `be785d01618584691a60bba9faa8125376ac788dae1cfeeaf763e97fc7ff767e` | Path-free binding for the two-case velocity pilot: exact committed mapping revision and source hashes, Python/NumPy/VTK runtime, launcher and scheduler identities, external receipt and mapping identities, and a byte-identical separate-process `run_1` repeat. It makes no activation, approval, model, convergence, or participant dry-run claim. |
+| [`real-reference-driver-run1-run44-candidate-v7-pilot.json`](real-reference-driver-run1-run44-candidate-v7-pilot.json) | `da80aebb11eb18d3bb66b7a968a94e9a779a6e60f5413ef73d2fbd6485d76572` | Passing candidate-only reference-driver receipt for pinned real `run_1` and `run_44` inputs. It verifies two- and three-part native-volume transport, complete deterministic all-zero surface and volume prediction chunks, equal-native-cell volume weighting, and consistent prediction identities across the core and diagnostic evaluators. The chunks are a transport and reduction fixture, not a model, physics-null baseline, participant dry run, or scoring result. |
+| [`real-reference-driver-run1-run44-candidate-v7-pilot-provenance.json`](real-reference-driver-run1-run44-candidate-v7-pilot-provenance.json) | `24fd18d70098e5943959c8f37e2cd0ade211322e0785734d0dd035200db8fff2` | Path-free binding for the reference-driver pilot: exact committed driver revision and source hashes, runtime, launcher and completed scheduler job, execution-config hash, all-zero fixture receipts and manifests, fixed surface-area arrays, Cp supports, 10 mm velocity mappings, and external child-evidence identities. It does not make the candidate evaluator frozen or public scoring support. |
 | [`volume-weight-vtk-run_1-failure-diagnostic.json`](volume-weight-vtk-run_1-failure-diagnostic.json) | `aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e` | Superseded historical record for a rejected geometric cell-volume experiment. Geometric volume weights are not part of the equal-native-cell contract; this file has no scoring or activation role. |
 | [`volume-weight-vtk96-run_1-wedge-probe.json`](volume-weight-vtk96-run_1-wedge-probe.json) | `2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6` | Superseded historical isolated-cell experiment under VTK 9.6.0. Geometric volume weights are not part of the equal-native-cell contract; this file has no scoring or activation role. |
 | [`cp-mapping-all484-hardened.json`](cp-mapping-all484-hardened.json) | `634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81` | Complete candidate sweep over 484 cases and all 101,156 case/probe rows. It retains 100,281 valid rows and all 875 invalid rows with explicit reasons. Owner visual sign-off is false and public-scoring eligibility is false. |
@@ -38,6 +42,20 @@ rows or confer owner visual sign-off. The owner must review the atlas, approve
 the disposition of every invalid or review-flagged row, and freeze an immutable
 support release before these artifacts can be used for public scoring. The
 two-case pilots remain discovery records only and must not be promoted.
+
+The two-case velocity pilot exercises the deterministic candidate-v7 geometry
+kernel. Its compact aggregate accounts for all 4,489 invalid rows, while the
+hash-bound external row-level files retain them explicitly. It does not cover
+the other 482 cases, replay the required 0.5, 1, and 2 micrometre tolerances,
+establish prediction convergence or method ordering, or supply an owner
+validity mask. The candidate `1e-3` steradian polyhedron-classification
+tolerance also remains subject to owner scientific approval.
+
+The required real-input two-case reference-driver pilot has now passed and is
+hash-bound above. This closes only that implementation subgate: it uses a
+deterministic all-zero transport fixture, covers two of 484 cases, and is not a
+trained-model result, physics-null denominator, independent participant dry
+run, frozen evaluator release, or owner-approved scoring support.
 
 ## Provenance limits
 
@@ -74,3 +92,21 @@ only the provenance recorded in their own files. The 20,883,275-byte atlas PDF
 is also external; only its SHA-256, page count, and complete compact review
 manifest are committed. Those limits prevent this directory alone from serving
 as an independently replayable immutable scoring-support release.
+
+The velocity aggregate was produced by
+`scripts/generate_drivaerml_velocity_assignments.py` and
+`scripts/aggregate_drivaerml_velocity_assignments.py`. Its companion provenance
+file binds the exact committed source snapshot, runtime, launchers, scheduler
+jobs, and identities of both external case receipts and all eight mapping
+files. A second process reproduced the `run_1` receipt and four mappings
+byte-for-byte. The external row-level artifacts are not bundled in Git, and the
+repeat does not extend the pilot beyond two cases or provide scientific
+validation of the candidate kernel choices.
+
+The reference-driver receipt is a byte-identical copy of the external campaign
+receipt. Its separate provenance file binds the exact source commit and hashes,
+runtime, launcher, scheduler execution, pathful input-config identity, compact
+identities for every fixed input, and all four external child evidence files.
+The large native sources, fixed arrays, prediction chunks, mappings, and child
+evidence remain external; their hashes do not turn this two-case fixture into a
+standalone or immutable scoring-support release.

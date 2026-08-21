@@ -34,6 +34,34 @@
       "public_scoring_support_eligible": false
     },
     {
+      "file": "velocity-mapping-run1-run44-candidate-v7-pilot.json",
+      "sha256": "91a7bb4cb7b7c6167c3577f62745021409c93cebc6b2685a57cdfe1debc06d76",
+      "scope": "run_1_run_44_non_public_pilot",
+      "role": "candidate_velocity_containing_cell_geometry_assignment_four_resolution_pilot",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "velocity-run1-run44-candidate-v7-pilot-provenance.json",
+      "sha256": "be785d01618584691a60bba9faa8125376ac788dae1cfeeaf763e97fc7ff767e",
+      "scope": "run_1_run_44_non_public_pilot",
+      "role": "path_free_code_runtime_launcher_repeat_and_external_velocity_pilot_identity_binding",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "real-reference-driver-run1-run44-candidate-v7-pilot.json",
+      "sha256": "da80aebb11eb18d3bb66b7a968a94e9a779a6e60f5413ef73d2fbd6485d76572",
+      "scope": "run_1_run_44_non_public_pilot",
+      "role": "real_native_inputs_zero_prediction_transport_and_reduction_reference_driver_pilot",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "real-reference-driver-run1-run44-candidate-v7-pilot-provenance.json",
+      "sha256": "24fd18d70098e5943959c8f37e2cd0ade211322e0785734d0dd035200db8fff2",
+      "scope": "run_1_run_44_non_public_pilot",
+      "role": "path_free_code_runtime_launcher_input_fixture_job_and_external_child_evidence_binding_for_reference_driver_pilot",
+      "public_scoring_support_eligible": false
+    },
+    {
       "file": "volume-weight-vtk-run_1-failure-diagnostic.json",
       "sha256": "aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e",
       "scope": "run_1_pilot",

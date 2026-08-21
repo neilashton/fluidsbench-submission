@@ -66,6 +66,37 @@ official leaderboard results.
   and its path-free
   [`provenance manifest`](evidence/native-volume-equal-cell-primary-all484-provenance.json)
   (SHA-256 `b5ffe2234bb1597cf041ff5d97458f3d0d6e81db7a30591a7e26f51ebc032fde`).
+- A deterministic candidate-v7 velocity containing-cell pilot completed for
+  the pinned `run_1` two-part volume and `run_44` three-part volume. The compact
+  aggregate accounts for all 134,768 requested assignments across 16 lines and
+  the 1, 2, 5, and 10 mm grids, and hash-binds complete duplicate-free external
+  row-level files: 130,279 rows are valid and all 4,489 invalid rows remain
+  explicit there (4,476 no-closure rows and 13 fail-closed native-cell
+  evaluation rows). A separate process reproduced the `run_1` receipt and all
+  four mapping files byte-for-byte. See
+  [`evidence/velocity-mapping-run1-run44-candidate-v7-pilot.json`](evidence/velocity-mapping-run1-run44-candidate-v7-pilot.json)
+  (SHA-256 `91a7bb4cb7b7c6167c3577f62745021409c93cebc6b2685a57cdfe1debc06d76`)
+  and its path-free
+  [`provenance manifest`](evidence/velocity-run1-run44-candidate-v7-pilot-provenance.json)
+  (SHA-256 `be785d01618584691a60bba9faa8125376ac788dae1cfeeaf763e97fc7ff767e`).
+  This is geometry-only implementation evidence, not all-case or tolerance-
+  replay evidence; it uses no model checkpoint or prediction fields and makes
+  no convergence, model-ordering, validity-mask, approval, or scoring claim.
+- The candidate real-reference driver passed on the pinned real `run_1` and
+  `run_44` inputs using exact two- and three-part native-volume transport. Its
+  deterministic all-zero fixture has complete duplicate-free native-cell
+  coverage: 20 surface chunks cover 18,903,869 polygons and 312 volume chunks
+  cover 310,848,384 cells. The run consumed the fixed surface-area arrays,
+  candidate Cp supports, and 10 mm velocity mappings, used one equal weight per
+  native volume cell, and verified identical prediction artifacts across the
+  core and diagnostic evaluators. See the byte-identical
+  [`validation receipt`](evidence/real-reference-driver-run1-run44-candidate-v7-pilot.json)
+  (SHA-256 `da80aebb11eb18d3bb66b7a968a94e9a779a6e60f5413ef73d2fbd6485d76572`)
+  and its path-free
+  [`provenance manifest`](evidence/real-reference-driver-run1-run44-candidate-v7-pilot-provenance.json)
+  (SHA-256 `24fd18d70098e5943959c8f37e2cd0ade211322e0785734d0dd035200db8fff2`).
+  The zero values test transport and reduction only; they are not a trained
+  model, physics-null baseline, participant dry run, or scientific result.
 - The hardened Cp candidate sweep covered all 484 cases and retained all
   101,156 case/probe rows: 100,281 valid and 875 explicitly invalid. Its source
   inventory covers 364,568,214 raw STL facets, and the 488-page external review
@@ -93,10 +124,13 @@ official leaderboard results.
    maintainer receipt matches a benchmark-owned frozen evaluator version and
    immutable Git revision; that binding remains deliberately pending with no
    revision while the evaluator is still a candidate. The remaining production
-   gates are not complete. As an explicit activation gate,
+   gates are not complete. The explicit two-case
    [`real_reference_driver.py`](../../examples/drivaerml-candidate-native-chunks/real_reference_driver.py)
-   must execute on the pinned real `run_1` and `run_44` inputs, and its
-   hash-bound validation receipt must be retained as indexed evidence.
+   execution subgate is now complete on the pinned real `run_1` and `run_44`
+   inputs, with its validation receipt and provenance indexed above. That
+   fixture does not freeze the evaluator, publish an immutable scoring-support
+   digest, validate all 484 cases through this driver, or confer owner approval;
+   this production-evaluator gate therefore remains open.
 3. Obtain dataset-owner scientific review of the completed all-484 force replay
    and its tolerance choices. The numerical replay, mirror checks, axle-load
    closure, fixed-area audit, and chunk-invariance evidence are complete at the
@@ -105,8 +139,15 @@ official leaderboard results.
    profiles. Run the prescribed 1, 2, 5, and 10 mm convergence study and method
    ordering test before retaining 10 mm as the ranked grid. All 2, 5, and 10 mm
    comparisons against the 1 mm reference must pass; a passing 10 mm result
-   cannot hide a failed finer candidate. The candidate
-   prediction-based reducer now verifies complete native chunk manifests,
+   cannot hide a failed finer candidate. The hash-bound two-case candidate-v7
+   pilot now accounts for complete explicit mapping rows in hash-bound external
+   files for `run_1` and `run_44` at the primary 1 micrometre geometric
+   tolerance, including fail-closed invalid rows and separate-process
+   determinism. It does not cover the remaining 482 cases, the required
+   0.5/1/2 micrometre replay, prediction convergence, or method ordering. The
+   candidate `1e-3` steradian polyhedron-
+   classification tolerance remains pending owner scientific approval. The
+   candidate prediction-based reducer now verifies complete native chunk manifests,
    streams pinned multipart `UMeanTrim` truth, separates geometric assignment
    invariance from loss/method-order convergence, and refuses owner-review
    eligibility for any reduced pilot. Its synthetic tests are not real-model
