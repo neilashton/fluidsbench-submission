@@ -96,6 +96,12 @@ prediction object `force_coefficients` with exactly `cd`, `cl`, `cm_pitch`,
 `clf`, and `clr`. The first three are ranked independently; `clf` and `clr` are
 report-only closure evidence.
 
+`force_mom_constref_all.csv` is the canonical force-truth table. The per-case
+`run_N/force_mom_constref_N.csv` files remain supported mirrors only after the
+evaluator proves that each row agrees exactly with the aggregate table. This
+does not change any target value or score; it provides one hash-bound source of
+truth while retaining the per-case files for convenient local processing.
+
 The submission-facing
 [`drivaerml-diagnostics-v9.json`](drivaerml-diagnostics-v9.json) registry contains 16
 velocity lines and four continuous Cp cuts: upperbody centreline (`y=0`),
@@ -131,6 +137,13 @@ mask has yet been approved, so the current candidate evaluator conservatively
 makes a velocity result unavailable when a mapping row is invalid.
 
 ## 5. Install and run the candidate tools
+
+The complete native-VTK candidate evaluator is currently supported on Linux
+only, including Linux HPC nodes and Linux containers or WSL. Its retained-file
+protections rely on Linux descriptor-filesystem semantics and are not yet
+validated on native macOS or Windows. JSON/schema and profile-package checks
+may run on other platforms, but official evaluator evidence must be generated
+on Linux until cross-platform support is implemented and tested.
 
 The generic repository checks use `requirements.txt`. The exact recommended
 stack for the complete VTK-based DrivAerML evidence workflow is defined in
