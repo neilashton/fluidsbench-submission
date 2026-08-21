@@ -176,10 +176,15 @@ Run the small two-part/three-part teaching fixture with one command:
 ```
 
 The fixture is synthetic and explicitly ineligible. It proves ordered two- and
-three-part byte concatenation, raw-ID chunk coverage, additive reduction,
-full-versus-chunked invariance, and schema-v3 prediction/case-metric artifact
-validation. Its small transport payloads are JSON, not VTK; it does not claim a
-real DrivAerML reconstruction, result, or official scoring support.
+three-part byte concatenation, raw-ID chunk coverage, additive reduction, and
+full-versus-chunked invariance for the two surface and two volume fields. Its
+dummy schema-v3 package mirrors the current participant shape: area-weighted
+and equal-polygon surface metrics, equal-cell volume metrics, coherent force
+coefficients, all four Cp cuts, all sixteen AutoCFD5 velocity profiles, and all
+27 non-score candidate metrics. Its small transport payloads and support
+tables are JSON, not VTK, and its force/profile values are synthetic; it does
+not claim real DrivAerML extraction, force integration, reconstruction, model
+results, or official scoring support.
 
 The command performs the fixture's schema-v3 checks itself. Its deliberately
 unregistered `synthetic-drivaerml-shaped` namespace is not accepted by the
