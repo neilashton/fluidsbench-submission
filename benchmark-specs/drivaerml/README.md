@@ -48,12 +48,14 @@ For every selected case:
    velocity lines on the candidate 10 mm grid and four continuous Cp cuts:
    upperbody centreline (`y=0`), underbody centreline (`y=0`), sidewall
    (`z=0.15 m`), and front-left wheelhouse (`y=-0.6 m`). Once the contract is
-   activated, the ranked velocity error will be the equal-case, equal-line
-   mean of arc-length trapezoidal RMSE for `|U|/Uinf`; continuous Cp-cut RMSE
-   remains a separate ranked component weighted by native cut-intersection
-   segment length. Submit the complete evaluator-produced coordinate and
-   prediction arrays for all 16 velocity profiles and all four Cp cuts in the
-   normal FluidsBench profile JSON.
+   activated, the ranked velocity metric will be global R2 with equal total
+   weight for every case and line and normalized trapezoidal arc-length weight
+   within each line. Continuous Cp-cut R2 is a separate ranked component with
+   equal total weight for every case and cut and normalized native
+   cut-intersection segment-length weight within each cut. The corresponding
+   RMSE values remain report-only diagnostics. Submit the complete
+   evaluator-produced coordinate and prediction arrays for all 16 velocity
+   profiles and all four Cp cuts in the normal FluidsBench profile JSON.
 
 The 209 discrete Cp probes are not part of the DrivAerML submission or scoring
 contract. Participants do not submit probe outputs or probe-mapping support,
@@ -85,11 +87,13 @@ pending.
 
 The primary leaderboard definition has nine components: four global fields,
 three independently ranked field-integrated coefficients, the velocity
-profiles with weight 0.15, and the continuous Cp cuts with weight 0.10. Each
-component uses unclipped physics-null skill `100 * (1 - E/B)`, so a method worse
-than the null reference keeps a negative score. `Clf` and `Clr` remain mandatory
-report-only diagnostics because they are dependent on `Cl` and `CmPitch` and
-must not receive duplicate composite weight.
+profiles with weight 0.15, and the continuous Cp cuts with weight 0.10. The
+four field errors use `clip(100 * (1 - error/cap), 0, 100)` with fixed caps of
+15% surface pressure, 20% wall shear, 12% volume velocity, and 15% volume
+pressure. Force and profile R2 values use `100 * clip(R2, 0, 1)`. The component
+weights preserve a 50% field, 25% force, and 25% profile split. `Clf`, `Clr`,
+and all RMSE values remain mandatory report-only diagnostics and receive no
+duplicate composite weight.
 
 The complete machine-readable source of truth is
 [`submission-spec.json`](submission-spec.json). Candidate evidence and its
@@ -113,10 +117,13 @@ case). It also writes dense, case-varying arc-length arrays for all four
 continuous Cp cuts. Because the immutable native Cp-cut support is still an
 activation gate, those cut coordinates and every profile value are explicitly
 analytical CFD-like display data, not extracted DrivAerML truth or model
-predictions. Diagnostic metrics are recomputed from the generated curves, the
-Cp error is dimensionally tied to the pressure-field fixture through
-`Cp = 2 pMeanTrim / 38.889^2`, and all rows remain labelled non-rankable
-prototype data.
+predictions. Diagnostic RMSE and R2 metrics are recomputed from the generated
+curves, the Cp error is dimensionally tied to the pressure-field fixture
+through `Cp = 2 pMeanTrim / 38.889^2`, and force R2 is tied to the exact pinned
+force table through
+[`force-r2-truth-statistics.json`](force-r2-truth-statistics.json). The
+displayed bounded scores are therefore internally consistent, while all rows
+remain labelled non-rankable prototype data.
 
 The candidate evaluator's all-484 native-surface force replay is recorded in
 [`evidence/force-replay-all484.json`](evidence/force-replay-all484.json). This
@@ -128,8 +135,8 @@ implementation pilot and the strict
 [`all-484 equal-cell primary audit`](evidence/native-volume-equal-cell-primary-all484.json).
 The latter verifies all 978 pinned segments and 68,949,662,110 native cells,
 including exact field shape/order, finite values, complete coverage, and two
-independent chunk partitions. It is not a model result or physics-null
-baseline. This audit supplies the complete volume-field weighting evidence
+independent chunk partitions. It is not a model result or scoring baseline.
+This audit supplies the complete volume-field weighting evidence
 because the contract uses equal native cells only.
 
 The earlier all-484 discrete-probe candidate sweep and its review artifacts
@@ -151,8 +158,8 @@ Activation evidence still requires complete all-case velocity mappings and
 genuine outputs from at least three distinct trained models. Those model
 predictions are not currently available and remain an owner input; publishing
 their complete native fields is not required. No real-model sensitivity result
-is claimed. Physics-null denominators and the bootstrap remain blocked until
-the evaluator is frozen.
+is claimed. The bounded-score sensitivity review and bootstrap remain pending
+until the evaluator is frozen.
 
 AutoCFD contributors can follow the bounded-memory native-mesh workflow in the
 [`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md). A one-command synthetic

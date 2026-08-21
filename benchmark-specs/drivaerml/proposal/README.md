@@ -5,6 +5,10 @@ evidence. The participant-facing decisions have since been promoted into the
 closed candidate [`../submission-spec.json`](../submission-spec.json), while
 the files here remain non-activating source evidence: they do not by themselves
 open submissions, activate the composite, or make historical dummy rows real.
+The machine-readable proposal includes the 2026-08-21 scoring update: fixed
+15%/20%/12%/15% field-error caps and bounded global R2 for the three force and
+two profile components. A physics-null prediction may still be retained as an
+unranked sensitivity control, but it is not a score denominator.
 
 The proposed benchmark is defined by a frozen raw-data support, not by the
 representation preferred by a particular model:

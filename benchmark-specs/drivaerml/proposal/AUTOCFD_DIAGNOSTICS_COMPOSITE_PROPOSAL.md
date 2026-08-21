@@ -1,9 +1,17 @@
 # AutoCFD velocity, FluidsBench Cp-cut, and composite proposal for DrivAerML
 
-Status: **review source promoted into the participant-facing closed candidate; profile
-support, baselines, and official ranking still require activation validation**
+Status: **review source promoted into the participant-facing closed candidate;
+profile support and official ranking still require activation validation**
 
 Prepared: 2026-08-19
+
+Scoring update (2026-08-21): the earlier physics-null proposal in this review
+record is superseded by the active machine-readable definition in
+`../submission-spec.json`. DrivAerML now uses the shared FluidsBench fixed caps
+for the four field errors and bounded global R2 for `Cd`, `Cl`, `CmPitch`, the
+16 velocity lines, and the four continuous Cp cuts. Historical null-baseline
+discussion below is retained only as decision provenance and is not a
+participant instruction.
 
 Owner scope update: **on 2026-08-21 the benchmark owner removed the 209
 discrete Cp probes from DrivAerML submissions and scoring.** This does not
@@ -432,28 +440,16 @@ residual `1.0e-7`). A missing,
 duplicate, non-integer, nonfinite, unexpected, or manifest-extraneous run is a
 hard evaluator error. The 16 known held-back run numbers are absent by design.
 
-For each ranked coefficient `k` in `{Cd, Cl, CmPitch}`, its raw error is
-`E_k=sqrt((1/N)*sum_c((k_pred,c-k_true,c)^2))`; compute `B_k` with the same
-case reduction and the declared zero-coefficient null. The report-only `Clf`
-and `Clr` RMSEs use that same equal-case formula against their released source
-columns.
-
-Do not use the prototype error caps or ranked flattened R-squared. For each
-component `j`, compute that raw error `E_j` and the identical reduction `B_j`
-for a frozen physics-null prediction, then use
-
-`S_j = 100 * (1 - E_j / B_j)`.
-
-The null is zero surface/volume pressure, zero wall shear, freestream volume
-velocity `(U_inf,0,0)`, velocity-profile ratio one, zero Cp along the four
-continuous cuts, and zero `Cd`, `Cl`, and `CmPitch`. Negative scores remain
-negative for ranking because they
-mean worse than the declared null; a clipped 0-100 value may be displayed but
-must not determine rank. `Cd`, `Cl`, `CmPitch`, `Clf`, and `Clr` are integrated
-or derived locally from each participant's native surface predictions using
-that constant-reference force contract. If a separately versioned
-direct-scalar force task is later activated, report it separately; it cannot
-enter this composite. For every native boundary polygon `f`, let `c_f` be the
+For each ranked coefficient `k` in `{Cd, Cl, CmPitch}`, use equal-case global
+R2. Retain equal-case RMSE for those coefficients and for `Clf` and `Clr` as
+report-only diagnostics. The four field errors use fixed bounded-error caps of
+15%, 20%, 12%, and 15%; the five force/profile R2 components use bounded
+quality `100*clip(R2,0,1)`. `Cd`, `Cl`, `CmPitch`, `Clf`, and `Clr` are
+integrated or derived locally from each participant's native surface
+predictions using the constant-reference force contract. If a separately
+versioned direct-scalar force task is later activated, report it separately;
+it cannot enter this composite. For every native boundary polygon `f`, let
+`c_f` be the
 arithmetic mean of its vertex coordinates and define the
 released-connectivity-order oriented area vector
 
@@ -588,6 +584,6 @@ policy questions:
    local-segment provenance, positive finite segment-length checks, validity
    handling, deterministic replay, and chunk invariance. Do not use the
    209-probe mappings or atlas as cut support.
-6. Compute the nine physics-null denominators and run the declared null,
-   nearest-training-design-vector (after its transfer contract), and real-model
-   sensitivity checks before enabling the composite for ranking.
+6. Run the nearest-training-design-vector (after its transfer contract),
+   fixed-cap/bounded-R2 real-model sensitivity checks, and the declared
+   bootstrap before enabling official ranking.

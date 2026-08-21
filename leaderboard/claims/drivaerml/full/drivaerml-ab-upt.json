@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-89a1295c9604/drivaerml/full/drivaerml-ab-upt",
+  "claim_id": "prototype-dev-2026-07-15-d0e3aec8f20f/drivaerml/full/drivaerml-ab-upt",
   "release": {
-    "id": "prototype-dev-2026-07-15-89a1295c9604",
+    "id": "prototype-dev-2026-07-15-d0e3aec8f20f",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-21T18:28:15Z",
+    "published_at": "2026-08-21T19:41:46Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 0.0,
-    "ranked_value": 0.0,
-    "display_value": "0.0",
+    "value": 78.863144384867,
+    "ranked_value": 78.9,
+    "display_value": "78.9",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -30,8 +30,8 @@
     "method": "competition",
     "rank": 1,
     "ranked_result_count": 2,
-    "tied": true,
-    "tie_count": 2
+    "tied": false,
+    "tie_count": 1
   },
   "eligibility": {
     "academic_citation": false,
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "89a1295c96040bca370ce2ded0c69f30335b689b37eb5d2dcfbc9aa302dd1b66",
+      "feed_sha256": "d0e3aec8f20f8d55cfac470b1d94e599d5c9d4cd45f173cd8c997f784e1c1d5b",
       "row_index": 15
     },
     "source_submission": {
       "path": "submissions/drivaerml/drivaerml-ab-upt/submission.json",
-      "sha256": "692b6162809cd3c5483c466ec039e30f18972d052fb1c561f280390b7cc5f184"
+      "sha256": "7050418a490aef965e6ed0b17ae7059cbd9cf0bd69cd469c3a48601945cc83c5"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaerml/drivaerml-ab-upt/evaluation-evidence.json",
-      "sha256": "b1412b90368adac2bddf1434f4c1bb6fe092b1c879dabc22b623b6e61ab93581"
+      "sha256": "8560bf08411642043232ef9fcf1db2b56fbef600d9b9b4797dd812294006a9c9"
     },
     "profile_index": {
       "path": "submissions/drivaerml/drivaerml-ab-upt/profiles/index.json",

@@ -3,8 +3,8 @@
 
 This migration is deliberately reproducible and idempotent. It activates the
 real public split identities and the participant-facing scientific contract,
-but it does not open submissions or manufacture the missing physics-null
-baselines, profile supports, or all-case evaluator replays.
+but it does not open submissions or manufacture missing profile supports or
+all-case evaluator replays.
 """
 
 from __future__ import annotations
@@ -13,11 +13,21 @@ import csv
 import hashlib
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from reference.scores import (
+    composite_component_group_scores,
+    composite_overall_score,
+)
+
+
 BENCHMARK_ROOT = ROOT / "benchmark-specs" / "drivaerml"
 PROPOSAL_ROOT = BENCHMARK_ROOT / "proposal"
 SUBMISSIONS_ROOT = ROOT / "submissions" / "drivaerml"
@@ -30,6 +40,7 @@ SPLIT_MANIFEST_SHA256 = "032a2e9f88926d9218a1943b51e650135cc78683cad6b0a38f3cf4f
 SOURCE_PIN_SHA256 = "4fc9077f8f23f4994c98f4d0e7a17aef7b998de4c996638e3a8a616b6d923fdd"
 SURFACE_AREA_MANIFEST_SHA256 = "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
 FORCE_TABLE_SHA256 = "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865"
+FORCE_R2_STATISTICS_SHA256 = "6deb7f61ef472eb1d6891927147bf9aafe7125ed6da4f96f0dcc05e0ba178b55"
 
 RETIRED_DRIVAER_PHYSICAL_VOLUME_METRIC_IDS = frozenset(
     {
@@ -223,6 +234,63 @@ def metric(
 
 def build_metrics() -> list[dict[str, Any]]:
     metrics = [score_metric(metric_id) for metric_id in SCORE_EQUATIONS]
+    metrics.extend(
+        [
+            {
+                "id": "cd_r2",
+                "unit": "",
+                "direction": "higher",
+                "kind": "r2",
+                "equation": r"1-\frac{\sum_c(C_{D,c}-\hat{C}_{D,c})^2}{\sum_c(C_{D,c}-\bar{C}_D)^2}",
+                "aggregation": "all_test_cases",
+                "weighting": "cases_equal",
+            },
+            {
+                "id": "cl_r2",
+                "unit": "",
+                "direction": "higher",
+                "kind": "r2",
+                "equation": r"1-\frac{\sum_c(C_{L,c}-\hat{C}_{L,c})^2}{\sum_c(C_{L,c}-\bar{C}_L)^2}",
+                "aggregation": "all_test_cases",
+                "weighting": "cases_equal",
+            },
+            {
+                "id": "c_pitch_r2",
+                "unit": "",
+                "direction": "higher",
+                "kind": "r2",
+                "equation": r"1-\frac{\sum_c(C_{M,c}-\hat{C}_{M,c})^2}{\sum_c(C_{M,c}-\bar{C}_M)^2}",
+                "aggregation": "all_test_cases",
+                "weighting": "cases_equal",
+            },
+            {
+                "id": "velocity_profile_r2",
+                "unit": "",
+                "direction": "higher",
+                "kind": "r2",
+                "equation": r"1-\frac{\sum_{c,l}\int_{A_{cl}}(\hat{U}/U_\infty-U/U_\infty)^2\,ds/L_{cl}}{\sum_{c,l}\int_{A_{cl}}(U/U_\infty-\bar{U}_w)^2\,ds/L_{cl}}",
+                "aggregation": "equal_case_equal_line_global_weighted_r2",
+                "weighting": "equal_cases_equal_lines_trapezoidal_arc_length_within_line",
+                "availability": (
+                    "all_16_lines_available_for_every_case_after_owner_mask_"
+                    "and_zero_unresolved_nonexcluded_samples"
+                ),
+            },
+            {
+                "id": "cp_cut_r2",
+                "unit": "",
+                "direction": "higher",
+                "kind": "r2",
+                "equation": r"1-\frac{\sum_{c,q}\sum_{s\in\Gamma_{cq}}\tilde{w}_{cqs}(\hat{C}_{p,s}-C_{p,s})^2}{\sum_{c,q}\sum_{s\in\Gamma_{cq}}\tilde{w}_{cqs}(C_{p,s}-\bar{C}_{p,w})^2}",
+                "aggregation": "equal_case_equal_cut_global_weighted_r2",
+                "weighting": "equal_cases_equal_cuts_normalized_native_cut_intersection_segment_length",
+                "availability": (
+                    "all_four_continuous_native_surface_cuts_available_for_every_"
+                    "case_after_immutable_owner_extraction_support_is_published"
+                ),
+            },
+        ]
+    )
     metrics.extend(
         [
             metric(
@@ -448,7 +516,9 @@ def build_profile_definition() -> dict[str, Any]:
         },
         "velocity_profiles": {
             "definition_authority": "AutoCFD5",
-            "ranked_metric_id": "velocity_profile_uinf_rmse",
+            "ranked_metric_id": "velocity_profile_r2",
+            "report_only_metric_id": "velocity_profile_uinf_rmse",
+            "ranked_reduction": "equal_case_equal_line_global_R2_with_normalized_trapezoidal_arc_length_support_per_line",
             "quantity": "magnitude(UMeanTrim)/38.889",
             "scoring_grid": "fixed_10_mm_candidate_grid",
             "line_count": len(velocity_stations),
@@ -457,12 +527,13 @@ def build_profile_definition() -> dict[str, Any]:
         },
         "pressure_cuts": {
             "definition_authority": "FluidsBench",
-            "ranked_metric_id": "cp_cut_rmse",
+            "ranked_metric_id": "cp_cut_r2",
+            "report_only_metric_id": "cp_cut_rmse",
             "quantity": "Cp=2*pMeanTrim/(38.889^2)",
             "cut_count": len(pressure_cuts),
             "association": "native_surface_VTP_CellData",
             "extraction_status": "pending_immutable_owner_cut_support",
-            "reduction": "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse",
+            "reduction": "equal_case_equal_cut_global_R2_with_normalized_native_intersection_segment_length_support_per_cut",
             "stations": pressure_cuts,
         },
         "activation_requirements": [
@@ -540,7 +611,7 @@ def build_profile_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
             "coordinate_order": "strictly_increasing",
             "coordinate_id": "arc_length_m",
             "coordinate_unit": "m",
-            "metric_id": "cp_cut_rmse",
+            "metric_id": "cp_cut_r2",
             "station_ids": [station["id"] for station in pressure],
             "quantity_ids": ["cp"],
         },
@@ -552,7 +623,7 @@ def build_profile_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
             "coordinate_order": "strictly_increasing",
             "coordinate_id": "distance_m",
             "coordinate_unit": "m",
-            "metric_id": "velocity_profile_uinf_rmse",
+            "metric_id": "velocity_profile_r2",
             "station_ids": [station["id"] for station in velocity],
             "quantity_ids": ["velocity_ratio"],
             "station_sample_counts": {station["id"]: station["sample_count"] for station in velocity},
@@ -563,35 +634,42 @@ def build_profile_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def build_composite() -> dict[str, Any]:
-    weighted = [
-        ("surface_pressure_rel_l2", 0.15),
-        ("surface_wall_shear_rel_l2", 0.10),
-        ("volume_velocity_rel_l2", 0.15),
-        ("volume_pressure_rel_l2", 0.10),
-        ("field_integrated_cd_rmse", 0.15),
-        ("field_integrated_cl_rmse", 0.05),
-        ("field_integrated_cmpitch_rmse", 0.05),
-        ("velocity_profile_uinf_rmse", 0.15),
-        ("cp_cut_rmse", 0.10),
+    bounded_errors = [
+        ("surface_pressure_rel_l2", 0.15, 15.0),
+        ("surface_wall_shear_rel_l2", 0.10, 20.0),
+        ("volume_velocity_rel_l2", 0.15, 12.0),
+        ("volume_pressure_rel_l2", 0.10, 15.0),
+    ]
+    bounded_quality = [
+        ("cd_r2", 0.15),
+        ("cl_r2", 0.05),
+        ("c_pitch_r2", 0.05),
+        ("velocity_profile_r2", 0.15),
+        ("cp_cut_r2", 0.10),
     ]
     return {
         "metric_id": "overall_score",
         "operation": "weighted_component_scores",
-        "status": "pending_reference_baselines",
-        "allow_negative_scores": True,
-        "component_skill_equation": "100*(1-E_j/B_j)",
+        "status": "active",
+        "score_range": [0.0, 100.0],
         "components": [
             {
                 "metric_id": metric_id,
                 "weight": weight,
-                "transform": "physics_null_skill",
-                "baseline_id": f"drivaerml.physics_null.{metric_id}",
-                "baseline_status": "pending_all_case_evaluator_replay",
+                "transform": "bounded_error",
+                "cap": cap,
             }
-            for metric_id, weight in weighted
+            for metric_id, weight, cap in bounded_errors
+        ]
+        + [
+            {
+                "metric_id": metric_id,
+                "weight": weight,
+                "transform": "bounded_quality",
+            }
+            for metric_id, weight in bounded_quality
         ],
         "tolerance": 1e-6,
-        "activation_rule": "set status=active and publish one finite positive baseline_error per component only after frozen evaluator replay and sensitivity review",
     }
 
 
@@ -685,10 +763,10 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "status": "owner_review_required",
         "submissions_open": False,
         "closed_reason": (
-            "The participant contract and official splits are published, but ranking remains closed until "
+            "The participant contract, official splits, and bounded scoring equation are published, but ranking remains closed until "
             "all-case velocity replay, immutable native Cp-cut extraction support, "
-            "physics-null baselines, genuine-model sensitivity analysis, "
-            "force-replay review, and immutable evaluator/scoring-support owner approval are complete."
+            "genuine-model sensitivity analysis, force-replay review, and immutable "
+            "evaluator/scoring-support owner approval are complete."
         ),
         "candidate_evidence_index_file": "evidence/README.md",
         "candidate_evidence_manifest_file": "evidence/manifest.json",
@@ -788,6 +866,11 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                 "id": "field_integrated_force_truth",
                 "authoritative_public_file": "force_mom_constref_all.csv",
                 "sha256": FORCE_TABLE_SHA256,
+                "prototype_r2_truth_statistics": {
+                    "file": "force-r2-truth-statistics.json",
+                    "sha256": FORCE_R2_STATISTICS_SHA256,
+                    "scope": "prototype_fixture_calibration_only; official_evaluation_uses_casewise_authoritative_truth",
+                },
                 "per_case_mirror": "<case_id>/force_mom_constref_<run_number>.csv",
                 "per_case_mirror_policy": "accepted_as_a_convenience_only_after_exact_row_replay_against_the_authoritative_aggregate",
                 "exact_header": ["run", "cd", "cl", "clf", "clr", "cs"],
@@ -853,7 +936,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "body_force_equation": "rho_inf*sum_f(pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f))",
             "body_moment_equation": "rho_inf*sum_f(cross(C_f-CoR,pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f)))",
             "face_area_and_centre_convention": "OpenFOAM_v2212_primitiveMeshTools_makeFaceCentresAndAreas",
-            "ranked_reduction": "separate_equal_case_RMSE_for_Cd_Cl_and_CmPitch",
+            "ranked_reduction": "separate_equal_case_R2_for_Cd_Cl_and_CmPitch_with_RMSE_reported_as_diagnostics",
             "dependent_axle_loads": {"Clf": "Cl/2+CmPitch", "Clr": "Cl/2-CmPitch", "composite_weight": 0.0},
             "participant_json": {
                 "file": "metrics/cases.json",
@@ -878,7 +961,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "cp_cut_support": {
                 "status": "pending_immutable_owner_release",
                 "cut_count": 4,
-                "metric_id": "cp_cut_rmse",
+                "metric_id": "cp_cut_r2",
                 "discrete_cp_probe_support_accepted": False,
             },
         },
@@ -899,8 +982,8 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
             "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
             "cp_cuts": "four_continuous_cut_definitions_complete_immutable_native_extraction_support_and_all_case_replay_pending",
-            "physics_null_baselines": "pending",
-            "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
+            "bounded_score_definition": "complete_fixed_field_error_caps_and_bounded_force_profile_R2",
+            "composite_sensitivity_and_bootstrap": "pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
             "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_frozen_evaluator_revision_and_owner_approval_pending",
             "independent_participant_dry_run": "pending",
             "owner_evaluator_approval": "pending",
@@ -911,7 +994,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "approve_velocity_assignment_and_resolution_convergence",
             "approve_immutable_native_surface_extraction_support_for_all_four_continuous_cp_cuts",
             "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
-            "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
+            "review_fixed_field_error_caps_and_bounded_R2_sensitivity_with_genuine_model_predictions_and_publish_bootstrap_indexes",
             "approve_the_candidate_schema_v3_participant_authored_metrics_case_evidence_and_profile_validation",
             "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions",
         ],
@@ -956,14 +1039,14 @@ def build_specification(
                 {
                     "metric_id": "force_score",
                     "component_metric_ids": [
-                        "field_integrated_cd_rmse",
-                        "field_integrated_cl_rmse",
-                        "field_integrated_cmpitch_rmse",
+                        "cd_r2",
+                        "cl_r2",
+                        "c_pitch_r2",
                     ],
                 },
                 {
                     "metric_id": "diagnostic_score",
-                    "component_metric_ids": ["velocity_profile_uinf_rmse", "cp_cut_rmse"],
+                    "component_metric_ids": ["velocity_profile_r2", "cp_cut_r2"],
                 },
             ],
             "tolerance": 1e-6,
@@ -986,6 +1069,11 @@ def build_specification(
 def presentation_definition(metric_spec: dict[str, Any]) -> dict[str, Any]:
     metric_id = metric_spec["id"]
     labels = {
+        "cd_r2": "Field-integrated C_D R2",
+        "cl_r2": "Field-integrated C_L R2",
+        "c_pitch_r2": "Field-integrated C_M,pitch R2",
+        "velocity_profile_r2": "AutoCFD5 velocity-profile R2",
+        "cp_cut_r2": "Continuous native-surface Cp-cut R2",
         "field_integrated_cd_rmse": "Field-integrated C_D RMSE",
         "field_integrated_cl_rmse": "Field-integrated C_L RMSE",
         "field_integrated_cmpitch_rmse": "Field-integrated C_M,pitch RMSE",
@@ -1006,13 +1094,27 @@ def presentation_definition(metric_spec: dict[str, Any]) -> dict[str, Any]:
     else:
         label = labels[metric_id]
         column_group = "diagnostics" if "profile" in metric_id or metric_id.startswith("cp_") else "integral"
-        group = "profile-errors" if column_group == "diagnostics" else "force-errors"
-        group_label = "Profile errors" if column_group == "diagnostics" else "Integral force / moment errors"
+        quality = metric_spec["kind"] == "r2"
+        group = (
+            "profile-quality" if quality and column_group == "diagnostics"
+            else "force-quality" if quality
+            else "profile-errors" if column_group == "diagnostics"
+            else "force-errors"
+        )
+        group_label = (
+            "Profile R2" if quality and column_group == "diagnostics"
+            else "Integral force / moment R2" if quality
+            else "Profile errors" if column_group == "diagnostics"
+            else "Integral force / moment errors"
+        )
         digits = 5 if metric_spec["unit"] == "" else 3
     return {
         "id": metric_id,
         "label": label,
-        "description": f"DrivAerML candidate contract metric using {metric_spec['weighting']}. Lower is better.",
+        "description": (
+            f"DrivAerML candidate contract metric using {metric_spec['weighting']}. "
+            f"{'Higher' if metric_spec['direction'] == 'higher' else 'Lower'} is better."
+        ),
         "group": group,
         "group_label": group_label,
         "column_group": column_group,
@@ -1071,7 +1173,7 @@ def diagnostic_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
         {
             "id": "velocity_profiles",
             "title": "AutoCFD5 velocity profiles",
-            "description": "Sixteen fixed lines scored on the pinned 10 mm grid using arc-length trapezoidal RMSE of |U|/Uinf.",
+            "description": "Sixteen fixed lines scored on the pinned 10 mm grid using equal-line global R2 with normalized trapezoidal arc-length support.",
             "data_key": "velocity_profiles",
             "profile_definition_id": profile["id"],
             "coordinate_unit": "m",
@@ -1264,6 +1366,9 @@ def migrated_metric_values(old: dict[str, Any]) -> dict[str, float]:
     cl = value(old, "field_integrated_cl_rmse", "c_lift_mae", 0.01)
     result.update(
         {
+            "cd_r2": value(old, "cd_r2", None, 0.8),
+            "cl_r2": value(old, "cl_r2", None, 0.8),
+            "c_pitch_r2": value(old, "c_pitch_r2", None, 0.8),
             "field_integrated_cd_rmse": cd,
             "field_integrated_cl_rmse": cl,
             "field_integrated_cmpitch_rmse": value(old, "field_integrated_cmpitch_rmse", None, max(0.001, 0.75 * cl)),
@@ -1276,6 +1381,8 @@ def migrated_metric_values(old: dict[str, Any]) -> dict[str, float]:
     velocity_rmse = value(old, "velocity_profile_uinf_rmse", None, math.sqrt(max(0.0, 1.0 - old_velocity_r2)))
     result.update(
         {
+            "velocity_profile_r2": old_velocity_r2,
+            "cp_cut_r2": value(old, "cp_cut_r2", None, 0.8),
             "velocity_profile_uinf_rmse": velocity_rmse,
             "velocity_profile_experimental_subset_uinf_rmse": value(old, "velocity_profile_experimental_subset_uinf_rmse", None, velocity_rmse),
             "cp_cut_rmse": value(old, "cp_cut_rmse", None, 0.25),
@@ -1322,6 +1429,16 @@ def migrate_submission(directory: Path, specification: dict[str, Any], profile: 
     write_json(index_path, index)
 
     metric_values = migrated_metric_values(submission.get("metric_values", {}))
+    metric_values.update(
+        composite_component_group_scores(
+            metric_values,
+            specification["overall_score_composite"],
+            specification["component_score_groups"],
+        )
+    )
+    metric_values["overall_score"] = composite_overall_score(
+        metric_values, specification["overall_score_composite"]
+    )
     ordered_ids = [item["id"] for item in specification["metrics"]]
     metric_values = {metric_id: metric_values[metric_id] for metric_id in ordered_ids}
     submission.update(
@@ -1341,8 +1458,8 @@ def migrate_submission(directory: Path, specification: dict[str, Any], profile: 
     }
     submission["note"] = (
         "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. "
-        "It is not a recomputation from native fields. The four score values are zero placeholders because the nine "
-        "physics-null denominators are not yet published, so this row is ineligible for ranking or citation."
+        "It is not a recomputation from native fields. Its bounded scores are structural placeholders, so this row is "
+        "ineligible for ranking or citation."
     )
 
     evidence_path = directory / submission["evaluation"]["evidence_file"]

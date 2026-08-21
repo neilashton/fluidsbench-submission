@@ -76,6 +76,13 @@ DIAGNOSTIC_METRIC_IDS = (
     "velocity_profile_experimental_subset_uinf_rmse",
     "cp_cut_rmse",
 )
+GLOBAL_R2_METRIC_IDS = (
+    "cd_r2",
+    "cl_r2",
+    "c_pitch_r2",
+    "velocity_profile_r2",
+    "cp_cut_r2",
+)
 
 
 @dataclass(frozen=True)
@@ -834,10 +841,63 @@ def _line_rmse(
     return math.sqrt(integral / float(np.sum(spacing)))
 
 
+def _line_r2_statistics(
+    coordinate: np.ndarray,
+    truth: np.ndarray,
+    prediction: np.ndarray,
+) -> tuple[float, float, float]:
+    """Return unit-support truth moments and SSE for one ordered profile."""
+
+    spacing = np.diff(coordinate)
+    if (
+        len(spacing) == 0
+        or np.any(spacing <= 0.0)
+        or len(coordinate) != len(truth)
+        or len(coordinate) != len(prediction)
+    ):
+        raise ValueError("synthetic profile R2 inputs are malformed")
+    length = float(np.sum(spacing))
+    squared_error = np.square(prediction - truth)
+    return (
+        float(np.sum(spacing * (truth[:-1] + truth[1:]) / 2.0)) / length,
+        float(
+            np.sum(spacing * (np.square(truth[:-1]) + np.square(truth[1:])) / 2.0)
+        )
+        / length,
+        float(
+            np.sum(
+                spacing
+                * (squared_error[:-1] + squared_error[1:])
+                / 2.0
+            )
+        )
+        / length,
+    )
+
+
+def _global_r2(statistics: list[tuple[float, float, float]]) -> float:
+    """Return global R2 after giving every supplied profile equal weight."""
+
+    if not statistics:
+        raise ValueError("synthetic global R2 requires at least one profile")
+    truth_sum = math.fsum(item[0] for item in statistics)
+    truth_squared_sum = math.fsum(item[1] for item in statistics)
+    squared_error_sum = math.fsum(item[2] for item in statistics)
+    truth_sst = truth_squared_sum - truth_sum * truth_sum / len(statistics)
+    if truth_sst <= 0.0:
+        raise ValueError("synthetic global R2 truth is constant")
+    return 1.0 - squared_error_sum / truth_sst
+
+
 def _synthetic_profiles(
     candidate_spec: dict[str, Any],
     profile_registry: dict[str, Any],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, dict[str, float]]]:
+) -> tuple[
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    dict[str, dict[str, float]],
+    dict[str, float],
+]:
     """Create all four Cp cuts and all sixteen AutoCFD5-shaped lines."""
 
     panels = {panel["id"]: panel for panel in candidate_spec["profile_panels"]}
@@ -861,6 +921,8 @@ def _synthetic_profiles(
     prediction_cases: list[dict[str, Any]] = []
     truth_cases: list[dict[str, Any]] = []
     diagnostic_values: dict[str, dict[str, float]] = {}
+    cp_r2_statistics: list[tuple[float, float, float]] = []
+    velocity_r2_statistics: list[tuple[float, float, float]] = []
     for case_index, case in enumerate(CASES):
         prediction_series: list[dict[str, Any]] = []
         truth_series: list[dict[str, Any]] = []
@@ -879,6 +941,9 @@ def _synthetic_profiles(
             offset = 0.012 * (case_index + 1) * (1.0 + station_index / 10.0)
             prediction = truth + offset
             cp_errors.append(_line_rmse(coordinate, truth, prediction))
+            cp_r2_statistics.append(
+                _line_r2_statistics(coordinate, truth, prediction)
+            )
             prediction_series.append(
                 {
                     "panel_id": pressure_panel["id"],
@@ -919,6 +984,9 @@ def _synthetic_profiles(
             offset = 0.004 * (case_index + 1) * (1.0 + station_index / 20.0)
             prediction = truth + offset
             error = _line_rmse(coordinate, truth, prediction)
+            velocity_r2_statistics.append(
+                _line_r2_statistics(coordinate, truth, prediction)
+            )
             velocity_errors.append(error)
             if station_id in experimental_station_ids:
                 experimental_errors.append(error)
@@ -954,7 +1022,45 @@ def _synthetic_profiles(
             ),
             "cp_cut_rmse": math.fsum(cp_errors) / len(cp_errors),
         }
-    return prediction_cases, truth_cases, diagnostic_values
+    return (
+        prediction_cases,
+        truth_cases,
+        diagnostic_values,
+        {
+            "velocity_profile_r2": _global_r2(velocity_r2_statistics),
+            "cp_cut_r2": _global_r2(cp_r2_statistics),
+        },
+    )
+
+
+def _synthetic_force_truth(case_index: int) -> dict[str, float]:
+    """Return the exact synthetic force truth for one case."""
+
+    truth_cl = 0.16 + 0.01 * case_index
+    truth_cm_pitch = 0.015 - 0.002 * case_index
+    return {
+        "cd": 0.24 + 0.005 * case_index,
+        "cl": truth_cl,
+        "cm_pitch": truth_cm_pitch,
+        "clf": truth_cl / 2.0 + truth_cm_pitch,
+        "clr": truth_cl / 2.0 - truth_cm_pitch,
+    }
+
+
+def _force_r2(truth: list[float], prediction: list[float]) -> float:
+    """Return equal-case R2 for one synthetic force coefficient."""
+
+    if len(truth) != len(prediction) or len(truth) < 2:
+        raise ValueError("synthetic force R2 inputs are malformed")
+    truth_mean = math.fsum(truth) / len(truth)
+    truth_sst = math.fsum((value - truth_mean) ** 2 for value in truth)
+    if truth_sst <= 0.0:
+        raise ValueError("synthetic force R2 truth is constant")
+    squared_error = math.fsum(
+        (predicted - observed) ** 2
+        for observed, predicted in zip(truth, prediction, strict=True)
+    )
+    return 1.0 - squared_error / truth_sst
 
 
 def _synthetic_force_values(
@@ -962,28 +1068,17 @@ def _synthetic_force_values(
 ) -> tuple[dict[str, float], dict[str, float]]:
     """Return coherent force coefficients and their per-case errors."""
 
-    truth_cd = 0.24 + 0.005 * case_index
-    truth_cl = 0.16 + 0.01 * case_index
-    truth_cm_pitch = 0.015 - 0.002 * case_index
-    truth_clf = truth_cl / 2.0 + truth_cm_pitch
-    truth_clr = truth_cl / 2.0 - truth_cm_pitch
+    truth = _synthetic_force_truth(case_index)
 
-    predicted_cd = truth_cd + 0.01 * (case_index + 1)
-    predicted_cl = truth_cl - 0.012 * (case_index + 1)
-    predicted_cm_pitch = truth_cm_pitch + 0.003 * (case_index + 1)
+    predicted_cd = truth["cd"] + 0.01 * (case_index + 1)
+    predicted_cl = truth["cl"] - 0.012 * (case_index + 1)
+    predicted_cm_pitch = truth["cm_pitch"] + 0.003 * (case_index + 1)
     prediction = {
         "cd": predicted_cd,
         "cl": predicted_cl,
         "cm_pitch": predicted_cm_pitch,
         "clf": predicted_cl / 2.0 + predicted_cm_pitch,
         "clr": predicted_cl / 2.0 - predicted_cm_pitch,
-    }
-    truth = {
-        "cd": truth_cd,
-        "cl": truth_cl,
-        "cm_pitch": truth_cm_pitch,
-        "clf": truth_clf,
-        "clr": truth_clr,
     }
     force_metric_keys = dict(
         zip(
@@ -1007,14 +1102,22 @@ def _augment_candidate_nonspatial_metrics(
     *,
     candidate_spec: dict[str, Any],
     diagnostic_values: dict[str, dict[str, float]],
+    profile_r2_values: dict[str, float],
 ) -> dict[str, Any]:
     """Add exact force/profile fields and validate DrivAerML reductions."""
 
     per_metric: dict[str, list[float]] = {
         metric_id: [] for metric_id in (*FORCE_METRIC_IDS, *DIAGNOSTIC_METRIC_IDS)
     }
+    force_truth: dict[str, list[float]] = {
+        coefficient: [] for coefficient in ("cd", "cl", "cm_pitch")
+    }
+    force_prediction: dict[str, list[float]] = {
+        coefficient: [] for coefficient in force_truth
+    }
     for case_index, case in enumerate(case_metrics["cases"]):
         force_coefficients, force_values = _synthetic_force_values(case_index)
+        truth_coefficients = _synthetic_force_truth(case_index)
         nonspatial = {
             **force_values,
             **diagnostic_values[case["case_id"]],
@@ -1023,6 +1126,9 @@ def _augment_candidate_nonspatial_metrics(
         case["nonspatial_metric_values"] = nonspatial
         for metric_id, value in nonspatial.items():
             per_metric[metric_id].append(value)
+        for coefficient in force_truth:
+            force_truth[coefficient].append(truth_coefficients[coefficient])
+            force_prediction[coefficient].append(force_coefficients[coefficient])
 
     for metric_id in FORCE_METRIC_IDS[:-1]:
         values = per_metric[metric_id]
@@ -1036,6 +1142,18 @@ def _augment_candidate_nonspatial_metrics(
     for metric_id in DIAGNOSTIC_METRIC_IDS:
         values = per_metric[metric_id]
         case_metrics["metric_values"][metric_id] = math.fsum(values) / len(values)
+    for metric_id, coefficient in (
+        ("cd_r2", "cd"),
+        ("cl_r2", "cl"),
+        ("c_pitch_r2", "cm_pitch"),
+    ):
+        case_metrics["metric_values"][metric_id] = _force_r2(
+            force_truth[coefficient],
+            force_prediction[coefficient],
+        )
+    if set(profile_r2_values) != {"velocity_profile_r2", "cp_cut_r2"}:
+        raise ValueError("synthetic profile R2 metric set is incomplete")
+    case_metrics["metric_values"].update(profile_r2_values)
 
     candidate_non_score_ids = {
         metric["id"]
@@ -1821,14 +1939,17 @@ def run_demo(output: Path) -> dict[str, Any]:
     )
     _assert_evaluator_matches_chunks(case_metrics, expected_statistics)
     _apply_candidate_field_metrics(case_metrics, expected_field_values)
-    profile_cases, profile_truth_cases, diagnostic_values = _synthetic_profiles(
-        candidate_spec,
-        profile_registry,
-    )
+    (
+        profile_cases,
+        profile_truth_cases,
+        diagnostic_values,
+        profile_r2_values,
+    ) = _synthetic_profiles(candidate_spec, profile_registry)
     nonspatial_validation = _augment_candidate_nonspatial_metrics(
         case_metrics,
         candidate_spec=candidate_spec,
         diagnostic_values=diagnostic_values,
+        profile_r2_values=profile_r2_values,
     )
     case_metrics_path = output / "metrics" / "cases.json"
     _write_json(case_metrics_path, case_metrics)

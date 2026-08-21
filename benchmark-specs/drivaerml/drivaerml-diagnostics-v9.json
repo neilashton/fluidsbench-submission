@@ -16,7 +16,9 @@
   },
   "velocity_profiles": {
     "definition_authority": "AutoCFD5",
-    "ranked_metric_id": "velocity_profile_uinf_rmse",
+    "ranked_metric_id": "velocity_profile_r2",
+    "report_only_metric_id": "velocity_profile_uinf_rmse",
+    "ranked_reduction": "equal_case_equal_line_global_R2_with_normalized_trapezoidal_arc_length_support_per_line",
     "quantity": "magnitude(UMeanTrim)/38.889",
     "scoring_grid": "fixed_10_mm_candidate_grid",
     "line_count": 16,
@@ -394,12 +396,13 @@
   },
   "pressure_cuts": {
     "definition_authority": "FluidsBench",
-    "ranked_metric_id": "cp_cut_rmse",
+    "ranked_metric_id": "cp_cut_r2",
+    "report_only_metric_id": "cp_cut_rmse",
     "quantity": "Cp=2*pMeanTrim/(38.889^2)",
     "cut_count": 4,
     "association": "native_surface_VTP_CellData",
     "extraction_status": "pending_immutable_owner_cut_support",
-    "reduction": "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse",
+    "reduction": "equal_case_equal_cut_global_R2_with_normalized_native_intersection_segment_length_support_per_cut",
     "stations": [
       {
         "id": "upperbody_centerline",

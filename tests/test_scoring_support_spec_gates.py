@@ -345,10 +345,18 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
         )
 
         metrics = {item["id"]: item for item in specification["metrics"]}
-        self.assertEqual(len(metrics), 31)
+        self.assertEqual(len(metrics), 36)
         self.assertTrue(
             REMOVED_DRIVAERML_PHYSICAL_VOLUME_METRIC_IDS.isdisjoint(metrics)
         )
+        for metric_id in (
+            "cd_r2",
+            "cl_r2",
+            "c_pitch_r2",
+            "velocity_profile_r2",
+            "cp_cut_r2",
+        ):
+            self.assertEqual(metrics[metric_id]["kind"], "r2")
         self.assertEqual(
             metrics["surface_pressure_rel_l2"]["weighting"],
             "surface_face_area",

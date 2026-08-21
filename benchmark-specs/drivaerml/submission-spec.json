@@ -9,7 +9,7 @@
   "scoring_support": {
     "status": "owner_review_required",
     "submissions_open": false,
-    "closed_reason": "The participant contract and official splits are published, but ranking remains closed until all-case velocity replay, immutable native Cp-cut extraction support, physics-null baselines, genuine-model sensitivity analysis, force-replay review, and immutable evaluator/scoring-support owner approval are complete.",
+    "closed_reason": "The participant contract, official splits, and bounded scoring equation are published, but ranking remains closed until all-case velocity replay, immutable native Cp-cut extraction support, genuine-model sensitivity analysis, force-replay review, and immutable evaluator/scoring-support owner approval are complete.",
     "candidate_evidence_index_file": "evidence/README.md",
     "candidate_evidence_manifest_file": "evidence/manifest.json",
     "dataset_evaluator_binding": {
@@ -34,7 +34,7 @@
       },
       "proposal_contract": {
         "file": "proposal/contract-proposal.json",
-        "sha256": "a7eca5f606a46f246cbaeac840b248f66e2fae4c09694b13345d137fce876d34"
+        "sha256": "b4210f7177f32f7fdd18f561d445f6180fabf3302ad6b7a72974ebfb4807935b"
       }
     },
     "case_file_binding": {
@@ -141,6 +141,11 @@
         "id": "field_integrated_force_truth",
         "authoritative_public_file": "force_mom_constref_all.csv",
         "sha256": "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865",
+        "prototype_r2_truth_statistics": {
+          "file": "force-r2-truth-statistics.json",
+          "sha256": "6deb7f61ef472eb1d6891927147bf9aafe7125ed6da4f96f0dcc05e0ba178b55",
+          "scope": "prototype_fixture_calibration_only; official_evaluation_uses_casewise_authoritative_truth"
+        },
         "per_case_mirror": "<case_id>/force_mom_constref_<run_number>.csv",
         "per_case_mirror_policy": "accepted_as_a_convenience_only_after_exact_row_replay_against_the_authoritative_aggregate",
         "exact_header": [
@@ -227,7 +232,7 @@
       "body_force_equation": "rho_inf*sum_f(pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f))",
       "body_moment_equation": "rho_inf*sum_f(cross(C_f-CoR,pMeanTrim_f*A_f-wallShearStressMeanTrim_f*norm(A_f)))",
       "face_area_and_centre_convention": "OpenFOAM_v2212_primitiveMeshTools_makeFaceCentresAndAreas",
-      "ranked_reduction": "separate_equal_case_RMSE_for_Cd_Cl_and_CmPitch",
+      "ranked_reduction": "separate_equal_case_R2_for_Cd_Cl_and_CmPitch_with_RMSE_reported_as_diagnostics",
       "dependent_axle_loads": {
         "Clf": "Cl/2+CmPitch",
         "Clr": "Cl/2-CmPitch",
@@ -263,7 +268,7 @@
     },
     "profile_definition": {
       "file": "drivaerml-diagnostics-v9.json",
-      "sha256": "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1",
+      "sha256": "df22bc807b62f925c32659d681ac44064e6acf46449038b8431b1e9139aba1e8",
       "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
       "velocity_validity_policy": {
         "id": "drivaerml-autocfd5-velocity-validity-v1",
@@ -333,7 +338,7 @@
       "cp_cut_support": {
         "status": "pending_immutable_owner_release",
         "cut_count": 4,
-        "metric_id": "cp_cut_rmse",
+        "metric_id": "cp_cut_r2",
         "discrete_cp_probe_support_accepted": false
       }
     },
@@ -354,8 +359,8 @@
       "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
       "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
       "cp_cuts": "four_continuous_cut_definitions_complete_immutable_native_extraction_support_and_all_case_replay_pending",
-      "physics_null_baselines": "pending",
-      "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
+      "bounded_score_definition": "complete_fixed_field_error_caps_and_bounded_force_profile_R2",
+      "composite_sensitivity_and_bootstrap": "pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
       "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_frozen_evaluator_revision_and_owner_approval_pending",
       "independent_participant_dry_run": "pending",
       "owner_evaluator_approval": "pending"
@@ -366,7 +371,7 @@
       "approve_velocity_assignment_and_resolution_convergence",
       "approve_immutable_native_surface_extraction_support_for_all_four_continuous_cp_cuts",
       "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
-      "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
+      "review_fixed_field_error_caps_and_bounded_R2_sensitivity_with_genuine_model_predictions_and_publish_bootstrap_indexes",
       "approve_the_candidate_schema_v3_participant_authored_metrics_case_evidence_and_profile_validation",
       "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions"
     ]
@@ -383,76 +388,63 @@
   "overall_score_composite": {
     "metric_id": "overall_score",
     "operation": "weighted_component_scores",
-    "status": "pending_reference_baselines",
-    "allow_negative_scores": true,
-    "component_skill_equation": "100*(1-E_j/B_j)",
+    "status": "active",
+    "score_range": [
+      0.0,
+      100.0
+    ],
     "components": [
       {
         "metric_id": "surface_pressure_rel_l2",
         "weight": 0.15,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.surface_pressure_rel_l2",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_error",
+        "cap": 15.0
       },
       {
         "metric_id": "surface_wall_shear_rel_l2",
         "weight": 0.1,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.surface_wall_shear_rel_l2",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_error",
+        "cap": 20.0
       },
       {
         "metric_id": "volume_velocity_rel_l2",
         "weight": 0.15,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.volume_velocity_rel_l2",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_error",
+        "cap": 12.0
       },
       {
         "metric_id": "volume_pressure_rel_l2",
         "weight": 0.1,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.volume_pressure_rel_l2",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_error",
+        "cap": 15.0
       },
       {
-        "metric_id": "field_integrated_cd_rmse",
+        "metric_id": "cd_r2",
         "weight": 0.15,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.field_integrated_cd_rmse",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_quality"
       },
       {
-        "metric_id": "field_integrated_cl_rmse",
+        "metric_id": "cl_r2",
         "weight": 0.05,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.field_integrated_cl_rmse",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_quality"
       },
       {
-        "metric_id": "field_integrated_cmpitch_rmse",
+        "metric_id": "c_pitch_r2",
         "weight": 0.05,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.field_integrated_cmpitch_rmse",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_quality"
       },
       {
-        "metric_id": "velocity_profile_uinf_rmse",
+        "metric_id": "velocity_profile_r2",
         "weight": 0.15,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.velocity_profile_uinf_rmse",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_quality"
       },
       {
-        "metric_id": "cp_cut_rmse",
+        "metric_id": "cp_cut_r2",
         "weight": 0.1,
-        "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.cp_cut_rmse",
-        "baseline_status": "pending_all_case_evaluator_replay"
+        "transform": "bounded_quality"
       }
     ],
-    "tolerance": 1e-06,
-    "activation_rule": "set status=active and publish one finite positive baseline_error per component only after frozen evaluator replay and sensitivity review"
+    "tolerance": 1e-06
   },
   "component_score_groups": {
     "operation": "normalized_weighted_component_scores",
@@ -469,16 +461,16 @@
       {
         "metric_id": "force_score",
         "component_metric_ids": [
-          "field_integrated_cd_rmse",
-          "field_integrated_cl_rmse",
-          "field_integrated_cmpitch_rmse"
+          "cd_r2",
+          "cl_r2",
+          "c_pitch_r2"
         ]
       },
       {
         "metric_id": "diagnostic_score",
         "component_metric_ids": [
-          "velocity_profile_uinf_rmse",
-          "cp_cut_rmse"
+          "velocity_profile_r2",
+          "cp_cut_r2"
         ]
       }
     ],
@@ -520,6 +512,53 @@
       "equation": "\\frac{\\sum_{j\\in D}\\alpha_j S_j}{\\sum_{j\\in D}\\alpha_j}",
       "aggregation": "derived_score_equation",
       "weighting": "dataset_declared_component_weights"
+    },
+    {
+      "id": "cd_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_c(C_{D,c}-\\hat{C}_{D,c})^2}{\\sum_c(C_{D,c}-\\bar{C}_D)^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "cl_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_c(C_{L,c}-\\hat{C}_{L,c})^2}{\\sum_c(C_{L,c}-\\bar{C}_L)^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "c_pitch_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_c(C_{M,c}-\\hat{C}_{M,c})^2}{\\sum_c(C_{M,c}-\\bar{C}_M)^2}",
+      "aggregation": "all_test_cases",
+      "weighting": "cases_equal"
+    },
+    {
+      "id": "velocity_profile_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_{c,l}\\int_{A_{cl}}(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds/L_{cl}}{\\sum_{c,l}\\int_{A_{cl}}(U/U_\\infty-\\bar{U}_w)^2\\,ds/L_{cl}}",
+      "aggregation": "equal_case_equal_line_global_weighted_r2",
+      "weighting": "equal_cases_equal_lines_trapezoidal_arc_length_within_line",
+      "availability": "all_16_lines_available_for_every_case_after_owner_mask_and_zero_unresolved_nonexcluded_samples"
+    },
+    {
+      "id": "cp_cut_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_{c,q}\\sum_{s\\in\\Gamma_{cq}}\\tilde{w}_{cqs}(\\hat{C}_{p,s}-C_{p,s})^2}{\\sum_{c,q}\\sum_{s\\in\\Gamma_{cq}}\\tilde{w}_{cqs}(C_{p,s}-\\bar{C}_{p,w})^2}",
+      "aggregation": "equal_case_equal_cut_global_weighted_r2",
+      "weighting": "equal_cases_equal_cuts_normalized_native_cut_intersection_segment_length",
+      "availability": "all_four_continuous_native_surface_cuts_available_for_every_case_after_immutable_owner_extraction_support_is_published"
     },
     {
       "id": "surface_pressure_rel_l2",
@@ -771,7 +810,7 @@
   "profile_definition": {
     "id": "drivaerml-diagnostics-v9-candidate",
     "file": "drivaerml-diagnostics-v9.json",
-    "sha256": "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1",
+    "sha256": "df22bc807b62f925c32659d681ac44064e6acf46449038b8431b1e9139aba1e8",
     "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
     "velocity_validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1"
   },
@@ -784,7 +823,7 @@
       "coordinate_order": "strictly_increasing",
       "coordinate_id": "arc_length_m",
       "coordinate_unit": "m",
-      "metric_id": "cp_cut_rmse",
+      "metric_id": "cp_cut_r2",
       "station_ids": [
         "upperbody_centerline",
         "underbody_centerline",
@@ -803,7 +842,7 @@
       "coordinate_order": "strictly_increasing",
       "coordinate_id": "distance_m",
       "coordinate_unit": "m",
-      "metric_id": "velocity_profile_uinf_rmse",
+      "metric_id": "velocity_profile_r2",
       "station_ids": [
         "autocfd5_v1",
         "autocfd5_v2",

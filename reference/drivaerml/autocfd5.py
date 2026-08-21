@@ -771,7 +771,10 @@ def load_autocfd5_submission_definition(
     samples = _load_velocity_samples(source_paths["velocity_scoring_grid"], lines)
     velocity = profile.get("velocity_profiles")
     if not isinstance(velocity, Mapping) or (
-        velocity.get("ranked_metric_id") != "velocity_profile_uinf_rmse"
+        velocity.get("ranked_metric_id") != "velocity_profile_r2"
+        or velocity.get("report_only_metric_id") != "velocity_profile_uinf_rmse"
+        or velocity.get("ranked_reduction")
+        != "equal_case_equal_line_global_R2_with_normalized_trapezoidal_arc_length_support_per_line"
         or velocity.get("definition_authority") != "AutoCFD5"
         or velocity.get("line_count") != VELOCITY_LINE_COUNT
         or velocity.get("sample_count_per_case") != VELOCITY_SAMPLE_COUNT
@@ -786,14 +789,15 @@ def load_autocfd5_submission_definition(
 
     cuts = profile.get("pressure_cuts")
     if not isinstance(cuts, Mapping) or (
-        cuts.get("ranked_metric_id") != "cp_cut_rmse"
+        cuts.get("ranked_metric_id") != "cp_cut_r2"
+        or cuts.get("report_only_metric_id") != "cp_cut_rmse"
         or cuts.get("definition_authority") != "FluidsBench"
         or cuts.get("cut_count") != 4
         or cuts.get("quantity") != "Cp=2*pMeanTrim/(38.889^2)"
         or cuts.get("association") != "native_surface_VTP_CellData"
         or cuts.get("extraction_status") != "pending_immutable_owner_cut_support"
         or cuts.get("reduction")
-        != "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse"
+        != "equal_case_equal_cut_global_R2_with_normalized_native_intersection_segment_length_support_per_cut"
     ):
         raise AutoCFD5Error("v9 Cp-cut metadata is inconsistent")
     cut_stations = cuts.get("stations")
