@@ -687,8 +687,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "closed_reason": (
             "The participant contract and official splits are published, but ranking remains closed until "
             "all-case velocity replay, immutable native Cp-cut extraction support, "
-            "physics-null baselines, genuine-model sensitivity analysis, one genuine maintainer "
-            "native-evaluator recomputation receipt, "
+            "physics-null baselines, genuine-model sensitivity analysis, "
             "force-replay review, and immutable evaluator/scoring-support owner approval are complete."
         ),
         "candidate_evidence_index_file": "evidence/README.md",
@@ -701,7 +700,9 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "activation_rule": (
                 "set status=frozen and publish the exact immutable evaluator Git "
                 "revision only after the production evaluator is scientifically "
-                "approved; final maintainer receipts must match both values exactly"
+                "approved; participant evaluation evidence must match the frozen "
+                "reference version, and optional maintainer recomputation receipts "
+                "must match both values exactly"
             ),
         },
         "source_release": {
@@ -725,7 +726,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "inference_may_be_chunked": True,
             "chunk_metrics_must_use_additive_sufficient_statistics": True,
             "complete_case_and_entity_coverage_required": True,
-            "full_prediction_artifact_required": True,
+            "full_prediction_artifact_required": False,
             "case_aggregation": "calculate_each_complete_case_then_macro_average_cases_equally",
             "vector_error": "componentwise_difference_then_euclidean_norm_not_difference_of_magnitudes",
         },
@@ -854,6 +855,14 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "face_area_and_centre_convention": "OpenFOAM_v2212_primitiveMeshTools_makeFaceCentresAndAreas",
             "ranked_reduction": "separate_equal_case_RMSE_for_Cd_Cl_and_CmPitch",
             "dependent_axle_loads": {"Clf": "Cl/2+CmPitch", "Clr": "Cl/2-CmPitch", "composite_weight": 0.0},
+            "participant_json": {
+                "file": "metrics/cases.json",
+                "case_property": "force_coefficients",
+                "required_prediction_keys": ["cd", "cl", "cm_pitch", "clf", "clr"],
+                "ranked_keys": ["cd", "cl", "cm_pitch"],
+                "report_only_keys": ["clf", "clr"],
+                "generation": "participant_runs_the_frozen_reference_evaluator_locally",
+            },
             "candidate_validation_evidence": {
                 "file": "evidence/force-replay-all484.json",
                 "sha256": "631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17",
@@ -879,8 +888,8 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling",
             "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
             "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
-            "derive field-integrated forces, AutoCFD5 velocity diagnostics, and FluidsBench continuous Cp cuts from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
-            "submit scalar metrics, per-case evidence, profile display chunks, and one revision-pinned complete-split scored-prediction artifact through the current FluidsBench schema; maintainers independently add the native-evaluator recomputation receipt",
+            "derive field-integrated forces, AutoCFD5 velocity diagnostics, and FluidsBench continuous Cp cuts from the participant's complete native predictions using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
+            "submit participant-authored scalar metrics, per-case force coefficients and evidence, and complete velocity-profile and continuous-Cp-cut JSON chunks through the current FluidsBench schema; sharing revision-pinned prediction artifacts and maintainer native-evaluator recomputation are optional audits and do not affect approval, rank, citation, or promotion eligibility",
         ],
         "activation_gates": {
             "official_splits": "complete",
@@ -892,7 +901,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "cp_cuts": "four_continuous_cut_definitions_complete_immutable_native_extraction_support_and_all_case_replay_pending",
             "physics_null_baselines": "pending",
             "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
-            "schema_v3_nonspatial_result_binding": "candidate_fail_closed_reductions_hash_bound_maintainer_native_evaluator_receipt_and_benchmark_owned_pending_immutable_revision_gate_implemented_tests_pass_genuine_full_split_receipt_frozen_revision_and_owner_approval_pending",
+            "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_frozen_evaluator_revision_and_owner_approval_pending",
             "independent_participant_dry_run": "pending",
             "owner_evaluator_approval": "pending",
         },
@@ -903,7 +912,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "approve_immutable_native_surface_extraction_support_for_all_four_continuous_cp_cuts",
             "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
             "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
-            "approve_the_candidate_schema_v3_nonspatial_validation_and_hash_bound_maintainer_receipt_then_issue_one_genuine_full_split_receipt",
+            "approve_the_candidate_schema_v3_participant_authored_metrics_case_evidence_and_profile_validation",
             "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions",
         ],
     }

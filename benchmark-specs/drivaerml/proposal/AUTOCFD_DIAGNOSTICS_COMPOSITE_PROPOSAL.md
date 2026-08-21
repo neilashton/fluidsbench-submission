@@ -192,8 +192,9 @@ cuts as one composite component:
 | `front_left_wheelhouse_y_neg_0_6` | front-left wheelhouse intersection at `y=-0.6 m` |
 
 These are continuous case-specific surface/plane intersections, not the 209
-AutoCFD taps and not four selected subsets of those taps. The evaluator derives
-truth and prediction from the submitted native surface-pressure field using
+AutoCFD taps and not four selected subsets of those taps. The participant's
+local evaluator derives truth and prediction from its native surface-pressure
+prediction using
 
 `Cp = 2 * pMeanTrim / (38.889 m/s)^2`.
 
@@ -364,7 +365,7 @@ material tap transported through ANSA.
   density and is unstable for nearly flat individual profiles.
 
 All profile predictions must come from the same model and checkpoint as the
-submitted native field predictions. The benchmark reference evaluator run at
+native predictions evaluated locally by the participant. The benchmark reference evaluator run at
 the contributor stage recomputes these diagnostics from benchmark truth rather
 than trusting manually supplied scalar summaries; this does not imply that a
 FluidsBench maintainer reruns the model or downloads its complete predictions.
@@ -403,7 +404,8 @@ The raw component errors are fixed as follows:
   case equal-native-cell relative L2, preserving the current repository-wide
   volume default; no geometric cell-volume secondary is required;
 - field-integrated `Cd`, `Cl`, and `CmPitch`: separate equal-case RMSEs of the
-  coefficients integrated from the submitted surface fields using the constant
+  coefficients integrated locally from each participant's native surface
+  predictions using the constant
   AutoCFD convention `A_ref=2.17 m^2`, `L_ref=2.78618 m`,
   `CoR=(1.40009,0,-0.3176) m`, `rho_inf=1 kg/m^3`, and
   `U_inf=38.889 m/s`, with drag in `+x`, lift in `+z`, and pitch about `+y`.
@@ -448,8 +450,8 @@ continuous cuts, and zero `Cd`, `Cl`, and `CmPitch`. Negative scores remain
 negative for ranking because they
 mean worse than the declared null; a clipped 0-100 value may be displayed but
 must not determine rank. `Cd`, `Cl`, `CmPitch`, `Clf`, and `Clr` are integrated
-or derived from the submitted surface fields using that constant-reference
-force contract. If a separately versioned
+or derived locally from each participant's native surface predictions using
+that constant-reference force contract. If a separately versioned
 direct-scalar force task is later activated, report it separately; it cannot
 enter this composite. For every native boundary polygon `f`, let `c_f` be the
 arithmetic mean of its vertex coordinates and define the

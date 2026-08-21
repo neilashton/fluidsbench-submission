@@ -77,15 +77,24 @@ metrics weight every native cell equally; no geometric cell-volume array or
 volume-weighted secondary metric is required. The evaluator audits, but never
 regenerates, the fixed surface-area inputs.
 
-## 4. Let the evaluator derive engineering diagnostics
+## 4. Run the reference evaluator locally
 
-Submit native fields rather than hand-calculated force or profile values. The
-candidate evaluator integrates submitted surface pressure and wall shear to
-derive `Cd`, `Cl`, `CmPitch`, and report-only `Clf`/`Clr`. After activation, the
-owner-approved frozen evaluator will use the approved mappings and extraction
-support to derive the 16 AutoCFD5 velocity profiles and the four FluidsBench
-continuous Cp cuts. This ensures truth and predictions use the same geometry,
-raw IDs, force convention, validity masks, and reductions.
+Use the candidate evaluator for implementation feedback now and, after
+activation, run the exact owner-approved frozen evaluator locally. Do not
+substitute hand-calculated force conventions or independently defined profile
+extraction. The evaluator integrates the participant's native surface pressure
+and wall shear to produce per-case `Cd`, `Cl`, `CmPitch`, and report-only
+`Clf`/`Clr`, together with their submitted metrics. It uses the approved
+mappings and extraction support to produce the complete JSON series for the 16
+AutoCFD5 velocity profiles and the four FluidsBench continuous Cp cuts. Include
+those derived coefficients, metrics, and profile series in the submission
+package. This keeps truth and predictions on the same geometry, raw IDs, force
+convention, validity masks, and reductions.
+
+For schema v3, each case in `metrics/cases.json` carries the evaluator-produced
+prediction object `force_coefficients` with exactly `cd`, `cl`, `cm_pitch`,
+`clf`, and `clr`. The first three are ranked independently; `clf` and `clr` are
+report-only closure evidence.
 
 The submission-facing
 [`drivaerml-diagnostics-v9.json`](drivaerml-diagnostics-v9.json) registry contains 16
@@ -97,9 +106,11 @@ pending. Contributors must not invent replacements for either official
 support.
 
 The four continuous Cp cuts remain a ranked component with composite weight
-0.10; the velocity profiles retain weight 0.15. Participants submit native
-surface `pMeanTrim`, from which the evaluator derives the cuts, so no separate
-participant Cp-cut field or extracted values are required.
+0.10; the velocity profiles retain weight 0.15. The evaluator derives every cut
+from native surface `pMeanTrim`. Participants therefore do not add a Cp-cut
+field to the VTP or predict a second Cp representation, but they do submit the
+evaluator-produced Cp-cut coordinate and prediction arrays in the normal
+FluidsBench profile JSON.
 
 Only the 209 discrete Cp probes are excluded. Participants do not submit probe
 outputs, probe mappings, or probe-specific support, and no discrete-probe
@@ -107,9 +118,10 @@ metric is calculated. The combined v8 registry and existing 209-probe files in
 the proposal and evidence directories are retained only as inactive,
 non-normative research records.
 
-Participants submit the complete native `UMeanTrim` field and do not create or
-modify velocity-profile validity masks. The frozen evaluator will apply the
-owner-published mask and containing-cell assignments. Only
+Participants run the evaluator over their complete native `UMeanTrim`
+prediction and do not create or modify velocity-profile validity masks. The
+frozen evaluator will apply the owner-published mask and containing-cell
+assignments and emit the JSON profile series to include in the package. Only
 `inside_morphed_solid` and `outside_released_fluid_domain` are permitted owner
 exclusion reasons. An unresolved containing-cell or cell-evaluation failure is
 not an automatic exclusion: it makes the required line unavailable until the
@@ -202,27 +214,50 @@ three-part streams respectively, calls the same core and diagnostic evaluator
 entry points, and writes candidate evidence only. It never downloads data,
 generates scientific support, or creates a submission.
 
+For a complete selected split, the dataset reducer writes both the case metrics
+and the standard profile chunks from the participant's evaluator evidence:
+
+```bash
+.venv-drivaerml/bin/python scripts/score_drivaerml_candidate_dataset.py \
+  --split-id <official-split-id> \
+  --core-evidence-dir /path/to/core-case-evidence \
+  --diagnostic-evidence-dir /path/to/diagnostic-case-evidence \
+  --force-truth /path/to/force_mom_constref_all.csv \
+  --output /path/to/package/evaluation-evidence.json \
+  --schema-v3-case-metrics-output /path/to/package/metrics/cases.json \
+  --schema-v3-profile-output-dir /path/to/package/profiles \
+  --submission-id <submission-id> \
+  --candidate-support-release-id <published-candidate-release-id> \
+  --candidate-support-manifest-sha256 <64-character-sha256>
+```
+
+Profile packaging fails closed unless every test case contains all four Cp-cut
+series followed by all 16 velocity-profile series. While the Cp-cut extraction
+support remains unpublished, this command may produce candidate dataset and
+case-metric evidence but must refuse the complete profile output; it never
+fills missing curves with placeholders.
+
 ## 6. Package through schema v3 only after activation
 
 The candidate tools produce deterministic local evaluation evidence, not an
 official `submission.json`. Once the owner publishes immutable official
-scoring support and opens DrivAerML submissions, package the selected split,
-model/checkpoint provenance, case evidence, profiles, and a revision-pinned
-complete-split scored-prediction artifact through the repository's normal
-schema-v3 contributor process. The official evaluator release IDs and hashes
-must match exactly.
+scoring support and opens DrivAerML submissions, run the frozen evaluator and
+package the selected split, model/checkpoint provenance, per-case force
+coefficients and metrics, complete profile JSON, case evidence, and aggregate
+metrics through the repository's normal schema-v3 contributor process. The
+profile JSON must cover every required case and contain all 16 velocity series
+and all four continuous Cp-cut series. The official evaluator and support
+release IDs and hashes must match exactly.
 
-Contributors declare a revision-pinned, complete-split `scored_predictions`
-artifact but do not create `prediction-artifact-checks.json`. A maintainer must
-replay the native evaluator over that artifact and add the check: it binds the
-exact case-metrics file, ordered force, velocity-profile, and Cp-cut values,
-evaluator version
-and code revision, and complete case count. Final validation also requires that
-revision to match the benchmark-owned frozen evaluator binding exactly; the
-candidate binding is deliberately still pending and has no frozen revision.
-The later approval record hashes that maintainer-owned check. A
-participant-edited scalar or receipt therefore fails validation. No genuine
-full-split DrivAerML receipt exists yet.
+Sharing complete native prediction fields is optional under the repository's
+normal reproducibility policy. If a contributor shares them, the declaration
+must use a revision-pinned artifact and a hash-bound manifest. A maintainer may
+optionally audit or recompute values from that artifact and record the result in
+maintainer-owned metadata. Participants must not create or edit
+`prediction-artifact-checks.json` or `maintainer-validation.json`. Neither a
+shared native-field artifact nor a maintainer recomputation is a participant
+submission requirement or an activation gate; the submitted JSON generated by
+the frozen evaluator remains the required result payload.
 
 Until then, use this workflow for implementation feedback and reproducibility
 review only. Do not describe a candidate dry run as an accepted submission,

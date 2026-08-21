@@ -136,7 +136,7 @@ volume-pressure paper result. The canonical target above is static
 `pMeanTrim`; a future coefficient target must have a separate metric ID and an
 owner-verified conversion. The 209 discrete Cp probes are not part of the
 current submission or score. The four retained continuous Cp cuts are derived
-by the evaluator from the submitted native `pMeanTrim` prediction using
+by the participant's local evaluator from its native `pMeanTrim` prediction using
 `Cp=2*pMeanTrim/(38.889 m/s)^2`; no `CpMeanTrim` prediction or manually
 supplied Cp scalar summary is accepted. The probe research record does not add
 a submitted field or evaluator requirement.
@@ -285,7 +285,8 @@ conventions:
   `L_ref=2.78618 m`; this retains geometry-size effects under one normalization.
 
 No directly predicted scalar-force submission metric is frozen yet. For forces
-reconstructed from the submitted surface fields, however, the proposed
+reconstructed locally from each participant's native surface predictions,
+however, the proposed
 composite selects the constant AutoCFD convention. Rank `Cd`, total lift `Cl`,
 and the independent front/rear balance
 `CmPitch=(Clf-Clr)/2` from `force_mom_constref_all.csv`. The engineering branch

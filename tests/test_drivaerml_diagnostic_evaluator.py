@@ -730,10 +730,23 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                 cp_cut["weighting"], "native_cut_intersection_segment_length"
             )
             self.assertFalse(cp_cut["discrete_cp_probe_fallback_used"])
+            self.assertEqual(cp_cut["cut_rmse"], [])
             self.assertEqual(
                 set(cp_cut["unavailable_reasons"][0]),
                 {"diagnostic", "stage", "reason"},
             )
+            self.assertEqual(len(result["profile_series"]), 16)
+            self.assertEqual(
+                result["profile_series"][0]["station_id"], "autocfd5_v1"
+            )
+            self.assertEqual(
+                result["profile_series"][-1]["station_id"], "autocfd5_r3"
+            )
+            for series in result["profile_series"]:
+                self.assertEqual(series["panel_id"], "velocity_profiles")
+                self.assertEqual(series["quantity_id"], "velocity_ratio")
+                self.assertEqual(len(series["coordinate"]), len(series["prediction"]))
+                self.assertGreaterEqual(len(series["coordinate"]), 2)
             self.assertNotIn("autocfd_probe_id", json.dumps(result, sort_keys=True))
 
     def test_mapping_json_mutation_during_parse_fails_closed(self) -> None:

@@ -3316,7 +3316,7 @@ def _submission_velocity_metrics(
     velocity_mapping: StrictVelocityMapping,
     volume_prediction: SparsePredictionGather,
     native_volume_velocity: SparseNativeField,
-) -> tuple[dict[str, object], dict[str, object]]:
+) -> tuple[dict[str, object], dict[str, object], list[dict[str, object]]]:
     """Reduce v9 velocity diagnostics without consulting legacy Cp probes."""
 
     if velocity_mapping.experimental_profile_ids != _EXPERIMENTAL_VELOCITY_PROFILE_IDS:
@@ -3378,7 +3378,7 @@ def _submission_velocity_metrics(
         "weighting": "trapezoidal_arc_length_within_line",
     }
     if velocity_reasons and experimental_reasons:
-        return ranked, experimental
+        return ranked, experimental, []
 
     valid_positions = [
         position
@@ -3433,6 +3433,7 @@ def _submission_velocity_metrics(
             )
         return results
 
+    profile_series: list[dict[str, object]] = []
     if not velocity_reasons:
         results = line_results_for(tuple(by_line))
         if len(results) != VELOCITY_LINE_COUNT:
@@ -3443,13 +3444,39 @@ def _submission_velocity_metrics(
         ranked["case_equal_line_mean_rmse"] = math.fsum(
             float(row["rmse"]) for row in results
         ) / VELOCITY_LINE_COUNT
+        for profile_id, positions in by_line.items():
+            indices = np.asarray(positions, dtype=np.int64)
+            distances = np.asarray(
+                [velocity_mapping.rows[position].distance_m for position in positions],
+                dtype=np.float64,
+            )
+            predictions = prediction_ratio[indices]
+            if (
+                len(distances) < 2
+                or not np.all(np.isfinite(distances))
+                or not np.all(np.isfinite(predictions))
+                or np.any(np.diff(distances) <= 0.0)
+            ):
+                raise DrivAerDiagnosticEvaluatorError(
+                    f"velocity line {profile_id!r} cannot be emitted as a finite "
+                    "strictly increasing FluidsBench profile series"
+                )
+            profile_series.append(
+                {
+                    "panel_id": "velocity_profiles",
+                    "station_id": f"autocfd5_{profile_id.lower()}",
+                    "quantity_id": "velocity_ratio",
+                    "coordinate": distances.tolist(),
+                    "prediction": predictions.tolist(),
+                }
+            )
     if not experimental_reasons:
         results = line_results_for(velocity_mapping.experimental_profile_ids)
         experimental["line_rmse"] = results
         experimental["case_equal_experimental_line_mean_rmse"] = math.fsum(
             float(row["rmse"]) for row in results
         ) / len(_EXPERIMENTAL_VELOCITY_PROFILE_IDS)
-    return ranked, experimental
+    return ranked, experimental, profile_series
 
 
 def evaluate_loaded_case_diagnostics(
@@ -3495,7 +3522,7 @@ def evaluate_loaded_case_diagnostics(
         hash_chunk_bytes=hash_chunk_bytes,
         validation_block_rows=validation_block_rows,
     )
-    velocity_metric, experimental_metric = _submission_velocity_metrics(
+    velocity_metric, experimental_metric, profile_series = _submission_velocity_metrics(
         velocity_mapping, volume_prediction, native_volume_velocity
     )
     invalid_velocity_rows = [
@@ -3549,6 +3576,7 @@ def evaluate_loaded_case_diagnostics(
                 "required_cut_count": 4,
                 "unavailable_reasons": [cp_cut_reason],
                 "case_equal_cut_mean_rmse": None,
+                "cut_rmse": [],
                 "aggregation": "equal_case_equal_cut_macro_average",
                 "weighting": "native_cut_intersection_segment_length",
                 "support_status": "pending_immutable_owner_release",
@@ -3557,6 +3585,7 @@ def evaluate_loaded_case_diagnostics(
             "velocity_profile_uinf_rmse": velocity_metric,
             "velocity_profile_experimental_subset_uinf_rmse": experimental_metric,
         },
+        "profile_series": profile_series,
         "claims": dict(OUTPUT_FALSE_CLAIMS),
     }
     _assert_no_absolute_paths(evidence)

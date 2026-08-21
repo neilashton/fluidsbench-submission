@@ -1364,7 +1364,9 @@ class ValidatorTests(unittest.TestCase):
                 "\n".join(errors),
             )
 
-    def test_drivaerml_requires_hash_bound_native_evaluator_receipt(self) -> None:
+    def test_drivaerml_prediction_artifacts_and_recomputation_are_optional_audits(
+        self,
+    ) -> None:
         from reference.drivaerml.dataset_scorer import (
             validate_schema_v3_candidate_nonspatial_metrics,
         )
@@ -1381,8 +1383,12 @@ class ValidatorTests(unittest.TestCase):
                 "field_integrated_lift_closure_max_abs",
             )
             rows = (
-                dict(zip(force_ids, (1.0, 2.0, 3.0, 4.0, 5.0, 0.1))),
-                dict(zip(force_ids, (3.0, 4.0, 5.0, 6.0, 7.0, 0.2))),
+                dict(zip(force_ids, (1.0, 2.0, 3.0, 4.0, 5.0, 0.0))),
+                dict(zip(force_ids, (3.0, 4.0, 5.0, 6.0, 7.0, 0.0))),
+            )
+            force_coefficients = (
+                {"cd": 0.1, "cl": 0.2, "cm_pitch": 0.02, "clf": 0.12, "clr": 0.08},
+                {"cd": 0.2, "cl": 0.4, "cm_pitch": -0.03, "clf": 0.17, "clr": 0.23},
             )
             aggregate = {
                 metric_id: math.sqrt(
@@ -1390,7 +1396,7 @@ class ValidatorTests(unittest.TestCase):
                 )
                 for metric_id in force_ids[:-1]
             }
-            aggregate[force_ids[-1]] = 0.2
+            aggregate[force_ids[-1]] = 0.0
             case_metrics = {
                 "$schema": "https://fluidsbench.org/schemas/v3/case-metrics.schema.json",
                 "schema_version": "1.0",
@@ -1418,8 +1424,11 @@ class ValidatorTests(unittest.TestCase):
                             }
                         ],
                         "nonspatial_metric_values": row,
+                        "force_coefficients": coefficients,
                     }
-                    for case_id, row in zip(split_case_ids, rows)
+                    for case_id, row, coefficients in zip(
+                        split_case_ids, rows, force_coefficients, strict=True
+                    )
                 ],
                 "metric_values": aggregate,
             }
@@ -1489,7 +1498,7 @@ class ValidatorTests(unittest.TestCase):
             )
 
             no_predictions = dict(submission)
-            no_predictions["prediction_artifacts"] = []
+            no_predictions.pop("prediction_artifacts")
             errors = []
             validate_v3_prediction_metadata(
                 errors.append,
@@ -1499,10 +1508,17 @@ class ValidatorTests(unittest.TestCase):
                 contributor_stage=True,
                 case_metrics=case_metrics,
             )
-            self.assertIn(
-                "requires exactly one revision-pinned complete_split",
-                "\n".join(errors),
+            self.assertEqual(errors, [])
+            errors = []
+            validate_v3_prediction_metadata(
+                errors.append,
+                directory,
+                no_predictions,
+                split_case_ids,
+                contributor_stage=False,
+                case_metrics=case_metrics,
             )
+            self.assertEqual(errors, [])
             support_manifest = {
                 "supports": [
                     {
@@ -1582,7 +1598,7 @@ class ValidatorTests(unittest.TestCase):
                 contributor_stage=False,
                 case_metrics=case_metrics,
             )
-            self.assertIn("requires a maintainer-owned", "\n".join(errors))
+            self.assertEqual(errors, [])
 
             checks = {
                 "$schema": "https://fluidsbench.org/schemas/v3/prediction-artifact-checks.schema.json",
@@ -1620,6 +1636,21 @@ class ValidatorTests(unittest.TestCase):
                 ],
             }
             checks_path = directory / "prediction-artifact-checks.json"
+            checks_without_recomputation = json.loads(json.dumps(checks))
+            checks_without_recomputation.pop("dataset_evaluator_recomputation")
+            write_json(checks_path, checks_without_recomputation)
+            errors = []
+            validate_v3_prediction_metadata(
+                errors.append,
+                directory,
+                submission,
+                split_case_ids,
+                contributor_stage=False,
+                case_metrics=case_metrics,
+                dataset_spec=candidate_dataset_spec,
+            )
+            self.assertEqual(errors, [])
+
             write_json(checks_path, checks)
             errors = []
             validate_v3_prediction_metadata(
@@ -1730,6 +1761,19 @@ class ValidatorTests(unittest.TestCase):
                 errors.append, directory, validation
             )
             self.assertIn("must bind", "\n".join(errors))
+
+            checks_path.unlink()
+            errors = []
+            validate_drivaerml_maintainer_receipt_hash(
+                errors.append, directory, {}
+            )
+            self.assertEqual(errors, [])
+
+            errors = []
+            validate_drivaerml_maintainer_receipt_hash(
+                errors.append, directory, validation
+            )
+            self.assertIn("must be absent", "\n".join(errors))
 
 
 if __name__ == "__main__":

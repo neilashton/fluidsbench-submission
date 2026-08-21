@@ -18,8 +18,10 @@ from reference.drivaerml.dataset_scorer import (  # noqa: E402
     DrivAerDatasetScorerError,
     evaluate_candidate_dataset,
     schema_v3_case_metrics_candidate_adapter,
+    schema_v3_profile_chunks_candidate_adapter,
     write_candidate_dataset_evidence,
     write_schema_v3_case_metrics_candidate,
+    write_schema_v3_profile_chunks_candidate,
 )
 
 
@@ -57,30 +59,59 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--submission-id")
     parser.add_argument("--candidate-support-release-id")
     parser.add_argument("--candidate-support-manifest-sha256")
+    parser.add_argument(
+        "--schema-v3-profile-output-dir",
+        type=Path,
+        help=(
+            "Optional candidate-only FluidsBench profile directory. Generation "
+            "fails unless every case has all 16 velocity lines and all four "
+            "continuous Cp cuts."
+        ),
+    )
+    parser.add_argument(
+        "--profile-cases-per-chunk",
+        type=int,
+        default=16,
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    adapter_arguments = (
-        args.submission_id,
+    support_arguments = (
         args.candidate_support_release_id,
         args.candidate_support_manifest_sha256,
     )
     if args.schema_v3_case_metrics_output is None and any(
-        value is not None for value in adapter_arguments
+        value is not None for value in support_arguments
     ):
         raise DrivAerDatasetScorerError(
-            "schema-v3 adapter identity arguments require "
+            "candidate support identity arguments require "
             "--schema-v3-case-metrics-output"
         )
-    if args.schema_v3_case_metrics_output is not None and any(
-        value is None for value in adapter_arguments
+    if args.schema_v3_case_metrics_output is not None and (
+        args.submission_id is None
+        or any(value is None for value in support_arguments)
     ):
         raise DrivAerDatasetScorerError(
             "schema-v3 adapter output requires --submission-id, "
             "--candidate-support-release-id and "
             "--candidate-support-manifest-sha256"
+        )
+    if (
+        args.schema_v3_profile_output_dir is not None
+        and args.submission_id is None
+    ):
+        raise DrivAerDatasetScorerError(
+            "schema-v3 profile output requires --submission-id"
+        )
+    if (
+        args.schema_v3_case_metrics_output is None
+        and args.schema_v3_profile_output_dir is None
+        and args.submission_id is not None
+    ):
+        raise DrivAerDatasetScorerError(
+            "--submission-id requires a schema-v3 case-metrics or profile output"
         )
     evaluation = evaluate_candidate_dataset(
         submission_specification=args.submission_specification,
@@ -104,6 +135,17 @@ def main(argv: Sequence[str] | None = None) -> int:
         result["schema_v3_case_metrics_candidate"] = (
             write_schema_v3_case_metrics_candidate(
                 adapter, args.schema_v3_case_metrics_output
+            )
+        )
+    if args.schema_v3_profile_output_dir is not None:
+        package = schema_v3_profile_chunks_candidate_adapter(
+            evaluation,
+            submission_id=args.submission_id,
+            cases_per_chunk=args.profile_cases_per_chunk,
+        )
+        result["schema_v3_profiles_candidate"] = (
+            write_schema_v3_profile_chunks_candidate(
+                package, args.schema_v3_profile_output_dir
             )
         )
     print(json.dumps(result, sort_keys=True, separators=(",", ":")))

@@ -38,6 +38,12 @@ official leaderboard results.
   executable in the reference score code: velocity profiles retain weight
   0.15 and the distinct continuous Cp-cut component retains weight 0.10.
   Pending scores cannot silently fall back to the old bounded caps.
+- The intended participant payload follows the repository-wide policy. The
+  participant runs the frozen evaluator locally and submits per-case force
+  coefficients and metrics plus complete JSON series for all 16 velocity
+  profiles and four continuous Cp cuts. No discrete Cp probes or additional
+  VTK Cp-cut field are submitted. Sharing full native prediction fields and a
+  maintainer recomputation are optional audits, not activation gates.
 - Prototype packages, generated feeds, and leaderboard panels use the new metric,
   split, and profile vocabulary while remaining ineligible dummy data.
 
@@ -97,7 +103,7 @@ official leaderboard results.
   cover 310,848,384 cells. The run consumed the fixed surface-area arrays,
   historical candidate discrete-probe Cp supports, and 10 mm velocity mappings,
   used one equal weight per native volume cell, and verified identical
-  prediction artifacts across the core and diagnostic evaluators. The probe
+  local prediction inputs across the core and diagnostic evaluators. The probe
   input records what that historical fixture consumed; it is not current Cp-cut
   support, a submission requirement, or a scoring dependency. See the
   byte-identical
@@ -128,22 +134,22 @@ official leaderboard results.
    pressure gauge, wall-shear sign, exclusion policy, and the combined evidence
    remains pending.
 2. Promote the implemented and tested candidate dataset loader/evaluator into a
-   frozen production evaluator. Before activation, it must bind every schema-v3
-   nonspatial metric value to dataset-specific validation and publish
-   a normalized immutable scoring-support digest. The current candidate covers
-   native VTP, reconstructed VTU, fixed area inputs, fields, forces, and
-   diagnostic profiles; its all-case equal-cell volume replay and chunk golden
-   evidence are complete. Final validation now fails closed unless the
-   maintainer receipt matches a benchmark-owned frozen evaluator version and
-   immutable Git revision; that binding remains deliberately pending with no
-   revision while the evaluator is still a candidate. The remaining production
-   gates are not complete. The explicit two-case
+   frozen production evaluator. Before activation, publish its immutable
+   version and normalized scoring-support digest, and make it generate and
+   validate the participant-facing per-case force coefficients and metrics plus
+   complete velocity-profile and continuous-Cp-cut JSON. The current candidate
+   covers native VTP, reconstructed VTU, fixed area inputs, fields, forces, and
+   diagnostic reductions; its all-case equal-cell volume replay and chunk
+   golden evidence are complete. The remaining production gates are not
+   complete. The explicit two-case
    [`real_reference_driver.py`](../../examples/drivaerml-candidate-native-chunks/real_reference_driver.py)
    execution subgate is now complete on the pinned real `run_1` and `run_44`
    inputs, with its validation receipt and provenance indexed above. That
    fixture does not freeze the evaluator, publish an immutable scoring-support
    digest, validate all 484 cases through this driver, or confer owner approval;
-   this production-evaluator gate therefore remains open.
+   this production-evaluator gate therefore remains open. A participant may
+   optionally publish revision-pinned native fields and a maintainer may
+   optionally recompute them, but neither is part of this activation gate.
 3. Obtain dataset-owner scientific review of the completed all-484 force replay
    and its tolerance choices. The numerical replay, mirror checks, axle-load
    closure, fixed-area audit, and chunk-invariance evidence are complete at the
@@ -179,8 +185,9 @@ official leaderboard results.
    streams pinned multipart `UMeanTrim` truth, separates geometric assignment
    invariance from loss/method-order convergence, and refuses owner-review
    eligibility for any reduced pilot. Its synthetic tests are not real-model
-   evidence. Complete all-case assignments, the genuine prediction artifacts,
-   and the real convergence replay remain outstanding. The current reducer is
+   evidence. Complete all-case assignments, genuine trained-model predictions,
+   and the real convergence replay remain outstanding; publishing those native
+   predictions as submission artifacts is not required. The current reducer is
    bounded-memory but single-process and non-resumable; immutable per-case
    worker receipts plus strict restartable aggregation remain an execution-
    hardening gate before the all-484, five-method replay.
@@ -200,16 +207,19 @@ official leaderboard results.
    split and component and publish the nine finite positive `B_j` denominators.
    Then run the nearest-training-design control, genuine three-real-model
    sensitivity study, and paired 10,000-replicate bootstrap specified by the
-   proposal. Predictions from three distinct trained model artifacts are not
-   currently available and remain an explicit owner input; no sensitivity result
-   is claimed. The null denominators and bootstrap are also blocked until the
+   proposal. Genuine outputs from three distinct trained model checkpoints are
+   not currently available and remain an explicit owner input; they need not be
+   published as native-field submission artifacts. No sensitivity result is
+   claimed. The null denominators and bootstrap are also blocked until the
    evaluator is frozen.
 7. Freeze an immutable scoring-support release and profile-ground-truth release,
-   add the publication-validation receipt, bind schema-v3 nonspatial values to
-   the frozen dataset-specific evaluator, update the candidate evaluator and
-   dataset versions to immutable release IDs, and change the composite status to
-   `active` with its nine baseline errors. Include the frozen four-cut Cp
-   support, but keep the 209-probe artifacts outside that release.
+   add the publication-validation receipt, bind the participant-generated
+   force, velocity-profile, and continuous-Cp-cut JSON to the frozen evaluator
+   identity, update the candidate evaluator and dataset versions to immutable
+   release IDs, and change the composite status to `active` with its nine
+   baseline errors. Include the frozen four-cut Cp support, but keep the
+   209-probe artifacts outside that release. Optional native-field artifacts and
+   maintainer recomputation records remain outside the activation requirements.
 8. Run at least one end-to-end schema-v3 dry-run submission from an independent
    AutoCFD5 participant. After dataset-owner review, set scoring support to
    `official` and only then set `submissions_open` to `true`.

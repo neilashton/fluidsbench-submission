@@ -1952,32 +1952,8 @@ def validate_v3_prediction_metadata(
             if case_ids is not None and case_ids != split_case_ids:
                 add(f"{label} complete_split case_ids must match the exact benchmark split")
 
-    if submission.get("dataset_id") == "drivaerml":
-        complete_scored_artifacts = [
-            artifact
-            for artifact in artifacts
-            if isinstance(artifact, dict)
-            and artifact.get("kind") == "scored_predictions"
-            and artifact.get("coverage", {}).get("kind") == "complete_split"
-        ]
-        if len(complete_scored_artifacts) != 1:
-            add(
-                "DrivAerML requires exactly one revision-pinned complete_split "
-                "scored_predictions artifact"
-            )
-
     checks_path = directory / "prediction-artifact-checks.json"
     if not checks_path.exists():
-        if (
-            submission.get("dataset_id") == "drivaerml"
-            and not contributor_stage
-            and not candidate_dry_run
-        ):
-            add(
-                "DrivAerML requires a maintainer-owned "
-                "prediction-artifact-checks.json native-evaluator "
-                "recomputation receipt before final validation"
-            )
         return None
     if contributor_stage or candidate_dry_run:
         add(
@@ -2079,7 +2055,10 @@ def validate_v3_prediction_metadata(
                     f"prediction check {artifact_id!r} performed metric recomputation "
                     "requires a complete_split prediction artifact"
                 )
-    if submission.get("dataset_id") == "drivaerml":
+    if (
+        submission.get("dataset_id") == "drivaerml"
+        and "dataset_evaluator_recomputation" in checks
+    ):
         _validate_drivaerml_native_evaluator_recomputation(
             add,
             submission=submission,
@@ -2265,17 +2244,22 @@ def validate_drivaerml_maintainer_receipt_hash(
     directory: Path,
     validation: dict[str, Any],
 ) -> None:
-    """Require the approval record to hash the maintainer replay receipt."""
+    """Bind optional DrivAerML prediction checks when maintainers add them."""
 
     checks_path = directory / "prediction-artifact-checks.json"
-    expected = sha256_file(checks_path) if checks_path.is_file() else None
-    if (
-        not isinstance(validation.get("prediction_artifact_checks_sha256"), str)
-        or validation.get("prediction_artifact_checks_sha256") != expected
-    ):
+    declared = validation.get("prediction_artifact_checks_sha256")
+    if not checks_path.is_file():
+        if declared is not None:
+            add(
+                "maintainer-validation.json prediction_artifact_checks_sha256 "
+                "must be absent when prediction-artifact-checks.json is absent"
+            )
+        return
+    expected = sha256_file(checks_path)
+    if not isinstance(declared, str) or declared != expected:
         add(
             "maintainer-validation.json prediction_artifact_checks_sha256 "
-            "must bind the DrivAerML native-evaluator recomputation receipt"
+            "must bind the optional DrivAerML prediction-artifact checks"
         )
 
 

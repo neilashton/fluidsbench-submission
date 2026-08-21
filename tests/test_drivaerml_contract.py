@@ -41,6 +41,27 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertEqual(support["status"], "owner_review_required")
         self.assertFalse(support["submissions_open"])
         self.assertTrue(support["owner_decisions_required"])
+        self.assertFalse(
+            support["coverage_contract"]["full_prediction_artifact_required"]
+        )
+        self.assertTrue(
+            all(panel["required"] for panel in self.specification["profile_panels"])
+        )
+        participant_process = " ".join(support["participant_process"])
+        self.assertIn("participant-authored scalar metrics", participant_process)
+        self.assertIn(
+            "complete velocity-profile and continuous-Cp-cut JSON chunks",
+            participant_process,
+        )
+        self.assertIn("optional audits", participant_process)
+        self.assertNotIn("complete-split scored-prediction artifact", participant_process)
+        self.assertNotIn("recomputation receipt", support["closed_reason"])
+        self.assertIn(
+            "schema_v3_participant_result_binding", support["activation_gates"]
+        )
+        self.assertNotIn(
+            "schema_v3_nonspatial_result_binding", support["activation_gates"]
+        )
         self.assertEqual(
             support["source_release"]["revision"],
             "7a5c0948ce27be709b1116a3a190f806e7a8f79f",

@@ -19,8 +19,10 @@ from reference.drivaerml.dataset_scorer import (
     DrivAerDatasetScorerError,
     evaluate_candidate_dataset,
     schema_v3_case_metrics_candidate_adapter,
+    schema_v3_profile_chunks_candidate_adapter,
     validate_schema_v3_candidate_nonspatial_metrics,
     write_candidate_dataset_evidence,
+    write_schema_v3_profile_chunks_candidate,
 )
 
 
@@ -588,6 +590,7 @@ class DatasetFixture:
                     "weighting": "native_cut_intersection_segment_length",
                     "support_status": "pending_immutable_owner_release",
                     "discrete_cp_probe_fallback_used": False,
+                    "cut_rmse": [],
                 },
                 "velocity_profile_uinf_rmse": {
                     "metric_id": "velocity_profile_uinf_rmse",
@@ -638,6 +641,60 @@ class DatasetFixture:
             },
             "claims": claims,
         }
+
+    def enable_complete_profile_series(self) -> None:
+        cut_ids = (
+            "upperbody_centerline",
+            "underbody_centerline",
+            "sidewall_z_0_15",
+            "front_left_wheelhouse_y_neg_0_6",
+        )
+        for case_index, case_id in enumerate(self.case_ids, start=1):
+            path = self.diagnostic_dir / f"{case_id}.json"
+            document = json.loads(path.read_text(encoding="utf-8"))
+            cp_value = 0.2 * case_index
+            document["metrics"]["cp_cut_rmse"] = {
+                "metric_id": "cp_cut_rmse",
+                "ranked_value_available": True,
+                "required_cut_count": 4,
+                "unavailable_reasons": [],
+                "case_equal_cut_mean_rmse": cp_value,
+                "aggregation": "equal_case_equal_cut_macro_average",
+                "weighting": "native_cut_intersection_segment_length",
+                "support_status": "immutable_owner_release",
+                "discrete_cp_probe_fallback_used": False,
+                "cut_rmse": [
+                    {
+                        "cut_id": cut_id,
+                        "segment_count": 2,
+                        "arc_length_m": 1.0,
+                        "rmse": cp_value,
+                    }
+                    for cut_id in cut_ids
+                ],
+            }
+            pressure_series = [
+                {
+                    "panel_id": "pressure_profiles",
+                    "station_id": cut_id,
+                    "quantity_id": "cp",
+                    "coordinate": [0.0, 1.0],
+                    "prediction": [0.1 * case_index, -0.1 * case_index],
+                }
+                for cut_id in cut_ids
+            ]
+            velocity_series = [
+                {
+                    "panel_id": "velocity_profiles",
+                    "station_id": f"line_{line:02d}",
+                    "quantity_id": "velocity_ratio",
+                    "coordinate": [0.0, 1.0],
+                    "prediction": [0.5, 1.0 + 0.01 * line],
+                }
+                for line in range(1, 17)
+            ]
+            document["profile_series"] = pressure_series + velocity_series
+            _write_json(path, document)
 
 
     def evaluate(self):
@@ -1075,6 +1132,16 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
             self.assertEqual(adapter["case_count"], 2)
             self.assertNotIn("overall_score", adapter["metric_values"])
             nonspatial = first_case["nonspatial_metric_values"]
+            self.assertEqual(
+                first_case["force_coefficients"],
+                {
+                    "cd": 0.11,
+                    "cl": 0.22,
+                    "cm_pitch": 0.02,
+                    "clf": 0.13,
+                    "clr": 0.09,
+                },
+            )
             for metric_id in (
                 "field_integrated_cd_rmse",
                 "field_integrated_cl_rmse",
@@ -1150,6 +1217,107 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
                 "contains undeclared DrivAerML nonspatial metrics",
             ):
                 validate_schema_v3_candidate_nonspatial_metrics(invented)
+
+            forged_force = copy.deepcopy(adapter)
+            forged_force["cases"][0]["force_coefficients"]["clf"] += 0.1
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "force_coefficients.clf differs",
+            ):
+                validate_schema_v3_candidate_nonspatial_metrics(forged_force)
+
+            missing_force = copy.deepcopy(adapter)
+            del missing_force["cases"][0]["force_coefficients"]["cm_pitch"]
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "force_coefficients.*missing",
+            ):
+                validate_schema_v3_candidate_nonspatial_metrics(missing_force)
+
+    def test_profile_chunk_adapter_fails_closed_then_packages_all_twenty_series(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = DatasetFixture(Path(directory))
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "required diagnostics are unavailable.*cp_cut_rmse",
+            ):
+                schema_v3_profile_chunks_candidate_adapter(
+                    fixture.evaluate(),
+                    submission_id="synthetic-drivaerml-profiles",
+                )
+
+            fixture.enable_complete_profile_series()
+            package = schema_v3_profile_chunks_candidate_adapter(
+                fixture.evaluate(),
+                submission_id="synthetic-drivaerml-profiles",
+                cases_per_chunk=1,
+            )
+            index = package.index_json()
+            self.assertEqual(index["case_count"], 2)
+            self.assertEqual(len(index["chunks"]), 2)
+            self.assertEqual(
+                index["chunks"][0]["case_ids"], ["run_1"]
+            )
+            first_chunk = package.chunk_json("chunk-000.json")
+            self.assertEqual(len(first_chunk["cases"]), 1)
+            self.assertEqual(len(first_chunk["cases"][0]["series"]), 20)
+            self.assertEqual(
+                first_chunk["cases"][0]["series"][0]["station_id"],
+                "upperbody_centerline",
+            )
+            self.assertEqual(
+                first_chunk["cases"][0]["series"][-1]["station_id"],
+                "line_16",
+            )
+
+            schema_root = Path(__file__).resolve().parents[1] / "schemas" / "v1"
+            index_schema = json.loads(
+                (schema_root / "profile-index.schema.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            chunk_schema = json.loads(
+                (schema_root / "profile-chunk.schema.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(
+                list(Draft202012Validator(index_schema).iter_errors(index)), []
+            )
+            self.assertEqual(
+                list(
+                    Draft202012Validator(chunk_schema).iter_errors(first_chunk)
+                ),
+                [],
+            )
+
+            output = Path(directory) / "profiles"
+            receipt = write_schema_v3_profile_chunks_candidate(package, output)
+            self.assertEqual(receipt["case_count"], 2)
+            self.assertEqual(receipt["series_count"], 40)
+            self.assertEqual(receipt["chunk_count"], 2)
+            self.assertTrue((output / "index.json").is_file())
+            self.assertEqual(
+                _sha256(output / "index.json"), receipt["index_sha256"]
+            )
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError, "must not already exist"
+            ):
+                write_schema_v3_profile_chunks_candidate(package, output)
+
+    def test_profile_series_reject_partial_cp_family(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = DatasetFixture(Path(directory))
+            fixture.enable_complete_profile_series()
+            path = fixture.diagnostic_dir / "run_1.json"
+            document = json.loads(path.read_text(encoding="utf-8"))
+            del document["profile_series"][2]
+            _write_json(path, document)
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "Cp-cut profile series are incomplete",
+            ):
+                fixture.evaluate()
 
     def test_incomplete_diagnostic_support_is_never_subset_reduced(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

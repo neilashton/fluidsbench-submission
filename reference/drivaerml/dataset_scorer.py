@@ -20,6 +20,7 @@ import json
 import math
 import os
 import re
+import shutil
 import tempfile
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -85,6 +86,20 @@ RANKED_DIAGNOSTIC_METRIC_IDS = (
 )
 REPORT_ONLY_DIAGNOSTIC_METRIC_IDS = (
     "velocity_profile_experimental_subset_uinf_rmse",
+)
+SCHEMA_V3_FORCE_COEFFICIENT_KEYS = (
+    "cd",
+    "cl",
+    "cm_pitch",
+    "clf",
+    "clr",
+)
+_INTERNAL_FORCE_COEFFICIENT_KEYS = (
+    "Cd",
+    "Cl",
+    "CmPitch",
+    "Clf",
+    "Clr",
 )
 NONSPATIAL_METRIC_IDS = (
     *RANKED_FORCE_METRIC_IDS,
@@ -184,6 +199,29 @@ class CandidateDatasetEvaluation:
 
 
 @dataclass(frozen=True)
+class CandidateProfileChunks:
+    """A deterministic candidate profile index and its ordered chunks."""
+
+    index: Mapping[str, object]
+    chunks: tuple[tuple[str, Mapping[str, object]], ...]
+
+    def index_json(self) -> dict[str, object]:
+        result = dict(self.index)
+        _assert_no_absolute_paths(result)
+        return result
+
+    def chunk_json(self, filename: str) -> dict[str, object]:
+        matches = [document for name, document in self.chunks if name == filename]
+        if len(matches) != 1:
+            raise DrivAerDatasetScorerError(
+                f"candidate profile package has no unique chunk {filename!r}"
+            )
+        result = dict(matches[0])
+        _assert_no_absolute_paths(result)
+        return result
+
+
+@dataclass(frozen=True)
 class CandidateDatasetImmutablePins:
     """Predeclared identities that cannot be learned from supplied inputs."""
 
@@ -222,6 +260,7 @@ class _Contract:
     profile_file: str
     profile_sha256: str
     profile_velocity_line_ids: tuple[str, ...]
+    profile_velocity_station_ids: tuple[str, ...]
     profile_velocity_line_sample_counts: tuple[int, ...]
     profile_experimental_velocity_line_ids: tuple[str, ...]
     profile_velocity_sample_count: int
@@ -258,6 +297,7 @@ class _DiagnosticCase:
     unavailable_reasons: Mapping[str, tuple[Mapping[str, object], ...]]
     velocity_mapping_sha256: str
     velocity_receipt_sha256: str
+    profile_series: tuple[Mapping[str, object], ...]
 
 
 def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -666,6 +706,10 @@ def _load_contract(
         )
         for item in normalized_stations
     )
+    station_ids = tuple(
+        _string(item.get("id"), "velocity station ID")
+        for item in normalized_stations
+    )
     experimental_line_ids = tuple(
         line_id
         for line_id, item in zip(line_ids, normalized_stations, strict=True)
@@ -677,6 +721,7 @@ def _load_contract(
     )
     if (
         len(line_ids) != len(set(line_ids))
+        or len(station_ids) != len(set(station_ids))
         or velocity_profile.get("line_count") != len(line_ids)
         or not experimental_line_ids
     ):
@@ -726,6 +771,7 @@ def _load_contract(
             profile_file=profile_path.name,
             profile_sha256=profile_sha,
             profile_velocity_line_ids=line_ids,
+            profile_velocity_station_ids=station_ids,
             profile_velocity_line_sample_counts=line_sample_counts,
             profile_experimental_velocity_line_ids=experimental_line_ids,
             profile_velocity_sample_count=sample_count,
@@ -1387,6 +1433,150 @@ def _validate_sparse_audit(
     _sha256(audit["selected_values_sha256"], f"{label}.selected_values_sha256")
 
 
+def _validate_diagnostic_profile_series(
+    value: object,
+    *,
+    case_id: str,
+    contract: _Contract,
+    velocity_available: bool,
+    cp_cut_available: bool,
+) -> tuple[Mapping[str, object], ...]:
+    """Validate optional participant-display series retained by the evaluator.
+
+    Case diagnostic evidence predates profile-series output, so an absent or
+    empty array remains valid candidate evidence.  Once a family is present it
+    must be complete, available, and in the canonical submission-panel order.
+    The packaging adapter applies the stronger rule that both families must be
+    present for every case.
+    """
+
+    if value is None:
+        return ()
+    if not isinstance(value, list):
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id}.profile_series must be an array"
+        )
+    if not value:
+        return ()
+
+    pressure_keys = tuple(
+        ("pressure_profiles", station_id, "cp")
+        for station_id in contract.profile_cp_cut_ids
+    )
+    velocity_keys = tuple(
+        ("velocity_profiles", station_id, "velocity_ratio")
+        for station_id in contract.profile_velocity_station_ids
+    )
+    expected_by_key: dict[tuple[str, str, str], int | None] = {
+        key: None for key in pressure_keys
+    }
+    expected_by_key.update(
+        zip(
+            velocity_keys,
+            contract.profile_velocity_line_sample_counts,
+            strict=True,
+        )
+    )
+    normalized: list[Mapping[str, object]] = []
+    observed_keys: list[tuple[str, str, str]] = []
+    for position, raw_series in enumerate(value):
+        series = _exact_keys(
+            raw_series,
+            {"panel_id", "station_id", "quantity_id", "coordinate", "prediction"},
+            f"{case_id} profile series {position}",
+        )
+        key = (
+            _string(series["panel_id"], f"{case_id} profile panel ID"),
+            _string(series["station_id"], f"{case_id} profile station ID"),
+            _string(series["quantity_id"], f"{case_id} profile quantity ID"),
+        )
+        if key not in expected_by_key:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} profile series names an undeclared panel/station/quantity {key}"
+            )
+        if key in observed_keys:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} profile series contains duplicate {key}"
+            )
+        coordinates = series["coordinate"]
+        predictions = series["prediction"]
+        if (
+            not isinstance(coordinates, list)
+            or not isinstance(predictions, list)
+            or len(coordinates) < 2
+            or len(coordinates) != len(predictions)
+        ):
+            raise DrivAerDatasetScorerError(
+                f"{case_id}/{key[1]} coordinate and prediction arrays must have the same length >= 2"
+            )
+        normalized_coordinates = [
+            _finite(item, f"{case_id}/{key[1]} coordinate {index}")
+            for index, item in enumerate(coordinates)
+        ]
+        normalized_predictions = [
+            _finite(item, f"{case_id}/{key[1]} prediction {index}")
+            for index, item in enumerate(predictions)
+        ]
+        if any(
+            right <= left
+            for left, right in zip(
+                normalized_coordinates, normalized_coordinates[1:]
+            )
+        ):
+            raise DrivAerDatasetScorerError(
+                f"{case_id}/{key[1]} profile coordinates must be strictly increasing"
+            )
+        expected_count = expected_by_key[key]
+        if expected_count is not None and len(normalized_coordinates) != expected_count:
+            raise DrivAerDatasetScorerError(
+                f"{case_id}/{key[1]} profile series must contain exactly {expected_count} samples"
+            )
+        observed_keys.append(key)
+        normalized.append(
+            {
+                "panel_id": key[0],
+                "station_id": key[1],
+                "quantity_id": key[2],
+                "coordinate": normalized_coordinates,
+                "prediction": normalized_predictions,
+            }
+        )
+
+    observed_pressure = tuple(
+        key for key in observed_keys if key[0] == "pressure_profiles"
+    )
+    observed_velocity = tuple(
+        key for key in observed_keys if key[0] == "velocity_profiles"
+    )
+    if observed_pressure:
+        if not cp_cut_available:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} cannot publish Cp-cut profile series while cp_cut_rmse is unavailable"
+            )
+        if observed_pressure != pressure_keys:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} Cp-cut profile series are incomplete or out of registry order"
+            )
+    if observed_velocity:
+        if not velocity_available:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} cannot publish velocity profile series while the ranked velocity metric is unavailable"
+            )
+        if observed_velocity != velocity_keys:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} velocity profile series are incomplete or out of registry order"
+            )
+    canonical_observed = (
+        (pressure_keys if observed_pressure else ())
+        + (velocity_keys if observed_velocity else ())
+    )
+    if tuple(observed_keys) != canonical_observed:
+        raise DrivAerDatasetScorerError(
+            f"{case_id} profile series differ from canonical pressure-then-velocity order"
+        )
+    return tuple(normalized)
+
+
 def _validate_diagnostic_case(
     document: Mapping[str, Any],
     path: Path,
@@ -1399,21 +1589,28 @@ def _validate_diagnostic_case(
     """Validate the probe-free v9 submission diagnostic evidence."""
 
     case_id = pinned.case_id
-    root = _exact_keys(
-        document,
-        {
-            "schema",
-            "schema_version",
-            "status",
-            "case_id",
-            "official_submission",
-            "mapping_inputs",
-            "sparse_gather_evidence",
-            "metrics",
-            "claims",
-        },
-        f"diagnostic evidence {case_id}",
-    )
+    required_root_keys = {
+        "schema",
+        "schema_version",
+        "status",
+        "case_id",
+        "official_submission",
+        "mapping_inputs",
+        "sparse_gather_evidence",
+        "metrics",
+        "claims",
+    }
+    root = _mapping(document, f"diagnostic evidence {case_id}")
+    observed_root_keys = set(root)
+    allowed_root_keys = required_root_keys | {"profile_series"}
+    if not required_root_keys.issubset(observed_root_keys) or not observed_root_keys.issubset(
+        allowed_root_keys
+    ):
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} keys differ from the frozen candidate "
+            f"schema (missing={sorted(required_root_keys - observed_root_keys)}, "
+            f"unexpected={sorted(observed_root_keys - allowed_root_keys)})"
+        )
     if (
         root["schema"] != DIAGNOSTIC_CASE_SCHEMA
         or root["schema_version"] != 3
@@ -1532,6 +1729,7 @@ def _validate_diagnostic_case(
             "weighting",
             "support_status",
             "discrete_cp_probe_fallback_used",
+            "cut_rmse",
         },
         f"{case_id} Cp-cut metric",
     )
@@ -1571,34 +1769,106 @@ def _validate_diagnostic_case(
         },
         f"{case_id} experimental velocity metric",
     )
-    cp_cut_reasons = cp_cut["unavailable_reasons"]
-    if not isinstance(cp_cut_reasons, list) or len(cp_cut_reasons) != 1:
-        raise DrivAerDatasetScorerError(
-            f"{case_id} Cp-cut support must fail closed with one explicit reason"
-        )
-    cp_cut_reason = _exact_keys(
-        cp_cut_reasons[0],
-        {"diagnostic", "stage", "reason"},
-        f"{case_id} Cp-cut unavailable reason",
-    )
     if (
         cp_cut["metric_id"] != "cp_cut_rmse"
-        or cp_cut["ranked_value_available"] is not False
         or cp_cut["required_cut_count"] != len(contract.profile_cp_cut_ids)
-        or cp_cut["case_equal_cut_mean_rmse"] is not None
         or cp_cut["aggregation"] != "equal_case_equal_cut_macro_average"
         or cp_cut["weighting"] != "native_cut_intersection_segment_length"
-        or cp_cut["support_status"] != "pending_immutable_owner_release"
         or cp_cut["discrete_cp_probe_fallback_used"] is not False
-        or cp_cut_reason
-        != {
-            "diagnostic": "cp_cut_rmse",
-            "stage": "benchmark_support",
-            "reason": "immutable_native_cp_cut_extraction_support_not_published",
-        }
     ):
         raise DrivAerDatasetScorerError(
-            f"diagnostic evidence {case_id} Cp-cut fail-closed contract mismatch"
+            f"diagnostic evidence {case_id} Cp-cut contract mismatch"
+        )
+    cp_cut_available = cp_cut["ranked_value_available"]
+    cp_cut_reasons = cp_cut["unavailable_reasons"]
+    cp_cut_rows = cp_cut["cut_rmse"]
+    if (
+        not isinstance(cp_cut_available, bool)
+        or not isinstance(cp_cut_reasons, list)
+        or not isinstance(cp_cut_rows, list)
+    ):
+        raise DrivAerDatasetScorerError(
+            f"{case_id} Cp-cut availability evidence is malformed"
+        )
+    cp_cut_reason: Mapping[str, Any] | None = None
+    cp_cut_value: float | None = None
+    if not cp_cut_available:
+        if len(cp_cut_reasons) != 1:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} Cp-cut support must fail closed with one explicit reason"
+            )
+        cp_cut_reason = _exact_keys(
+            cp_cut_reasons[0],
+            {"diagnostic", "stage", "reason"},
+            f"{case_id} Cp-cut unavailable reason",
+        )
+        if (
+            cp_cut["case_equal_cut_mean_rmse"] is not None
+            or cp_cut["support_status"] != "pending_immutable_owner_release"
+            or cp_cut_rows != []
+            or cp_cut_reason
+            != {
+                "diagnostic": "cp_cut_rmse",
+                "stage": "benchmark_support",
+                "reason": "immutable_native_cp_cut_extraction_support_not_published",
+            }
+        ):
+            raise DrivAerDatasetScorerError(
+                f"diagnostic evidence {case_id} Cp-cut fail-closed contract mismatch"
+            )
+    else:
+        if (
+            cp_cut_reasons != []
+            or cp_cut["support_status"] != "immutable_owner_release"
+            or len(cp_cut_rows) != len(contract.profile_cp_cut_ids)
+        ):
+            raise DrivAerDatasetScorerError(
+                f"diagnostic evidence {case_id} available Cp-cut support is incomplete"
+            )
+        cut_values: list[float] = []
+        observed_cut_ids: list[str] = []
+        for position, row in enumerate(cp_cut_rows):
+            item = _exact_keys(
+                row,
+                {"cut_id", "segment_count", "arc_length_m", "rmse"},
+                f"{case_id} Cp-cut row {position}",
+            )
+            observed_cut_ids.append(
+                _string(item["cut_id"], f"{case_id} Cp-cut ID")
+            )
+            _integer(
+                item["segment_count"],
+                f"{case_id}/{item['cut_id']} segment count",
+                minimum=1,
+            )
+            if _finite(
+                item["arc_length_m"],
+                f"{case_id}/{item['cut_id']} arc length",
+                nonnegative=True,
+            ) <= 0.0:
+                raise DrivAerDatasetScorerError(
+                    f"{case_id}/{item['cut_id']} arc length must be positive"
+                )
+            cut_values.append(
+                _finite(
+                    item["rmse"],
+                    f"{case_id}/{item['cut_id']} Cp-cut RMSE",
+                    nonnegative=True,
+                )
+            )
+        if tuple(observed_cut_ids) != contract.profile_cp_cut_ids:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} Cp-cut order differs from the registry"
+            )
+        cp_cut_value = _finite(
+            cp_cut["case_equal_cut_mean_rmse"],
+            f"{case_id}/cp_cut_rmse",
+            nonnegative=True,
+        )
+        _require_same_float(
+            cp_cut_value,
+            math.fsum(cut_values) / len(cut_values),
+            f"{case_id}/cp_cut_rmse case metric",
         )
 
     u_inf = _finite(
@@ -1643,9 +1913,9 @@ def _validate_diagnostic_case(
             f"diagnostic evidence {case_id} velocity contract mismatch"
         )
 
-    values: dict[str, float | None] = {"cp_cut_rmse": None}
+    values: dict[str, float | None] = {"cp_cut_rmse": cp_cut_value}
     reasons: dict[str, tuple[Mapping[str, object], ...]] = {
-        "cp_cut_rmse": (dict(cp_cut_reason),)
+        "cp_cut_rmse": (() if cp_cut_reason is None else (dict(cp_cut_reason),))
     }
     for metric_id, metric, availability_key, value_key in (
         (
@@ -1846,6 +2116,13 @@ def _validate_diagnostic_case(
         experimental_velocity,
         contract.profile_experimental_velocity_line_ids,
     )
+    profile_series = _validate_diagnostic_profile_series(
+        root.get("profile_series"),
+        case_id=case_id,
+        contract=contract,
+        velocity_available=values["velocity_profile_uinf_rmse"] is not None,
+        cp_cut_available=values["cp_cut_rmse"] is not None,
+    )
     return _DiagnosticCase(
         case_id=case_id,
         input_file=path.name,
@@ -1854,6 +2131,7 @@ def _validate_diagnostic_case(
         unavailable_reasons=reasons,
         velocity_mapping_sha256=velocity_artifact_sha,
         velocity_receipt_sha256=velocity_receipt_sha,
+        profile_series=profile_series,
     )
 
 
@@ -2034,6 +2312,7 @@ def evaluate_candidate_dataset(
                 },
                 "force": force_row,
                 "diagnostic_metric_values": dict(diagnostic.values),
+                "profile_series": [dict(series) for series in diagnostic.profile_series],
             }
         )
 
@@ -2136,6 +2415,14 @@ def evaluate_candidate_dataset(
             "geometric_cell_volume_weights_used": False,
             "diagnostic_profile_file": contract.profile_file,
             "diagnostic_profile_sha256": contract.profile_sha256,
+            "diagnostic_profile_series_contract": {
+                "pressure_station_ids": list(contract.profile_cp_cut_ids),
+                "velocity_station_ids": list(contract.profile_velocity_station_ids),
+                "velocity_station_sample_counts": list(
+                    contract.profile_velocity_line_sample_counts
+                ),
+                "canonical_order": "pressure_profiles_then_velocity_profiles",
+            },
             "force_truth_file": contract.force_truth_file,
             "force_truth_sha256": contract.force_truth_sha256,
         },
@@ -2278,6 +2565,17 @@ def schema_v3_case_metrics_candidate_adapter(
                 "case_id": case["case_id"],
                 "supports": supports,
                 "nonspatial_metric_values": nonspatial,
+                "force_coefficients": {
+                    output_key: _finite(
+                        predicted[internal_key],
+                        f"{case['case_id']} predicted force coefficient {internal_key}",
+                    )
+                    for output_key, internal_key in zip(
+                        SCHEMA_V3_FORCE_COEFFICIENT_KEYS,
+                        _INTERNAL_FORCE_COEFFICIENT_KEYS,
+                        strict=True,
+                    )
+                },
             }
         )
     result: dict[str, object] = {
@@ -2297,6 +2595,267 @@ def schema_v3_case_metrics_candidate_adapter(
     return result
 
 
+def _canonical_json_payload(document: Mapping[str, object]) -> bytes:
+    return (
+        json.dumps(
+            dict(document),
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+            allow_nan=False,
+        )
+        + "\n"
+    ).encode("utf-8")
+
+
+def schema_v3_profile_chunks_candidate_adapter(
+    evaluation: CandidateDatasetEvaluation,
+    *,
+    submission_id: str,
+    cases_per_chunk: int = 16,
+) -> CandidateProfileChunks:
+    """Project complete evaluator series into FluidsBench profile chunks.
+
+    This adapter deliberately has no partial-output mode.  Every selected case
+    must contain all sixteen velocity lines and all four continuous Cp cuts in
+    the evaluator's canonical order.  In particular, current evidence with
+    unavailable Cp-cut support raises instead of fabricating display values.
+    """
+
+    if not isinstance(evaluation, CandidateDatasetEvaluation):
+        raise DrivAerDatasetScorerError(
+            "evaluation must be CandidateDatasetEvaluation"
+        )
+    if (
+        not isinstance(submission_id, str)
+        or _SUBMISSION_ID_RE.fullmatch(submission_id) is None
+    ):
+        raise DrivAerDatasetScorerError(
+            "submission_id is not schema-v3 compatible"
+        )
+    chunk_size = _integer(cases_per_chunk, "cases_per_chunk", minimum=1)
+    evidence = evaluation.to_json()
+    split = _mapping(evidence.get("split"), "candidate dataset split")
+    source_contract = _mapping(
+        evidence.get("source_contract"), "candidate source contract"
+    )
+    series_contract = _exact_keys(
+        source_contract.get("diagnostic_profile_series_contract"),
+        {
+            "pressure_station_ids",
+            "velocity_station_ids",
+            "velocity_station_sample_counts",
+            "canonical_order",
+        },
+        "candidate profile-series contract",
+    )
+    if series_contract["canonical_order"] != "pressure_profiles_then_velocity_profiles":
+        raise DrivAerDatasetScorerError(
+            "candidate profile-series contract has an unsupported order"
+        )
+
+    def safe_id_array(value: object, label: str) -> tuple[str, ...]:
+        if not isinstance(value, list) or not value:
+            raise DrivAerDatasetScorerError(f"{label} must be a non-empty array")
+        result = tuple(_string(item, label) for item in value)
+        if len(result) != len(set(result)):
+            raise DrivAerDatasetScorerError(f"{label} contains duplicate IDs")
+        return result
+
+    pressure_ids = safe_id_array(
+        series_contract["pressure_station_ids"], "pressure station IDs"
+    )
+    velocity_ids = safe_id_array(
+        series_contract["velocity_station_ids"], "velocity station IDs"
+    )
+    raw_velocity_counts = series_contract["velocity_station_sample_counts"]
+    if not isinstance(raw_velocity_counts, list):
+        raise DrivAerDatasetScorerError(
+            "velocity station sample counts must be an array"
+        )
+    velocity_counts = tuple(
+        _integer(item, "velocity station sample count", minimum=2)
+        for item in raw_velocity_counts
+    )
+    if (
+        len(pressure_ids) != 4
+        or len(velocity_ids) != 16
+        or len(velocity_counts) != len(velocity_ids)
+    ):
+        raise DrivAerDatasetScorerError(
+            "candidate profile-series contract must define four Cp cuts and sixteen velocity lines"
+        )
+    expected_keys = tuple(
+        ("pressure_profiles", station_id, "cp") for station_id in pressure_ids
+    ) + tuple(
+        ("velocity_profiles", station_id, "velocity_ratio")
+        for station_id in velocity_ids
+    )
+    expected_counts = {
+        ("velocity_profiles", station_id, "velocity_ratio"): sample_count
+        for station_id, sample_count in zip(
+            velocity_ids, velocity_counts, strict=True
+        )
+    }
+
+    raw_cases = evidence.get("cases")
+    if not isinstance(raw_cases, list) or not raw_cases:
+        raise DrivAerDatasetScorerError(
+            "candidate dataset evidence cases are malformed"
+        )
+    split_case_ids = split.get("case_ids")
+    if not isinstance(split_case_ids, list):
+        raise DrivAerDatasetScorerError("candidate split case IDs are malformed")
+    packaged_cases: list[dict[str, object]] = []
+    for position, raw_case in enumerate(raw_cases):
+        case = _mapping(raw_case, f"candidate dataset case {position}")
+        case_id = _case_id(case.get("case_id"), f"candidate case {position} ID")
+        if position >= len(split_case_ids) or case_id != split_case_ids[position]:
+            raise DrivAerDatasetScorerError(
+                "candidate dataset cases differ from the selected split order"
+            )
+        diagnostics = _mapping(
+            case.get("diagnostic_metric_values"),
+            f"candidate case {case_id} diagnostic values",
+        )
+        unavailable = [
+            metric_id
+            for metric_id in ("velocity_profile_uinf_rmse", "cp_cut_rmse")
+            if diagnostics.get(metric_id) is None
+        ]
+        if unavailable:
+            raise DrivAerDatasetScorerError(
+                f"cannot package {case_id} profiles because required diagnostics "
+                f"are unavailable: {unavailable}"
+            )
+        for metric_id in ("velocity_profile_uinf_rmse", "cp_cut_rmse"):
+            _finite(
+                diagnostics[metric_id],
+                f"{case_id}/{metric_id}",
+                nonnegative=True,
+            )
+        raw_series = case.get("profile_series")
+        if not isinstance(raw_series, list):
+            raise DrivAerDatasetScorerError(
+                f"candidate case {case_id} profile_series must be an array"
+            )
+        if len(raw_series) != len(expected_keys):
+            raise DrivAerDatasetScorerError(
+                f"candidate case {case_id} must provide exactly four Cp cuts and sixteen velocity lines"
+            )
+        normalized_series: list[dict[str, object]] = []
+        observed_keys: list[tuple[str, str, str]] = []
+        for series_position, raw_series_item in enumerate(raw_series):
+            series = _exact_keys(
+                raw_series_item,
+                {
+                    "panel_id",
+                    "station_id",
+                    "quantity_id",
+                    "coordinate",
+                    "prediction",
+                },
+                f"{case_id} profile series {series_position}",
+            )
+            key = (
+                _string(series["panel_id"], f"{case_id} panel ID"),
+                _string(series["station_id"], f"{case_id} station ID"),
+                _string(series["quantity_id"], f"{case_id} quantity ID"),
+            )
+            observed_keys.append(key)
+            coordinates = series["coordinate"]
+            predictions = series["prediction"]
+            if (
+                not isinstance(coordinates, list)
+                or not isinstance(predictions, list)
+                or len(coordinates) < 2
+                or len(coordinates) != len(predictions)
+            ):
+                raise DrivAerDatasetScorerError(
+                    f"{case_id}/{key[1]} profile arrays must have the same length >= 2"
+                )
+            normalized_coordinates = [
+                _finite(item, f"{case_id}/{key[1]} coordinate {index}")
+                for index, item in enumerate(coordinates)
+            ]
+            normalized_predictions = [
+                _finite(item, f"{case_id}/{key[1]} prediction {index}")
+                for index, item in enumerate(predictions)
+            ]
+            if any(
+                right <= left
+                for left, right in zip(
+                    normalized_coordinates, normalized_coordinates[1:]
+                )
+            ):
+                raise DrivAerDatasetScorerError(
+                    f"{case_id}/{key[1]} profile coordinates must be strictly increasing"
+                )
+            expected_count = expected_counts.get(key)
+            if expected_count is not None and len(normalized_coordinates) != expected_count:
+                raise DrivAerDatasetScorerError(
+                    f"{case_id}/{key[1]} profile series must contain exactly {expected_count} samples"
+                )
+            normalized_series.append(
+                {
+                    "panel_id": key[0],
+                    "station_id": key[1],
+                    "quantity_id": key[2],
+                    "coordinate": normalized_coordinates,
+                    "prediction": normalized_predictions,
+                }
+            )
+        if tuple(observed_keys) != expected_keys:
+            raise DrivAerDatasetScorerError(
+                f"candidate case {case_id} profile series are incomplete, duplicated, or out of canonical order"
+            )
+        packaged_cases.append({"case_id": case_id, "series": normalized_series})
+    if len(packaged_cases) != len(split_case_ids) or split.get("case_count") != len(
+        packaged_cases
+    ):
+        raise DrivAerDatasetScorerError(
+            "candidate profile package does not cover the complete selected split"
+        )
+
+    chunk_count = math.ceil(len(packaged_cases) / chunk_size)
+    if chunk_count > 1000:
+        raise DrivAerDatasetScorerError(
+            "cases_per_chunk would exceed the three-digit profile chunk namespace"
+        )
+    chunks: list[tuple[str, Mapping[str, object]]] = []
+    chunk_index: list[dict[str, object]] = []
+    for chunk_number, start in enumerate(range(0, len(packaged_cases), chunk_size)):
+        filename = f"chunk-{chunk_number:03d}.json"
+        selected = packaged_cases[start : start + chunk_size]
+        document: dict[str, object] = {
+            "schema_version": "1.0",
+            "cases": selected,
+        }
+        digest = hashlib.sha256(_canonical_json_payload(document)).hexdigest()
+        chunks.append((filename, document))
+        chunk_index.append(
+            {
+                "file": filename,
+                "case_ids": [case["case_id"] for case in selected],
+                "sha256": digest,
+            }
+        )
+    index: dict[str, object] = {
+        "schema_version": "1.0",
+        "submission_id": submission_id,
+        "dataset_id": "drivaerml",
+        "split_id": split["split_id"],
+        "case_set_id": split["case_set_id"],
+        "case_count": len(packaged_cases),
+        "case_id_status": "official",
+        "chunks": chunk_index,
+    }
+    _assert_no_absolute_paths(index)
+    for _, document in chunks:
+        _assert_no_absolute_paths(document)
+    return CandidateProfileChunks(index=index, chunks=tuple(chunks))
+
+
 def validate_schema_v3_candidate_nonspatial_metrics(
     document: Mapping[str, object],
 ) -> dict[str, object]:
@@ -2309,10 +2868,10 @@ def validate_schema_v3_candidate_nonspatial_metrics(
     case, no undeclared nonspatial metric is accepted, and every dataset value
     is recomputed from the per-case values.
 
-    The returned digest covers only the ordered case IDs and their exact
-    nonspatial values.  A maintainer-owned native-evaluator recomputation
-    receipt binds this digest and the complete case-metrics file before an
-    official result can be accepted.
+    The returned digest covers the ordered case IDs, their exact nonspatial
+    values, and the participant-reported force coefficients.  It can be used
+    to bind an optional maintainer audit, but native-field sharing and
+    maintainer recomputation are not required for a normal submission.
     """
 
     root = _mapping(document, "schema-v3 case metrics")
@@ -2349,6 +2908,28 @@ def validate_schema_v3_candidate_nonspatial_metrics(
             case.get("nonspatial_metric_values"),
             f"schema-v3 {case_id} nonspatial_metric_values",
         )
+        force_coefficients = _exact_keys(
+            case.get("force_coefficients"),
+            SCHEMA_V3_FORCE_COEFFICIENT_KEYS,
+            f"schema-v3 {case_id} force_coefficients",
+        )
+        canonical_force = {
+            key: _finite(
+                force_coefficients[key],
+                f"schema-v3 {case_id} force_coefficients.{key}",
+            )
+            for key in SCHEMA_V3_FORCE_COEFFICIENT_KEYS
+        }
+        _require_same_float(
+            canonical_force["clf"],
+            canonical_force["cl"] / 2.0 + canonical_force["cm_pitch"],
+            f"schema-v3 {case_id} force_coefficients.clf",
+        )
+        _require_same_float(
+            canonical_force["clr"],
+            canonical_force["cl"] / 2.0 - canonical_force["cm_pitch"],
+            f"schema-v3 {case_id} force_coefficients.clr",
+        )
         observed = set(values)
         if not required_force.issubset(observed):
             raise DrivAerDatasetScorerError(
@@ -2372,8 +2953,27 @@ def validate_schema_v3_candidate_nonspatial_metrics(
             per_metric[metric_id].append(value)
             canonical_values[metric_id] = value
         canonical_cases.append(
-            {"case_id": case_id, "nonspatial_metric_values": canonical_values}
+            {
+                "case_id": case_id,
+                "force_coefficients": canonical_force,
+                "nonspatial_metric_values": canonical_values,
+            }
         )
+
+        closure_value = canonical_values.get(
+            "field_integrated_lift_closure_max_abs"
+        )
+        if closure_value is not None:
+            expected_closure = abs(
+                canonical_force["cl"]
+                - canonical_force["clf"]
+                - canonical_force["clr"]
+            )
+            if not _same_float(closure_value, expected_closure):
+                raise DrivAerDatasetScorerError(
+                    f"schema-v3 {case_id} lift-closure metric differs from "
+                    "the explicit force coefficients"
+                )
 
     case_count = len(raw_cases)
     for metric_id in DIAGNOSTIC_METRIC_IDS:
@@ -2434,6 +3034,7 @@ def validate_schema_v3_candidate_nonspatial_metrics(
     return {
         "case_count": case_count,
         "metric_ids": list(present_ids),
+        "force_coefficient_keys": list(SCHEMA_V3_FORCE_COEFFICIENT_KEYS),
         "nonspatial_values_sha256": hashlib.sha256(encoded).hexdigest(),
     }
 
@@ -2528,6 +3129,127 @@ def write_schema_v3_case_metrics_candidate(
         "file": destination.name,
         "sha256": hashlib.sha256(payload).hexdigest(),
         "size_bytes": len(payload),
+        "candidate_only": True,
+        "official_submission": False,
+    }
+
+
+def write_schema_v3_profile_chunks_candidate(
+    package: CandidateProfileChunks, directory: Path | str
+) -> dict[str, object]:
+    """Atomically publish one candidate profile index and its chunks.
+
+    The destination must not already exist.  Refusing replacement avoids stale
+    or unindexed chunk files and prevents a failed write from damaging an
+    existing participant package.
+    """
+
+    if not isinstance(package, CandidateProfileChunks):
+        raise DrivAerDatasetScorerError(
+            "package must be CandidateProfileChunks"
+        )
+    index = _exact_keys(
+        package.index,
+        {
+            "schema_version",
+            "submission_id",
+            "dataset_id",
+            "split_id",
+            "case_set_id",
+            "case_count",
+            "case_id_status",
+            "chunks",
+        },
+        "candidate profile index",
+    )
+    raw_index_chunks = index["chunks"]
+    if (
+        index["schema_version"] != "1.0"
+        or index["dataset_id"] != "drivaerml"
+        or index["case_id_status"] != "official"
+        or not isinstance(raw_index_chunks, list)
+        or len(raw_index_chunks) != len(package.chunks)
+    ):
+        raise DrivAerDatasetScorerError(
+            "candidate profile package index is inconsistent"
+        )
+    for position, ((filename, document), raw_entry) in enumerate(
+        zip(package.chunks, raw_index_chunks, strict=True)
+    ):
+        entry = _exact_keys(
+            raw_entry,
+            {"file", "case_ids", "sha256"},
+            f"candidate profile index chunk {position}",
+        )
+        chunk = _exact_keys(
+            document,
+            {"schema_version", "cases"},
+            f"candidate profile chunk {position}",
+        )
+        cases = chunk["cases"]
+        if not isinstance(cases, list) or not cases:
+            raise DrivAerDatasetScorerError(
+                f"candidate profile chunk {position} cases are malformed"
+            )
+        case_ids = [
+            _case_id(
+                _mapping(case, f"candidate profile chunk {position} case").get(
+                    "case_id"
+                ),
+                f"candidate profile chunk {position} case ID",
+            )
+            for case in cases
+        ]
+        digest = hashlib.sha256(_canonical_json_payload(document)).hexdigest()
+        if (
+            chunk["schema_version"] != "1.0"
+            or entry["file"] != filename
+            or entry["case_ids"] != case_ids
+            or entry["sha256"] != digest
+        ):
+            raise DrivAerDatasetScorerError(
+                f"candidate profile chunk {position} differs from its index binding"
+            )
+    destination = Path(directory)
+    if destination.exists() or destination.is_symlink():
+        raise DrivAerDatasetScorerError(
+            "profile output directory must not already exist"
+        )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = Path(
+        tempfile.mkdtemp(
+            prefix=f".{destination.name}.", dir=destination.parent
+        )
+    )
+    try:
+        chunk_receipts: list[dict[str, object]] = []
+        for filename, document in package.chunks:
+            if re.fullmatch(r"chunk-[0-9]{3}\.json", filename) is None:
+                raise DrivAerDatasetScorerError(
+                    f"invalid candidate profile chunk filename {filename!r}"
+                )
+            payload = _canonical_json_payload(document)
+            (temporary / filename).write_bytes(payload)
+            chunk_receipts.append(
+                {
+                    "file": filename,
+                    "sha256": hashlib.sha256(payload).hexdigest(),
+                    "size_bytes": len(payload),
+                }
+            )
+        index_payload = _canonical_json_payload(package.index)
+        (temporary / "index.json").write_bytes(index_payload)
+        os.replace(temporary, destination)
+    except BaseException:
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise
+    return {
+        "index_file": "index.json",
+        "index_sha256": hashlib.sha256(index_payload).hexdigest(),
+        "chunk_count": len(package.chunks),
+        "case_count": package.index["case_count"],
+        "series_count": int(package.index["case_count"]) * 20,
+        "chunks": chunk_receipts,
         "candidate_only": True,
         "official_submission": False,
     }

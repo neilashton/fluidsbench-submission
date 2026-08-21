@@ -34,12 +34,16 @@ For every selected case:
    counts, and weights across chunks; calculate one case metric only after the
    complete case is represented. Never average chunk-local L1, L2, MAE, or RMSE
    values.
-4. Derive `Cd`, `Cl`, and `CmPitch` by integrating submitted surface pressure and
-   wall shear with the defined constant-reference convention. The authoritative
-   truth is `force_mom_constref_all.csv`; per-case
+4. Run the reference evaluator locally to derive per-case `Cd`, `Cl`,
+   `CmPitch`, and report-only `Clf`/`Clr` by integrating the predicted surface
+   pressure and wall shear with the defined constant-reference convention.
+   Submit those coefficients and their required metrics in the result JSON. The
+   per-case `metrics/cases.json` entry uses `force_coefficients` with `cd`,
+   `cl`, `cm_pitch`, `clf`, and `clr`; the last two remain report-only. The
+   authoritative truth is `force_mom_constref_all.csv`; per-case
    `run_N/force_mom_constref_N.csv` files are convenience mirrors that must
    replay the matching aggregate row.
-5. Extract the diagnostics defined in
+5. Use the same evaluator to extract the diagnostics defined in
    [`drivaerml-diagnostics-v9.json`](drivaerml-diagnostics-v9.json): 16 AutoCFD5
    velocity lines on the candidate 10 mm grid and four continuous Cp cuts:
    upperbody centreline (`y=0`), underbody centreline (`y=0`), sidewall
@@ -47,15 +51,26 @@ For every selected case:
    activated, the ranked velocity error will be the equal-case, equal-line
    mean of arc-length trapezoidal RMSE for `|U|/Uinf`; continuous Cp-cut RMSE
    remains a separate ranked component weighted by native cut-intersection
-   segment length.
+   segment length. Submit the complete evaluator-produced coordinate and
+   prediction arrays for all 16 velocity profiles and all four Cp cuts in the
+   normal FluidsBench profile JSON.
 
 The 209 discrete Cp probes are not part of the DrivAerML submission or scoring
 contract. Participants do not submit probe outputs or probe-mapping support,
 and no discrete-probe metric is calculated. The combined v8 registry and
 existing 209-probe mapping artifacts are retained only as inactive,
 non-normative research evidence. This exclusion does not apply to the four
-continuous Cp cuts, which the evaluator will derive from submitted native
-surface `pMeanTrim`; participants provide no separate Cp-cut field.
+continuous Cp cuts, which the participant's local frozen evaluator will derive
+from its native surface `pMeanTrim` prediction. Participants provide no extra
+Cp field in the VTP, but do include the derived continuous-cut series in their
+submitted profile JSON.
+
+The participant runs the frozen reference evaluator locally and submits its
+derived JSON values. Sharing the complete native prediction fields is optional
+under the repository-wide reproducibility policy. A maintainer may optionally
+audit a shared, revision-pinned artifact, but native-field sharing and
+maintainer recomputation are neither participant requirements nor activation
+gates.
 
 Velocity validity is benchmark-owned support. Only coordinates confirmed to be
 inside the morphed solid or outside the released fluid domain may be excluded.
@@ -107,16 +122,17 @@ activation requirement.
 
 The prescribed 1, 2, 5, and 10 mm profile study can be checked with
 [`proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md`](proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md).
-The prediction-based maintainer command described there verifies complete
-native chunk manifests, streams the pinned multipart `UMeanTrim` truth, and
-constructs the loss tensor itself. Reduced case pilots always remain
+The prediction-based reference command described there can verify complete
+native chunk manifests, stream the pinned multipart `UMeanTrim` truth, and
+construct the loss tensor itself. Reduced case pilots always remain
 ineligible; owner-review eligibility additionally requires the exact ordered
 484-case scope and the pending immutable owner validity-mask binding.
 Activation evidence still requires complete all-case velocity mappings and
-genuine predictions from at least three distinct trained model artifacts. Those
-model predictions are not currently available and remain an owner input; no
-real-model sensitivity result is claimed. Physics-null denominators and the
-bootstrap remain blocked until the evaluator is frozen.
+genuine outputs from at least three distinct trained models. Those model
+predictions are not currently available and remain an owner input; publishing
+their complete native fields is not required. No real-model sensitivity result
+is claimed. Physics-null denominators and the bootstrap remain blocked until
+the evaluator is frozen.
 
 AutoCFD contributors can follow the bounded-memory native-mesh workflow in the
 [`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md). A one-command synthetic

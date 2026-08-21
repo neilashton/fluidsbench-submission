@@ -22,7 +22,7 @@ score: AB-UPT samples volume cells, while GeoTransolver evaluates raw VTU
 paper-specific sampling and reduction detail to be pinned.
 
 The proposed engineering branch reconstructs whole-vehicle force and pitch
-moment from the submitted native surface fields. It reports `Cd`, `Cl`,
+moment from the participant's locally evaluated native surface predictions. It reports `Cd`, `Cl`,
 `CmPitch`, `Clf`, and `Clr`; the composite ranks the independent `Cd`,
 total-`Cl`, and
 front/rear-balance modes without treating `Cl=Clf+Clr` as three independent

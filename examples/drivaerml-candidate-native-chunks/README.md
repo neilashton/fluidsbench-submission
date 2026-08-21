@@ -79,9 +79,10 @@ The 209 discrete Cp probes are not part of the DrivAerML submission or scoring
 contract. The pilot therefore requires no participant probe values or probe
 mapping support; historical probe artifacts elsewhere in the repository are
 non-normative research evidence only. Four continuous Cp cuts remain in the
-candidate contract and will be derived from submitted native surface
-`pMeanTrim`, without a separate participant field. Their exact immutable native
-extraction support is pending and is not demonstrated by this pilot.
+candidate contract and will be derived locally from each participant's native
+surface `pMeanTrim` prediction, without a separate participant field. Their
+exact immutable native extraction support is pending and is not demonstrated
+by this pilot.
 
 Prediction `.npz` files remain bounded inputs: the loader caps an NPY header at
 4 KiB, the sum of all archive members' declared uncompressed byte sizes at 512
