@@ -13,9 +13,14 @@ official leaderboard results.
 - Surface predictions use native VTP `CellData`; volume predictions use native
   reconstructed VTU `CellData`. Both scalar and three-component target arrays are
   explicit.
-- Per-case surface polygon areas are public and bound to the identical native
-  polygon order. Surface primary metrics are area-weighted and secondary metrics
-  are equal-polygon.
+- Per-case surface polygon areas are public in the pinned Hugging Face release
+  and bound to the identical native polygon order. The complete 484-case
+  `surface_cell_areas/manifest.json` (SHA-256
+  `1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e`)
+  covers 4,159,517,910 polygons and 16,638,133,592 payload bytes. Its metadata
+  matches the FluidsBench native-source pin for every case, so the
+  surface-area release gate is complete. Surface primary metrics are
+  area-weighted and secondary metrics are equal-polygon.
 - Volume metrics use one equal weight per native cell. No geometric cell-volume
   array or volume-weighted secondary metric is required.
 - The multipart VTU rule covers all 978 parts, including the ten three-part cases,

@@ -823,6 +823,14 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                 "physical_weight_dtype": "little_endian_float32",
                 "physical_weight_association": "one_positive_finite_area_per_native_polygon_in_identical_order",
                 "physical_weight_manifest": {"path": "surface_cell_areas/manifest.json", "sha256": SURFACE_AREA_MANIFEST_SHA256},
+                "physical_weight_release": {
+                    "status": "public_complete",
+                    "dataset_revision": DATASET_REVISION,
+                    "case_count": 484,
+                    "payload_file_count": 484,
+                    "native_polygon_count": 4_159_517_910,
+                    "payload_bytes": 16_638_133_592,
+                },
             },
             {
                 "id": "volume_native_cells",
@@ -977,7 +985,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "activation_gates": {
             "official_splits": "complete",
             "pinned_native_files": "complete",
-            "surface_area_weights": "all_484_candidate_order_count_hash_and_value_audit_passed_owner_release_approval_pending",
+            "surface_area_weights": "complete_public_all_484_pinned_order_count_hash_and_value_audit_passed",
             "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
             "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
             "velocity_profiles": "definition_complete_mapping_and_convergence_pending",

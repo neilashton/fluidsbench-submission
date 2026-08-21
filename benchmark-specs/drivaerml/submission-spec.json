@@ -34,7 +34,7 @@
       },
       "proposal_contract": {
         "file": "proposal/contract-proposal.json",
-        "sha256": "b4210f7177f32f7fdd18f561d445f6180fabf3302ad6b7a72974ebfb4807935b"
+        "sha256": "3f76cb41f8d0a7565baf2df8f23085a8cdd4c6b9147606624595935f5ea0556b"
       }
     },
     "case_file_binding": {
@@ -85,6 +85,14 @@
         "physical_weight_manifest": {
           "path": "surface_cell_areas/manifest.json",
           "sha256": "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
+        },
+        "physical_weight_release": {
+          "status": "public_complete",
+          "dataset_revision": "7a5c0948ce27be709b1116a3a190f806e7a8f79f",
+          "case_count": 484,
+          "payload_file_count": 484,
+          "native_polygon_count": 4159517910,
+          "payload_bytes": 16638133592
         }
       },
       {
@@ -354,7 +362,7 @@
     "activation_gates": {
       "official_splits": "complete",
       "pinned_native_files": "complete",
-      "surface_area_weights": "all_484_candidate_order_count_hash_and_value_audit_passed_owner_release_approval_pending",
+      "surface_area_weights": "complete_public_all_484_pinned_order_count_hash_and_value_audit_passed",
       "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
       "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
       "velocity_profiles": "definition_complete_mapping_and_convergence_pending",

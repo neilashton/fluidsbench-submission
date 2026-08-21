@@ -15,13 +15,21 @@ owner-published manifest. Test fields are public but evaluation-only: they must
 not be used for fitting, tuning, checkpoint selection, manual selection, or
 preprocessing statistics.
 
+The native surface-area weights are now public in that same pinned Hugging Face
+release. The authoritative `surface_cell_areas/manifest.json` has SHA-256
+`1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e`
+and binds 484 `run_N/boundary_cell_area_N.npy` payloads to 4,159,517,910 raw
+boundary polygons. FluidsBench uses those published arrays directly and does
+not regenerate areas during evaluation.
+
 For every selected case:
 
 1. Read every native surface polygon from `run_N/boundary_N.vtp` as `CellData`.
    Predict `pMeanTrim` and all three components of `wallShearStressMeanTrim` in
    raw VTK cell order. Use `run_N/boundary_cell_area_N.npy` for the primary
    area-weighted reductions; the equal-polygon values are mandatory secondary
-   results.
+   results. Verify each payload against the public manifest and its case record;
+   never apply it to a reordered, remeshed, triangulated, or STL surface.
 2. Reconstruct the actual `run_N/volume_N.vtu` by byte-concatenating the exact
    ordered part list in [`proposal/native-source-pin.json`](proposal/native-source-pin.json).
    Ten cases have a `.02.part`, so code must not assume two parts. Predict
