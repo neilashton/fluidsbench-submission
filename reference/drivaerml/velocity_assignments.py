@@ -588,6 +588,16 @@ class NativeContainingCellKernel:
                 )
                 self._evaluation_scratch[cell_point_count] = scratch
             closest, sub_id, parametric, distance_squared, weights = scratch
+            # Match a freshly allocated EvaluatePosition call exactly.  Real
+            # native cell implementations do not all overwrite every mutable
+            # output on every return path; in particular, a failure sentinel
+            # must not leak into the following cell that reuses this buffer.
+            closest[0] = closest[1] = closest[2] = 0.0
+            sub_id.set(0)
+            parametric[0] = parametric[1] = parametric[2] = 0.0
+            distance_squared.set(0.0)
+            for weight_index in range(cell_point_count):
+                weights[weight_index] = 0.0
             status = int(
                 cell.EvaluatePosition(
                     point_m,
