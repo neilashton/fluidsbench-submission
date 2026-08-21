@@ -56,7 +56,7 @@ from .profile_convergence import (
     method_set_sha256,
 )
 from .velocity_assignments import (
-    EVALUATE_POSITION_FAILURE_REASON_PREFIX,
+    CELL_EVALUATION_FAILURE_REASON_PREFIX,
     NO_CLOSURE_CELL_REASON,
     OWNER_INVALID_REASONS,
     assignment_evidence_sha256,
@@ -311,10 +311,10 @@ class ResolutionMapping:
                 elif row.reason in OWNER_INVALID_REASONS:
                     pass
                 elif row.reason.startswith(
-                    EVALUATE_POSITION_FAILURE_REASON_PREFIX
+                    CELL_EVALUATION_FAILURE_REASON_PREFIX
                 ):
                     suffix = row.reason[
-                        len(EVALUATE_POSITION_FAILURE_REASON_PREFIX) :
+                        len(CELL_EVALUATION_FAILURE_REASON_PREFIX) :
                     ]
                     tokens = suffix.split(",") if suffix else []
                     if any(

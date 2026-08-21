@@ -383,6 +383,35 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
                     "unique_query_keys": 64,
                     "cache_hits": 0,
                 },
+                "polyhedron_geometry_cache": {
+                    "policy": "deterministic_least_recently_used",
+                    "maximum_entries": 8_192,
+                    "maximum_emitted_triangles": 131_072,
+                    "current_entries": 0,
+                    "current_emitted_triangles": 0,
+                    "peak_entries": 0,
+                    "peak_emitted_triangles": 0,
+                    "cache_hits": 0,
+                    "cache_misses": 0,
+                    "evictions": 0,
+                    "oversized_entry_bypasses": 0,
+                    "fail_closed_preparations": 0,
+                    "vtk_objects_cached": False,
+                },
+                "polyhedron_evaluation": {
+                    "scope": (
+                        "broad_phase_polyhedron_visits_for_uncached_exact_xyz_"
+                        "tolerance_queries"
+                    ),
+                    "broad_phase_polyhedron_visit_count": 0,
+                    "boundary_count": 0,
+                    "inside_count": 0,
+                    "outside_count": 0,
+                    "ambiguous_count": 0,
+                    "winding_classified_count": 0,
+                    "minimum_winding_classification_margin_steradian": None,
+                    "classification_absolute_tolerance_steradian": 1.0e-3,
+                },
             },
             "artifacts": summaries,
             "coverage": {
@@ -465,6 +494,38 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
                 "total_rows": 64,
                 "unique_query_keys_sum": 64,
                 "cache_hits": 0,
+            },
+        )
+        self.assertEqual(
+            first["totals"]["polyhedron_geometry_cache"],
+            {
+                "audited_receipt_count": 1,
+                "policy": "deterministic_least_recently_used",
+                "maximum_entries_per_case": 8_192,
+                "maximum_emitted_triangles_per_case": 131_072,
+                "peak_entries_max": 0,
+                "peak_emitted_triangles_max": 0,
+                "current_entries": 0,
+                "current_emitted_triangles": 0,
+                "cache_hits": 0,
+                "cache_misses": 0,
+                "evictions": 0,
+                "oversized_entry_bypasses": 0,
+                "fail_closed_preparations": 0,
+            },
+        )
+        self.assertEqual(
+            first["totals"]["polyhedron_evaluation"],
+            {
+                "audited_receipt_count": 1,
+                "classification_absolute_tolerance_steradian": 1.0e-3,
+                "broad_phase_polyhedron_visit_count": 0,
+                "boundary_count": 0,
+                "inside_count": 0,
+                "outside_count": 0,
+                "ambiguous_count": 0,
+                "winding_classified_count": 0,
+                "minimum_winding_classification_margin_steradian": None,
             },
         )
         for spacing_mm in (1, 2, 5, 10):
@@ -598,6 +659,30 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
         ):
             self._aggregate()
 
+    def test_polyhedron_runtime_audits_are_strict(self) -> None:
+        receipt_path = self.case_root / "receipt.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt["execution"]["polyhedron_geometry_cache"][
+            "maximum_entries"
+        ] = 8_191
+        _write_json(receipt_path, receipt)
+        with self.assertRaisesRegex(
+            VelocityAssignmentAggregateError,
+            "polyhedron geometry-cache audit is inconsistent",
+        ):
+            self._aggregate()
+
+        self.setUp()
+        receipt_path = self.case_root / "receipt.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt["execution"]["polyhedron_evaluation"]["inside_count"] = 1
+        _write_json(receipt_path, receipt)
+        with self.assertRaisesRegex(
+            VelocityAssignmentAggregateError,
+            "polyhedron evaluation audit is inconsistent",
+        ):
+            self._aggregate()
+
     def test_official_query_cache_counts_are_derived_from_exact_grids(self) -> None:
         expected_samples = aggregate_module._expected_samples_by_resolution(
             self.definition
@@ -673,8 +758,8 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
         ):
             self._aggregate()
 
-    def test_evaluate_position_failure_reason_ids_are_canonical(self) -> None:
-        prefix = "vtk_evaluate_position_failed_for_broad_phase_cells:"
+    def test_cell_evaluation_failure_reason_ids_are_canonical(self) -> None:
+        prefix = "native_cell_closure_evaluation_failed_for_broad_phase_cells:"
         self.assertEqual(
             aggregate_module._evaluation_failure_ids(
                 prefix + "3,9", cell_count=10, label="reason"

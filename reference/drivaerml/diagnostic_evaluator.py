@@ -78,7 +78,7 @@ from .source import (
     stream_inline_binary_payload,
 )
 from .velocity_assignments import (
-    EVALUATE_POSITION_FAILURE_REASON_PREFIX,
+    CELL_EVALUATION_FAILURE_REASON_PREFIX,
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
     OWNER_INVALID_REASONS,
@@ -109,7 +109,7 @@ PINNED_KERNEL_VERSIONS = {
     "vtk_source": "vtk version 9.5.2",
 }
 PINNED_KERNEL_SETTINGS_SHA256 = (
-    "0bd2511f30c9d8ce743a043e27b734212355a1d3ac1916d02453c88fab13dd62"
+    "6cbd2b2fb56fc782fd9e9990bd43f2bad7fd040b355f128555ecf101b369fa1b"
 )
 EXPECTED_ROW_FIELDS = [
     "profile_id",
@@ -1751,7 +1751,7 @@ def _validate_velocity_kernel(value: object) -> None:
     expected_hash = hashlib.sha256(_canonical_json(expected_settings)).hexdigest()
     if expected_hash != PINNED_KERNEL_SETTINGS_SHA256:
         raise DrivAerDiagnosticEvaluatorError(
-            "local velocity candidate-v6 settings differ from the frozen hash"
+            "local velocity candidate-v7 settings differ from the frozen hash"
         )
     if (
         kernel["kernel_id"] != KERNEL_ID
@@ -1773,18 +1773,18 @@ def _validate_velocity_invalid_reason(
                 f"{label} no-closure assignment cannot retain candidates"
             )
         return
-    if not reason.startswith(EVALUATE_POSITION_FAILURE_REASON_PREFIX):
+    if not reason.startswith(CELL_EVALUATION_FAILURE_REASON_PREFIX):
         raise DrivAerDiagnosticEvaluatorError(
             f"{label} has an unknown invalid-assignment reason"
         )
-    suffix = reason.removeprefix(EVALUATE_POSITION_FAILURE_REASON_PREFIX)
+    suffix = reason.removeprefix(CELL_EVALUATION_FAILURE_REASON_PREFIX)
     tokens = suffix.split(",")
     if (
         not suffix
         or any(re.fullmatch(r"0|[1-9][0-9]*", token) is None for token in tokens)
     ):
         raise DrivAerDiagnosticEvaluatorError(
-            f"{label} EvaluatePosition failure IDs are not canonical unsigned decimals"
+            f"{label} closure-evaluation failure IDs are not canonical unsigned decimals"
         )
     failed_ids = tuple(int(token) for token in tokens)
     if (
@@ -1792,7 +1792,7 @@ def _validate_velocity_invalid_reason(
         or any(raw_id >= cell_count for raw_id in failed_ids)
     ):
         raise DrivAerDiagnosticEvaluatorError(
-            f"{label} EvaluatePosition failure IDs must be unique, increasing, and in range"
+            f"{label} closure-evaluation failure IDs must be unique, increasing, and in range"
         )
     if candidate_count > cell_count - len(failed_ids):
         raise DrivAerDiagnosticEvaluatorError(

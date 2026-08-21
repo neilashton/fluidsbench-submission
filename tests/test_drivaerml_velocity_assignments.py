@@ -16,7 +16,7 @@ from reference.drivaerml.autocfd5 import (
     load_autocfd5_definition,
 )
 from reference.drivaerml.velocity_assignments import (
-    EVALUATE_POSITION_FAILURE_REASON_PREFIX,
+    CELL_EVALUATION_FAILURE_REASON_PREFIX,
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
     QUERY_CACHE_KEY_ID,
@@ -45,7 +45,7 @@ SYNTHETIC_ASSIGNMENT_SHA256 = (
 )
 FULL_GRID_SHA256 = "46ffdde32e4892562d7e80e41a5727d50db22420efde26f17aa0db363b43a9f0"
 KERNEL_SETTINGS_SHA256 = (
-    "0bd2511f30c9d8ce743a043e27b734212355a1d3ac1916d02453c88fab13dd62"
+    "6cbd2b2fb56fc782fd9e9990bd43f2bad7fd040b355f128555ecf101b369fa1b"
 )
 
 if VTK_READY:
@@ -150,7 +150,9 @@ class DrivAerMLVelocityGridDefinitionTests(unittest.TestCase):
     def test_candidate_settings_are_explicitly_not_frozen(self) -> None:
         settings = candidate_kernel_settings()
         self.assertEqual(settings["kernel_id"], KERNEL_ID)
+        self.assertTrue(KERNEL_ID.endswith("candidate-v7"))
         self.assertIn("candidate_pending", settings["status"])
+        self.assertEqual(settings["required_dependency"], {"vtk": "9.5.2"})
         self.assertEqual(
             settings["candidate_discovery"],
             {
@@ -180,6 +182,57 @@ class DrivAerMLVelocityGridDefinitionTests(unittest.TestCase):
         self.assertEqual(
             settings["selection"]["candidate_count"],
             "number_of_distinct_cells_passing_closure_predicate",
+        )
+        closure = settings["closure"]
+        self.assertEqual(closure["dispatch"], "native_vtk_cell_type")
+        self.assertEqual(
+            closure["fixed_native_cell_types"]["vtk_type_ids"],
+            [10, 12, 13, 14],
+        )
+        polyhedron = closure["native_vtk_polyhedron"]
+        self.assertEqual(
+            polyhedron["closure_id"], "triangulated-signed-solid-angle-v1"
+        )
+        self.assertEqual(polyhedron["randomness"], "none")
+        self.assertFalse(polyhedron["vtk_9_5_2_IsInside_called"])
+        self.assertEqual(polyhedron["vtk_type_id"], 42)
+        self.assertEqual(
+            polyhedron["ambiguous_action"],
+            "fail_closed_and_record_raw_cell_id",
+        )
+        self.assertEqual(
+            polyhedron["classification_absolute_tolerance_steradian"],
+            1.0e-3,
+        )
+        self.assertEqual(
+            polyhedron["classification_tolerance_status"],
+            "candidate_scientific_choice_pending_owner_approval",
+        )
+        self.assertEqual(
+            polyhedron["upstream_algorithm_basis"],
+            {
+                "repository": "https://gitlab.kitware.com/vtk/vtk",
+                "commit": "33c54a2c6b829031e4f013bf5cb7e45daef299d9",
+                "file": "Common/DataModel/vtkPolyhedron.cxx",
+                "function": "vtkPolyhedron::IsInside",
+            },
+        )
+        self.assertEqual(len(polyhedron["deviations_from_upstream_basis"]), 4)
+        self.assertIn(
+            "all_triangle_distances_and_solid_angles",
+            polyhedron["work_bound"]["each_query"],
+        )
+        geometry_cache = polyhedron["geometry_cache"]
+        self.assertEqual(geometry_cache["key"], "raw_vtk_cell_id")
+        self.assertFalse(geometry_cache["vtk_objects_cached"])
+        self.assertIn("None_for_fail_closed", geometry_cache["value"])
+        self.assertIn("distinct_broad_phase", geometry_cache["entry_bound"])
+        self.assertEqual(geometry_cache["maximum_entries"], 8_192)
+        self.assertEqual(
+            geometry_cache["maximum_emitted_triangles"], 131_072
+        )
+        self.assertEqual(
+            geometry_cache["eviction"], "deterministic_least_recently_used"
         )
         self.assertEqual(
             settings["required_tolerance_replay_m"], list(TOLERANCE_REPLAY_M)
@@ -302,6 +355,47 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
         grid.InsertNextCell(vtk.VTK_HEXAHEDRON, 8, [1, 8, 9, 2, 5, 10, 11, 6])
         return grid
 
+    @classmethod
+    def concave_l_prism_grid(
+        cls, *, reverse_face_index: int | None = None
+    ) -> object:
+        footprint = ((0, 0), (2, 0), (2, 1), (1, 1), (1, 2), (0, 2))
+        points = vtk.vtkPoints()
+        points.SetDataTypeToDouble()
+        point_ids = cls._append_points(
+            points,
+            [
+                (x, y, z)
+                for z in (0, 1)
+                for x, y in footprint
+            ],
+        )
+        local_faces = [
+            tuple(reversed(range(6))),
+            tuple(range(6, 12)),
+            *(
+                (index, (index + 1) % 6, (index + 1) % 6 + 6, index + 6)
+                for index in range(6)
+            ),
+        ]
+        if reverse_face_index is not None:
+            local_faces[reverse_face_index] = tuple(
+                reversed(local_faces[reverse_face_index])
+            )
+        faces = vtk.vtkCellArray()
+        for local_face in local_faces:
+            face = [point_ids[index] for index in local_face]
+            faces.InsertNextCell(len(face), face)
+        grid = vtk.vtkUnstructuredGrid()
+        grid.SetPoints(points)
+        grid.InsertNextCell(
+            vtk.VTK_POLYHEDRON,
+            len(point_ids),
+            point_ids,
+            faces,
+        )
+        return grid
+
     @staticmethod
     def sample(
         profile_id: str,
@@ -350,6 +444,210 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
             points_before,
         )
         self.assertEqual(grid.GetCellData().GetNumberOfArrays(), 0)
+
+    def test_deterministic_concave_polyhedron_closure(self) -> None:
+        kernel = NativeContainingCellKernel(self.concave_l_prism_grid())
+        assignments = kernel.assign(
+            (
+                self.sample("inside", 0, (0.5, 1.5, 0.5)),
+                self.sample("aabb_notch", 0, (1.5, 1.5, 0.5)),
+                self.sample("half_micrometre", 0, (1.0 + 0.5e-6, 1.5, 0.5)),
+                self.sample("two_micrometres", 0, (1.0 + 2.0e-6, 1.5, 0.5)),
+            ),
+            case_id="synthetic_concave_l_prism",
+            source_sha256=SOURCE_HASHES,
+        )
+        self.assertTrue(assignments[0].valid)
+        self.assertEqual(assignments[0].raw_vtk_cell_id, 0)
+        self.assertEqual(assignments[0].candidate_count, 1)
+        self.assertFalse(assignments[1].valid)
+        self.assertEqual(assignments[1].reason, NO_CLOSURE_CELL_REASON)
+        self.assertEqual(assignments[1].candidate_count, 0)
+        self.assertTrue(assignments[2].valid)
+        self.assertEqual(assignments[2].raw_vtk_cell_id, 0)
+        self.assertEqual(assignments[2].candidate_count, 1)
+        self.assertFalse(assignments[3].valid)
+        self.assertEqual(assignments[3].reason, NO_CLOSURE_CELL_REASON)
+        self.assertEqual(assignments[3].candidate_count, 0)
+        evaluation_audit = kernel.polyhedron_evaluation_audit()
+        self.assertEqual(evaluation_audit["broad_phase_polyhedron_visit_count"], 4)
+        self.assertEqual(evaluation_audit["boundary_count"], 1)
+        self.assertEqual(evaluation_audit["inside_count"], 1)
+        self.assertEqual(evaluation_audit["outside_count"], 2)
+        self.assertEqual(evaluation_audit["ambiguous_count"], 0)
+        self.assertEqual(evaluation_audit["winding_classified_count"], 3)
+        self.assertGreaterEqual(
+            evaluation_audit[
+                "minimum_winding_classification_margin_steradian"
+            ],
+            0.0,
+        )
+        self.assertLessEqual(
+            evaluation_audit[
+                "minimum_winding_classification_margin_steradian"
+            ],
+            1.0e-3,
+        )
+
+    def test_polyhedron_triangulation_is_cached_without_vtk_objects(self) -> None:
+        kernel = NativeContainingCellKernel(
+            self.concave_l_prism_grid(), query_cache_enabled=False
+        )
+        with patch.object(
+            velocity_assignments_module,
+            "_prepare_polyhedron_triangles",
+            wraps=velocity_assignments_module._prepare_polyhedron_triangles,
+        ) as prepare, patch.object(
+            velocity_assignments_module.vtk,
+            "vtkGenericCell",
+            wraps=vtk.vtkGenericCell,
+        ) as cell_factory:
+            assignments = kernel.assign(
+                (
+                    self.sample("inside_first", 0, (0.5, 1.5, 0.5)),
+                    self.sample("inside_second", 0, (0.5, 1.4, 0.5)),
+                ),
+                case_id="synthetic_polyhedron_geometry_cache",
+                source_sha256=SOURCE_HASHES,
+            )
+        self.assertTrue(all(row.valid for row in assignments))
+        self.assertEqual(prepare.call_count, 1)
+        self.assertEqual(cell_factory.call_count, 1)
+        self.assertEqual(set(kernel._polyhedron_triangle_cache), {0})
+        triangles = kernel._polyhedron_triangle_cache[0]
+        self.assertIsInstance(triangles, tuple)
+        self.assertTrue(all(isinstance(triangle, tuple) for triangle in triangles))
+        triangle_count = len(triangles)
+        self.assertEqual(
+            kernel.polyhedron_geometry_cache_audit(),
+            {
+                "policy": "deterministic_least_recently_used",
+                "maximum_entries": 8_192,
+                "maximum_emitted_triangles": 131_072,
+                "current_entries": 1,
+                "current_emitted_triangles": triangle_count,
+                "peak_entries": 1,
+                "peak_emitted_triangles": triangle_count,
+                "cache_hits": 1,
+                "cache_misses": 1,
+                "evictions": 0,
+                "oversized_entry_bypasses": 0,
+                "fail_closed_preparations": 0,
+                "vtk_objects_cached": False,
+            },
+        )
+
+    def test_misoriented_polyhedron_face_fails_closed(self) -> None:
+        kernel = NativeContainingCellKernel(
+            self.concave_l_prism_grid(reverse_face_index=2),
+            query_cache_enabled=False,
+        )
+        with patch.object(
+            velocity_assignments_module,
+            "_prepare_polyhedron_triangles",
+            wraps=velocity_assignments_module._prepare_polyhedron_triangles,
+        ) as prepare:
+            assignments = kernel.assign(
+                (
+                    self.sample("inside_first", 0, (0.5, 1.5, 0.5)),
+                    self.sample("inside_second", 0, (0.5, 1.4, 0.5)),
+                ),
+                case_id="synthetic_misoriented_polyhedron",
+                source_sha256=SOURCE_HASHES,
+            )
+        self.assertEqual(prepare.call_count, 1)
+        self.assertIsNone(kernel._polyhedron_triangle_cache[0])
+        self.assertEqual(
+            kernel.polyhedron_geometry_cache_audit()["fail_closed_preparations"],
+            1,
+        )
+        self.assertEqual(
+            kernel.polyhedron_geometry_cache_audit()["cache_hits"], 1
+        )
+        self.assertEqual(
+            kernel.polyhedron_evaluation_audit()["ambiguous_count"], 2
+        )
+        for assignment in assignments:
+            self.assertFalse(assignment.valid)
+            self.assertEqual(assignment.raw_vtk_cell_id, None)
+            self.assertEqual(assignment.candidate_count, 0)
+            self.assertEqual(
+                assignment.reason,
+                CELL_EVALUATION_FAILURE_REASON_PREFIX + "0",
+            )
+
+    def test_polyhedron_geometry_cache_uses_bounded_lru_eviction(self) -> None:
+        kernel = NativeContainingCellKernel(self.concave_l_prism_grid())
+        kernel._polyhedron_cache_max_entries = 2
+        triangle = (((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),)
+        kernel._cache_polyhedron_triangles(10, triangle)
+        kernel._cache_polyhedron_triangles(20, None)
+        self.assertEqual(kernel._cached_polyhedron_triangles(10), triangle)
+        kernel._cache_polyhedron_triangles(30, triangle)
+        self.assertEqual(list(kernel._polyhedron_triangle_cache), [10, 30])
+        self.assertIs(
+            kernel._cached_polyhedron_triangles(20),
+            velocity_assignments_module._CACHE_MISS,
+        )
+        audit = kernel.polyhedron_geometry_cache_audit()
+        self.assertEqual(audit["maximum_entries"], 2)
+        self.assertEqual(audit["current_entries"], 2)
+        self.assertEqual(audit["current_emitted_triangles"], 2)
+        self.assertEqual(audit["peak_entries"], 2)
+        self.assertEqual(audit["peak_emitted_triangles"], 2)
+        self.assertEqual(audit["cache_hits"], 1)
+        self.assertEqual(audit["evictions"], 1)
+
+    def test_polyhedron_geometry_cache_bypasses_oversized_entry(self) -> None:
+        kernel = NativeContainingCellKernel(self.concave_l_prism_grid())
+        kernel._polyhedron_cache_max_triangles = 1
+        triangle = (
+            ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)),
+            ((0.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)),
+        )
+        kernel._cache_polyhedron_triangles(10, triangle)
+        self.assertEqual(kernel._polyhedron_triangle_cache, {})
+        audit = kernel.polyhedron_geometry_cache_audit()
+        self.assertEqual(audit["current_entries"], 0)
+        self.assertEqual(audit["current_emitted_triangles"], 0)
+        self.assertEqual(audit["oversized_entry_bypasses"], 1)
+
+    def test_grid_modification_is_rejected_before_cached_assignment(self) -> None:
+        grid = self.concave_l_prism_grid()
+        kernel = NativeContainingCellKernel(grid)
+        grid.GetPoints().SetPoint(0, -0.25, 0.0, 0.0)
+        grid.GetPoints().Modified()
+        with self.assertRaisesRegex(
+            VelocityAssignmentError,
+            "geometry changed after containing-cell kernel construction",
+        ):
+            kernel.assign(
+                (self.sample("inside", 0, (0.5, 1.5, 0.5)),),
+                case_id="synthetic_modified_grid",
+                source_sha256=SOURCE_HASHES,
+            )
+
+    def test_ambiguous_polyhedron_winding_fails_closed(self) -> None:
+        kernel = NativeContainingCellKernel(self.concave_l_prism_grid())
+        with patch.object(
+            velocity_assignments_module,
+            "_classify_polyhedron_solid_angle_detail",
+            return_value=velocity_assignments_module._PolyhedronClosureEvaluation(
+                None, "ambiguous"
+            ),
+        ):
+            assignment = kernel.assign(
+                (self.sample("inside", 0, (0.5, 1.5, 0.5)),),
+                case_id="synthetic_ambiguous_polyhedron",
+                source_sha256=SOURCE_HASHES,
+            )[0]
+        self.assertFalse(assignment.valid)
+        self.assertEqual(assignment.raw_vtk_cell_id, None)
+        self.assertEqual(assignment.candidate_count, 0)
+        self.assertEqual(
+            assignment.reason,
+            CELL_EVALUATION_FAILURE_REASON_PREFIX + "0",
+        )
 
     def test_serial_queries_reuse_buffers_but_not_generic_cell_state(self) -> None:
         kernel = NativeContainingCellKernel(
@@ -654,7 +952,7 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
         self.assertTrue(all(row.candidate_count == 1 for row in cached))
         self.assertTrue(
             all(
-                row.reason == EVALUATE_POSITION_FAILURE_REASON_PREFIX + "1"
+                row.reason == CELL_EVALUATION_FAILURE_REASON_PREFIX + "1"
                 for row in cached
             )
         )
@@ -739,7 +1037,7 @@ class DrivAerMLVelocityContainingCellTests(unittest.TestCase):
         self.assertEqual(assignment.candidate_count, 1)
         self.assertEqual(
             assignment.reason,
-            EVALUATE_POSITION_FAILURE_REASON_PREFIX + "1",
+            CELL_EVALUATION_FAILURE_REASON_PREFIX + "1",
         )
 
     def test_half_one_two_micrometre_replay_is_tolerance_sensitive(self) -> None:

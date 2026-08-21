@@ -47,7 +47,7 @@ from reference.drivaerml.prediction_chunks import (
 )
 from reference.drivaerml.source import index_inline_binary_vtk_xml
 from reference.drivaerml.velocity_assignments import (
-    EVALUATE_POSITION_FAILURE_REASON_PREFIX,
+    CELL_EVALUATION_FAILURE_REASON_PREFIX,
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
     assignment_evidence_sha256,
@@ -882,7 +882,7 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                 invalid_cp_position=5,
                 invalid_velocity_position=7,
                 invalid_velocity_reason=(
-                    EVALUATE_POSITION_FAILURE_REASON_PREFIX + "3,9"
+                    CELL_EVALUATION_FAILURE_REASON_PREFIX + "3,9"
                 ),
             )
             cp, velocity = fixture.loaded()
@@ -917,7 +917,7 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
             self.assertIsNone(velocity_metric["case_equal_line_mean_rmse"])
             self.assertEqual(
                 velocity_metric["unavailable_reasons"][0]["reason"],
-                EVALUATE_POSITION_FAILURE_REASON_PREFIX + "3,9",
+                CELL_EVALUATION_FAILURE_REASON_PREFIX + "3,9",
             )
             self.assertFalse(experimental_velocity_metric["value_available"])
             self.assertEqual(
@@ -950,7 +950,7 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                 Path(directory),
                 invalid_velocity_position=7,
                 invalid_velocity_reason=(
-                    EVALUATE_POSITION_FAILURE_REASON_PREFIX + "9,3"
+                    CELL_EVALUATION_FAILURE_REASON_PREFIX + "9,3"
                 ),
             )
             with self.assertRaisesRegex(

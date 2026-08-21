@@ -642,6 +642,20 @@ def generate_pinned_velocity_assignments(
             raise VelocityAssignmentCLIError(
                 "cross-resolution containing-cell query-cache audit is inconsistent"
             )
+        polyhedron_geometry_cache_audit = (
+            kernel.polyhedron_geometry_cache_audit()
+        )
+        polyhedron_evaluation_audit = kernel.polyhedron_evaluation_audit()
+        if (
+            polyhedron_evaluation_audit["broad_phase_polyhedron_visit_count"]
+            != polyhedron_geometry_cache_audit["cache_hits"]
+            + polyhedron_geometry_cache_audit["cache_misses"]
+            or polyhedron_evaluation_audit["ambiguous_count"]
+            < polyhedron_geometry_cache_audit["fail_closed_preparations"]
+        ):
+            raise VelocityAssignmentCLIError(
+                "polyhedron cache and evaluation audits are inconsistent"
+            )
 
         receipt: dict[str, object] = {
             "schema": RECEIPT_SCHEMA,
@@ -658,6 +672,8 @@ def generate_pinned_velocity_assignments(
                 "resolution_order_mm": [row[0] for row in RESOLUTIONS],
                 "geometric_tolerance_m": POINT_IN_CELL_CLOSURE_TOLERANCE_M,
                 "containing_cell_query_cache": query_cache_audit,
+                "polyhedron_geometry_cache": polyhedron_geometry_cache_audit,
+                "polyhedron_evaluation": polyhedron_evaluation_audit,
             },
             "artifacts": artifact_summaries,
             "coverage": {

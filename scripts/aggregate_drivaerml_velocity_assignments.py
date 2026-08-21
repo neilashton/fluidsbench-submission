@@ -35,10 +35,13 @@ from reference.drivaerml.autocfd5 import (  # noqa: E402
 )
 from reference.drivaerml.source import load_native_source_pin  # noqa: E402
 from reference.drivaerml.velocity_assignments import (  # noqa: E402
-    EVALUATE_POSITION_FAILURE_REASON_PREFIX,
+    CELL_EVALUATION_FAILURE_REASON_PREFIX,
     KERNEL_ID,
     NO_CLOSURE_CELL_REASON,
     OWNER_INVALID_REASONS,
+    POLYHEDRON_GEOMETRY_CACHE_MAX_ENTRIES,
+    POLYHEDRON_GEOMETRY_CACHE_MAX_TRIANGLES,
+    POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE,
     QUERY_CACHE_KEY_ID,
     TOLERANCE_REPLAY_M,
     assignment_evidence_sha256,
@@ -83,7 +86,7 @@ PINNED_VERSIONS = {
 }
 PINNED_KERNEL_SETTINGS = candidate_kernel_settings()
 PINNED_KERNEL_SETTINGS_SHA256 = (
-    "0bd2511f30c9d8ce743a043e27b734212355a1d3ac1916d02453c88fab13dd62"
+    "6cbd2b2fb56fc782fd9e9990bd43f2bad7fd040b355f128555ecf101b369fa1b"
 )
 FALSE_CASE_CLAIMS = {
     "resolution_convergence": False,
@@ -266,11 +269,11 @@ def _same_float(actual: object, expected: float, label: str) -> float:
 def _evaluation_failure_ids(
     reason: str, *, cell_count: int, label: str
 ) -> tuple[int, ...] | None:
-    """Parse the explicit conservative-invalid VTK evaluation reason."""
+    """Parse the explicit conservative-invalid cell-evaluation reason."""
 
-    if not reason.startswith(EVALUATE_POSITION_FAILURE_REASON_PREFIX):
+    if not reason.startswith(CELL_EVALUATION_FAILURE_REASON_PREFIX):
         return None
-    suffix = reason[len(EVALUATE_POSITION_FAILURE_REASON_PREFIX) :]
+    suffix = reason[len(CELL_EVALUATION_FAILURE_REASON_PREFIX) :]
     if not suffix:
         raise VelocityAssignmentAggregateError(
             f"{label} must record at least one failed raw cell ID"
@@ -1035,6 +1038,193 @@ def _validate_artifact(
     }
 
 
+def _validate_polyhedron_runtime_audits(
+    geometry_cache_value: object,
+    evaluation_value: object,
+    *,
+    case_id: str,
+) -> tuple[dict[str, object], dict[str, object]]:
+    cache = _exact_keys(
+        geometry_cache_value,
+        {
+            "policy",
+            "maximum_entries",
+            "maximum_emitted_triangles",
+            "current_entries",
+            "current_emitted_triangles",
+            "peak_entries",
+            "peak_emitted_triangles",
+            "cache_hits",
+            "cache_misses",
+            "evictions",
+            "oversized_entry_bypasses",
+            "fail_closed_preparations",
+            "vtk_objects_cached",
+        },
+        f"{case_id} polyhedron geometry-cache audit",
+    )
+    maximum_entries = _integer(
+        cache["maximum_entries"], "maximum_entries", minimum=1
+    )
+    maximum_triangles = _integer(
+        cache["maximum_emitted_triangles"],
+        "maximum_emitted_triangles",
+        minimum=1,
+    )
+    current_entries = _integer(
+        cache["current_entries"], "current_entries", minimum=0
+    )
+    current_triangles = _integer(
+        cache["current_emitted_triangles"],
+        "current_emitted_triangles",
+        minimum=0,
+    )
+    peak_entries = _integer(cache["peak_entries"], "peak_entries", minimum=0)
+    peak_triangles = _integer(
+        cache["peak_emitted_triangles"],
+        "peak_emitted_triangles",
+        minimum=0,
+    )
+    cache_hits = _integer(cache["cache_hits"], "cache_hits", minimum=0)
+    cache_misses = _integer(cache["cache_misses"], "cache_misses", minimum=0)
+    evictions = _integer(cache["evictions"], "evictions", minimum=0)
+    oversized_bypasses = _integer(
+        cache["oversized_entry_bypasses"],
+        "oversized_entry_bypasses",
+        minimum=0,
+    )
+    preparation_failures = _integer(
+        cache["fail_closed_preparations"],
+        "fail_closed_preparations",
+        minimum=0,
+    )
+    if (
+        cache["policy"] != "deterministic_least_recently_used"
+        or cache["vtk_objects_cached"] is not False
+        or maximum_entries != POLYHEDRON_GEOMETRY_CACHE_MAX_ENTRIES
+        or maximum_triangles != POLYHEDRON_GEOMETRY_CACHE_MAX_TRIANGLES
+        or current_entries > maximum_entries
+        or peak_entries < current_entries
+        or peak_entries > maximum_entries
+        or current_triangles > maximum_triangles
+        or peak_triangles < current_triangles
+        or peak_triangles > maximum_triangles
+        or current_entries
+        != cache_misses - oversized_bypasses - evictions
+        or preparation_failures > cache_misses
+    ):
+        raise VelocityAssignmentAggregateError(
+            f"{case_id} polyhedron geometry-cache audit is inconsistent"
+        )
+    cache_audit = {
+        "policy": "deterministic_least_recently_used",
+        "maximum_entries": maximum_entries,
+        "maximum_emitted_triangles": maximum_triangles,
+        "current_entries": current_entries,
+        "current_emitted_triangles": current_triangles,
+        "peak_entries": peak_entries,
+        "peak_emitted_triangles": peak_triangles,
+        "cache_hits": cache_hits,
+        "cache_misses": cache_misses,
+        "evictions": evictions,
+        "oversized_entry_bypasses": oversized_bypasses,
+        "fail_closed_preparations": preparation_failures,
+        "vtk_objects_cached": False,
+    }
+
+    evaluation = _exact_keys(
+        evaluation_value,
+        {
+            "scope",
+            "broad_phase_polyhedron_visit_count",
+            "boundary_count",
+            "inside_count",
+            "outside_count",
+            "ambiguous_count",
+            "winding_classified_count",
+            "minimum_winding_classification_margin_steradian",
+            "classification_absolute_tolerance_steradian",
+        },
+        f"{case_id} polyhedron evaluation audit",
+    )
+    visit_count = _integer(
+        evaluation["broad_phase_polyhedron_visit_count"],
+        "broad_phase_polyhedron_visit_count",
+        minimum=0,
+    )
+    boundary_count = _integer(
+        evaluation["boundary_count"], "boundary_count", minimum=0
+    )
+    inside_count = _integer(
+        evaluation["inside_count"], "inside_count", minimum=0
+    )
+    outside_count = _integer(
+        evaluation["outside_count"], "outside_count", minimum=0
+    )
+    ambiguous_count = _integer(
+        evaluation["ambiguous_count"], "ambiguous_count", minimum=0
+    )
+    classified_count = _integer(
+        evaluation["winding_classified_count"],
+        "winding_classified_count",
+        minimum=0,
+    )
+    _same_float(
+        evaluation["classification_absolute_tolerance_steradian"],
+        POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE,
+        "classification_absolute_tolerance_steradian",
+    )
+    margin_value = evaluation[
+        "minimum_winding_classification_margin_steradian"
+    ]
+    if margin_value is None:
+        minimum_margin = None
+    elif isinstance(margin_value, (int, float)) and not isinstance(
+        margin_value, bool
+    ):
+        minimum_margin = float(margin_value)
+    else:
+        raise VelocityAssignmentAggregateError(
+            f"{case_id} polyhedron classification margin must be numeric or null"
+        )
+    if (
+        evaluation["scope"]
+        != "broad_phase_polyhedron_visits_for_uncached_exact_xyz_tolerance_queries"
+        or visit_count
+        != boundary_count + inside_count + outside_count + ambiguous_count
+        or visit_count != cache_hits + cache_misses
+        or classified_count != inside_count + outside_count
+        or ambiguous_count < preparation_failures
+        or (classified_count == 0) != (minimum_margin is None)
+        or (
+            minimum_margin is not None
+            and (
+                not math.isfinite(minimum_margin)
+                or minimum_margin < 0.0
+                or minimum_margin
+                > POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE
+            )
+        )
+    ):
+        raise VelocityAssignmentAggregateError(
+            f"{case_id} polyhedron evaluation audit is inconsistent"
+        )
+    evaluation_audit = {
+        "scope": evaluation["scope"],
+        "broad_phase_polyhedron_visit_count": visit_count,
+        "boundary_count": boundary_count,
+        "inside_count": inside_count,
+        "outside_count": outside_count,
+        "ambiguous_count": ambiguous_count,
+        "winding_classified_count": classified_count,
+        "minimum_winding_classification_margin_steradian": minimum_margin,
+        "classification_absolute_tolerance_steradian": (
+            POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE
+        ),
+    }
+    return cache_audit, evaluation_audit
+
+
 def _validate_case_receipt(
     case_directory: Path,
     *,
@@ -1102,6 +1292,8 @@ def _validate_case_receipt(
         "validation_chunk_cells",
         "resolution_order_mm",
         "geometric_tolerance_m",
+        "polyhedron_geometry_cache",
+        "polyhedron_evaluation",
     }
     if query_cache_present:
         execution_keys.add("containing_cell_query_cache")
@@ -1149,6 +1341,13 @@ def _validate_case_receipt(
             "unique_query_keys": unique_keys,
             "cache_hits": cache_hits,
         }
+    polyhedron_cache_audit, polyhedron_evaluation_audit = (
+        _validate_polyhedron_runtime_audits(
+            execution["polyhedron_geometry_cache"],
+            execution["polyhedron_evaluation"],
+            case_id=case_id,
+        )
+    )
     coverage = _exact_keys(
         receipt["coverage"],
         {
@@ -1237,6 +1436,8 @@ def _validate_case_receipt(
             "ordered_verified_segment_count": len(pinned_case.volume_parts),
         },
         "containing_cell_query_cache": query_cache_audit,
+        "polyhedron_geometry_cache": polyhedron_cache_audit,
+        "polyhedron_evaluation": polyhedron_evaluation_audit,
         "resolutions": resolution_rows,
     }
 
@@ -1335,6 +1536,11 @@ def aggregate_velocity_assignments(
     cache_audit_total_rows = 0
     cache_audit_unique_query_keys = 0
     cache_audit_hits = 0
+    polyhedron_cache_totals: collections.Counter[str] = collections.Counter()
+    polyhedron_cache_peak_entries_max = 0
+    polyhedron_cache_peak_triangles_max = 0
+    polyhedron_evaluation_totals: collections.Counter[str] = collections.Counter()
+    polyhedron_minimum_winding_margin: float | None = None
     all_invalid_reasons: collections.Counter[str] = collections.Counter()
     for case_id in expected_cases:
         case = _validate_case_receipt(
@@ -1358,6 +1564,43 @@ def aggregate_velocity_assignments(
             cache_audit_total_rows += int(cache_audit["total_rows"])
             cache_audit_unique_query_keys += int(cache_audit["unique_query_keys"])
             cache_audit_hits += int(cache_audit["cache_hits"])
+        polyhedron_cache = case["polyhedron_geometry_cache"]
+        for key in (
+            "current_entries",
+            "current_emitted_triangles",
+            "cache_hits",
+            "cache_misses",
+            "evictions",
+            "oversized_entry_bypasses",
+            "fail_closed_preparations",
+        ):
+            polyhedron_cache_totals[key] += int(polyhedron_cache[key])
+        polyhedron_cache_peak_entries_max = max(
+            polyhedron_cache_peak_entries_max,
+            int(polyhedron_cache["peak_entries"]),
+        )
+        polyhedron_cache_peak_triangles_max = max(
+            polyhedron_cache_peak_triangles_max,
+            int(polyhedron_cache["peak_emitted_triangles"]),
+        )
+        polyhedron_evaluation = case["polyhedron_evaluation"]
+        for key in (
+            "broad_phase_polyhedron_visit_count",
+            "boundary_count",
+            "inside_count",
+            "outside_count",
+            "ambiguous_count",
+            "winding_classified_count",
+        ):
+            polyhedron_evaluation_totals[key] += int(polyhedron_evaluation[key])
+        case_margin = polyhedron_evaluation[
+            "minimum_winding_classification_margin_steradian"
+        ]
+        if case_margin is not None and (
+            polyhedron_minimum_winding_margin is None
+            or float(case_margin) < polyhedron_minimum_winding_margin
+        ):
+            polyhedron_minimum_winding_margin = float(case_margin)
         for resolution in case["resolutions"]:
             spacing_mm = int(resolution["nominal_spacing_mm"])
             totals = totals_by_resolution[spacing_mm]
@@ -1431,6 +1674,31 @@ def aggregate_velocity_assignments(
                 "total_rows": cache_audit_total_rows,
                 "unique_query_keys_sum": cache_audit_unique_query_keys,
                 "cache_hits": cache_audit_hits,
+            },
+            "polyhedron_geometry_cache": {
+                "audited_receipt_count": len(cases),
+                "policy": "deterministic_least_recently_used",
+                "maximum_entries_per_case": (
+                    POLYHEDRON_GEOMETRY_CACHE_MAX_ENTRIES
+                ),
+                "maximum_emitted_triangles_per_case": (
+                    POLYHEDRON_GEOMETRY_CACHE_MAX_TRIANGLES
+                ),
+                "peak_entries_max": polyhedron_cache_peak_entries_max,
+                "peak_emitted_triangles_max": (
+                    polyhedron_cache_peak_triangles_max
+                ),
+                **dict(polyhedron_cache_totals),
+            },
+            "polyhedron_evaluation": {
+                "audited_receipt_count": len(cases),
+                "classification_absolute_tolerance_steradian": (
+                    POLYHEDRON_SOLID_ANGLE_ABSOLUTE_TOLERANCE
+                ),
+                **dict(polyhedron_evaluation_totals),
+                "minimum_winding_classification_margin_steradian": (
+                    polyhedron_minimum_winding_margin
+                ),
             },
             "explicit_assignment_row_count": sum(
                 values["sample_count"] for values in totals_by_resolution.values()

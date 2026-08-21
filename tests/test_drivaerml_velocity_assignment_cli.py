@@ -384,6 +384,41 @@ class DrivAerMLVelocityAssignmentCLIVTKTests(unittest.TestCase):
                     "cache_hits": 28_022,
                 },
             )
+            self.assertEqual(
+                first_receipt["execution"]["polyhedron_geometry_cache"],
+                {
+                    "policy": "deterministic_least_recently_used",
+                    "maximum_entries": 8_192,
+                    "maximum_emitted_triangles": 131_072,
+                    "current_entries": 0,
+                    "current_emitted_triangles": 0,
+                    "peak_entries": 0,
+                    "peak_emitted_triangles": 0,
+                    "cache_hits": 0,
+                    "cache_misses": 0,
+                    "evictions": 0,
+                    "oversized_entry_bypasses": 0,
+                    "fail_closed_preparations": 0,
+                    "vtk_objects_cached": False,
+                },
+            )
+            self.assertEqual(
+                first_receipt["execution"]["polyhedron_evaluation"],
+                {
+                    "scope": (
+                        "broad_phase_polyhedron_visits_for_uncached_exact_xyz_"
+                        "tolerance_queries"
+                    ),
+                    "broad_phase_polyhedron_visit_count": 0,
+                    "boundary_count": 0,
+                    "inside_count": 0,
+                    "outside_count": 0,
+                    "ambiguous_count": 0,
+                    "winding_classified_count": 0,
+                    "minimum_winding_classification_margin_steradian": None,
+                    "classification_absolute_tolerance_steradian": 1.0e-3,
+                },
+            )
 
             for summary in first_receipt["artifacts"]:
                 spacing_mm = summary["nominal_spacing_mm"]
