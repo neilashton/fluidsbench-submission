@@ -309,13 +309,12 @@ residual `1.0e-7`, RMS `3.18e-8`). Reject missing, duplicate, non-integer,
 nonfinite, unexpected, or manifest-extraneous run IDs rather than dropping or
 positionally aligning them.
 
-For each ranked coefficient `k` in `{Cd, Cl, CmPitch}`, use the equal-case raw
-error `E_k=sqrt((1/N)*sum_c((k_pred,c-k_true,c)^2))`; its physics-null
-denominator uses the identical case reduction with `k_pred,c=0`. Apply the
-same equal-case RMSE to the mandatory report-only `Clf` and `Clr` diagnostics.
-Publish the maximum predicted `Cl-(Clf+Clr)` closure residual separately from
-the frozen source-table closure audit, whose `1.0e-7` maximum reflects CSV
-rounding.
+For each ranked coefficient `k` in `{Cd, Cl, CmPitch}`, use equal-case global
+R2, `1-sum_c((k_pred,c-k_true,c)^2)/sum_c((k_true,c-mean(k_true))^2)`.
+Publish equal-case RMSE for all three ranked coefficients and for the mandatory
+report-only `Clf` and `Clr` diagnostics. Publish the maximum predicted
+`Cl-(Clf+Clr)` closure residual separately from the frozen source-table closure
+audit, whose `1.0e-7` maximum reflects CSV rounding.
 
 The freestream values are `U_inf=38.889 m/s` and `rho_inf=1 kg/m^3`; drag is
 `+x`, lift is `+z`, and positive pitch is about `+y`. The constant convention

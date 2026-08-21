@@ -7,9 +7,9 @@ official split, the immutable native-source pin, the candidate diagnostic
 registry, and a predeclared authoritative force-table hash.  Only then are
 case metrics reduced.
 
-This is *candidate* evidence.  Physics-null denominators, a frozen scoring
-support release, owner approval, and an independent participant dry run are
-still required before a composite score or an official submission can exist.
+This is *candidate* evidence.  A frozen scoring-support release, owner
+approval, and an independent participant dry run are still required before an
+official submission can exist.
 """
 
 from __future__ import annotations
@@ -52,7 +52,7 @@ OFFICIAL_FORCE_TRUTH_SHA256 = (
     "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865"
 )
 OFFICIAL_DIAGNOSTIC_PROFILE_SHA256 = (
-    "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1"
+    "df22bc807b62f925c32659d681ac44064e6acf46449038b8431b1e9139aba1e8"
 )
 OFFICIAL_SURFACE_AREA_MANIFEST_SHA256 = (
     "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
@@ -432,8 +432,9 @@ def _declared_path(base: Path, value: object, label: str) -> Path:
     relative = PurePosixPath(_string(value, label))
     if relative.is_absolute() or ".." in relative.parts:
         raise DrivAerDatasetScorerError(f"{label} must be a safe relative path")
-    result = (base / Path(*relative.parts)).resolve()
-    if base != result and base not in result.parents:
+    resolved_base = base.resolve()
+    result = (resolved_base / Path(*relative.parts)).resolve()
+    if resolved_base != result and resolved_base not in result.parents:
         raise DrivAerDatasetScorerError(f"{label} escapes the specification root")
     return result
 
@@ -682,14 +683,19 @@ def _load_contract(
     pressure_profile = _mapping(profile.get("pressure_cuts"), "pressure_cuts")
     velocity_profile = _mapping(profile.get("velocity_profiles"), "velocity_profiles")
     if (
-        pressure_profile.get("ranked_metric_id") != "cp_cut_rmse"
+        pressure_profile.get("ranked_metric_id") != "cp_cut_r2"
+        or pressure_profile.get("report_only_metric_id") != "cp_cut_rmse"
         or pressure_profile.get("definition_authority") != "FluidsBench"
         or pressure_profile.get("association") != "native_surface_VTP_CellData"
         or pressure_profile.get("extraction_status")
         != "pending_immutable_owner_cut_support"
         or pressure_profile.get("reduction")
-        != "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse"
-        or velocity_profile.get("ranked_metric_id") != "velocity_profile_uinf_rmse"
+        != "equal_case_equal_cut_global_R2_with_normalized_native_intersection_segment_length_support_per_cut"
+        or velocity_profile.get("ranked_metric_id") != "velocity_profile_r2"
+        or velocity_profile.get("report_only_metric_id")
+        != "velocity_profile_uinf_rmse"
+        or velocity_profile.get("ranked_reduction")
+        != "equal_case_equal_line_global_R2_with_normalized_trapezoidal_arc_length_support_per_line"
         or velocity_profile.get("definition_authority") != "AutoCFD5"
     ):
         raise DrivAerDatasetScorerError("diagnostic canonical definitions are inconsistent")
@@ -2392,7 +2398,7 @@ def evaluate_candidate_dataset(
             "scoring_contract_active": False,
             "composite_score_available": False,
             "component_scores_available": False,
-            "reason": "physics-null denominators and owner activation approval are not frozen",
+            "reason": "immutable profile support and owner activation approval are not frozen",
         },
         "split": {
             "split_id": contract.split_id,
@@ -2447,7 +2453,7 @@ def evaluate_candidate_dataset(
         },
         "cases": case_rows,
         "claims": {
-            "null_denominators_frozen": False,
+            "bounded_score_definition_active": True,
             "overall_score_computed": False,
             "field_force_or_diagnostic_component_score_computed": False,
             "scoring_contract_active": False,

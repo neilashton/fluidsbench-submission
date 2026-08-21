@@ -46,7 +46,7 @@ RECEIPT_SCHEMA = "drivaerml-velocity-cell-assignments-case-candidate-v1"
 ARTIFACT_SCHEMA = "drivaerml-velocity-cell-mapping-candidate-v1"
 RECEIPT_STATUS = "candidate_complete_geometry_mapping_not_activation_evidence"
 EXPECTED_DIAGNOSTIC_PROFILE_SHA256 = (
-    "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1"
+    "df22bc807b62f925c32659d681ac44064e6acf46449038b8431b1e9139aba1e8"
 )
 # Compatibility name retained for downstream candidate tooling; it now binds
 # the probe-free v9 diagnostic registry, not the historical v8 research file.

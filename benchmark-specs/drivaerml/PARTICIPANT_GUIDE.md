@@ -2,8 +2,9 @@
 
 This guide describes the proposed native-mesh workflow for AutoCFD and
 FluidsBench contributors. The contract is still a closed candidate:
-`submissions_open` is `false`, the composite is inactive, and no package made
-with these instructions is an official leaderboard submission yet.
+`submissions_open` is `false`. The bounded composite equation is active and can
+produce implementation-feedback scores, but no package made with these
+instructions is an official leaderboard submission yet.
 
 ## 1. Choose one official split
 
@@ -118,6 +119,21 @@ field to the VTP or predict a second Cp representation, but they do submit the
 evaluator-produced Cp-cut coordinate and prediction arrays in the normal
 FluidsBench profile JSON.
 
+The ranked profile metrics are global R2 values, not macro-averaged RMSE. Each
+case and each required line or cut receives equal total weight. Within a
+velocity line, samples use normalized trapezoidal arc-length support; within a
+Cp cut, samples use normalized native intersection-segment-length support. A
+single global weighted truth mean is then used for each profile family. This
+prevents the 651-sample L1 velocity line from outweighing a 31-sample R line.
+The corresponding equal-case/equal-line and equal-case/equal-cut RMSE values
+remain report-only diagnostics.
+
+The four field components use fixed bounded-error caps of 15% for surface
+pressure, 20% for wall shear, 12% for volume velocity, and 15% for volume
+pressure. `Cd`, `Cl`, `CmPitch`, velocity-profile, and Cp-cut R2 use bounded
+quality scores `100 * clip(R2, 0, 1)`. The nine weights total 50% fields, 25%
+forces, and 25% profiles.
+
 Only the 209 discrete Cp probes are excluded. Participants do not submit probe
 outputs, probe mappings, or probe-specific support, and no discrete-probe
 metric is calculated. The combined v8 registry and existing 209-probe files in
@@ -181,7 +197,7 @@ full-versus-chunked invariance for the two surface and two volume fields. Its
 dummy schema-v3 package mirrors the current participant shape: area-weighted
 and equal-polygon surface metrics, equal-cell volume metrics, coherent force
 coefficients, all four Cp cuts, all sixteen AutoCFD5 velocity profiles, and all
-27 non-score candidate metrics. Its small transport payloads and support
+32 non-score candidate metrics. Its small transport payloads and support
 tables are JSON, not VTK, and its force/profile values are synthetic; it does
 not claim real DrivAerML extraction, force integration, reconstruction, model
 results, or official scoring support.

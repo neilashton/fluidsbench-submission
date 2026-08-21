@@ -6,6 +6,7 @@
   "non_activating": true,
   "purpose": "Reviewed source proposal promoted into the active closed candidate submission specification; this evidence file does not itself open submissions or activate ranking.",
   "prepared_date": "2026-08-19",
+  "scoring_policy_updated_date": "2026-08-21",
   "source_release": {
     "repository": "neashton/drivaerml",
     "repository_type": "huggingface_dataset",
@@ -406,8 +407,13 @@
       "Clf_equation": "Cl/2+CmPitch",
       "Clr_equation": "Cl/2-CmPitch",
       "front_rear_interpretation": "equivalent_axle_loads_from_whole_surface_force_and_pitch_moment_not_surface_partitions",
-      "case_reduction": "separate_equal_case_rmse_for_Cd_Cl_and_CmPitch",
-      "mandatory_report_only_reductions": "individual_equal_case_rmse_for_Clf_and_Clr_plus_maximum_predicted_casewise_Cl_minus_(Clf_plus_Clr)_closure_residual_and_published_source_truth_closure_audit",
+      "ranked_metric_ids": [
+        "cd_r2",
+        "cl_r2",
+        "c_pitch_r2"
+      ],
+      "case_reduction": "separate_equal_case_R2_for_Cd_Cl_and_CmPitch",
+      "mandatory_report_only_reductions": "individual_equal_case_rmse_for_Cd_Cl_CmPitch_Clf_and_Clr_plus_maximum_predicted_casewise_Cl_minus_(Clf_plus_Clr)_closure_residual_and_published_source_truth_closure_audit",
       "independent_lift_mode_rationale": "rank_Cl_and_CmPitch_once_each_to_measure_total_lift_and_axle_balance_without_double_counting_dependent_Clf_and_Clr",
       "geometry_specific_reference_role": "separately_reported_unranked_abupt_aerodynamic_efficiency_diagnostic"
     },
@@ -569,7 +575,10 @@
         "polyhedron_ambiguous_action": "retain_explicit_unresolved_invalid_row_no_cell_assignment",
         "case_line_error_id": "velocity_profile_uinf_rmse",
         "case_line_error_equation": "sqrt(sum_owner_included_mapped_edges(ds_k*(e_k^2+e_kplus1^2)/2)/sum_owner_included_mapped_edges(ds_k)), where e=norm(U_pred)/U_inf-norm(U_truth)/U_inf",
+        "score_metric_id": "velocity_profile_r2",
+        "score_metric_equation": "one_minus_global_equal_case_equal_line_normalized_arc_weighted_prediction_SSE_divided_by_truth_SST",
         "ranked_error_equation": "mean_cases(mean_16_lines(case_line_error))",
+        "ranked_error_equation_role": "report_only_loss_and_resolution_convergence_not_composite_scoring",
         "experimental_subset_report_equation": "mean_cases(mean_11_declared_experimental_parity_lines(case_line_error))",
         "scoring_spacing_m": 0.01,
         "scoring_sample_count_per_case": 3756,
@@ -671,8 +680,11 @@
         },
         "case_cut_error_id": "cp_cut_rmse",
         "case_cut_error_equation": "sqrt(sum_segments(ds*(Cp_prediction-Cp_truth)^2)/sum_segments(ds))",
+        "score_metric_id": "cp_cut_r2",
+        "score_metric_equation": "one_minus_global_equal_case_equal_cut_normalized_native_segment_length_weighted_prediction_SSE_divided_by_truth_SST",
         "within_cut_weighting": "native_cut_intersection_segment_length",
         "ranked_error_equation": "mean_cases(mean_4_cuts(case_cut_error))",
+        "ranked_error_equation_role": "report_only_loss_not_composite_scoring",
         "availability_rule": "all_four_continuous_cuts_must_have_positive_finite_complete_support_for_every_ranked_case",
         "failure_rule": "cp_cut_component_unavailable_no_cut_case_or_segment_omission",
         "forbidden_fallbacks": [
@@ -690,7 +702,7 @@
       }
     },
     "overall_composite": {
-      "status": "owner_structure_approved_pending_baseline_and_replay_validation",
+      "status": "bounded_equation_active_owner_replay_and_sensitivity_validation_pending",
       "component_weights": {
         "native_surface_pressure_field": 0.15,
         "native_surface_wall_shear_field": 0.1,
@@ -707,16 +719,16 @@
         "field_integrated_engineering_quantities": 0.25,
         "local_diagnostics": 0.25
       },
-      "component_error_metrics": {
+      "component_metrics": {
         "native_surface_pressure_field": "equal_case_mean_of_case_area_weighted_relative_l2",
         "native_surface_wall_shear_field": "equal_case_mean_of_case_area_weighted_relative_l2",
         "native_volume_velocity_field": "equal_case_mean_of_case_equal_native_cell_relative_l2",
         "native_volume_pressure_field": "equal_case_mean_of_case_equal_native_cell_relative_l2",
-        "field_integrated_Cd": "equal_case_rmse",
-        "field_integrated_Cl": "equal_case_rmse",
-        "field_integrated_CmPitch": "equal_case_rmse_of_casewise_(Clf-Clr)/2",
-        "autocfd_velocity_profiles": "equal_case_equal_line_mean_of_arc_weighted_rmse",
-        "fluidsbench_cp_cuts": "equal_case_equal_cut_mean_of_native_intersection_segment_length_weighted_rmse"
+        "field_integrated_Cd": "equal_case_R2",
+        "field_integrated_Cl": "equal_case_R2",
+        "field_integrated_CmPitch": "equal_case_R2_of_casewise_(Clf-Clr)/2",
+        "autocfd_velocity_profiles": "global_equal_case_equal_line_normalized_arc_weighted_R2",
+        "fluidsbench_cp_cuts": "global_equal_case_equal_cut_normalized_native_intersection_segment_length_weighted_R2"
       },
       "ranked_force_reference": {
         "convention": "constant_autocfd",
@@ -744,26 +756,40 @@
           "source_truth_Cl_minus_(Clf_plus_Clr)_closure_audit"
         ]
       },
-      "component_skill": "100*(1-E_j/B_j)",
-      "component_skill_denominator_requirement": "B_j_must_be_finite_and_strictly_positive_otherwise_component_and_overall_score_are_unranked",
-      "physics_null_predictions": {
-        "native_surface_pressure_field": 0.0,
-        "native_surface_wall_shear_field": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "native_volume_velocity_field_m_per_s": [
-          38.889,
-          0.0,
-          0.0
-        ],
-        "native_volume_pressure_field": 0.0,
-        "field_integrated_Cd": 0.0,
-        "field_integrated_Cl": 0.0,
-        "field_integrated_CmPitch": 0.0,
-        "autocfd_velocity_profile_u_over_uinf": 1.0,
-        "autocfd_cp_cut": 0.0
+      "bounded_error_equation": "clip(100*(1-error_percent/cap_percent),0,100)",
+      "bounded_R2_equation": "100*clip(R2,0,1)",
+      "component_transforms": {
+        "native_surface_pressure_field": {
+          "kind": "bounded_error",
+          "cap_percent": 15.0
+        },
+        "native_surface_wall_shear_field": {
+          "kind": "bounded_error",
+          "cap_percent": 20.0
+        },
+        "native_volume_velocity_field": {
+          "kind": "bounded_error",
+          "cap_percent": 12.0
+        },
+        "native_volume_pressure_field": {
+          "kind": "bounded_error",
+          "cap_percent": 15.0
+        },
+        "field_integrated_Cd": {
+          "kind": "bounded_R2"
+        },
+        "field_integrated_Cl": {
+          "kind": "bounded_R2"
+        },
+        "field_integrated_CmPitch": {
+          "kind": "bounded_R2"
+        },
+        "autocfd_velocity_profiles": {
+          "kind": "bounded_R2"
+        },
+        "fluidsbench_cp_cuts": {
+          "kind": "bounded_R2"
+        }
       },
       "branch_membership": {
         "global_fields": [
@@ -784,8 +810,8 @@
       },
       "branch_score_equation": "sum_j_in_branch(w_j*S_j)/sum_j_in_branch(w_j)",
       "overall_score_equation": "sum_all_components(w_j*S_j)",
-      "ranking_clips_negative_skill": false,
-      "prototype_error_caps_allowed": false,
+      "ranking_clips_R2_to_unit_interval": true,
+      "field_error_caps_status": "active_shared_fluidsbench_fixed_caps_not_fit_to_dummy_rows",
       "sensitivity_controls": {
         "nearest_training_design_vector": {
           "role": "benchmark_owned_unranked_control_not_a_submission_method",
@@ -840,7 +866,7 @@
         }
       },
       "uncertainty": {
-        "method": "paired_equal_case_nonparametric_bootstrap_recomputing_E_j_and_B_j_per_replicate",
+        "method": "paired_equal_case_nonparametric_bootstrap_recomputing_component_metrics_and_bounded_transforms_per_replicate",
         "replicates": 10000,
         "seed": 20260819,
         "interval": "two_sided_percentile_95_percent",
@@ -857,7 +883,7 @@
       },
       "activation_requirements": [
         "field_integrated_force_all_484_case_golden_replay_and_chunk_invariance",
-        "physics_null_denominators",
+        "fixed_field_cap_and_bounded_R2_real_model_sensitivity",
         "nearest_training_design_vector_donor_map_and_golden_field_transfer_control",
         "real_model_sensitivity",
         "equal_case_bootstrap_confidence_intervals"
@@ -877,7 +903,7 @@
     "immutable_native_surface_support_and_all_case_replay_for_the_four_continuous_cp_cuts",
     "official_split_indexes_derived_from_pinned_owner_manifest",
     "nearest_training_design_vector_donor_map_and_golden_donor_to_target_field_transfer_control",
-    "published_bootstrap_index_matrix_hash_and_baseline_sensitivity_review_before_any_composite_ranking",
+    "published_bootstrap_index_matrix_hash_and_fixed_cap_bounded_R2_sensitivity_review_before_any_composite_ranking",
     "dataset_owner_approval_of_scoring_support_and_evaluator_release"
   ]
 }

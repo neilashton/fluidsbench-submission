@@ -16,18 +16,29 @@ import hashlib
 import json
 import math
 import re
+import sys
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from reference.scores import (
+    composite_component_group_scores,
+    composite_overall_score,
+)
+
+
 DATASET_ROOT = ROOT / "benchmark-specs" / "drivaerml"
 SUBMISSIONS_ROOT = ROOT / "submissions" / "drivaerml"
+FORCE_R2_REFERENCE_PATH = DATASET_ROOT / "force-r2-truth-statistics.json"
 
 U_INF_M_PER_S = 38.889
 CASES_PER_CHUNK = 5
 GENERATED_AT = "2026-08-21T00:00:00Z"
-GENERATOR_REVISION = "drivaerml-realistic-prototype-profiles-v1"
+GENERATOR_REVISION = "drivaerml-bounded-r2-prototype-v2"
 GENERATOR_COMMAND = "python3 scripts/generate_drivaerml_leaderboard_fixtures.py"
 CASE_ID_PATTERN = re.compile(r"run_([1-9][0-9]*)\Z")
 
@@ -59,10 +70,11 @@ PROTOTYPE_NOTE = (
     "It contains smooth CFD-like predictions on all four continuous Cp-cut supports "
     "and the exact 3,756-point AutoCFD5 velocity grid for every official test case. "
     "The dimensional field errors retain the prototype calibration and the profile "
-    "errors are recomputed from the generated curves. It is not a native-field "
-    "evaluation, approved result, ranking entry, or citable model claim. The four "
-    "score values remain zero because the nine physics-null denominators are not "
-    "published."
+    "RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 "
+    "is derived from each prototype's existing RMSE and hash-bound official split "
+    "truth statistics. The four score values use the published bounded-error and "
+    "bounded-R2 transforms. This is not a native-field evaluation, approved result, "
+    "ranking entry, or citable model claim."
 )
 
 
@@ -284,6 +296,87 @@ def trapezoidal_rmse(coordinate: Sequence[float], errors: Sequence[float]) -> fl
     return math.sqrt(integral / length)
 
 
+def trapezoidal_r2_statistics(
+    coordinate: Sequence[float],
+    truth: Sequence[float],
+    prediction: Sequence[float],
+) -> tuple[float, float, float]:
+    """Return normalized truth sum, truth-square sum, and SSE for one profile.
+
+    Normalizing each line or cut to unit support gives every case/profile block
+    equal total weight while retaining trapezoidal arc-length weighting within
+    the block.  The three returned values are additive across blocks and are
+    sufficient to evaluate one global weighted R2 with a global truth mean.
+    """
+
+    if not (len(coordinate) == len(truth) == len(prediction)) or len(coordinate) < 2:
+        raise ValueError("profile R2 inputs must have a common length of at least two")
+    length = coordinate[-1] - coordinate[0]
+    if not math.isfinite(length) or length <= 0.0:
+        raise ValueError("profile R2 coordinate support must have positive length")
+    truth_integral = 0.0
+    truth_squared_integral = 0.0
+    squared_error_integral = 0.0
+    for left, right, truth_left, truth_right, pred_left, pred_right in zip(
+        coordinate,
+        coordinate[1:],
+        truth,
+        truth[1:],
+        prediction,
+        prediction[1:],
+    ):
+        width = right - left
+        if width <= 0.0:
+            raise ValueError("profile R2 coordinates must be strictly increasing")
+        error_left = pred_left - truth_left
+        error_right = pred_right - truth_right
+        truth_integral += width * (truth_left + truth_right) / 2.0
+        truth_squared_integral += width * (truth_left**2 + truth_right**2) / 2.0
+        squared_error_integral += width * (error_left**2 + error_right**2) / 2.0
+    return (
+        truth_integral / length,
+        truth_squared_integral / length,
+        squared_error_integral / length,
+    )
+
+
+def r2_from_block_statistics(
+    statistics: Sequence[tuple[float, float, float]],
+) -> float:
+    if not statistics:
+        raise ValueError("profile R2 requires at least one case/profile block")
+    truth_sum = math.fsum(item[0] for item in statistics)
+    truth_squared_sum = math.fsum(item[1] for item in statistics)
+    squared_error_sum = math.fsum(item[2] for item in statistics)
+    truth_sst = truth_squared_sum - truth_sum**2 / len(statistics)
+    if truth_sst <= 0.0:
+        raise ValueError("profile R2 is undefined for constant weighted truth")
+    return 1.0 - squared_error_sum / truth_sst
+
+
+def force_r2_metrics(
+    metrics: dict[str, float],
+    split_id: str,
+    split_sha256: str,
+    force_reference: dict[str, Any],
+) -> dict[str, float]:
+    split = force_reference["splits"].get(split_id)
+    if not isinstance(split, dict) or split.get("split_sha256") != split_sha256:
+        raise ValueError(f"force R2 truth statistics do not match split {split_id!r}")
+    result: dict[str, float] = {}
+    for target, rmse_metric_id, r2_metric_id in (
+        ("cd", "field_integrated_cd_rmse", "cd_r2"),
+        ("cl", "field_integrated_cl_rmse", "cl_r2"),
+        ("c_pitch", "field_integrated_cmpitch_rmse", "c_pitch_r2"),
+    ):
+        statistics = split["targets"][target]
+        count = int(statistics["case_count"])
+        truth_sst = float(statistics["truth_sst"])
+        squared_error_sum = count * float(metrics[rmse_metric_id]) ** 2
+        result[r2_metric_id] = 1.0 - squared_error_sum / truth_sst
+    return result
+
+
 def velocity_contract(specification: dict[str, Any]) -> tuple[list[str], dict[str, list[float]]]:
     panel = next(panel for panel in specification["profile_panels"] if panel["id"] == "velocity_profiles")
     station_ids = list(panel["station_ids"])
@@ -379,11 +472,19 @@ def build_case(
     velocity_coordinates: dict[str, list[float]],
     cp_scale: float,
     velocity_scale: float,
-) -> tuple[dict[str, Any], list[float], list[tuple[str, float]]]:
+) -> tuple[
+    dict[str, Any],
+    list[float],
+    list[tuple[str, float]],
+    list[tuple[float, float, float]],
+    list[tuple[float, float, float]],
+]:
     run = case_number(case_id)
     series: list[dict[str, Any]] = []
     cp_losses: list[float] = []
     velocity_losses: list[tuple[str, float]] = []
+    cp_r2_statistics: list[tuple[float, float, float]] = []
+    velocity_r2_statistics: list[tuple[float, float, float]] = []
 
     for station_id in pressure_station_ids:
         coordinate = pressure_coordinates(station_id, run)
@@ -394,6 +495,9 @@ def build_case(
         prediction = [round(value + cp_scale * error, 7) for value, error in zip(truth, raw_error)]
         rounded_errors = [predicted - expected for predicted, expected in zip(prediction, truth)]
         cp_losses.append(trapezoidal_rmse(coordinate, rounded_errors))
+        cp_r2_statistics.append(
+            trapezoidal_r2_statistics(coordinate, truth, prediction)
+        )
         series.append(
             {
                 "panel_id": "pressure_profiles",
@@ -416,6 +520,9 @@ def build_case(
         ]
         rounded_errors = [predicted - expected for predicted, expected in zip(prediction, truth)]
         velocity_losses.append((station_id, trapezoidal_rmse(coordinate, rounded_errors)))
+        velocity_r2_statistics.append(
+            trapezoidal_r2_statistics(coordinate, truth, prediction)
+        )
         series.append(
             {
                 "panel_id": "velocity_profiles",
@@ -426,7 +533,13 @@ def build_case(
             }
         )
 
-    return {"case_id": case_id, "series": series}, cp_losses, velocity_losses
+    return (
+        {"case_id": case_id, "series": series},
+        cp_losses,
+        velocity_losses,
+        cp_r2_statistics,
+        velocity_r2_statistics,
+    )
 
 
 def build_ground_truth_case(
@@ -569,6 +682,7 @@ def regenerate_submission(
     split_id: str,
     specification: dict[str, Any],
     diagnostics: dict[str, Any],
+    force_reference: dict[str, Any],
 ) -> dict[str, float]:
     directory = SUBMISSIONS_ROOT / submission_id
     submission_path = directory / "submission.json"
@@ -628,10 +742,18 @@ def regenerate_submission(
     all_cp_case_means: list[float] = []
     all_velocity_case_means: list[float] = []
     experimental_case_means: list[float] = []
+    all_cp_r2_statistics: list[tuple[float, float, float]] = []
+    all_velocity_r2_statistics: list[tuple[float, float, float]] = []
     for chunk_number, chunk_case_ids in enumerate(chunks(case_ids, CASES_PER_CHUNK)):
         cases: list[dict[str, Any]] = []
         for case_id in chunk_case_ids:
-            case, cp_losses, velocity_losses = build_case(
+            (
+                case,
+                cp_losses,
+                velocity_losses,
+                cp_r2_statistics,
+                velocity_r2_statistics,
+            ) = build_case(
                 case_id,
                 submission_id,
                 pressure_station_ids,
@@ -651,6 +773,8 @@ def regenerate_submission(
             experimental_case_means.append(
                 sum(experimental_losses) / len(experimental_losses)
             )
+            all_cp_r2_statistics.extend(cp_r2_statistics)
+            all_velocity_r2_statistics.extend(velocity_r2_statistics)
 
         chunk_path = profiles_directory / f"chunk-{chunk_number:03d}.json"
         write_json(chunk_path, {"schema_version": "1.0", "cases": cases}, compact=True)
@@ -669,8 +793,35 @@ def regenerate_submission(
         sum(experimental_case_means) / len(experimental_case_means), 12
     )
     metrics["cp_cut_rmse"] = round(sum(all_cp_case_means) / len(all_cp_case_means), 12)
-    for score_id in ("overall_score", "field_score", "force_score", "diagnostic_score"):
-        metrics[score_id] = 0.0
+    metrics["velocity_profile_r2"] = round(
+        r2_from_block_statistics(all_velocity_r2_statistics), 12
+    )
+    metrics["cp_cut_r2"] = round(r2_from_block_statistics(all_cp_r2_statistics), 12)
+    metrics.update(
+        {
+            metric_id: round(value, 12)
+            for metric_id, value in force_r2_metrics(
+                metrics,
+                split_id,
+                sha256_file(split_path),
+                force_reference,
+            ).items()
+        }
+    )
+    metrics.update(
+        {
+            metric_id: round(value, 12)
+            for metric_id, value in composite_component_group_scores(
+                metrics,
+                specification["overall_score_composite"],
+                specification["component_score_groups"],
+            ).items()
+        }
+    )
+    metrics["overall_score"] = round(
+        composite_overall_score(metrics, specification["overall_score_composite"]),
+        12,
+    )
 
     index_path = profiles_directory / "index.json"
     index = {
@@ -722,6 +873,9 @@ def regenerate_submission(
     submission["note"] = PROTOTYPE_NOTE
     write_json(submission_path, submission)
     return {
+        "overall_score": metrics["overall_score"],
+        "force_score": metrics["force_score"],
+        "diagnostic_score": metrics["diagnostic_score"],
         "cp_cut_rmse": metrics["cp_cut_rmse"],
         "velocity_profile_uinf_rmse": metrics["velocity_profile_uinf_rmse"],
         "velocity_profile_experimental_subset_uinf_rmse": metrics[
@@ -773,6 +927,7 @@ def main() -> None:
     validate_fixture_inventory()
     specification = load_json(DATASET_ROOT / "submission-spec.json")
     diagnostics = load_json(DATASET_ROOT / specification["profile_definition"]["file"])
+    force_reference = load_json(FORCE_R2_REFERENCE_PATH)
     if args.ground_truth_only and args.ground_truth_root is None:
         raise ValueError("--ground-truth-only requires --ground-truth-root")
     if not args.ground_truth_only:
@@ -783,12 +938,14 @@ def main() -> None:
                 SUBMISSION_SPLITS[submission_id],
                 specification,
                 diagnostics,
+                force_reference,
             )
             print(
                 f"Regenerated {submission_id}: "
                 f"Cp={metrics['cp_cut_rmse']:.5f}, "
                 f"U={metrics['velocity_profile_uinf_rmse']:.5f}, "
-                f"U-exp={metrics['velocity_profile_experimental_subset_uinf_rmse']:.5f}"
+                f"U-exp={metrics['velocity_profile_experimental_subset_uinf_rmse']:.5f}, "
+                f"score={metrics['overall_score']:.2f}"
             )
     if args.ground_truth_root is not None:
         ground_truth_root = args.ground_truth_root.expanduser().resolve()

@@ -5,6 +5,11 @@ import math
 import unittest
 from pathlib import Path
 
+from reference.scores import (
+    composite_component_group_scores,
+    composite_overall_score,
+)
+
 from scripts.generate_drivaerml_leaderboard_fixtures import (
     CASES_PER_CHUNK,
     DATASET_ROOT,
@@ -112,10 +117,37 @@ class DrivAerMLLeaderboardFixtureTests(unittest.TestCase):
                     metrics["velocity_profile_experimental_subset_uinf_rmse"], 0.0
                 )
                 self.assertLess(metrics["velocity_profile_uinf_rmse"], 0.355)
-                self.assertEqual(metrics["overall_score"], 0.0)
-                self.assertEqual(metrics["field_score"], 0.0)
-                self.assertEqual(metrics["force_score"], 0.0)
-                self.assertEqual(metrics["diagnostic_score"], 0.0)
+                for metric_id in (
+                    "cd_r2",
+                    "cl_r2",
+                    "c_pitch_r2",
+                    "velocity_profile_r2",
+                    "cp_cut_r2",
+                ):
+                    self.assertTrue(math.isfinite(metrics[metric_id]))
+                expected_groups = composite_component_group_scores(
+                    metrics,
+                    self.specification["overall_score_composite"],
+                    self.specification["component_score_groups"],
+                )
+                for metric_id, expected in expected_groups.items():
+                    self.assertTrue(
+                        math.isclose(
+                            metrics[metric_id], expected, rel_tol=0.0, abs_tol=1.0e-10
+                        )
+                    )
+                self.assertTrue(
+                    math.isclose(
+                        metrics["overall_score"],
+                        composite_overall_score(
+                            metrics, self.specification["overall_score_composite"]
+                        ),
+                        rel_tol=0.0,
+                        abs_tol=1.0e-10,
+                    )
+                )
+                self.assertGreaterEqual(metrics["overall_score"], 0.0)
+                self.assertLessEqual(metrics["overall_score"], 100.0)
 
                 expected_cp_from_pressure_units = (
                     2.0
@@ -151,7 +183,7 @@ class DrivAerMLLeaderboardFixtureTests(unittest.TestCase):
             submission_id,
             self.velocity_coordinates,
         )
-        expected_case, _, _ = build_case(
+        expected_case, *_ = build_case(
             case_ids[0],
             submission_id,
             self.pressure_station_ids,

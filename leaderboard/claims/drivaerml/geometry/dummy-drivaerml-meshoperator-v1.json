@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-89a1295c9604/drivaerml/geometry/dummy-drivaerml-meshoperator-v1",
+  "claim_id": "prototype-dev-2026-07-15-d0e3aec8f20f/drivaerml/geometry/dummy-drivaerml-meshoperator-v1",
   "release": {
-    "id": "prototype-dev-2026-07-15-89a1295c9604",
+    "id": "prototype-dev-2026-07-15-d0e3aec8f20f",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-21T18:28:15Z",
+    "published_at": "2026-08-21T19:41:46Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -20,9 +20,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 0.0,
-    "ranked_value": 0.0,
-    "display_value": "0.0",
+    "value": 90.086954615212,
+    "ranked_value": 90.1,
+    "display_value": "90.1",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -44,16 +44,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "89a1295c96040bca370ce2ded0c69f30335b689b37eb5d2dcfbc9aa302dd1b66",
+      "feed_sha256": "d0e3aec8f20f8d55cfac470b1d94e599d5c9d4cd45f173cd8c997f784e1c1d5b",
       "row_index": 24
     },
     "source_submission": {
       "path": "submissions/drivaerml/dummy-drivaerml-meshoperator-v1/submission.json",
-      "sha256": "9a4d32d2241f2a7ccada2ebb638ddff1d964d784b86d92dcbcad1dfc63b509df"
+      "sha256": "cd4b62a5086a323fc1ee2880277b740c054c5cfdf8071532def2ba39d84fdc5e"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaerml/dummy-drivaerml-meshoperator-v1/evaluation-evidence.json",
-      "sha256": "cee6836d26d31e82c175db9eea98cac1be544626c1e5bfeee34658186a1b6fd1"
+      "sha256": "ad51ff2d3e92de1bab968ff1a92339d9fd6ce6e6d1ab5ef625a7a0f1ff6ef57a"
     },
     "profile_index": {
       "path": "submissions/drivaerml/dummy-drivaerml-meshoperator-v1/profiles/index.json",

@@ -196,7 +196,7 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertIn("explicit_normalization", all_case_evidence["normalization_status"])
 
         metrics = {item["id"]: item for item in self.specification["metrics"]}
-        self.assertEqual(len(metrics), 31)
+        self.assertEqual(len(metrics), 36)
         self.assertTrue(REMOVED_PHYSICAL_VOLUME_METRIC_IDS.isdisjoint(metrics))
         self.assertEqual(metrics["surface_pressure_rel_l2"]["weighting"], "surface_face_area")
         self.assertEqual(
@@ -221,20 +221,26 @@ class DrivAerMLContractTests(unittest.TestCase):
             force_truth["per_case_mirror"],
             "<case_id>/force_mom_constref_<run_number>.csv",
         )
+        statistics = force_truth["prototype_r2_truth_statistics"]
+        statistics_path = DATASET_ROOT / statistics["file"]
+        self.assertEqual(statistics["sha256"], sha256_file(statistics_path))
+        self.assertEqual(
+            load_json(statistics_path)["source"]["sha256"], force_truth["sha256"]
+        )
         force = support["force_integration"]
         self.assertEqual(force["reference_area_m2"], 2.17)
         self.assertEqual(force["reference_length_m"], 2.78618)
         self.assertEqual(force["centre_of_rotation_m"], [1.40009, 0.0, -0.3176])
         self.assertEqual(
             force["ranked_reduction"],
-            "separate_equal_case_RMSE_for_Cd_Cl_and_CmPitch",
+            "separate_equal_case_R2_for_Cd_Cl_and_CmPitch_with_RMSE_reported_as_diagnostics",
         )
         self.assertEqual(force["dependent_axle_loads"]["composite_weight"], 0.0)
 
-    def test_composite_is_the_unclipped_nine_component_proposal(self) -> None:
+    def test_composite_uses_fixed_field_caps_and_bounded_r2(self) -> None:
         composite = self.specification["overall_score_composite"]
-        self.assertEqual(composite["status"], "pending_reference_baselines")
-        self.assertTrue(composite["allow_negative_scores"])
+        self.assertEqual(composite["status"], "active")
+        self.assertEqual(composite["score_range"], [0.0, 100.0])
         self.assertEqual(len(composite["components"]), 9)
         self.assertTrue(
             math.isclose(
@@ -244,14 +250,55 @@ class DrivAerMLContractTests(unittest.TestCase):
                 abs_tol=1e-12,
             )
         )
-        self.assertTrue(
-            all(item["transform"] == "physics_null_skill" for item in composite["components"])
+        self.assertEqual(
+            [item["transform"] for item in composite["components"]],
+            ["bounded_error"] * 4 + ["bounded_quality"] * 5,
         )
-        self.assertTrue(all("cap" not in item for item in composite["components"]))
+        self.assertEqual(
+            [item["cap"] for item in composite["components"][:4]],
+            [15.0, 20.0, 12.0, 15.0],
+        )
+        self.assertTrue(
+            all("cap" not in item for item in composite["components"][4:])
+        )
         self.assertTrue(all("baseline_error" not in item for item in composite["components"]))
         self.assertEqual(
             [item["weight"] for item in composite["components"]],
             [0.15, 0.10, 0.15, 0.10, 0.15, 0.05, 0.05, 0.15, 0.10],
+        )
+
+        proposal_binding = self.specification["scoring_support"]["source_release"][
+            "proposal_contract"
+        ]
+        proposal_path = DATASET_ROOT / proposal_binding["file"]
+        self.assertEqual(proposal_binding["sha256"], sha256_file(proposal_path))
+        proposal = load_json(proposal_path)
+        proposal_composite = proposal["deferred_contracts"]["overall_composite"]
+        self.assertNotIn("physics_null_predictions", proposal_composite)
+        self.assertEqual(
+            [
+                proposal_composite["component_transforms"][metric]["cap_percent"]
+                for metric in (
+                    "native_surface_pressure_field",
+                    "native_surface_wall_shear_field",
+                    "native_volume_velocity_field",
+                    "native_volume_pressure_field",
+                )
+            ],
+            [15.0, 20.0, 12.0, 15.0],
+        )
+        self.assertTrue(
+            all(
+                proposal_composite["component_transforms"][metric]["kind"]
+                == "bounded_R2"
+                for metric in (
+                    "field_integrated_Cd",
+                    "field_integrated_Cl",
+                    "field_integrated_CmPitch",
+                    "autocfd_velocity_profiles",
+                    "fluidsbench_cp_cuts",
+                )
+            )
         )
 
     def test_v9_diagnostic_profile_contract_is_fully_pinned(self) -> None:
@@ -263,10 +310,11 @@ class DrivAerMLContractTests(unittest.TestCase):
         pressure = self.profile["pressure_cuts"]
         self.assertEqual(pressure["definition_authority"], "FluidsBench")
         self.assertEqual(pressure["cut_count"], 4)
-        self.assertEqual(pressure["ranked_metric_id"], "cp_cut_rmse")
+        self.assertEqual(pressure["ranked_metric_id"], "cp_cut_r2")
+        self.assertEqual(pressure["report_only_metric_id"], "cp_cut_rmse")
         self.assertEqual(
             pressure["reduction"],
-            "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse",
+            "equal_case_equal_cut_global_R2_with_normalized_native_intersection_segment_length_support_per_cut",
         )
         self.assertEqual(
             [station["id"] for station in pressure["stations"]],
@@ -279,6 +327,10 @@ class DrivAerMLContractTests(unittest.TestCase):
         )
         velocity = self.profile["velocity_profiles"]
         self.assertEqual(velocity["definition_authority"], "AutoCFD5")
+        self.assertEqual(velocity["ranked_metric_id"], "velocity_profile_r2")
+        self.assertEqual(
+            velocity["report_only_metric_id"], "velocity_profile_uinf_rmse"
+        )
         self.assertEqual(velocity["line_count"], 16)
         self.assertEqual(velocity["sample_count_per_case"], 3756)
         self.assertEqual(
@@ -380,7 +432,7 @@ class DrivAerMLContractTests(unittest.TestCase):
             [4, 16],
         )
         expected_metrics = {item["id"] for item in self.specification["metrics"]}
-        self.assertEqual(len(expected_metrics), 31)
+        self.assertEqual(len(expected_metrics), 36)
         self.assertTrue(
             REMOVED_PHYSICAL_VOLUME_METRIC_IDS.isdisjoint(expected_metrics)
         )
@@ -392,7 +444,7 @@ class DrivAerMLContractTests(unittest.TestCase):
         )
         self.assertEqual(
             diagnostic_group["component_metric_ids"],
-            ["velocity_profile_uinf_rmse", "cp_cut_rmse"],
+            ["velocity_profile_r2", "cp_cut_r2"],
         )
         manifest_metric_ids = {
             definition["id"] for definition in manifest["metric_definitions"]
@@ -413,7 +465,8 @@ class DrivAerMLContractTests(unittest.TestCase):
                 self.assertEqual(submission["dataset_version"], self.specification["dataset_version"])
                 self.assertEqual(set(submission["metric_values"]), expected_metrics)
                 self.assertEqual(submission["approval"]["status"], "prototype")
-                self.assertEqual(submission["metric_values"]["overall_score"], 0.0)
+                self.assertGreater(submission["metric_values"]["overall_score"], 0.0)
+                self.assertLessEqual(submission["metric_values"]["overall_score"], 100.0)
 
     def test_leaderboard_catalog_and_fixture_population_are_drivaer_specific(self) -> None:
         manifest = load_json(ROOT / "leaderboard" / "manifest.json")

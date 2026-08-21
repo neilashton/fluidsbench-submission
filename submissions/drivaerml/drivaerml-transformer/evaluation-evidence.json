@@ -4,14 +4,14 @@
   "dataset_id": "drivaerml",
   "split_id": "rear_separation",
   "reference_version": "drivaerml-evaluator-v3-candidate",
-  "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+  "code_revision": "drivaerml-bounded-r2-prototype-v2",
   "generated_at": "2026-08-21T00:00:00Z",
   "status": "prototype_dummy_data",
   "metric_values": {
-    "overall_score": 0.0,
-    "field_score": 0.0,
-    "force_score": 0.0,
-    "diagnostic_score": 0.0,
+    "overall_score": 76.89877224332,
+    "field_score": 59.155,
+    "force_score": 98.60667922328,
+    "diagnostic_score": 90.67840975,
     "surface_pressure_rel_l2": 4.35,
     "surface_pressure_equal_entity_rel_l2": 4.437,
     "surface_wall_shear_rel_l2": 8.26,
@@ -38,9 +38,14 @@
     "field_integrated_lift_closure_max_abs": 1e-07,
     "velocity_profile_uinf_rmse": 0.07638721486,
     "velocity_profile_experimental_subset_uinf_rmse": 0.078324066444,
-    "cp_cut_rmse": 0.049908938999
+    "cp_cut_rmse": 0.049908938999,
+    "velocity_profile_r2": 0.860773232962,
+    "cp_cut_r2": 0.975800394307,
+    "cd_r2": 0.989791734452,
+    "cl_r2": 0.979847232192,
+    "c_pitch_r2": 0.981111525616
   },
   "profile_index_sha256": "d63bb5d2b70a386fed7d39414493bf4b0a3406e45ca165672495a7efd4c46394",
-  "notes": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+  "notes": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
   "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py"
 }

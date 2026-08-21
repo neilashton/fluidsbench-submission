@@ -34,10 +34,11 @@ official leaderboard results.
   centreline, sidewall at `z=0.15 m`, and front-left wheelhouse at
   `y=-0.6 m`. Their extraction and scoring support are distinct from the
   excluded discrete probes and remain an activation task.
-- The nine component weights and unclipped physics-null skill transform are
-  executable in the reference score code: velocity profiles retain weight
-  0.15 and the distinct continuous Cp-cut component retains weight 0.10.
-  Pending scores cannot silently fall back to the old bounded caps.
+- The nine component weights and bounded transforms are executable in the
+  reference score code. The four field metrics use fixed 15%, 20%, 12%, and
+  15% caps; the three force and two profile metrics use bounded R2. Velocity
+  profiles retain weight 0.15 and the distinct continuous Cp-cut component
+  retains weight 0.10, preserving the 50%/25%/25% group balance.
 - The intended participant payload follows the repository-wide policy. The
   participant runs the frozen evaluator locally and submits per-case force
   coefficients and metrics plus complete JSON series for all 16 velocity
@@ -197,27 +198,27 @@ official leaderboard results.
    Freeze their plane-intersection tolerance, curve segmentation,
    anatomical-component inclusion rules, coordinate and orientation,
    branch/degeneracy handling, deterministic realization of the fixed
-   equal-case/equal-cut native-segment-length-weighted RMSE, and all-case truth
-   hashes. Prove tolerance stability and chunk invariance; no resampled Cp grid
+   equal-case/equal-cut global R2 with normalized native-segment-length support,
+   its report-only RMSE, and all-case truth hashes. Prove tolerance stability
+   and chunk invariance; no resampled Cp grid
    or separate cut-resolution study is part of this definition. This gate
    concerns continuous cuts only;
    the 209 discrete probes, their atlas, and their 875 invalid mappings are
    inactive research evidence and are not part of the gate.
-6. After the evaluator is frozen, evaluate the physics-null predictions for every
-   split and component and publish the nine finite positive `B_j` denominators.
-   Then run the nearest-training-design control, genuine three-real-model
-   sensitivity study, and paired 10,000-replicate bootstrap specified by the
-   proposal. Genuine outputs from three distinct trained model checkpoints are
-   not currently available and remain an explicit owner input; they need not be
-   published as native-field submission artifacts. No sensitivity result is
-   claimed. The null denominators and bootstrap are also blocked until the
-   evaluator is frozen.
+6. After the evaluator is frozen, run the nearest-training-design control,
+   genuine three-real-model sensitivity study, and paired 10,000-replicate
+   bootstrap against the fixed field caps and bounded-R2 definition. Genuine
+   outputs from three distinct trained model checkpoints are not currently
+   available and remain an explicit owner input; they need not be published as
+   native-field submission artifacts. No sensitivity result is claimed, and
+   the bootstrap remains blocked until the evaluator is frozen.
 7. Freeze an immutable scoring-support release and profile-ground-truth release,
    add the publication-validation receipt, bind the participant-generated
    force, velocity-profile, and continuous-Cp-cut JSON to the frozen evaluator
-   identity, update the candidate evaluator and dataset versions to immutable
-   release IDs, and change the composite status to `active` with its nine
-   baseline errors. Include the frozen four-cut Cp support, but keep the
+   identity, and update the candidate evaluator and dataset versions to
+   immutable release IDs. Retain the already active bounded composite without
+   introducing split-dependent baseline errors. Include the frozen four-cut Cp
+   support, but keep the
    209-probe artifacts outside that release. Optional native-field artifacts and
    maintainer recomputation records remain outside the activation requirements.
 8. Run at least one end-to-end schema-v3 dry-run submission from an independent

@@ -1475,20 +1475,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "b1412b90368adac2bddf1434f4c1bb6fe092b1c879dabc22b623b6e61ab93581"
+      "evidence_sha256": "8560bf08411642043232ef9fcf1db2b56fbef600d9b9b4797dd812294006a9c9"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
-      "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "overall_score": 78.863144384867,
+      "field_score": 62.138333333333,
+      "force_score": 99.73019455494,
+      "diagnostic_score": 91.44571631786,
       "surface_pressure_rel_l2": 3.82,
       "surface_pressure_equal_entity_rel_l2": 3.82,
       "surface_wall_shear_rel_l2": 7.29,
@@ -1515,7 +1515,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.0739214185,
       "velocity_profile_experimental_subset_uinf_rmse": 0.076212960848,
-      "cp_cut_rmse": 0.042979346518
+      "cp_cut_rmse": 0.042979346518,
+      "velocity_profile_r2": 0.869741294707,
+      "cp_cut_r2": 0.981530965886,
+      "cd_r2": 0.998398762631,
+      "cl_r2": 0.995791683785,
+      "c_pitch_r2": 0.995521756069
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -1524,13 +1529,13 @@
       "case_set_id": "standard",
       "index_sha256": "b0d069aa1cbd1da54e9752fd4780be1ff035f991576a5d3d1583e91ac6641d97"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 8.75,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 78.863144384867,
+      "ranked_value": 78.9,
+      "display_value": "78.9",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
@@ -1538,8 +1543,8 @@
       "method": "competition",
       "rank": 1,
       "ranked_result_count": 2,
-      "tied": true,
-      "tie_count": 2
+      "tied": false,
+      "tie_count": 1
     },
     "claim_eligibility": {
       "academic_citation": false,
@@ -1575,20 +1580,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "97743b75ebe4bfd289a209f8e0fa9e19796799d1ac05b07512a8be137e6c26b2"
+      "evidence_sha256": "55dd8ea68abafe5187af169dbd135eab206a35f807a0011eb9a93946a55e5499"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
-      "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "overall_score": 21.30832524282,
+      "field_score": 3.94,
+      "force_score": 46.21138704804,
+      "diagnostic_score": 31.14191392324,
       "surface_pressure_rel_l2": 13.03,
       "surface_pressure_equal_entity_rel_l2": 13.2906,
       "surface_wall_shear_rel_l2": 21.71,
@@ -1615,7 +1620,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.224253406383,
       "velocity_profile_experimental_subset_uinf_rmse": 0.231450263799,
-      "cp_cut_rmse": 0.149457039941
+      "cp_cut_rmse": 0.149457039941,
+      "velocity_profile_r2": -0.19004720167,
+      "cp_cut_r2": 0.778547848081,
+      "cd_r2": 0.447028242052,
+      "cl_r2": 0.500753522171,
+      "c_pitch_r2": 0.468731104075
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -1624,22 +1634,22 @@
       "case_set_id": "standard",
       "index_sha256": "83164ab7b48d30d96ac8d707c41d7a6dd01787d09c488e3003cbcd27c1539564"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 15.6,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 21.30832524282,
+      "ranked_value": 21.3,
+      "display_value": "21.3",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
       "rounding": "decimal_half_up",
       "method": "competition",
-      "rank": 1,
+      "rank": 2,
       "ranked_result_count": 2,
-      "tied": true,
-      "tie_count": 2
+      "tied": false,
+      "tie_count": 1
     },
     "claim_eligibility": {
       "academic_citation": false,
@@ -1675,20 +1685,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "8aa7e6c94d11b5893421a1ec65ff878434cbf7c6ac6f79a0b17262b82c046668"
+      "evidence_sha256": "834114c1329ea5e6252ee8fe8711a6b041cd0beb6e229f4da0abf5c6026442c6"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
+      "overall_score": 32.930980814185,
       "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "force_score": 79.09579229298,
+      "diagnostic_score": 52.62813096376,
       "surface_pressure_rel_l2": 16.13,
       "surface_pressure_equal_entity_rel_l2": 16.7752,
       "surface_wall_shear_rel_l2": 27.85,
@@ -1715,7 +1725,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.154191840262,
       "velocity_profile_experimental_subset_uinf_rmse": 0.157835802544,
-      "cp_cut_rmse": 0.188558988052
+      "cp_cut_rmse": 0.188558988052,
+      "velocity_profile_r2": 0.443363234936,
+      "cp_cut_r2": 0.65065842169,
+      "cd_r2": 0.79129427648,
+      "cl_r2": 0.79696488117,
+      "c_pitch_r2": 0.783941904039
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -1724,13 +1739,13 @@
       "case_set_id": "standard",
       "index_sha256": "82d6077fb814956cfc64c3c2bfef75b9fb66e48a7ba1c74b81dbfd908345875a"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 14.11,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 32.930980814185,
+      "ranked_value": 32.9,
+      "display_value": "32.9",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
@@ -1775,20 +1790,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "00936ce71100a7d3c98baaf9d5bc9b472c6401c0893c17570ca9b3c02e88f02b"
+      "evidence_sha256": "7d3868de98eddc2b3deb0e821572b4d2e76129b6de299dbb4e3a4d970e744ce6"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
+      "overall_score": 24.485151011625,
       "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "force_score": 61.2834971913,
+      "diagnostic_score": 36.6571068552,
       "surface_pressure_rel_l2": 20.51,
       "surface_pressure_equal_entity_rel_l2": 19.4845,
       "surface_wall_shear_rel_l2": 36.44,
@@ -1815,7 +1830,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.176567663306,
       "velocity_profile_experimental_subset_uinf_rmse": 0.181567120057,
-      "cp_cut_rmse": 0.218976463175
+      "cp_cut_rmse": 0.218976463175,
+      "velocity_profile_r2": 0.261906096922,
+      "cp_cut_r2": 0.523568525997,
+      "cd_r2": 0.615302721994,
+      "cl_r2": 0.621279206725,
+      "c_pitch_r2": 0.596987486858
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -1824,13 +1844,13 @@
       "case_set_id": "standard",
       "index_sha256": "5285809e81fcd01de2a91c26e7ef455acb0bdedb2f34ed0a9ca5ad5e9ec89c4e"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 6.3,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 24.485151011625,
+      "ranked_value": 24.5,
+      "display_value": "24.5",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
@@ -1875,20 +1895,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "0c40646ab267b696b7101b39c929ee03f6bfbbb788f9da578b5f36790633fed4"
+      "evidence_sha256": "3c85be079f56bb898732784de255b3bd2c74e3e6179b91dbc987885f261ebd4d"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
-      "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "overall_score": 74.816192216772,
+      "field_score": 56.053333333333,
+      "force_score": 97.61522728594,
+      "diagnostic_score": 89.54287491448,
       "surface_pressure_rel_l2": 4.48,
       "surface_pressure_equal_entity_rel_l2": 4.3456,
       "surface_wall_shear_rel_l2": 8.92,
@@ -1915,7 +1935,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.080402120584,
       "velocity_profile_experimental_subset_uinf_rmse": 0.082686235636,
-      "cp_cut_rmse": 0.048873467726
+      "cp_cut_rmse": 0.048873467726,
+      "velocity_profile_r2": 0.841551658884,
+      "cp_cut_r2": 0.976244384536,
+      "cd_r2": 0.976733125002,
+      "cl_r2": 0.976823376401,
+      "c_pitch_r2": 0.97373861289
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -1924,13 +1949,13 @@
       "case_set_id": "high_drag",
       "index_sha256": "f0c4e9210fe10199096e2e7f9bb92f6a13723d6413644f4d530e81d7a439a091"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 6.1,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 74.816192216772,
+      "ranked_value": 74.8,
+      "display_value": "74.8",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
@@ -1975,20 +2000,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "de6db8f87924df22af86dc1efc96d72f12b2861a49f95dceff78a12e15e1d401"
+      "evidence_sha256": "81935b6a453332a2ca933026878079fec9abb86771d888c715b50a5a9438daf3"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
+      "overall_score": 10.08909522753,
       "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "force_score": 21.25184340182,
+      "diagnostic_score": 19.1045375083,
       "surface_pressure_rel_l2": 23.63,
       "surface_pressure_equal_entity_rel_l2": 22.9211,
       "surface_wall_shear_rel_l2": 41.85,
@@ -2015,7 +2040,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.193092741849,
       "velocity_profile_experimental_subset_uinf_rmse": 0.198463004749,
-      "cp_cut_rmse": 0.257708127139
+      "cp_cut_rmse": 0.257708127139,
+      "velocity_profile_r2": 0.090968121181,
+      "cp_cut_r2": 0.341161255936,
+      "cd_r2": -0.021009315325,
+      "cl_r2": 0.553843327594,
+      "c_pitch_r2": 0.508748842497
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -2024,13 +2054,13 @@
       "case_set_id": "low_drag",
       "index_sha256": "440c2ac1d8d3cf91ab168b6b21cd90d7692cd1eabd58fd276b646b846827b2a2"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 3.6,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 10.08909522753,
+      "ranked_value": 10.1,
+      "display_value": "10.1",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
@@ -2075,20 +2105,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "2c5b0a3cd1a45836efea7c5f72d98da838675ef6be0a70d5436b8ffcb9b9ccd6"
+      "evidence_sha256": "3fa1273fd56f0d431f03774946501028a5c03e7a7efcb52ac4bcbd7380dce30d"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
-      "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "overall_score": 76.89877224332,
+      "field_score": 59.155,
+      "force_score": 98.60667922328,
+      "diagnostic_score": 90.67840975,
       "surface_pressure_rel_l2": 4.35,
       "surface_pressure_equal_entity_rel_l2": 4.437,
       "surface_wall_shear_rel_l2": 8.26,
@@ -2115,7 +2145,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.07638721486,
       "velocity_profile_experimental_subset_uinf_rmse": 0.078324066444,
-      "cp_cut_rmse": 0.049908938999
+      "cp_cut_rmse": 0.049908938999,
+      "velocity_profile_r2": 0.860773232962,
+      "cp_cut_r2": 0.975800394307,
+      "cd_r2": 0.989791734452,
+      "cl_r2": 0.979847232192,
+      "c_pitch_r2": 0.981111525616
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -2124,13 +2159,13 @@
       "case_set_id": "rear_separation",
       "index_sha256": "d63bb5d2b70a386fed7d39414493bf4b0a3406e45ca165672495a7efd4c46394"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 5.49,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 76.89877224332,
+      "ranked_value": 76.9,
+      "display_value": "76.9",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
@@ -2175,20 +2210,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "9b96eebe2cf3e703889945e03b4518816406392a6ada7e615ca524a5c006c643"
+      "evidence_sha256": "d2057d81c5211be5440235abe7d65b1570f4e3326c342be19a8ed9ba465f41ae"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
-      "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "overall_score": 73.93262975656,
+      "field_score": 54.16,
+      "force_score": 98.02468150386,
+      "diagnostic_score": 89.38583752238,
       "surface_pressure_rel_l2": 4.81,
       "surface_pressure_equal_entity_rel_l2": 5.0024,
       "surface_wall_shear_rel_l2": 8.95,
@@ -2215,7 +2250,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.08158412554,
       "velocity_profile_experimental_subset_uinf_rmse": 0.083434571684,
-      "cp_cut_rmse": 0.056251368401
+      "cp_cut_rmse": 0.056251368401,
+      "velocity_profile_r2": 0.843937536357,
+      "cp_cut_r2": 0.968739633524,
+      "cd_r2": 0.983086930285,
+      "cl_r2": 0.976732837523,
+      "c_pitch_r2": 0.975240446815
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -2224,22 +2264,22 @@
       "case_set_id": "standard",
       "index_sha256": "a1b8d2b7c69881b8887983de61c1378667730ebcf4c091c1b40adc533681ad13"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 5.49,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 73.93262975656,
+      "ranked_value": 73.9,
+      "display_value": "73.9",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
       "rounding": "decimal_half_up",
       "method": "competition",
-      "rank": 1,
+      "rank": 2,
       "ranked_result_count": 2,
-      "tied": true,
-      "tie_count": 2
+      "tied": false,
+      "tie_count": 1
     },
     "claim_eligibility": {
       "academic_citation": false,
@@ -2275,20 +2315,20 @@
     "submitted_at": "2025-06-13",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "bcd2c9e60a8d7ea0682d46139bd5339acf789a2942f3b0212886bfeeea9ff626"
+      "evidence_sha256": "3c8456aba1fa447a195e5f7d52a2dd627df1d50903c877773557f9d75074baf4"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
-      "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "overall_score": 62.058240732323,
+      "field_score": 34.996666666667,
+      "force_score": 95.35616080902,
+      "diagnostic_score": 82.88346878694,
       "surface_pressure_rel_l2": 7.85,
       "surface_pressure_equal_entity_rel_l2": 7.536,
       "surface_wall_shear_rel_l2": 12.7,
@@ -2315,7 +2355,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.100057034171,
       "velocity_profile_experimental_subset_uinf_rmse": 0.10330132136,
-      "cp_cut_rmse": 0.08467856932
+      "cp_cut_rmse": 0.08467856932,
+      "velocity_profile_r2": 0.762214433507,
+      "cp_cut_r2": 0.928765069413,
+      "cd_r2": 0.957255857999,
+      "cl_r2": 0.949635461749,
+      "c_pitch_r2": 0.946405004705
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -2324,13 +2369,13 @@
       "case_set_id": "standard",
       "index_sha256": "67e586a937f7367b8a7dc99437684add99d8c31768e0e127e90696b52a7d3091"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 10.98,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 62.058240732323,
+      "ranked_value": 62.1,
+      "display_value": "62.1",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
@@ -2338,8 +2383,8 @@
       "method": "competition",
       "rank": 1,
       "ranked_result_count": 2,
-      "tied": true,
-      "tie_count": 2
+      "tied": false,
+      "tie_count": 1
     },
     "claim_eligibility": {
       "academic_citation": false,
@@ -2383,20 +2428,20 @@
     "submitted_at": "2026-07-08",
     "evaluation": {
       "reference_version": "drivaerml-evaluator-v3-candidate",
-      "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+      "code_revision": "drivaerml-bounded-r2-prototype-v2",
       "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "cee6836d26d31e82c175db9eea98cac1be544626c1e5bfeee34658186a1b6fd1"
+      "evidence_sha256": "ad51ff2d3e92de1bab968ff1a92339d9fd6ce6e6d1ab5ef625a7a0f1ff6ef57a"
     },
     "approval": {
       "status": "prototype",
       "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
     },
     "metric_values": {
-      "overall_score": 0.0,
-      "field_score": 0.0,
-      "force_score": 0.0,
-      "diagnostic_score": 0.0,
+      "overall_score": 90.086954615212,
+      "field_score": 81.333333333333,
+      "force_score": 99.68197035132,
+      "diagnostic_score": 97.99918144286,
       "surface_pressure_rel_l2": 3.08,
       "surface_pressure_equal_entity_rel_l2": 2.9876,
       "surface_wall_shear_rel_l2": 4.18,
@@ -2423,7 +2468,12 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.0322675232,
       "velocity_profile_experimental_subset_uinf_rmse": 0.033229356962,
-      "cp_cut_rmse": 0.033608526227
+      "cp_cut_rmse": 0.033608526227,
+      "velocity_profile_r2": 0.974222440165,
+      "cp_cut_r2": 0.988645875824,
+      "cd_r2": 0.996914396494,
+      "cl_r2": 0.997754109436,
+      "c_pitch_r2": 0.995601218648
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
@@ -2432,13 +2482,13 @@
       "case_set_id": "geometry",
       "index_sha256": "ac6dcfcac755da5fe4eb51ce7ccbbd9da8fde85a24d346ee485e14b599854f4e"
     },
-    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+    "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 18.7,
     "ranking": {
       "metric_id": "overall_score",
-      "value": 0.0,
-      "ranked_value": 0.0,
-      "display_value": "0.0",
+      "value": 90.086954615212,
+      "ranked_value": 90.1,
+      "display_value": "90.1",
       "unit": "",
       "direction": "higher",
       "decimal_places": 1,
