@@ -78,6 +78,10 @@ class DrivAerMLContractTests(unittest.TestCase):
             support["activation_gates"]["volume_field_weighting"],
             "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
         )
+        self.assertEqual(
+            support["activation_gates"]["surface_area_weights"],
+            "complete_public_all_484_pinned_order_count_hash_and_value_audit_passed",
+        )
         self.assertFalse(
             any(
                 "volume" in decision and "weight" in decision
@@ -169,6 +173,12 @@ class DrivAerMLContractTests(unittest.TestCase):
             surface["physical_weight_manifest"]["sha256"],
             "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e",
         )
+        area_release = surface["physical_weight_release"]
+        self.assertEqual(area_release["status"], "public_complete")
+        self.assertEqual(area_release["case_count"], 484)
+        self.assertEqual(area_release["payload_file_count"], 484)
+        self.assertEqual(area_release["native_polygon_count"], 4_159_517_910)
+        self.assertEqual(area_release["payload_bytes"], 16_638_133_592)
         volume = supports["volume_native_cells"]
         self.assertEqual(volume["association"], "CellData")
         self.assertEqual(volume["arrays"], ["UMeanTrim", "pMeanTrim"])

@@ -79,7 +79,13 @@
         ],
         "public_weight_manifest": {
           "path_in_dataset": "surface_cell_areas/manifest.json",
-          "sha256": "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
+          "sha256": "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e",
+          "status": "public_complete",
+          "dataset_revision": "7a5c0948ce27be709b1116a3a190f806e7a8f79f",
+          "complete_case_count": 484,
+          "payload_file_count": 484,
+          "total_native_polygons": 4159517910,
+          "total_payload_bytes": 16638133592
         },
         "required_arrays": [
           {
@@ -895,7 +901,7 @@
   },
   "activation_blockers": [
     "all_case_vtk_array_association_tuple_component_finiteness_units_gauge_sign_and_provenance_inventory",
-    "immutable_surface_stable_id_coordinate_and_area_weight_support_plus_volume_equal_cell_identity_with_pinned_tolerances_and_qa",
+    "immutable_surface_stable_id_and_coordinate_support_plus_volume_equal_cell_identity_with_pinned_tolerances_and_qa",
     "owner_approved_exclusion_policy_and_mask_if_needed",
     "golden_scalar_and_vector_reductions_with_chunk_invariance_tests",
     "all_484_case_explicit_force_formula_replay_and_chunk_invariance_against_constant_reference_truth",

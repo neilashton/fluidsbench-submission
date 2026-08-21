@@ -25,11 +25,29 @@ The source dataset is `neashton/drivaerml` at immutable revision
 file from [`proposal/native-source-pin.json`](proposal/native-source-pin.json),
 not from directory discovery or a presumed run-number range.
 
+The same release now includes the authoritative native surface weights. For
+each `run_N`, load `run_N/boundary_cell_area_N.npy` together with
+`surface_cell_areas/cases/run_N.json`. The complete 484-case manifest is
+`surface_cell_areas/manifest.json` (SHA-256
+`1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e`).
+For example, to fetch only the run-1 support:
+
+```bash
+hf download neashton/drivaerml \
+  surface_cell_areas/manifest.json \
+  surface_cell_areas/cases/run_1.json \
+  run_1/boundary_cell_area_1.npy \
+  --repo-type dataset \
+  --revision 7a5c0948ce27be709b1116a3a190f806e7a8f79f
+```
+
 For each evaluated case:
 
 1. Read `run_N/boundary_N.vtp` without remeshing or triangulating it. Predict
    scalar `pMeanTrim` and three-component `wallShearStressMeanTrim` as native
-   polygon `CellData` in zero-based raw VTK cell order.
+   polygon `CellData` in zero-based raw VTK cell order. Load the corresponding
+   public area payload in that identical order; do not calculate a replacement
+   from a processed surface.
 2. Byte-concatenate the pinned `.00.part`, `.01.part`, and optional `.02.part`
    files in that exact order, with no delimiter or transformation. Ten cases
    have three parts. A seekable segmented reader may present the same logical
