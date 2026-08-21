@@ -24,6 +24,10 @@ does not accept it as a new submission.
 [`profile-chunk.example.json`](profile-chunk.example.json) demonstrates the compact case/series representation with Cp, Cf, and
 velocity profiles. It is intentionally abridged and is not a complete benchmark split.
 
+[`airfrans-profile-extraction/`](airfrans-profile-extraction/) provides the hash-bound official-data reference fixture and the
+pinned extractor for AirfRANS extrados velocity profiles. It also demonstrates evaluating native point-ordered NumPy or PyTorch
+velocity predictions without serializing a predicted VTU mesh.
+
 For a historical v1 prototype directory that passes the dummy-data validator, inspect the AhmedML
 [`transolver`](../submissions/ahmedml/transolver/) submission. It includes all prototype case IDs, chunk checksums, required
 pressure stations, optional velocity stations, metadata, and scalar metrics. Do not use it as a real-submission template.
