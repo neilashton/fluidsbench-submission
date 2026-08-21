@@ -60,7 +60,7 @@ class DatasetFixture:
             for index, case_id in enumerate(self.case_ids, start=1)
         }
 
-        self.profile_path = root / "autocfd5-profiles-v8.json"
+        self.profile_path = root / "drivaerml-diagnostics-v9.json"
         stations = [
             {
                 "id": f"line_{index:02d}",
@@ -74,20 +74,27 @@ class DatasetFixture:
         ]
         profile = {
             "schema_version": "1.0",
-            "id": "synthetic-drivaerml-candidate-profile",
+            "id": "drivaerml-diagnostics-v9-candidate",
             "dataset_id": "drivaerml",
             "status": "candidate_support_pending_all_case_validation",
             "source": {},
-            "pressure_profiles": {
-                "ranked_metric_id": "cp_probe_rmse",
-                "unique_probe_count": 2,
-                "panel_count": 1,
-                "panel_membership_row_count": 2,
-                "duplicate_rule": "none",
-                "quantity": "Cp",
-                "stations": [{"id": "panel_1", "sample_count": 2}],
+            "pressure_cuts": {
+                "definition_authority": "FluidsBench",
+                "ranked_metric_id": "cp_cut_rmse",
+                "quantity": "Cp=2*pMeanTrim/(38.889^2)",
+                "cut_count": 4,
+                "association": "native_surface_VTP_CellData",
+                "extraction_status": "pending_immutable_owner_cut_support",
+                "reduction": "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse",
+                "stations": [
+                    {"id": "upperbody_centerline"},
+                    {"id": "underbody_centerline"},
+                    {"id": "sidewall_z_0_15"},
+                    {"id": "front_left_wheelhouse_y_neg_0_6"},
+                ],
             },
             "velocity_profiles": {
+                "definition_authority": "AutoCFD5",
                 "ranked_metric_id": "velocity_profile_uinf_rmse",
                 "quantity": "magnitude(UMeanTrim)/Uinf",
                 "scoring_grid": {},
@@ -299,7 +306,7 @@ class DatasetFixture:
             repository_revision=REVISION,
             native_source_pin_sha256=self.pin_sha,
             force_truth_sha256=self.force_sha,
-            autocfd5_profile_sha256=self.profile_sha,
+            diagnostic_profile_sha256=self.profile_sha,
             surface_area_manifest_sha256=SURFACE_MANIFEST_SHA,
         )
 
@@ -491,10 +498,8 @@ class DatasetFixture:
     def _diagnostic(self, case_id: str, case_index: int) -> dict[str, object]:
         core = self._core(case_id, case_index)
         predictions = core["prediction_inputs"]
-        boundary = self.boundary_sha[case_id]
         parts = self.part_sha[case_id]
         velocity_value = 0.1 if case_index == 1 else 0.3
-        cp_value = 0.2 if case_index == 1 else 0.4
         claims = {
             "scoring_contract_active": False,
             "official_submission": False,
@@ -504,61 +509,85 @@ class DatasetFixture:
             "independent_participant_dry_run": False,
             "all_case_chunk_partition_invariance": False,
         }
+
         def prediction_audit(support: str, field: str):
             item = predictions[support]
-            return {"support_id": support, "field_name": field, "total_row_count": 2, "manifest_file": "manifest.json", "manifest_sha256": item["manifest_sha256"], "chunk_count": 1, "chunk_sha256": item["chunk_sha256"], "complete_gap_free_duplicate_free_coverage": True, "selected_unique_raw_cell_id_count": 2, "selected_values_sha256": "6" * 64}
+            return {
+                "support_id": support,
+                "field_name": field,
+                "total_row_count": 2,
+                "manifest_file": "manifest.json",
+                "manifest_sha256": item["manifest_sha256"],
+                "chunk_count": 1,
+                "chunk_sha256": item["chunk_sha256"],
+                "complete_gap_free_duplicate_free_coverage": True,
+                "selected_unique_raw_cell_id_count": 2,
+                "selected_values_sha256": "6" * 64,
+            }
+
         def native_audit(support: str, field: str, files, hashes):
-            return {"support_id": support, "field_name": field, "total_row_count": 2, "selected_unique_raw_cell_id_count": 2, "selected_values_sha256": "7" * 64, "source_files": files, "source_sha256": hashes, "source_payload_sha256": "8" * 64, "complete_source_identity_verified": True}
+            return {
+                "support_id": support,
+                "field_name": field,
+                "total_row_count": 2,
+                "selected_unique_raw_cell_id_count": 2,
+                "selected_values_sha256": "7" * 64,
+                "source_files": files,
+                "source_sha256": hashes,
+                "source_payload_sha256": "8" * 64,
+                "complete_source_identity_verified": True,
+            }
+
         return {
-            "schema": "drivaerml-autocfd5-case-diagnostics-candidate-v1",
-            "schema_version": 1,
+            "schema": "drivaerml-case-diagnostics-candidate-v3",
+            "schema_version": 3,
             "status": "candidate_diagnostics_not_active_or_official_submission",
             "case_id": case_id,
             "official_submission": False,
             "mapping_inputs": {
-                "cp_support": {"file": f"{case_id}-cp.json", "sha256": "9" * 64, "profile_sha256": self.profile_sha, "row_count": 2, "invalid_rows": []},
-                "velocity_10mm": {"artifact_file": "velocity-cell-mapping-10mm.json", "artifact_sha256": "a" * 64, "receipt_file": f"{case_id}-velocity.json", "receipt_sha256": "b" * 64, "profile_sha256": self.profile_sha, "row_count": 32, "invalid_rows": []},
+                "velocity_10mm": {
+                    "artifact_file": "velocity-cell-mapping-10mm.json",
+                    "artifact_sha256": "a" * 64,
+                    "receipt_file": f"{case_id}-velocity.json",
+                    "receipt_sha256": "b" * 64,
+                    "profile_sha256": self.profile_sha,
+                    "row_count": 32,
+                    "invalid_rows": [],
+                }
             },
             "sparse_gather_evidence": {
-                "surface_prediction": prediction_audit("surface_native_cells", "pMeanTrim"),
-                "volume_prediction": prediction_audit("volume_native_cells", "UMeanTrim"),
-                "surface_native_truth": native_audit("surface_native_cells", "pMeanTrim", [f"boundary_{case_index}.vtp"], [boundary]),
-                "volume_native_truth": native_audit("volume_native_cells", "UMeanTrim", [f"volume_{case_index}.vtu.00.part", f"volume_{case_index}.vtu.01.part"], list(parts)),
+                "volume_prediction": prediction_audit(
+                    "volume_native_cells", "UMeanTrim"
+                ),
+                "volume_native_truth": native_audit(
+                    "volume_native_cells",
+                    "UMeanTrim",
+                    [
+                        f"volume_{case_index}.vtu.00.part",
+                        f"volume_{case_index}.vtu.01.part",
+                    ],
+                    list(parts),
+                ),
                 "only_unique_mapped_raw_ids_retained": True,
-                "prediction_manifests_fully_consumed": True,
+                "prediction_manifest_fully_consumed": True,
             },
             "metrics": {
-                "cp_probe_rmse": {
-                    "metric_id": "cp_probe_rmse",
-                    "ranked_value_available": True,
-                    "required_unique_probe_count": 2,
-                    "unavailable_reasons": [],
-                    "case_rmse": cp_value,
-                    "aggregation": "per_case_unique_probe_rmse_then_macro_average",
-                    "weighting": "209_unique_probes_equal",
-                    "equation": "Cp=2*pMeanTrim/Uinf^2",
-                    "Uinf_m_per_s": 38.889,
-                    "valid_truth_row_equation_replay_count": 2,
-                    "truth_equation_verified": True,
-                },
-                "cp_panel_macro_rmse": {
-                    "metric_id": "cp_panel_macro_rmse",
-                    "value_available": True,
-                    "required_panel_count": 1,
-                    "required_panel_membership_row_count": 2,
-                    "required_unique_probe_count": 2,
-                    "unavailable_reasons": [],
-                    "panel_rmse": [
+                "cp_cut_rmse": {
+                    "metric_id": "cp_cut_rmse",
+                    "ranked_value_available": False,
+                    "required_cut_count": 4,
+                    "unavailable_reasons": [
                         {
-                            "panel_id": "panel_1",
-                            "membership_row_count": 2,
-                            "rmse": cp_value,
+                            "diagnostic": "cp_cut_rmse",
+                            "stage": "benchmark_support",
+                            "reason": "immutable_native_cp_cut_extraction_support_not_published",
                         }
                     ],
-                    "case_equal_panel_mean_rmse": cp_value,
-                    "aggregation": "per_case_panel_rmse_then_equal_panel_and_case_average",
-                    "weighting": "panel_membership_rows_equal",
-                    "truth_equation_verified": True,
+                    "case_equal_cut_mean_rmse": None,
+                    "aggregation": "equal_case_equal_cut_macro_average",
+                    "weighting": "native_cut_intersection_segment_length",
+                    "support_status": "pending_immutable_owner_release",
+                    "discrete_cp_probe_fallback_used": False,
                 },
                 "velocity_profile_uinf_rmse": {
                     "metric_id": "velocity_profile_uinf_rmse",
@@ -566,7 +595,15 @@ class DatasetFixture:
                     "required_line_count": 16,
                     "required_sample_count": 32,
                     "unavailable_reasons": [],
-                    "line_rmse": [{"profile_id": f"line_{line:02d}", "sample_count": 2, "arc_length_m": 1.0, "rmse": velocity_value} for line in range(1, 17)],
+                    "line_rmse": [
+                        {
+                            "profile_id": f"line_{line:02d}",
+                            "sample_count": 2,
+                            "arc_length_m": 1.0,
+                            "rmse": velocity_value,
+                        }
+                        for line in range(1, 17)
+                    ],
                     "case_equal_line_mean_rmse": velocity_value,
                     "quantity": "magnitude(UMeanTrim)/Uinf",
                     "Uinf_m_per_s": 38.889,
@@ -578,9 +615,19 @@ class DatasetFixture:
                     "metric_id": "velocity_profile_experimental_subset_uinf_rmse",
                     "value_available": True,
                     "required_line_count": 11,
-                    "required_profile_ids": [f"line_{line:02d}" for line in range(1, 12)],
+                    "required_profile_ids": [
+                        f"line_{line:02d}" for line in range(1, 12)
+                    ],
                     "unavailable_reasons": [],
-                    "line_rmse": [{"profile_id": f"line_{line:02d}", "sample_count": 2, "arc_length_m": 1.0, "rmse": velocity_value} for line in range(1, 12)],
+                    "line_rmse": [
+                        {
+                            "profile_id": f"line_{line:02d}",
+                            "sample_count": 2,
+                            "arc_length_m": 1.0,
+                            "rmse": velocity_value,
+                        }
+                        for line in range(1, 12)
+                    ],
                     "case_equal_experimental_line_mean_rmse": velocity_value,
                     "quantity": "magnitude(UMeanTrim)/Uinf",
                     "Uinf_m_per_s": 38.889,
@@ -591,6 +638,7 @@ class DatasetFixture:
             },
             "claims": claims,
         }
+
 
     def evaluate(self):
         return evaluate_candidate_dataset(
@@ -695,19 +743,13 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
             self.assertAlmostEqual(
                 values["velocity_profile_experimental_subset_uinf_rmse"], 0.2
             )
-            self.assertAlmostEqual(values["cp_probe_rmse"], 0.3)
-            self.assertAlmostEqual(values["cp_panel_macro_rmse"], 0.3)
+            self.assertIsNone(values["cp_cut_rmse"])
             expected_operations = {
                 "velocity_profile_uinf_rmse": "equal_case_equal_line_macro_average",
                 "velocity_profile_experimental_subset_uinf_rmse": (
                     "equal_case_equal_experimental_line_macro_average"
                 ),
-                "cp_probe_rmse": (
-                    "per_case_unique_probe_rmse_then_macro_average"
-                ),
-                "cp_panel_macro_rmse": (
-                    "per_case_panel_rmse_then_equal_panel_and_case_average"
-                ),
+                "cp_cut_rmse": "equal_case_equal_cut_macro_average",
             }
             for metric_id, operation in expected_operations.items():
                 self.assertEqual(
@@ -727,16 +769,13 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
                 11,
             )
             self.assertEqual(
-                evidence["metric_reductions"]["cp_probe_rmse"]["support_scope"][
-                    "unique_probe_count_per_case"
-                ],
-                2,
-            )
-            self.assertEqual(
-                evidence["metric_reductions"]["cp_panel_macro_rmse"][
-                    "support_scope"
-                ]["panel_membership_row_count_per_case"],
-                2,
+                evidence["metric_reductions"]["cp_cut_rmse"]["support_scope"],
+                {
+                    "cut_count_per_case": 4,
+                    "within_cut_weighting": "native_cut_intersection_segment_length",
+                    "between_cut_weighting": "cuts_equal",
+                    "support_status": "pending_immutable_owner_release",
+                },
             )
             self.assertFalse(evidence["eligibility"]["official_submission"])
             self.assertFalse(evidence["eligibility"]["composite_score_available"])
@@ -744,9 +783,9 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
             self.assertEqual(evidence["status"], CANDIDATE_DATASET_STATUS)
             self.assertEqual(
                 evidence["schema"],
-                "drivaerml-candidate-dataset-evaluation-v2",
+                "drivaerml-candidate-dataset-evaluation-v3",
             )
-            self.assertEqual(evidence["schema_version"], 2)
+            self.assertEqual(evidence["schema_version"], 3)
             self.assertFalse(
                 any("physical" in metric_id for metric_id in ALL_FIELD_METRIC_IDS)
             )
@@ -985,7 +1024,7 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
                 _write_json(path, diagnostic)
                 with self.assertRaisesRegex(
                     DrivAerDatasetScorerError,
-                    "canonical metric contract mismatch",
+                    "velocity contract mismatch",
                 ):
                     fixture.evaluate()
 
@@ -1117,67 +1156,72 @@ class DrivAerDatasetScorerTests(unittest.TestCase):
             fixture = DatasetFixture(Path(directory))
             path = fixture.diagnostic_dir / "run_2.json"
             document = json.loads(path.read_text())
-            invalid_row = {
-                "autocfd_probe_id": 2,
-                "mapping_valid": False,
-                "mapping_reason": "synthetic_mapping_failure",
-                "raw_vtk_polygon_id": None,
-                "truth_valid": False,
-                "truth_reason": "mapping_invalid",
-                "support_valid": False,
-            }
-            document["mapping_inputs"]["cp_support"]["invalid_rows"] = [invalid_row]
-            for metric_id, value_key in (
-                ("cp_probe_rmse", "case_rmse"),
-                ("cp_panel_macro_rmse", "case_equal_panel_mean_rmse"),
+            document["mapping_inputs"]["velocity_10mm"]["invalid_rows"] = [
+                {
+                    "profile_id": "line_01",
+                    "sample_index": 0,
+                    "valid": False,
+                    "reason": "synthetic_mapping_failure",
+                    "raw_vtk_cell_id": None,
+                    "candidate_count": 0,
+                }
+            ]
+            for metric_id, availability_key, value_key in (
+                (
+                    "velocity_profile_uinf_rmse",
+                    "ranked_value_available",
+                    "case_equal_line_mean_rmse",
+                ),
+                (
+                    "velocity_profile_experimental_subset_uinf_rmse",
+                    "value_available",
+                    "case_equal_experimental_line_mean_rmse",
+                ),
             ):
                 metric = document["metrics"][metric_id]
-                metric[
-                    "ranked_value_available"
-                    if metric_id == "cp_probe_rmse"
-                    else "value_available"
-                ] = False
+                metric[availability_key] = False
                 metric[value_key] = None
+                metric["line_rmse"] = []
                 metric["unavailable_reasons"] = [
                     {
                         "diagnostic": metric_id,
                         "stage": "mapping",
                         "reason": "synthetic_mapping_failure",
-                        "autocfd_probe_id": 2,
-                        "profile_id": None,
-                        "sample_index": None,
+                        "profile_id": "line_01",
+                        "sample_index": 0,
                     }
                 ]
-                metric["truth_equation_verified"] = False
-            document["metrics"]["cp_probe_rmse"][
-                "valid_truth_row_equation_replay_count"
-            ] = 1
-            document["metrics"]["cp_panel_macro_rmse"]["panel_rmse"] = []
             _write_json(path, document)
 
             evaluation = fixture.evaluate()
             evidence = evaluation.to_json()
-            self.assertIsNone(evidence["metric_values"]["cp_probe_rmse"])
-            self.assertIsNone(evidence["metric_values"]["cp_panel_macro_rmse"])
-            availability = evidence["diagnostic_availability"]["cp_probe_rmse"]
-            self.assertFalse(availability["available"])
-            self.assertEqual(availability["available_case_count"], 1)
-            self.assertEqual(availability["omitted_case_count"], 0)
+            self.assertIsNone(evidence["metric_values"]["cp_cut_rmse"])
+            cp_availability = evidence["diagnostic_availability"]["cp_cut_rmse"]
+            self.assertFalse(cp_availability["available"])
+            self.assertEqual(cp_availability["available_case_count"], 0)
+            velocity_availability = evidence["diagnostic_availability"][
+                "velocity_profile_uinf_rmse"
+            ]
+            self.assertFalse(velocity_availability["available"])
+            self.assertEqual(velocity_availability["available_case_count"], 1)
+            self.assertEqual(velocity_availability["omitted_case_count"], 0)
             adapter = schema_v3_case_metrics_candidate_adapter(
                 evaluation,
                 submission_id="synthetic-incomplete-support",
                 candidate_support_release_id="drivaerml-candidate-support-v1",
                 candidate_support_manifest_sha256="e" * 64,
             )
-            self.assertNotIn("cp_probe_rmse", adapter["metric_values"])
-            self.assertNotIn("cp_panel_macro_rmse", adapter["metric_values"])
-            for case in adapter["cases"]:
-                self.assertNotIn(
-                    "cp_probe_rmse", case["nonspatial_metric_values"]
-                )
-                self.assertNotIn(
-                    "cp_panel_macro_rmse", case["nonspatial_metric_values"]
-                )
+            for metric_id in (
+                "cp_cut_rmse",
+                "velocity_profile_uinf_rmse",
+                "velocity_profile_experimental_subset_uinf_rmse",
+            ):
+                self.assertNotIn(metric_id, adapter["metric_values"])
+                for case in adapter["cases"]:
+                    self.assertNotIn(
+                        metric_id, case["nonspatial_metric_values"]
+                    )
+
 
 
 if __name__ == "__main__":

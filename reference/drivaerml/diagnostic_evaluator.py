@@ -42,11 +42,13 @@ from .autocfd5 import (
     VELOCITY_SAMPLE_COUNT,
     AutoCFD5Definition,
     AutoCFD5Error,
+    AutoCFD5SubmissionDefinition,
     CpProbeMappingEvidence,
     VelocityCellAssignmentEvidence,
     cp_from_kinematic_pressure,
     cp_probe_rmse,
     load_autocfd5_definition,
+    load_autocfd5_submission_definition,
     validate_cp_mapping_evidence,
     velocity_magnitude_ratio,
     velocity_profile_rmse,
@@ -91,7 +93,7 @@ from .velocity_assignments import (
 )
 
 
-CANDIDATE_SCHEMA = "drivaerml-autocfd5-case-diagnostics-candidate-v1"
+CANDIDATE_SCHEMA = "drivaerml-case-diagnostics-candidate-v3"
 CANDIDATE_STATUS = "candidate_diagnostics_not_active_or_official_submission"
 CP_SUPPORT_SCHEMA = "drivaerml-autocfd5-cp-case-support-candidate-v1"
 CP_SUPPORT_STATUS = "candidate_not_owner_approved_not_active_scoring_support"
@@ -101,8 +103,11 @@ VELOCITY_RECEIPT_SCHEMA = (
 VELOCITY_ARTIFACT_SCHEMA = "drivaerml-velocity-cell-mapping-candidate-v1"
 VELOCITY_STATUS = "candidate_complete_geometry_mapping_not_activation_evidence"
 VELOCITY_ARTIFACT_BASENAME = "velocity-cell-mapping-10mm.json"
-EXPECTED_PROFILE_SHA256 = (
+EXPECTED_RESEARCH_PROFILE_SHA256 = (
     "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184"
+)
+EXPECTED_SUBMISSION_PROFILE_SHA256 = (
+    "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1"
 )
 EXPECTED_REPOSITORY_ID = "neashton/drivaerml"
 EXPECTED_REPOSITORY_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
@@ -686,10 +691,10 @@ def _assert_no_absolute_paths(value: object, label: str = "evidence") -> None:
             )
 
 
-def _load_profile(path: Path | str) -> tuple[AutoCFD5Definition, dict[str, object]]:
+def _load_research_profile(path: Path | str) -> tuple[AutoCFD5Definition, dict[str, object]]:
     source = Path(path).expanduser().resolve()
     digest = _sha256_file(source)
-    if digest != EXPECTED_PROFILE_SHA256:
+    if digest != EXPECTED_RESEARCH_PROFILE_SHA256:
         raise DrivAerDiagnosticEvaluatorError(
             "AutoCFD5 profile is not the exact v8 candidate identity"
         )
@@ -708,6 +713,35 @@ def _load_profile(path: Path | str) -> tuple[AutoCFD5Definition, dict[str, objec
         "source_registry_sha256": dict(definition.source_sha256),
         "line_count": VELOCITY_LINE_COUNT,
         "fixed_10mm_sample_count": VELOCITY_SAMPLE_COUNT,
+    }
+
+
+def _load_submission_profile(
+    path: Path | str,
+) -> tuple[AutoCFD5SubmissionDefinition, dict[str, object]]:
+    source = Path(path).expanduser().resolve()
+    digest = _sha256_file(source)
+    if digest != EXPECTED_SUBMISSION_PROFILE_SHA256:
+        raise DrivAerDiagnosticEvaluatorError(
+            "diagnostic registry is not the exact Cp-probe-free v9 submission identity"
+        )
+    try:
+        definition = load_autocfd5_submission_definition(source)
+    except AutoCFD5Error as error:
+        raise DrivAerDiagnosticEvaluatorError(
+            "v9 submission diagnostic registry validation failed"
+        ) from error
+    if _sha256_file(source) != digest:
+        raise DrivAerDiagnosticEvaluatorError(
+            "submission diagnostic registry changed during validation"
+        )
+    return definition, {
+        "profile_sha256": digest,
+        "source_registry_sha256": dict(definition.source_sha256),
+        "line_count": VELOCITY_LINE_COUNT,
+        "fixed_10mm_sample_count": VELOCITY_SAMPLE_COUNT,
+        "continuous_cp_cut_count": len(definition.pressure_cut_ids),
+        "discrete_cp_probe_count": 0,
     }
 
 
@@ -1544,7 +1578,7 @@ def _load_cp_support(
         path=path.expanduser().resolve(),
         sha256=digest,
         case_id=case_id,
-        profile_sha256=EXPECTED_PROFILE_SHA256,
+        profile_sha256=EXPECTED_RESEARCH_PROFILE_SHA256,
         boundary_file=boundary_file,
         boundary_sha256=boundary_sha256,
         boundary_polygon_count=polygon_count,
@@ -1560,10 +1594,10 @@ def load_strict_cp_case_support(
     case_id: str,
     expected_boundary_sha256: str | None = None,
 ) -> StrictCpCaseSupport:
-    """Load and validate one complete 209-row candidate Cp support receipt."""
+    """Load historical v8 discrete-tap evidence for inactive research only."""
 
     canonical_case = _case_id(case_id)
-    definition, profile_binding = _load_profile(autocfd5_profile)
+    definition, profile_binding = _load_research_profile(autocfd5_profile)
     return _load_cp_support(
         Path(path),
         definition=definition,
@@ -2037,7 +2071,7 @@ def _load_velocity_mapping(
     artifact_path: Path,
     receipt_path: Path,
     *,
-    definition: AutoCFD5Definition,
+    definition: AutoCFD5Definition | AutoCFD5SubmissionDefinition,
     profile_binding: Mapping[str, object],
     case_id: str,
     expected_source_pin_sha256: str | None,
@@ -2369,7 +2403,7 @@ def _load_velocity_mapping(
     )
     if experimental_profile_ids != _EXPERIMENTAL_VELOCITY_PROFILE_IDS:
         raise DrivAerDiagnosticEvaluatorError(
-            "velocity experimental subset differs from the exact v8 eleven-line set"
+            "velocity experimental subset differs from the exact eleven-line set"
         )
     return StrictVelocityMapping(
         artifact_path=artifact_path.expanduser().resolve(),
@@ -2377,7 +2411,9 @@ def _load_velocity_mapping(
         receipt_path=receipt_path.expanduser().resolve(),
         receipt_sha256=receipt_sha256,
         case_id=case_id,
-        profile_sha256=EXPECTED_PROFILE_SHA256,
+        profile_sha256=_sha256(
+            profile_binding["profile_sha256"], "velocity profile SHA-256"
+        ),
         source_pin_sha256=pin_sha256,
         source_part_sha256=source_part_sha256,
         native_cell_count=cell_count,
@@ -2398,7 +2434,31 @@ def load_strict_velocity_10mm_mapping(
     """Load strict receipt-bound assignments for all 3,756 10 mm samples."""
 
     canonical_case = _case_id(case_id)
-    definition, profile_binding = _load_profile(autocfd5_profile)
+    definition, profile_binding = _load_submission_profile(autocfd5_profile)
+    return _load_velocity_mapping(
+        Path(artifact_path),
+        Path(receipt_path),
+        definition=definition,
+        profile_binding=profile_binding,
+        case_id=canonical_case,
+        expected_source_pin_sha256=expected_source_pin_sha256,
+        expected_source_part_sha256=expected_source_part_sha256,
+    )
+
+
+def _load_research_velocity_10mm_mapping(
+    artifact_path: Path | str,
+    receipt_path: Path | str,
+    *,
+    autocfd5_profile: Path | str,
+    case_id: str,
+    expected_source_pin_sha256: str | None = None,
+    expected_source_part_sha256: Sequence[str] | None = None,
+) -> StrictVelocityMapping:
+    """Load historical v8 velocity evidence for inactive probe research only."""
+
+    canonical_case = _case_id(case_id)
+    definition, profile_binding = _load_research_profile(autocfd5_profile)
     return _load_velocity_mapping(
         Path(artifact_path),
         Path(receipt_path),
@@ -2791,7 +2851,7 @@ def _velocity_unavailable_reasons(
     ]
 
 
-def evaluate_loaded_case_diagnostics(
+def _evaluate_loaded_probe_research_diagnostics(
     *,
     cp_support: StrictCpCaseSupport,
     velocity_mapping: StrictVelocityMapping,
@@ -3205,7 +3265,7 @@ def evaluate_loaded_case_diagnostics(
     return CandidateCaseDiagnostics(MappingProxyType(evidence))
 
 
-def evaluate_case_diagnostics(
+def _evaluate_probe_research_case_diagnostics(
     *,
     case_id: str,
     autocfd5_profile: Path | str,
@@ -3231,6 +3291,294 @@ def evaluate_case_diagnostics(
         case_id=case_id,
         expected_boundary_sha256=expected_boundary_sha256,
     )
+    velocity_mapping = _load_research_velocity_10mm_mapping(
+        velocity_mapping_json,
+        velocity_receipt_json,
+        autocfd5_profile=autocfd5_profile,
+        case_id=case_id,
+        expected_source_pin_sha256=expected_source_pin_sha256,
+        expected_source_part_sha256=expected_source_part_sha256,
+    )
+    return _evaluate_loaded_probe_research_diagnostics(
+        cp_support=cp_support,
+        velocity_mapping=velocity_mapping,
+        surface_prediction_manifest=surface_prediction_manifest,
+        volume_prediction_manifest=volume_prediction_manifest,
+        native_surface_pressure=native_surface_pressure,
+        native_volume_velocity=native_volume_velocity,
+        maximum_prediction_chunk_rows=maximum_prediction_chunk_rows,
+        hash_chunk_bytes=hash_chunk_bytes,
+        validation_block_rows=validation_block_rows,
+    )
+
+
+def _submission_velocity_metrics(
+    velocity_mapping: StrictVelocityMapping,
+    volume_prediction: SparsePredictionGather,
+    native_volume_velocity: SparseNativeField,
+) -> tuple[dict[str, object], dict[str, object]]:
+    """Reduce v9 velocity diagnostics without consulting legacy Cp probes."""
+
+    if velocity_mapping.experimental_profile_ids != _EXPERIMENTAL_VELOCITY_PROFILE_IDS:
+        raise DrivAerDiagnosticEvaluatorError(
+            "velocity mapping does not retain the exact experimental subset"
+        )
+    def submission_velocity_reasons(
+        *, profile_ids: frozenset[str] | None = None, diagnostic: str
+    ) -> list[dict[str, object]]:
+        legacy_rows = _velocity_unavailable_reasons(
+            velocity_mapping.rows,
+            profile_ids=profile_ids,
+            diagnostic=diagnostic,
+        )
+        return [
+            {
+                "diagnostic": row["diagnostic"],
+                "stage": row["stage"],
+                "reason": row["reason"],
+                "profile_id": row["profile_id"],
+                "sample_index": row["sample_index"],
+            }
+            for row in legacy_rows
+        ]
+
+    velocity_reasons = submission_velocity_reasons(
+        diagnostic="velocity_profile_uinf_rmse"
+    )
+    experimental_reasons = submission_velocity_reasons(
+        profile_ids=frozenset(velocity_mapping.experimental_profile_ids),
+        diagnostic="velocity_profile_experimental_subset_uinf_rmse",
+    )
+    ranked: dict[str, object] = {
+        "metric_id": "velocity_profile_uinf_rmse",
+        "ranked_value_available": not velocity_reasons,
+        "required_line_count": VELOCITY_LINE_COUNT,
+        "required_sample_count": VELOCITY_SAMPLE_COUNT,
+        "unavailable_reasons": velocity_reasons,
+        "line_rmse": [],
+        "case_equal_line_mean_rmse": None,
+        "quantity": "magnitude(UMeanTrim)/Uinf",
+        "Uinf_m_per_s": U_INF_M_PER_S,
+        "arc_rule": "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging",
+        "aggregation": "equal_case_equal_line_macro_average",
+        "weighting": "trapezoidal_arc_length_within_line",
+    }
+    experimental: dict[str, object] = {
+        "metric_id": "velocity_profile_experimental_subset_uinf_rmse",
+        "value_available": not experimental_reasons,
+        "required_line_count": len(_EXPERIMENTAL_VELOCITY_PROFILE_IDS),
+        "required_profile_ids": list(_EXPERIMENTAL_VELOCITY_PROFILE_IDS),
+        "unavailable_reasons": experimental_reasons,
+        "line_rmse": [],
+        "case_equal_experimental_line_mean_rmse": None,
+        "quantity": "magnitude(UMeanTrim)/Uinf",
+        "Uinf_m_per_s": U_INF_M_PER_S,
+        "arc_rule": "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging",
+        "aggregation": "equal_case_equal_experimental_line_macro_average",
+        "weighting": "trapezoidal_arc_length_within_line",
+    }
+    if velocity_reasons and experimental_reasons:
+        return ranked, experimental
+
+    valid_positions = [
+        position
+        for position, row in enumerate(velocity_mapping.rows)
+        if row.valid and row.raw_vtk_cell_id is not None
+    ]
+    valid_ids = np.asarray(
+        [velocity_mapping.rows[position].raw_vtk_cell_id for position in valid_positions],
+        dtype=np.int64,
+    )
+    prediction_valid_ratio = velocity_magnitude_ratio(
+        volume_prediction.values_for(valid_ids)
+    )
+    truth_valid_ratio = velocity_magnitude_ratio(
+        native_volume_velocity.values_for(valid_ids)
+    )
+    prediction_ratio = np.full(len(velocity_mapping.rows), np.nan, dtype=np.float64)
+    truth_ratio = np.full(len(velocity_mapping.rows), np.nan, dtype=np.float64)
+    prediction_ratio[valid_positions] = prediction_valid_ratio
+    truth_ratio[valid_positions] = truth_valid_ratio
+    by_line: dict[str, list[int]] = collections.defaultdict(list)
+    for position, row in enumerate(velocity_mapping.rows):
+        by_line[row.profile_id].append(position)
+
+    def line_results_for(profile_ids: Sequence[str]) -> list[dict[str, object]]:
+        results: list[dict[str, object]] = []
+        for profile_id in profile_ids:
+            positions = by_line.get(profile_id, [])
+            if len(positions) < 2 or any(
+                not velocity_mapping.rows[position].valid for position in positions
+            ):
+                raise DrivAerDiagnosticEvaluatorError(
+                    f"velocity line {profile_id!r} is unavailable during reduction"
+                )
+            indices = np.asarray(positions, dtype=np.int64)
+            distances = np.asarray(
+                [velocity_mapping.rows[position].distance_m for position in positions],
+                dtype=np.float64,
+            )
+            results.append(
+                {
+                    "profile_id": profile_id,
+                    "sample_count": len(indices),
+                    "arc_length_m": float(distances[-1] - distances[0]),
+                    "rmse": velocity_profile_rmse(
+                        distances,
+                        prediction_ratio[indices],
+                        truth_ratio[indices],
+                        np.ones(len(indices), dtype=bool),
+                    ),
+                }
+            )
+        return results
+
+    if not velocity_reasons:
+        results = line_results_for(tuple(by_line))
+        if len(results) != VELOCITY_LINE_COUNT:
+            raise DrivAerDiagnosticEvaluatorError(
+                "velocity reduction did not produce exactly sixteen lines"
+            )
+        ranked["line_rmse"] = results
+        ranked["case_equal_line_mean_rmse"] = math.fsum(
+            float(row["rmse"]) for row in results
+        ) / VELOCITY_LINE_COUNT
+    if not experimental_reasons:
+        results = line_results_for(velocity_mapping.experimental_profile_ids)
+        experimental["line_rmse"] = results
+        experimental["case_equal_experimental_line_mean_rmse"] = math.fsum(
+            float(row["rmse"]) for row in results
+        ) / len(_EXPERIMENTAL_VELOCITY_PROFILE_IDS)
+    return ranked, experimental
+
+
+def evaluate_loaded_case_diagnostics(
+    *,
+    velocity_mapping: StrictVelocityMapping,
+    volume_prediction_manifest: PredictionChunkManifest | Path | str,
+    native_volume_velocity: SparseNativeField,
+    maximum_prediction_chunk_rows: int | None = 1_000_000,
+    hash_chunk_bytes: int = DEFAULT_HASH_CHUNK_BYTES,
+    validation_block_rows: int = DEFAULT_VALIDATION_BLOCK_ROWS,
+) -> CandidateCaseDiagnostics:
+    """Evaluate the Cp-probe-free v9 diagnostics for one complete native case."""
+
+    case_id = velocity_mapping.case_id
+    velocity_ids = np.asarray(
+        [
+            row.raw_vtk_cell_id
+            for row in velocity_mapping.rows
+            if row.valid and row.raw_vtk_cell_id is not None
+        ],
+        dtype=np.int64,
+    )
+    _require_exact_native_selection(
+        native_volume_velocity,
+        case_id=case_id,
+        support_id="volume_native_cells",
+        field_name="UMeanTrim",
+        total_row_count=velocity_mapping.native_cell_count,
+        required_ids=velocity_ids,
+    )
+    if native_volume_velocity.source_sha256 != velocity_mapping.source_part_sha256:
+        raise DrivAerDiagnosticEvaluatorError(
+            "native volume truth part hashes differ from the velocity mapping"
+        )
+    volume_prediction = gather_mapped_prediction_field(
+        volume_prediction_manifest,
+        velocity_ids,
+        case_id=case_id,
+        support_id="volume_native_cells",
+        field_name="UMeanTrim",
+        expected_total_row_count=velocity_mapping.native_cell_count,
+        maximum_chunk_rows=maximum_prediction_chunk_rows,
+        hash_chunk_bytes=hash_chunk_bytes,
+        validation_block_rows=validation_block_rows,
+    )
+    velocity_metric, experimental_metric = _submission_velocity_metrics(
+        velocity_mapping, volume_prediction, native_volume_velocity
+    )
+    invalid_velocity_rows = [
+        {
+            "profile_id": row.profile_id,
+            "sample_index": row.sample_index,
+            "valid": row.valid,
+            "reason": row.reason,
+            "raw_vtk_cell_id": row.raw_vtk_cell_id,
+            "candidate_count": row.candidate_count,
+        }
+        for row in velocity_mapping.rows
+        if not row.valid
+    ]
+    cp_cut_reason = {
+        "diagnostic": "cp_cut_rmse",
+        "stage": "benchmark_support",
+        "reason": "immutable_native_cp_cut_extraction_support_not_published",
+    }
+    evidence: dict[str, object] = {
+        "schema": CANDIDATE_SCHEMA,
+        "schema_version": 3,
+        "status": CANDIDATE_STATUS,
+        "case_id": case_id,
+        "official_submission": False,
+        "mapping_inputs": {
+            "velocity_10mm": {
+                "artifact_file": _basename(
+                    velocity_mapping.artifact_path.name, "velocity artifact file"
+                ),
+                "artifact_sha256": velocity_mapping.artifact_sha256,
+                "receipt_file": _basename(
+                    velocity_mapping.receipt_path.name, "velocity receipt file"
+                ),
+                "receipt_sha256": velocity_mapping.receipt_sha256,
+                "profile_sha256": velocity_mapping.profile_sha256,
+                "row_count": len(velocity_mapping.rows),
+                "invalid_rows": invalid_velocity_rows,
+            }
+        },
+        "sparse_gather_evidence": {
+            "volume_prediction": volume_prediction.audit_record(),
+            "volume_native_truth": native_volume_velocity.audit_record(),
+            "only_unique_mapped_raw_ids_retained": True,
+            "prediction_manifest_fully_consumed": True,
+        },
+        "metrics": {
+            "cp_cut_rmse": {
+                "metric_id": "cp_cut_rmse",
+                "ranked_value_available": False,
+                "required_cut_count": 4,
+                "unavailable_reasons": [cp_cut_reason],
+                "case_equal_cut_mean_rmse": None,
+                "aggregation": "equal_case_equal_cut_macro_average",
+                "weighting": "native_cut_intersection_segment_length",
+                "support_status": "pending_immutable_owner_release",
+                "discrete_cp_probe_fallback_used": False,
+            },
+            "velocity_profile_uinf_rmse": velocity_metric,
+            "velocity_profile_experimental_subset_uinf_rmse": experimental_metric,
+        },
+        "claims": dict(OUTPUT_FALSE_CLAIMS),
+    }
+    _assert_no_absolute_paths(evidence)
+    return CandidateCaseDiagnostics(MappingProxyType(evidence))
+
+
+def evaluate_case_diagnostics(
+    *,
+    case_id: str,
+    autocfd5_profile: Path | str,
+    velocity_mapping_json: Path | str,
+    velocity_receipt_json: Path | str,
+    volume_prediction_manifest: PredictionChunkManifest | Path | str,
+    native_volume_velocity: SparseNativeField,
+    expected_source_pin_sha256: str | None = None,
+    expected_source_part_sha256: Sequence[str] | None = None,
+    maximum_prediction_chunk_rows: int | None = 1_000_000,
+    hash_chunk_bytes: int = DEFAULT_HASH_CHUNK_BYTES,
+    validation_block_rows: int = DEFAULT_VALIDATION_BLOCK_ROWS,
+) -> CandidateCaseDiagnostics:
+    """Load v9 velocity support and emit fail-closed continuous-Cp-cut evidence."""
+
     velocity_mapping = load_strict_velocity_10mm_mapping(
         velocity_mapping_json,
         velocity_receipt_json,
@@ -3240,11 +3588,8 @@ def evaluate_case_diagnostics(
         expected_source_part_sha256=expected_source_part_sha256,
     )
     return evaluate_loaded_case_diagnostics(
-        cp_support=cp_support,
         velocity_mapping=velocity_mapping,
-        surface_prediction_manifest=surface_prediction_manifest,
         volume_prediction_manifest=volume_prediction_manifest,
-        native_surface_pressure=native_surface_pressure,
         native_volume_velocity=native_volume_velocity,
         maximum_prediction_chunk_rows=maximum_prediction_chunk_rows,
         hash_chunk_bytes=hash_chunk_bytes,
@@ -3295,18 +3640,15 @@ __all__ = [
     "CANDIDATE_SCHEMA",
     "CANDIDATE_STATUS",
     "CandidateCaseDiagnostics",
-    "CpSupportRow",
     "DrivAerDiagnosticEvaluatorError",
     "SparseNativeField",
     "SparsePredictionGather",
-    "StrictCpCaseSupport",
     "StrictVelocityMapping",
     "VelocityMappingRow",
     "evaluate_case_diagnostics",
     "evaluate_loaded_case_diagnostics",
     "gather_mapped_prediction_field",
     "gather_sparse_inline_native_field",
-    "load_strict_cp_case_support",
     "load_strict_velocity_10mm_mapping",
     "sparse_native_field_from_array",
     "write_candidate_diagnostic_evidence",

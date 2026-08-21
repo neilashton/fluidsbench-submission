@@ -9,6 +9,14 @@ paths instead resolve within the pinned `neashton/drivaerml` release.
 The same file identities and non-activation status are available to tooling in
 [`manifest.json`](manifest.json).
 
+The benchmark owner decided on 2026-08-21 that the 209 discrete Cp probes are
+excluded from the current participant submission and score. Every discrete-
+probe Cp artifact indexed here is retained only as inactive research evidence.
+It is not a participant requirement, evaluator dependency, composite component,
+scoring support, or activation gate; its presence does not authorize probe
+scoring. Four continuous Cp cuts remain in scope, but they require separate
+extraction evidence and support that is not supplied by these probe artifacts.
+
 | Artifact | SHA-256 | Scope and eligibility |
 | --- | --- | --- |
 | [`force-replay-all484.json`](force-replay-all484.json) | `631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17` | Passing candidate evaluator replay for all 484 cases, including fixed-area audit and chunk invariance. Dataset-owner scientific approval remains pending; this does not activate scoring. |
@@ -18,16 +26,16 @@ The same file identities and non-activation status are available to tooling in
 | [`velocity-mapping-run1-run44-candidate-v7-pilot.json`](velocity-mapping-run1-run44-candidate-v7-pilot.json) | `91a7bb4cb7b7c6167c3577f62745021409c93cebc6b2685a57cdfe1debc06d76` | Explicit non-public candidate-v7 containing-cell geometry pilot for `run_1` and `run_44`. The compact aggregate accounts for all 134,768 requested rows at 1, 2, 5, and 10 mm, including 4,489 invalid rows, and hash-binds the complete duplicate-free external row-level mapping files. It is not an all-case tolerance replay, prediction convergence result, model-ordering result, validity mask, or scoring support. |
 | [`velocity-run1-run44-candidate-v7-pilot-provenance.json`](velocity-run1-run44-candidate-v7-pilot-provenance.json) | `be785d01618584691a60bba9faa8125376ac788dae1cfeeaf763e97fc7ff767e` | Path-free binding for the two-case velocity pilot: exact committed mapping revision and source hashes, Python/NumPy/VTK runtime, launcher and scheduler identities, external receipt and mapping identities, and a byte-identical separate-process `run_1` repeat. It makes no activation, approval, model, convergence, or participant dry-run claim. |
 | [`real-reference-driver-run1-run44-candidate-v7-pilot.json`](real-reference-driver-run1-run44-candidate-v7-pilot.json) | `da80aebb11eb18d3bb66b7a968a94e9a779a6e60f5413ef73d2fbd6485d76572` | Passing candidate-only reference-driver receipt for pinned real `run_1` and `run_44` inputs. It verifies two- and three-part native-volume transport, complete deterministic all-zero surface and volume prediction chunks, equal-native-cell volume weighting, and consistent prediction identities across the core and diagnostic evaluators. The chunks are a transport and reduction fixture, not a model, physics-null baseline, participant dry run, or scoring result. |
-| [`real-reference-driver-run1-run44-candidate-v7-pilot-provenance.json`](real-reference-driver-run1-run44-candidate-v7-pilot-provenance.json) | `24fd18d70098e5943959c8f37e2cd0ade211322e0785734d0dd035200db8fff2` | Path-free binding for the reference-driver pilot: exact committed driver revision and source hashes, runtime, launcher and completed scheduler job, execution-config hash, all-zero fixture receipts and manifests, fixed surface-area arrays, Cp supports, 10 mm velocity mappings, and external child-evidence identities. It does not make the candidate evaluator frozen or public scoring support. |
+| [`real-reference-driver-run1-run44-candidate-v7-pilot-provenance.json`](real-reference-driver-run1-run44-candidate-v7-pilot-provenance.json) | `24fd18d70098e5943959c8f37e2cd0ade211322e0785734d0dd035200db8fff2` | Path-free binding for the reference-driver pilot: exact committed driver revision and source hashes, runtime, launcher and completed scheduler job, execution-config hash, all-zero fixture receipts and manifests, fixed surface-area arrays, historical candidate discrete-probe Cp supports, 10 mm velocity mappings, and external child-evidence identities. The probe inputs record what the historical pilot consumed and are neither current Cp-cut support nor current requirements. The artifact does not make the candidate evaluator frozen or public scoring support. |
 | [`volume-weight-vtk-run_1-failure-diagnostic.json`](volume-weight-vtk-run_1-failure-diagnostic.json) | `aa2a209cafbd598930bfbe2dd1a73e8c06108188aff69c30841bfc46bfe7927e` | Superseded historical record for a rejected geometric cell-volume experiment. Geometric volume weights are not part of the equal-native-cell contract; this file has no scoring or activation role. |
 | [`volume-weight-vtk96-run_1-wedge-probe.json`](volume-weight-vtk96-run_1-wedge-probe.json) | `2970c507038bc1c3978542cc8e07c6682230db496f646a4887467645304a58a6` | Superseded historical isolated-cell experiment under VTK 9.6.0. Geometric volume weights are not part of the equal-native-cell contract; this file has no scoring or activation role. |
-| [`cp-mapping-all484-hardened.json`](cp-mapping-all484-hardened.json) | `634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81` | Complete candidate sweep over 484 cases and all 101,156 case/probe rows. It retains 100,281 valid rows and all 875 invalid rows with explicit reasons. Owner visual sign-off is false and public-scoring eligibility is false. |
-| [`cp-stl-inventory-all484-hardened.json`](cp-stl-inventory-all484-hardened.json) | `cd4e1788a633196524b11f9d5f8868df05b71b11fed7fdf86892678c9cf41676` | Complete candidate named-STL inventory for 484 cases: 364,568,214 raw facets, 23,716 named solids, and 68,902,520,476 source bytes. It is deliberately separate from the native-source pin and is not scoring support. |
-| [`cp-owner-review-atlas-all484-hardened.manifest.json`](cp-owner-review-atlas-all484-hardened.manifest.json) | `6a72536911010bdb741586018d1a13887f19756e135e8d35e6ea2da4b9fc7c4c` | Compact manifest for the external 488-page candidate review atlas. It covers all 484 cases and retains all 101,156 rows, including 875 invalid rows and 999 review-flagged rows. The external PDF is hash-bound as `e133fa14b6150c6f60590d19ba9b590072da0b758a19383976739c0f0fce654e`; neither visual sign-off nor scientific approval is claimed, and this does not activate scoring. |
+| [`cp-mapping-all484-hardened.json`](cp-mapping-all484-hardened.json) | `634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81` | Inactive research sweep over 484 cases and all 101,156 case/probe rows. It retains 100,281 valid rows and all 875 invalid rows with explicit reasons. It has no submission, scoring, or activation role. |
+| [`cp-stl-inventory-all484-hardened.json`](cp-stl-inventory-all484-hardened.json) | `cd4e1788a633196524b11f9d5f8868df05b71b11fed7fdf86892678c9cf41676` | Inactive research named-STL inventory for 484 cases: 364,568,214 raw facets, 23,716 named solids, and 68,902,520,476 source bytes. It is deliberately separate from the native-source pin and is not scoring support or an activation dependency. |
+| [`cp-owner-review-atlas-all484-hardened.manifest.json`](cp-owner-review-atlas-all484-hardened.manifest.json) | `6a72536911010bdb741586018d1a13887f19756e135e8d35e6ea2da4b9fc7c4c` | Compact manifest for the external 488-page inactive discrete-probe research atlas. It covers all 484 cases and retains all 101,156 rows, including 875 invalid rows and 999 review-flagged rows. The external PDF is hash-bound as `e133fa14b6150c6f60590d19ba9b590072da0b758a19383976739c0f0fce654e`; visual sign-off is not claimed or required for the current probe-free contract. |
 | [`volume-cell-types-run_1-pilot.json`](volume-cell-types-run_1-pilot.json) | `63f4c794807fd4d327d2e5017db585b41047c758e1ca9eeb4d22f2010817092e` | Diagnostic-only native-cell inventory for `run_1`; it is not a volume-weight definition or positivity result. The mesh contains 6,349,119 `vtkPolyhedron` cells. |
 | [`volume-cell-types-run_44-pilot.json`](volume-cell-types-run_44-pilot.json) | `4f3a1cc6bf1c4010daf4a94c2bdf56cc9fb4a684e8cb2610dce6f00bcf482f71` | Diagnostic-only native-cell inventory for `run_44`; it is not a volume-weight definition or positivity result. The mesh contains 7,509,644 `vtkPolyhedron` cells. |
-| [`cp-mapping-run1-run44-pilot.json`](cp-mapping-run1-run44-pilot.json) | `7200e6a97356b8edffa9e7eb1cd22fe31d79daf8551a7a9405273a6c5591a0ea` | Discovery-only two-case Cp pilot. The file declares itself incomplete with `public_evidence_eligible=false` and `public_scoring_support_eligible=false`. It records seven invalid mappings, omits 482 official cases, and has no owner visual sign-off. It is implementation diagnostics, not scoring support. |
-| [`cp-stl-inventory-run1-run44-pilot.json`](cp-stl-inventory-run1-run44-pilot.json) | `db2b4031bf0051a51c4709f90e11eaee8b3886b858ce96649aa381778c9c5b0a` | Discovery-only two-case named-STL inventory. The file declares itself incomplete with `public_evidence_eligible=false` and `public_scoring_support_eligible=false`. It is not the required all-case source inventory. |
+| [`cp-mapping-run1-run44-pilot.json`](cp-mapping-run1-run44-pilot.json) | `7200e6a97356b8edffa9e7eb1cd22fe31d79daf8551a7a9405273a6c5591a0ea` | Inactive discovery-only two-case Cp research pilot. The file declares itself incomplete with `public_evidence_eligible=false` and `public_scoring_support_eligible=false`. It records seven invalid mappings and omits 482 official cases. It is not scoring support or an activation dependency. |
+| [`cp-stl-inventory-run1-run44-pilot.json`](cp-stl-inventory-run1-run44-pilot.json) | `db2b4031bf0051a51c4709f90e11eaee8b3886b858ce96649aa381778c9c5b0a` | Inactive discovery-only two-case named-STL research inventory. The file declares itself incomplete with `public_evidence_eligible=false` and `public_scoring_support_eligible=false`. It has no role in the current submission or activation. |
 
 ## Current blockers
 
@@ -36,12 +44,14 @@ cell-volume generation is therefore not an activation gate. The retained VTK
 experiments above are historical provenance only and must not be interpreted as
 current scoring support.
 
-The all-case Cp candidate sweep, source inventory, truth replay, and review
-atlas are now hash-bound above. They do not resolve the 875 explicit invalid
-rows or confer owner visual sign-off. The owner must review the atlas, approve
-the disposition of every invalid or review-flagged row, and freeze an immutable
-support release before these artifacts can be used for public scoring. The
-two-case pilots remain discovery records only and must not be promoted.
+The all-case Cp research sweep, source inventory, truth replay, review atlas,
+and two-case pilots remain hash-bound for provenance. The 875 invalid rows and
+999 review flags remain visible, but resolving them and signing off the atlas
+are no longer activation blockers because the discrete probes are outside the
+submission and score. These artifacts must not be promoted into the current
+scoring-support release or treated as support for the retained continuous Cp
+cuts. Freezing and validating the distinct four-cut extraction remains an
+activation task.
 
 The two-case velocity pilot exercises the deterministic candidate-v7 geometry
 kernel. Its compact aggregate accounts for all 4,489 invalid rows, while the
@@ -72,8 +82,8 @@ unit-weight declaration was named `volume_weights`; their bound generating
 revision remains the reproducibility source. The current v2 tools accept only
 the unambiguous `volume_weighting: one_per_native_cell` schema and do not accept
 or generate geometric volume arrays.
-The Cp files were
-produced by the candidate Cp builder, strict aggregator, and
+The inactive Cp research files were produced by the candidate Cp builder,
+strict aggregator, and
 `scripts/build_drivaerml_cp_owner_review_atlas.py`; the cell-type files were
 produced by `scripts/audit_drivaerml_volume_cell_types.py`. The superseded
 physical-volume failure diagnostic records an execution of the hash-bound

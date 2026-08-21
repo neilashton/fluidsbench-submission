@@ -13,7 +13,7 @@
   "pretraining_data": [],
   "dataset": "DrivAerML",
   "dataset_id": "drivaerml",
-  "dataset_version": "drivaerml-native-v2-candidate",
+  "dataset_version": "drivaerml-native-v3-candidate",
   "split": "Super scarce",
   "split_id": "super_scarce",
   "case_set_id": "standard",
@@ -25,11 +25,11 @@
   "code_url": "",
   "submitted_at": "2025-06-13",
   "evaluation": {
-    "reference_version": "drivaerml-evaluator-v2-candidate",
+    "reference_version": "drivaerml-evaluator-v3-candidate",
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "fc6af2e9a43a89bb52b73b32e7a52c200d07b2035303397f14b4223d3ee80fec"
+    "evidence_sha256": "7c5a26b4018a860143845b410aea0a8bf7f7d7caefcb6f4b47e43b68d6101150"
   },
   "approval": {
     "status": "prototype",
@@ -66,8 +66,7 @@
     "field_integrated_lift_closure_max_abs": 1e-07,
     "velocity_profile_uinf_rmse": 0.5099019513592785,
     "velocity_profile_experimental_subset_uinf_rmse": 0.5099019513592785,
-    "cp_probe_rmse": 0.4949747468305833,
-    "cp_panel_macro_rmse": 0.4949747468305833
+    "cp_cut_rmse": 0.25
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",

@@ -13,7 +13,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Full",
     "split_id": "full",
     "case_set_id": "standard",
@@ -25,11 +25,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "0746b1e5c3db8067c1037b1b36bd980ee5993276f96362b9c996cc35dca8ed9f"
+      "evidence_sha256": "ce70db186f651549ac91b6c8cc1f05ebc5e2ba9b5ad0883019e461704c4d8af9"
     },
     "approval": {
       "status": "prototype",
@@ -66,15 +66,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.1732050807568878,
       "velocity_profile_experimental_subset_uinf_rmse": 0.1732050807568878,
-      "cp_probe_rmse": 0.17888543819998326,
-      "cp_panel_macro_rmse": 0.17888543819998326
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-ab-upt/profiles/index.json",
       "case_count": 50,
       "case_set_id": "standard",
-      "index_sha256": "c3e9dd376317e69c6f98880134f55029e94ebcc2ce6278196e8c3422f6c7acf1"
+      "index_sha256": "b5bff19b251cff28086f03bb0a67998cc48eeb8da87cf49d9b3bd6f999dfc664"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 8.75,
@@ -114,7 +113,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Medium",
     "split_id": "medium",
     "case_set_id": "standard",
@@ -126,11 +125,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "3c047ab410857bb1700d47785f48ae78cbcd50bc81a089c28285d82db5dd4979"
+      "evidence_sha256": "866ba72b8e06b4dcd78d1907d5af2d7dc9dfe77c224a5a2f0fda8f7d91e74247"
     },
     "approval": {
       "status": "prototype",
@@ -167,15 +166,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.5916079783099616,
       "velocity_profile_experimental_subset_uinf_rmse": 0.5916079783099616,
-      "cp_probe_rmse": 0.5744562646538028,
-      "cp_panel_macro_rmse": 0.5744562646538028
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-gino/profiles/index.json",
       "case_count": 50,
       "case_set_id": "standard",
-      "index_sha256": "fafd089394e0f8339b65f2b746a8fc21d83f5cc7e83fea32cab42775b5c36728"
+      "index_sha256": "a6fe9acd2ccd80d9435cdcf1d3399047c152e5b58840cb46778269c3fa31ec63"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 15.6,
@@ -215,7 +213,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Scarce",
     "split_id": "scarce",
     "case_set_id": "standard",
@@ -227,11 +225,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "ecee2d91d5c5fab55c4ea8acf8be99fea9491197840a38e7c88bd0e1a33989c6"
+      "evidence_sha256": "ed1f96bfbc0d177bd38fc63d0197395b5a1e590907a969556bf94f17e883ee22"
     },
     "approval": {
       "status": "prototype",
@@ -268,15 +266,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.45825756949558394,
       "velocity_profile_experimental_subset_uinf_rmse": 0.45825756949558394,
-      "cp_probe_rmse": 0.4415880433163923,
-      "cp_panel_macro_rmse": 0.4415880433163923
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-graph-u-net/profiles/index.json",
       "case_count": 50,
       "case_set_id": "standard",
-      "index_sha256": "5271c314e6733f7468da224b166bf03d6397c55d5308238dccd79ecf0df2c7bb"
+      "index_sha256": "5aa45a23e1746b8fbda9511599236c27d1e599eb1346dc082d16e2bc4fc8d938"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 14.11,
@@ -316,7 +313,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Super scarce",
     "split_id": "super_scarce",
     "case_set_id": "standard",
@@ -328,11 +325,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "fc6af2e9a43a89bb52b73b32e7a52c200d07b2035303397f14b4223d3ee80fec"
+      "evidence_sha256": "7c5a26b4018a860143845b410aea0a8bf7f7d7caefcb6f4b47e43b68d6101150"
     },
     "approval": {
       "status": "prototype",
@@ -369,15 +366,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.5099019513592785,
       "velocity_profile_experimental_subset_uinf_rmse": 0.5099019513592785,
-      "cp_probe_rmse": 0.4949747468305833,
-      "cp_panel_macro_rmse": 0.4949747468305833
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-lno/profiles/index.json",
       "case_count": 50,
       "case_set_id": "standard",
-      "index_sha256": "5e9310c5bbf066c436d4d501d683fc2b336561c17f7ef14c59f0410f353206f6"
+      "index_sha256": "18dbdc7b1b7689bfbd997d98a76a74232be1069f0e390e6ce9b21e883fa94002"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 6.3,
@@ -417,7 +413,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "High drag",
     "split_id": "high_drag",
     "case_set_id": "high_drag",
@@ -429,11 +425,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "f0f44b6994b88a943ede508a33a22144a29e9f2d0a511901417acd0a8b860a3e"
+      "evidence_sha256": "6a98e742f01e7c5d78ba5311fb1e5cc4e482858955902ceef4381f6ba7f23b87"
     },
     "approval": {
       "status": "prototype",
@@ -470,15 +466,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.24899799195977476,
       "velocity_profile_experimental_subset_uinf_rmse": 0.24899799195977476,
-      "cp_probe_rmse": 0.2529822128134702,
-      "cp_panel_macro_rmse": 0.2529822128134702
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-oformer/profiles/index.json",
       "case_count": 97,
       "case_set_id": "high_drag",
-      "index_sha256": "f1a83e425a801cd377a1861f90ac46279c1ec99e51a61b7b7ca6ab1db3a2e314"
+      "index_sha256": "ec2e4ace7948b412fb866b37fc7e512d1cfeb3d905062ba8bb61d35f0821ad60"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 6.1,
@@ -518,7 +513,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Low drag",
     "split_id": "low_drag",
     "case_set_id": "low_drag",
@@ -530,11 +525,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "50748570199bcd7093c6c66e8f3e86778652c8b56bc6b2a1917b5b2786fbfce2"
+      "evidence_sha256": "0c22592f69dae695e1f3a8d03ec20b7a5354d36c1075fba89e56e841f2ddf857"
     },
     "approval": {
       "status": "prototype",
@@ -571,15 +566,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.5567764362830022,
       "velocity_profile_experimental_subset_uinf_rmse": 0.5567764362830022,
-      "cp_probe_rmse": 0.5385164807134505,
-      "cp_panel_macro_rmse": 0.5385164807134505
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-pointnet/profiles/index.json",
       "case_count": 97,
       "case_set_id": "low_drag",
-      "index_sha256": "a2b8b5014f775caae8c7c40164584f2d883fe473f169fd4eb1684943c94c03c0"
+      "index_sha256": "f05d1b2027ae5b44c242badade4aa0330e3ded0e74d8fe7f71dc9ca3d105a058"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 3.6,
@@ -619,7 +613,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Rear separation",
     "split_id": "rear_separation",
     "case_set_id": "rear_separation",
@@ -631,11 +625,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "cf3e6765ce02dd6a3af7b8ee0926df8e3bbbf7642729768a7480ae7d9f5fcebf"
+      "evidence_sha256": "dba0841a9be73dbe8d934487019bbcfc3fd9435e0a5e998fd11ff4fb42c02dff"
     },
     "approval": {
       "status": "prototype",
@@ -672,15 +666,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.2449489742783179,
       "velocity_profile_experimental_subset_uinf_rmse": 0.2449489742783179,
-      "cp_probe_rmse": 0.24899799195977476,
-      "cp_panel_macro_rmse": 0.24899799195977476
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-transformer/profiles/index.json",
       "case_count": 97,
       "case_set_id": "rear_separation",
-      "index_sha256": "e3cf77d1fa741a348afa9309dcab26e00091702899189d4ab373710acce76398"
+      "index_sha256": "d34ac86d644e347e8aee73683bb430216b5f184508ad0590f16e310a1b646b19"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 5.49,
@@ -720,7 +713,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Full",
     "split_id": "full",
     "case_set_id": "standard",
@@ -732,11 +725,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "ae3cf3904b0f6ff51b0f51862194735a95fa33a08bcaaffc33ceb95689101cfe"
+      "evidence_sha256": "4debc4dd6df7f9c34272150181f9dbcc08e12ac5da74a732ffcccc0e16c41e28"
     },
     "approval": {
       "status": "prototype",
@@ -773,15 +766,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.25495097567963915,
       "velocity_profile_experimental_subset_uinf_rmse": 0.25495097567963915,
-      "cp_probe_rmse": 0.26076809620810587,
-      "cp_panel_macro_rmse": 0.26076809620810587
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-transolver/profiles/index.json",
       "case_count": 50,
       "case_set_id": "standard",
-      "index_sha256": "19fc488b44c43da9f71d4625c5c80b5e36615e3c6e2e463e2844afc02ede4345"
+      "index_sha256": "2305a6bd94f26753e730a3d58c1331b6f49d26dfdafad65edf978e1bce7f472a"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 5.49,
@@ -821,7 +813,7 @@
     "pretraining_data": [],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Medium",
     "split_id": "medium",
     "case_set_id": "standard",
@@ -833,11 +825,11 @@
     "code_url": "",
     "submitted_at": "2025-06-13",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "6ccd7454db188378f36cd009f5b0e89372c43ea4098904dceadc9e40c7e5c670"
+      "evidence_sha256": "d2beb5db1d022dc35b44a1946c45a4fcde978bbe551ba2974863bd26dcc63d5b"
     },
     "approval": {
       "status": "prototype",
@@ -874,15 +866,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.30822070014844877,
       "velocity_profile_experimental_subset_uinf_rmse": 0.30822070014844877,
-      "cp_probe_rmse": 0.3162277660168379,
-      "cp_panel_macro_rmse": 0.3162277660168379
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/drivaerml-upt/profiles/index.json",
       "case_count": 50,
       "case_set_id": "standard",
-      "index_sha256": "fbfbeb3e6deb1290708aacfffe23124b2106e88be73e191ec552406147e6cc97"
+      "index_sha256": "1c0757b6c25b788ba8e27da8a143dbc547f049c63e796b6e3137077a24bd2cd7"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 10.98,
@@ -930,7 +921,7 @@
     ],
     "dataset": "DrivAerML",
     "dataset_id": "drivaerml",
-    "dataset_version": "drivaerml-native-v2-candidate",
+    "dataset_version": "drivaerml-native-v3-candidate",
     "split": "Geometry",
     "split_id": "geometry",
     "case_set_id": "geometry",
@@ -942,11 +933,11 @@
     "code_url": "https://github.com/example/meshoperator-plus",
     "submitted_at": "2026-07-08",
     "evaluation": {
-      "reference_version": "drivaerml-evaluator-v2-candidate",
+      "reference_version": "drivaerml-evaluator-v3-candidate",
       "code_revision": "prototype-dummy-data",
       "command": "not-applicable (illustrative dummy data)",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "777ada78e92d173190884d19fcb9bb44bbe4de930f30a63e7a400b1b0ef9190c"
+      "evidence_sha256": "235f1d60930a19a402fded8d15c3b4ed2273703faa358542dacb318b7c0dfd61"
     },
     "approval": {
       "status": "prototype",
@@ -983,15 +974,14 @@
       "field_integrated_lift_closure_max_abs": 1e-07,
       "velocity_profile_uinf_rmse": 0.14832396974191334,
       "velocity_profile_experimental_subset_uinf_rmse": 0.14832396974191334,
-      "cp_probe_rmse": 0.1643167672515499,
-      "cp_panel_macro_rmse": 0.1643167672515499
+      "cp_cut_rmse": 0.25
     },
     "profile_data": {
       "format": "fluidsbench-profile-chunks-v1",
       "index_file": "submissions/drivaerml/dummy-drivaerml-meshoperator-v1/profiles/index.json",
       "case_count": 97,
       "case_set_id": "geometry",
-      "index_sha256": "80e12555f3cc672104161406f82b72abdf9176bad7af6fd0c092737e6b4db810"
+      "index_sha256": "da8eee3393ee1e9c61922e58217b1c0c04bdd0ec41ae4a291dbefe40a3b709e6"
     },
     "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation.",
     "parameter_count": 18.7,

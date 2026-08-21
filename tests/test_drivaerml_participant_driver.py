@@ -270,6 +270,8 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("run_1 and run_44", completed.stdout)
         self.assertIn("--case-inputs", completed.stdout)
+        self.assertIn("--diagnostic-profile", completed.stdout)
+        self.assertNotIn("--autocfd5-profile", completed.stdout)
         for obsolete_option in (
             "--volume-weight-npy",
             "--volume-weight-receipt",
@@ -283,13 +285,13 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
     def _real_driver_fixture(self, root: Path) -> tuple[Path, SimpleNamespace]:
         input_file = root / "input.dat"
         input_file.write_bytes(b"fixture")
-        profile_file = root / "autocfd5-profiles-v8.json"
+        profile_file = root / "drivaerml-diagnostics-v9.json"
         profile_file.write_bytes(
             (
                 ROOT
                 / "benchmark-specs"
                 / "drivaerml"
-                / "autocfd5-profiles-v8.json"
+                / "drivaerml-diagnostics-v9.json"
             ).read_bytes()
         )
         cases = []
@@ -313,7 +315,7 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             case_inputs=config,
             native_source_pin=input_file,
             dataset_root=dataset,
-            autocfd5_profile=profile_file,
+            diagnostic_profile=profile_file,
             output=root / "result",
             maximum_prediction_chunk_rows=17,
             io_chunk_bytes=4096,
@@ -354,13 +356,13 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
 
         return FakePin()
 
-    @staticmethod
     def _fake_real_evidence(
+        self,
         kind: str,
         case_id: str,
         *,
         native_source_pin_sha256: str,
-        autocfd5_profile_sha256: str,
+        diagnostic_profile_sha256: str,
         diagnostic_manifest_mismatch: bool = False,
     ) -> dict[str, object]:
         identities: dict[str, dict[str, object]] = {}
@@ -395,30 +397,40 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 "prediction_inputs": identities,
             }
         return {
-            "schema": "drivaerml-autocfd5-case-diagnostics-candidate-v1",
-            "schema_version": 1,
+            "schema": self.real_driver.DIAGNOSTIC_EVIDENCE_SCHEMA,
+            "schema_version": 3,
             "case_id": case_id,
             "mapping_inputs": {
-                "cp_support": {
-                    "profile_sha256": autocfd5_profile_sha256,
-                },
                 "velocity_10mm": {
-                    "profile_sha256": autocfd5_profile_sha256,
+                    "profile_sha256": diagnostic_profile_sha256,
                 },
             },
             "sparse_gather_evidence": {
-                "surface_prediction": {
-                    **identities["surface_native_cells"],
-                    "total_row_count": identities["surface_native_cells"][
-                        "entity_count"
-                    ],
-                },
                 "volume_prediction": {
                     **identities["volume_native_cells"],
                     "total_row_count": identities["volume_native_cells"][
                         "entity_count"
                     ],
                 },
+            },
+            "metrics": {
+                "cp_cut_rmse": {
+                    "metric_id": "cp_cut_rmse",
+                    "ranked_value_available": False,
+                    "required_cut_count": 4,
+                    "unavailable_reasons": [
+                        {
+                            "reason": (
+                                "immutable_native_cp_cut_extraction_support_"
+                                "not_published"
+                            )
+                        }
+                    ],
+                    "case_equal_cut_mean_rmse": None,
+                    "weighting": "native_cut_intersection_segment_length",
+                    "support_status": "pending_immutable_owner_release",
+                    "discrete_cp_probe_fallback_used": False,
+                }
             },
         }
 
@@ -435,6 +447,11 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
 
         def fake_evaluator(kind):
             def run(args):
+                if kind == "diagnostic":
+                    self.assertFalse(hasattr(args, "cp_support_json"))
+                    self.assertFalse(
+                        hasattr(args, "surface_prediction_manifest")
+                    )
                 args.output.parent.mkdir(parents=True, exist_ok=True)
                 args.output.write_text(
                     json.dumps(
@@ -444,10 +461,10 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                             native_source_pin_sha256=self.sha256(
                                 args.native_source_pin
                             ),
-                            autocfd5_profile_sha256=(
-                                self.real_driver.EXPECTED_PROFILE_SHA256
+                            diagnostic_profile_sha256=(
+                                self.real_driver.EXPECTED_SUBMISSION_PROFILE_SHA256
                                 if kind == "core"
-                                else self.sha256(args.autocfd5_profile)
+                                else self.sha256(args.diagnostic_profile)
                             ),
                         )
                     )
@@ -471,7 +488,7 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             config, args = self._real_driver_fixture(root)
             self.assertEqual(
                 self.real_driver.INPUT_SCHEMA,
-                "drivaerml-run1-run44-reference-inputs-v2",
+                "drivaerml-run1-run44-reference-inputs-v3",
             )
             self.assertEqual(
                 json.loads(config.read_text(encoding="utf-8"))["schema"],
@@ -484,7 +501,6 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                     "surface_area_npy",
                     "surface_prediction_manifest",
                     "volume_prediction_manifest",
-                    "cp_support_json",
                     "velocity_mapping_json",
                     "velocity_receipt_json",
                 },
@@ -552,21 +568,21 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             self.assertFalse(receipt["official_submission"])
             self.assertFalse(receipt["downloads_performed"])
             self.assertEqual(
-                receipt["schema"], "drivaerml-run1-run44-reference-evidence-v3"
+                receipt["schema"], "drivaerml-run1-run44-reference-evidence-v4"
             )
-            self.assertEqual(receipt["schema_version"], 3)
+            self.assertEqual(receipt["schema_version"], 4)
             self.assertEqual(receipt["volume_weighting"], "one_per_native_cell")
             self.assertFalse(receipt["geometric_cell_volume_weights_used"])
             self.assertEqual(
                 receipt["case_input_config_sha256"], self.sha256(config)
             )
             self.assertEqual(
-                receipt["autocfd5_profile_sha256"],
-                self.real_driver.EXPECTED_PROFILE_SHA256,
+                receipt["diagnostic_profile_sha256"],
+                self.real_driver.EXPECTED_SUBMISSION_PROFILE_SHA256,
             )
             self.assertEqual(
                 receipt["evaluator_binding"]["reference_version"],
-                "drivaerml-evaluator-v2-candidate",
+                "drivaerml-evaluator-v3-candidate",
             )
             self.assertFalse(receipt["evaluator_binding"]["frozen_release"])
             self.assertEqual(
@@ -584,6 +600,18 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             )
             self.assertFalse(receipt["complete_484_case_split_evaluated"])
             self.assertFalse(receipt["public_scoring_support_eligible"])
+            self.assertEqual(
+                receipt["continuous_cp_cuts"],
+                {
+                    "required_cut_count": 4,
+                    "ranked_value_available": False,
+                    "support_status": "pending_immutable_owner_release",
+                    "participant_field_required": False,
+                    "derived_from": "surface_native_cells.pMeanTrim",
+                    "weighting": "native_cut_intersection_segment_length",
+                    "discrete_cp_probe_fallback_used": False,
+                },
+            )
             self.assertEqual(
                 set(
                     receipt["evaluator_binding"][
@@ -609,89 +637,33 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 self.assertNotIn(obsolete_field, receipt)
             self.assertTrue(
                 all(
-                    case["cross_evaluator_prediction_identity_verified"]
+                    case["cross_evaluator_volume_prediction_identity_verified"]
                     for case in receipt["cases"]
                 )
             )
             self.assertTrue((args.output / "validation-receipt.json").is_file())
             self.assertFalse((args.output / "submission.json").exists())
 
-    def test_real_driver_preflights_every_cp_support_before_core(self) -> None:
-        for bad_case, expected_cp_calls in (
-            ("run_1", ["run_1"]),
-            ("run_44", ["run_1", "run_44"]),
-        ):
-            with self.subTest(bad_case=bad_case), tempfile.TemporaryDirectory() as temporary:
-                root = Path(temporary)
-                _, args = self._real_driver_fixture(root)
-                cp_calls: list[str] = []
-
-                def fake_cp_loader(path, *, case_id, **kwargs):
-                    cp_calls.append(case_id)
-                    if case_id == bad_case:
-                        raise self.real_driver.DrivAerDiagnosticEvaluatorError(
-                            f"bad {case_id} Cp support"
-                        )
-                    resolved = Path(path).resolve()
-                    return SimpleNamespace(
-                        path=resolved,
-                        sha256=self.sha256(resolved),
-                    )
-
-                with (
-                    patch.object(
-                        self.real_driver,
-                        "_repository_identity",
-                        return_value=CLEAN_REPOSITORY_IDENTITY,
-                    ),
-                    patch.object(
-                        self.real_driver,
-                        "load_native_source_pin",
-                        return_value=self._fake_preflight_pin(),
-                    ),
-                    patch.object(
-                        self.real_driver,
-                        "validate_native_source_contract",
-                        return_value=self.sha256(args.native_source_pin),
-                    ),
-                    patch.object(
-                        self.real_driver,
-                        "load_strict_cp_case_support",
-                        side_effect=fake_cp_loader,
-                    ),
-                    patch.object(self.real_driver, "_run_core_case") as core,
-                    patch.object(
-                        self.real_driver, "_run_diagnostic_case"
-                    ) as diagnostic,
-                ):
-                    with self.assertRaisesRegex(
-                        self.real_driver.DrivAerDiagnosticEvaluatorError,
-                        f"bad {bad_case} Cp support",
-                    ):
-                        self.real_driver.run(args)
-                self.assertEqual(cp_calls, expected_cp_calls)
-                core.assert_not_called()
-                diagnostic.assert_not_called()
-                self.assertFalse(args.output.exists())
+    def test_real_driver_rejects_legacy_discrete_cp_support_input(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            config, _ = self._real_driver_fixture(root)
+            document = json.loads(config.read_text(encoding="utf-8"))
+            for row in document["cases"]:
+                row["cp_support_json"] = "legacy-discrete-probe-support.json"
+            config.write_text(json.dumps(document), encoding="utf-8")
+            with self.assertRaisesRegex(
+                self.real_driver.RealReferenceDriverError,
+                r"closed schema.*unknown=\['cp_support_json'\]",
+            ):
+                self.real_driver.load_case_inputs(config)
 
     def test_real_driver_preflights_later_velocity_support_before_core(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             _, args = self._real_driver_fixture(root)
             pin = self._fake_preflight_pin()
-            cp_calls: list[str] = []
             velocity_calls: list[str] = []
-
-            def fake_cp_loader(path, *, case_id, **kwargs):
-                cp_calls.append(case_id)
-                resolved = Path(path).resolve()
-                return SimpleNamespace(
-                    path=resolved,
-                    sha256=self.sha256(resolved),
-                    boundary_polygon_count=(
-                        pin.case(case_id).surface_cell_area.element_count
-                    ),
-                )
 
             def fake_velocity_loader(
                 artifact_path, receipt_path, *, case_id, **kwargs
@@ -729,11 +701,6 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 ),
                 patch.object(
                     self.real_driver,
-                    "load_strict_cp_case_support",
-                    side_effect=fake_cp_loader,
-                ),
-                patch.object(
-                    self.real_driver,
                     "load_strict_velocity_10mm_mapping",
                     side_effect=fake_velocity_loader,
                 ),
@@ -747,7 +714,6 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                     "bad run_44 velocity support",
                 ):
                     self.real_driver.run(args)
-            self.assertEqual(cp_calls, ["run_1", "run_44"])
             self.assertEqual(velocity_calls, ["run_1", "run_44"])
             core.assert_not_called()
             diagnostic.assert_not_called()
@@ -785,7 +751,6 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             ):
                 preflight = self.real_driver._preflight(args)
 
-            cp_calls: list[str] = []
             velocity_calls: list[str] = []
             expected_manifests = [
                 (
@@ -805,25 +770,6 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             ]
             manifest_calls: list[tuple[str, str, int]] = []
 
-            def fake_cp_loader(
-                path, *, autocfd5_profile, case_id, expected_boundary_sha256
-            ):
-                cp_calls.append(case_id)
-                self.assertEqual(
-                    Path(autocfd5_profile), preflight.autocfd5_profile_path
-                )
-                self.assertEqual(
-                    expected_boundary_sha256, pin.case(case_id).boundary.sha256
-                )
-                resolved = Path(path).resolve()
-                return SimpleNamespace(
-                    path=resolved,
-                    sha256=self.sha256(resolved),
-                    boundary_polygon_count=(
-                        pin.case(case_id).surface_cell_area.element_count
-                    ),
-                )
-
             def fake_velocity_loader(
                 artifact_path,
                 receipt_path,
@@ -835,7 +781,7 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             ):
                 velocity_calls.append(case_id)
                 self.assertEqual(
-                    Path(autocfd5_profile), preflight.autocfd5_profile_path
+                    Path(autocfd5_profile), preflight.diagnostic_profile_path
                 )
                 self.assertEqual(expected_source_pin_sha256, pin_sha256)
                 self.assertEqual(
@@ -867,11 +813,6 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             with (
                 patch.object(
                     self.real_driver,
-                    "load_strict_cp_case_support",
-                    side_effect=fake_cp_loader,
-                ),
-                patch.object(
-                    self.real_driver,
                     "load_strict_velocity_10mm_mapping",
                     side_effect=fake_velocity_loader,
                 ),
@@ -883,14 +824,12 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             ):
                 retained = self.real_driver._preflight_case_inputs(preflight)
 
-            self.assertEqual(cp_calls, ["run_1", "run_44"])
             self.assertEqual(velocity_calls, ["run_1", "run_44"])
             self.assertEqual(manifest_calls, expected_manifests)
             expected_retained_paths = {
                 getattr(case, field)
                 for case in preflight.cases
                 for field in (
-                    "cp_support_json",
                     "velocity_mapping_json",
                     "velocity_receipt_json",
                     "surface_prediction_manifest",
@@ -955,8 +894,8 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                             native_source_pin_sha256=self.sha256(
                                 run_args.native_source_pin
                             ),
-                            autocfd5_profile_sha256=(
-                                self.real_driver.EXPECTED_PROFILE_SHA256
+                            diagnostic_profile_sha256=(
+                                self.real_driver.EXPECTED_SUBMISSION_PROFILE_SHA256
                             ),
                         )
                     )
@@ -984,8 +923,8 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                             native_source_pin_sha256=self.sha256(
                                 run_args.native_source_pin
                             ),
-                            autocfd5_profile_sha256=self.sha256(
-                                run_args.autocfd5_profile
+                            diagnostic_profile_sha256=self.sha256(
+                                run_args.diagnostic_profile
                             ),
                         )
                     )
@@ -1065,9 +1004,9 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                 run_args.output.parent.mkdir(parents=True, exist_ok=True)
                 pin_sha256 = self.sha256(run_args.native_source_pin)
                 profile_sha256 = (
-                    self.real_driver.EXPECTED_PROFILE_SHA256
+                    self.real_driver.EXPECTED_SUBMISSION_PROFILE_SHA256
                     if kind == "core"
-                    else self.sha256(run_args.autocfd5_profile)
+                    else self.sha256(run_args.diagnostic_profile)
                 )
                 run_args.output.write_text(
                     json.dumps(
@@ -1075,7 +1014,7 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                             kind,
                             run_args.case_id,
                             native_source_pin_sha256=pin_sha256,
-                            autocfd5_profile_sha256=profile_sha256,
+                            diagnostic_profile_sha256=profile_sha256,
                         )
                     )
                     + "\n",
@@ -1139,7 +1078,7 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             self.assertTrue(mutated)
             self.assertFalse(args.output.exists())
 
-    def test_real_driver_rejects_cross_evaluator_prediction_mismatch(self) -> None:
+    def test_real_driver_rejects_cross_evaluator_volume_prediction_mismatch(self) -> None:
         class FakePin:
             def case(self, case_id):
                 count = {"run_1": 2, "run_44": 3}[case_id]
@@ -1161,10 +1100,10 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                             native_source_pin_sha256=self.sha256(
                                 args.native_source_pin
                             ),
-                            autocfd5_profile_sha256=(
-                                self.real_driver.EXPECTED_PROFILE_SHA256
+                            diagnostic_profile_sha256=(
+                                self.real_driver.EXPECTED_SUBMISSION_PROFILE_SHA256
                                 if kind == "core"
-                                else self.sha256(args.autocfd5_profile)
+                                else self.sha256(args.diagnostic_profile)
                             ),
                             diagnostic_manifest_mismatch=mismatch,
                         )
@@ -1216,7 +1155,7 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             ):
                 with self.assertRaisesRegex(
                     self.real_driver.RealReferenceDriverError,
-                    "different prediction manifest, chunk, or entity identities",
+                    "different volume-prediction manifest, chunk, or entity identities",
                 ):
                     self.real_driver.run(args)
             self.assertFalse(args.output.exists())
@@ -1240,8 +1179,8 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                         native_source_pin_sha256=self.sha256(
                             args.native_source_pin
                         ),
-                        autocfd5_profile_sha256=(
-                            self.real_driver.EXPECTED_PROFILE_SHA256
+                        diagnostic_profile_sha256=(
+                            self.real_driver.EXPECTED_SUBMISSION_PROFILE_SHA256
                         ),
                     )
                 )
@@ -1264,8 +1203,8 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
                         native_source_pin_sha256=self.sha256(
                             args.native_source_pin
                         ),
-                        autocfd5_profile_sha256=self.sha256(
-                            args.autocfd5_profile
+                        diagnostic_profile_sha256=self.sha256(
+                            args.diagnostic_profile
                         ),
                     )
                 )

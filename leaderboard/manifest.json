@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-08-20T20:30:36Z",
+  "generated_at": "2026-08-21T12:07:44Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-07-15-8ee23ec1e4fb",
+    "id": "prototype-dev-2026-07-15-68bb62dfbc5f",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-08-20T20:30:36Z",
+    "generated_at": "2026-08-21T12:07:44Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "8ee23ec1e4fbf5e9c9851981317ec64bb2637492a1750967b4dd03a5c91032b5",
+    "feed_sha256": "68bb62dfbc5f217f024150da467005957f19329bba1b84643fb1b3a4dafe2784",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,7 +51,7 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "5f24239c74c82b15798a0929b39a3c2cf851f0c59b5e2cc73789c2f824780574",
+      "index_sha256": "b224a69197ca8ef08ba0af9e5067429240af282f3316075d7cdf7bcf91891d1a",
       "record_count": 72,
       "eligible_record_count": 0
     }
@@ -1051,7 +1051,7 @@
           "description": "Image-derived low-speed wake and rear-separation out-of-distribution split."
         }
       ],
-      "submission_format": "drivaerml_native_candidate_v2",
+      "submission_format": "drivaerml_native_candidate_v3",
       "metric_ids": [
         "overall_score",
         "field_score",
@@ -1083,8 +1083,7 @@
         "field_integrated_lift_closure_max_abs",
         "velocity_profile_uinf_rmse",
         "velocity_profile_experimental_subset_uinf_rmse",
-        "cp_probe_rmse",
-        "cp_panel_macro_rmse"
+        "cp_cut_rmse"
       ],
       "metric_definition_overrides": {
         "surface_pressure_rel_l2": {
@@ -1114,13 +1113,14 @@
       "diagnostic_panels": [
         {
           "id": "pressure_profiles",
-          "title": "AutoCFD5 pressure-coefficient profiles",
-          "description": "Display panels use 217 ordered memberships; the ranked metric deduplicates them to 209 probes per case.",
-          "data_key": "cp_profiles",
-          "profile_definition_id": "drivaerml-autocfd5-v8-candidate",
-          "coordinate_unit": "",
+          "title": "Continuous pressure-coefficient cuts",
+          "description": "Four continuous native-surface Cp cuts; the 209 discrete AutoCFD taps are excluded.",
+          "data_key": "cp_cuts",
+          "profile_definition_id": "drivaerml-diagnostics-v9-candidate",
+          "coordinate_unit": "m",
           "x_keys": [
-            "panel_point_index",
+            "arc_length_m",
+            "distance",
             "x"
           ],
           "quantities": [
@@ -1137,123 +1137,35 @@
           "stations": [
             {
               "id": "upperbody_centerline",
-              "label": "Upper-body centreline",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 43 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+              "label": "Upper-body centreline (y = 0 m)",
+              "x_label": "Arc length along continuous native-surface cut, m",
+              "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+              "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
+              "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
             {
               "id": "underbody_centerline",
-              "label": "Underbody Centerline",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 22 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+              "label": "Underbody centreline (y = 0 m)",
+              "x_label": "Arc length along continuous native-surface cut, m",
+              "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+              "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
+              "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
             {
-              "id": "sidewall_z_150mm",
-              "label": "Sidewall z = 150mm",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 27 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+              "id": "sidewall_z_0_15",
+              "label": "Sidewall (z = 0.15 m)",
+              "x_label": "Arc length along continuous native-surface cut, m",
+              "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+              "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
+              "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
             {
-              "id": "front_wheelhouse_y_neg_600mm",
-              "label": "Wheelhouse y = -600mm",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 11 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "front_wheelhouse_y_neg_750mm",
-              "label": "Wheelhouse y = -750mm",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 11 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "front_wheelhouse_z_115_155mm",
-              "label": "Wheelhouse z = 115mm & 155mm",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 4 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "a_pillar",
-              "label": "A-Pillar",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 8 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "rearend_z_150mm",
-              "label": "Rearend z = 150mm",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 10 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "rearend_z_500mm",
-              "label": "Rearend z = 500mm",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 10 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "c_pillar_symmetry",
-              "label": "C-Pillar (Symmetry)",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 6 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "c_pillar_y_negative",
-              "label": "C-Pillar",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 13 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "underbody_off_centerline",
-              "label": "Underbody Off-Centerline",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 13 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "front_window",
-              "label": "Front Window",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 11 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "rear_window_and_trunk",
-              "label": "Rear Window & Trunk",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 8 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
-            },
-            {
-              "id": "side_window",
-              "label": "Side Window",
-              "x_label": "AutoCFD5 panel point index",
-              "description": "Pinned AutoCFD5 v8 panel sequence with 20 membership rows.",
-              "basis": "pinned_autocfd5_v8_probe_registry",
-              "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+              "id": "front_left_wheelhouse_y_neg_0_6",
+              "label": "Front-left wheelhouse (y = -0.6 m)",
+              "x_label": "Arc length along continuous native-surface cut, m",
+              "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+              "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
+              "source_url": "https://github.com/neilashton/fluidsbench-submission"
             }
           ],
           "required": true,
@@ -1269,7 +1181,7 @@
           "title": "AutoCFD5 velocity profiles",
           "description": "Sixteen fixed lines scored on the pinned 10 mm grid using arc-length trapezoidal RMSE of |U|/Uinf.",
           "data_key": "velocity_profiles",
-          "profile_definition_id": "drivaerml-autocfd5-v8-candidate",
+          "profile_definition_id": "drivaerml-diagnostics-v9-candidate",
           "coordinate_unit": "m",
           "x_keys": [
             "distance_m",
@@ -1294,7 +1206,7 @@
               "label": "AutoCFD5 V1",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1302,7 +1214,7 @@
               "label": "AutoCFD5 V2",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1310,7 +1222,7 @@
               "label": "AutoCFD5 V3",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1318,7 +1230,7 @@
               "label": "AutoCFD5 V4",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1326,7 +1238,7 @@
               "label": "AutoCFD5 V5",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1334,7 +1246,7 @@
               "label": "AutoCFD5 V6",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 201 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1342,7 +1254,7 @@
               "label": "AutoCFD5 U1",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1350,7 +1262,7 @@
               "label": "AutoCFD5 U2",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1358,7 +1270,7 @@
               "label": "AutoCFD5 U3",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1366,7 +1278,7 @@
               "label": "AutoCFD5 U4",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1374,7 +1286,7 @@
               "label": "AutoCFD5 U5",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1382,7 +1294,7 @@
               "label": "AutoCFD5 U6",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 301 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1390,7 +1302,7 @@
               "label": "AutoCFD5 L1",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 651 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1398,7 +1310,7 @@
               "label": "AutoCFD5 R1",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 31 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1406,7 +1318,7 @@
               "label": "AutoCFD5 R2",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 31 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             },
             {
@@ -1414,7 +1326,7 @@
               "label": "AutoCFD5 R3",
               "x_label": "Distance along line, m",
               "description": "Pinned 10 mm AutoCFD5 line with 31 samples.",
-              "basis": "pinned_autocfd5_v8_velocity_line",
+              "basis": "pinned_autocfd5_v9_velocity_line",
               "source_url": "https://autocfd5.s3.eu-west-1.amazonaws.com/"
             }
           ],
@@ -1429,13 +1341,13 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "The participant contract and official splits are published, but ranking remains closed until all-case velocity replay, Cp failure resolution and visual review, physics-null baselines, genuine-model sensitivity analysis, one genuine maintainer native-evaluator recomputation receipt, force-replay review, and immutable evaluator/scoring-support owner approval are complete.",
+        "closed_reason": "The participant contract and official splits are published, but ranking remains closed until all-case velocity replay, immutable native Cp-cut extraction support, physics-null baselines, genuine-model sensitivity analysis, one genuine maintainer native-evaluator recomputation receipt, force-replay review, and immutable evaluator/scoring-support owner approval are complete.",
         "candidate_evidence_index_file": "evidence/README.md",
         "candidate_evidence_manifest_file": "evidence/manifest.json",
         "dataset_evaluator_binding": {
           "status": "pending_frozen_release",
           "repository_url": "https://github.com/neilashton/fluidsbench-submission",
-          "evaluator_reference_version": "drivaerml-evaluator-v2-candidate",
+          "evaluator_reference_version": "drivaerml-evaluator-v3-candidate",
           "evaluator_code_revision": null,
           "activation_rule": "set status=frozen and publish the exact immutable evaluator Git revision only after the production evaluator is scientifically approved; final maintainer receipts must match both values exactly"
         },
@@ -1454,7 +1366,7 @@
           },
           "proposal_contract": {
             "file": "proposal/contract-proposal.json",
-            "sha256": "e8b6836bf1acc8190629a2a9d30ed07958511f906660a3bd23b051d843f7be34"
+            "sha256": "a7eca5f606a46f246cbaeac840b248f66e2fae4c09694b13345d137fce876d34"
           }
         },
         "case_file_binding": {
@@ -1661,9 +1573,9 @@
           }
         },
         "profile_definition": {
-          "file": "autocfd5-profiles-v8.json",
-          "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
-          "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+          "file": "drivaerml-diagnostics-v9.json",
+          "sha256": "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1",
+          "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
           "velocity_validity_policy": {
             "id": "drivaerml-autocfd5-velocity-validity-v1",
             "status": "candidate_policy_defined_owner_mask_pending",
@@ -1729,16 +1641,11 @@
             },
             "activation_requirement": "publish_and_hash_the_complete_owner_mask_and_all_case_assignments_with_zero_unresolved_non_excluded_samples"
           },
-          "candidate_cp_validation_evidence": {
-            "file": "evidence/cp-mapping-all484-hardened.json",
-            "sha256": "634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81",
-            "case_count": 484,
-            "probe_row_count": 101156,
-            "valid_mapping_count": 100281,
-            "invalid_mapping_count": 875,
-            "omitted_row_count": 0,
-            "public_scoring_support_eligible": false,
-            "owner_visual_signoff": false
+          "cp_cut_support": {
+            "status": "pending_immutable_owner_release",
+            "cut_count": 4,
+            "metric_id": "cp_cut_rmse",
+            "discrete_cp_probe_support_accepted": false
           }
         },
         "participant_process": [
@@ -1747,7 +1654,7 @@
           "reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling",
           "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
           "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
-          "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
+          "derive field-integrated forces, AutoCFD5 velocity diagnostics, and FluidsBench continuous Cp cuts from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
           "submit scalar metrics, per-case evidence, profile display chunks, and one revision-pinned complete-split scored-prediction artifact through the current FluidsBench schema; maintainers independently add the native-evaluator recomputation receipt"
         ],
         "activation_gates": {
@@ -1757,7 +1664,7 @@
           "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
           "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
           "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
-          "cp_probes": "all_484_candidate_mapping_and_cp_equation_replay_complete_with_875_explicit_invalid_rows_owner_resolution_and_visual_signoff_pending",
+          "cp_cuts": "four_continuous_cut_definitions_complete_immutable_native_extraction_support_and_all_case_replay_pending",
           "physics_null_baselines": "pending",
           "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
           "schema_v3_nonspatial_result_binding": "candidate_fail_closed_reductions_hash_bound_maintainer_native_evaluator_receipt_and_benchmark_owned_pending_immutable_revision_gate_implemented_tests_pass_genuine_full_split_receipt_frozen_revision_and_owner_approval_pending",
@@ -1768,7 +1675,7 @@
           "approve_all_case_native_array_inventory_and_exclusion_policy",
           "approve_all_484_case_force_replay_and_chunk_invariance",
           "approve_velocity_assignment_and_resolution_convergence",
-          "resolve_and_approve_all_875_explicit_cp_mapping_failures_and_visual_atlas",
+          "approve_immutable_native_surface_extraction_support_for_all_four_continuous_cp_cuts",
           "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
           "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
           "approve_the_candidate_schema_v3_nonspatial_validation_and_hash_bound_maintainer_receipt_then_issue_one_genuine_full_split_receipt",
@@ -1839,10 +1746,10 @@
             "baseline_status": "pending_all_case_evaluator_replay"
           },
           {
-            "metric_id": "cp_probe_rmse",
+            "metric_id": "cp_cut_rmse",
             "weight": 0.1,
             "transform": "physics_null_skill",
-            "baseline_id": "drivaerml.physics_null.cp_probe_rmse",
+            "baseline_id": "drivaerml.physics_null.cp_cut_rmse",
             "baseline_status": "pending_all_case_evaluator_replay"
           }
         ],
@@ -1873,17 +1780,17 @@
             "metric_id": "diagnostic_score",
             "component_metric_ids": [
               "velocity_profile_uinf_rmse",
-              "cp_probe_rmse"
+              "cp_cut_rmse"
             ]
           }
         ],
         "tolerance": 1e-06
       },
       "profile_definition": {
-        "id": "drivaerml-autocfd5-v8-candidate",
-        "file": "autocfd5-profiles-v8.json",
-        "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
-        "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+        "id": "drivaerml-diagnostics-v9-candidate",
+        "file": "drivaerml-diagnostics-v9.json",
+        "sha256": "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1",
+        "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
         "velocity_validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1"
       }
     },
@@ -6770,7 +6677,7 @@
       "digits": 5,
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{16}\\sum_l\\sqrt{\\frac{\\int_l(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_l ds}}",
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{16}\\sum_l\\sqrt{\\frac{\\int_{A_{cl}}(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_{A_{cl}} ds}}",
       "comparison_group": "profile-errors",
       "comparison_group_label": "Profile errors",
       "column_group_label": "Diagnostics"
@@ -6786,15 +6693,15 @@
       "digits": 5,
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{11}\\sum_{l\\in E}\\sqrt{\\frac{\\int_l(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_l ds}}",
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{11}\\sum_{l\\in E}\\sqrt{\\frac{\\int_{A_{cl}}(\\hat{U}/U_\\infty-U/U_\\infty)^2\\,ds}{\\int_{A_{cl}} ds}}",
       "comparison_group": "profile-errors",
       "comparison_group_label": "Profile errors",
       "column_group_label": "Diagnostics"
     },
     {
-      "id": "cp_probe_rmse",
-      "label": "AutoCFD5 Cp-probe RMSE",
-      "description": "DrivAerML candidate contract metric using 209_unique_probes_equal. Lower is better.",
+      "id": "cp_cut_rmse",
+      "label": "Continuous native-surface Cp-cut RMSE",
+      "description": "DrivAerML candidate contract metric using trapezoidal_arc_length_within_cut. Lower is better.",
       "group": "profile-errors",
       "group_label": "Profile errors",
       "column_group": "diagnostics",
@@ -6802,23 +6709,7 @@
       "digits": 5,
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{1}{N}\\sum_c\\sqrt{\\frac{1}{209}\\sum_{i=1}^{209}(\\hat{C}_{p,ci}-C_{p,ci})^2}",
-      "comparison_group": "profile-errors",
-      "comparison_group_label": "Profile errors",
-      "column_group_label": "Diagnostics"
-    },
-    {
-      "id": "cp_panel_macro_rmse",
-      "label": "AutoCFD5 Cp-panel macro RMSE",
-      "description": "DrivAerML candidate contract metric using panel_membership_rows_equal. Lower is better.",
-      "group": "profile-errors",
-      "group_label": "Profile errors",
-      "column_group": "diagnostics",
-      "unit": "",
-      "digits": 5,
-      "direction": "lower",
-      "kind": "error",
-      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{15}\\sum_p\\sqrt{\\frac{1}{n_p}\\sum_{i\\in p}(\\hat{C}_{p,ci}-C_{p,ci})^2}",
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{4}\\sum_q\\sqrt{\\frac{\\sum_{s\\in\\Gamma_{cq}}\\Delta s_s(\\hat{C}_{p,s}-C_{p,s})^2}{\\sum_{s\\in\\Gamma_{cq}}\\Delta s_s}}",
       "comparison_group": "profile-errors",
       "comparison_group_label": "Profile errors",
       "column_group_label": "Diagnostics"

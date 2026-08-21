@@ -337,15 +337,15 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
         self.assertTrue(support["closed_reason"].strip())
         self.assertEqual(
             specification["evaluation_reference_version"],
-            "drivaerml-evaluator-v2-candidate",
+            "drivaerml-evaluator-v3-candidate",
         )
         self.assertEqual(
             support["dataset_evaluator_binding"]["evaluator_reference_version"],
-            "drivaerml-evaluator-v2-candidate",
+            "drivaerml-evaluator-v3-candidate",
         )
 
         metrics = {item["id"]: item for item in specification["metrics"]}
-        self.assertEqual(len(metrics), 32)
+        self.assertEqual(len(metrics), 31)
         self.assertTrue(
             REMOVED_DRIVAERML_PHYSICAL_VOLUME_METRIC_IDS.isdisjoint(metrics)
         )

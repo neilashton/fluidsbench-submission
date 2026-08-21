@@ -31,7 +31,7 @@ if str(ROOT) not in sys.path:
 
 from reference.drivaerml.autocfd5 import (  # noqa: E402
     VELOCITY_LINE_COUNT,
-    load_autocfd5_definition,
+    load_autocfd5_submission_definition,
 )
 from scripts import aggregate_drivaerml_velocity_assignments as aggregate_module  # noqa: E402
 from scripts.aggregate_drivaerml_velocity_assignments import (  # noqa: E402
@@ -266,7 +266,7 @@ def load_atlas_inputs(
     if sha256_file(autocfd5_profile) != expected_profile_digest:
         raise VelocityAtlasError("AutoCFD5 profile changed after strict replay")
     try:
-        definition = load_autocfd5_definition(autocfd5_profile)
+        definition = load_autocfd5_submission_definition(autocfd5_profile)
     except ValueError as error:
         raise VelocityAtlasError("AutoCFD5 profile changed during atlas binding") from error
     if sha256_file(autocfd5_profile) != expected_profile_digest:
@@ -1017,7 +1017,7 @@ def build_manifest(
             "id": ATLAS_ALGORITHM_ID,
             "case_order": "increasing_run_number",
             "resolution_order_mm": list(analysis.resolutions_mm),
-            "profile_order": "exact_autocfd5_v8_velocity_line_registry_order",
+            "profile_order": "exact_v9_diagnostic_velocity_line_registry_order",
             "sample_order": "exact_endpoint_inclusive_registry_order",
             "invalid_sample_policy": "retain_every_failure_in_hash_bound_csv_and_mark_in_pdf",
             "valid_sample_policy": "represent_every_row_in_summaries_and_case_page",

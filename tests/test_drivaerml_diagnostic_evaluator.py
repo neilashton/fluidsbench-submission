@@ -24,7 +24,8 @@ from reference.drivaerml.diagnostic_evaluator import (
     CANDIDATE_SCHEMA,
     CP_SUPPORT_SCHEMA,
     CP_SUPPORT_STATUS,
-    EXPECTED_PROFILE_SHA256,
+    EXPECTED_RESEARCH_PROFILE_SHA256,
+    EXPECTED_SUBMISSION_PROFILE_SHA256,
     FALSE_CASE_CLAIMS,
     PINNED_KERNEL_VERSIONS,
     VELOCITY_ARTIFACT_SCHEMA,
@@ -32,11 +33,13 @@ from reference.drivaerml.diagnostic_evaluator import (
     VELOCITY_STATUS,
     DrivAerDiagnosticEvaluatorError,
     SparseNativeField,
-    evaluate_loaded_case_diagnostics,
+    _evaluate_loaded_probe_research_diagnostics as evaluate_loaded_case_diagnostics,
+    evaluate_loaded_case_diagnostics as evaluate_loaded_submission_diagnostics,
     gather_mapped_prediction_field,
     gather_sparse_inline_native_field,
     load_strict_cp_case_support,
-    load_strict_velocity_10mm_mapping,
+    _load_research_velocity_10mm_mapping as load_research_velocity_10mm_mapping,
+    load_strict_velocity_10mm_mapping as load_submission_velocity_10mm_mapping,
     sparse_native_field_from_array,
     write_candidate_diagnostic_evidence,
 )
@@ -66,6 +69,9 @@ from scripts.build_drivaerml_cp_case_support import (
 
 ROOT = Path(__file__).resolve().parents[1]
 PROFILE = ROOT / "benchmark-specs" / "drivaerml" / "autocfd5-profiles-v8.json"
+SUBMISSION_PROFILE = (
+    ROOT / "benchmark-specs" / "drivaerml" / "drivaerml-diagnostics-v9.json"
+)
 CASE_ID = "run_44"
 BOUNDARY_SHA = "b" * 64
 STL_SHA = "c" * 64
@@ -148,9 +154,11 @@ class DiagnosticFixture:
         invalid_cp_position: int | None = None,
         invalid_velocity_position: int | None = None,
         invalid_velocity_reason: str = NO_CLOSURE_CELL_REASON,
+        submission_velocity_profile: bool = False,
     ) -> None:
         self.root = root
         self.definition = load_autocfd5_definition(PROFILE)
+        self.submission_velocity_profile = submission_velocity_profile
         self.surface_truth = np.linspace(-20.0, 40.0, SURFACE_COUNT, dtype=np.float64)
         pressure_delta = 0.05 * U_INF_M_PER_S * U_INF_M_PER_S
         self.surface_prediction = self.surface_truth + pressure_delta
@@ -243,7 +251,7 @@ class DiagnosticFixture:
             "status": CP_SUPPORT_STATUS,
             "owner_visual_signoff_claimed": False,
             "definition": {
-                "profile_sha256": EXPECTED_PROFILE_SHA256,
+                "profile_sha256": EXPECTED_RESEARCH_PROFILE_SHA256,
                 "registry_sha256": dict(self.definition.source_sha256),
                 "probe_count": len(rows),
                 "rule_count": len(rows),
@@ -311,12 +319,30 @@ class DiagnosticFixture:
                 ensure_ascii=True,
             ).encode("utf-8")
         ).hexdigest()
+        source_registry_sha256 = dict(self.definition.source_sha256)
+        if self.submission_velocity_profile:
+            source_registry_sha256 = {
+                key: value
+                for key, value in source_registry_sha256.items()
+                if key.startswith("velocity_")
+            }
         registries = {
-            "profile_sha256": EXPECTED_PROFILE_SHA256,
-            "source_registry_sha256": dict(self.definition.source_sha256),
+            "profile_sha256": (
+                EXPECTED_SUBMISSION_PROFILE_SHA256
+                if self.submission_velocity_profile
+                else EXPECTED_RESEARCH_PROFILE_SHA256
+            ),
+            "source_registry_sha256": source_registry_sha256,
             "line_count": 16,
             "fixed_10mm_sample_count": 3756,
         }
+        if self.submission_velocity_profile:
+            registries.update(
+                {
+                    "continuous_cp_cut_count": 4,
+                    "discrete_cp_probe_count": 0,
+                }
+            )
         source = {
             "pin_sha256": PIN_SHA,
             "repository_id": "neashton/drivaerml",
@@ -575,7 +601,7 @@ class DiagnosticFixture:
             case_id=CASE_ID,
             expected_boundary_sha256=BOUNDARY_SHA,
         )
-        velocity = load_strict_velocity_10mm_mapping(
+        velocity = load_research_velocity_10mm_mapping(
             self.velocity_path,
             self.receipt_path,
             autocfd5_profile=PROFILE,
@@ -584,6 +610,16 @@ class DiagnosticFixture:
             expected_source_part_sha256=PART_SHA,
         )
         return cp, velocity
+
+    def loaded_submission_velocity(self):
+        return load_submission_velocity_10mm_mapping(
+            self.velocity_path,
+            self.receipt_path,
+            autocfd5_profile=SUBMISSION_PROFILE,
+            case_id=CASE_ID,
+            expected_source_pin_sha256=PIN_SHA,
+            expected_source_part_sha256=PART_SHA,
+        )
 
     def native_fields(self, cp, velocity):
         cp_ids = [
@@ -642,6 +678,64 @@ class DiagnosticFixture:
 
 
 class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
+    def test_v9_submission_path_is_probe_free_and_cp_cuts_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = DiagnosticFixture(
+                Path(directory), submission_velocity_profile=True
+            )
+            cp = load_strict_cp_case_support(
+                fixture.cp_path,
+                autocfd5_profile=PROFILE,
+                case_id=CASE_ID,
+                expected_boundary_sha256=BOUNDARY_SHA,
+            )
+            velocity = fixture.loaded_submission_velocity()
+            self.assertEqual(
+                velocity.profile_sha256, EXPECTED_SUBMISSION_PROFILE_SHA256
+            )
+            _, native_volume = fixture.native_fields(cp, velocity)
+            _, volume = fixture.manifests(
+                "submission-v9", (SURFACE_COUNT,), (VOLUME_COUNT,)
+            )
+            result = evaluate_loaded_submission_diagnostics(
+                velocity_mapping=velocity,
+                volume_prediction_manifest=volume,
+                native_volume_velocity=native_volume,
+                maximum_prediction_chunk_rows=VOLUME_COUNT,
+            ).to_json()
+            self.assertEqual(result["schema"], "drivaerml-case-diagnostics-candidate-v3")
+            self.assertEqual(result["schema_version"], 3)
+            self.assertEqual(set(result["mapping_inputs"]), {"velocity_10mm"})
+            self.assertEqual(
+                set(result["sparse_gather_evidence"]),
+                {
+                    "volume_prediction",
+                    "volume_native_truth",
+                    "only_unique_mapped_raw_ids_retained",
+                    "prediction_manifest_fully_consumed",
+                },
+            )
+            self.assertEqual(
+                set(result["metrics"]),
+                {
+                    "cp_cut_rmse",
+                    "velocity_profile_uinf_rmse",
+                    "velocity_profile_experimental_subset_uinf_rmse",
+                },
+            )
+            cp_cut = result["metrics"]["cp_cut_rmse"]
+            self.assertFalse(cp_cut["ranked_value_available"])
+            self.assertEqual(cp_cut["required_cut_count"], 4)
+            self.assertEqual(
+                cp_cut["weighting"], "native_cut_intersection_segment_length"
+            )
+            self.assertFalse(cp_cut["discrete_cp_probe_fallback_used"])
+            self.assertEqual(
+                set(cp_cut["unavailable_reasons"][0]),
+                {"diagnostic", "stage", "reason"},
+            )
+            self.assertNotIn("autocfd_probe_id", json.dumps(result, sort_keys=True))
+
     def test_mapping_json_mutation_during_parse_fails_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "mapping.json"
@@ -667,6 +761,9 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             fixture = DiagnosticFixture(Path(directory))
             cp, velocity = fixture.loaded()
+            self.assertEqual(
+                velocity.profile_sha256, EXPECTED_RESEARCH_PROFILE_SHA256
+            )
             native_surface, native_volume = fixture.native_fields(cp, velocity)
             surface_a, volume_a = fixture.manifests(
                 "a", (SURFACE_COUNT,), (VOLUME_COUNT,)
@@ -841,8 +938,15 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
             }
             for metric_id, output in metrics.items():
                 self.assertEqual(output["metric_id"], metric_id)
-                self.assertEqual(output["aggregation"], definitions[metric_id]["aggregation"])
-                self.assertEqual(output["weighting"], definitions[metric_id]["weighting"])
+                if metric_id.startswith("cp_"):
+                    self.assertNotIn(metric_id, definitions)
+                    continue
+                self.assertEqual(
+                    output["aggregation"], definitions[metric_id]["aggregation"]
+                )
+                self.assertEqual(
+                    output["weighting"], definitions[metric_id]["weighting"]
+                )
 
     def test_cp_loader_rejects_semantically_fabricated_evidence(self) -> None:
         mutations = (
@@ -1001,7 +1105,7 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                 DrivAerDiagnosticEvaluatorError,
                 "unique, increasing, and in range",
             ):
-                load_strict_velocity_10mm_mapping(
+                load_research_velocity_10mm_mapping(
                     fixture.velocity_path,
                     fixture.receipt_path,
                     autocfd5_profile=PROFILE,
@@ -1019,7 +1123,7 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                 with self.assertRaisesRegex(
                     DrivAerDiagnosticEvaluatorError, "keys differ from schema"
                 ):
-                    load_strict_velocity_10mm_mapping(
+                    load_research_velocity_10mm_mapping(
                         fixture.velocity_path,
                         fixture.receipt_path,
                         autocfd5_profile=PROFILE,
@@ -1080,7 +1184,7 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                 with self.assertRaisesRegex(
                     DrivAerDiagnosticEvaluatorError, message
                 ):
-                    load_strict_velocity_10mm_mapping(
+                    load_research_velocity_10mm_mapping(
                         fixture.velocity_path,
                         fixture.receipt_path,
                         autocfd5_profile=PROFILE,
@@ -1114,7 +1218,7 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                 }
             )
             _write_json(fixture.receipt_path, receipt)
-            mapping = load_strict_velocity_10mm_mapping(
+            mapping = load_research_velocity_10mm_mapping(
                 fixture.velocity_path,
                 fixture.receipt_path,
                 autocfd5_profile=PROFILE,

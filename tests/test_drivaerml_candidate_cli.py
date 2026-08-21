@@ -42,62 +42,41 @@ class DrivAerMLCandidateCLITests(unittest.TestCase):
         ):
             self.assertNotIn(obsolete_option, completed.stdout)
 
-    def test_diagnostic_boundary_reader_rejects_path_replacement_without_redirect(
-        self,
-    ) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            boundary = root / "boundary.vtp"
-            replacement = root / "replacement.vtp"
-            original = b"pinned-native-boundary-bytes"
-            boundary.write_bytes(original)
-            replacement.write_bytes(b"replacement-path-bytes")
-            expected = hashlib.sha256(original).hexdigest()
-            observed: dict[str, bytes] = {}
+    def test_diagnostic_cli_uses_v9_registry_and_rejects_probe_inputs(self) -> None:
+        required = [
+            "--case-id",
+            "run_1",
+            "--native-source-pin",
+            "native-source-pin.json",
+            "--dataset-root",
+            "dataset",
+            "--velocity-mapping-json",
+            "velocity.json",
+            "--velocity-receipt-json",
+            "receipt.json",
+            "--volume-prediction-manifest",
+            "volume-manifest.json",
+            "--multipart",
+            "--output",
+            "diagnostics.json",
+        ]
+        args = diagnostic_cli.parse_args(required)
+        self.assertEqual(
+            args.diagnostic_profile,
+            ROOT
+            / "benchmark-specs"
+            / "drivaerml"
+            / "drivaerml-diagnostics-v9.json",
+        )
+        with self.assertRaises(SystemExit):
+            diagnostic_cli.parse_args(
+                [*required, "--cp-support-json", "legacy-probes.json"]
+            )
+        with self.assertRaises(SystemExit):
+            diagnostic_cli.parse_args(
+                [*required, "--surface-prediction-manifest", "surface.json"]
+            )
 
-            def reader(descriptor_path: Path, raw_ids: object) -> object:
-                self.assertEqual(tuple(raw_ids), (3, 9))
-                os.replace(replacement, boundary)
-                observed["bytes"] = descriptor_path.read_bytes()
-                return object()
-
-            with self.assertRaisesRegex(
-                DrivAerDiagnosticEvaluatorError,
-                "changed while all hashing and parser passes ran",
-            ):
-                diagnostic_cli._read_verified_boundary_pressure(
-                    boundary,
-                    (3, 9),
-                    expected_sha256=expected,
-                    chunk_bytes=7,
-                    reader=reader,
-                )
-            self.assertEqual(observed["bytes"], original)
-            self.assertEqual(boundary.read_bytes(), b"replacement-path-bytes")
-
-    def test_diagnostic_boundary_reader_rejects_in_place_mutation(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            boundary = Path(temporary) / "boundary.vtp"
-            original = b"pinned-native-boundary-bytes"
-            boundary.write_bytes(original)
-            expected = hashlib.sha256(original).hexdigest()
-
-            def mutating_reader(descriptor_path: Path, raw_ids: object) -> object:
-                del descriptor_path, raw_ids
-                boundary.write_bytes(b"mutated-native-boundary")
-                return object()
-
-            with self.assertRaisesRegex(
-                DrivAerDiagnosticEvaluatorError,
-                "changed while all hashing and parser passes ran",
-            ):
-                diagnostic_cli._read_verified_boundary_pressure(
-                    boundary,
-                    (0,),
-                    expected_sha256=expected,
-                    chunk_bytes=5,
-                    reader=mutating_reader,
-                )
 
 
 if __name__ == "__main__":

@@ -1,9 +1,20 @@
-# AutoCFD diagnostics and composite proposal for DrivAerML
+# AutoCFD velocity, FluidsBench Cp-cut, and composite proposal for DrivAerML
 
-Status: **review source promoted into the active closed candidate; profile
+Status: **review source promoted into the participant-facing closed candidate; profile
 support, baselines, and official ranking still require activation validation**
 
 Prepared: 2026-08-19
+
+Owner scope update: **on 2026-08-21 the benchmark owner removed the 209
+discrete Cp probes from DrivAerML submissions and scoring.** This does not
+remove the four continuous Cp cuts: upperbody centreline, underbody centreline,
+sidewall at `z=0.15 m`, and front-left wheelhouse at `y=-0.6 m`. The
+submission-facing registry is `drivaerml-diagnostics-v9.json`; the Cp cuts still
+require separate frozen extraction support. The 209-probe
+definitions, mappings, atlases, and replays documented below are retained only
+as inactive research evidence. They are not participant inputs or outputs,
+evaluator dependencies, composite components, scoring support, or activation
+gates.
 
 ## Authoritative AutoCFD inputs
 
@@ -20,16 +31,19 @@ Prepared: 2026-08-19
 The current guide marks these diagnostic definitions as unchanged from
 AutoCFD4.
 
-The derived registries are pinned as follows: velocity lines
+The submission-facing v9 registry incorporates the velocity lines
 `sha256:6eb1528034e27a75ab1949551d58c8a161331bf6d343ca7fb4324f0800ca4d12`,
 expanded 10 mm velocity samples
-`sha256:5f1bcf84a633aa6bfdd776764c3295d5d624ef0b6c3649f67de446281ae5ba97`,
-unique Cp taps
+`sha256:5f1bcf84a633aa6bfdd776764c3295d5d624ef0b6c3649f67de446281ae5ba97`.
+It also names the four retained continuous Cp cuts, whose generated extraction
+support and hashes remain an activation task.
+For historical research reproducibility only, the inactive unique Cp taps are
 `sha256:2c1e216ef5693b26d43b9b4f55586ca35516224af0ad874987e5902c67f08e6f`,
 and Cp panel membership
 `sha256:6e288077b8b87e0c5d8d77c1050b07e4b5dd155a8e4fad8815ce4b0581995538`.
 The candidate tap-to-component review atlas is
 `sha256:b4ef9270f2633f2bd3d271e18de23f93e8da3398d67fbc34e77271fb37cbce66`.
+None of those probe hashes defines the retained continuous-cut support.
 
 ## What AutoCFD actually defines
 
@@ -41,6 +55,12 @@ families. The AutoCFD plotting sheet rearranges the same 209 probes into 15
 named plotting sequences and reuses eight probes between plots; that 217-row
 plot membership and ordering is recorded in
 `autocfd_cp_panel_membership.csv`.
+
+This describes the AutoCFD source and the earlier discrete-probe research
+proposal, not the current DrivAerML submission contract. Participants do not
+submit Cp probe values or mappings, and the evaluator does not calculate or
+score them. The separately retained continuous Cp cuts must not be implemented
+by treating these sparse probe rows as cut samples.
 
 The v8 workbook has one internal inconsistency: its hidden plotting sheet swaps
 the `y` coordinates attached to underbody probe IDs 623 and 629 relative to the
@@ -159,6 +179,51 @@ unranked pending an owner-reviewed support correction. The ranked profile error 
 equally. This is an RMSE of an already freestream-normalized quantity, not an
 RMSE divided by a second data-dependent normalizer.
 
+## Retained continuous Cp cuts
+
+The current contract retains exactly these four continuous surface-pressure
+cuts as one composite component:
+
+| Cut ID | Geometric plane |
+|---|---|
+| `upperbody_centerline` | upperbody intersection at `y=0` |
+| `underbody_centerline` | underbody intersection at `y=0` |
+| `sidewall_z_0_15` | sidewall intersection at `z=0.15 m` |
+| `front_left_wheelhouse_y_neg_0_6` | front-left wheelhouse intersection at `y=-0.6 m` |
+
+These are continuous case-specific surface/plane intersections, not the 209
+AutoCFD taps and not four selected subsets of those taps. The evaluator derives
+truth and prediction from the submitted native surface-pressure field using
+
+`Cp = 2 * pMeanTrim / (38.889 m/s)^2`.
+
+Before activation, a separate immutable Cp-cut support must freeze the included
+anatomical components, connected-curve segmentation, coordinate origin and
+orientation, plane-intersection tolerance, tie and degeneracy rules, validity
+handling, raw native polygon and local-segment provenance, positive finite
+intersection-segment lengths, source hashes, and full-case versus chunked
+invariance. Surface `pMeanTrim` is native `CellData`, so its value is piecewise
+constant on each intersected polygon segment; there is no resampled Cp grid or
+trapezoidal interpolation. For case `c` and cut `r`, the fixed reduction is
+
+`R_cr = sqrt(sum_j(ds_j*(Cp_pred,j-Cp_truth,j)^2) / sum_j(ds_j))`,
+
+where `j` runs over the frozen native polygon-intersection segments and `ds_j`
+is the segment length. Then
+`E_cp_cut=mean_c(mean_(r=1)^4(R_cr))`. Until that support and its golden replay
+are approved, the Cp-cut component remains unranked. The excluded probe
+registry, probe atlas, and probe overrides may not be used as a shortcut for
+this support.
+
+## Inactive 209-probe research record
+
+Everything in this section is historical discrete-probe research evidence and
+has no role in the current submission, evaluator, score, or activation
+decision. It is retained so the earlier mapping investigation remains
+reproducible; completing the mappings or approving the atlas is not required
+before submissions open. This exclusion does not apply to the four continuous
+Cp cuts defined above.
+
 The 209 Cp coordinates belong to the baseline AutoCFD geometry and generally do
 not lie on a morphed DrivAerML surface. Propagating every probe through the
 original ANSA morph would be scientifically preferable, but the benchmark
@@ -247,38 +312,39 @@ offset above 0.5 mm, at 0.983322 mm. These flags are recorded in the atlas and
 every row remains `pending_visual_signoff`; the audit does not substitute for
 owner review or rule-specific projection.
 
-At the selected native polygon, derive both truth and prediction from the same
-canonical surface-pressure field:
+The superseded research proposal would have derived both truth and prediction
+at the selected native polygon from the same canonical surface-pressure field:
 
 `Cp = 2 * pMeanTrim / (38.889 m/s)^2`.
 
-Do not require a separately predicted `CpMeanTrim` array. On all 8,828,095
+It would not have required a separately predicted `CpMeanTrim` array. On all 8,828,095
 native polygons in `run_1`, this transform reproduces the released
 `CpMeanTrim` with maximum absolute difference `4.694e-7` and RMSE
-`1.698e-8`; repeat and publish that replay over all 484 cases before activation,
-requiring a maximum absolute difference no greater than `1e-6` in every case.
-The diagnostic remains inactive if any case fails. The released `CpMeanTrim`
-remains a source QA array, not a second model target.
+`1.698e-8`. The previously planned all-484 replay and `1e-6` acceptance test
+are no longer activation requirements. The released `CpMeanTrim` remains a
+source QA array, not a current model target.
 
 Tyres, rims, brakes, wheel supports, mirrors, door handles, and artificial
-`CTRL_SURFACE_*` patches are globally excluded unless the frozen atlas
-explicitly assigns a probe to one of them. The normative mapping gates are:
+`CTRL_SURFACE_*` patches were globally excluded unless the research atlas
+explicitly assigned a probe to one of them. The historical mapping gates were:
 the declared component must exist; the declared projection must return a
 finite, nondegenerate candidate; the 2 mm bridge and 30-degree normal filters
 must pass; the selected raw polygon must be unique after the fixed tie rules;
 and nominal displacement must not exceed `0.278618 m` (10% of the 2.78618 m
-reference wheelbase). Displacement above `0.2089635 m` (7.5% wheelbase) is a
+reference wheelbase). Displacement above `0.2089635 m` (7.5% wheelbase) was a
 mandatory owner-review flag. Side, symmetry, panel-order, mirrored-pair, and
-duplicate/collapse summaries are non-normative owner-review diagnostics in
-this proposal: they may not change validity or selection unless a later
-version publishes exact equations, tolerances, and outcomes.
+duplicate/collapse summaries were non-normative owner-review diagnostics in
+that proposal.
 
-Every one of the 209 mappings must be valid for every ranked case. A failed
-mapping is repaired only before activation by an immutable owner-override row
+Under the superseded research proposal, every one of the 209 mappings would
+have needed to be valid for every ranked case. A failed mapping would have been
+repaired only before activation by an immutable owner-override row
 keyed by `(case_id, autocfd_probe_id)` and containing replacement mapping IDs
-and coordinates, reason, author, version, and source hashes; otherwise the Cp
-component remains unranked. An active support version is never edited in
-place. This construction must be described as a
+and coordinates, reason, author, version, and source hashes. No such probe
+repair or active probe support is required under the current probe-free
+contract; this does not waive the separate continuous-cut support. If the probe
+work is revisited, an active support version must never be edited in place.
+This construction must be described as a
 reproducible AutoCFD-location surrogate on each morph, not as the original
 material tap transported through ANSA.
 
@@ -288,13 +354,11 @@ material tap transported through ANSA.
   using arc-length trapezoidal weights, then an equal mean over the 16 lines,
   then an equal mean over cases. Also report the 11-line experimental-parity
   subset and every individual line.
-- `cp_probe_rmse`: for `e_ci=Cp_pred,ci-Cp_truth,ci`, calculate
-  `R_c=sqrt(sum_(i=1)^209 e_ci^2/209)` and then `mean_c(R_c)`. For panel `p`,
-  calculate the same per-case RMSE over its ordered membership rows and report
-  `mean_c(R_cp)`; the panel-macro sensitivity is
-  `mean_c(mean_(p=1)^15(R_cp))`. Each of the eight probes reused between panels
-  contributes once in every panel containing it, but only once in the ranked
-  209-unique-probe metric.
+- `cp_cut_rmse`: `E_cp_cut=mean_c(mean_(r=1)^4(R_cr))`, where `R_cr` is the
+  native intersection-segment-length-weighted continuous-cut RMSE defined
+  above. Every cut and case must be represented. The immutable segment support
+  remains an activation item; the evaluator may not substitute or average the
+  excluded discrete probes.
 - R-squared remains a secondary literature diagnostic only. It is not the
   ranked profile statistic because flattened R-squared changes with sampling
   density and is unstable for nearly flat individual profiles.
@@ -304,16 +368,20 @@ submitted native field predictions. The benchmark reference evaluator run at
 the contributor stage recomputes these diagnostics from benchmark truth rather
 than trusting manually supplied scalar summaries; this does not imply that a
 FluidsBench maintainer reruns the model or downloads its complete predictions.
-AutoCFD supplies the diagnostic locations and panel conventions; the ranked
-truth is the released DrivAerML CFD for each morphology, not the baseline
-AutoCFD wind-tunnel measurements.
+AutoCFD supplies the velocity-line locations; FluidsBench defines the four
+continuous cut planes. The ranked truth is the released DrivAerML CFD for each
+morphology, not the baseline AutoCFD wind-tunnel measurements.
 
 ## Owner-approved overall-score structure
 
 The benchmark owner approved on 2026-08-19 the broader FluidsBench utility
 allocation: 50% global fields, 25% field-integrated engineering quantities, and
-25% AutoCFD local diagnostics. Within those branches use the existing 60/40
-priority:
+25% local diagnostics. Within the local branch, the 16 velocity profiles are
+AutoCFD-defined and the four continuous Cp cuts are FluidsBench-defined. The
+2026-08-21 clarification removes only the 209 discrete probes and retains the
+0.15/0.10 split between velocity profiles and continuous Cp cuts. The nine
+component weights therefore still sum to one. The composite remains inactive
+pending the scientific and activation gates.
 
 | Component | Weight |
 |---|---:|
@@ -325,7 +393,7 @@ priority:
 | field-integrated total `Cl` | 0.05 |
 | field-integrated axle balance `CmPitch` | 0.05 |
 | 16 AutoCFD velocity profiles | 0.15 |
-| 209 AutoCFD Cp probes | 0.10 |
+| 4 continuous Cp cuts | 0.10 |
 
 The raw component errors are fixed as follows:
 
@@ -347,7 +415,10 @@ The raw component errors are fixed as follows:
   aerodynamic-efficiency view;
 - velocity profiles: the equal-case/equal-line arc-weighted RMSE defined above;
   and
-- Cp probes: the equal-case 209-unique-probe RMSE defined above.
+- continuous Cp cuts: the four-cut error whose deterministic native
+  polygon-intersection segment support must be frozen through the activation
+  work above.
+  The 209 probes do not enter it.
 
 The pinned constant-reference truth table has the exact header
 `run,cd,cl,clf,clr,cs`, 484 finite rows, and one unique integer `run` for each
@@ -372,8 +443,9 @@ for a frozen physics-null prediction, then use
 `S_j = 100 * (1 - E_j / B_j)`.
 
 The null is zero surface/volume pressure, zero wall shear, freestream volume
-velocity `(U_inf,0,0)`, velocity-profile ratio one, zero `Cp`, and zero `Cd` and
-`Cl` and `CmPitch`. Negative scores remain negative for ranking because they
+velocity `(U_inf,0,0)`, velocity-profile ratio one, zero Cp along the four
+continuous cuts, and zero `Cd`, `Cl`, and `CmPitch`. Negative scores remain
+negative for ranking because they
 mean worse than the declared null; a clipped 0-100 value may be displayed but
 must not determine rank. `Cd`, `Cl`, `CmPitch`, `Clf`, and `Clr` are integrated
 or derived from the submitted surface fields using that constant-reference
@@ -471,38 +543,49 @@ the pinned source force files and weight/cap-free baseline sensitivity is tested
 with a null baseline, the nearest-training-design-vector control after its
 transfer contract is frozen, and several real model architectures.
 
-## Owner decisions recorded on 2026-08-19
+## Owner decisions recorded on 2026-08-19 and 2026-08-21
 
-1. Treat case-specific ANSA-morphed pressure-probe positions as unavailable
-   unless a retained mapping is subsequently recovered; implement and validate
-   the benchmark-owned constrained-projection route.
-2. Treat the mandatory v8 input tables as authoritative for underbody probes
-   623 and 629.
+1. The 2026-08-19 research decision treated case-specific ANSA-morphed
+   pressure-probe positions as unavailable and selected a benchmark-owned
+   constrained-projection investigation. The 2026-08-21 scope decision
+   supersedes its implementation and activation requirement.
+2. For preservation of that inactive research record, the mandatory v8 input
+   tables remain authoritative for underbody probes 623 and 629.
 3. Rank all 16 mandatory AutoCFD velocity lines and additionally report the
    experimentally supported 11-line subset.
 4. Use the 50/25/25 multi-scale allocation and the 60/40 priorities within each
-   branch for the overall composite.
+   multi-component branch. The local-diagnostics branch therefore remains
+   split between velocity profiles (0.15 overall) and continuous Cp cuts (0.10
+   overall); removing the discrete probes does not remove the Cp-cut component.
+5. On 2026-08-21, exclude the 209 discrete Cp probes from participant
+   submissions, evaluation, scoring, baselines, bootstrap evidence, and
+   activation gates. Retain the existing probe files only as inactive research
+   evidence. Keep the four true continuous Cp cuts in the submission and the
+   nine-component composite, with velocity profiles weighted 0.15 and the
+   continuous Cp-cut component weighted 0.10. Probe mapping and Cp-cut
+   extraction are separate scientific problems and must not be conflated.
 
 ## Remaining implementation gates
 
 These are reproducibility and validation tasks, not unresolved benchmark-owner
 policy questions:
 
-1. Complete owner visual sign-off of the generated 209-row Cp anatomy atlas,
-   especially wheelhouse, detailed-underbody, and window/frame or trunk seams;
-   pin the exact `run_N/drivaer_N.stl` identity for all 484 public cases, then
-   generate and audit the mapped support for all of them.
-2. Complete the 1/2/5/10 mm profile-resolution convergence study and verify the
+1. Complete the 1/2/5/10 mm profile-resolution convergence study and verify the
    frozen proposed 10 mm grid satisfies the declared activation criteria.
-3. Publish and hash the reference containing-cell implementation for all five
+2. Publish and hash the reference containing-cell implementation for all five
    released cell types, then golden-replay every profile assignment and
    tolerance-sensitivity result.
-4. Replay the now-explicit native force-and-pitch-moment integration over all
+3. Replay the now-explicit native force-and-pitch-moment integration over all
    484 cases and require the declared absolute `1e-6` tolerance for `Cd`, `Cl`,
    `Clf`, and `Clr`, plus chunk-invariance tests.
-5. Generate versioned golden truth and scoring support for the 209 probes and
-   16 lines, with checksums, source raw IDs, validity masks, and deterministic
-   evaluator replay tests.
-6. Compute the physics-null denominators and run the declared null,
+4. Generate versioned golden truth and scoring support for the 16 velocity
+   lines, with checksums, source raw IDs, validity masks, and deterministic
+   evaluator replay tests. Do not include the inactive probe artifacts.
+5. Generate and validate separate continuous extraction and scoring support for
+   the four Cp cuts, including plane-tolerance sensitivity, raw polygon and
+   local-segment provenance, positive finite segment-length checks, validity
+   handling, deterministic replay, and chunk invariance. Do not use the
+   209-probe mappings or atlas as cut support.
+6. Compute the nine physics-null denominators and run the declared null,
    nearest-training-design-vector (after its transfer contract), and real-model
    sensitivity checks before enabling the composite for ranking.

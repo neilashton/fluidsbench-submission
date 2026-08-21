@@ -24,8 +24,8 @@ SUBMISSIONS_ROOT = ROOT / "submissions" / "drivaerml"
 MANIFEST_PATH = ROOT / "leaderboard" / "manifest.json"
 
 DATASET_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
-DATASET_VERSION = "drivaerml-native-v2-candidate"
-EVALUATOR_VERSION = "drivaerml-evaluator-v2-candidate"
+DATASET_VERSION = "drivaerml-native-v3-candidate"
+EVALUATOR_VERSION = "drivaerml-evaluator-v3-candidate"
 SPLIT_MANIFEST_SHA256 = "032a2e9f88926d9218a1943b51e650135cc78683cad6b0a38f3cf4f9dfba647d"
 SOURCE_PIN_SHA256 = "4fc9077f8f23f4994c98f4d0e7a17aef7b998de4c996638e3a8a616b6d923fdd"
 SURFACE_AREA_MANIFEST_SHA256 = "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
@@ -37,6 +37,8 @@ RETIRED_DRIVAER_PHYSICAL_VOLUME_METRIC_IDS = frozenset(
         "drivaerml_volume_velocity_physical_rmse",
         "drivaerml_volume_pressure_physical_mae",
         "drivaerml_volume_pressure_physical_rmse",
+        "cp_probe_rmse",
+        "cp_panel_macro_rmse",
     }
 )
 
@@ -351,18 +353,20 @@ def build_metrics() -> list[dict[str, Any]]:
                 ),
             ),
             metric(
-                "cp_probe_rmse",
+                "cp_cut_rmse",
                 unit="",
-                equation=r"\frac{1}{N}\sum_c\sqrt{\frac{1}{209}\sum_{i=1}^{209}(\hat{C}_{p,ci}-C_{p,ci})^2}",
-                aggregation="per_case_unique_probe_rmse_then_macro_average",
-                weighting="209_unique_probes_equal",
-            ),
-            metric(
-                "cp_panel_macro_rmse",
-                unit="",
-                equation=r"\frac{1}{N}\sum_c\frac{1}{15}\sum_p\sqrt{\frac{1}{n_p}\sum_{i\in p}(\hat{C}_{p,ci}-C_{p,ci})^2}",
-                aggregation="per_case_panel_rmse_then_equal_panel_and_case_average",
-                weighting="panel_membership_rows_equal",
+                equation=(
+                    r"\frac{1}{N}\sum_c\frac{1}{4}\sum_q"
+                    r"\sqrt{\frac{\sum_{s\in\Gamma_{cq}}\Delta s_s"
+                    r"(\hat{C}_{p,s}-C_{p,s})^2}"
+                    r"{\sum_{s\in\Gamma_{cq}}\Delta s_s}}"
+                ),
+                aggregation="equal_case_equal_cut_macro_average",
+                weighting="native_cut_intersection_segment_length",
+                availability=(
+                    "all_four_continuous_native_surface_cuts_available_for_every_"
+                    "case_after_immutable_owner_extraction_support_is_published"
+                ),
             ),
         ]
     )
@@ -370,37 +374,8 @@ def build_metrics() -> list[dict[str, Any]]:
 
 
 def build_profile_definition() -> dict[str, Any]:
-    membership_path = PROPOSAL_ROOT / "autocfd_cp_panel_membership.csv"
-    taps_path = PROPOSAL_ROOT / "autocfd_cp_taps_nominal.csv"
-    component_path = PROPOSAL_ROOT / "autocfd_cp_tap_component_registry.csv"
     lines_path = PROPOSAL_ROOT / "autocfd_velocity_lines_nominal.csv"
     samples_path = PROPOSAL_ROOT / "autocfd_velocity_samples_10mm.csv"
-
-    pressure_rows = read_csv(membership_path)
-    pressure_groups: dict[str, list[dict[str, str]]] = {}
-    for row in pressure_rows:
-        pressure_groups.setdefault(row["panel_id"], []).append(row)
-    corrected_labels = {"upperbody_centerline": "Upper-body centreline"}
-    pressure_stations = []
-    for panel_id, rows in pressure_groups.items():
-        pressure_stations.append(
-            {
-                "id": panel_id,
-                "label": corrected_labels.get(panel_id, rows[0]["panel_label"]),
-                "source_label": rows[0]["panel_label"],
-                "sample_count": len(rows),
-                "coordinate_id": "panel_point_index",
-                "coordinate_unit": "",
-                "probes": [
-                    {
-                        "panel_point_index": int(row["panel_point_index"]),
-                        "autocfd_probe_id": int(row["autocfd_probe_id"]),
-                        "point_m": [float(row["x_m"]), float(row["y_m"]), float(row["z_m"])],
-                    }
-                    for row in rows
-                ],
-            }
-        )
 
     line_rows = read_csv(lines_path)
     sample_rows = read_csv(samples_path)
@@ -426,29 +401,53 @@ def build_profile_definition() -> dict[str, Any]:
             }
         )
 
+    pressure_cuts = [
+        {
+            "id": "upperbody_centerline",
+            "label": "Upper-body centreline (y = 0 m)",
+            "plane": {"axis": "y", "value_m": 0.0},
+            "anatomical_scope": "upper_body_external_surface",
+            "coordinate_id": "arc_length_m",
+            "coordinate_unit": "m",
+        },
+        {
+            "id": "underbody_centerline",
+            "label": "Underbody centreline (y = 0 m)",
+            "plane": {"axis": "y", "value_m": 0.0},
+            "anatomical_scope": "underbody_external_surface",
+            "coordinate_id": "arc_length_m",
+            "coordinate_unit": "m",
+        },
+        {
+            "id": "sidewall_z_0_15",
+            "label": "Sidewall (z = 0.15 m)",
+            "plane": {"axis": "z", "value_m": 0.15},
+            "anatomical_scope": "vehicle_sidewall_external_surface",
+            "coordinate_id": "arc_length_m",
+            "coordinate_unit": "m",
+        },
+        {
+            "id": "front_left_wheelhouse_y_neg_0_6",
+            "label": "Front-left wheelhouse (y = -0.6 m)",
+            "plane": {"axis": "y", "value_m": -0.6},
+            "anatomical_scope": "front_left_wheelhouse_surface",
+            "coordinate_id": "arc_length_m",
+            "coordinate_unit": "m",
+        },
+    ]
+
     return {
         "schema_version": "1.0",
-        "id": "drivaerml-autocfd5-v8-candidate",
+        "id": "drivaerml-diagnostics-v9-candidate",
         "dataset_id": "drivaerml",
-        "status": "candidate_support_pending_all_case_validation",
+        "status": "candidate_velocity_and_cp_cut_support_pending_all_case_validation",
         "source": {
             "result_template_version": 8,
-            "cp_nominal_registry": {"file": "proposal/autocfd_cp_taps_nominal.csv", "sha256": sha256_file(taps_path)},
-            "cp_panel_membership": {"file": "proposal/autocfd_cp_panel_membership.csv", "sha256": sha256_file(membership_path)},
-            "cp_component_registry": {"file": "proposal/autocfd_cp_tap_component_registry.csv", "sha256": sha256_file(component_path)},
             "velocity_lines": {"file": "proposal/autocfd_velocity_lines_nominal.csv", "sha256": sha256_file(lines_path)},
             "velocity_scoring_grid": {"file": "proposal/autocfd_velocity_samples_10mm.csv", "sha256": sha256_file(samples_path)},
         },
-        "pressure_profiles": {
-            "ranked_metric_id": "cp_probe_rmse",
-            "unique_probe_count": len({row["autocfd_probe_id"] for row in pressure_rows}),
-            "panel_count": len(pressure_stations),
-            "panel_membership_row_count": len(pressure_rows),
-            "duplicate_rule": "a reused probe is scored once in the ranked unique-probe metric and once in each containing display panel",
-            "quantity": "Cp=2*pMeanTrim/(38.889^2)",
-            "stations": pressure_stations,
-        },
         "velocity_profiles": {
+            "definition_authority": "AutoCFD5",
             "ranked_metric_id": "velocity_profile_uinf_rmse",
             "quantity": "magnitude(UMeanTrim)/38.889",
             "scoring_grid": "fixed_10_mm_candidate_grid",
@@ -456,12 +455,25 @@ def build_profile_definition() -> dict[str, Any]:
             "sample_count_per_case": sum(station["sample_count"] for station in velocity_stations),
             "stations": velocity_stations,
         },
+        "pressure_cuts": {
+            "definition_authority": "FluidsBench",
+            "ranked_metric_id": "cp_cut_rmse",
+            "quantity": "Cp=2*pMeanTrim/(38.889^2)",
+            "cut_count": len(pressure_cuts),
+            "association": "native_surface_VTP_CellData",
+            "extraction_status": "pending_immutable_owner_cut_support",
+            "reduction": "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse",
+            "stations": pressure_cuts,
+        },
         "activation_requirements": [
             "publish_all_case_containing_cell_assignments_and_hashes",
             "pass_velocity_1_2_5_10mm_resolution_convergence",
-            "pass_all_case_cp_projection_and_source_relation_replay",
-            "complete_owner_visual_signoff_for_all_cp_component_mappings",
+            "publish_immutable_native_surface_cp_cut_extraction_support",
+            "pass_all_case_cp_cut_replay_and_chunk_invariance",
         ],
+        "excluded_diagnostics": {
+            "cp_probes": "the_209_discrete_taps_are_not_part_of_the_drivaerml_submission_or_score"
+        },
     }
 
 
@@ -517,7 +529,7 @@ def write_splits() -> list[dict[str, Any]]:
 
 
 def build_profile_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
-    pressure = profile["pressure_profiles"]["stations"]
+    pressure = profile["pressure_cuts"]["stations"]
     velocity = profile["velocity_profiles"]["stations"]
     return [
         {
@@ -526,14 +538,11 @@ def build_profile_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
             "allow_unlisted_stations": False,
             "minimum_points": 2,
             "coordinate_order": "strictly_increasing",
-            "coordinate_id": "panel_point_index",
-            "coordinate_unit": "",
-            "metric_id": "cp_probe_rmse",
+            "coordinate_id": "arc_length_m",
+            "coordinate_unit": "m",
+            "metric_id": "cp_cut_rmse",
             "station_ids": [station["id"] for station in pressure],
             "quantity_ids": ["cp"],
-            "station_sample_counts": {station["id"]: station["sample_count"] for station in pressure},
-            "station_coordinate_intervals": {station["id"]: [1.0, float(station["sample_count"])] for station in pressure},
-            "station_coordinate_spacings": {station["id"]: "uniform" for station in pressure},
         },
         {
             "id": "velocity_profiles",
@@ -563,7 +572,7 @@ def build_composite() -> dict[str, Any]:
         ("field_integrated_cl_rmse", 0.05),
         ("field_integrated_cmpitch_rmse", 0.05),
         ("velocity_profile_uinf_rmse", 0.15),
-        ("cp_probe_rmse", 0.10),
+        ("cp_cut_rmse", 0.10),
     ]
     return {
         "metric_id": "overall_score",
@@ -677,7 +686,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "submissions_open": False,
         "closed_reason": (
             "The participant contract and official splits are published, but ranking remains closed until "
-            "all-case velocity replay, Cp failure resolution and visual review, "
+            "all-case velocity replay, immutable native Cp-cut extraction support, "
             "physics-null baselines, genuine-model sensitivity analysis, one genuine maintainer "
             "native-evaluator recomputation receipt, "
             "force-replay review, and immutable evaluator/scoring-support owner approval are complete."
@@ -855,18 +864,13 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "profile_definition": {
             "file": str(profile_path.relative_to(BENCHMARK_ROOT)),
             "sha256": sha256_file(profile_path),
-            "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+            "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
             "velocity_validity_policy": build_velocity_validity_policy(),
-            "candidate_cp_validation_evidence": {
-                "file": "evidence/cp-mapping-all484-hardened.json",
-                "sha256": "634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81",
-                "case_count": 484,
-                "probe_row_count": 101156,
-                "valid_mapping_count": 100281,
-                "invalid_mapping_count": 875,
-                "omitted_row_count": 0,
-                "public_scoring_support_eligible": False,
-                "owner_visual_signoff": False,
+            "cp_cut_support": {
+                "status": "pending_immutable_owner_release",
+                "cut_count": 4,
+                "metric_id": "cp_cut_rmse",
+                "discrete_cp_probe_support_accepted": False,
             },
         },
         "participant_process": [
@@ -875,7 +879,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling",
             "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
             "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
-            "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
+            "derive field-integrated forces, AutoCFD5 velocity diagnostics, and FluidsBench continuous Cp cuts from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
             "submit scalar metrics, per-case evidence, profile display chunks, and one revision-pinned complete-split scored-prediction artifact through the current FluidsBench schema; maintainers independently add the native-evaluator recomputation receipt",
         ],
         "activation_gates": {
@@ -885,7 +889,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
             "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
             "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
-            "cp_probes": "all_484_candidate_mapping_and_cp_equation_replay_complete_with_875_explicit_invalid_rows_owner_resolution_and_visual_signoff_pending",
+            "cp_cuts": "four_continuous_cut_definitions_complete_immutable_native_extraction_support_and_all_case_replay_pending",
             "physics_null_baselines": "pending",
             "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
             "schema_v3_nonspatial_result_binding": "candidate_fail_closed_reductions_hash_bound_maintainer_native_evaluator_receipt_and_benchmark_owned_pending_immutable_revision_gate_implemented_tests_pass_genuine_full_split_receipt_frozen_revision_and_owner_approval_pending",
@@ -896,7 +900,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "approve_all_case_native_array_inventory_and_exclusion_policy",
             "approve_all_484_case_force_replay_and_chunk_invariance",
             "approve_velocity_assignment_and_resolution_convergence",
-            "resolve_and_approve_all_875_explicit_cp_mapping_failures_and_visual_atlas",
+            "approve_immutable_native_surface_extraction_support_for_all_four_continuous_cp_cuts",
             "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
             "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
             "approve_the_candidate_schema_v3_nonspatial_validation_and_hash_bound_maintainer_receipt_then_issue_one_genuine_full_split_receipt",
@@ -950,7 +954,7 @@ def build_specification(
                 },
                 {
                     "metric_id": "diagnostic_score",
-                    "component_metric_ids": ["velocity_profile_uinf_rmse", "cp_probe_rmse"],
+                    "component_metric_ids": ["velocity_profile_uinf_rmse", "cp_cut_rmse"],
                 },
             ],
             "tolerance": 1e-6,
@@ -960,7 +964,7 @@ def build_specification(
             "id": profile["id"],
             "file": str(profile_path.relative_to(BENCHMARK_ROOT)),
             "sha256": sha256_file(profile_path),
-            "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+            "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
             "velocity_validity_policy_id": (
                 "drivaerml-autocfd5-velocity-validity-v1"
             ),
@@ -981,8 +985,7 @@ def presentation_definition(metric_spec: dict[str, Any]) -> dict[str, Any]:
         "field_integrated_lift_closure_max_abs": "Lift closure max. error",
         "velocity_profile_uinf_rmse": "AutoCFD5 velocity-profile RMSE",
         "velocity_profile_experimental_subset_uinf_rmse": "Experimental-line velocity RMSE",
-        "cp_probe_rmse": "AutoCFD5 Cp-probe RMSE",
-        "cp_panel_macro_rmse": "AutoCFD5 Cp-panel macro RMSE",
+        "cp_cut_rmse": "Continuous native-surface Cp-cut RMSE",
     }
     if metric_id.startswith("drivaerml_"):
         readable = metric_id.removeprefix("drivaerml_").replace("_", " ")
@@ -1016,17 +1019,18 @@ def presentation_definition(metric_spec: dict[str, Any]) -> dict[str, Any]:
 
 
 def diagnostic_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
-    source_url = "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+    velocity_source_url = "https://autocfd5.s3.eu-west-1.amazonaws.com/"
+    cut_source_url = "https://github.com/neilashton/fluidsbench-submission"
     pressure_stations = [
         {
             "id": station["id"],
             "label": station["label"],
-            "x_label": "AutoCFD5 panel point index",
-            "description": f"Pinned AutoCFD5 v8 panel sequence with {station['sample_count']} membership rows.",
-            "basis": "pinned_autocfd5_v8_probe_registry",
-            "source_url": source_url,
+            "x_label": "Arc length along continuous native-surface cut, m",
+            "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+            "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
+            "source_url": cut_source_url,
         }
-        for station in profile["pressure_profiles"]["stations"]
+        for station in profile["pressure_cuts"]["stations"]
     ]
     velocity_stations = [
         {
@@ -1034,20 +1038,20 @@ def diagnostic_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
             "label": station["label"],
             "x_label": "Distance along line, m",
             "description": f"Pinned 10 mm AutoCFD5 line with {station['sample_count']} samples.",
-            "basis": "pinned_autocfd5_v8_velocity_line",
-            "source_url": source_url,
+            "basis": "pinned_autocfd5_v9_velocity_line",
+            "source_url": velocity_source_url,
         }
         for station in profile["velocity_profiles"]["stations"]
     ]
     return [
         {
             "id": "pressure_profiles",
-            "title": "AutoCFD5 pressure-coefficient profiles",
-            "description": "Display panels use 217 ordered memberships; the ranked metric deduplicates them to 209 probes per case.",
-            "data_key": "cp_profiles",
+            "title": "Continuous pressure-coefficient cuts",
+            "description": "Four continuous native-surface Cp cuts; the 209 discrete AutoCFD taps are excluded.",
+            "data_key": "cp_cuts",
             "profile_definition_id": profile["id"],
-            "coordinate_unit": "",
-            "x_keys": ["panel_point_index", "x"],
+            "coordinate_unit": "m",
+            "x_keys": ["arc_length_m", "distance", "x"],
             "quantities": [{"id": "cp", "label": "Cp", "y_label": "Pressure coefficient, Cp", "y_keys": ["cp"], "unit": ""}],
             "stations": pressure_stations,
             "required": True,
@@ -1125,7 +1129,7 @@ def update_manifest(specification: dict[str, Any], profile: dict[str, Any]) -> N
             "latest_submitted_at_date_among_prototype_fixture_rows_not_a_contract_or_scientific_evidence_update"
         ),
     }
-    dataset["submission_format"] = "drivaerml_native_candidate_v2"
+    dataset["submission_format"] = "drivaerml_native_candidate_v3"
     dataset["metrics"] = {
         "dimensional_fields": [
             entry["id"] for entry in DRIVAER_DIMENSIONAL_CATALOG
@@ -1139,6 +1143,7 @@ def update_manifest(specification: dict[str, Any], profile: dict[str, Any]) -> N
     dataset["overall_score_composite"] = specification[
         "overall_score_composite"
     ]
+    dataset["component_score_groups"] = specification["component_score_groups"]
     dataset["profile_definition"] = specification["profile_definition"]
     dataset["metric_definition_overrides"] = {
         "surface_pressure_rel_l2": {
@@ -1175,7 +1180,7 @@ def migrated_series(case: dict[str, Any], profile: dict[str, Any]) -> list[dict[
     pressure_sources = [series for series in existing if series.get("panel_id") == "pressure_profiles"]
     velocity_sources = [series for series in existing if series.get("panel_id") == "velocity_profiles"]
     result = []
-    for index, station in enumerate(profile["pressure_profiles"]["stations"]):
+    for index, station in enumerate(profile["pressure_cuts"]["stations"]):
         exact = next((series for series in pressure_sources if series.get("station_id") == station["id"]), None)
         source = exact or (pressure_sources[index % len(pressure_sources)] if pressure_sources else None)
         left, right = first_and_last(source, (0.0, 0.0))
@@ -1185,7 +1190,7 @@ def migrated_series(case: dict[str, Any], profile: dict[str, Any]) -> list[dict[
                 "panel_id": "pressure_profiles",
                 "station_id": station["id"],
                 "quantity_id": "cp",
-                "coordinate": [1.0, float(station["sample_count"])],
+                "coordinate": [0.0, 1.0],
                 "prediction": [round(left + offset, 7), round(right + offset, 7)],
             }
         )
@@ -1259,15 +1264,12 @@ def migrated_metric_values(old: dict[str, Any]) -> dict[str, float]:
         }
     )
     old_velocity_r2 = value(old, "velocity_profile_r2", None, 0.95)
-    old_cp_r2 = value(old, "cp_cut_r2", None, 0.95)
     velocity_rmse = value(old, "velocity_profile_uinf_rmse", None, math.sqrt(max(0.0, 1.0 - old_velocity_r2)))
-    cp_rmse = value(old, "cp_probe_rmse", None, math.sqrt(max(0.0, 1.0 - old_cp_r2)))
     result.update(
         {
             "velocity_profile_uinf_rmse": velocity_rmse,
             "velocity_profile_experimental_subset_uinf_rmse": value(old, "velocity_profile_experimental_subset_uinf_rmse", None, velocity_rmse),
-            "cp_probe_rmse": cp_rmse,
-            "cp_panel_macro_rmse": value(old, "cp_panel_macro_rmse", None, cp_rmse),
+            "cp_cut_rmse": value(old, "cp_cut_rmse", None, 0.25),
         }
     )
     return result
@@ -1360,7 +1362,7 @@ def main() -> int:
             raise ValueError(f"proposal source digest changed for {path}: {actual}")
 
     profile = build_profile_definition()
-    profile_path = BENCHMARK_ROOT / "autocfd5-profiles-v8.json"
+    profile_path = BENCHMARK_ROOT / "drivaerml-diagnostics-v9.json"
     write_json(profile_path, profile)
     split_entries = write_splits()
     specification = build_specification(split_entries, profile_path, profile)

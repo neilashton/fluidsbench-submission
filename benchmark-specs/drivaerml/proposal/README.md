@@ -28,6 +28,16 @@ total-`Cl`, and
 front/rear-balance modes without treating `Cl=Clf+Clr` as three independent
 measurements.
 
+On 2026-08-21 the benchmark owner removed the 209 discrete Cp probes from the
+current DrivAerML submission and score, while retaining four true continuous Cp
+cuts: upperbody centreline, underbody centreline, sidewall at `z=0.15 m`, and
+front-left wheelhouse at `y=-0.6 m`. The submission-facing diagnostic registry
+is `../drivaerml-diagnostics-v9.json`. The probe files in this proposal directory
+and the generated probe evidence are retained only as inactive research
+records; they are not participant requirements, scoring support, composite
+components, or activation gates. Separate continuous-cut extraction and
+scoring support remains an activation task.
+
 Files:
 
 - [`SCIENTIFIC_CONTRACT.md`](SCIENTIFIC_CONTRACT.md): review rationale and the
@@ -42,16 +52,19 @@ Files:
   the golden native-polygon force and pitch-moment replay for `Cd`, `Cl`,
   `Clf`, and `Clr` in run 1;
 - [`AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md`](AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md):
-  the review source for the active-candidate AutoCFD4/5 profile,
-  pressure-probe, resolution, reduction, and overall-score definitions;
-- `autocfd_cp_taps_nominal.csv`: the 209 unique nominal AutoCFD pressure taps;
+  the review source for the active-candidate AutoCFD4/5 velocity-profile,
+  continuous-Cp-cut native-segment reduction, and nine-component overall-score
+  definitions, plus an explicitly inactive historical discrete-probe research
+  record;
+- `autocfd_cp_taps_nominal.csv`: inactive research coordinates for the 209
+  unique nominal AutoCFD pressure taps;
 - `autocfd_cp_panel_membership.csv`: their AutoCFD plot-panel ordering,
-  including intentional reuse between panels;
+  including intentional reuse between panels; inactive research only;
 - `autocfd_cp_tap_component_registry.csv`: the owner-review atlas connecting
   each nominal tap to one candidate named DrivAerML surface component and one
   per-case projection rule; its `component_assignment_*` values are anatomy
-  audit evidence, not scoring support (visual owner sign-off is still an
-  activation gate);
+  audit evidence, not scoring support; visual owner sign-off is not an
+  activation gate while the discrete probes remain excluded;
 - `autocfd_velocity_lines_nominal.csv`: all 16 exact AutoCFD line endpoints and
   the fixed proposed 10 mm scoring and 1 mm validation counts;
 - `autocfd_velocity_samples_10mm.csv`: all 3,756 explicit points on the fixed

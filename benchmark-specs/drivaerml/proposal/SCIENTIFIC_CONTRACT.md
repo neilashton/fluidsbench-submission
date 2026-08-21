@@ -21,9 +21,13 @@ definition only. All errors are calculated per case and then macro-averaged.
 Activation remains conditional on the declared baseline/model sensitivity
 study. AB-UPT and GeoTransolver are
 preserved as explicitly different literature tracks because they do not use the
-same volume support. No profile, cut, force integration, exclusion mask, or
-overall composite becomes official until its complete definition and a golden
-reference calculation are approved.
+same volume support. On 2026-08-21 the benchmark owner excluded the 209
+discrete Cp probes from participant submissions and scoring; their existing
+files are inactive research records and are not activation gates. Four
+continuous Cp cuts remain in scope and require separate extraction support. No
+velocity profile, Cp cut, force integration, exclusion mask, or overall
+composite becomes official until its complete definition and a golden reference
+calculation are approved.
 
 ## Why this is the review-grade choice
 
@@ -130,9 +134,12 @@ called “pressure” without qualification. `CpMeanTrim` is the static pressure
 coefficient; `CptMeanTrim` is the total pressure coefficient used by the AB-UPT
 volume-pressure paper result. The canonical target above is static
 `pMeanTrim`; a future coefficient target must have a separate metric ID and an
-owner-verified conversion. The proposed AutoCFD tap diagnostic supplies that
-separate metric ID and deterministically derives
-`Cp=2*pMeanTrim/(38.889 m/s)^2`; it does not add a separately submitted field.
+owner-verified conversion. The 209 discrete Cp probes are not part of the
+current submission or score. The four retained continuous Cp cuts are derived
+by the evaluator from the submitted native `pMeanTrim` prediction using
+`Cp=2*pMeanTrim/(38.889 m/s)^2`; no `CpMeanTrim` prediction or manually
+supplied Cp scalar summary is accepted. The probe research record does not add
+a submitted field or evaluator requirement.
 Kinematic pressure must not be labelled as pascals.
 
 For vector fields, the error at an entity is the norm of the component-wise
@@ -194,7 +201,7 @@ wall-shear vector.
 The surface area and equal-polygon results answer different questions and
 neither may be omitted. Volume scoring intentionally follows the existing
 equal-cell default, which emphasizes refined mesh regions and avoids introducing
-an additional geometry-derived support. The owner-approved composite remains
+an additional geometry-derived support. The candidate composite remains
 inactive until reference baselines establish its distributions and the declared
 sensitivity review confirms that the ranking is stable enough to publish. Any
 near-body or wake-only score would require a separate owner-published geometric
@@ -367,7 +374,7 @@ The compact `run-1-force-axle-replay-summary.json` and separate
 the candidate numerical force evidence but does not confer owner approval or
 replace the pending frozen evaluator and immutable scoring-support release.
 
-## Validity, exclusions, profiles, and cuts
+## Validity, exclusions, velocity profiles, and continuous Cp cuts
 
 - No submitter may infer an exclusion mask from target values. In particular,
   zero pressure is not by itself invalid.
@@ -384,16 +391,19 @@ replace the pending frozen evaluator and immutable scoring-support release.
   nothing, and an evaluator must never bridge the resulting gap.
 - The former prototype profile and Cp-cut station names did not include a full
   extraction and ground-truth contract and were not supported by AB-UPT or
-  GeoTransolver scoring. They have been replaced in the active candidate by the
-  separately versioned AutoCFD vocabulary below, but remain unranked until its
-  exact case-specific mapping, truth hashes, and validation support are
-  published and activated.
-- The exact nominal AutoCFD4/5 pressure taps and velocity lines, together with
-  fixed proposed FluidsBench sampling, reduction, and composite semantics, are
-  now recorded in `AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md` and its five CSV
-  registries. They are active candidate definitions but remain non-rankable
-  because the case-specific surrogate mapping, resolution-convergence audit,
-  truth release, and validation gates listed there are not yet complete.
+  GeoTransolver scoring. The submission-facing replacement is the separately
+  versioned diagnostic vocabulary in `../drivaerml-diagnostics-v9.json`: 16 AutoCFD5 velocity
+  lines plus four continuous Cp cuts. It remains unranked until exact
+  case-specific mapping/extraction, truth hashes, resolution studies, and
+  validation support are published and activated.
+- The exact nominal AutoCFD4/5 velocity lines, the four FluidsBench cut planes,
+  fixed proposed sampling, reduction, and nine-component composite semantics
+  are recorded in
+  `AUTOCFD_DIAGNOSTICS_COMPOSITE_PROPOSAL.md`. The 209 discrete-probe
+  registries, atlas, and mapping discussion in that proposal are explicitly
+  inactive research evidence. Probe mapping, atlas review, and probe truth
+  replay are not activation requirements and must not be substituted for the
+  continuous-cut support.
 
 ## Approval blockers
 
@@ -410,8 +420,10 @@ more reviewed pull requests supply and owner-approve all of the following:
    volume-cell weights or volume-weight algorithm are required;
 3. a declared exclusion policy and, if needed, a public stable-ID mask;
 4. golden calculations for scalar and vector field reductions, including
-   chunk-invariance tests, plus the reference profile locator and all-case
-   AutoCFD profile/Cp support replay;
+   chunk-invariance tests, plus the reference velocity-profile locator and
+   all-case AutoCFD velocity-profile support replay, and distinct continuous
+   extraction, plane-tolerance sensitivity, segment-length reduction, and truth
+   replay for the four Cp cuts;
 5. an all-484-case replay of the now-explicit force-and-pitch-moment integration
    formula against public constant-reference `Cd`, `Cl`, `Clf`, and `Clr`, plus
    chunk-invariance tests and,
@@ -420,8 +432,8 @@ more reviewed pull requests supply and owner-approve all of the following:
 6. official split index files generated from the pinned owner manifest;
 7. the nearest-training-design donor map and golden donor-to-target transfer,
    the frozen bootstrap index artifact, and evidence from the declared
-   baseline/model sensitivity analysis that the owner-approved composite is
-   stable enough for a single ranking; and
+   nine-component baseline/model sensitivity analysis that the owner-approved
+   composite is stable enough for a single ranking; and
 8. dataset-owner approval of the immutable scoring-support manifest and
    evaluator release.
 

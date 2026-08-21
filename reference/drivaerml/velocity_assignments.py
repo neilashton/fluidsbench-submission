@@ -38,6 +38,7 @@ import numpy as np
 from .autocfd5 import (
     POINT_IN_CELL_CLOSURE_TOLERANCE_M,
     AutoCFD5Definition,
+    AutoCFD5SubmissionDefinition,
     VelocityCellAssignmentEvidence,
     VelocityLineDefinition,
     VelocitySampleDefinition,
@@ -436,13 +437,15 @@ def generate_velocity_line_samples(
 
 
 def generate_definition_velocity_samples(
-    definition: AutoCFD5Definition,
+    definition: AutoCFD5Definition | AutoCFD5SubmissionDefinition,
     nominal_spacing_m: float,
 ) -> tuple[VelocitySampleDefinition, ...]:
     """Generate a complete arbitrary-spacing grid in registry line order."""
 
-    if not isinstance(definition, AutoCFD5Definition):
-        raise VelocityAssignmentError("definition must be an AutoCFD5Definition")
+    if not isinstance(
+        definition, (AutoCFD5Definition, AutoCFD5SubmissionDefinition)
+    ):
+        raise VelocityAssignmentError("definition must contain frozen velocity lines")
     spacing = _positive_finite(nominal_spacing_m, "nominal_spacing_m")
     return tuple(
         sample

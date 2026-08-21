@@ -33,8 +33,7 @@ if str(REPOSITORY_ROOT) not in sys.path:
 from reference.drivaerml.diagnostic_evaluator import (  # noqa: E402
     CANDIDATE_SCHEMA as DIAGNOSTIC_EVIDENCE_SCHEMA,
     DrivAerDiagnosticEvaluatorError,
-    EXPECTED_PROFILE_SHA256,
-    load_strict_cp_case_support,
+    EXPECTED_SUBMISSION_PROFILE_SHA256,
     load_strict_velocity_10mm_mapping,
 )
 from reference.drivaerml.evaluator import (  # noqa: E402
@@ -51,7 +50,6 @@ from reference.drivaerml.source import (  # noqa: E402
     NativeSourceError,
     load_native_source_pin,
 )
-from scripts.build_drivaerml_cp_case_support import CpCaseSupportError  # noqa: E402
 from scripts.evaluate_drivaerml_candidate_case import run as _run_core_case  # noqa: E402
 from scripts.evaluate_drivaerml_candidate_diagnostics import (  # noqa: E402
     DEFAULT_PROFILE,
@@ -59,10 +57,10 @@ from scripts.evaluate_drivaerml_candidate_diagnostics import (  # noqa: E402
 )
 
 
-INPUT_SCHEMA = "drivaerml-run1-run44-reference-inputs-v2"
-OUTPUT_SCHEMA = "drivaerml-run1-run44-reference-evidence-v3"
+INPUT_SCHEMA = "drivaerml-run1-run44-reference-inputs-v3"
+OUTPUT_SCHEMA = "drivaerml-run1-run44-reference-evidence-v4"
 OUTPUT_STATUS = "candidate_pilot_evidence_not_official_submission"
-EVALUATOR_REFERENCE_VERSION = "drivaerml-evaluator-v2-candidate"
+EVALUATOR_REFERENCE_VERSION = "drivaerml-evaluator-v3-candidate"
 REPOSITORY_URL = "https://github.com/neilashton/fluidsbench-submission"
 REQUIRED_CASE_PART_COUNTS = {"run_1": 2, "run_44": 3}
 PREDICTION_SUPPORT_IDS = ("surface_native_cells", "volume_native_cells")
@@ -81,7 +79,6 @@ CASE_INPUT_KEYS = frozenset(
         "surface_area_npy",
         "surface_prediction_manifest",
         "volume_prediction_manifest",
-        "cp_support_json",
         "velocity_mapping_json",
         "velocity_receipt_json",
     }
@@ -98,7 +95,6 @@ class RealCaseInputs:
     surface_area_npy: Path
     surface_prediction_manifest: Path
     volume_prediction_manifest: Path
-    cp_support_json: Path
     velocity_mapping_json: Path
     velocity_receipt_json: Path
 
@@ -116,8 +112,8 @@ class _PreflightResult:
     config_path: Path
     config_sha256: str
     native_source_pin_sha256: str
-    autocfd5_profile_path: Path
-    autocfd5_profile_sha256: str
+    diagnostic_profile_path: Path
+    diagnostic_profile_sha256: str
     cases: tuple[RealCaseInputs, ...]
 
 
@@ -307,13 +303,15 @@ def _prediction_evidence_identities(
 ) -> dict[str, _PredictionEvidenceIdentity]:
     """Extract the prediction identities common to core and diagnostics."""
 
+    support_ids = (
+        ("volume_native_cells",) if diagnostic else PREDICTION_SUPPORT_IDS
+    )
     if diagnostic:
         root = _mapping(
             document.get("sparse_gather_evidence"),
             f"{case_id} diagnostic sparse_gather_evidence",
         )
         records = {
-            "surface_native_cells": root.get("surface_prediction"),
             "volume_native_cells": root.get("volume_prediction"),
         }
     else:
@@ -327,7 +325,7 @@ def _prediction_evidence_identities(
         }
 
     result: dict[str, _PredictionEvidenceIdentity] = {}
-    for support_id in PREDICTION_SUPPORT_IDS:
+    for support_id in support_ids:
         record = _mapping(
             records[support_id], f"{case_id}/{support_id} prediction evidence"
         )
@@ -367,7 +365,7 @@ def _validated_case_provenance(
     *,
     case_id: str,
     native_source_pin_sha256: str,
-    autocfd5_profile_sha256: str,
+    diagnostic_profile_sha256: str,
 ) -> str:
     """Verify generated evidence used the preflight pin and profile."""
 
@@ -380,7 +378,7 @@ def _validated_case_provenance(
         )
     if (
         diagnostic_document.get("schema") != DIAGNOSTIC_EVIDENCE_SCHEMA
-        or diagnostic_document.get("schema_version") != 1
+        or diagnostic_document.get("schema_version") != 3
     ):
         raise RealReferenceDriverError(
             f"{case_id} diagnostic evidence schema differs from the candidate evaluator"
@@ -407,19 +405,45 @@ def _validated_case_provenance(
         diagnostic_document.get("mapping_inputs"),
         f"{case_id} diagnostic mapping_inputs",
     )
-    for input_id in ("cp_support", "velocity_10mm"):
-        mapping_input = _mapping(
-            mapping_inputs.get(input_id),
-            f"{case_id} diagnostic {input_id}",
+    if set(mapping_inputs) != {"velocity_10mm"}:
+        raise RealReferenceDriverError(
+            f"{case_id} diagnostic evidence must use velocity-only v9 mapping input"
         )
-        observed_profile = _sha256(
-            mapping_input.get("profile_sha256"),
-            f"{case_id} diagnostic {input_id} profile SHA-256",
+    velocity_input = _mapping(
+        mapping_inputs.get("velocity_10mm"),
+        f"{case_id} diagnostic velocity_10mm",
+    )
+    observed_profile = _sha256(
+        velocity_input.get("profile_sha256"),
+        f"{case_id} diagnostic velocity_10mm profile SHA-256",
+    )
+    if observed_profile != diagnostic_profile_sha256:
+        raise RealReferenceDriverError(
+            f"{case_id} diagnostic evidence used a different v9 profile"
         )
-        if observed_profile != autocfd5_profile_sha256:
-            raise RealReferenceDriverError(
-                f"{case_id} diagnostic evidence used a different AutoCFD5 profile"
-            )
+
+    metrics = _mapping(
+        diagnostic_document.get("metrics"), f"{case_id} diagnostic metrics"
+    )
+    cp_cut = _mapping(metrics.get("cp_cut_rmse"), f"{case_id} Cp-cut metric")
+    unavailable_reasons = cp_cut.get("unavailable_reasons")
+    if (
+        cp_cut.get("metric_id") != "cp_cut_rmse"
+        or cp_cut.get("ranked_value_available") is not False
+        or cp_cut.get("required_cut_count") != 4
+        or cp_cut.get("case_equal_cut_mean_rmse") is not None
+        or cp_cut.get("weighting") != "native_cut_intersection_segment_length"
+        or cp_cut.get("support_status") != "pending_immutable_owner_release"
+        or cp_cut.get("discrete_cp_probe_fallback_used") is not False
+        or not isinstance(unavailable_reasons, list)
+        or len(unavailable_reasons) != 1
+        or not isinstance(unavailable_reasons[0], dict)
+        or unavailable_reasons[0].get("reason")
+        != "immutable_native_cp_cut_extraction_support_not_published"
+    ):
+        raise RealReferenceDriverError(
+            f"{case_id} diagnostic evidence must keep four Cp cuts explicitly unavailable"
+        )
     return vtk_version
 
 
@@ -526,7 +550,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--case-inputs", type=Path, required=True)
     parser.add_argument("--native-source-pin", type=Path, required=True)
     parser.add_argument("--dataset-root", type=Path, required=True)
-    parser.add_argument("--autocfd5-profile", type=Path, default=DEFAULT_PROFILE)
+    parser.add_argument("--diagnostic-profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--maximum-prediction-chunk-rows",
@@ -550,12 +574,12 @@ def _preflight(
 ) -> _PreflightResult:
     config_path, config_sha256, cases = load_case_inputs(args.case_inputs)
     pin_path = _regular_file(args.native_source_pin, "native-source pin")
-    profile_path = _regular_file(args.autocfd5_profile, "AutoCFD5 profile")
+    profile_path = _regular_file(args.diagnostic_profile, "diagnostic profile")
     pin_sha256 = _sha256_file(pin_path)
     profile_sha256 = _sha256_file(profile_path)
-    if profile_sha256 != EXPECTED_PROFILE_SHA256:
+    if profile_sha256 != EXPECTED_SUBMISSION_PROFILE_SHA256:
         raise RealReferenceDriverError(
-            "AutoCFD5 profile SHA-256 differs from the candidate evaluator profile"
+            "diagnostic profile SHA-256 differs from the candidate evaluator profile"
         )
     dataset_root = Path(args.dataset_root).expanduser().resolve()
     if not dataset_root.is_dir():
@@ -577,15 +601,15 @@ def _preflight(
         pin.resolve(case_id, dataset_root)
     args.native_source_pin = pin_path
     args.dataset_root = dataset_root
-    args.autocfd5_profile = profile_path
+    args.diagnostic_profile = profile_path
     args.output = output
     return _PreflightResult(
         pin=pin,
         config_path=config_path,
         config_sha256=config_sha256,
         native_source_pin_sha256=pin_sha256,
-        autocfd5_profile_path=profile_path,
-        autocfd5_profile_sha256=profile_sha256,
+        diagnostic_profile_path=profile_path,
+        diagnostic_profile_sha256=profile_sha256,
         cases=cases,
     )
 
@@ -595,40 +619,23 @@ def _preflight_case_inputs(
 ) -> dict[Path, tuple[str, str]]:
     """Validate every compact case input before any native-field evaluation.
 
-    The core evaluator reads multi-gigabyte native fields.  Validate both
-    cases' small Cp receipts first, then their velocity mappings and prediction
-    manifest metadata, so a stale later-case artifact cannot waste an earlier
-    case's core pass.  Prediction NPZ payloads remain lazily verified by the
-    evaluators themselves.
+    The core evaluator reads multi-gigabyte native fields. Validate both cases'
+    velocity mappings and prediction-manifest metadata first, so a stale
+    later-case artifact cannot waste an earlier case's core pass. Prediction
+    NPZ payloads remain lazily verified by the evaluators themselves. The four
+    continuous Cp cuts have no immutable support yet, and the excluded 209
+    discrete probes are deliberately not accepted as a fallback input.
     """
 
     retained: dict[Path, tuple[str, str]] = {}
-    cp_supports: dict[str, Any] = {}
     velocity_mappings: dict[str, Any] = {}
-
-    # Deliberately finish the Cp pass for every case before inspecting other
-    # metadata: this is the cheapest strict check and caught the stale pilot
-    # input that motivated the all-case preflight.
-    for inputs in preflight.cases:
-        case = preflight.pin.case(inputs.case_id)
-        support = load_strict_cp_case_support(
-            inputs.cp_support_json,
-            autocfd5_profile=preflight.autocfd5_profile_path,
-            case_id=inputs.case_id,
-            expected_boundary_sha256=case.boundary.sha256,
-        )
-        cp_supports[inputs.case_id] = support
-        retained[support.path] = (
-            f"{inputs.case_id} Cp support",
-            support.sha256,
-        )
 
     for inputs in preflight.cases:
         case = preflight.pin.case(inputs.case_id)
         mapping = load_strict_velocity_10mm_mapping(
             inputs.velocity_mapping_json,
             inputs.velocity_receipt_json,
-            autocfd5_profile=preflight.autocfd5_profile_path,
+            autocfd5_profile=preflight.diagnostic_profile_path,
             case_id=inputs.case_id,
             expected_source_pin_sha256=preflight.native_source_pin_sha256,
             expected_source_part_sha256=tuple(
@@ -647,18 +654,12 @@ def _preflight_case_inputs(
 
     for inputs in preflight.cases:
         case = preflight.pin.case(inputs.case_id)
-        cp_support = cp_supports[inputs.case_id]
         velocity_mapping = velocity_mappings[inputs.case_id]
-        if cp_support.boundary_polygon_count != case.surface_cell_area.element_count:
-            raise RealReferenceDriverError(
-                f"{inputs.case_id} Cp support polygon count differs from the "
-                "pinned surface-cell count"
-            )
         for path, expected_support_id, expected_count in (
             (
                 inputs.surface_prediction_manifest,
                 "surface_native_cells",
-                cp_support.boundary_polygon_count,
+                case.surface_cell_area.element_count,
             ),
             (
                 inputs.volume_prediction_manifest,
@@ -698,9 +699,9 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "native-source pin",
             preflight.native_source_pin_sha256,
         ),
-        args.autocfd5_profile: (
-            "AutoCFD5 profile",
-            preflight.autocfd5_profile_sha256,
+        args.diagnostic_profile: (
+            "diagnostic profile",
+            preflight.diagnostic_profile_sha256,
         ),
     }
     retained_inputs.update(
@@ -753,13 +754,9 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                     case_id=case_inputs.case_id,
                     native_source_pin=args.native_source_pin,
                     dataset_root=args.dataset_root,
-                    autocfd5_profile=args.autocfd5_profile,
-                    cp_support_json=case_inputs.cp_support_json,
+                    diagnostic_profile=args.diagnostic_profile,
                     velocity_mapping_json=case_inputs.velocity_mapping_json,
                     velocity_receipt_json=case_inputs.velocity_receipt_json,
-                    surface_prediction_manifest=(
-                        case_inputs.surface_prediction_manifest
-                    ),
                     volume_prediction_manifest=case_inputs.volume_prediction_manifest,
                     multipart=True,
                     monolithic_vtu=None,
@@ -790,8 +787,8 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                     native_source_pin_sha256=(
                         preflight.native_source_pin_sha256
                     ),
-                    autocfd5_profile_sha256=(
-                        preflight.autocfd5_profile_sha256
+                    diagnostic_profile_sha256=(
+                        preflight.diagnostic_profile_sha256
                     ),
                 )
             )
@@ -805,10 +802,14 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                 case_id=case_inputs.case_id,
                 diagnostic=True,
             )
-            if core_prediction_identities != diagnostic_prediction_identities:
+            if diagnostic_prediction_identities != {
+                "volume_native_cells": core_prediction_identities[
+                    "volume_native_cells"
+                ]
+            }:
                 raise RealReferenceDriverError(
                     f"{case_inputs.case_id} core and diagnostic evaluations used "
-                    "different prediction manifest, chunk, or entity identities"
+                    "different volume-prediction manifest, chunk, or entity identities"
                 )
             case_results.append(
                 {
@@ -817,7 +818,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
                         pin.case(case_inputs.case_id).volume_parts
                     ),
                     "transport": "verified_ordered_multipart_byte_stream",
-                    "cross_evaluator_prediction_identity_verified": True,
+                    "cross_evaluator_volume_prediction_identity_verified": True,
                     "core_evidence": {
                         **core_identity,
                         "file": core_output.relative_to(staging).as_posix(),
@@ -834,7 +835,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         )
         receipt: dict[str, object] = {
             "schema": OUTPUT_SCHEMA,
-            "schema_version": 3,
+            "schema_version": 4,
             "status": OUTPUT_STATUS,
             "official_submission": False,
             "scoring_contract_active": False,
@@ -845,7 +846,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "complete_484_case_split_evaluated": False,
             "public_scoring_support_eligible": False,
             "native_source_pin_sha256": preflight.native_source_pin_sha256,
-            "autocfd5_profile_sha256": preflight.autocfd5_profile_sha256,
+            "diagnostic_profile_sha256": preflight.diagnostic_profile_sha256,
             "case_input_config_sha256": preflight.config_sha256,
             "evaluator_binding": {
                 "repository_url": REPOSITORY_URL,
@@ -857,6 +858,15 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "runtime": _runtime_identity(vtk_versions),
             "volume_weighting": "one_per_native_cell",
             "geometric_cell_volume_weights_used": False,
+            "continuous_cp_cuts": {
+                "required_cut_count": 4,
+                "ranked_value_available": False,
+                "support_status": "pending_immutable_owner_release",
+                "participant_field_required": False,
+                "derived_from": "surface_native_cells.pMeanTrim",
+                "weighting": "native_cut_intersection_segment_length",
+                "discrete_cp_probe_fallback_used": False,
+            },
             "cases": case_results,
         }
         receipt_path = staging / "validation-receipt.json"
@@ -887,7 +897,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         receipt = run(args)
     except (
-        CpCaseSupportError,
         DrivAerCandidateEvaluatorError,
         DrivAerDiagnosticEvaluatorError,
         DrivAerNativeSurfaceError,

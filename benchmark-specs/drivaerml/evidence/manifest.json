@@ -79,21 +79,21 @@
       "file": "cp-mapping-all484-hardened.json",
       "sha256": "634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81",
       "scope": "all_484_cases",
-      "role": "candidate_cp_mapping_and_truth_replay_with_all_failures_retained",
+      "role": "inactive_discrete_cp_probe_research_mapping_and_truth_replay_no_submission_or_cp_cut_support_role",
       "public_scoring_support_eligible": false
     },
     {
       "file": "cp-stl-inventory-all484-hardened.json",
       "sha256": "cd4e1788a633196524b11f9d5f8868df05b71b11fed7fdf86892678c9cf41676",
       "scope": "all_484_cases",
-      "role": "candidate_named_stl_source_inventory",
+      "role": "inactive_discrete_cp_probe_research_named_stl_inventory_no_submission_or_cp_cut_support_role",
       "public_scoring_support_eligible": false
     },
     {
       "file": "cp-owner-review-atlas-all484-hardened.manifest.json",
       "sha256": "6a72536911010bdb741586018d1a13887f19756e135e8d35e6ea2da4b9fc7c4c",
       "scope": "all_484_cases",
-      "role": "candidate_owner_review_atlas_manifest_with_external_pdf_hash_and_all_failures_retained",
+      "role": "inactive_discrete_cp_probe_research_atlas_manifest_no_submission_or_cp_cut_support_role",
       "public_scoring_support_eligible": false
     },
     {
@@ -114,14 +114,14 @@
       "file": "cp-mapping-run1-run44-pilot.json",
       "sha256": "7200e6a97356b8edffa9e7eb1cd22fe31d79daf8551a7a9405273a6c5591a0ea",
       "scope": "run_1_run_44_discovery_pilot",
-      "role": "candidate_cp_mapping_discovery_evidence_with_invalid_rows_retained",
+      "role": "inactive_discrete_cp_probe_discovery_evidence_no_submission_or_cp_cut_support_role",
       "public_scoring_support_eligible": false
     },
     {
       "file": "cp-stl-inventory-run1-run44-pilot.json",
       "sha256": "db2b4031bf0051a51c4709f90e11eaee8b3886b858ce96649aa381778c9c5b0a",
       "scope": "run_1_run_44_discovery_pilot",
-      "role": "candidate_named_stl_inventory_discovery_evidence",
+      "role": "inactive_discrete_cp_probe_named_stl_discovery_evidence_no_submission_or_cp_cut_support_role",
       "public_scoring_support_eligible": false
     }
   ]

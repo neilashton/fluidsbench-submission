@@ -25,11 +25,19 @@ official leaderboard results.
   columns. Candidate `CmPitch` truth is derived algebraically as
   `(Clf-Clr)/2`; accepting that derived moment as the benchmark convention
   remains pending owner scientific approval. `Clf`/`Clr` remain report-only.
-- The AutoCFD5 v8 registries define 16 velocity lines, 209 unique Cp probes, and
-  15 pressure display panels.
+- The submission-facing `drivaerml-diagnostics-v9.json` registry defines 16
+  velocity lines and the four retained continuous Cp cuts. The combined v8
+  registry and the 209-probe and 15-panel Cp registries are retained only as
+  inactive research records; discrete Cp probes are excluded from participant
+  submissions, evaluation, scoring, and activation.
+- Four continuous Cp cuts remain in scope: upperbody centreline, underbody
+  centreline, sidewall at `z=0.15 m`, and front-left wheelhouse at
+  `y=-0.6 m`. Their extraction and scoring support are distinct from the
+  excluded discrete probes and remain an activation task.
 - The nine component weights and unclipped physics-null skill transform are
-  executable in the reference score code. Pending scores cannot silently fall
-  back to the old bounded caps.
+  executable in the reference score code: velocity profiles retain weight
+  0.15 and the distinct continuous Cp-cut component retains weight 0.10.
+  Pending scores cannot silently fall back to the old bounded caps.
 - Prototype packages, generated feeds, and leaderboard panels use the new metric,
   split, and profile vocabulary while remaining ineligible dummy data.
 
@@ -87,9 +95,12 @@ official leaderboard results.
   deterministic all-zero fixture has complete duplicate-free native-cell
   coverage: 20 surface chunks cover 18,903,869 polygons and 312 volume chunks
   cover 310,848,384 cells. The run consumed the fixed surface-area arrays,
-  candidate Cp supports, and 10 mm velocity mappings, used one equal weight per
-  native volume cell, and verified identical prediction artifacts across the
-  core and diagnostic evaluators. See the byte-identical
+  historical candidate discrete-probe Cp supports, and 10 mm velocity mappings,
+  used one equal weight per native volume cell, and verified identical
+  prediction artifacts across the core and diagnostic evaluators. The probe
+  input records what that historical fixture consumed; it is not current Cp-cut
+  support, a submission requirement, or a scoring dependency. See the
+  byte-identical
   [`validation receipt`](evidence/real-reference-driver-run1-run44-candidate-v7-pilot.json)
   (SHA-256 `da80aebb11eb18d3bb66b7a968a94e9a779a6e60f5413ef73d2fbd6485d76572`)
   and its path-free
@@ -97,13 +108,15 @@ official leaderboard results.
   (SHA-256 `24fd18d70098e5943959c8f37e2cd0ade211322e0785734d0dd035200db8fff2`).
   The zero values test transport and reduction only; they are not a trained
   model, physics-null baseline, participant dry run, or scientific result.
-- The hardened Cp candidate sweep covered all 484 cases and retained all
+- The hardened Cp research sweep covered all 484 cases and retained all
   101,156 case/probe rows: 100,281 valid and 875 explicitly invalid. Its source
   inventory covers 364,568,214 raw STL facets, and the 488-page external review
   atlas keeps every failure visible. The mapping, inventory, and compact atlas
   manifest are hash-bound under [`evidence/README.md`](evidence/README.md).
-  Owner visual sign-off and scientific approval remain false, so none of these
-  artifacts is active or public scoring support.
+  Following the owner decision on 2026-08-21, these artifacts are retained only
+  as inactive research evidence. They are not submission or scoring support,
+  and their invalid rows and lack of visual sign-off are not activation
+  blockers.
 
 ## Required before submissions open
 
@@ -171,15 +184,18 @@ official leaderboard results.
    bounded-memory but single-process and non-resumable; immutable per-case
    worker receipts plus strict restartable aggregation remain an execution-
    hardening gate before the all-484, five-method replay.
-5. Publish and hash every case/probe Cp mapping, named-STL source inventory,
-   bridge checks, overrides, and the all-case `Cp=2*pMeanTrim/Uinf^2` replay.
-   Complete the owner visual atlas sign-off; no failed case or probe may be
-   silently omitted. The all-case candidate mapping, inventory, truth replay,
-   and atlas manifest are now indexed under
-   [`evidence/README.md`](evidence/README.md), with all 875 invalid rows retained.
-   This gate remains open until the owner reviews those failures and the atlas,
-   approves any explicit overrides or exclusions, and signs off an immutable
-   scoring-support release. The two-case artifacts remain discovery-only pilots.
+5. Define, publish, and hash the case-specific extraction support for exactly
+   four continuous Cp cuts: upperbody centreline (`y=0`), underbody centreline
+   (`y=0`), sidewall (`z=0.15 m`), and front-left wheelhouse (`y=-0.6 m`).
+   Freeze their plane-intersection tolerance, curve segmentation,
+   anatomical-component inclusion rules, coordinate and orientation,
+   branch/degeneracy handling, deterministic realization of the fixed
+   equal-case/equal-cut native-segment-length-weighted RMSE, and all-case truth
+   hashes. Prove tolerance stability and chunk invariance; no resampled Cp grid
+   or separate cut-resolution study is part of this definition. This gate
+   concerns continuous cuts only;
+   the 209 discrete probes, their atlas, and their 875 invalid mappings are
+   inactive research evidence and are not part of the gate.
 6. After the evaluator is frozen, evaluate the physics-null predictions for every
    split and component and publish the nine finite positive `B_j` denominators.
    Then run the nearest-training-design control, genuine three-real-model
@@ -192,7 +208,8 @@ official leaderboard results.
    add the publication-validation receipt, bind schema-v3 nonspatial values to
    the frozen dataset-specific evaluator, update the candidate evaluator and
    dataset versions to immutable release IDs, and change the composite status to
-   `active` with its nine baseline errors.
+   `active` with its nine baseline errors. Include the frozen four-cut Cp
+   support, but keep the 209-probe artifacts outside that release.
 8. Run at least one end-to-end schema-v3 dry-run submission from an independent
    AutoCFD5 participant. After dataset-owner review, set scoring support to
    `official` and only then set `submissions_open` to `true`.

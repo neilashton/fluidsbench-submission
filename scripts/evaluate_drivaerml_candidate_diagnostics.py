@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Evaluate one candidate DrivAerML AutoCFD5 diagnostic case.
+"""Evaluate one candidate DrivAerML diagnostic case.
 
-The command consumes strict case-local Cp and 10 mm velocity mapping evidence,
-complete candidate prediction chunk manifests, and immutable native truth.  It
-emits candidate-only evidence and never activates scoring or creates an
-official submission.
+The command consumes strict 10 mm velocity mapping evidence, a complete volume
+prediction chunk manifest, and immutable native truth. Continuous Cp cuts stay
+explicitly unavailable until the benchmark owner publishes immutable cut
+support. The legacy 209 discrete Cp probes are not accepted.
 """
 
 from __future__ import annotations
@@ -17,9 +17,6 @@ from contextlib import closing
 from pathlib import Path
 from typing import Sequence
 
-import numpy as np
-
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -29,13 +26,8 @@ from reference.drivaerml.diagnostic_evaluator import (  # noqa: E402
     SparseNativeField,
     evaluate_loaded_case_diagnostics,
     gather_sparse_inline_native_field,
-    load_strict_cp_case_support,
     load_strict_velocity_10mm_mapping,
     write_candidate_diagnostic_evidence,
-)
-from reference.drivaerml.cp_mapping import (  # noqa: E402
-    CpMappingError,
-    RetainedVerifiedRegularFile,
 )
 from reference.drivaerml.evaluator import (  # noqa: E402
     validate_native_source_contract,
@@ -48,14 +40,8 @@ from reference.drivaerml.source import (  # noqa: E402
     open_verified_monolithic,
     open_verified_multipart,
 )
-from scripts.build_drivaerml_cp_case_support import (  # noqa: E402
-    CpCaseSupportError,
-    read_boundary_pressure_selection,
-)
-
-
 DEFAULT_PROFILE = (
-    ROOT / "benchmark-specs" / "drivaerml" / "autocfd5-profiles-v8.json"
+    ROOT / "benchmark-specs" / "drivaerml" / "drivaerml-diagnostics-v9.json"
 )
 
 
@@ -82,47 +68,14 @@ def _sha256_file(path: Path, *, chunk_bytes: int) -> str:
     return digest.hexdigest()
 
 
-def _read_verified_boundary_pressure(
-    path: Path,
-    raw_polygon_ids: Sequence[int],
-    *,
-    expected_sha256: str,
-    chunk_bytes: int,
-    reader=read_boundary_pressure_selection,
-):
-    """Hash and parse one boundary inode retained through the VTK pass.
-
-    VTK accepts only a filename, so it receives a verified descriptor-filesystem
-    alias.  Replacing ``path`` after it is opened therefore cannot redirect the
-    parser, and in-place mutation is rejected by the post-read ``fstat`` check.
-    """
-
-    try:
-        with RetainedVerifiedRegularFile.open(
-            path, label="native boundary VTP"
-        ) as retained:
-            if retained.sha256(chunk_bytes=chunk_bytes) != expected_sha256:
-                raise DrivAerDiagnosticEvaluatorError(
-                    "native boundary bytes differ from the immutable source pin"
-                )
-            descriptor_path = retained.descriptor_path()
-            boundary = reader(descriptor_path, raw_polygon_ids)
-            retained.finalize_verification()
-            return boundary
-    except CpMappingError as error:
-        raise DrivAerDiagnosticEvaluatorError(str(error)) from error
-
-
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--native-source-pin", type=Path, required=True)
     parser.add_argument("--dataset-root", type=Path, required=True)
-    parser.add_argument("--autocfd5-profile", type=Path, default=DEFAULT_PROFILE)
-    parser.add_argument("--cp-support-json", type=Path, required=True)
+    parser.add_argument("--diagnostic-profile", type=Path, default=DEFAULT_PROFILE)
     parser.add_argument("--velocity-mapping-json", type=Path, required=True)
     parser.add_argument("--velocity-receipt-json", type=Path, required=True)
-    parser.add_argument("--surface-prediction-manifest", type=Path, required=True)
     parser.add_argument("--volume-prediction-manifest", type=Path, required=True)
     transport = parser.add_mutually_exclusive_group(required=True)
     transport.add_argument(
@@ -166,57 +119,14 @@ def run(args: argparse.Namespace) -> dict[str, object]:
     case = pin.case(args.case_id)
     resolved = pin.resolve(args.case_id, args.dataset_root)
     expected_part_sha256 = tuple(part.sha256 for part in case.volume_parts)
-    cp_support = load_strict_cp_case_support(
-        args.cp_support_json,
-        autocfd5_profile=args.autocfd5_profile,
-        case_id=args.case_id,
-        expected_boundary_sha256=case.boundary.sha256,
-    )
     velocity_mapping = load_strict_velocity_10mm_mapping(
         args.velocity_mapping_json,
         args.velocity_receipt_json,
-        autocfd5_profile=args.autocfd5_profile,
+        autocfd5_profile=args.diagnostic_profile,
         case_id=args.case_id,
         expected_source_pin_sha256=pin_sha256,
         expected_source_part_sha256=expected_part_sha256,
     )
-    cp_raw_ids = tuple(
-        row.raw_vtk_polygon_id
-        for row in cp_support.rows
-        if row.mapping_valid and row.raw_vtk_polygon_id is not None
-    )
-    boundary = _read_verified_boundary_pressure(
-        resolved.boundary_path,
-        cp_raw_ids,
-        expected_sha256=case.boundary.sha256,
-        chunk_bytes=args.io_chunk_bytes,
-    )
-    if (
-        boundary.polygon_count != cp_support.boundary_polygon_count
-        or boundary.tuple_count != boundary.polygon_count
-        or boundary.component_count != 1
-    ):
-        raise DrivAerDiagnosticEvaluatorError(
-            "native boundary pressure support differs from strict Cp evidence"
-        )
-    selected_surface_ids = np.asarray(
-        [raw_id for raw_id, _ in boundary.selected_values], dtype=np.int64
-    )
-    selected_surface_values = np.asarray(
-        [value for _, value in boundary.selected_values], dtype=np.float64
-    )
-    native_surface = SparseNativeField(
-        case_id=args.case_id,
-        support_id="surface_native_cells",
-        field_name="pMeanTrim",
-        total_row_count=boundary.polygon_count,
-        raw_cell_ids=selected_surface_ids,
-        values=selected_surface_values,
-        source_files=(case.boundary.path.name,),
-        source_sha256=(case.boundary.sha256,),
-        complete_source_identity_verified=True,
-    )
-
     if args.multipart:
         volume_stream = open_verified_multipart(
             resolved,
@@ -267,11 +177,8 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             encoded_chunk_bytes=args.io_chunk_bytes,
         )
         evaluation = evaluate_loaded_case_diagnostics(
-            cp_support=cp_support,
             velocity_mapping=velocity_mapping,
-            surface_prediction_manifest=args.surface_prediction_manifest,
             volume_prediction_manifest=args.volume_prediction_manifest,
-            native_surface_pressure=native_surface,
             native_volume_velocity=native_volume,
             maximum_prediction_chunk_rows=args.maximum_prediction_chunk_rows,
             hash_chunk_bytes=args.io_chunk_bytes,
@@ -286,7 +193,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         identity = run(args)
     except (
-        CpCaseSupportError,
         DrivAerDiagnosticEvaluatorError,
         NativeSourceError,
         PredictionChunkError,

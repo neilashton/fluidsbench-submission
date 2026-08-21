@@ -56,9 +56,9 @@ It imports and calls the repository's core and AutoCFD5 candidate evaluator
 entry points. Scientific reductions are not copied into the example. Both
 cases always use the verified ordered multipart stream. The driver consumes
 the immutable source pin, Neil's fixed surface-area arrays, participant
-prediction chunks, Cp support, and the 10 mm velocity mapping/receipt. Volume
-fields use one equal weight per native cell; no geometric cell-volume array is
-required. It downloads and generates nothing. Run it from a clean Git checkout
+prediction chunks, and the 10 mm velocity mapping/receipt. Volume fields use
+one equal weight per native cell; no geometric cell-volume array is required.
+It downloads and generates nothing. Run it from a clean Git checkout
 so the receipt can bind the entire evaluator to one revision. Copy
 `real-case-inputs.example.json`, replace its paths, and run:
 
@@ -74,6 +74,14 @@ python3 -m venv .venv-drivaerml
 
 Successful output contains core and diagnostic candidate evidence for both
 cases plus a hashed validation receipt; it never contains `submission.json`.
+
+The 209 discrete Cp probes are not part of the DrivAerML submission or scoring
+contract. The pilot therefore requires no participant probe values or probe
+mapping support; historical probe artifacts elsewhere in the repository are
+non-normative research evidence only. Four continuous Cp cuts remain in the
+candidate contract and will be derived from submitted native surface
+`pMeanTrim`, without a separate participant field. Their exact immutable native
+extraction support is pending and is not demonstrated by this pilot.
 
 Prediction `.npz` files remain bounded inputs: the loader caps an NPY header at
 4 KiB, the sum of all archive members' declared uncompressed byte sizes at 512

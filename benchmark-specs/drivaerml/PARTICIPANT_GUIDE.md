@@ -82,16 +82,30 @@ regenerates, the fixed surface-area inputs.
 Submit native fields rather than hand-calculated force or profile values. The
 candidate evaluator integrates submitted surface pressure and wall shear to
 derive `Cd`, `Cl`, `CmPitch`, and report-only `Clf`/`Clr`. After activation, the
-owner-approved frozen evaluator will use the approved mappings to derive
-AutoCFD5 velocity profiles and Cp probes. This ensures truth and predictions use
-the same geometry, raw IDs, force convention, validity masks, and reductions.
+owner-approved frozen evaluator will use the approved mappings and extraction
+support to derive the 16 AutoCFD5 velocity profiles and the four FluidsBench
+continuous Cp cuts. This ensures truth and predictions use the same geometry,
+raw IDs, force convention, validity masks, and reductions.
 
-The current candidate definitions contain 16 velocity lines and 209 unique Cp
-probes. All-case velocity mappings and their resolution study are still
-pending. The candidate Cp sweep covers all 484 cases, but retains 875 explicit
-invalid rows and is awaiting owner visual review and disposition. Neither
-candidate mapping is immutable scoring support; contributors must not invent
-their own replacements for official scoring.
+The submission-facing
+[`drivaerml-diagnostics-v9.json`](drivaerml-diagnostics-v9.json) registry contains 16
+velocity lines and four continuous Cp cuts: upperbody centreline (`y=0`),
+underbody centreline (`y=0`), sidewall (`z=0.15 m`), and front-left wheelhouse
+(`y=-0.6 m`). All-case velocity mappings and their resolution study are still
+pending. Exact immutable native extraction support for the four Cp cuts is also
+pending. Contributors must not invent replacements for either official
+support.
+
+The four continuous Cp cuts remain a ranked component with composite weight
+0.10; the velocity profiles retain weight 0.15. Participants submit native
+surface `pMeanTrim`, from which the evaluator derives the cuts, so no separate
+participant Cp-cut field or extracted values are required.
+
+Only the 209 discrete Cp probes are excluded. Participants do not submit probe
+outputs, probe mappings, or probe-specific support, and no discrete-probe
+metric is calculated. The combined v8 registry and existing 209-probe files in
+the proposal and evidence directories are retained only as inactive,
+non-normative research records.
 
 Participants submit the complete native `UMeanTrim` field and do not create or
 modify velocity-profile validity masks. The frozen evaluator will apply the
@@ -111,9 +125,9 @@ stack for the complete VTK-based DrivAerML evidence workflow is defined in
 [`requirements-drivaerml-evaluator.txt`](../../requirements-drivaerml-evaluator.txt):
 Python 3.12.13, NumPy 2.2.6, and VTK 9.5.2. Runtime enforcement differs by
 workflow. Velocity-assignment generation rejects a Python, NumPy, or VTK
-version mismatch. The native-surface and Cp readers reject a VTK version other
-than 9.5.2, and their evidence records the dependency identities available to
-each path. Force replay records its Python, NumPy, and VTK versions but does not
+version mismatch. The native-surface reader rejects a VTK version other than
+9.5.2, and its evidence records the dependency identities available to that
+path. Force replay records its Python, NumPy, and VTK versions but does not
 reject a different Python patch or NumPy version. The bounded XML equal-cell
 volume audit does not invoke VTK or compute cell volumes; it records its
 Python/NumPy runtime for provenance, while the strict aggregate validates the
@@ -201,7 +215,8 @@ must match exactly.
 Contributors declare a revision-pinned, complete-split `scored_predictions`
 artifact but do not create `prediction-artifact-checks.json`. A maintainer must
 replay the native evaluator over that artifact and add the check: it binds the
-exact case-metrics file, ordered force/velocity/Cp values, evaluator version
+exact case-metrics file, ordered force, velocity-profile, and Cp-cut values,
+evaluator version
 and code revision, and complete case count. Final validation also requires that
 revision to match the benchmark-owned frozen evaluator binding exactly; the
 candidate binding is deliberately still pending and has no frozen revision.

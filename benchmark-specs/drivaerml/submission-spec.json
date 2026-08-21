@@ -2,20 +2,20 @@
   "schema_version": "1.1",
   "dataset_id": "drivaerml",
   "dataset_name": "DrivAerML",
-  "dataset_version": "drivaerml-native-v2-candidate",
+  "dataset_version": "drivaerml-native-v3-candidate",
   "status": "candidate_scoring_contract",
   "contract_base_path": "benchmark-specs/drivaerml/",
   "contract_base_path_scope": "repository_relative_contract_artifact_fields_only; upstream_dataset_paths_resolve_within_source_release",
   "scoring_support": {
     "status": "owner_review_required",
     "submissions_open": false,
-    "closed_reason": "The participant contract and official splits are published, but ranking remains closed until all-case velocity replay, Cp failure resolution and visual review, physics-null baselines, genuine-model sensitivity analysis, one genuine maintainer native-evaluator recomputation receipt, force-replay review, and immutable evaluator/scoring-support owner approval are complete.",
+    "closed_reason": "The participant contract and official splits are published, but ranking remains closed until all-case velocity replay, immutable native Cp-cut extraction support, physics-null baselines, genuine-model sensitivity analysis, one genuine maintainer native-evaluator recomputation receipt, force-replay review, and immutable evaluator/scoring-support owner approval are complete.",
     "candidate_evidence_index_file": "evidence/README.md",
     "candidate_evidence_manifest_file": "evidence/manifest.json",
     "dataset_evaluator_binding": {
       "status": "pending_frozen_release",
       "repository_url": "https://github.com/neilashton/fluidsbench-submission",
-      "evaluator_reference_version": "drivaerml-evaluator-v2-candidate",
+      "evaluator_reference_version": "drivaerml-evaluator-v3-candidate",
       "evaluator_code_revision": null,
       "activation_rule": "set status=frozen and publish the exact immutable evaluator Git revision only after the production evaluator is scientifically approved; final maintainer receipts must match both values exactly"
     },
@@ -34,7 +34,7 @@
       },
       "proposal_contract": {
         "file": "proposal/contract-proposal.json",
-        "sha256": "e8b6836bf1acc8190629a2a9d30ed07958511f906660a3bd23b051d843f7be34"
+        "sha256": "a7eca5f606a46f246cbaeac840b248f66e2fae4c09694b13345d137fce876d34"
       }
     },
     "case_file_binding": {
@@ -241,9 +241,9 @@
       }
     },
     "profile_definition": {
-      "file": "autocfd5-profiles-v8.json",
-      "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
-      "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+      "file": "drivaerml-diagnostics-v9.json",
+      "sha256": "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1",
+      "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
       "velocity_validity_policy": {
         "id": "drivaerml-autocfd5-velocity-validity-v1",
         "status": "candidate_policy_defined_owner_mask_pending",
@@ -309,16 +309,11 @@
         },
         "activation_requirement": "publish_and_hash_the_complete_owner_mask_and_all_case_assignments_with_zero_unresolved_non_excluded_samples"
       },
-      "candidate_cp_validation_evidence": {
-        "file": "evidence/cp-mapping-all484-hardened.json",
-        "sha256": "634e95279a2fb1078b3547616f29ddfc0a38ffe03f0b487fa0688be95aadbe81",
-        "case_count": 484,
-        "probe_row_count": 101156,
-        "valid_mapping_count": 100281,
-        "invalid_mapping_count": 875,
-        "omitted_row_count": 0,
-        "public_scoring_support_eligible": false,
-        "owner_visual_signoff": false
+      "cp_cut_support": {
+        "status": "pending_immutable_owner_release",
+        "cut_count": 4,
+        "metric_id": "cp_cut_rmse",
+        "discrete_cp_probe_support_accepted": false
       }
     },
     "participant_process": [
@@ -327,7 +322,7 @@
       "reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling",
       "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
       "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
-      "derive field-integrated forces and AutoCFD5 diagnostics from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
+      "derive field-integrated forces, AutoCFD5 velocity diagnostics, and FluidsBench continuous Cp cuts from the submitted fields using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
       "submit scalar metrics, per-case evidence, profile display chunks, and one revision-pinned complete-split scored-prediction artifact through the current FluidsBench schema; maintainers independently add the native-evaluator recomputation receipt"
     ],
     "activation_gates": {
@@ -337,7 +332,7 @@
       "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
       "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
       "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
-      "cp_probes": "all_484_candidate_mapping_and_cp_equation_replay_complete_with_875_explicit_invalid_rows_owner_resolution_and_visual_signoff_pending",
+      "cp_cuts": "four_continuous_cut_definitions_complete_immutable_native_extraction_support_and_all_case_replay_pending",
       "physics_null_baselines": "pending",
       "composite_sensitivity_and_bootstrap": "blocked_pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
       "schema_v3_nonspatial_result_binding": "candidate_fail_closed_reductions_hash_bound_maintainer_native_evaluator_receipt_and_benchmark_owned_pending_immutable_revision_gate_implemented_tests_pass_genuine_full_split_receipt_frozen_revision_and_owner_approval_pending",
@@ -348,14 +343,14 @@
       "approve_all_case_native_array_inventory_and_exclusion_policy",
       "approve_all_484_case_force_replay_and_chunk_invariance",
       "approve_velocity_assignment_and_resolution_convergence",
-      "resolve_and_approve_all_875_explicit_cp_mapping_failures_and_visual_atlas",
+      "approve_immutable_native_surface_extraction_support_for_all_four_continuous_cp_cuts",
       "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
       "publish_physics_null_denominators_sensitivity_controls_and_bootstrap_indexes",
       "approve_the_candidate_schema_v3_nonspatial_validation_and_hash_bound_maintainer_receipt_then_issue_one_genuine_full_split_receipt",
       "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions"
     ]
   },
-  "evaluation_reference_version": "drivaerml-evaluator-v2-candidate",
+  "evaluation_reference_version": "drivaerml-evaluator-v3-candidate",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {
     "metric_id": "overall_score",
@@ -428,10 +423,10 @@
         "baseline_status": "pending_all_case_evaluator_replay"
       },
       {
-        "metric_id": "cp_probe_rmse",
+        "metric_id": "cp_cut_rmse",
         "weight": 0.1,
         "transform": "physics_null_skill",
-        "baseline_id": "drivaerml.physics_null.cp_probe_rmse",
+        "baseline_id": "drivaerml.physics_null.cp_cut_rmse",
         "baseline_status": "pending_all_case_evaluator_replay"
       }
     ],
@@ -462,7 +457,7 @@
         "metric_id": "diagnostic_score",
         "component_metric_ids": [
           "velocity_profile_uinf_rmse",
-          "cp_probe_rmse"
+          "cp_cut_rmse"
         ]
       }
     ],
@@ -742,29 +737,21 @@
       "availability": "all_11_experimental_lines_available_for_every_case_after_owner_mask_and_zero_unresolved_nonexcluded_samples"
     },
     {
-      "id": "cp_probe_rmse",
+      "id": "cp_cut_rmse",
       "unit": "",
       "direction": "lower",
       "kind": "error",
-      "equation": "\\frac{1}{N}\\sum_c\\sqrt{\\frac{1}{209}\\sum_{i=1}^{209}(\\hat{C}_{p,ci}-C_{p,ci})^2}",
-      "aggregation": "per_case_unique_probe_rmse_then_macro_average",
-      "weighting": "209_unique_probes_equal"
-    },
-    {
-      "id": "cp_panel_macro_rmse",
-      "unit": "",
-      "direction": "lower",
-      "kind": "error",
-      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{15}\\sum_p\\sqrt{\\frac{1}{n_p}\\sum_{i\\in p}(\\hat{C}_{p,ci}-C_{p,ci})^2}",
-      "aggregation": "per_case_panel_rmse_then_equal_panel_and_case_average",
-      "weighting": "panel_membership_rows_equal"
+      "equation": "\\frac{1}{N}\\sum_c\\frac{1}{4}\\sum_q\\sqrt{\\frac{\\sum_{s\\in\\Gamma_{cq}}\\Delta s_s(\\hat{C}_{p,s}-C_{p,s})^2}{\\sum_{s\\in\\Gamma_{cq}}\\Delta s_s}}",
+      "aggregation": "equal_case_equal_cut_macro_average",
+      "weighting": "native_cut_intersection_segment_length",
+      "availability": "all_four_continuous_native_surface_cuts_available_for_every_case_after_immutable_owner_extraction_support_is_published"
     }
   ],
   "profile_definition": {
-    "id": "drivaerml-autocfd5-v8-candidate",
-    "file": "autocfd5-profiles-v8.json",
-    "sha256": "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184",
-    "status": "candidate_all_case_cp_mapping_complete_with_explicit_failures_velocity_all_case_pending",
+    "id": "drivaerml-diagnostics-v9-candidate",
+    "file": "drivaerml-diagnostics-v9.json",
+    "sha256": "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1",
+    "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
     "velocity_validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1"
   },
   "profile_panels": [
@@ -774,125 +761,18 @@
       "allow_unlisted_stations": false,
       "minimum_points": 2,
       "coordinate_order": "strictly_increasing",
-      "coordinate_id": "panel_point_index",
-      "coordinate_unit": "",
-      "metric_id": "cp_probe_rmse",
+      "coordinate_id": "arc_length_m",
+      "coordinate_unit": "m",
+      "metric_id": "cp_cut_rmse",
       "station_ids": [
         "upperbody_centerline",
         "underbody_centerline",
-        "sidewall_z_150mm",
-        "front_wheelhouse_y_neg_600mm",
-        "front_wheelhouse_y_neg_750mm",
-        "front_wheelhouse_z_115_155mm",
-        "a_pillar",
-        "rearend_z_150mm",
-        "rearend_z_500mm",
-        "c_pillar_symmetry",
-        "c_pillar_y_negative",
-        "underbody_off_centerline",
-        "front_window",
-        "rear_window_and_trunk",
-        "side_window"
+        "sidewall_z_0_15",
+        "front_left_wheelhouse_y_neg_0_6"
       ],
       "quantity_ids": [
         "cp"
-      ],
-      "station_sample_counts": {
-        "upperbody_centerline": 43,
-        "underbody_centerline": 22,
-        "sidewall_z_150mm": 27,
-        "front_wheelhouse_y_neg_600mm": 11,
-        "front_wheelhouse_y_neg_750mm": 11,
-        "front_wheelhouse_z_115_155mm": 4,
-        "a_pillar": 8,
-        "rearend_z_150mm": 10,
-        "rearend_z_500mm": 10,
-        "c_pillar_symmetry": 6,
-        "c_pillar_y_negative": 13,
-        "underbody_off_centerline": 13,
-        "front_window": 11,
-        "rear_window_and_trunk": 8,
-        "side_window": 20
-      },
-      "station_coordinate_intervals": {
-        "upperbody_centerline": [
-          1.0,
-          43.0
-        ],
-        "underbody_centerline": [
-          1.0,
-          22.0
-        ],
-        "sidewall_z_150mm": [
-          1.0,
-          27.0
-        ],
-        "front_wheelhouse_y_neg_600mm": [
-          1.0,
-          11.0
-        ],
-        "front_wheelhouse_y_neg_750mm": [
-          1.0,
-          11.0
-        ],
-        "front_wheelhouse_z_115_155mm": [
-          1.0,
-          4.0
-        ],
-        "a_pillar": [
-          1.0,
-          8.0
-        ],
-        "rearend_z_150mm": [
-          1.0,
-          10.0
-        ],
-        "rearend_z_500mm": [
-          1.0,
-          10.0
-        ],
-        "c_pillar_symmetry": [
-          1.0,
-          6.0
-        ],
-        "c_pillar_y_negative": [
-          1.0,
-          13.0
-        ],
-        "underbody_off_centerline": [
-          1.0,
-          13.0
-        ],
-        "front_window": [
-          1.0,
-          11.0
-        ],
-        "rear_window_and_trunk": [
-          1.0,
-          8.0
-        ],
-        "side_window": [
-          1.0,
-          20.0
-        ]
-      },
-      "station_coordinate_spacings": {
-        "upperbody_centerline": "uniform",
-        "underbody_centerline": "uniform",
-        "sidewall_z_150mm": "uniform",
-        "front_wheelhouse_y_neg_600mm": "uniform",
-        "front_wheelhouse_y_neg_750mm": "uniform",
-        "front_wheelhouse_z_115_155mm": "uniform",
-        "a_pillar": "uniform",
-        "rearend_z_150mm": "uniform",
-        "rearend_z_500mm": "uniform",
-        "c_pillar_symmetry": "uniform",
-        "c_pillar_y_negative": "uniform",
-        "underbody_off_centerline": "uniform",
-        "front_window": "uniform",
-        "rear_window_and_trunk": "uniform",
-        "side_window": "uniform"
-      }
+      ]
     },
     {
       "id": "velocity_profiles",

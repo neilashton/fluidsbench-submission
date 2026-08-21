@@ -31,7 +31,7 @@ if str(ROOT) not in sys.path:
 from reference.drivaerml.autocfd5 import (  # noqa: E402
     POINT_IN_CELL_CLOSURE_TOLERANCE_M,
     AutoCFD5Error,
-    load_autocfd5_definition,
+    load_autocfd5_submission_definition,
 )
 from reference.drivaerml.source import (  # noqa: E402
     NativeSourceError,
@@ -45,13 +45,16 @@ from reference.drivaerml.source import (  # noqa: E402
 RECEIPT_SCHEMA = "drivaerml-velocity-cell-assignments-case-candidate-v1"
 ARTIFACT_SCHEMA = "drivaerml-velocity-cell-mapping-candidate-v1"
 RECEIPT_STATUS = "candidate_complete_geometry_mapping_not_activation_evidence"
-EXPECTED_AUTOCFD5_PROFILE_SHA256 = (
-    "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184"
+EXPECTED_DIAGNOSTIC_PROFILE_SHA256 = (
+    "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1"
 )
+# Compatibility name retained for downstream candidate tooling; it now binds
+# the probe-free v9 diagnostic registry, not the historical v8 research file.
+EXPECTED_AUTOCFD5_PROFILE_SHA256 = EXPECTED_DIAGNOSTIC_PROFILE_SHA256
 EXPECTED_DATASET_REPOSITORY_ID = "neashton/drivaerml"
 EXPECTED_DATASET_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
 DEFAULT_PROFILE = (
-    ROOT / "benchmark-specs" / "drivaerml" / "autocfd5-profiles-v8.json"
+    ROOT / "benchmark-specs" / "drivaerml" / "drivaerml-diagnostics-v9.json"
 )
 DEFAULT_IO_CHUNK_BYTES = 16 * 1024 * 1024
 DEFAULT_VALIDATION_CHUNK_CELLS = 1_000_000
@@ -160,20 +163,20 @@ def _verified_segment_binding(
 
 def _profile_binding(profile_path: Path) -> tuple[Any, dict[str, object]]:
     initial_hash = _sha256_file(profile_path)
-    if initial_hash != EXPECTED_AUTOCFD5_PROFILE_SHA256:
+    if initial_hash != EXPECTED_DIAGNOSTIC_PROFILE_SHA256:
         raise VelocityAssignmentCLIError(
-            "AutoCFD5 profile does not match the exact candidate v8 SHA-256: "
-            f"expected {EXPECTED_AUTOCFD5_PROFILE_SHA256}, got {initial_hash}"
+            "diagnostic profile does not match the exact probe-free v9 SHA-256: "
+            f"expected {EXPECTED_DIAGNOSTIC_PROFILE_SHA256}, got {initial_hash}"
         )
     try:
-        definition = load_autocfd5_definition(profile_path)
+        definition = load_autocfd5_submission_definition(profile_path)
     except AutoCFD5Error as error:
         raise VelocityAssignmentCLIError(
-            f"AutoCFD5 v8 registry validation failed: {error}"
+            f"v9 diagnostic registry validation failed: {error}"
         ) from error
     if _sha256_file(profile_path) != initial_hash:
         raise VelocityAssignmentCLIError(
-            "AutoCFD5 profile changed while its registries were validated"
+            "diagnostic profile changed while its registries were validated"
         )
     return definition, {
         "profile_sha256": initial_hash,
@@ -182,6 +185,8 @@ def _profile_binding(profile_path: Path) -> tuple[Any, dict[str, object]]:
         },
         "line_count": len(definition.velocity_lines),
         "fixed_10mm_sample_count": len(definition.velocity_samples),
+        "continuous_cp_cut_count": len(definition.pressure_cut_ids),
+        "discrete_cp_probe_count": 0,
     }
 
 

@@ -13,7 +13,7 @@ from reference.drivaerml.autocfd5 import (
     POINT_IN_CELL_CLOSURE_TOLERANCE_M,
     VelocityCellAssignmentEvidence,
     VelocitySampleDefinition,
-    load_autocfd5_definition,
+    load_autocfd5_submission_definition,
 )
 from reference.drivaerml.velocity_assignments import (
     KERNEL_ID,
@@ -44,7 +44,7 @@ from scripts.generate_drivaerml_velocity_assignments import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PROFILE = ROOT / "benchmark-specs" / "drivaerml" / "autocfd5-profiles-v8.json"
+PROFILE = ROOT / "benchmark-specs" / "drivaerml" / "drivaerml-diagnostics-v9.json"
 CASE_ID = "run_44"
 PROFILE_IDS = (
     "V1",
@@ -93,7 +93,7 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
         self.receipts_root = self.root / "receipts"
         self.case_root = self.receipts_root / CASE_ID
         self.case_root.mkdir(parents=True)
-        self.definition = load_autocfd5_definition(PROFILE)
+        self.definition = load_autocfd5_submission_definition(PROFILE)
         self.samples = self._samples()
         self.pin_path, self.parts = self._pin()
         self.registry_binding = {
@@ -103,6 +103,8 @@ class DrivAerMLVelocityAssignmentAggregateTests(unittest.TestCase):
             },
             "line_count": 16,
             "fixed_10mm_sample_count": 16,
+            "continuous_cp_cut_count": 4,
+            "discrete_cp_probe_count": 0,
         }
         self.kernel = {
             "kernel_id": KERNEL_ID,

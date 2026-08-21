@@ -31,7 +31,7 @@ if str(ROOT) not in sys.path:
 from reference.drivaerml.autocfd5 import (  # noqa: E402
     POINT_IN_CELL_CLOSURE_TOLERANCE_M,
     VelocityCellAssignmentEvidence,
-    load_autocfd5_definition,
+    load_autocfd5_submission_definition,
 )
 from reference.drivaerml.source import load_native_source_pin  # noqa: E402
 from reference.drivaerml.velocity_assignments import (  # noqa: E402
@@ -65,7 +65,7 @@ DEFAULT_NATIVE_SOURCE_PIN = (
     ROOT / "benchmark-specs" / "drivaerml" / "proposal" / "native-source-pin.json"
 )
 DEFAULT_AUTOCFD5_PROFILE = (
-    ROOT / "benchmark-specs" / "drivaerml" / "autocfd5-profiles-v8.json"
+    ROOT / "benchmark-specs" / "drivaerml" / "drivaerml-diagnostics-v9.json"
 )
 OFFICIAL_NATIVE_SOURCE_PIN_SHA256 = (
     "4fc9077f8f23f4994c98f4d0e7a17aef7b998de4c996638e3a8a616b6d923fdd"
@@ -304,17 +304,17 @@ def _validate_profile(path: Path) -> tuple[Any, dict[str, object]]:
     digest = sha256_file(path)
     if digest != EXPECTED_AUTOCFD5_PROFILE_SHA256:
         raise VelocityAssignmentAggregateError(
-            "AutoCFD5 profile SHA-256 is not the exact v8 candidate identity"
+            "diagnostic profile SHA-256 is not the exact probe-free v9 identity"
         )
     try:
-        definition = load_autocfd5_definition(path)
+        definition = load_autocfd5_submission_definition(path)
     except ValueError as error:
         raise VelocityAssignmentAggregateError(
-            f"AutoCFD5 v8 registry validation failed: {error}"
+            f"v9 diagnostic registry validation failed: {error}"
         ) from error
     if sha256_file(path) != digest:
         raise VelocityAssignmentAggregateError(
-            "AutoCFD5 profile changed during registry validation"
+            "diagnostic profile changed during registry validation"
         )
     binding: dict[str, object] = {
         "profile_sha256": digest,
@@ -323,6 +323,8 @@ def _validate_profile(path: Path) -> tuple[Any, dict[str, object]]:
         },
         "line_count": 16,
         "fixed_10mm_sample_count": EXPECTED_SAMPLE_COUNTS[10],
+        "continuous_cp_cut_count": len(definition.pressure_cut_ids),
+        "discrete_cp_probe_count": 0,
     }
     return definition, binding
 
@@ -429,12 +431,14 @@ def _validate_registry_binding(
             "source_registry_sha256",
             "line_count",
             "fixed_10mm_sample_count",
+            "continuous_cp_cut_count",
+            "discrete_cp_probe_count",
         },
         label,
     )
     if dict(binding) != expected:
         raise VelocityAssignmentAggregateError(
-            f"{label} differs from the exact AutoCFD5 v8 registry binding"
+            f"{label} differs from the exact v9 diagnostic registry binding"
         )
     return dict(binding)
 

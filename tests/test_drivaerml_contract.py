@@ -35,7 +35,7 @@ class DrivAerMLContractTests(unittest.TestCase):
     def test_candidate_is_concrete_but_closed(self) -> None:
         self.assertEqual(
             self.specification["dataset_version"],
-            "drivaerml-native-v2-candidate",
+            "drivaerml-native-v3-candidate",
         )
         support = self.specification["scoring_support"]
         self.assertEqual(support["status"], "owner_review_required")
@@ -47,11 +47,11 @@ class DrivAerMLContractTests(unittest.TestCase):
         )
         self.assertEqual(
             self.specification["evaluation_reference_version"],
-            "drivaerml-evaluator-v2-candidate",
+            "drivaerml-evaluator-v3-candidate",
         )
         self.assertEqual(
             support["dataset_evaluator_binding"]["evaluator_reference_version"],
-            "drivaerml-evaluator-v2-candidate",
+            "drivaerml-evaluator-v3-candidate",
         )
         self.assertEqual(
             support["activation_gates"]["volume_field_weighting"],
@@ -175,7 +175,7 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertIn("explicit_normalization", all_case_evidence["normalization_status"])
 
         metrics = {item["id"]: item for item in self.specification["metrics"]}
-        self.assertEqual(len(metrics), 32)
+        self.assertEqual(len(metrics), 31)
         self.assertTrue(REMOVED_PHYSICAL_VOLUME_METRIC_IDS.isdisjoint(metrics))
         self.assertEqual(metrics["surface_pressure_rel_l2"]["weighting"], "surface_face_area")
         self.assertEqual(
@@ -233,19 +233,31 @@ class DrivAerMLContractTests(unittest.TestCase):
             [0.15, 0.10, 0.15, 0.10, 0.15, 0.05, 0.05, 0.15, 0.10],
         )
 
-    def test_autocfd5_profile_contract_is_fully_pinned(self) -> None:
+    def test_v9_diagnostic_profile_contract_is_fully_pinned(self) -> None:
         binding = self.specification["profile_definition"]
         profile_path = DATASET_ROOT / binding["file"]
         self.assertEqual(binding["sha256"], sha256_file(profile_path))
-        pressure = self.profile["pressure_profiles"]
-        self.assertEqual(pressure["unique_probe_count"], 209)
-        self.assertEqual(pressure["panel_count"], 15)
-        self.assertEqual(pressure["panel_membership_row_count"], 217)
+        self.assertEqual(self.profile["id"], "drivaerml-diagnostics-v9-candidate")
+        self.assertNotIn("pressure_profiles", self.profile)
+        pressure = self.profile["pressure_cuts"]
+        self.assertEqual(pressure["definition_authority"], "FluidsBench")
+        self.assertEqual(pressure["cut_count"], 4)
+        self.assertEqual(pressure["ranked_metric_id"], "cp_cut_rmse")
         self.assertEqual(
-            [station["sample_count"] for station in pressure["stations"]],
-            [43, 22, 27, 11, 11, 4, 8, 10, 10, 6, 13, 13, 11, 8, 20],
+            pressure["reduction"],
+            "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse",
+        )
+        self.assertEqual(
+            [station["id"] for station in pressure["stations"]],
+            [
+                "upperbody_centerline",
+                "underbody_centerline",
+                "sidewall_z_0_15",
+                "front_left_wheelhouse_y_neg_0_6",
+            ],
         )
         velocity = self.profile["velocity_profiles"]
+        self.assertEqual(velocity["definition_authority"], "AutoCFD5")
         self.assertEqual(velocity["line_count"], 16)
         self.assertEqual(velocity["sample_count_per_case"], 3756)
         self.assertEqual(
@@ -322,35 +334,20 @@ class DrivAerMLContractTests(unittest.TestCase):
             ],
         )
 
-    def test_all_case_cp_candidate_evidence_is_bound_but_not_scoring_support(self) -> None:
-        candidate = self.specification["scoring_support"]["profile_definition"][
-            "candidate_cp_validation_evidence"
+    def test_discrete_cp_probe_evidence_is_inactive_research_only(self) -> None:
+        profile_support = self.specification["scoring_support"]["profile_definition"]
+        self.assertNotIn("candidate_cp_validation_evidence", profile_support)
+        manifest = load_json(DATASET_ROOT / "evidence" / "manifest.json")
+        cp_artifacts = [
+            artifact
+            for artifact in manifest["artifacts"]
+            if artifact["file"].startswith("cp-")
         ]
-        path = DATASET_ROOT / candidate["file"]
-        self.assertEqual(candidate["sha256"], sha256_file(path))
-        self.assertEqual(candidate["case_count"], 484)
-        self.assertEqual(candidate["probe_row_count"], 484 * 209)
-        self.assertEqual(
-            candidate["valid_mapping_count"] + candidate["invalid_mapping_count"],
-            candidate["probe_row_count"],
-        )
-        self.assertEqual(candidate["invalid_mapping_count"], 875)
-        self.assertEqual(candidate["omitted_row_count"], 0)
-        self.assertFalse(candidate["public_scoring_support_eligible"])
-        self.assertFalse(candidate["owner_visual_signoff"])
-
-        evidence = load_json(path)
-        self.assertEqual(evidence["case_count"], candidate["case_count"])
-        self.assertEqual(
-            evidence["aggregate"]["probe_row_count"],
-            candidate["probe_row_count"],
-        )
-        self.assertEqual(
-            evidence["aggregate"]["mapping_invalid_count"],
-            candidate["invalid_mapping_count"],
-        )
-        self.assertFalse(evidence["public_scoring_support_eligible"])
-        self.assertFalse(evidence["owner_visual_signoff_claimed"])
+        self.assertTrue(cp_artifacts)
+        for artifact in cp_artifacts:
+            self.assertIn("inactive_discrete_cp_probe", artifact["role"])
+            self.assertIn("no_submission_or_cp_cut_support_role", artifact["role"])
+            self.assertFalse(artifact["public_scoring_support_eligible"])
 
     def test_leaderboard_and_prototypes_use_the_candidate_contract(self) -> None:
         manifest = load_json(ROOT / "leaderboard" / "manifest.json")
@@ -359,14 +356,23 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertEqual(dataset["overall_score_composite"], self.specification["overall_score_composite"])
         self.assertEqual(
             [len(panel["stations"]) for panel in dataset["diagnostic_panels"]],
-            [15, 16],
+            [4, 16],
         )
         expected_metrics = {item["id"] for item in self.specification["metrics"]}
-        self.assertEqual(len(expected_metrics), 32)
+        self.assertEqual(len(expected_metrics), 31)
         self.assertTrue(
             REMOVED_PHYSICAL_VOLUME_METRIC_IDS.isdisjoint(expected_metrics)
         )
-        self.assertEqual(dataset["submission_format"], "drivaerml_native_candidate_v2")
+        self.assertEqual(dataset["submission_format"], "drivaerml_native_candidate_v3")
+        diagnostic_group = next(
+            group
+            for group in dataset["component_score_groups"]["groups"]
+            if group["metric_id"] == "diagnostic_score"
+        )
+        self.assertEqual(
+            diagnostic_group["component_metric_ids"],
+            ["velocity_profile_uinf_rmse", "cp_cut_rmse"],
+        )
         manifest_metric_ids = {
             definition["id"] for definition in manifest["metric_definitions"]
         }

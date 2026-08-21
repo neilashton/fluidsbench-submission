@@ -3,7 +3,7 @@
   "submission_id": "drivaerml-pointnet",
   "dataset_id": "drivaerml",
   "split_id": "low_drag",
-  "reference_version": "drivaerml-evaluator-v2-candidate",
+  "reference_version": "drivaerml-evaluator-v3-candidate",
   "code_revision": "prototype-dummy-data",
   "generated_at": "2025-06-13T00:00:00Z",
   "status": "prototype_dummy_data",
@@ -38,10 +38,9 @@
     "field_integrated_lift_closure_max_abs": 1e-07,
     "velocity_profile_uinf_rmse": 0.5567764362830022,
     "velocity_profile_experimental_subset_uinf_rmse": 0.5567764362830022,
-    "cp_probe_rmse": 0.5385164807134505,
-    "cp_panel_macro_rmse": 0.5385164807134505
+    "cp_cut_rmse": 0.25
   },
-  "profile_index_sha256": "a2b8b5014f775caae8c7c40164584f2d883fe473f169fd4eb1684943c94c03c0",
+  "profile_index_sha256": "f05d1b2027ae5b44c242badade4aa0330e3ded0e74d8fe7f71dc9ca3d105a058",
   "notes": "Structural dummy evidence for the closed DrivAerML candidate; not computed from public fields and not scientifically rankable.",
   "command": "not-applicable (illustrative dummy data)"
 }

@@ -25,13 +25,14 @@ from scripts.generate_drivaerml_velocity_assignments import (
     RECEIPT_SCHEMA,
     RECEIPT_STATUS,
     VelocityAssignmentCLIError,
+    _profile_binding,
     generate_pinned_velocity_assignments,
 )
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "generate_drivaerml_velocity_assignments.py"
-PROFILE = ROOT / "benchmark-specs" / "drivaerml" / "autocfd5-profiles-v8.json"
+PROFILE = ROOT / "benchmark-specs" / "drivaerml" / "drivaerml-diagnostics-v9.json"
 VTK_READY = vtk_available()
 
 if VTK_READY:
@@ -58,6 +59,30 @@ def _relative_hashes(root: Path) -> dict[str, str]:
 
 
 class DrivAerMLVelocityAssignmentCLIBaseTests(unittest.TestCase):
+    def test_profile_binding_is_probe_free_v9(self) -> None:
+        definition, binding = _profile_binding(PROFILE)
+        self.assertEqual(
+            set(binding),
+            {
+                "profile_sha256",
+                "source_registry_sha256",
+                "line_count",
+                "fixed_10mm_sample_count",
+                "continuous_cp_cut_count",
+                "discrete_cp_probe_count",
+            },
+        )
+        self.assertEqual(
+            set(binding["source_registry_sha256"]),
+            {"velocity_lines", "velocity_scoring_grid"},
+        )
+        self.assertEqual(binding["profile_sha256"], EXPECTED_AUTOCFD5_PROFILE_SHA256)
+        self.assertEqual(binding["line_count"], 16)
+        self.assertEqual(binding["fixed_10mm_sample_count"], 3756)
+        self.assertEqual(binding["continuous_cp_cut_count"], 4)
+        self.assertEqual(binding["discrete_cp_probe_count"], 0)
+        self.assertEqual(len(definition.pressure_cut_ids), 4)
+
     def test_help_is_strict_candidate_only(self) -> None:
         completed = subprocess.run(
             [sys.executable, str(SCRIPT), "--help"],
@@ -101,7 +126,7 @@ class DrivAerMLVelocityAssignmentCLIBaseTests(unittest.TestCase):
                 )
             self.assertEqual(marker.read_text(encoding="utf-8"), "preserve me")
 
-            tampered_profile = root / "autocfd5-profiles-v8.json"
+            tampered_profile = root / "drivaerml-diagnostics-v9.json"
             tampered_profile.write_bytes(PROFILE.read_bytes() + b"\n")
             completed = subprocess.run(
                 [
@@ -126,7 +151,7 @@ class DrivAerMLVelocityAssignmentCLIBaseTests(unittest.TestCase):
                 check=False,
             )
             self.assertNotEqual(completed.returncode, 0)
-            self.assertIn("exact candidate v8 SHA-256", completed.stderr)
+            self.assertIn("exact probe-free v9 SHA-256", completed.stderr)
             self.assertFalse((root / "rejected").exists())
 
     def test_runtime_mismatch_fails_before_native_source_binding(self) -> None:
@@ -155,7 +180,7 @@ class DrivAerMLVelocityAssignmentCLIBaseTests(unittest.TestCase):
                         dataset_root=root,
                         monolithic_vtu=root / "volume_44.vtu",
                         output_root=output,
-                        autocfd5_profile=root / "autocfd5-profiles-v8.json",
+                        autocfd5_profile=root / "drivaerml-diagnostics-v9.json",
                     )
             profile_binding.assert_called_once()
             runtime_receipt.assert_called_once_with()

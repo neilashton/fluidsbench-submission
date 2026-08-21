@@ -43,6 +43,7 @@ NATIVE_BRIDGE_MIN_ABS_NORMAL_DOT = 0.8660254037844387
 NOMINAL_PROBE_DISPLACEMENT_MAX_M = 0.278618
 
 _PROFILE_ID = "drivaerml-autocfd5-v8-candidate"
+_SUBMISSION_PROFILE_ID = "drivaerml-diagnostics-v9-candidate"
 _VELOCITY_PROFILE_IDS = (
     "V1",
     "V2",
@@ -316,6 +317,33 @@ class AutoCFD5Definition:
             raise AutoCFD5Error(
                 f"velocity grid must contain {VELOCITY_SAMPLE_COUNT} samples"
             )
+
+
+@dataclass(frozen=True)
+class AutoCFD5SubmissionDefinition:
+    """Cp-probe-free v9 submission registry for velocity lines and true Cp cuts."""
+
+    velocity_lines: tuple[VelocityLineDefinition, ...]
+    velocity_samples: tuple[VelocitySampleDefinition, ...]
+    pressure_cut_ids: tuple[str, ...]
+    source_sha256: tuple[tuple[str, str], ...]
+
+    def __post_init__(self) -> None:
+        if len(self.velocity_lines) != VELOCITY_LINE_COUNT:
+            raise AutoCFD5Error(
+                f"velocity registry must contain {VELOCITY_LINE_COUNT} lines"
+            )
+        if len(self.velocity_samples) != VELOCITY_SAMPLE_COUNT:
+            raise AutoCFD5Error(
+                f"velocity grid must contain {VELOCITY_SAMPLE_COUNT} samples"
+            )
+        if self.pressure_cut_ids != (
+            "upperbody_centerline",
+            "underbody_centerline",
+            "sidewall_z_0_15",
+            "front_left_wheelhouse_y_neg_0_6",
+        ):
+            raise AutoCFD5Error("submission profile must contain the four Cp cuts")
 
 
 def _load_cp_probes(path: Path) -> tuple[CpProbeDefinition, ...]:
@@ -683,6 +711,117 @@ def load_autocfd5_definition(profile_path: str | Path) -> AutoCFD5Definition:
     )
     _validate_profile_json(profile, definition)
     return definition
+
+
+def load_autocfd5_submission_definition(
+    profile_path: str | Path,
+) -> AutoCFD5SubmissionDefinition:
+    """Load the v9 submission profile without accepting v8 Cp-probe registries."""
+
+    path = Path(profile_path)
+    try:
+        profile = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise AutoCFD5Error(f"cannot read valid JSON profile {path}") from error
+    if not isinstance(profile, Mapping) or profile.get("id") != _SUBMISSION_PROFILE_ID:
+        raise AutoCFD5Error(
+            f"submission profile id must be {_SUBMISSION_PROFILE_ID!r}"
+        )
+    if profile.get("status") != (
+        "candidate_velocity_and_cp_cut_support_pending_all_case_validation"
+    ):
+        raise AutoCFD5Error("submission profile status must retain both pending supports")
+    source = profile.get("source")
+    if not isinstance(source, Mapping) or set(source) != {
+        "result_template_version",
+        "velocity_lines",
+        "velocity_scoring_grid",
+    }:
+        raise AutoCFD5Error(
+            "submission profile must bind only the two velocity registries"
+        )
+    if source.get("result_template_version") != 8:
+        raise AutoCFD5Error("submission profile result-template version is not 8")
+
+    source_paths: dict[str, Path] = {}
+    source_hashes: list[tuple[str, str]] = []
+    for key in ("velocity_lines", "velocity_scoring_grid"):
+        binding = source.get(key)
+        if not isinstance(binding, Mapping) or set(binding) != {"file", "sha256"}:
+            raise AutoCFD5Error(f"submission profile binding {key!r} is malformed")
+        relative_path = binding.get("file")
+        expected_hash = binding.get("sha256")
+        if not isinstance(relative_path, str) or not isinstance(expected_hash, str):
+            raise AutoCFD5Error(f"submission profile binding {key!r} is malformed")
+        if _SHA256_RE.fullmatch(expected_hash) is None:
+            raise AutoCFD5Error(
+                f"submission profile binding {key!r} has an invalid SHA-256"
+            )
+        source_path = path.parent / relative_path
+        actual_hash = _sha256_file(source_path)
+        if actual_hash != expected_hash:
+            raise AutoCFD5Error(
+                f"submission profile binding {key!r} SHA-256 mismatch: "
+                f"expected {expected_hash}, got {actual_hash}"
+            )
+        source_paths[key] = source_path
+        source_hashes.append((key, actual_hash))
+
+    lines = _load_velocity_lines(source_paths["velocity_lines"])
+    samples = _load_velocity_samples(source_paths["velocity_scoring_grid"], lines)
+    velocity = profile.get("velocity_profiles")
+    if not isinstance(velocity, Mapping) or (
+        velocity.get("ranked_metric_id") != "velocity_profile_uinf_rmse"
+        or velocity.get("definition_authority") != "AutoCFD5"
+        or velocity.get("line_count") != VELOCITY_LINE_COUNT
+        or velocity.get("sample_count_per_case") != VELOCITY_SAMPLE_COUNT
+        or velocity.get("quantity") != "magnitude(UMeanTrim)/38.889"
+    ):
+        raise AutoCFD5Error("v9 velocity profile metadata is inconsistent")
+    stations = velocity.get("stations")
+    if not isinstance(stations, list) or [
+        item.get("source_profile_id") for item in stations if isinstance(item, Mapping)
+    ] != list(_VELOCITY_PROFILE_IDS):
+        raise AutoCFD5Error("v9 velocity station IDs or ordering are inconsistent")
+
+    cuts = profile.get("pressure_cuts")
+    if not isinstance(cuts, Mapping) or (
+        cuts.get("ranked_metric_id") != "cp_cut_rmse"
+        or cuts.get("definition_authority") != "FluidsBench"
+        or cuts.get("cut_count") != 4
+        or cuts.get("quantity") != "Cp=2*pMeanTrim/(38.889^2)"
+        or cuts.get("association") != "native_surface_VTP_CellData"
+        or cuts.get("extraction_status") != "pending_immutable_owner_cut_support"
+        or cuts.get("reduction")
+        != "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse"
+    ):
+        raise AutoCFD5Error("v9 Cp-cut metadata is inconsistent")
+    cut_stations = cuts.get("stations")
+    if not isinstance(cut_stations, list):
+        raise AutoCFD5Error("v9 Cp-cut stations must be an array")
+    cut_ids = tuple(
+        _nonempty_string(item.get("id"), "Cp-cut station id")
+        for item in cut_stations
+        if isinstance(item, Mapping)
+    )
+    if len(cut_ids) != len(cut_stations):
+        raise AutoCFD5Error("v9 Cp-cut station is malformed")
+    if "pressure_profiles" in profile or any(
+        key.startswith("cp_") and key != "cp_probes"
+        for key in source
+    ):
+        raise AutoCFD5Error("v9 submission profile cannot contain Cp-probe registries")
+    excluded = profile.get("excluded_diagnostics")
+    if not isinstance(excluded, Mapping) or excluded.get("cp_probes") != (
+        "the_209_discrete_taps_are_not_part_of_the_drivaerml_submission_or_score"
+    ):
+        raise AutoCFD5Error("v9 profile must explicitly exclude the 209 Cp probes")
+    return AutoCFD5SubmissionDefinition(
+        velocity_lines=lines,
+        velocity_samples=samples,
+        pressure_cut_ids=cut_ids,
+        source_sha256=tuple(sorted(source_hashes)),
+    )
 
 
 def _validate_source_hashes(value: tuple[str, ...], label: str) -> None:
@@ -1123,6 +1262,7 @@ def velocity_profile_rmse(
 __all__ = [
     "AutoCFD5Definition",
     "AutoCFD5Error",
+    "AutoCFD5SubmissionDefinition",
     "CP_PANEL_COUNT",
     "CP_PANEL_MEMBERSHIP_COUNT",
     "CP_PROBE_COUNT",
@@ -1144,6 +1284,7 @@ __all__ = [
     "cp_probe_rmse",
     "cp_values_from_mappings",
     "load_autocfd5_definition",
+    "load_autocfd5_submission_definition",
     "sample_native_cell_data_zeroth_order",
     "validate_cp_mapping_evidence",
     "validate_velocity_assignment_evidence",

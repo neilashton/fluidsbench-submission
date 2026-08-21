@@ -39,14 +39,23 @@ For every selected case:
    truth is `force_mom_constref_all.csv`; per-case
    `run_N/force_mom_constref_N.csv` files are convenience mirrors that must
    replay the matching aggregate row.
-5. Extract the AutoCFD5 diagnostics defined in
-   [`autocfd5-profiles-v8.json`](autocfd5-profiles-v8.json): 16 velocity lines on
-   the candidate 10 mm grid and 209 unique pressure probes shown through 15
-   ordered display panels. Once the contract is activated, the ranked velocity
-   error will be the equal-case,
-   equal-line mean of arc-length trapezoidal RMSE for `|U|/Uinf`. The ranked
-   pressure error will be the equal-case mean of RMSE across 209 unique probes;
-   probes repeated between display panels count only once in that ranked value.
+5. Extract the diagnostics defined in
+   [`drivaerml-diagnostics-v9.json`](drivaerml-diagnostics-v9.json): 16 AutoCFD5
+   velocity lines on the candidate 10 mm grid and four continuous Cp cuts:
+   upperbody centreline (`y=0`), underbody centreline (`y=0`), sidewall
+   (`z=0.15 m`), and front-left wheelhouse (`y=-0.6 m`). Once the contract is
+   activated, the ranked velocity error will be the equal-case, equal-line
+   mean of arc-length trapezoidal RMSE for `|U|/Uinf`; continuous Cp-cut RMSE
+   remains a separate ranked component weighted by native cut-intersection
+   segment length.
+
+The 209 discrete Cp probes are not part of the DrivAerML submission or scoring
+contract. Participants do not submit probe outputs or probe-mapping support,
+and no discrete-probe metric is calculated. The combined v8 registry and
+existing 209-probe mapping artifacts are retained only as inactive,
+non-normative research evidence. This exclusion does not apply to the four
+continuous Cp cuts, which the evaluator will derive from submitted native
+surface `pMeanTrim`; participants provide no separate Cp-cut field.
 
 Velocity validity is benchmark-owned support. Only coordinates confirmed to be
 inside the morphed solid or outside the released fluid domain may be excluded.
@@ -60,11 +69,12 @@ fail closed. The all-case mask, tolerance replay, and owner approval are still
 pending.
 
 The primary leaderboard definition has nine components: four global fields,
-three independently ranked field-integrated coefficients, the velocity profiles,
-and the Cp probes. Each component uses unclipped physics-null skill
-`100 * (1 - E/B)`, so a method worse than the null reference keeps a negative
-score. `Clf` and `Clr` remain mandatory report-only diagnostics because they are
-dependent on `Cl` and `CmPitch` and must not receive duplicate composite weight.
+three independently ranked field-integrated coefficients, the velocity
+profiles with weight 0.15, and the continuous Cp cuts with weight 0.10. Each
+component uses unclipped physics-null skill `100 * (1 - E/B)`, so a method worse
+than the null reference keeps a negative score. `Clf` and `Clr` remain mandatory
+report-only diagnostics because they are dependent on `Cl` and `CmPitch` and
+must not receive duplicate composite weight.
 
 The complete machine-readable source of truth is
 [`submission-spec.json`](submission-spec.json). Candidate evidence and its
@@ -87,12 +97,13 @@ independent chunk partitions. It is not a model result or physics-null
 baseline. This audit supplies the complete volume-field weighting evidence
 because the contract uses equal native cells only.
 
-The all-484 Cp candidate sweep retains every one of the 101,156 case/probe rows:
-100,281 are valid and 875 are explicitly invalid. Its mapping, named-STL
-inventory, truth replay, and compact atlas manifest are indexed in
-[`evidence/README.md`](evidence/README.md). The invalid rows and review flags
-still require owner disposition and visual sign-off, so these artifacts are not
-official scoring support and cannot make a submission eligible.
+The earlier all-484 discrete-probe candidate sweep and its review artifacts
+remain indexed in [`evidence/README.md`](evidence/README.md) for research
+provenance only. They are not participant instructions, submission artifacts,
+or scoring support, and their unresolved rows do not block a submission
+contract that otherwise becomes eligible. Exact immutable native extraction
+support for the four continuous Cp cuts is still pending and remains a separate
+activation requirement.
 
 The prescribed 1, 2, 5, and 10 mm profile study can be checked with
 [`proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md`](proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md).
@@ -113,5 +124,5 @@ two-part/three-part dry run is provided under
 [`examples/drivaerml-candidate-native-chunks/`](../../examples/drivaerml-candidate-native-chunks/);
 it is an ineligible transport and packaging fixture, not an official
 DrivAerML submission. Candidate native-volume support generation uses the exact
-receipt-compatible runtime Python 3.12.13 and NumPy 2.2.6. Surface, Cp, and
-velocity evidence remains pinned to VTK 9.5.2.
+receipt-compatible runtime Python 3.12.13 and NumPy 2.2.6. Surface and velocity
+evidence remains pinned to VTK 9.5.2.

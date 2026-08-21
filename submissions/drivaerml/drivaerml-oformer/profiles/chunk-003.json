@@ -9,8 +9,8 @@
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            43.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.9529018,
@@ -22,8 +22,8 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            22.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.899091,
@@ -32,171 +32,28 @@
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_150mm",
+          "station_id": "sidewall_z_0_15",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            27.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.9568056,
-            -0.1274772
+            0.9572056,
+            -0.1270772
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_600mm",
+          "station_id": "front_left_wheelhouse_y_neg_0_6",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            11.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.8761931,
-            0.2667228
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_750mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9537018,
-            -0.0051988
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_z_115_155mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            4.0
-          ],
-          "prediction": [
-            0.899891,
-            0.1562365
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "a_pillar",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.9576056,
-            -0.1266772
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_150mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.8769931,
-            0.2675228
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_500mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.9545018,
-            -0.0043988
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_symmetry",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            6.0
-          ],
-          "prediction": [
-            0.900691,
-            0.1570365
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_y_negative",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.9584056,
-            -0.1258772
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "underbody_off_centerline",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.8777931,
-            0.2683228
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9553018,
-            -0.0035988
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rear_window_and_trunk",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.901491,
-            0.1578365
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "side_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            20.0
-          ],
-          "prediction": [
-            0.9592056,
-            -0.1250772
+            0.8767931,
+            0.2673228
           ]
         },
         {
@@ -417,8 +274,8 @@
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            43.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.9351416,
@@ -430,8 +287,8 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            22.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.8928336,
@@ -440,171 +297,28 @@
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_150mm",
+          "station_id": "sidewall_z_0_15",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            27.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.9611048,
-            -0.1265497
+            0.9615048,
+            -0.1261497
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_600mm",
+          "station_id": "front_left_wheelhouse_y_neg_0_6",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            11.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.8704453,
-            0.2645658
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_750mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9359416,
-            -0.0070172
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_z_115_155mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            4.0
-          ],
-          "prediction": [
-            0.8936336,
-            0.1546376
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "a_pillar",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.9619048,
-            -0.1257497
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_150mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.8712453,
-            0.2653658
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_500mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.9367416,
-            -0.0062172
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_symmetry",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            6.0
-          ],
-          "prediction": [
-            0.8944336,
-            0.1554376
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_y_negative",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.9627048,
-            -0.1249497
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "underbody_off_centerline",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.8720453,
-            0.2661658
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9375416,
-            -0.0054172
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rear_window_and_trunk",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.8952336,
-            0.1562376
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "side_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            20.0
-          ],
-          "prediction": [
-            0.9635048,
-            -0.1241497
+            0.8710453,
+            0.2651658
           ]
         },
         {
@@ -825,8 +539,8 @@
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            43.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.9366869,
@@ -838,8 +552,8 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            22.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.9035848,
@@ -848,171 +562,28 @@
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_150mm",
+          "station_id": "sidewall_z_0_15",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            27.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.9545346,
-            -0.1279672
+            0.9549346,
+            -0.1275672
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_600mm",
+          "station_id": "front_left_wheelhouse_y_neg_0_6",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            11.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.8724522,
-            0.2653189
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_750mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9374869,
-            -0.006859
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_z_115_155mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            4.0
-          ],
-          "prediction": [
-            0.9043848,
-            0.1573847
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "a_pillar",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.9553346,
-            -0.1271672
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_150mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.8732522,
-            0.2661189
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_500mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.9382869,
-            -0.006059
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_symmetry",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            6.0
-          ],
-          "prediction": [
-            0.9051848,
-            0.1581847
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_y_negative",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.9561346,
-            -0.1263672
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "underbody_off_centerline",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.8740522,
-            0.2669189
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9390869,
-            -0.005259
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rear_window_and_trunk",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.9059848,
-            0.1589847
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "side_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            20.0
-          ],
-          "prediction": [
-            0.9569346,
-            -0.1255672
+            0.8730522,
+            0.2659189
           ]
         },
         {
@@ -1233,8 +804,8 @@
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            43.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.93605,
@@ -1246,8 +817,8 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            22.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.8933816,
@@ -1256,171 +827,28 @@
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_150mm",
+          "station_id": "sidewall_z_0_15",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            27.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.9563725,
-            -0.1275706
+            0.9567725,
+            -0.1271706
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_600mm",
+          "station_id": "front_left_wheelhouse_y_neg_0_6",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            11.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.8653697,
-            0.262661
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_750mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.93685,
-            -0.0069242
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_z_115_155mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            4.0
-          ],
-          "prediction": [
-            0.8941816,
-            0.1547776
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "a_pillar",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.9571725,
-            -0.1267706
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_150mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.8661697,
-            0.263461
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_500mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.93765,
-            -0.0061242
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_symmetry",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            6.0
-          ],
-          "prediction": [
-            0.8949816,
-            0.1555776
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_y_negative",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.9579725,
-            -0.1259706
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "underbody_off_centerline",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.8669697,
-            0.264261
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.93845,
-            -0.0053242
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rear_window_and_trunk",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.8957816,
-            0.1563776
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "side_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            20.0
-          ],
-          "prediction": [
-            0.9587725,
-            -0.1251706
+            0.8659697,
+            0.263261
           ]
         },
         {
@@ -1641,8 +1069,8 @@
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            43.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.9428784,
@@ -1654,8 +1082,8 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            22.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.8962911,
@@ -1664,171 +1092,28 @@
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_150mm",
+          "station_id": "sidewall_z_0_15",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            27.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.9529607,
-            -0.1283068
+            0.9533607,
+            -0.1279068
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_600mm",
+          "station_id": "front_left_wheelhouse_y_neg_0_6",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            11.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.8658374,
-            0.2628365
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_750mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9436784,
-            -0.0062251
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_z_115_155mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            4.0
-          ],
-          "prediction": [
-            0.8970911,
-            0.1555211
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "a_pillar",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.9537607,
-            -0.1275068
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_150mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.8666374,
-            0.2636365
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_500mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.9444784,
-            -0.0054251
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_symmetry",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            6.0
-          ],
-          "prediction": [
-            0.8978911,
-            0.1563211
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_y_negative",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.9545607,
-            -0.1267068
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "underbody_off_centerline",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.8674374,
-            0.2644365
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9452784,
-            -0.0046251
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rear_window_and_trunk",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.8986911,
-            0.1571211
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "side_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            20.0
-          ],
-          "prediction": [
-            0.9553607,
-            -0.1259068
+            0.8664374,
+            0.2634365
           ]
         },
         {
@@ -2049,8 +1334,8 @@
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            43.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.9403517,
@@ -2062,8 +1347,8 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            22.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.8940592,
@@ -2072,171 +1357,28 @@
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_150mm",
+          "station_id": "sidewall_z_0_15",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            27.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.9483235,
-            -0.1293072
+            0.9487235,
+            -0.1289072
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_600mm",
+          "station_id": "front_left_wheelhouse_y_neg_0_6",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            11.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.8808887,
-            0.268485
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_750mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9411517,
-            -0.0064838
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_z_115_155mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            4.0
-          ],
-          "prediction": [
-            0.8948592,
-            0.1549508
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "a_pillar",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.9491235,
-            -0.1285072
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_150mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.8816887,
-            0.269285
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_500mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.9419517,
-            -0.0056838
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_symmetry",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            6.0
-          ],
-          "prediction": [
-            0.8956592,
-            0.1557508
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_y_negative",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.9499235,
-            -0.1277072
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "underbody_off_centerline",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.8824887,
-            0.270085
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9427517,
-            -0.0048838
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rear_window_and_trunk",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.8964592,
-            0.1565508
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "side_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            20.0
-          ],
-          "prediction": [
-            0.9507235,
-            -0.1269072
+            0.8814887,
+            0.269085
           ]
         },
         {
@@ -2457,8 +1599,8 @@
           "station_id": "upperbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            43.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.9513669,
@@ -2470,8 +1612,8 @@
           "station_id": "underbody_centerline",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            22.0
+            0.0,
+            1.0
           ],
           "prediction": [
             0.8967096,
@@ -2480,171 +1622,28 @@
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "sidewall_z_150mm",
+          "station_id": "sidewall_z_0_15",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            27.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.9596576,
-            -0.1268619
+            0.9600576,
+            -0.1264619
           ]
         },
         {
           "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_600mm",
+          "station_id": "front_left_wheelhouse_y_neg_0_6",
           "quantity_id": "cp",
           "coordinate": [
-            1.0,
-            11.0
+            0.0,
+            1.0
           ],
           "prediction": [
-            0.8718871,
-            0.2651069
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_y_neg_750mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9521669,
-            -0.005356
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_wheelhouse_z_115_155mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            4.0
-          ],
-          "prediction": [
-            0.8975096,
-            0.155628
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "a_pillar",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.9604576,
-            -0.1260619
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_150mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.8726871,
-            0.2659069
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rearend_z_500mm",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            10.0
-          ],
-          "prediction": [
-            0.9529669,
-            -0.004556
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_symmetry",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            6.0
-          ],
-          "prediction": [
-            0.8983096,
-            0.156428
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "c_pillar_y_negative",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.9612576,
-            -0.1252619
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "underbody_off_centerline",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            13.0
-          ],
-          "prediction": [
-            0.8734871,
-            0.2667069
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "front_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            11.0
-          ],
-          "prediction": [
-            0.9537669,
-            -0.003756
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "rear_window_and_trunk",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            8.0
-          ],
-          "prediction": [
-            0.8991096,
-            0.157228
-          ]
-        },
-        {
-          "panel_id": "pressure_profiles",
-          "station_id": "side_window",
-          "quantity_id": "cp",
-          "coordinate": [
-            1.0,
-            20.0
-          ],
-          "prediction": [
-            0.9620576,
-            -0.1244619
+            0.8724871,
+            0.2657069
           ]
         },
         {

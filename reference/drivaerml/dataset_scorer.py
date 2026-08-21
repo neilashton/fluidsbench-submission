@@ -3,8 +3,8 @@
 The native DrivAerML evaluator deliberately produces one compact evidence
 document per case.  This module performs the next reduction level without
 opening VTK or prediction arrays: it validates every case document against one
-official split, the immutable native-source pin, the candidate AutoCFD5
-definition, and a predeclared authoritative force-table hash.  Only then are
+official split, the immutable native-source pin, the candidate diagnostic
+registry, and a predeclared authoritative force-table hash.  Only then are
 case metrics reduced.
 
 This is *candidate* evidence.  Physics-null denominators, a frozen scoring
@@ -33,13 +33,13 @@ from .source import (
     NativeSourcePin,
     load_native_source_pin,
 )
-CANDIDATE_DATASET_SCHEMA = "drivaerml-candidate-dataset-evaluation-v2"
+CANDIDATE_DATASET_SCHEMA = "drivaerml-candidate-dataset-evaluation-v3"
 CANDIDATE_DATASET_STATUS = (
     "candidate_dataset_evidence_not_active_or_official_submission"
 )
 CORE_CASE_SCHEMA = "drivaerml-candidate-case-evaluation-v2"
 CORE_CASE_STATUS = "candidate_evaluator_evidence_not_official_submission"
-DIAGNOSTIC_CASE_SCHEMA = "drivaerml-autocfd5-case-diagnostics-candidate-v1"
+DIAGNOSTIC_CASE_SCHEMA = "drivaerml-case-diagnostics-candidate-v3"
 DIAGNOSTIC_CASE_STATUS = "candidate_diagnostics_not_active_or_official_submission"
 
 OFFICIAL_REPOSITORY_ID = "neashton/drivaerml"
@@ -50,8 +50,8 @@ OFFICIAL_NATIVE_SOURCE_PIN_SHA256 = (
 OFFICIAL_FORCE_TRUTH_SHA256 = (
     "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865"
 )
-OFFICIAL_AUTOCFD5_PROFILE_SHA256 = (
-    "17d830087d11e83e3cba75358f33fdd827421be6698ba1624e547ae36f359184"
+OFFICIAL_DIAGNOSTIC_PROFILE_SHA256 = (
+    "b34c8c5075cca578819821c9e8765193c49909c19957b8df133160e540461db1"
 )
 OFFICIAL_SURFACE_AREA_MANIFEST_SHA256 = (
     "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
@@ -77,16 +77,14 @@ REPORT_ONLY_FORCE_METRIC_IDS = (
 DIAGNOSTIC_METRIC_IDS = (
     "velocity_profile_uinf_rmse",
     "velocity_profile_experimental_subset_uinf_rmse",
-    "cp_probe_rmse",
-    "cp_panel_macro_rmse",
+    "cp_cut_rmse",
 )
 RANKED_DIAGNOSTIC_METRIC_IDS = (
     "velocity_profile_uinf_rmse",
-    "cp_probe_rmse",
+    "cp_cut_rmse",
 )
 REPORT_ONLY_DIAGNOSTIC_METRIC_IDS = (
     "velocity_profile_experimental_subset_uinf_rmse",
-    "cp_panel_macro_rmse",
 )
 NONSPATIAL_METRIC_IDS = (
     *RANKED_FORCE_METRIC_IDS,
@@ -193,7 +191,7 @@ class CandidateDatasetImmutablePins:
     repository_revision: str
     native_source_pin_sha256: str
     force_truth_sha256: str
-    autocfd5_profile_sha256: str
+    diagnostic_profile_sha256: str
     surface_area_manifest_sha256: str
 
 
@@ -202,7 +200,7 @@ OFFICIAL_IMMUTABLE_PINS = CandidateDatasetImmutablePins(
     repository_revision=OFFICIAL_REPOSITORY_REVISION,
     native_source_pin_sha256=OFFICIAL_NATIVE_SOURCE_PIN_SHA256,
     force_truth_sha256=OFFICIAL_FORCE_TRUTH_SHA256,
-    autocfd5_profile_sha256=OFFICIAL_AUTOCFD5_PROFILE_SHA256,
+    diagnostic_profile_sha256=OFFICIAL_DIAGNOSTIC_PROFILE_SHA256,
     surface_area_manifest_sha256=OFFICIAL_SURFACE_AREA_MANIFEST_SHA256,
 )
 
@@ -227,10 +225,7 @@ class _Contract:
     profile_velocity_line_sample_counts: tuple[int, ...]
     profile_experimental_velocity_line_ids: tuple[str, ...]
     profile_velocity_sample_count: int
-    profile_cp_probe_count: int
-    profile_cp_panel_ids: tuple[str, ...]
-    profile_cp_panel_sample_counts: tuple[int, ...]
-    profile_cp_panel_membership_count: int
+    profile_cp_cut_ids: tuple[str, ...]
     surface_area_manifest_sha256: str
     force_constants: Mapping[str, object]
 
@@ -261,7 +256,6 @@ class _DiagnosticCase:
     input_sha256: str
     values: Mapping[str, float | None]
     unavailable_reasons: Mapping[str, tuple[Mapping[str, object], ...]]
-    cp_support_sha256: str
     velocity_mapping_sha256: str
     velocity_receipt_sha256: str
 
@@ -440,7 +434,7 @@ def _load_contract(
     for label, digest in (
         ("native source pin", immutable_pins.native_source_pin_sha256),
         ("force truth", immutable_pins.force_truth_sha256),
-        ("AutoCFD5 profile", immutable_pins.autocfd5_profile_sha256),
+        ("diagnostic profile", immutable_pins.diagnostic_profile_sha256),
         ("surface-area manifest", immutable_pins.surface_area_manifest_sha256),
     ):
         _sha256(digest, f"predeclared {label} SHA-256")
@@ -623,24 +617,42 @@ def _load_contract(
     profile_path = _declared_path(
         spec_path.parent, profile_declaration.get("file"), "profile definition file"
     )
-    profile, _, profile_sha = _read_json(profile_path, "AutoCFD5 profile definition")
+    profile, _, profile_sha = _read_json(profile_path, "diagnostic profile definition")
     declared_profile_sha = _sha256(
         profile_declaration.get("sha256"), "profile definition SHA-256"
     )
-    if declared_profile_sha != immutable_pins.autocfd5_profile_sha256:
+    if declared_profile_sha != immutable_pins.diagnostic_profile_sha256:
         raise DrivAerDatasetScorerError(
-            "submission specification AutoCFD5 profile differs from the "
+            "submission specification diagnostic profile differs from the "
             "predeclared hash"
         )
     if profile_sha != declared_profile_sha:
-        raise DrivAerDatasetScorerError("AutoCFD5 profile definition SHA-256 mismatch")
-    pressure_profile = _mapping(profile.get("pressure_profiles"), "pressure_profiles")
+        raise DrivAerDatasetScorerError("diagnostic profile definition SHA-256 mismatch")
+    if profile.get("id") != "drivaerml-diagnostics-v9-candidate":
+        raise DrivAerDatasetScorerError("diagnostic profile identity mismatch")
+    if "pressure_profiles" in profile:
+        raise DrivAerDatasetScorerError(
+            "active diagnostic profile cannot contain discrete Cp probe panels"
+        )
+    source_bindings = _mapping(profile.get("source"), "diagnostic profile source")
+    if any(key.startswith("cp_") or "probe" in key for key in source_bindings):
+        raise DrivAerDatasetScorerError(
+            "active diagnostic profile cannot bind discrete Cp probe support"
+        )
+    pressure_profile = _mapping(profile.get("pressure_cuts"), "pressure_cuts")
     velocity_profile = _mapping(profile.get("velocity_profiles"), "velocity_profiles")
     if (
-        pressure_profile.get("ranked_metric_id") != "cp_probe_rmse"
+        pressure_profile.get("ranked_metric_id") != "cp_cut_rmse"
+        or pressure_profile.get("definition_authority") != "FluidsBench"
+        or pressure_profile.get("association") != "native_surface_VTP_CellData"
+        or pressure_profile.get("extraction_status")
+        != "pending_immutable_owner_cut_support"
+        or pressure_profile.get("reduction")
+        != "equal_case_equal_cut_native_intersection_segment_length_weighted_rmse"
         or velocity_profile.get("ranked_metric_id") != "velocity_profile_uinf_rmse"
+        or velocity_profile.get("definition_authority") != "AutoCFD5"
     ):
-        raise DrivAerDatasetScorerError("AutoCFD5 canonical metric IDs are inconsistent")
+        raise DrivAerDatasetScorerError("diagnostic canonical definitions are inconsistent")
     stations = velocity_profile.get("stations")
     if not isinstance(stations, list):
         raise DrivAerDatasetScorerError("velocity profile stations must be an array")
@@ -674,43 +686,27 @@ def _load_contract(
         "velocity sample count",
         minimum=1,
     )
-    cp_count = _integer(
-        pressure_profile.get("unique_probe_count"),
-        "unique Cp probe count",
-        minimum=1,
-    )
     pressure_stations = pressure_profile.get("stations")
     if not isinstance(pressure_stations, list):
-        raise DrivAerDatasetScorerError("pressure profile stations must be an array")
-    cp_panel_ids = tuple(
+        raise DrivAerDatasetScorerError("pressure cut stations must be an array")
+    cp_cut_ids = tuple(
         _string(
-            _mapping(item, "pressure profile station").get("id"),
-            "pressure profile station ID",
+            _mapping(item, "pressure cut station").get("id"),
+            "pressure cut station ID",
         )
         for item in pressure_stations
     )
-    cp_panel_sample_counts = tuple(
-        _integer(
-            _mapping(item, "pressure profile station").get("sample_count"),
-            "pressure profile station sample count",
-            minimum=1,
-        )
-        for item in pressure_stations
+    expected_cp_cut_ids = (
+        "upperbody_centerline",
+        "underbody_centerline",
+        "sidewall_z_0_15",
+        "front_left_wheelhouse_y_neg_0_6",
     )
     if (
-        len(cp_panel_ids) != len(set(cp_panel_ids))
-        or pressure_profile.get("panel_count") != len(cp_panel_ids)
+        cp_cut_ids != expected_cp_cut_ids
+        or pressure_profile.get("cut_count") != len(cp_cut_ids)
     ):
-        raise DrivAerDatasetScorerError("pressure panel registry is inconsistent")
-    panel_membership_count = _integer(
-        pressure_profile.get("panel_membership_row_count"),
-        "Cp panel membership row count",
-        minimum=1,
-    )
-    if sum(cp_panel_sample_counts) != panel_membership_count:
-        raise DrivAerDatasetScorerError(
-            "pressure panel sample counts differ from the membership-row count"
-        )
+        raise DrivAerDatasetScorerError("pressure cut registry is inconsistent")
     force_constants = _mapping(scoring.get("force_integration"), "force_integration")
 
     return (
@@ -733,10 +729,7 @@ def _load_contract(
             profile_velocity_line_sample_counts=line_sample_counts,
             profile_experimental_velocity_line_ids=experimental_line_ids,
             profile_velocity_sample_count=sample_count,
-            profile_cp_probe_count=cp_count,
-            profile_cp_panel_ids=cp_panel_ids,
-            profile_cp_panel_sample_counts=cp_panel_sample_counts,
-            profile_cp_panel_membership_count=panel_membership_count,
+            profile_cp_cut_ids=cp_cut_ids,
             surface_area_manifest_sha256=surface_manifest_sha,
             force_constants=force_constants,
         ),
@@ -1403,127 +1396,218 @@ def _validate_diagnostic_case(
     pinned: NativeCaseRecord,
     core: _CoreCase,
 ) -> _DiagnosticCase:
+    """Validate the probe-free v9 submission diagnostic evidence."""
+
     case_id = pinned.case_id
     root = _exact_keys(
         document,
-        {"schema", "schema_version", "status", "case_id", "official_submission", "mapping_inputs", "sparse_gather_evidence", "metrics", "claims"},
+        {
+            "schema",
+            "schema_version",
+            "status",
+            "case_id",
+            "official_submission",
+            "mapping_inputs",
+            "sparse_gather_evidence",
+            "metrics",
+            "claims",
+        },
         f"diagnostic evidence {case_id}",
     )
     if (
         root["schema"] != DIAGNOSTIC_CASE_SCHEMA
-        or root["schema_version"] != 1
+        or root["schema_version"] != 3
         or root["status"] != DIAGNOSTIC_CASE_STATUS
         or root["case_id"] != case_id
         or root["official_submission"] is not False
     ):
-        raise DrivAerDatasetScorerError(f"diagnostic evidence {case_id} schema/status mismatch")
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} schema/status mismatch"
+        )
     claims = _exact_keys(
         root["claims"],
-        {"scoring_contract_active", "official_submission", "owner_scientific_approval", "profile_resolution_convergence", "three_real_model_ordering", "independent_participant_dry_run", "all_case_chunk_partition_invariance"},
+        {
+            "scoring_contract_active",
+            "official_submission",
+            "owner_scientific_approval",
+            "profile_resolution_convergence",
+            "three_real_model_ordering",
+            "independent_participant_dry_run",
+            "all_case_chunk_partition_invariance",
+        },
         f"diagnostic evidence {case_id}.claims",
     )
     if any(value is not False for value in claims.values()):
-        raise DrivAerDatasetScorerError(f"diagnostic evidence {case_id} makes an ineligible claim")
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} makes an ineligible claim"
+        )
+
     mappings = _exact_keys(
-        root["mapping_inputs"], {"cp_support", "velocity_10mm"}, f"{case_id} mapping_inputs"
-    )
-    cp_mapping = _exact_keys(
-        mappings["cp_support"], {"file", "sha256", "profile_sha256", "row_count", "invalid_rows"}, f"{case_id} cp_support"
+        root["mapping_inputs"], {"velocity_10mm"}, f"{case_id} mapping_inputs"
     )
     velocity_mapping = _exact_keys(
-        mappings["velocity_10mm"], {"artifact_file", "artifact_sha256", "receipt_file", "receipt_sha256", "profile_sha256", "row_count", "invalid_rows"}, f"{case_id} velocity_10mm"
+        mappings["velocity_10mm"],
+        {
+            "artifact_file",
+            "artifact_sha256",
+            "receipt_file",
+            "receipt_sha256",
+            "profile_sha256",
+            "row_count",
+            "invalid_rows",
+        },
+        f"{case_id} velocity_10mm",
     )
-    _basename(cp_mapping["file"], f"{case_id} Cp support file")
     _basename(velocity_mapping["artifact_file"], f"{case_id} velocity artifact file")
     _basename(velocity_mapping["receipt_file"], f"{case_id} velocity receipt file")
     if (
-        cp_mapping["profile_sha256"] != contract.profile_sha256
-        or velocity_mapping["profile_sha256"] != contract.profile_sha256
-        or cp_mapping["row_count"] != contract.profile_cp_probe_count
+        velocity_mapping["profile_sha256"] != contract.profile_sha256
         or velocity_mapping["row_count"] != contract.profile_velocity_sample_count
-        or not isinstance(cp_mapping["invalid_rows"], list)
         or not isinstance(velocity_mapping["invalid_rows"], list)
     ):
-        raise DrivAerDatasetScorerError(f"diagnostic evidence {case_id} mapping support mismatch")
-    cp_support_sha = _sha256(cp_mapping["sha256"], f"{case_id} Cp support SHA-256")
-    velocity_artifact_sha = _sha256(velocity_mapping["artifact_sha256"], f"{case_id} velocity mapping SHA-256")
-    velocity_receipt_sha = _sha256(velocity_mapping["receipt_sha256"], f"{case_id} velocity receipt SHA-256")
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} velocity mapping support mismatch"
+        )
+    velocity_artifact_sha = _sha256(
+        velocity_mapping["artifact_sha256"], f"{case_id} velocity mapping SHA-256"
+    )
+    velocity_receipt_sha = _sha256(
+        velocity_mapping["receipt_sha256"], f"{case_id} velocity receipt SHA-256"
+    )
 
     sparse = _exact_keys(
         root["sparse_gather_evidence"],
-        {"surface_prediction", "volume_prediction", "surface_native_truth", "volume_native_truth", "only_unique_mapped_raw_ids_retained", "prediction_manifests_fully_consumed"},
+        {
+            "volume_prediction",
+            "volume_native_truth",
+            "only_unique_mapped_raw_ids_retained",
+            "prediction_manifest_fully_consumed",
+        },
         f"diagnostic evidence {case_id}.sparse_gather_evidence",
     )
-    if sparse["only_unique_mapped_raw_ids_retained"] is not True or sparse["prediction_manifests_fully_consumed"] is not True:
-        raise DrivAerDatasetScorerError(f"diagnostic evidence {case_id} sparse coverage mismatch")
+    if (
+        sparse["only_unique_mapped_raw_ids_retained"] is not True
+        or sparse["prediction_manifest_fully_consumed"] is not True
+    ):
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} sparse coverage mismatch"
+        )
     _validate_sparse_audit(
-        sparse["surface_prediction"], label=f"{case_id} surface prediction gather", support_id="surface_native_cells", field_name="pMeanTrim", total_count=core.surface_count,
-        manifest_sha256=core.surface_prediction_manifest_sha256, chunk_sha256=core.surface_prediction_chunk_sha256,
+        sparse["volume_prediction"],
+        label=f"{case_id} volume prediction gather",
+        support_id="volume_native_cells",
+        field_name="UMeanTrim",
+        total_count=core.volume_count,
+        manifest_sha256=core.volume_prediction_manifest_sha256,
+        chunk_sha256=core.volume_prediction_chunk_sha256,
     )
     _validate_sparse_audit(
-        sparse["volume_prediction"], label=f"{case_id} volume prediction gather", support_id="volume_native_cells", field_name="UMeanTrim", total_count=core.volume_count,
-        manifest_sha256=core.volume_prediction_manifest_sha256, chunk_sha256=core.volume_prediction_chunk_sha256,
-    )
-    _validate_sparse_audit(
-        sparse["surface_native_truth"], label=f"{case_id} surface native truth", support_id="surface_native_cells", field_name="pMeanTrim", total_count=core.surface_count,
-        source_files=(pinned.boundary.path.name,), source_hashes=(pinned.boundary.sha256,),
-    )
-    _validate_sparse_audit(
-        sparse["volume_native_truth"], label=f"{case_id} volume native truth", support_id="volume_native_cells", field_name="UMeanTrim", total_count=core.volume_count,
-        source_files=tuple(part.path.name for part in pinned.volume_parts), source_hashes=core.volume_part_sha256,
+        sparse["volume_native_truth"],
+        label=f"{case_id} volume native truth",
+        support_id="volume_native_cells",
+        field_name="UMeanTrim",
+        total_count=core.volume_count,
+        source_files=tuple(part.path.name for part in pinned.volume_parts),
+        source_hashes=core.volume_part_sha256,
     )
 
     metrics = _exact_keys(
         root["metrics"],
         {
-            "cp_probe_rmse",
-            "cp_panel_macro_rmse",
+            "cp_cut_rmse",
             "velocity_profile_uinf_rmse",
             "velocity_profile_experimental_subset_uinf_rmse",
         },
         f"{case_id} diagnostics metrics",
     )
-    cp = _exact_keys(
-        metrics["cp_probe_rmse"],
-        {"metric_id", "ranked_value_available", "required_unique_probe_count", "unavailable_reasons", "case_rmse", "aggregation", "weighting", "equation", "Uinf_m_per_s", "valid_truth_row_equation_replay_count", "truth_equation_verified"},
-        f"{case_id} Cp metric",
-    )
-    cp_panel = _exact_keys(
-        metrics["cp_panel_macro_rmse"],
-        {"metric_id", "value_available", "required_panel_count", "required_panel_membership_row_count", "required_unique_probe_count", "unavailable_reasons", "panel_rmse", "case_equal_panel_mean_rmse", "aggregation", "weighting", "truth_equation_verified"},
-        f"{case_id} Cp panel metric",
+    cp_cut = _exact_keys(
+        metrics["cp_cut_rmse"],
+        {
+            "metric_id",
+            "ranked_value_available",
+            "required_cut_count",
+            "unavailable_reasons",
+            "case_equal_cut_mean_rmse",
+            "aggregation",
+            "weighting",
+            "support_status",
+            "discrete_cp_probe_fallback_used",
+        },
+        f"{case_id} Cp-cut metric",
     )
     velocity = _exact_keys(
         metrics["velocity_profile_uinf_rmse"],
-        {"metric_id", "ranked_value_available", "required_line_count", "required_sample_count", "unavailable_reasons", "line_rmse", "case_equal_line_mean_rmse", "quantity", "Uinf_m_per_s", "arc_rule", "aggregation", "weighting"},
+        {
+            "metric_id",
+            "ranked_value_available",
+            "required_line_count",
+            "required_sample_count",
+            "unavailable_reasons",
+            "line_rmse",
+            "case_equal_line_mean_rmse",
+            "quantity",
+            "Uinf_m_per_s",
+            "arc_rule",
+            "aggregation",
+            "weighting",
+        },
         f"{case_id} velocity metric",
     )
     experimental_velocity = _exact_keys(
         metrics["velocity_profile_experimental_subset_uinf_rmse"],
-        {"metric_id", "value_available", "required_line_count", "required_profile_ids", "unavailable_reasons", "line_rmse", "case_equal_experimental_line_mean_rmse", "quantity", "Uinf_m_per_s", "arc_rule", "aggregation", "weighting"},
+        {
+            "metric_id",
+            "value_available",
+            "required_line_count",
+            "required_profile_ids",
+            "unavailable_reasons",
+            "line_rmse",
+            "case_equal_experimental_line_mean_rmse",
+            "quantity",
+            "Uinf_m_per_s",
+            "arc_rule",
+            "aggregation",
+            "weighting",
+        },
         f"{case_id} experimental velocity metric",
     )
-    u_inf = _finite(contract.force_constants.get("freestream_velocity_m_per_s"), "force freestream velocity", nonnegative=True)
-    truth_replay_count = _integer(
-        cp["valid_truth_row_equation_replay_count"],
-        f"{case_id} Cp truth equation replay count",
-        minimum=0,
+    cp_cut_reasons = cp_cut["unavailable_reasons"]
+    if not isinstance(cp_cut_reasons, list) or len(cp_cut_reasons) != 1:
+        raise DrivAerDatasetScorerError(
+            f"{case_id} Cp-cut support must fail closed with one explicit reason"
+        )
+    cp_cut_reason = _exact_keys(
+        cp_cut_reasons[0],
+        {"diagnostic", "stage", "reason"},
+        f"{case_id} Cp-cut unavailable reason",
     )
     if (
-        cp["metric_id"] != "cp_probe_rmse"
-        or cp["required_unique_probe_count"] != contract.profile_cp_probe_count
-        or cp["aggregation"] != "per_case_unique_probe_rmse_then_macro_average"
-        or cp["weighting"] != "209_unique_probes_equal"
-        or cp["equation"] != "Cp=2*pMeanTrim/Uinf^2"
-        or truth_replay_count > contract.profile_cp_probe_count
-        or not _same_float(_finite(cp["Uinf_m_per_s"], f"{case_id} Cp Uinf"), u_inf)
-        or cp_panel["metric_id"] != "cp_panel_macro_rmse"
-        or cp_panel["required_panel_count"] != len(contract.profile_cp_panel_ids)
-        or cp_panel["required_panel_membership_row_count"] != contract.profile_cp_panel_membership_count
-        or cp_panel["required_unique_probe_count"] != contract.profile_cp_probe_count
-        or cp_panel["aggregation"] != "per_case_panel_rmse_then_equal_panel_and_case_average"
-        or cp_panel["weighting"] != "panel_membership_rows_equal"
-        or velocity["metric_id"] != "velocity_profile_uinf_rmse"
+        cp_cut["metric_id"] != "cp_cut_rmse"
+        or cp_cut["ranked_value_available"] is not False
+        or cp_cut["required_cut_count"] != len(contract.profile_cp_cut_ids)
+        or cp_cut["case_equal_cut_mean_rmse"] is not None
+        or cp_cut["aggregation"] != "equal_case_equal_cut_macro_average"
+        or cp_cut["weighting"] != "native_cut_intersection_segment_length"
+        or cp_cut["support_status"] != "pending_immutable_owner_release"
+        or cp_cut["discrete_cp_probe_fallback_used"] is not False
+        or cp_cut_reason
+        != {
+            "diagnostic": "cp_cut_rmse",
+            "stage": "benchmark_support",
+            "reason": "immutable_native_cp_cut_extraction_support_not_published",
+        }
+    ):
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} Cp-cut fail-closed contract mismatch"
+        )
+
+    u_inf = _finite(
+        contract.force_constants.get("freestream_velocity_m_per_s"),
+        "force freestream velocity",
+        nonnegative=True,
+    )
+    if (
+        velocity["metric_id"] != "velocity_profile_uinf_rmse"
         or velocity["required_line_count"] != len(contract.profile_velocity_line_ids)
         or velocity["required_sample_count"] != contract.profile_velocity_sample_count
         or velocity["quantity"] != "magnitude(UMeanTrim)/Uinf"
@@ -1531,93 +1615,82 @@ def _validate_diagnostic_case(
         != "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging"
         or velocity["aggregation"] != "equal_case_equal_line_macro_average"
         or velocity["weighting"] != "trapezoidal_arc_length_within_line"
-        or not _same_float(_finite(velocity["Uinf_m_per_s"], f"{case_id} velocity Uinf"), u_inf)
-        or experimental_velocity["metric_id"] != "velocity_profile_experimental_subset_uinf_rmse"
-        or experimental_velocity["required_line_count"] != len(contract.profile_experimental_velocity_line_ids)
-        or experimental_velocity["required_profile_ids"] != list(contract.profile_experimental_velocity_line_ids)
+        or not _same_float(
+            _finite(velocity["Uinf_m_per_s"], f"{case_id} velocity Uinf"), u_inf
+        )
+        or experimental_velocity["metric_id"]
+        != "velocity_profile_experimental_subset_uinf_rmse"
+        or experimental_velocity["required_line_count"]
+        != len(contract.profile_experimental_velocity_line_ids)
+        or experimental_velocity["required_profile_ids"]
+        != list(contract.profile_experimental_velocity_line_ids)
         or experimental_velocity["quantity"] != "magnitude(UMeanTrim)/Uinf"
         or experimental_velocity["arc_rule"]
         != "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging"
-        or experimental_velocity["aggregation"] != "equal_case_equal_experimental_line_macro_average"
-        or experimental_velocity["weighting"] != "trapezoidal_arc_length_within_line"
-        or not _same_float(_finite(experimental_velocity["Uinf_m_per_s"], f"{case_id} experimental velocity Uinf"), u_inf)
+        or experimental_velocity["aggregation"]
+        != "equal_case_equal_experimental_line_macro_average"
+        or experimental_velocity["weighting"]
+        != "trapezoidal_arc_length_within_line"
+        or not _same_float(
+            _finite(
+                experimental_velocity["Uinf_m_per_s"],
+                f"{case_id} experimental velocity Uinf",
+            ),
+            u_inf,
+        )
     ):
-        raise DrivAerDatasetScorerError(f"diagnostic evidence {case_id} canonical metric contract mismatch")
-    values: dict[str, float | None] = {}
-    reasons: dict[str, tuple[Mapping[str, object], ...]] = {}
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} velocity contract mismatch"
+        )
+
+    values: dict[str, float | None] = {"cp_cut_rmse": None}
+    reasons: dict[str, tuple[Mapping[str, object], ...]] = {
+        "cp_cut_rmse": (dict(cp_cut_reason),)
+    }
     for metric_id, metric, availability_key, value_key in (
-        ("cp_probe_rmse", cp, "ranked_value_available", "case_rmse"),
-        ("cp_panel_macro_rmse", cp_panel, "value_available", "case_equal_panel_mean_rmse"),
-        ("velocity_profile_uinf_rmse", velocity, "ranked_value_available", "case_equal_line_mean_rmse"),
-        ("velocity_profile_experimental_subset_uinf_rmse", experimental_velocity, "value_available", "case_equal_experimental_line_mean_rmse"),
+        (
+            "velocity_profile_uinf_rmse",
+            velocity,
+            "ranked_value_available",
+            "case_equal_line_mean_rmse",
+        ),
+        (
+            "velocity_profile_experimental_subset_uinf_rmse",
+            experimental_velocity,
+            "value_available",
+            "case_equal_experimental_line_mean_rmse",
+        ),
     ):
         available = metric[availability_key]
         unavailable = metric["unavailable_reasons"]
         if not isinstance(available, bool) or not isinstance(unavailable, list):
-            raise DrivAerDatasetScorerError(f"{case_id}/{metric_id} availability is malformed")
-        for position, reason in enumerate(unavailable):
-            _mapping(reason, f"{case_id}/{metric_id} unavailable reason {position}")
+            raise DrivAerDatasetScorerError(
+                f"{case_id}/{metric_id} availability is malformed"
+            )
         if available:
             if unavailable:
-                raise DrivAerDatasetScorerError(f"{case_id}/{metric_id} claims availability despite unavailable reasons")
-            values[metric_id] = _finite(metric[value_key], f"{case_id}/{metric_id}", nonnegative=True)
+                raise DrivAerDatasetScorerError(
+                    f"{case_id}/{metric_id} claims availability despite reasons"
+                )
+            values[metric_id] = _finite(
+                metric[value_key], f"{case_id}/{metric_id}", nonnegative=True
+            )
             reasons[metric_id] = ()
         else:
             if metric[value_key] is not None or not unavailable:
-                raise DrivAerDatasetScorerError(f"{case_id}/{metric_id} unavailable evidence is incomplete")
+                raise DrivAerDatasetScorerError(
+                    f"{case_id}/{metric_id} unavailable evidence is incomplete"
+                )
             values[metric_id] = None
-            reasons[metric_id] = tuple(dict(reason) for reason in unavailable)
-
-    cp_invalid_keys: list[
-        tuple[int | None, str | None, int | None, str, str]
-    ] = []
-    for position, row in enumerate(cp_mapping["invalid_rows"]):
-        item = _exact_keys(
-            row,
-            {
-                "autocfd_probe_id",
-                "mapping_valid",
-                "mapping_reason",
-                "raw_vtk_polygon_id",
-                "truth_valid",
-                "truth_reason",
-                "support_valid",
-            },
-            f"{case_id} invalid Cp row {position}",
-        )
-        probe_id = _integer(
-            item["autocfd_probe_id"],
-            f"{case_id} invalid Cp probe ID",
-            minimum=1,
-        )
-        if item["support_valid"] is not False:
-            raise DrivAerDatasetScorerError(
-                f"{case_id} invalid Cp row claims valid support"
+            reasons[metric_id] = tuple(
+                dict(_mapping(reason, f"{case_id}/{metric_id} unavailable reason"))
+                for reason in unavailable
             )
-        if item["mapping_valid"] is False:
-            stage = "mapping"
-            reason_text = _string(
-                item["mapping_reason"], f"{case_id} Cp mapping reason"
-            )
-        elif item["truth_valid"] is False:
-            stage = "native_truth"
-            reason_text = _string(
-                item["truth_reason"], f"{case_id} Cp truth reason"
-            )
-        else:
-            raise DrivAerDatasetScorerError(
-                f"{case_id} invalid Cp row has neither mapping nor truth failure"
-            )
-        cp_invalid_keys.append((probe_id, None, None, stage, reason_text))
 
     def unavailable_reason_keys(
         metric_id: str,
-    ) -> tuple[
-        tuple[int | None, str | None, int | None, str, str], ...
-    ]:
-        result: list[
-            tuple[int | None, str | None, int | None, str, str]
-        ] = []
+    ) -> tuple[tuple[str, int, str, str], ...]:
+        result: list[tuple[str, int, str, str]] = []
         for position, reason in enumerate(reasons[metric_id]):
             item = _exact_keys(
                 reason,
@@ -1625,57 +1698,34 @@ def _validate_diagnostic_case(
                     "diagnostic",
                     "stage",
                     "reason",
-                    "autocfd_probe_id",
                     "profile_id",
                     "sample_index",
                 },
                 f"{case_id}/{metric_id} unavailable reason {position}",
             )
-            if item["diagnostic"] != metric_id:
+            if (
+                item["diagnostic"] != metric_id
+                or item["profile_id"] is None
+                or item["sample_index"] is None
+            ):
                 raise DrivAerDatasetScorerError(
-                    f"{case_id}/{metric_id} unavailable reason names another diagnostic"
-                )
-            stage = _string(
-                item["stage"], f"{case_id}/{metric_id} unavailable stage"
-            )
-            reason_text = _string(
-                item["reason"], f"{case_id}/{metric_id} unavailable reason"
-            )
-            probe_id = item["autocfd_probe_id"]
-            profile_id = item["profile_id"]
-            sample_index = item["sample_index"]
-            if probe_id is not None:
-                probe_id = _integer(
-                    probe_id, f"{case_id}/{metric_id} probe ID", minimum=1
-                )
-            if profile_id is not None:
-                profile_id = _string(
-                    profile_id, f"{case_id}/{metric_id} profile ID"
-                )
-            if sample_index is not None:
-                sample_index = _integer(
-                    sample_index,
-                    f"{case_id}/{metric_id} sample index",
-                    minimum=0,
+                    f"{case_id}/{metric_id} unavailable reason identity mismatch"
                 )
             result.append(
-                (probe_id, profile_id, sample_index, stage, reason_text)
+                (
+                    _string(item["profile_id"], f"{case_id} unavailable profile ID"),
+                    _integer(
+                        item["sample_index"],
+                        f"{case_id} unavailable sample index",
+                        minimum=0,
+                    ),
+                    _string(item["stage"], f"{case_id} unavailable stage"),
+                    _string(item["reason"], f"{case_id} unavailable reason"),
+                )
             )
         return tuple(result)
 
-    cp_reason_keys = unavailable_reason_keys("cp_probe_rmse")
-    cp_panel_reason_keys = unavailable_reason_keys("cp_panel_macro_rmse")
-    if (
-        cp_reason_keys != tuple(cp_invalid_keys)
-        or cp_panel_reason_keys != tuple(cp_invalid_keys)
-    ):
-        raise DrivAerDatasetScorerError(
-            f"{case_id} Cp unavailable reasons differ from explicit invalid rows"
-        )
-
-    velocity_invalid_keys: list[
-        tuple[None, str, int, str, str]
-    ] = []
+    velocity_invalid_keys: list[tuple[str, int, str, str]] = []
     for position, row in enumerate(velocity_mapping["invalid_rows"]):
         item = _exact_keys(
             row,
@@ -1690,6 +1740,10 @@ def _validate_diagnostic_case(
             f"{case_id} invalid velocity row {position}",
         )
         profile_id = _string(item["profile_id"], f"{case_id} invalid profile ID")
+        if profile_id not in set(contract.profile_velocity_line_ids):
+            raise DrivAerDatasetScorerError(
+                f"{case_id} invalid velocity row names an unknown profile"
+            )
         sample_index = _integer(
             item["sample_index"], f"{case_id} invalid sample index", minimum=0
         )
@@ -1699,67 +1753,83 @@ def _validate_diagnostic_case(
             )
         velocity_invalid_keys.append(
             (
-                None,
                 profile_id,
                 sample_index,
                 "mapping",
                 _string(item["reason"], f"{case_id} velocity invalid reason"),
             )
         )
-    velocity_reason_keys = unavailable_reason_keys("velocity_profile_uinf_rmse")
-    experimental_reason_keys = unavailable_reason_keys(
-        "velocity_profile_experimental_subset_uinf_rmse"
-    )
     expected_experimental_keys = tuple(
         key
         for key in velocity_invalid_keys
-        if key[1] in set(contract.profile_experimental_velocity_line_ids)
+        if key[0] in set(contract.profile_experimental_velocity_line_ids)
     )
     if (
-        velocity_reason_keys != tuple(velocity_invalid_keys)
-        or experimental_reason_keys != expected_experimental_keys
+        unavailable_reason_keys("velocity_profile_uinf_rmse")
+        != tuple(velocity_invalid_keys)
+        or unavailable_reason_keys("velocity_profile_experimental_subset_uinf_rmse")
+        != expected_experimental_keys
     ):
         raise DrivAerDatasetScorerError(
             f"{case_id} velocity unavailable reasons differ from explicit invalid rows"
         )
 
+    sample_count_by_id = dict(
+        zip(
+            contract.profile_velocity_line_ids,
+            contract.profile_velocity_line_sample_counts,
+            strict=True,
+        )
+    )
+
     def validate_line_reduction(
         metric_id: str,
         metric: Mapping[str, Any],
         expected_ids: tuple[str, ...],
-        value_key: str,
     ) -> None:
         line_results = metric["line_rmse"]
         if values[metric_id] is None:
             if line_results != []:
                 raise DrivAerDatasetScorerError(
-                    f"{case_id} unavailable {metric_id} must not contain partial line scores"
+                    f"{case_id} unavailable {metric_id} contains partial scores"
                 )
             return
         if not isinstance(line_results, list) or len(line_results) != len(expected_ids):
-            raise DrivAerDatasetScorerError(f"{case_id}/{metric_id} line evidence is incomplete")
-        sample_count_by_id = dict(
-            zip(
-                contract.profile_velocity_line_ids,
-                contract.profile_velocity_line_sample_counts,
-                strict=True,
+            raise DrivAerDatasetScorerError(
+                f"{case_id}/{metric_id} line evidence is incomplete"
             )
-        )
         line_values: list[float] = []
         observed_ids: list[str] = []
         for position, row in enumerate(line_results):
-            item = _exact_keys(row, {"profile_id", "sample_count", "arc_length_m", "rmse"}, f"{case_id}/{metric_id} line {position}")
+            item = _exact_keys(
+                row,
+                {"profile_id", "sample_count", "arc_length_m", "rmse"},
+                f"{case_id}/{metric_id} line {position}",
+            )
             profile_id = _string(item["profile_id"], f"{case_id} profile ID")
             observed_ids.append(profile_id)
             if item["sample_count"] != sample_count_by_id.get(profile_id):
                 raise DrivAerDatasetScorerError(
-                    f"{case_id}/{metric_id}/{profile_id} sample count differs from the profile registry"
+                    f"{case_id}/{metric_id}/{profile_id} sample count mismatch"
                 )
-            if _finite(item["arc_length_m"], f"{case_id} profile arc length", nonnegative=True) <= 0.0:
-                raise DrivAerDatasetScorerError(f"{case_id} profile arc length must be positive")
-            line_values.append(_finite(item["rmse"], f"{case_id} profile RMSE", nonnegative=True))
+            if (
+                _finite(
+                    item["arc_length_m"],
+                    f"{case_id} profile arc length",
+                    nonnegative=True,
+                )
+                <= 0.0
+            ):
+                raise DrivAerDatasetScorerError(
+                    f"{case_id} profile arc length must be positive"
+                )
+            line_values.append(
+                _finite(item["rmse"], f"{case_id} profile RMSE", nonnegative=True)
+            )
         if tuple(observed_ids) != expected_ids:
-            raise DrivAerDatasetScorerError(f"{case_id}/{metric_id} line order differs from the profile registry")
+            raise DrivAerDatasetScorerError(
+                f"{case_id}/{metric_id} line order differs from the registry"
+            )
         _require_same_float(
             values[metric_id],
             math.fsum(line_values) / len(line_values),
@@ -1770,51 +1840,18 @@ def _validate_diagnostic_case(
         "velocity_profile_uinf_rmse",
         velocity,
         contract.profile_velocity_line_ids,
-        "case_equal_line_mean_rmse",
     )
     validate_line_reduction(
         "velocity_profile_experimental_subset_uinf_rmse",
         experimental_velocity,
         contract.profile_experimental_velocity_line_ids,
-        "case_equal_experimental_line_mean_rmse",
     )
-
-    panel_results = cp_panel["panel_rmse"]
-    if values["cp_panel_macro_rmse"] is None:
-        if panel_results != []:
-            raise DrivAerDatasetScorerError(
-                f"{case_id} unavailable cp_panel_macro_rmse must not contain partial panel scores"
-            )
-    else:
-        if not isinstance(panel_results, list) or len(panel_results) != len(contract.profile_cp_panel_ids):
-            raise DrivAerDatasetScorerError(f"{case_id} Cp panel evidence is incomplete")
-        panel_values: list[float] = []
-        observed_panels: list[str] = []
-        for position, row in enumerate(panel_results):
-            item = _exact_keys(row, {"panel_id", "membership_row_count", "rmse"}, f"{case_id} Cp panel {position}")
-            observed_panels.append(_string(item["panel_id"], f"{case_id} panel ID"))
-            if item["membership_row_count"] != contract.profile_cp_panel_sample_counts[position]:
-                raise DrivAerDatasetScorerError(f"{case_id} Cp panel membership count mismatch")
-            panel_values.append(_finite(item["rmse"], f"{case_id} Cp panel RMSE", nonnegative=True))
-        if tuple(observed_panels) != contract.profile_cp_panel_ids:
-            raise DrivAerDatasetScorerError(f"{case_id} Cp panel order differs from the profile registry")
-        _require_same_float(
-            values["cp_panel_macro_rmse"],
-            math.fsum(panel_values) / len(panel_values),
-            f"{case_id} Cp panel case metric",
-        )
-    cp_available = values["cp_probe_rmse"] is not None
-    if cp["truth_equation_verified"] is not cp_available or cp_panel["truth_equation_verified"] is not cp_available:
-        raise DrivAerDatasetScorerError(f"{case_id} Cp truth-equation coverage claim is inconsistent")
-    if cp_available and truth_replay_count != contract.profile_cp_probe_count:
-        raise DrivAerDatasetScorerError(f"{case_id} Cp truth-equation replay is incomplete")
     return _DiagnosticCase(
         case_id=case_id,
         input_file=path.name,
         input_sha256=digest,
         values=values,
         unavailable_reasons=reasons,
-        cp_support_sha256=cp_support_sha,
         velocity_mapping_sha256=velocity_artifact_sha,
         velocity_receipt_sha256=velocity_receipt_sha,
     )
@@ -1984,7 +2021,6 @@ def evaluate_candidate_dataset(
                         "total_weight": float(core.volume_count),
                         "geometric_cell_volume_weights_used": False,
                     },
-                    "cp_support_sha256": diagnostic.cp_support_sha256,
                     "velocity_mapping_sha256": diagnostic.velocity_mapping_sha256,
                     "velocity_receipt_sha256": diagnostic.velocity_receipt_sha256,
                 },
@@ -2033,10 +2069,7 @@ def evaluate_candidate_dataset(
         "velocity_profile_experimental_subset_uinf_rmse": (
             "equal_case_equal_experimental_line_macro_average"
         ),
-        "cp_probe_rmse": "per_case_unique_probe_rmse_then_macro_average",
-        "cp_panel_macro_rmse": (
-            "per_case_panel_rmse_then_equal_panel_and_case_average"
-        ),
+        "cp_cut_rmse": "equal_case_equal_cut_macro_average",
     }
     diagnostic_scopes = {
         "velocity_profile_uinf_rmse": {
@@ -2049,17 +2082,11 @@ def evaluate_candidate_dataset(
             ),
             "within_line_weighting": "trapezoidal_arc_length",
         },
-        "cp_probe_rmse": {
-            "unique_probe_count_per_case": contract.profile_cp_probe_count,
-            "within_case_weighting": "unique_probes_equal",
-        },
-        "cp_panel_macro_rmse": {
-            "panel_count_per_case": len(contract.profile_cp_panel_ids),
-            "panel_membership_row_count_per_case": (
-                contract.profile_cp_panel_membership_count
-            ),
-            "within_panel_weighting": "membership_rows_equal",
-            "between_panel_weighting": "panels_equal",
+        "cp_cut_rmse": {
+            "cut_count_per_case": len(contract.profile_cp_cut_ids),
+            "within_cut_weighting": "native_cut_intersection_segment_length",
+            "between_cut_weighting": "cuts_equal",
+            "support_status": "pending_immutable_owner_release",
         },
     }
     for metric_id in DIAGNOSTIC_METRIC_IDS:
@@ -2078,7 +2105,7 @@ def evaluate_candidate_dataset(
 
     evidence: dict[str, object] = {
         "schema": CANDIDATE_DATASET_SCHEMA,
-        "schema_version": 2,
+        "schema_version": 3,
         "status": CANDIDATE_DATASET_STATUS,
         "eligibility": {
             "official_submission": False,
@@ -2107,8 +2134,8 @@ def evaluate_candidate_dataset(
             "surface_area_manifest_sha256": contract.surface_area_manifest_sha256,
             "volume_weighting": "one_per_native_cell",
             "geometric_cell_volume_weights_used": False,
-            "autocfd5_profile_file": contract.profile_file,
-            "autocfd5_profile_sha256": contract.profile_sha256,
+            "diagnostic_profile_file": contract.profile_file,
+            "diagnostic_profile_sha256": contract.profile_sha256,
             "force_truth_file": contract.force_truth_file,
             "force_truth_sha256": contract.force_truth_sha256,
         },
