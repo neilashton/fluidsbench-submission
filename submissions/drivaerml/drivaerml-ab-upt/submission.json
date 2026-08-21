@@ -26,14 +26,14 @@
   "submitted_at": "2025-06-13",
   "evaluation": {
     "reference_version": "drivaerml-evaluator-v3-candidate",
-    "code_revision": "prototype-dummy-data",
-    "command": "not-applicable (illustrative dummy data)",
+    "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+    "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "ce70db186f651549ac91b6c8cc1f05ebc5e2ba9b5ad0883019e461704c4d8af9"
+    "evidence_sha256": "b1412b90368adac2bddf1434f4c1bb6fe092b1c879dabc22b623b6e61ab93581"
   },
   "approval": {
     "status": "prototype",
-    "note": "Structural fixture for the closed DrivAerML candidate; no metric or score is an approved result."
+    "note": "Realistic deterministic prototype fixture for the closed DrivAerML candidate; no metric or score is an approved model result."
   },
   "metric_values": {
     "overall_score": 0.0,
@@ -64,9 +64,9 @@
     "field_integrated_clf_rmse": 0.0029600000000000004,
     "field_integrated_clr_rmse": 0.0029600000000000004,
     "field_integrated_lift_closure_max_abs": 1e-07,
-    "velocity_profile_uinf_rmse": 0.1732050807568878,
-    "velocity_profile_experimental_subset_uinf_rmse": 0.1732050807568878,
-    "cp_cut_rmse": 0.25
+    "velocity_profile_uinf_rmse": 0.0739214185,
+    "velocity_profile_experimental_subset_uinf_rmse": 0.076212960848,
+    "cp_cut_rmse": 0.042979346518
   },
   "profile_data": {
     "format": "fluidsbench-profile-chunks-v1",
@@ -74,5 +74,5 @@
     "case_count": 50,
     "case_set_id": "standard"
   },
-  "note": "Illustrative structural fixture migrated to the official split IDs and candidate DrivAerML metric/profile vocabulary. It is not a recomputation from native fields. The four score values are zero placeholders because the nine physics-null denominators are not yet published, so this row is ineligible for ranking or citation."
+  "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published."
 }

@@ -98,6 +98,26 @@ history and paper-parity definitions remain in [`proposal/`](proposal/). The
 exact work still needed before opening submissions is tracked in
 [`ACTIVATION_CHECKLIST.md`](ACTIVATION_CHECKLIST.md).
 
+## Prototype leaderboard fixtures
+
+The ten checked-in DrivAerML leaderboard rows can be regenerated with:
+
+```bash
+python3 scripts/generate_drivaerml_leaderboard_fixtures.py
+python3 scripts/manage_leaderboard.py build
+```
+
+The generator uses every official test case and writes all 16 AutoCFD5 lines
+on the exact station-specific 10 mm candidate grids (3,756 velocity samples per
+case). It also writes dense, case-varying arc-length arrays for all four
+continuous Cp cuts. Because the immutable native Cp-cut support is still an
+activation gate, those cut coordinates and every profile value are explicitly
+analytical CFD-like display data, not extracted DrivAerML truth or model
+predictions. Diagnostic metrics are recomputed from the generated curves, the
+Cp error is dimensionally tied to the pressure-field fixture through
+`Cp = 2 pMeanTrim / 38.889^2`, and all rows remain labelled non-rankable
+prototype data.
+
 The candidate evaluator's all-484 native-surface force replay is recorded in
 [`evidence/force-replay-all484.json`](evidence/force-replay-all484.json). This
 passing implementation evidence does not constitute owner approval or open

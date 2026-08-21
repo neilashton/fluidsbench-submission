@@ -4,8 +4,8 @@
   "dataset_id": "drivaerml",
   "split_id": "full",
   "reference_version": "drivaerml-evaluator-v3-candidate",
-  "code_revision": "prototype-dummy-data",
-  "generated_at": "2025-06-13T00:00:00Z",
+  "code_revision": "drivaerml-realistic-prototype-profiles-v1",
+  "generated_at": "2026-08-21T00:00:00Z",
   "status": "prototype_dummy_data",
   "metric_values": {
     "overall_score": 0.0,
@@ -36,11 +36,11 @@
     "field_integrated_clf_rmse": 0.0029600000000000004,
     "field_integrated_clr_rmse": 0.0029600000000000004,
     "field_integrated_lift_closure_max_abs": 1e-07,
-    "velocity_profile_uinf_rmse": 0.1732050807568878,
-    "velocity_profile_experimental_subset_uinf_rmse": 0.1732050807568878,
-    "cp_cut_rmse": 0.25
+    "velocity_profile_uinf_rmse": 0.0739214185,
+    "velocity_profile_experimental_subset_uinf_rmse": 0.076212960848,
+    "cp_cut_rmse": 0.042979346518
   },
-  "profile_index_sha256": "b5bff19b251cff28086f03bb0a67998cc48eeb8da87cf49d9b3bd6f999dfc664",
-  "notes": "Structural dummy evidence for the closed DrivAerML candidate; not computed from public fields and not scientifically rankable.",
-  "command": "not-applicable (illustrative dummy data)"
+  "profile_index_sha256": "b0d069aa1cbd1da54e9752fd4780be1ff035f991576a5d3d1583e91ac6641d97",
+  "notes": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile errors are recomputed from the generated curves. It is not a native-field evaluation, approved result, ranking entry, or citable model claim. The four score values remain zero because the nine physics-null denominators are not published.",
+  "command": "python3 scripts/generate_drivaerml_leaderboard_fixtures.py"
 }
