@@ -1,16 +1,25 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-d0e3aec8f20f/vki-ls59/train_64/vkils59-prototype-train-64",
+  "claim_id": "prototype-dev-2026-07-15-071e9792fc3d/vki-ls59/train_64/vkils59-prototype-train-64",
   "release": {
-    "id": "prototype-dev-2026-07-15-d0e3aec8f20f",
+    "id": "prototype-dev-2026-07-15-071e9792fc3d",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-21T19:41:46Z",
+    "published_at": "2026-08-22T07:12:51Z",
     "archive_url": null,
     "release_view_url": null
   },
   "result": {
     "submission_id": "vkils59-prototype-train-64",
+    "result_revision": {
+      "series_id": "vkils59-prototype-train-64",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "vkils59-prototype-train-64",
+      "version_count": 1
+    },
     "model": "Transolver",
     "dataset": "VKI-LS59",
     "dataset_id": "vki-ls59",
@@ -44,7 +53,7 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "d0e3aec8f20f8d55cfac470b1d94e599d5c9d4cd45f173cd8c997f784e1c1d5b",
+      "feed_sha256": "071e9792fc3d764f85f168826b59b4600ad4cb8e86ecd1c1fa2e08100065a333",
       "row_index": 61
     },
     "source_submission": {

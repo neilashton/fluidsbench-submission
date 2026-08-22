@@ -2,6 +2,12 @@
   "$schema": "https://fluidsbench.org/schemas/v3/submission.schema.json",
   "schema_version": "3.0",
   "submission_id": "synthetic-open-model-v1",
+  "result_revision": {
+    "series_id": "synthetic-open-model",
+    "version": 1,
+    "supersedes": null,
+    "change_summary": "Initial published result."
+  },
   "model": "Synthetic Open Model",
   "model_type": "Coordinate network",
   "model_types": [

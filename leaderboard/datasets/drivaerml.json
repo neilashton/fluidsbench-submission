@@ -82,6 +82,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 8.75,
+    "result_revision": {
+      "series_id": "drivaerml-ab-upt",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-ab-upt",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 78.863144384867,
@@ -187,6 +196,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 15.6,
+    "result_revision": {
+      "series_id": "drivaerml-gino",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-gino",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 21.30832524282,
@@ -292,6 +310,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 14.11,
+    "result_revision": {
+      "series_id": "drivaerml-graph-u-net",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-graph-u-net",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 32.930980814185,
@@ -397,6 +424,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 6.3,
+    "result_revision": {
+      "series_id": "drivaerml-lno",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-lno",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 24.485151011625,
@@ -502,6 +538,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 6.1,
+    "result_revision": {
+      "series_id": "drivaerml-oformer",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-oformer",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 74.816192216772,
@@ -607,6 +652,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 3.6,
+    "result_revision": {
+      "series_id": "drivaerml-pointnet",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-pointnet",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 10.08909522753,
@@ -712,6 +766,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 5.49,
+    "result_revision": {
+      "series_id": "drivaerml-transformer",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-transformer",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 76.89877224332,
@@ -817,6 +880,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 5.49,
+    "result_revision": {
+      "series_id": "drivaerml-transolver",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-transolver",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 73.93262975656,
@@ -922,6 +994,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 10.98,
+    "result_revision": {
+      "series_id": "drivaerml-upt",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-upt",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 62.058240732323,
@@ -1035,6 +1116,15 @@
     },
     "note": "Deterministic analytical teaching fixture for the closed DrivAerML candidate. It contains smooth CFD-like predictions on all four continuous Cp-cut supports and the exact 3,756-point AutoCFD5 velocity grid for every official test case. The dimensional field errors retain the prototype calibration and the profile RMSE and R2 diagnostics are recomputed from the generated curves. Force R2 is derived from each prototype's existing RMSE and hash-bound official split truth statistics. The four score values use the published bounded-error and bounded-R2 transforms. This is not a native-field evaluation, approved result, ranking entry, or citable model claim.",
     "parameter_count": 18.7,
+    "result_revision": {
+      "series_id": "dummy-drivaerml-meshoperator",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "dummy-drivaerml-meshoperator-v1",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 90.086954615212,

@@ -191,6 +191,40 @@ manifest. The same values are repeated in the submitter-authored evaluation evid
 The profile index records the SHA-256 checksum and case IDs for each chunk. Normal JSON is used so pull requests remain readable;
 hosting can compress it during delivery.
 
+## Result versions
+
+Published result packages are immutable. Every schema-v3 submission declares a stable result series and an integer version:
+
+```json
+"submission_id": "team-model-drivaerml-full-v2",
+"result_revision": {
+  "series_id": "team-model-drivaerml-full",
+  "version": 2,
+  "supersedes": "team-model-drivaerml-full-v1",
+  "change_summary": "Retrained the model and corrected the mesh-to-support mapping."
+}
+```
+
+The first package is `<series-id>-v1`, uses `version: 1`, and sets `supersedes` to `null`. An update copies the previous package into
+a completely new `<series-id>-vN` directory, replaces every changed prediction, metric, profile, evidence record, and checksum,
+increments the version by exactly one, points to the immediately preceding published submission, and explains the material change.
+Never edit, rename, or delete an earlier published directory.
+
+For a result published before this versioning contract whose ID does not end in `-v1`, keep that package unchanged. Its first update
+uses `<legacy-submission-id>-v2`, retains `<legacy-submission-id>` as the series ID, and sets `supersedes` to the exact legacy ID. For
+example, `drivaerml-ab-upt-v2` supersedes `drivaerml-ab-upt`. The validator treats that immutable legacy package as v1.
+
+A revision remains in the same series only when the exact dataset version, split hash, case set, submitter, and institution are
+unchanged. A genuinely different benchmark contract, model family, or submitting team starts a new series at v1. The validator
+rejects skipped versions, forks, missing or unpublished predecessors, non-chronological dates, and IDs that do not match
+`<series-id>-vN`.
+
+The current leaderboard ranks only the latest published version in each series, so repeated updates cannot occupy multiple ranking
+positions. Earlier versions, their submitted scores, dates, metadata, and change summaries remain in the hash-bound revision-history
+feed and are available from the result details. An immutable release snapshot continues to preserve the exact version and rank that
+it originally published. Historical schema-v1/v2 packages are exposed as v1-compatible legacy records; all new schema-v3 packages
+must declare `result_revision` explicitly.
+
 ## 3. Validate and submit
 
 Create a Python environment and install the two validation/reference dependencies:
@@ -238,7 +272,8 @@ recompute submitted base metrics.
 After validation:
 
 1. Commit exactly one new submission directory. Do not modify schemas, specifications, validators, workflows, generated feeds, or
-   existing submissions in the same pull request; a new result version uses a new globally unique submission ID.
+   existing submissions in the same pull request. Use a new globally unique `<series-id>-vN` submission ID and the revision rules
+   above.
 2. Open a pull request against `main` once FluidsBench announces that the dataset is accepting real submissions.
 3. Complete the pull request checklist and resolve all automated validation failures.
 4. Maintainers review scientific provenance, public-evaluation-use eligibility, metadata, submitted values, result-data licence,
@@ -264,14 +299,17 @@ leaderboard/
   manifest.json
   datasets/<dataset-id>.json
   all.json
+  revisions.json
   claims/
     index.json
     <dataset-id>/<split-id>/<submission-id>.json
 leaderboard.json
 ```
 
-The website loads the selected scalar dataset lazily. Profile arrays are not copied into these feeds; each row contains a relative
-profile index path, and the browser fetches only the selected geometry's chunk.
+The website loads the selected scalar dataset lazily. `all.json`, `leaderboard.json`, and the dataset files contain only the latest
+version of each result series and therefore define the current rankings. `revisions.json` is a separately hash-pinned, unranked
+history containing every published version. Profile arrays are not copied into these feeds; each row contains a relative profile
+index path, and the browser fetches only the selected geometry's chunk.
 
 `leaderboard/manifest.json` also publishes the data-release identifier, generation time, source reference, contract version,
 licence scope, archive URL, immutable asset base, SHA-256 digest of the complete scalar feed, and the expected release ID and

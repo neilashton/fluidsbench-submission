@@ -51,6 +51,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 6.01,
+    "result_revision": {
+      "series_id": "drivaernetpp-ab-upt",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-ab-upt",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 86.0,
@@ -125,6 +134,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 2.1,
+    "result_revision": {
+      "series_id": "drivaernetpp-neuraloperator",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-neuraloperator",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 71.54717,
@@ -200,6 +218,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 1.67,
+    "result_revision": {
+      "series_id": "drivaernetpp-pointmae",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-pointmae",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 73.401961,
@@ -274,6 +301,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 1.67,
+    "result_revision": {
+      "series_id": "drivaernetpp-pointnet",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-pointnet",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 64.122642,
@@ -348,6 +384,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 32.58,
+    "result_revision": {
+      "series_id": "drivaernetpp-pointnet-large",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-pointnet-large",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 74.62500000000001,
@@ -423,6 +468,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 3.05,
+    "result_revision": {
+      "series_id": "drivaernetpp-pointtransformer",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-pointtransformer",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 80.717172,
@@ -497,6 +551,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 1.44,
+    "result_revision": {
+      "series_id": "drivaernetpp-regdgcnn",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-regdgcnn",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 78.65957399999999,
@@ -571,6 +634,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 2.47,
+    "result_revision": {
+      "series_id": "drivaernetpp-transolver",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-transolver",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 85.548077,
@@ -645,6 +717,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 7.58,
+    "result_revision": {
+      "series_id": "drivaernetpp-transolver-large",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-transolver-large",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 86.254717,
@@ -719,6 +800,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 1.81,
+    "result_revision": {
+      "series_id": "drivaernetpp-transolver-plus-plus",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-transolver-plus-plus",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 84.72815499999999,
@@ -793,6 +883,15 @@
     },
     "note": "CarBench Table 1 reports DrivAerNet++ surface-pressure Rel L2, pressure-field R2, and parameter count; force, volume, wall-shear, and profile metrics are placeholders until a DrivAerNet++ evaluator is available. Dummy JSON mirrors the existing generated placeholder profile curves so the frontend can load this row through the submission feed. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 24.1,
+    "result_revision": {
+      "series_id": "drivaernetpp-tripnet",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-tripnet",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 83.591837,
@@ -867,6 +966,15 @@
     },
     "note": "Dummy DrivAerNet++ submission with compact profile curves. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
     "parameter_count": 9.6,
+    "result_revision": {
+      "series_id": "dummy-drivaernetplusplus-surfacegnn",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
+      "version_count": 1
+    },
     "ranking": {
       "metric_id": "overall_score",
       "value": 96.616162,

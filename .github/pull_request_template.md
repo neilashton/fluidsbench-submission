@@ -8,6 +8,9 @@
 ## Checklist
 
 - [ ] I used the exact dataset and split version recorded in `submission.json`.
+- [ ] `submission_id` is `<result_revision.series_id>-v<result_revision.version>`; v1 sets `supersedes` to `null`, while later
+      versions point to the immediately preceding published submission and summarize what changed.
+- [ ] I added a new immutable submission directory and did not edit or replace an earlier result version.
 - [ ] The dataset specification marks my exact scoring-support release `official`, owner-approved, and open for submissions.
 - [ ] I followed the published FluidsBench metric equations and dataset-specific reductions.
 - [ ] `metrics/cases.json` covers every official case and support with complete count and weight coverage.

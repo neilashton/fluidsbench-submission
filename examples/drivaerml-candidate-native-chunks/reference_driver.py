@@ -49,7 +49,8 @@ except ImportError as error:  # pragma: no cover - requirements.txt supplies it
     ) from error
 
 
-SUBMISSION_ID = "synthetic-drivaerml-native-chunk-demo"
+RESULT_SERIES_ID = "synthetic-drivaerml-native-chunk-demo"
+SUBMISSION_ID = f"{RESULT_SERIES_ID}-v1"
 DATASET_ID = "synthetic-drivaerml-shaped"
 DATASET_VERSION = "synthetic-native-chunk-demo-v1"
 RELEASE_ID = "synthetic-drivaerml-shaped-support-v1"
@@ -1489,6 +1490,12 @@ def _write_submission_package(
             "$schema": "https://fluidsbench.org/schemas/v3/submission.schema.json",
             "schema_version": "3.0",
             "submission_id": SUBMISSION_ID,
+            "result_revision": {
+                "series_id": RESULT_SERIES_ID,
+                "version": 1,
+                "supersedes": None,
+                "change_summary": "Initial synthetic teaching-bundle result.",
+            },
             "model": "Deterministic Synthetic Teaching Function",
             "model_type": "Synthetic fixture",
             "model_types": ["Synthetic fixture"],

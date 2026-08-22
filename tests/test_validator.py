@@ -20,6 +20,7 @@ from scripts.validate_submission import (
     validate_open_reproducibility,
     validate_metrics,
     validate_profiles,
+    validate_result_revisions,
     validate_v3_case_metrics,
     validate_v3_discretization,
     validate_v3_prediction_metadata,
@@ -148,6 +149,92 @@ def without_storage_error(errors: list[str]) -> list[str]:
 
 
 class ValidatorTests(unittest.TestCase):
+    def test_result_revisions_are_sequential_and_keep_the_same_owner_scope(self) -> None:
+        first_path = Path("/tmp/team-model-v1/submission.json")
+        second_path = Path("/tmp/team-model-v2/submission.json")
+        first = {
+            "submission_id": "team-model-v1",
+            "result_revision": {
+                "series_id": "team-model",
+                "version": 1,
+                "supersedes": None,
+                "change_summary": "Initial result.",
+            },
+            "dataset_id": "example",
+            "split_id": "full",
+            "submitter_name": "Example Researcher",
+            "institution": "Example University",
+            "submitted_at": "2026-08-01",
+            "approval": {"status": "approved"},
+        }
+        second = {
+            **first,
+            "submission_id": "team-model-v2",
+            "submitted_at": "2026-08-02",
+            "approval": {},
+            "result_revision": {
+                "series_id": "team-model",
+                "version": 2,
+                "supersedes": "team-model-v1",
+                "change_summary": "Retrained checkpoint.",
+            },
+        }
+        self.assertEqual(
+            validate_result_revisions(
+                [(first_path, first), (second_path, second)],
+                focus_paths={second_path},
+            ),
+            [],
+        )
+
+        malformed = dict(second)
+        malformed["result_revision"] = {
+            **second["result_revision"],
+            "version": 3,
+            "supersedes": "team-model-v1",
+        }
+        malformed["institution"] = "Different University"
+        joined = "\n".join(
+            validate_result_revisions(
+                [(first_path, first), (second_path, malformed)],
+                focus_paths={second_path},
+            )
+        )
+        self.assertIn("submission_id must equal", joined)
+        self.assertIn("must supersede 'team-model-v2'", joined)
+
+    def test_result_revision_v2_can_supersede_an_unnumbered_legacy_result(self) -> None:
+        legacy_path = Path("/tmp/team-model/submission.json")
+        update_path = Path("/tmp/team-model-v2/submission.json")
+        legacy = {
+            "submission_id": "team-model",
+            "dataset_id": "example",
+            "split_id": "full",
+            "submitter_name": "Example Researcher",
+            "institution": "Example University",
+            "submitted_at": "2026-07-01",
+            "approval": {"status": "approved"},
+        }
+        update = {
+            **legacy,
+            "submission_id": "team-model-v2",
+            "submitted_at": "2026-08-01",
+            "approval": {},
+            "result_revision": {
+                "series_id": "team-model",
+                "version": 2,
+                "supersedes": "team-model",
+                "change_summary": "Updated checkpoint.",
+            },
+        }
+        self.assertEqual(
+            validate_result_revisions(
+                [(legacy_path, legacy), (update_path, update)],
+                focus_paths={update_path},
+            ),
+            [],
+        )
+
     def test_benchmark_contract_overlay_allows_manifest_rebuild_after_spec_change(self) -> None:
         manifest = load_json(ROOT / "leaderboard" / "manifest.json")
         airfrans = next(dataset for dataset in manifest["datasets"] if dataset["slug"] == "airfrans")
