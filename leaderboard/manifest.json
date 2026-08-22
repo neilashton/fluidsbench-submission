@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-08-21T19:41:46Z",
+  "generated_at": "2026-08-22T07:12:51Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-07-15-d0e3aec8f20f",
+    "id": "prototype-dev-2026-07-15-071e9792fc3d",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-08-21T19:41:46Z",
+    "generated_at": "2026-08-22T07:12:51Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "d0e3aec8f20f8d55cfac470b1d94e599d5c9d4cd45f173cd8c997f784e1c1d5b",
+    "feed_sha256": "071e9792fc3d764f85f168826b59b4600ad4cb8e86ecd1c1fa2e08100065a333",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,9 +51,16 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "041ca40ae7eaa4977742e770799a10d0565f870c21c0adfc3285c7757c2a7db9",
+      "index_sha256": "317497dc3062875fc645c095149821b06e78f6f105338598c5825fef9f1a7a42",
       "record_count": 72,
       "eligible_record_count": 0
+    },
+    "revision_history": {
+      "schema_version": "1.0",
+      "file": "leaderboard/revisions.json",
+      "sha256": "53703439c1f64717a9ec699e70115923db3fce8b2451f0e610f7da9416c094a7",
+      "record_count": 72,
+      "series_count": 72
     }
   },
   "all_file": "leaderboard/all.json",
@@ -644,7 +651,8 @@
           }
         ],
         "tolerance": 1e-06
-      }
+      },
+      "revision_count": 10
     },
     {
       "name": "AirfRANS",
@@ -954,7 +962,8 @@
         "file": "velocity-profiles-v1.json",
         "sha256": "539e5b34cc9da7c2915453dc45d17b0652c16e42a6bf3363695be82bbd763d54",
         "status": "owner_review_required"
-      }
+      },
+      "revision_count": 5
     },
     {
       "name": "DrivAerML",
@@ -1818,7 +1827,8 @@
         "sha256": "df22bc807b62f925c32659d681ac44064e6acf46449038b8431b1e9139aba1e8",
         "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
         "velocity_validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1"
-      }
+      },
+      "revision_count": 10
     },
     {
       "name": "DrivAerNet++",
@@ -2065,7 +2075,8 @@
           }
         ],
         "tolerance": 1e-06
-      }
+      },
+      "revision_count": 12
     },
     {
       "name": "HiLiftAeroML",
@@ -2790,7 +2801,8 @@
           }
         ],
         "tolerance": 1e-06
-      }
+      },
+      "revision_count": 8
     },
     {
       "name": "WindsorML",
@@ -3139,7 +3151,8 @@
           }
         ],
         "tolerance": 1e-06
-      }
+      },
+      "revision_count": 10
     },
     {
       "name": "VKI-LS59",
@@ -3500,7 +3513,8 @@
           }
         ],
         "tolerance": 1e-06
-      }
+      },
+      "revision_count": 8
     },
     {
       "name": "Rotor37",
@@ -3861,7 +3875,8 @@
           }
         ],
         "tolerance": 1e-06
-      }
+      },
+      "revision_count": 8
     },
     {
       "name": "BlendedNet",
@@ -4154,7 +4169,8 @@
           }
         ],
         "tolerance": 1e-06
-      }
+      },
+      "revision_count": 1
     }
   ],
   "metric_definitions": [

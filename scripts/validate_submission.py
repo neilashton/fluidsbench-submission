@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import sys
 from copy import deepcopy
 from datetime import date, datetime
@@ -43,11 +44,163 @@ OPEN_REPRODUCIBILITY_CONTRACTS = {
     "2.0": "open-reproducibility-2.0",
     "3.0": "open-reproducibility-3.0",
 }
+LEGACY_V1_SUBMISSION_ID = re.compile(r"^(?P<series>[a-z0-9][a-z0-9-]{2,69})-v1$")
 
 
 def load_json(path: Path) -> Any:
     with path.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def normalized_result_revision(submission: dict[str, Any]) -> dict[str, Any]:
+    """Return public revision metadata, including a safe legacy-v1 fallback."""
+
+    declared = submission.get("result_revision")
+    if isinstance(declared, dict):
+        return {
+            "series_id": declared.get("series_id"),
+            "version": declared.get("version"),
+            "supersedes": declared.get("supersedes"),
+            "change_summary": declared.get("change_summary"),
+        }
+
+    submission_id = submission.get("submission_id")
+    match = LEGACY_V1_SUBMISSION_ID.fullmatch(submission_id or "")
+    if match:
+        series_id = match.group("series")
+        return {
+            "series_id": series_id,
+            "version": 1,
+            "supersedes": None,
+            "change_summary": None,
+        }
+    return {
+        "series_id": submission_id,
+        "version": 1,
+        "supersedes": None,
+        "change_summary": None,
+    }
+
+
+def validate_result_revisions(
+    records: list[tuple[Path, dict[str, Any]]],
+    *,
+    focus_paths: set[Path] | None = None,
+) -> list[str]:
+    """Validate immutable, sequential result-series relationships across packages."""
+
+    focus = {path.resolve() for path in focus_paths} if focus_paths is not None else None
+    errors: list[str] = []
+    by_submission_id = {
+        submission.get("submission_id"): (path, submission)
+        for path, submission in records
+        if isinstance(submission.get("submission_id"), str)
+    }
+    by_revision: dict[tuple[Any, Any, Any, Any], tuple[Path, dict[str, Any]]] = {}
+
+    def selected(path: Path) -> bool:
+        return focus is None or path.resolve() in focus
+
+    def add(path: Path, message: str) -> None:
+        if selected(path):
+            prefix = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
+            errors.append(f"{prefix}: {message}")
+
+    for path, submission in records:
+        revision = normalized_result_revision(submission)
+        key = (
+            submission.get("dataset_id"),
+            submission.get("split_id"),
+            revision.get("series_id"),
+            revision.get("version"),
+        )
+        previous = by_revision.get(key)
+        if previous is not None:
+            previous_path, previous_submission = previous
+            if isinstance(submission.get("result_revision"), dict) or isinstance(
+                previous_submission.get("result_revision"), dict
+            ):
+                add(
+                    path,
+                    "result_revision duplicates the dataset/split/series/version used by "
+                    f"{previous_path.relative_to(ROOT) if previous_path.is_relative_to(ROOT) else previous_path}",
+                )
+                if selected(previous_path):
+                    add(previous_path, "result_revision is duplicated by another submission package")
+        else:
+            by_revision[key] = (path, submission)
+
+        declared = submission.get("result_revision")
+        if not isinstance(declared, dict):
+            continue
+        series_id = declared.get("series_id")
+        version = declared.get("version")
+        supersedes = declared.get("supersedes")
+        if not isinstance(series_id, str) or not isinstance(version, int) or isinstance(version, bool):
+            continue  # JSON Schema reports structural failures.
+        expected_submission_id = f"{series_id}-v{version}"
+        if submission.get("submission_id") != expected_submission_id:
+            add(
+                path,
+                "submission_id must equal result_revision.series_id followed by "
+                f"'-v{version}' ({expected_submission_id!r})",
+            )
+        if version == 1:
+            if supersedes is not None:
+                add(path, "result_revision version 1 must set supersedes to null")
+            continue
+
+        expected_predecessor_id = f"{series_id}-v{version - 1}"
+        allowed_predecessor_ids = [expected_predecessor_id]
+        legacy_predecessor = by_submission_id.get(series_id) if version == 2 else None
+        if (
+            legacy_predecessor is not None
+            and not isinstance(legacy_predecessor[1].get("result_revision"), dict)
+            and normalized_result_revision(legacy_predecessor[1]).get("version") == 1
+        ):
+            allowed_predecessor_ids.append(series_id)
+        if supersedes not in allowed_predecessor_ids:
+            expected = " or ".join(repr(identifier) for identifier in allowed_predecessor_ids)
+            add(
+                path,
+                f"result_revision version {version} must supersede {expected}",
+            )
+            continue
+        predecessor_record = by_submission_id.get(supersedes)
+        if predecessor_record is None:
+            add(path, f"result_revision predecessor {supersedes!r} does not exist")
+            continue
+        _, predecessor = predecessor_record
+        predecessor_revision = normalized_result_revision(predecessor)
+        if (
+            predecessor_revision.get("series_id") != series_id
+            or predecessor_revision.get("version") != version - 1
+        ):
+            add(path, "result_revision predecessor does not belong to the immediately preceding series version")
+        for field in (
+            "dataset_id",
+            "dataset_version",
+            "split_id",
+            "split_sha256",
+            "case_set_id",
+            "submitter_name",
+            "institution",
+        ):
+            if predecessor.get(field) != submission.get(field):
+                add(path, f"result_revision predecessor must have the same {field}")
+        predecessor_status = predecessor.get("approval", {}).get("status")
+        if predecessor_status not in {"approved", "prototype"}:
+            add(path, "result_revision predecessor must already be published as approved or prototype")
+        try:
+            submitted_at = date.fromisoformat(str(submission.get("submitted_at")))
+            predecessor_date = date.fromisoformat(str(predecessor.get("submitted_at")))
+        except ValueError:
+            pass  # JSON Schema reports invalid dates.
+        else:
+            if submitted_at < predecessor_date:
+                add(path, "submitted_at must not be earlier than the superseded result")
+
+    return errors
 
 
 def manifest_with_benchmark_contract(manifest: dict[str, Any]) -> dict[str, Any]:
@@ -226,7 +379,7 @@ def validate_domain_semantics(add: Any, domain: Any, *, label: str) -> None:
 
 def submission_files(paths: list[Path] | None = None) -> list[Path]:
     if not paths:
-        return sorted((ROOT / "submissions").glob("*/*/submission.json"))
+        return sorted(path.resolve() for path in (ROOT / "submissions").glob("*/*/submission.json"))
     result: list[Path] = []
     for raw_path in paths:
         path = raw_path.resolve()
@@ -253,7 +406,7 @@ def validate_metadata(
     split: dict[str, Any],
 ) -> None:
     expected_parent = ROOT / "submissions" / dataset["slug"] / submission["submission_id"]
-    if path.parent != expected_parent:
+    if path.parent.resolve() != expected_parent.resolve():
         add(f"submission.json must be stored at {expected_parent.relative_to(ROOT)}/submission.json")
     if submission.get("dataset") != dataset["name"]:
         add(f"dataset must be {dataset['name']!r} for dataset_id {dataset['slug']!r}")
@@ -2991,6 +3144,23 @@ def validate_many(
             errors.append(f"{path.relative_to(ROOT)}: duplicate submission_id also used by {seen_ids[submission_id].relative_to(ROOT)}")
         elif submission_id:
             seen_ids[submission_id] = path
+    revision_paths = {path.resolve() for path in files}
+    if paths:
+        revision_paths.update(path.resolve() for path in submission_files())
+    revision_records: list[tuple[Path, dict[str, Any]]] = []
+    for path in sorted(revision_paths):
+        try:
+            submission = load_json(path)
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(submission, dict):
+            revision_records.append((path, submission))
+    errors.extend(
+        validate_result_revisions(
+            revision_records,
+            focus_paths=set(files) if paths else None,
+        )
+    )
     return errors, totals
 
 
