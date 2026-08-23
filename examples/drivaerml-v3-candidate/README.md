@@ -4,6 +4,10 @@ This directory is a configuration template, not a submission and not scoring
 support. It deliberately contains `__REPLACE_...__` participant fields and
 `__UNRESOLVED_DRIVAERML_...__` owner-release fields. Those strings are
 machine-detectable blockers; they are not example hashes or release IDs.
+The benchmark's separate release hand-off may already hash-bind a local v10
+profile registry. That is not an instruction to replace this template's v10
+tokens: wait until the active specification and all owner-release bindings are
+published as one coherent release.
 
 Copy `package-config.template.json` outside the repository, fill the
 participant fields, and use the immutable release values published by the

@@ -14,12 +14,12 @@
     "code_revision": "__UNRESOLVED_DRIVAERML_CANDIDATE_EVALUATOR_CODE_REVISION__"
   },
   "profile_definition_v10": {
-    "file": "__UNRESOLVED_DRIVAERML_PROFILE_DEFINITION_V10_FILE__",
-    "sha256": "__UNRESOLVED_DRIVAERML_PROFILE_DEFINITION_V10_SHA256__"
+    "file": "drivaerml-diagnostics-v10.json",
+    "sha256": "9136feac7ac276d91f7cbcfb6c558beffc97cfaf0f0174626fee67a1f2a52bd0"
   },
   "profile_ground_truth": {
     "release_id": "__UNRESOLVED_DRIVAERML_PROFILE_GROUND_TRUTH_RELEASE_ID__",
     "manifest_sha256": "__UNRESOLVED_DRIVAERML_PROFILE_GROUND_TRUTH_MANIFEST_SHA256__"
   },
-  "notes": "This file is the release hand-off, not an active scoring-support declaration. Change status to ready only after replacing every unresolved token with an immutable owner-published identity."
+  "notes": "This file is the release hand-off, not an active scoring-support declaration. The local v10 candidate registry is hash-bound, but scoring support, evaluator, and profile-ground-truth release identities remain unresolved. Change status to ready only after replacing every remaining unresolved token with an immutable owner-published identity."
 }

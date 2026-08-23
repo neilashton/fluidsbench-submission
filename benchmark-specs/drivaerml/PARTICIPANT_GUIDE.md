@@ -319,6 +319,11 @@ Start from
 [`examples/drivaerml-v3-candidate/`](../../examples/drivaerml-v3-candidate/).
 Its explicit `__REPLACE_...__` and `__UNRESOLVED_DRIVAERML_...__` strings are
 real machine-detectable blockers, not illustrative release IDs or hashes.
+The repository release hand-off can resolve and verify the local v10 profile
+file/SHA-256 pair before the other owner-release fields exist. That does not
+resolve the participant template: do not copy the v10 pair into a package
+until the active specification and the owner-published release bindings match
+it and every other release token has been replaced.
 List them at any time:
 
 ```bash

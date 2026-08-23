@@ -43,6 +43,7 @@ UNRESOLVED_RELEASE_PREFIX = "__UNRESOLVED_DRIVAERML_"
 SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
 GIT_REVISION_PATTERN = re.compile(r"^(?:[a-f0-9]{40}|[a-f0-9]{64})$")
 SAFE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,159}$")
+PROFILE_DEFINITION_V10_ID = "drivaerml-diagnostics-v10-candidate"
 
 DATASET_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
 DATASET_VERSION = "drivaerml-native-v3-candidate"
@@ -205,19 +206,26 @@ def load_json(path: Path) -> Any:
     return load_json_with_sha256(path, label=str(path))[0]
 
 
-def resolved_benchmark_file(relative_value: Any, *, label: str) -> Path:
+def resolved_benchmark_file(
+    relative_value: Any,
+    *,
+    label: str,
+    benchmark_root: Path | None = None,
+) -> Path:
     """Resolve a release-managed path while proving dataset containment."""
 
+    root = BENCHMARK_ROOT if benchmark_root is None else benchmark_root
     if not isinstance(relative_value, str) or not relative_value:
         raise ValueError(f"{label} must be a non-empty relative path")
     relative = Path(relative_value)
     if relative.is_absolute() or ".." in relative.parts:
         raise ValueError(f"{label} must stay inside DrivAerML")
     try:
-        resolved = (BENCHMARK_ROOT / relative).resolve(strict=True)
+        resolved_root = root.resolve(strict=True)
+        resolved = (root / relative).resolve(strict=True)
     except OSError as error:
-        raise ValueError(f"{label} does not exist: {BENCHMARK_ROOT / relative}") from error
-    if not resolved.is_relative_to(BENCHMARK_ROOT.resolve()):
+        raise ValueError(f"{label} does not exist: {root / relative}") from error
+    if not resolved.is_relative_to(resolved_root):
         raise ValueError(f"{label} must stay inside DrivAerML")
     if not resolved.is_file():
         raise ValueError(f"{label} is not a regular file: {resolved}")
@@ -252,13 +260,21 @@ def unresolved_release_tokens(
 def load_candidate_release_bindings(
     path: Path = CANDIDATE_RELEASE_BINDINGS_PATH,
 ) -> dict[str, Any]:
-    """Load the release hand-off while rejecting partially resolved states."""
+    """Load the release hand-off while rejecting incoherent partial states.
+
+    An unresolved hand-off may still pin the complete local profile-v10
+    file/SHA-256 pair.  The pair is atomic: both fields must remain explicit
+    unresolved tokens or both must resolve to the exact retained artifact next
+    to this hand-off file.
+    """
 
     value = load_json(path)
     if value.get("schema") != "drivaerml-fluidsbench-candidate-release-bindings-v1":
         raise ValueError("unsupported DrivAerML candidate release-binding schema")
     if value.get("status") not in {"unresolved", "ready"}:
         raise ValueError("candidate release-binding status must be unresolved or ready")
+    if value.get("unresolved_token_prefix") != UNRESOLVED_RELEASE_PREFIX:
+        raise ValueError("candidate release-binding unresolved_token_prefix is invalid")
     required_objects = {
         "candidate_manifest": {
             "status", "release_id", "manifest_file", "manifest_url", "manifest_sha256"
@@ -275,6 +291,26 @@ def load_candidate_release_bindings(
         raise ValueError("candidate_manifest.status must remain candidate")
     if value["evaluator"].get("reference_version") != EVALUATOR_VERSION:
         raise ValueError("candidate evaluator reference version changed unexpectedly")
+    profile_binding = value["profile_definition_v10"]
+    if set(profile_binding) != {"file", "sha256"}:
+        raise ValueError("profile_definition_v10 binding must contain exactly file and sha256")
+    file_is_token = (
+        isinstance(profile_binding.get("file"), str)
+        and profile_binding["file"].startswith(UNRESOLVED_RELEASE_PREFIX)
+    )
+    sha256_is_token = (
+        isinstance(profile_binding.get("sha256"), str)
+        and profile_binding["sha256"].startswith(UNRESOLVED_RELEASE_PREFIX)
+    )
+    if file_is_token != sha256_is_token:
+        raise ValueError(
+            "profile_definition_v10 file and SHA-256 must be resolved together"
+        )
+    if not file_is_token:
+        validate_profile_v10_binding(
+            profile_binding,
+            benchmark_root=path.parent,
+        )
     tokens = [
         item
         for item in unresolved_release_tokens(value)
@@ -1336,10 +1372,12 @@ def select_generation_profile(
 def validate_profile_v10_binding(
     binding: dict[str, Any],
     expected_definition: dict[str, Any] | None = None,
+    *,
+    benchmark_root: Path | None = None,
 ) -> tuple[Path, dict[str, Any]]:
     """Read, hash, and parse the exact contained profile-v10 artifact."""
 
-    if not isinstance(binding, dict):
+    if not isinstance(binding, dict) or set(binding) != {"file", "sha256"}:
         raise ValueError("profile_definition_v10 binding must be an object")
     file_value = binding.get("file")
     digest = binding.get("sha256")
@@ -1353,6 +1391,7 @@ def validate_profile_v10_binding(
     profile_path = resolved_benchmark_file(
         file_value,
         label="profile_definition_v10.file",
+        benchmark_root=benchmark_root,
     )
     profile, actual_sha256 = load_json_with_sha256(
         profile_path,
@@ -1365,10 +1404,12 @@ def validate_profile_v10_binding(
         )
     if (
         not isinstance(profile, dict)
-        or not isinstance(profile.get("id"), str)
-        or "v10" not in profile["id"]
+        or profile.get("id") != PROFILE_DEFINITION_V10_ID
     ):
-        raise ValueError("profile-definition-v10 artifact has an invalid v10 identity")
+        raise ValueError(
+            "profile-definition-v10 artifact id must equal "
+            f"{PROFILE_DEFINITION_V10_ID!r}"
+        )
     if expected_definition is not None:
         for key, expected in (
             ("file", file_value),

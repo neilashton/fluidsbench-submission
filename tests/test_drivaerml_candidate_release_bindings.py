@@ -26,6 +26,19 @@ def write_json(path: Path, value: object) -> None:
 
 
 class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
+    def make_unresolved_v10_fixture(self, root: Path) -> tuple[dict, Path, Path]:
+        benchmark = root / "benchmark-specs" / "drivaerml"
+        benchmark.mkdir(parents=True)
+        bindings = load_json(BINDINGS_PATH)
+        profile_path = benchmark / bindings["profile_definition_v10"]["file"]
+        shutil.copy2(
+            ROOT / "benchmark-specs" / "drivaerml" / profile_path.name,
+            profile_path,
+        )
+        bindings_path = benchmark / "candidate-release-bindings.json"
+        write_json(bindings_path, bindings)
+        return bindings, bindings_path, profile_path
+
     def make_ready_fixture(
         self, root: Path
     ) -> tuple[dict, Path, Path, dict]:
@@ -167,6 +180,17 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
         active = load_json(ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json")
         self.assertEqual(promoter.unresolved_release_tokens(active), [])
         self.assertNotIn("candidate_manifest", active["scoring_support"])
+        self.assertEqual(active["profile_definition"]["id"], "drivaerml-diagnostics-v9-candidate")
+        profile_path = BINDINGS_PATH.parent / bindings["profile_definition_v10"]["file"]
+        self.assertEqual(
+            bindings["profile_definition_v10"]["sha256"],
+            promoter.sha256_file(profile_path),
+        )
+        profile = load_json(profile_path)
+        self.assertEqual(profile["id"], promoter.PROFILE_DEFINITION_V10_ID)
+        self.assertEqual(profile["dataset_id"], "drivaerml")
+        self.assertEqual(profile["pressure_cuts"]["truth_source_array"], "CpMeanTrim")
+        self.assertEqual(profile["pressure_cuts"]["prediction_source_array"], "pMeanTrim")
 
     def test_unresolved_generator_preserves_later_candidate_and_v10_bindings(self) -> None:
         bindings = promoter.load_candidate_release_bindings(BINDINGS_PATH)
@@ -223,7 +247,7 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             bindings, benchmark, global_manifest_path, generated = (
                 self.make_ready_fixture(Path(temporary))
             )
-            bindings_path = Path(temporary) / "candidate-release-bindings.json"
+            bindings_path = benchmark / "candidate-release-bindings.json"
             write_json(bindings_path, bindings)
             loaded = promoter.load_candidate_release_bindings(bindings_path)
             with patch.object(promoter, "BENCHMARK_ROOT", benchmark), patch.object(
@@ -314,6 +338,75 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 promoter.AuthoritativeJSONError, "duplicate key 'status'"
             ):
                 promoter.load_candidate_release_bindings(path)
+
+    def test_unresolved_profile_v10_pair_is_atomic_and_strict(self) -> None:
+        for mutation, message in (
+            ("file_only_token", "must be resolved together"),
+            ("sha_only_token", "must be resolved together"),
+            ("parent_escape", "must stay inside"),
+            ("absolute", "must stay inside"),
+            ("unsafe_hash", "incomplete or invalid"),
+            ("wrong_hash", "SHA-256 changed"),
+            ("invalid_id", "id must equal"),
+        ):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                bindings, bindings_path, profile_path = self.make_unresolved_v10_fixture(
+                    Path(temporary)
+                )
+                profile_binding = bindings["profile_definition_v10"]
+                if mutation == "file_only_token":
+                    profile_binding["file"] = "__UNRESOLVED_DRIVAERML_PROFILE_FILE__"
+                elif mutation == "sha_only_token":
+                    profile_binding["sha256"] = "__UNRESOLVED_DRIVAERML_PROFILE_SHA256__"
+                elif mutation == "parent_escape":
+                    profile_binding["file"] = f"../{profile_path.name}"
+                elif mutation == "absolute":
+                    profile_binding["file"] = str(profile_path)
+                elif mutation == "unsafe_hash":
+                    profile_binding["sha256"] = "A" * 64
+                elif mutation == "wrong_hash":
+                    profile_binding["sha256"] = "0" * 64
+                else:
+                    write_json(profile_path, {"id": "drivaerml-diagnostics-v10-wrong"})
+                    profile_binding["sha256"] = promoter.sha256_file(profile_path)
+                write_json(bindings_path, bindings)
+                with self.assertRaisesRegex(ValueError, message):
+                    promoter.load_candidate_release_bindings(bindings_path)
+
+    def test_unresolved_profile_v10_rejects_ambiguous_json_and_symlink_escape(self) -> None:
+        for mutation, message in (
+            ("duplicate", "duplicate key 'id'"),
+            ("nonfinite", "forbidden non-finite token NaN"),
+            ("symlink_escape", "must stay inside"),
+        ):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                bindings, bindings_path, profile_path = self.make_unresolved_v10_fixture(root)
+                if mutation == "duplicate":
+                    profile_path.write_text(
+                        '{"id":"drivaerml-diagnostics-v10-candidate",'
+                        '"id":"drivaerml-diagnostics-v10-candidate"}\n',
+                        encoding="utf-8",
+                    )
+                elif mutation == "nonfinite":
+                    profile_path.write_text(
+                        '{"id":"drivaerml-diagnostics-v10-candidate","bad":NaN}\n',
+                        encoding="utf-8",
+                    )
+                else:
+                    outside = root / "outside-v10.json"
+                    write_json(outside, {"id": promoter.PROFILE_DEFINITION_V10_ID})
+                    profile_path.unlink()
+                    try:
+                        profile_path.symlink_to(outside)
+                    except OSError as error:
+                        self.skipTest(f"symbolic links are unavailable: {error}")
+                bindings["profile_definition_v10"]["sha256"] = promoter.sha256_file(
+                    profile_path
+                )
+                write_json(bindings_path, bindings)
+                with self.assertRaisesRegex(ValueError, message):
+                    promoter.load_candidate_release_bindings(bindings_path)
 
     def test_ready_profile_symlink_cannot_escape_drivaerml(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

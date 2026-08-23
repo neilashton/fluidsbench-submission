@@ -175,8 +175,11 @@ candidate package workflow in
 the provenance for the 16 velocity-line definitions; it is not a second
 submission target. The candidate release hand-off is recorded in
 [`candidate-release-bindings.json`](candidate-release-bindings.json); its
-unresolved tokens are blockers and are never copied into the active
-`submission-spec.json`. A one-command synthetic
+unresolved owner-release tokens are blockers and are never copied into the
+active `submission-spec.json`. The hand-off may hash-bind the complete local
+`drivaerml-diagnostics-v10.json` file while those owner fields remain
+unresolved; that partial hand-off is integrity evidence only and neither
+activates v10 nor makes a participant package ready. A one-command synthetic
 two-part/three-part dry run is provided under
 [`examples/drivaerml-candidate-native-chunks/`](../../examples/drivaerml-candidate-native-chunks/);
 it is an ineligible transport and packaging fixture, not an official
