@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,6 +13,7 @@ from scripts import promote_drivaerml_candidate as promoter
 
 ROOT = Path(__file__).resolve().parents[1]
 BINDINGS_PATH = ROOT / "benchmark-specs" / "drivaerml" / "candidate-release-bindings.json"
+TEMPLATE = ROOT / "examples" / "v3-template"
 
 
 def load_json(path: Path) -> dict:
@@ -24,38 +26,53 @@ def write_json(path: Path, value: object) -> None:
 
 
 class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
-    def base_generated_specification(self) -> dict:
-        return {
-            "profile_definition": {
-                "id": "drivaerml-diagnostics-v9-candidate",
-                "file": "drivaerml-diagnostics-v9.json",
-                "sha256": "1" * 64,
-            },
-            "scoring_support": {
-                "dataset_evaluator_binding": {
-                    "status": "pending_frozen_release",
-                    "evaluator_reference_version": promoter.EVALUATOR_VERSION,
-                    "evaluator_code_revision": None,
-                },
-                "profile_definition": {
-                    "file": "drivaerml-diagnostics-v9.json",
-                    "sha256": "1" * 64,
-                    "status": "pending",
-                },
-            },
-        }
-
-    def make_ready_fixture(self, root: Path) -> tuple[dict, Path, Path]:
+    def make_ready_fixture(
+        self, root: Path
+    ) -> tuple[dict, Path, Path, dict]:
         benchmark = root / "benchmark-specs" / "drivaerml"
-        manifest_path = benchmark / "scoring-support" / "candidate-v1" / "manifest.json"
-        release_id = "drivaerml-candidate-support-v1"
-        manifest = {
-            "status": "candidate",
-            "release_id": release_id,
+        split_path = benchmark / "splits" / "default.json"
+        split = {
+            "schema_version": "1.0",
             "dataset_id": "drivaerml",
-            "dataset_version": promoter.DATASET_VERSION,
-            "evaluation_reference_version": promoter.EVALUATOR_VERSION,
+            "split_id": "default",
+            "case_set_id": "standard",
+            "split_label": "Default",
+            "case_id_status": "official",
+            "case_count": 2,
+            "case_ids": ["case-001", "case-002"],
         }
+        write_json(split_path, split)
+
+        support_root = benchmark / "scoring-support" / "candidate-v1"
+        shutil.copytree(TEMPLATE / "support", support_root)
+        manifest_path = support_root / "manifest.json"
+        release_id = "drivaerml-candidate-support-v1"
+        manifest = load_json(manifest_path)
+        manifest.update(
+            {
+                "status": "candidate",
+                "release_id": release_id,
+                "dataset_id": "drivaerml",
+                "dataset_version": promoter.DATASET_VERSION,
+                "evaluation_reference_version": promoter.EVALUATOR_VERSION,
+            }
+        )
+        manifest.pop("owner_approval", None)
+        for support in manifest["supports"]:
+            for binding in support["metric_bindings"]:
+                if binding["weighting"] == "support_weights":
+                    binding["dataset_weighting"] = "cell_volume"
+
+        chunk_path = support_root / "case-sets" / "standard" / "chunk-000.json"
+        chunk = load_json(chunk_path)
+        chunk.update({"release_id": release_id, "dataset_id": "drivaerml"})
+        write_json(chunk_path, chunk)
+        index_path = support_root / "case-sets" / "standard" / "index.json"
+        index = load_json(index_path)
+        index.update({"release_id": release_id, "dataset_id": "drivaerml"})
+        index["chunks"][0]["sha256"] = promoter.sha256_file(chunk_path)
+        write_json(index_path, index)
+        manifest["case_sets"][0]["index_sha256"] = promoter.sha256_file(index_path)
         write_json(manifest_path, manifest)
         global_truth = {
             "release_id": "prototype-profile-ground-truth-2026-08-21",
@@ -68,6 +85,54 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
         )
         profile_path = benchmark / "drivaerml-diagnostics-v10.json"
         write_json(profile_path, {"id": "drivaerml-diagnostics-v10-candidate"})
+        profile_sha256 = promoter.sha256_file(profile_path)
+        metrics = [
+            {
+                "id": binding["metric_id"],
+                "aggregation": binding["aggregation"],
+                "weighting": binding["dataset_weighting"],
+            }
+            for support in manifest["supports"]
+            for binding in support["metric_bindings"]
+        ]
+        generated = {
+            "schema_version": "1.1",
+            "dataset_id": "drivaerml",
+            "dataset_name": "DrivAerML",
+            "dataset_version": promoter.DATASET_VERSION,
+            "evaluation_reference_version": promoter.EVALUATOR_VERSION,
+            "metrics": metrics,
+            "splits": [
+                {
+                    "id": "default",
+                    "label": "Default",
+                    "index_file": "splits/default.json",
+                    "case_count": 2,
+                    "case_set_id": "standard",
+                    "case_id_status": "official",
+                    "sha256": promoter.sha256_file(split_path),
+                }
+            ],
+            "profile_definition": {
+                "id": "drivaerml-diagnostics-v10-candidate",
+                "file": profile_path.name,
+                "sha256": profile_sha256,
+            },
+            "scoring_support": {
+                "status": "owner_review_required",
+                "submissions_open": False,
+                "dataset_evaluator_binding": {
+                    "status": "pending_frozen_release",
+                    "evaluator_reference_version": promoter.EVALUATOR_VERSION,
+                    "evaluator_code_revision": None,
+                },
+                "profile_definition": {
+                    "file": profile_path.name,
+                    "sha256": profile_sha256,
+                    "status": "candidate",
+                },
+            },
+        }
         bindings = {
             "schema": "drivaerml-fluidsbench-candidate-release-bindings-v1",
             "status": "ready",
@@ -88,11 +153,11 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             },
             "profile_definition_v10": {
                 "file": profile_path.name,
-                "sha256": promoter.sha256_file(profile_path),
+                "sha256": profile_sha256,
             },
             "profile_ground_truth": global_truth,
         }
-        return bindings, benchmark, global_manifest_path
+        return bindings, benchmark, global_manifest_path, generated
 
     def test_checked_in_unresolved_hand_off_never_leaks_into_active_spec(self) -> None:
         bindings = promoter.load_candidate_release_bindings(BINDINGS_PATH)
@@ -105,54 +170,36 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
 
     def test_unresolved_generator_preserves_later_candidate_and_v10_bindings(self) -> None:
         bindings = promoter.load_candidate_release_bindings(BINDINGS_PATH)
-        existing = {
-            "profile_definition": {
-                "id": "drivaerml-diagnostics-v10-candidate",
-                "file": "drivaerml-diagnostics-v10.json",
-                "sha256": "4" * 64,
-            },
-            "scoring_support": {
-                "candidate_manifest": {
-                    "status": "candidate",
-                    "release_id": "later-release-v1",
-                },
-                "dataset_evaluator_binding": {
-                    "status": "frozen",
-                    "evaluator_reference_version": promoter.EVALUATOR_VERSION,
-                    "evaluator_code_revision": "5" * 40,
-                },
-                "profile_definition": {
-                    "file": "drivaerml-diagnostics-v10.json",
-                    "sha256": "4" * 64,
-                    "status": "later-reviewed-status",
-                    "profile_ground_truth": {
-                        "release_id": "later-truth-v1",
-                        "manifest_sha256": "6" * 64,
-                    },
-                },
-            },
-        }
-        generated = self.base_generated_specification()
-        result = promoter.apply_release_managed_bindings(
-            generated, bindings, existing
-        )
-        self.assertEqual(
-            result["scoring_support"]["candidate_manifest"],
-            existing["scoring_support"]["candidate_manifest"],
-        )
-        self.assertEqual(
-            result["scoring_support"]["dataset_evaluator_binding"],
-            existing["scoring_support"]["dataset_evaluator_binding"],
-        )
-        self.assertEqual(
-            result["scoring_support"]["profile_definition"],
-            existing["scoring_support"]["profile_definition"],
-        )
+        with tempfile.TemporaryDirectory() as temporary:
+            ready, benchmark, global_manifest_path, generated = self.make_ready_fixture(
+                Path(temporary)
+            )
+            with patch.object(promoter, "BENCHMARK_ROOT", benchmark), patch.object(
+                promoter, "MANIFEST_PATH", global_manifest_path
+            ):
+                existing = promoter.apply_release_managed_bindings(
+                    copy.deepcopy(generated), ready, None
+                )
+                result = promoter.apply_release_managed_bindings(
+                    copy.deepcopy(generated), bindings, existing
+                )
+            self.assertEqual(
+                result["scoring_support"]["candidate_manifest"],
+                existing["scoring_support"]["candidate_manifest"],
+            )
+            self.assertEqual(
+                result["scoring_support"]["dataset_evaluator_binding"],
+                existing["scoring_support"]["dataset_evaluator_binding"],
+            )
+            self.assertEqual(
+                result["scoring_support"]["profile_definition"],
+                existing["scoring_support"]["profile_definition"],
+            )
 
     def test_ready_binding_is_idempotent_and_checks_manifest_and_global_truth(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            bindings, benchmark, global_manifest_path = self.make_ready_fixture(
-                Path(temporary)
+            bindings, benchmark, global_manifest_path, generated = (
+                self.make_ready_fixture(Path(temporary))
             )
             bindings_path = Path(temporary) / "candidate-release-bindings.json"
             write_json(bindings_path, bindings)
@@ -161,10 +208,10 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 promoter, "MANIFEST_PATH", global_manifest_path
             ):
                 first = promoter.apply_release_managed_bindings(
-                    self.base_generated_specification(), loaded, None
+                    copy.deepcopy(generated), loaded, None
                 )
                 second = promoter.apply_release_managed_bindings(
-                    self.base_generated_specification(), loaded, copy.deepcopy(first)
+                    copy.deepcopy(generated), loaded, copy.deepcopy(first)
                 )
             self.assertEqual(first, second)
             self.assertEqual(
@@ -182,7 +229,7 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 promoter, "MANIFEST_PATH", global_manifest_path
             ), self.assertRaisesRegex(ValueError, "does not match its local file"):
                 promoter.apply_release_managed_bindings(
-                    self.base_generated_specification(), bad_hash, None
+                    copy.deepcopy(generated), bad_hash, None
                 )
 
             bad_truth = copy.deepcopy(bindings)
@@ -191,28 +238,150 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 promoter, "MANIFEST_PATH", global_manifest_path
             ), self.assertRaisesRegex(ValueError, "global leaderboard binding"):
                 promoter.apply_release_managed_bindings(
-                    self.base_generated_specification(), bad_truth, None
+                    copy.deepcopy(generated), bad_truth, None
                 )
+
+    def test_ready_manifest_requires_valid_complete_candidate_support(self) -> None:
+        for mutation, message in (
+            ("missing_supports", "supports"),
+            ("owner_approval", "must not claim owner approval"),
+            ("semantic_binding", "dataset_weighting must match"),
+        ):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                bindings, benchmark, global_manifest_path, generated = (
+                    self.make_ready_fixture(Path(temporary))
+                )
+                manifest_path = benchmark / bindings["candidate_manifest"][
+                    "manifest_file"
+                ]
+                manifest = load_json(manifest_path)
+                if mutation == "missing_supports":
+                    manifest.pop("supports")
+                else:
+                    if mutation == "owner_approval":
+                        manifest["owner_approval"] = {
+                            "approved_by": "Not allowed for a candidate",
+                            "approved_at": "2026-08-22",
+                            "pull_request_url": "https://github.com/example/repo/pull/1",
+                        }
+                    else:
+                        manifest["supports"][0]["metric_bindings"][0][
+                            "dataset_weighting"
+                        ] = "entities_equal"
+                write_json(manifest_path, manifest)
+                bindings["candidate_manifest"]["manifest_sha256"] = (
+                    promoter.sha256_file(manifest_path)
+                )
+                with patch.object(promoter, "BENCHMARK_ROOT", benchmark), patch.object(
+                    promoter, "MANIFEST_PATH", global_manifest_path
+                ), self.assertRaisesRegex(ValueError, message):
+                    promoter.apply_release_managed_bindings(
+                        copy.deepcopy(generated), bindings, None
+                    )
+
+    def test_release_handoff_rejects_duplicate_keys(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "bindings.json"
+            text = BINDINGS_PATH.read_text(encoding="utf-8").replace(
+                "{\n",
+                '{\n  "status": "unresolved",\n',
+                1,
+            )
+            path.write_text(text, encoding="utf-8")
+            with self.assertRaisesRegex(
+                promoter.AuthoritativeJSONError, "duplicate key 'status'"
+            ):
+                promoter.load_candidate_release_bindings(path)
+
+    def test_ready_profile_symlink_cannot_escape_drivaerml(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bindings, benchmark, global_manifest_path, _generated = (
+                self.make_ready_fixture(root)
+            )
+            profile_path = benchmark / bindings["profile_definition_v10"]["file"]
+            outside = root / "outside-v10.json"
+            write_json(outside, {"id": "drivaerml-diagnostics-v10-candidate"})
+            profile_path.unlink()
+            try:
+                profile_path.symlink_to(outside)
+            except OSError as error:
+                self.skipTest(f"symbolic links are unavailable: {error}")
+            bindings["profile_definition_v10"]["sha256"] = promoter.sha256_file(
+                outside
+            )
+            with patch.object(promoter, "BENCHMARK_ROOT", benchmark), patch.object(
+                promoter, "MANIFEST_PATH", global_manifest_path
+            ), self.assertRaisesRegex(ValueError, "must stay inside"):
+                promoter.select_generation_profile(bindings, None)
 
     def test_unresolved_selection_does_not_regress_an_existing_v10_file(self) -> None:
         bindings = promoter.load_candidate_release_bindings(BINDINGS_PATH)
         with tempfile.TemporaryDirectory() as temporary:
-            benchmark = Path(temporary)
-            profile_path = benchmark / "drivaerml-diagnostics-v10.json"
-            profile = {"id": "drivaerml-diagnostics-v10-candidate"}
-            write_json(profile_path, profile)
-            existing = {
-                "profile_definition": {
-                    "file": profile_path.name,
-                    "sha256": promoter.sha256_file(profile_path),
-                }
-            }
-            with patch.object(promoter, "BENCHMARK_ROOT", benchmark):
+            ready, benchmark, global_manifest_path, generated = self.make_ready_fixture(
+                Path(temporary)
+            )
+            with patch.object(promoter, "BENCHMARK_ROOT", benchmark), patch.object(
+                promoter, "MANIFEST_PATH", global_manifest_path
+            ):
+                existing = promoter.apply_release_managed_bindings(
+                    copy.deepcopy(generated), ready, None
+                )
                 selected_path, selected_profile = promoter.select_generation_profile(
                     bindings, existing
                 )
-            self.assertEqual(selected_path, profile_path)
-            self.assertEqual(selected_profile, profile)
+            self.assertEqual(
+                selected_path, benchmark / "drivaerml-diagnostics-v10.json"
+            )
+            self.assertEqual(
+                selected_profile["id"], "drivaerml-diagnostics-v10-candidate"
+            )
+
+    def test_unresolved_rerun_rejects_partial_or_stale_preserved_state(self) -> None:
+        unresolved = promoter.load_candidate_release_bindings(BINDINGS_PATH)
+        with tempfile.TemporaryDirectory() as temporary:
+            ready, benchmark, global_manifest_path, generated = self.make_ready_fixture(
+                Path(temporary)
+            )
+            with patch.object(promoter, "BENCHMARK_ROOT", benchmark), patch.object(
+                promoter, "MANIFEST_PATH", global_manifest_path
+            ):
+                existing = promoter.apply_release_managed_bindings(
+                    copy.deepcopy(generated), ready, None
+                )
+                for mutation, message in (
+                    ("candidate", "candidate manifest"),
+                    ("token", "candidate manifest"),
+                    ("evaluator", "evaluator binding"),
+                    ("profile", "profile-v10"),
+                    ("profile_bytes", "SHA-256 changed"),
+                ):
+                    stale = copy.deepcopy(existing)
+                    if mutation == "candidate":
+                        stale["scoring_support"]["candidate_manifest"].pop(
+                            "manifest_sha256"
+                        )
+                    elif mutation == "token":
+                        stale["scoring_support"]["candidate_manifest"][
+                            "release_id"
+                        ] = "__UNRESOLVED_DRIVAERML_RELEASE_ID__"
+                    elif mutation == "evaluator":
+                        stale["scoring_support"]["dataset_evaluator_binding"][
+                            "evaluator_reference_version"
+                        ] = "wrong-evaluator"
+                    elif mutation == "profile":
+                        stale["profile_definition"]["sha256"] = "f" * 64
+                    else:
+                        write_json(
+                            benchmark / stale["profile_definition"]["file"],
+                            {"id": "drivaerml-diagnostics-v10-stale"},
+                        )
+                    with self.subTest(mutation=mutation), self.assertRaisesRegex(
+                        ValueError, message
+                    ):
+                        promoter.apply_release_managed_bindings(
+                            copy.deepcopy(generated), unresolved, stale
+                        )
 
 
 if __name__ == "__main__":

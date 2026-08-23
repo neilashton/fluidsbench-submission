@@ -16,6 +16,7 @@ import json
 import math
 import re
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Iterable, Sequence
@@ -25,6 +26,13 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from reference.drivaerml.retained_file import RetainedFileError, RetainedVerifiedFile
+from scripts.validate_scoring_supports import validate_candidate_manifest_release
+
+
 DEFAULT_SPECIFICATION = ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json"
 SCHEMA_ROOT = ROOT / "schemas"
 CONFIG_SCHEMA = "drivaerml-fluidsbench-schema-v3-package-config-v1"
@@ -38,14 +46,45 @@ class PackageAssemblyError(ValueError):
     """Raised when a package cannot be assembled without inventing data."""
 
 
-def load_json(path: Path) -> dict[str, Any]:
+def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise PackageAssemblyError(f"JSON object contains duplicate key {key!r}")
+        result[key] = value
+    return result
+
+
+def _reject_nonfinite_json(token: str) -> Any:
+    raise PackageAssemblyError(f"JSON contains forbidden non-finite token {token}")
+
+
+def load_json_with_sha256(path: Path, *, label: str) -> tuple[dict[str, Any], str]:
+    """Hash and parse the same retained regular-file descriptor."""
+
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
+        with RetainedVerifiedFile.open(path, label=label) as retained:
+            digest = retained.sha256(chunk_bytes=1024 * 1024)
+            retained.handle.seek(0)
+            value = json.load(
+                retained.handle,
+                object_pairs_hook=_reject_duplicate_json_keys,
+                parse_constant=_reject_nonfinite_json,
+            )
+            retained.assert_unchanged(context="while its JSON was parsed")
+    except PackageAssemblyError:
+        raise
+    except RetainedFileError as error:
+        raise PackageAssemblyError(str(error)) from error
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise PackageAssemblyError(f"cannot read JSON {path}: {error}") from error
     if not isinstance(value, dict):
         raise PackageAssemblyError(f"{path} must contain a JSON object")
-    return value
+    return value, digest
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    return load_json_with_sha256(path, label=str(path))[0]
 
 
 def canonical_json_bytes(value: Any) -> bytes:
@@ -264,7 +303,13 @@ def _release_binding(
         owner_candidate.get("manifest_file"),
         "scoring_support.candidate_manifest.manifest_file",
     )
-    if not manifest_path.is_file() or sha256_file(manifest_path) != candidate["manifest_sha256"]:
+    if not manifest_path.is_file():
+        raise PackageAssemblyError("candidate scoring-support manifest is missing")
+    manifest, actual_manifest_sha256 = load_json_with_sha256(
+        manifest_path,
+        label="candidate scoring-support manifest",
+    )
+    if actual_manifest_sha256 != candidate["manifest_sha256"]:
         raise PackageAssemblyError("candidate scoring-support manifest is missing or its SHA-256 changed")
     parsed_manifest_url = urlparse(candidate["manifest_url"])
     if (
@@ -278,7 +323,6 @@ def _release_binding(
         not in [part for part in parsed_manifest_url.path.split("/") if part]
     ):
         raise PackageAssemblyError("candidate manifest URL is not a clean release-scoped HTTPS URL")
-    manifest = load_json(manifest_path)
     for key, expected in {
         "status": "candidate",
         "release_id": candidate["release_id"],
@@ -290,6 +334,19 @@ def _release_binding(
             raise PackageAssemblyError(
                 f"candidate scoring-support manifest {key} must equal {expected!r}"
             )
+    if "owner_approval" in manifest:
+        raise PackageAssemblyError("candidate scoring-support manifest must not claim owner approval")
+    support_errors = validate_candidate_manifest_release(
+        specification,
+        specification_path.parent,
+        manifest_path,
+        manifest,
+    )
+    if support_errors:
+        raise PackageAssemblyError(
+            "candidate scoring-support manifest is not valid support: "
+            + "; ".join(support_errors)
+        )
 
     owner_evaluator = support.get("dataset_evaluator_binding", {})
     if (
@@ -472,8 +529,17 @@ def _normalize_discretization_cases(
 ) -> str:
     try:
         lines = [line for line in source.read_text(encoding="utf-8").splitlines() if line.strip()]
-        records = [json.loads(line) for line in lines]
-    except (OSError, json.JSONDecodeError) as error:
+        records = [
+            json.loads(
+                line,
+                object_pairs_hook=_reject_duplicate_json_keys,
+                parse_constant=_reject_nonfinite_json,
+            )
+            for line in lines
+        ]
+    except PackageAssemblyError:
+        raise
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise PackageAssemblyError(f"cannot read discretization cases: {error}") from error
     if not all(isinstance(record, dict) for record in records):
         raise PackageAssemblyError("every discretization case line must be a JSON object")
@@ -539,7 +605,7 @@ def assemble_package(
             "configuration contains unresolved release or participant tokens: "
             + ", ".join(item["path"] for item in blockers)
         )
-    if output_path.exists():
+    if output_path.exists() or output_path.is_symlink():
         raise PackageAssemblyError(f"output already exists: {output_path}")
 
     specification = load_json(specification_path)
@@ -555,8 +621,23 @@ def assemble_package(
 
     profile_config = config["release_bindings"]["profile_definition_v10"]
     profile_path = _safe_child(specification_path.parent, profile_config["file"], "profile_definition_v10.file")
-    if not profile_path.is_file() or sha256_file(profile_path) != profile_config["sha256"]:
+    if not profile_path.is_file():
+        raise PackageAssemblyError("active profile-v10 file is missing")
+    profile_document, actual_profile_sha256 = load_json_with_sha256(
+        profile_path,
+        label="active profile-v10 artifact",
+    )
+    if actual_profile_sha256 != profile_config["sha256"]:
         raise PackageAssemblyError("active profile-v10 file is missing or its SHA-256 changed")
+    active_profile = specification.get("profile_definition")
+    if (
+        not isinstance(active_profile, dict)
+        or profile_document.get("id") != active_profile.get("id")
+        or "v10" not in str(profile_document.get("id", ""))
+    ):
+        raise PackageAssemblyError(
+            "active profile-v10 artifact identity does not match the specification"
+        )
 
     participant = config.get("participant")
     if not isinstance(participant, dict):

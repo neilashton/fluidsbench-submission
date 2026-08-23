@@ -46,12 +46,12 @@ before canonicalizing it. Only the participant-authored per-case
 split identity fields; the assembler inserts those fields and rejects any
 conflicting value that is present.
 
-The frozen evaluator Git revision is benchmark-owned and remains in the
-scoring-support contract. The optional `evaluation.code_revision` field has a
-different meaning: it identifies the participant's public model code. The
-assembler omits it when `participant.reproducibility.code` is absent; when that
-block is supplied, it copies the participant code commit into both submission
-and evidence records.
+The frozen evaluator Git revision is benchmark-owned and is pinned by
+`scoring_support.dataset_evaluator_binding` in the benchmark specification; it
+is never written to `evaluation.code_revision`. That optional submission field
+identifies the participant's public model code. The assembler omits it when
+`participant.reproducibility.code` is absent; when that block is supplied, it
+copies the participant code commit into both submission and evidence records.
 
 The output contains no `approval`, `maintainer-validation.json`, or
 `prediction-artifact-checks.json`; those are not contributor-owned records.

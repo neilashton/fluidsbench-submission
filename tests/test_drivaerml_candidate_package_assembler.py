@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts import assemble_drivaerml_schema_v3_candidate as assembler
 
@@ -58,21 +59,62 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
                 "drivaerml-candidate-support-v1/manifest.json"
             ),
         }
-        support_manifest_path = benchmark / "scoring-support" / "candidate" / "manifest.json"
-        write_json(
-            support_manifest_path,
+        support_root = benchmark / "scoring-support" / "candidate"
+        shutil.copytree(TEMPLATE / "support", support_root)
+        support_manifest_path = support_root / "manifest.json"
+        support_manifest = load_json(support_manifest_path)
+        support_manifest.update(
             {
                 "status": "candidate",
                 "release_id": candidate["release_id"],
                 "dataset_id": "drivaerml",
                 "dataset_version": "drivaerml-native-v3-candidate",
                 "evaluation_reference_version": "drivaerml-evaluator-v3-candidate",
-            },
+            }
         )
+        support_manifest.pop("owner_approval", None)
+        for support in support_manifest["supports"]:
+            for binding in support["metric_bindings"]:
+                if binding["weighting"] == "support_weights":
+                    binding["dataset_weighting"] = "cell_volume"
+        support_chunk_path = support_root / "case-sets" / "standard" / "chunk-000.json"
+        support_chunk = load_json(support_chunk_path)
+        support_chunk.update(
+            {
+                "release_id": candidate["release_id"],
+                "dataset_id": "drivaerml",
+            }
+        )
+        write_json(support_chunk_path, support_chunk)
+        support_index_path = support_root / "case-sets" / "standard" / "index.json"
+        support_index = load_json(support_index_path)
+        support_index.update(
+            {
+                "release_id": candidate["release_id"],
+                "dataset_id": "drivaerml",
+            }
+        )
+        support_index["chunks"][0]["sha256"] = assembler.sha256_file(
+            support_chunk_path
+        )
+        write_json(support_index_path, support_index)
+        support_manifest["case_sets"][0]["index_sha256"] = assembler.sha256_file(
+            support_index_path
+        )
+        write_json(support_manifest_path, support_manifest)
         support_sha256 = assembler.sha256_file(support_manifest_path)
         candidate["manifest_sha256"] = support_sha256
         metric_values = load_json(TEMPLATE / "metrics" / "cases.json")[
             "metric_values"
+        ]
+        metrics = [
+            {
+                "id": binding["metric_id"],
+                "aggregation": binding["aggregation"],
+                "weighting": binding["dataset_weighting"],
+            }
+            for support in support_manifest["supports"]
+            for binding in support["metric_bindings"]
         ]
         specification = {
             "schema_version": "1.1",
@@ -113,7 +155,7 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
                     "quantity_ids": ["pressure"],
                 }
             ],
-            "metrics": [{"id": metric_id} for metric_id in metric_values],
+            "metrics": metrics,
             "splits": [
                 {
                     "id": "default",
@@ -140,6 +182,13 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
                 "scoring_support_manifest_sha256": support_sha256,
             }
         )
+        for case in case_metrics["cases"]:
+            for support in case["supports"]:
+                for statistics in support.get(
+                    "metric_sufficient_statistics", {}
+                ).values():
+                    if statistics["weighting"] == "support_weights":
+                        statistics["dataset_weighting"] = "cell_volume"
         case_metrics_path = root / "inputs" / "metrics" / "cases.json"
         write_json(case_metrics_path, case_metrics)
 
@@ -241,7 +290,22 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
             "profiles": profiles_path,
             "discretization_cases": cases_path,
             "output": root / "output" / "drivaerml-test-model-v1",
+            "candidate_manifest": support_manifest_path,
+            "profile_definition": profile_path,
         }
+
+    def rebind_candidate_manifest(self, paths: dict[str, Path]) -> None:
+        digest = assembler.sha256_file(paths["candidate_manifest"])
+        specification = load_json(paths["specification"])
+        specification["scoring_support"]["candidate_manifest"][
+            "manifest_sha256"
+        ] = digest
+        write_json(paths["specification"], specification)
+        config = load_json(paths["config"])
+        config["release_bindings"]["candidate_manifest"][
+            "manifest_sha256"
+        ] = digest
+        write_json(paths["config"], config)
 
     def test_checked_in_template_reports_explicit_tokens_without_ready_claim(self) -> None:
         config = load_json(DRIVAER_TEMPLATE)
@@ -331,6 +395,150 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
                         output_path=paths["output"],
                     )
                 self.assertFalse(paths["output"].exists())
+
+    def test_candidate_manifest_must_be_schema_valid_complete_and_unapproved(self) -> None:
+        for mutation, message in (
+            ("missing_supports", "supports"),
+            ("owner_approval", "must not claim owner approval"),
+            ("semantic_binding", "dataset_weighting must match"),
+        ):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                paths = self.make_fixture(Path(temporary))
+                manifest = load_json(paths["candidate_manifest"])
+                if mutation == "missing_supports":
+                    manifest.pop("supports")
+                else:
+                    if mutation == "owner_approval":
+                        manifest["owner_approval"] = {
+                            "approved_by": "Not allowed for a candidate",
+                            "approved_at": "2026-08-22",
+                            "pull_request_url": "https://github.com/example/repo/pull/1",
+                        }
+                    else:
+                        manifest["supports"][0]["metric_bindings"][0][
+                            "dataset_weighting"
+                        ] = "entities_equal"
+                write_json(paths["candidate_manifest"], manifest)
+                self.rebind_candidate_manifest(paths)
+                with self.assertRaisesRegex(assembler.PackageAssemblyError, message):
+                    assembler.assemble_package(
+                        config_path=paths["config"],
+                        specification_path=paths["specification"],
+                        case_metrics_path=paths["case_metrics"],
+                        profiles_path=paths["profiles"],
+                        discretization_cases_path=paths["discretization_cases"],
+                        output_path=paths["output"],
+                    )
+                self.assertFalse(paths["output"].exists())
+
+    def test_authoritative_json_rejects_duplicate_keys_even_when_hash_bound(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            paths = self.make_fixture(Path(temporary))
+            manifest_text = paths["candidate_manifest"].read_text(encoding="utf-8")
+            manifest_text = manifest_text.replace(
+                "{\n",
+                '{\n  "status": "candidate",\n',
+                1,
+            )
+            paths["candidate_manifest"].write_text(manifest_text, encoding="utf-8")
+            self.rebind_candidate_manifest(paths)
+            with self.assertRaisesRegex(
+                assembler.PackageAssemblyError, "duplicate key 'status'"
+            ):
+                assembler.assemble_package(
+                    config_path=paths["config"],
+                    specification_path=paths["specification"],
+                    case_metrics_path=paths["case_metrics"],
+                    profiles_path=paths["profiles"],
+                    discretization_cases_path=paths["discretization_cases"],
+                    output_path=paths["output"],
+                )
+
+    def test_profile_v10_must_resolve_inside_dataset_and_remain_unchanged(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            paths = self.make_fixture(root)
+            outside = root / "outside-v10.json"
+            write_json(outside, {"id": "drivaerml-diagnostics-v10-candidate"})
+            paths["profile_definition"].unlink()
+            try:
+                paths["profile_definition"].symlink_to(outside)
+            except OSError as error:
+                self.skipTest(f"symbolic links are unavailable: {error}")
+            digest = assembler.sha256_file(outside)
+            specification = load_json(paths["specification"])
+            specification["profile_definition"]["sha256"] = digest
+            write_json(paths["specification"], specification)
+            config = load_json(paths["config"])
+            config["release_bindings"]["profile_definition_v10"]["sha256"] = digest
+            write_json(paths["config"], config)
+            with self.assertRaisesRegex(
+                assembler.PackageAssemblyError, "must remain inside"
+            ):
+                assembler.assemble_package(
+                    config_path=paths["config"],
+                    specification_path=paths["specification"],
+                    case_metrics_path=paths["case_metrics"],
+                    profiles_path=paths["profiles"],
+                    discretization_cases_path=paths["discretization_cases"],
+                    output_path=paths["output"],
+                )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            paths = self.make_fixture(Path(temporary))
+            original_assert_unchanged = assembler.RetainedVerifiedFile.assert_unchanged
+            mutated = False
+
+            def mutate_during_profile_parse(retained, *, context: str) -> None:
+                nonlocal mutated
+                if (
+                    not mutated
+                    and retained.label == "active profile-v10 artifact"
+                    and context == "while its JSON was parsed"
+                ):
+                    mutated = True
+                    write_json(
+                        paths["profile_definition"],
+                        {"id": "drivaerml-diagnostics-v10-mutated"},
+                    )
+                original_assert_unchanged(retained, context=context)
+
+            with patch.object(
+                assembler.RetainedVerifiedFile,
+                "assert_unchanged",
+                new=mutate_during_profile_parse,
+            ), self.assertRaisesRegex(
+                assembler.PackageAssemblyError, "changed while its JSON was parsed"
+            ):
+                assembler.assemble_package(
+                    config_path=paths["config"],
+                    specification_path=paths["specification"],
+                    case_metrics_path=paths["case_metrics"],
+                    profiles_path=paths["profiles"],
+                    discretization_cases_path=paths["discretization_cases"],
+                    output_path=paths["output"],
+                )
+            self.assertTrue(mutated)
+
+    def test_dangling_output_symlink_is_a_clean_existing_output_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            paths = self.make_fixture(Path(temporary))
+            paths["output"].parent.mkdir(parents=True)
+            try:
+                paths["output"].symlink_to(paths["output"].parent / "missing-target")
+            except OSError as error:
+                self.skipTest(f"symbolic links are unavailable: {error}")
+            with self.assertRaisesRegex(
+                assembler.PackageAssemblyError, "output already exists"
+            ):
+                assembler.assemble_package(
+                    config_path=paths["config"],
+                    specification_path=paths["specification"],
+                    case_metrics_path=paths["case_metrics"],
+                    profiles_path=paths["profiles"],
+                    discretization_cases_path=paths["discretization_cases"],
+                    output_path=paths["output"],
+                )
 
     def test_participant_code_commit_is_optional_but_consistent_when_present(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
