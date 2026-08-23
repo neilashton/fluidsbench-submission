@@ -169,8 +169,14 @@ their complete native fields is not required. No real-model sensitivity result
 is claimed. The bounded-score sensitivity review and bootstrap remain pending
 until the evaluator is frozen.
 
-AutoCFD contributors can follow the bounded-memory native-mesh workflow in the
-[`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md). A one-command synthetic
+FluidsBench contributors can follow the bounded-memory native-mesh and closed
+candidate package workflow in
+[`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md). AutoCFD5 is used there only as
+the provenance for the 16 velocity-line definitions; it is not a second
+submission target. The candidate release hand-off is recorded in
+[`candidate-release-bindings.json`](candidate-release-bindings.json); its
+unresolved tokens are blockers and are never copied into the active
+`submission-spec.json`. A one-command synthetic
 two-part/three-part dry run is provided under
 [`examples/drivaerml-candidate-native-chunks/`](../../examples/drivaerml-candidate-native-chunks/);
 it is an ineligible transport and packaging fixture, not an official

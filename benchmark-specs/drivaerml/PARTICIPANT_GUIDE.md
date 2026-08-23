@@ -1,7 +1,10 @@
 # DrivAerML candidate participant guide
 
-This guide describes the proposed native-mesh workflow for AutoCFD and
-FluidsBench contributors. The contract is still a closed candidate:
+This guide describes the native-mesh workflow for a DrivAerML result submitted
+to `fluidsbench-submission`. It is not an AutoCFD submission guide. AutoCFD5 is
+named below only because its published line definitions are the provenance for
+the 16 velocity diagnostics used by FluidsBench. The contract is still a
+closed candidate:
 `submissions_open` is `false`. The bounded composite equation is active and can
 produce implementation-feedback scores, but no package made with these
 instructions is an official leaderboard submission yet.
@@ -96,7 +99,7 @@ metrics weight every native cell equally; no geometric cell-volume array or
 volume-weighted secondary metric is required. The evaluator audits, but never
 regenerates, the fixed surface-area inputs.
 
-## 4. Run the reference evaluator locally
+## 4. Run the FluidsBench reference evaluator locally
 
 Use the candidate evaluator for implementation feedback now and, after
 activation, run the exact owner-approved frozen evaluator locally. Do not
@@ -107,7 +110,9 @@ and wall shear to produce per-case `Cd`, `Cl`, `CmPitch`, and report-only
 mappings and extraction support to produce the complete JSON series for the 16
 AutoCFD5 velocity profiles and the four FluidsBench continuous Cp cuts. Include
 those derived coefficients, metrics, and profile series in the submission
-package. This keeps truth and predictions on the same geometry, raw IDs, force
+package. The AutoCFD5 name identifies the source line geometry only; this JSON
+belongs to the DrivAerML FluidsBench package and is not submitted to AutoCFD.
+This keeps truth and predictions on the same geometry, raw IDs, force
 convention, validity masks, and reductions.
 
 For schema v3, each case in `metrics/cases.json` carries the evaluator-produced
@@ -266,8 +271,9 @@ three-part streams respectively, calls the same core and diagnostic evaluator
 entry points, and writes candidate evidence only. It never downloads data,
 generates scientific support, or creates a submission.
 
-For a complete selected split, the dataset reducer writes both the case metrics
-and the standard profile chunks from the participant's evaluator evidence:
+For a complete selected split, first run the reducer for candidate scientific
+evidence. Keep this output outside the eventual schema-v3 package because it is
+not the schema-v3 `evaluation-evidence.json` record:
 
 ```bash
 .venv-drivaerml/bin/python scripts/score_drivaerml_candidate_dataset.py \
@@ -275,7 +281,19 @@ and the standard profile chunks from the participant's evaluator evidence:
   --core-evidence-dir /path/to/core-case-evidence \
   --diagnostic-evidence-dir /path/to/diagnostic-case-evidence \
   --force-truth /path/to/force_mom_constref_all.csv \
-  --output /path/to/package/evaluation-evidence.json \
+  --output /path/to/work/candidate-dataset-evidence.json
+```
+
+After the owner publishes all immutable candidate release bindings, rerun the
+same reducer with the schema-v3 adapters:
+
+```bash
+.venv-drivaerml/bin/python scripts/score_drivaerml_candidate_dataset.py \
+  --split-id <official-split-id> \
+  --core-evidence-dir /path/to/core-case-evidence \
+  --diagnostic-evidence-dir /path/to/diagnostic-case-evidence \
+  --force-truth /path/to/force_mom_constref_all.csv \
+  --output /path/to/work/candidate-dataset-evidence.json \
   --schema-v3-case-metrics-output /path/to/package/metrics/cases.json \
   --schema-v3-profile-output-dir /path/to/package/profiles \
   --submission-id <submission-id> \
@@ -289,17 +307,77 @@ support remains unpublished, this command may produce candidate dataset and
 case-metric evidence but must refuse the complete profile output; it never
 fills missing curves with placeholders.
 
-## 6. Package through schema v3 only after activation
+The current candidate reducer also does not yet emit the complete
+composite/group/global-R2 metric set required in a submission. The package
+assembler checks the specification's exact metric set and therefore refuses
+that incomplete adapter output. Do not calculate or insert those missing
+values by hand; the frozen reducer must produce them.
 
-The candidate tools produce deterministic local evaluation evidence, not an
-official `submission.json`. Once the owner publishes immutable official
-scoring support and opens DrivAerML submissions, run the frozen evaluator and
-package the selected split, model/checkpoint provenance, per-case force
-coefficients and metrics, complete profile JSON, case evidence, and aggregate
-metrics through the repository's normal schema-v3 contributor process. The
-profile JSON must cover every required case and contain all 16 velocity series
-and all four continuous Cp-cut series. The official evaluator and support
-release IDs and hashes must match exactly.
+## 6. Assemble and validate a closed candidate
+
+Start from
+[`examples/drivaerml-v3-candidate/`](../../examples/drivaerml-v3-candidate/).
+Its explicit `__REPLACE_...__` and `__UNRESOLVED_DRIVAERML_...__` strings are
+real machine-detectable blockers, not illustrative release IDs or hashes.
+List them at any time:
+
+```bash
+python scripts/assemble_drivaerml_schema_v3_candidate.py \
+  --config /path/to/package-config.json \
+  --list-unresolved
+```
+
+Once that command reports no unresolved tokens, run assembly to perform the
+authoritative repository-binding, input, and schema checks. Assemble only
+participant-owned files:
+
+```bash
+python scripts/assemble_drivaerml_schema_v3_candidate.py \
+  --config /path/to/package-config.json \
+  --case-metrics /path/to/package/metrics/cases.json \
+  --profiles /path/to/package/profiles \
+  --discretization-cases /path/to/discretization/cases.jsonl \
+  --output /path/to/submissions/drivaerml/<submission-id>
+```
+
+The assembler obtains dataset, split, evaluator, and release identities from
+the checked-in contract, rebuilds the participant hash chain, schema-checks
+the files, and refuses an existing output directory. It intentionally does not
+write `approval`, `maintainer-validation.json`, or
+`prediction-artifact-checks.json`. Candidate validity can then be checked with:
+
+```bash
+python scripts/validate_submission.py --candidate-dry-run \
+  /path/to/submissions/drivaerml/<submission-id>
+```
+
+This mode is non-approving. It works only after the repository contains an
+exact `scoring_support.candidate_manifest`; it does not fall back to the
+candidate evidence manifest or accept unresolved release tokens. A passing
+candidate dry run means that the package implements the closed contract. It
+does not mean that the result is accepted, rankable, citable, independently
+validated, or scientifically approved.
+
+## 7. Pull-request boundary and later official submission
+
+While `submissions_open` is `false`, use a candidate package for local or
+owner-coordinated dry-run review only. Do not merge it as a public leaderboard
+result. Contract, evaluator, support, Cp/velocity, or instruction changes
+belong in a separate trusted-maintenance pull request; never combine them with
+a participant result.
+
+After FluidsBench explicitly opens DrivAerML, rebuild the package against the
+official frozen release, change its scoring-support status through the
+owner-published instructions, and run `--contributor-stage`. The participant
+pull request then contains exactly one entirely new
+`submissions/drivaerml/<submission-id>/` directory and no edits to schemas,
+specifications, scripts, workflows, generated feeds, maintainer-owned files,
+or existing submissions. Follow the immutable result-series/version rules in
+the repository root README.
+
+The profile JSON must cover every required case and contain all 16 velocity
+series and all four continuous Cp-cut series. The official evaluator and
+support release IDs and hashes must match exactly.
 
 Sharing complete native prediction fields is optional under the repository's
 normal reproducibility policy. If a contributor shares them, the declaration
@@ -312,5 +390,4 @@ submission requirement or an activation gate; the submitted JSON generated by
 the frozen evaluator remains the required result payload.
 
 Until then, use this workflow for implementation feedback and reproducibility
-review only. Do not describe a candidate dry run as an accepted submission,
-independent participant validation, or owner scientific approval.
+review only.

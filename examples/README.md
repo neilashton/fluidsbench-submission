@@ -5,6 +5,13 @@ evidence, canonical scoring support, per-case metrics and sufficient statistics,
 profiles, maintainer validation, and internal SHA-256 bindings. It is a format fixture, not an official dataset result; use the
 selected dataset's official support release and specification when submissions open.
 
+For the closed DrivAerML candidate, use the dataset-specific
+[`drivaerml-v3-candidate/`](drivaerml-v3-candidate/) configuration and
+fail-closed assembler. It contains explicit unresolved release tokens rather
+than invented hashes and cannot produce a package until the repository
+publishes matching candidate support, evaluator, profile-v10, and profile
+ground-truth bindings.
+
 A real dataset specification pins its original public field-bearing files and requires one mapped prediction for every official
 entity in every case. It also identifies whether fields are point-, node-, face-, or cell-associated and supplies the authoritative
 area, length, volume, or cell-area weights. The guidance distinguishes three-dimensional surfaces and flow domains, two-dimensional
