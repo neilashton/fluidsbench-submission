@@ -19,7 +19,76 @@ their fields must not affect fitting, tuning, checkpoint choice, manual
 selection, normalization, or other training statistics.
 
 Record the split ID, ordered train/validation/test case lists, source dataset
-revision, model commit, checkpoint hash, and preprocessing configuration.
+revision, checkpoint hashes, and preprocessing configuration. Record the model
+commit locally as well; publishing that commit through optional code metadata
+is encouraged but is not required for approval or ranking.
+
+### Submit a reproducible method record
+
+Every schema-v3 DrivAerML package must include
+`methodology.format=fluidsbench-drivaerml-method-v1`. A model name or broad
+architecture label is not sufficient. The record must describe:
+
+- the complete architecture as one or more named components, including each
+  component's specific family, role, layer/operator description, parameter
+  count, and the key hyperparameters needed to distinguish it;
+- the exact total number of learned scalar parameters loaded for inference and
+  the subset updated by the submitter, plus every input feature and the
+  component that consumes it;
+- whether each of the four required native fields is a direct output or is
+  deterministically derived from an output, and which component produces it;
+- normalization, preprocessing, and training-time sampling or downsampling;
+- every training stage and the components it affected; a submitter-performed
+  stage records either its gradient recipe (loss and term weights, optimizer
+  groups, schedule, integer batch definition, and duration) or another fully
+  described fitting procedure, one seed per stochastic run, and measured
+  training compute; an upstream stage instead cites the upstream method;
+- one raw-file SHA-256 entry for every checkpoint file actually read to create
+  the predictions, including its component scope, byte description, role, and
+  checkpoint-selection rule; and
+- measured inference hardware, maximum concurrent device count, evaluated case
+  count, campaign wall time excluding queue delay, aggregate device time,
+  whether preprocessing and native-support mapping are included, and the
+  timing scope.
+
+Training provenance and `training_regime` answer different questions. The
+regime records target-data use. A submitter may therefore perform external
+pretraining for a zero-shot result, while a from-scratch checkpoint may have
+been trained upstream. Describe the actual actor independently in each stage.
+Use multiple components and stages for separate surface/volume models,
+ensembles, adapters, or staged optimization.
+For each submitter stage, the campaign wall time and aggregate device-hours
+cover all declared runs in that stage and exclude scheduler queue delay; explain
+parallel or heterogeneous allocations in `compute.measurement_notes`.
+
+Use
+[`methodology.example.json`](../../examples/drivaerml-v3-candidate/methodology.example.json)
+as a filled structural example. Its values are illustrative, not a baseline.
+The assembler derives the legacy display field `parameter_count_millions` from
+`architecture.total_parameter_count`. This is the sum of unique learned scalar
+values loaded across the architecture components: count ensemble copies
+separately, count shared storage once, and assign shared parameters to one
+component so the component counts still sum exactly. The separate
+`submitter_trainable_parameter_count` counts unique scalars updated by the
+submitter. The assembler rejects broken component references, inconsistent
+counts, duplicate IDs, missing required output fields, or an inference case
+count that differs from the selected split. Current official test sets contain
+50 or 97 cases, not all 484 public cases; copy the count from the selected split.
+
+Calculate each checkpoint entry from the raw file the loader read, for example
+with `sha256sum checkpoint.pt`. A sharded, base-plus-adapter, or directory model
+therefore has one entry per loaded weight file; do not substitute the hash of a
+repacked archive. These declared digests identify the exact local bytes but do
+not require them to be uploaded. Public code, model weights, environment
+artifacts, and full native predictions remain optional. If an optional public
+model artifact is supplied, its archive digest may legitimately differ from the
+digest of a checkpoint stored inside it.
+
+The methodology record is the scientific description of the model. The
+required `discretization.json` and its case records remain authoritative for
+actual representation sizes, direct outputs, sampling counts, and mappings to
+the scoring supports. The two disclosures must describe the same pipeline;
+maintainers reject contradictions.
 
 ## 2. Predict on the actual native supports
 

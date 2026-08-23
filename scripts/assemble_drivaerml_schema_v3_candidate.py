@@ -29,13 +29,18 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from reference.drivaerml.methodology import (
+    DrivAerMethodologyError,
+    derived_parameter_count_millions,
+    require_methodology,
+)
 from reference.drivaerml.retained_file import RetainedFileError, RetainedVerifiedFile
 from scripts.validate_scoring_supports import validate_candidate_manifest_release
 
 
 DEFAULT_SPECIFICATION = ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json"
 SCHEMA_ROOT = ROOT / "schemas"
-CONFIG_SCHEMA = "drivaerml-fluidsbench-schema-v3-package-config-v1"
+CONFIG_SCHEMA = "drivaerml-fluidsbench-schema-v3-package-config-v2"
 TOKEN_PREFIXES = ("__REPLACE_", "__UNRESOLVED_DRIVAERML_")
 SAFE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,159}$")
 SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
@@ -148,6 +153,30 @@ def _require_schema(value: Any, relative_path: str, label: str) -> None:
     if errors:
         raise PackageAssemblyError(
             f"{label} does not satisfy {relative_path}: " + "; ".join(errors)
+        )
+
+
+def _require_drivaerml_methodology_schema(value: Any) -> None:
+    """Validate the inline DrivAerML fragment before processing large evidence."""
+
+    submission_schema = load_json(SCHEMA_ROOT / "v3" / "submission.schema.json")
+    fragment = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$defs": submission_schema["$defs"],
+        "$ref": "#/$defs/drivaerml_methodology",
+    }
+    validator = Draft202012Validator(fragment, format_checker=FormatChecker())
+    errors = [
+        f"{_json_path(error.absolute_path)}: {error.message}"
+        for error in sorted(
+            validator.iter_errors(value),
+            key=lambda item: _json_path(item.absolute_path),
+        )
+    ]
+    if errors:
+        raise PackageAssemblyError(
+            "participant methodology does not satisfy the DrivAerML schema: "
+            + "; ".join(errors)
         )
 
 
@@ -646,7 +675,7 @@ def assemble_package(
         "dataset", "dataset_id", "dataset_version", "split", "split_id",
         "case_set_id", "split_sha256", "evaluation", "scoring_support",
         "spatial_discretization", "case_metrics", "metric_values", "profile_data",
-        "approval", "prediction_artifacts",
+        "approval", "prediction_artifacts", "parameter_count_millions",
     }
     overlap = sorted(forbidden.intersection(participant))
     if overlap:
@@ -654,6 +683,20 @@ def assemble_package(
     submission_id = participant.get("submission_id")
     if not isinstance(submission_id, str):
         raise PackageAssemblyError("participant.submission_id must be a string")
+    participant_submission = copy.deepcopy(participant)
+    try:
+        participant_submission["parameter_count_millions"] = (
+            derived_parameter_count_millions(participant.get("methodology"))
+        )
+        _require_drivaerml_methodology_schema(participant.get("methodology"))
+        require_methodology(
+            participant_submission,
+            expected_case_count=len(case_ids),
+        )
+    except DrivAerMethodologyError as error:
+        raise PackageAssemblyError(
+            f"participant methodology is invalid: {error}"
+        ) from error
     required_metric_ids = [metric["id"] for metric in specification.get("metrics", [])]
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -761,7 +804,7 @@ def assemble_package(
         submission = {
             "$schema": "https://fluidsbench.org/schemas/v3/submission.schema.json",
             "schema_version": "3.0",
-            **copy.deepcopy(participant),
+            **participant_submission,
             "dataset": specification["dataset_name"],
             "dataset_id": "drivaerml",
             "dataset_version": specification["dataset_version"],

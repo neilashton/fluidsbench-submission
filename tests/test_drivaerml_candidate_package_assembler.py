@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts import assemble_drivaerml_schema_v3_candidate as assembler
+from scripts import validate_submission as submission_validator
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +26,140 @@ def load_json(path: Path) -> dict:
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+
+def valid_methodology(*, case_count: int = 2) -> dict:
+    return {
+        "format": "fluidsbench-drivaerml-method-v1",
+        "architecture": {
+            "description": (
+                "Two coordinate-network heads predict the complete native surface "
+                "and volume fields."
+            ),
+            "total_parameter_count": 1_234_567,
+            "submitter_trainable_parameter_count": 1_234_567,
+            "components": [
+                {
+                    "id": "joint-predictor",
+                    "family": "Coordinate network",
+                    "role": "Joint surface and volume predictor.",
+                    "description": "Residual coordinate network with two output heads.",
+                    "parameter_count": 1_234_567,
+                }
+            ],
+            "key_hyperparameters": [
+                {
+                    "id": "hidden-width",
+                    "component_ids": ["joint-predictor"],
+                    "name": "hidden_width",
+                    "value": 128,
+                    "description": "Latent width in every residual block.",
+                }
+            ],
+            "input_features": [
+                {
+                    "id": "body-coordinates",
+                    "component_ids": ["joint-predictor"],
+                    "name": "body_coordinates",
+                    "domain": "surface",
+                    "component_count": 3,
+                    "description": "Body-frame x/y/z coordinates in metres.",
+                }
+            ],
+            "predicted_fields": [
+                {
+                    "field_id": "surface_native_cells.pMeanTrim",
+                    "component_ids": ["joint-predictor"],
+                    "production": "direct_model_output",
+                    "description": "Native-cell surface pressure prediction.",
+                },
+                {
+                    "field_id": "surface_native_cells.wallShearStressMeanTrim",
+                    "component_ids": ["joint-predictor"],
+                    "production": "direct_model_output",
+                    "description": "Native-cell surface wall-shear prediction.",
+                },
+                {
+                    "field_id": "volume_native_cells.pMeanTrim",
+                    "component_ids": ["joint-predictor"],
+                    "production": "direct_model_output",
+                    "description": "Native-cell volume pressure prediction.",
+                },
+                {
+                    "field_id": "volume_native_cells.UMeanTrim",
+                    "component_ids": ["joint-predictor"],
+                    "production": "direct_model_output",
+                    "description": "Native-cell volume velocity prediction.",
+                },
+            ],
+        },
+        "data_handling": {
+            "normalization": "Training-split mean and standard deviation per field.",
+            "preprocessing": "Body-frame centring only.",
+            "sampling": "Fixed native-cell order with no downsampling.",
+        },
+        "training": {
+            "stages": [
+                {
+                    "id": "joint-training",
+                    "status": "performed_by_submitter",
+                    "component_ids": ["joint-predictor"],
+                    "description": "Joint gradient training.",
+                    "procedure": {
+                        "kind": "gradient_based",
+                        "loss": {
+                            "description": "Sum of normalized field mean-squared errors.",
+                            "weighting": "Each of the four fields has unit loss weight.",
+                        },
+                        "optimizers": [
+                            {
+                                "name": "AdamW",
+                                "learning_rate": 0.0001,
+                                "schedule": "Cosine decay after a 100-step warm-up.",
+                            }
+                        ],
+                        "batch": {
+                            "value": 2,
+                            "unit": "cases",
+                            "gradient_accumulation_steps": 1,
+                        },
+                        "duration": {"epochs": 10, "optimizer_steps": 500},
+                    },
+                    "run_count": 1,
+                    "stochastic": True,
+                    "random_seeds": [1234],
+                    "compute": {
+                        "hardware": "1 x NVIDIA A100 80GB",
+                        "max_concurrent_device_count": 1,
+                        "campaign_wall_time_hours": 2.0,
+                        "aggregate_device_hours": 2.0,
+                        "measurement_notes": "One fixed single-GPU allocation.",
+                    },
+                }
+            ]
+        },
+        "checkpoints": [
+            {
+                "id": "joint-model",
+                "component_ids": ["joint-predictor"],
+                "sha256": "1" * 64,
+                "digest_scope": "raw_loaded_file",
+                "bytes_description": "Raw bytes loaded from joint-model.pt.",
+                "role": "Joint surface and volume predictor.",
+                "selection_rule": "Lowest official-validation loss before test inference.",
+            }
+        ],
+        "inference_compute": {
+            "hardware": "1 x NVIDIA A100 80GB",
+            "max_concurrent_device_count": 1,
+            "case_count": case_count,
+            "campaign_wall_time_seconds": 12.5,
+            "aggregate_device_time_seconds": 12.5,
+            "includes_preprocessing": True,
+            "includes_mapping": True,
+            "measurement_notes": "End-to-end timing over the complete test split.",
+        },
+    }
 
 
 class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
@@ -244,7 +379,7 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
                 "target_data_used": "official_train",
                 "external_pretraining": False,
                 "pretraining_data": [],
-                "parameter_count_millions": None,
+                "methodology": valid_methodology(),
                 "submitter_name": "Test Submitter",
                 "institution": "Test Institution",
                 "paper_url": "",
@@ -315,6 +450,9 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
             any(item["token"].startswith("__UNRESOLVED_DRIVAERML_") for item in tokens)
         )
         self.assertTrue(any(item["token"].startswith("__REPLACE_") for item in tokens))
+        self.assertTrue(
+            any(item["path"].startswith("$.participant.methodology") for item in tokens)
+        )
         with tempfile.TemporaryDirectory() as temporary:
             with self.assertRaisesRegex(
                 assembler.PackageAssemblyError, "contains unresolved"
@@ -359,6 +497,12 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
             self.assertNotIn("approval", submission)
             self.assertNotIn("code_revision", submission["evaluation"])
             self.assertNotIn("code_revision", evidence)
+            source_config = load_json(paths["config"])
+            self.assertEqual(
+                submission["methodology"],
+                source_config["participant"]["methodology"],
+            )
+            self.assertEqual(submission["parameter_count_millions"], 1.234567)
             self.assertFalse((paths["output"] / "maintainer-validation.json").exists())
             expected_order = [
                 item["id"] for item in load_json(paths["specification"])["metrics"]
@@ -368,6 +512,144 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
                 submission["case_metrics"]["sha256"],
                 assembler.sha256_file(paths["output"] / "metrics" / "cases.json"),
             )
+
+            specification = load_json(paths["specification"])
+            manifest_path = Path(temporary) / "leaderboard" / "manifest.json"
+            write_json(
+                manifest_path,
+                {
+                    "data_release": {
+                        "profile_ground_truth": load_json(
+                            ROOT / "leaderboard" / "manifest.json"
+                        )["data_release"]["profile_ground_truth"]
+                    },
+                    "datasets": [
+                        {
+                            "name": "DrivAerML",
+                            "slug": "drivaerml",
+                            "splits": [{"id": "default", "name": "Default"}],
+                            "metric_ids": [
+                                metric["id"] for metric in specification["metrics"]
+                            ],
+                            "scoring_support": copy.deepcopy(
+                                specification["scoring_support"]
+                            ),
+                        }
+                    ],
+                    "metric_definitions": [
+                        {
+                            "id": metric["id"],
+                            "direction": "lower",
+                            "kind": "error",
+                            "unit": "",
+                        }
+                        for metric in specification["metrics"]
+                    ],
+                },
+            )
+            with patch.object(
+                submission_validator, "ROOT", Path(temporary)
+            ), patch.object(
+                submission_validator, "MANIFEST_PATH", manifest_path
+            ):
+                validation_errors, validation_stats = (
+                    submission_validator.validate_submission_file(
+                        paths["output"] / "submission.json",
+                        candidate_dry_run=True,
+                    )
+                )
+            # This tiny assembler fixture deliberately uses synthetic case IDs
+            # and discretization summaries, so the full validator also reports
+            # unrelated DrivAer scientific-contract errors. The assertions here
+            # exercise only the newly added methodology integration branch.
+            self.assertFalse(
+                any("methodology" in error for error in validation_errors),
+                "\n".join(validation_errors),
+            )
+            self.assertEqual(validation_stats, {"cases": 2, "series": 2})
+
+            inconsistent = load_json(paths["output"] / "submission.json")
+            inconsistent["parameter_count_millions"] = 999.0
+            write_json(paths["output"] / "submission.json", inconsistent)
+            with patch.object(
+                submission_validator, "ROOT", Path(temporary)
+            ), patch.object(
+                submission_validator, "MANIFEST_PATH", manifest_path
+            ):
+                inconsistent_errors, _ = (
+                    submission_validator.validate_submission_file(
+                        paths["output"] / "submission.json",
+                        candidate_dry_run=True,
+                    )
+                )
+            self.assertIn(
+                "parameter_count_millions must equal",
+                "\n".join(inconsistent_errors),
+            )
+
+    def test_methodology_is_required_hash_bound_and_semantically_consistent(self) -> None:
+        for mutation, message in (
+            ("missing", "methodology must be an object"),
+            ("checkpoint_hash", "does not match"),
+            ("seed_count", "exactly one seed"),
+            ("component_total", "must equal the sum"),
+            ("case_count", "must equal the official evaluation case count 2"),
+            ("duplicate_checkpoint", "checkpoints id values must be unique"),
+            ("unknown_key", "Additional properties are not allowed"),
+        ):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                paths = self.make_fixture(Path(temporary))
+                config = load_json(paths["config"])
+                methodology = config["participant"].get("methodology")
+                if mutation == "missing":
+                    config["participant"].pop("methodology")
+                elif mutation == "checkpoint_hash":
+                    methodology["checkpoints"][0]["sha256"] = "not-a-digest"
+                elif mutation == "seed_count":
+                    methodology["training"]["stages"][0]["run_count"] = 2
+                elif mutation == "component_total":
+                    methodology["architecture"]["components"][0][
+                        "parameter_count"
+                    ] = 1
+                elif mutation == "case_count":
+                    methodology["inference_compute"]["case_count"] = 1
+                elif mutation == "duplicate_checkpoint":
+                    duplicate = copy.deepcopy(methodology["checkpoints"][0])
+                    duplicate["sha256"] = "2" * 64
+                    methodology["checkpoints"].append(duplicate)
+                else:
+                    methodology["architecture"]["invented"] = True
+                write_json(paths["config"], config)
+                with self.assertRaisesRegex(assembler.PackageAssemblyError, message):
+                    assembler.assemble_package(
+                        config_path=paths["config"],
+                        specification_path=paths["specification"],
+                        case_metrics_path=paths["case_metrics"],
+                        profiles_path=paths["profiles"],
+                        discretization_cases_path=paths["discretization_cases"],
+                        output_path=paths["output"],
+                    )
+                self.assertFalse(paths["output"].exists())
+
+    def test_parameter_count_millions_is_derived_not_participant_authored(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            paths = self.make_fixture(Path(temporary))
+            config = load_json(paths["config"])
+            config["participant"]["parameter_count_millions"] = 999.0
+            write_json(paths["config"], config)
+            with self.assertRaisesRegex(
+                assembler.PackageAssemblyError,
+                "participant config must not override benchmark fields.*parameter_count_millions",
+            ):
+                assembler.assemble_package(
+                    config_path=paths["config"],
+                    specification_path=paths["specification"],
+                    case_metrics_path=paths["case_metrics"],
+                    profiles_path=paths["profiles"],
+                    discretization_cases_path=paths["discretization_cases"],
+                    output_path=paths["output"],
+                )
+            self.assertFalse(paths["output"].exists())
 
     def test_conflicting_evaluator_identity_and_profile_chunk_drift_fail(self) -> None:
         for mutation, message in (

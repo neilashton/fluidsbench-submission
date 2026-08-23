@@ -82,6 +82,19 @@ audit a shared, revision-pinned artifact, but native-field sharing and
 maintainer recomputation are neither participant requirements nor activation
 gates.
 
+Every new schema-v3 DrivAerML result also includes the mandatory
+`fluidsbench-drivaerml-method-v1` methodology record. It binds a detailed
+multi-component architecture and exact total/submitter-trainable parameter
+counts, input and output definitions, data handling, every submitter or upstream
+training stage, compute for every submitter-performed stage, every exact loaded
+checkpoint-file SHA-256, and measured inference compute. The record is required
+even when public code and model weights are not shared. This makes the method and
+checkpoint identity reviewable without turning optional artifact publication
+into a ranking or approval requirement. See
+[`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md) and the
+[`methodology.example.json`](../../examples/drivaerml-v3-candidate/methodology.example.json)
+shape example.
+
 Velocity validity is benchmark-owned support. Only coordinates confirmed to be
 inside the morphed solid or outside the released fluid domain may be excluded.
 Every other coordinate must map deterministically to a native volume cell or

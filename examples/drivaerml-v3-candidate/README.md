@@ -19,6 +19,35 @@ python scripts/assemble_drivaerml_schema_v3_candidate.py \
   --list-unresolved
 ```
 
+The config-v2 format for schema-v3 packages requires a structured
+`participant.methodology` record. Start from the placeholders in the template
+and use [`methodology.example.json`](methodology.example.json) only as a shape
+example. Replace all illustrative values with the submitted method's actual:
+
+- named architecture components, exact total and submitter-trainable parameter
+  counts, scoped hyperparameters and inputs, and the production path for all
+  four required fields;
+- normalization, preprocessing, and sampling plus every submitter or upstream
+  training stage; submitter stages include their fitting procedure, runs,
+  random seeds when stochastic, and measured compute;
+- a raw-file SHA-256, byte description, component scope, role, and pre-test
+  selection rule for every loaded checkpoint file; and
+- complete-split inference campaign wall time, aggregate device time, and their
+  inclusion boundaries.
+
+`parameter_count_millions` is deliberately absent from the configuration. The
+assembler derives it from `methodology.architecture.total_parameter_count`. The
+checkpoint hashes bind the local bytes actually loaded for inference; they do
+not require public model-weight upload and need not equal the hash of an
+optional published model archive.
+
+The template shows one jointly trained component and one gradient-based stage.
+Add components, stages, and checkpoint-file entries when surface and volume use
+different networks, when training is staged, or when a model is an ensemble.
+For an upstream stage use `status=performed_upstream`, a component scope, and
+an upstream reference. This provenance choice is independent of the top-level
+target-data `training_regime`.
+
 The token report does not validate repository bindings or evaluator outputs;
 successful assembly is the authoritative readiness check. Once the
 owner-release fields are published and the frozen evaluator produces

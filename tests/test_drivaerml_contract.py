@@ -53,6 +53,8 @@ class DrivAerMLContractTests(unittest.TestCase):
             "complete velocity-profile and continuous-Cp-cut JSON chunks",
             participant_process,
         )
+        self.assertIn("methodology disclosure", participant_process)
+        self.assertIn("checkpoint publication remains optional", participant_process)
         self.assertIn("optional audits", participant_process)
         self.assertNotIn("complete-split scored-prediction artifact", participant_process)
         self.assertNotIn("recomputation receipt", support["closed_reason"])
