@@ -38,10 +38,12 @@ tokens, incomplete or reordered cases, missing metrics or profiles, mismatched
 release bindings, and an existing output directory.
 
 Evaluator-produced `metrics/cases.json` and `profiles/index.json` must already
-carry the exact submission, split, case-set, and release identities supplied to
-the evaluator; the assembler rejects conflicts instead of rewriting them. It
-also verifies every source profile chunk against the evaluator's input index
-before canonicalizing it. Only the participant-authored per-case
+carry the exact submission, split, and case-set identities supplied to the
+evaluator. `metrics/cases.json` must additionally carry the exact candidate
+support release ID and manifest hash; the profile index has no release-identity
+fields. The assembler rejects conflicts instead of rewriting them and verifies
+every source profile chunk against the evaluator's input index before
+canonicalizing it. Only the participant-authored per-case
 `discretization/cases.jsonl` may omit its repeated schema/submission/dataset/
 split identity fields; the assembler inserts those fields and rejects any
 conflicting value that is present.

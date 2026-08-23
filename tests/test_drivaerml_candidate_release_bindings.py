@@ -180,6 +180,12 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 existing = promoter.apply_release_managed_bindings(
                     copy.deepcopy(generated), ready, None
                 )
+                existing["scoring_support"]["dataset_evaluator_binding"][
+                    "legacy_extra"
+                ] = "validated but deliberately not copied"
+                existing["scoring_support"]["profile_definition"][
+                    "legacy_extra"
+                ] = "validated but deliberately not copied"
                 result = promoter.apply_release_managed_bindings(
                     copy.deepcopy(generated), bindings, existing
                 )
@@ -189,11 +195,27 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             )
             self.assertEqual(
                 result["scoring_support"]["dataset_evaluator_binding"],
-                existing["scoring_support"]["dataset_evaluator_binding"],
+                {
+                    key: value
+                    for key, value in existing["scoring_support"][
+                        "dataset_evaluator_binding"
+                    ].items()
+                    if key != "legacy_extra"
+                },
             )
             self.assertEqual(
                 result["scoring_support"]["profile_definition"],
-                existing["scoring_support"]["profile_definition"],
+                {
+                    key: value
+                    for key, value in existing["scoring_support"][
+                        "profile_definition"
+                    ].items()
+                    if key != "legacy_extra"
+                },
+            )
+            self.assertNotIn(
+                "legacy_extra",
+                result["scoring_support"]["dataset_evaluator_binding"],
             )
 
     def test_ready_binding_is_idempotent_and_checks_manifest_and_global_truth(self) -> None:
@@ -351,7 +373,8 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 )
                 for mutation, message in (
                     ("candidate", "candidate manifest"),
-                    ("token", "candidate manifest"),
+                    ("token", "unresolved release tokens"),
+                    ("extra_token", "unresolved release tokens"),
                     ("evaluator", "evaluator binding"),
                     ("profile", "profile-v10"),
                     ("profile_bytes", "SHA-256 changed"),
@@ -365,6 +388,10 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                         stale["scoring_support"]["candidate_manifest"][
                             "release_id"
                         ] = "__UNRESOLVED_DRIVAERML_RELEASE_ID__"
+                    elif mutation == "extra_token":
+                        stale["scoring_support"]["dataset_evaluator_binding"][
+                            "legacy_note"
+                        ] = "__UNRESOLVED_DRIVAERML_HIDDEN_LEGACY_FIELD__"
                     elif mutation == "evaluator":
                         stale["scoring_support"]["dataset_evaluator_binding"][
                             "evaluator_reference_version"
@@ -382,6 +409,27 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                         promoter.apply_release_managed_bindings(
                             copy.deepcopy(generated), unresolved, stale
                         )
+
+    def test_unresolved_rerun_validates_old_manifest_against_new_contract(self) -> None:
+        unresolved = promoter.load_candidate_release_bindings(BINDINGS_PATH)
+        with tempfile.TemporaryDirectory() as temporary:
+            ready, benchmark, global_manifest_path, generated = self.make_ready_fixture(
+                Path(temporary)
+            )
+            with patch.object(promoter, "BENCHMARK_ROOT", benchmark), patch.object(
+                promoter, "MANIFEST_PATH", global_manifest_path
+            ):
+                existing = promoter.apply_release_managed_bindings(
+                    copy.deepcopy(generated), ready, None
+                )
+                changed_contract = copy.deepcopy(generated)
+                changed_contract["metrics"][0]["weighting"] = "entities_equal"
+                with self.assertRaisesRegex(
+                    ValueError, "dataset_weighting must match"
+                ):
+                    promoter.apply_release_managed_bindings(
+                        changed_contract, unresolved, existing
+                    )
 
 
 if __name__ == "__main__":

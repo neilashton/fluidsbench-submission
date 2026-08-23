@@ -365,6 +365,15 @@ def validate_ready_candidate_manifest(
         )
     if not isinstance(manifest, dict):
         raise ValueError("candidate scoring-support manifest must be a JSON object")
+    manifest_tokens = unresolved_release_tokens(manifest)
+    if manifest_tokens:
+        rendered = [
+            ".".join(map(str, location)) for location, _token in manifest_tokens
+        ]
+        raise ValueError(
+            "candidate scoring-support manifest contains unresolved release tokens: "
+            + ", ".join(rendered)
+        )
     identities = {
         "status": "candidate",
         "release_id": release_id,
@@ -1402,8 +1411,14 @@ def validate_profile_ground_truth_binding(binding: dict[str, Any]) -> None:
 
 def validate_preserved_release_managed_bindings(
     existing_specification: dict[str, Any] | None,
+    *,
+    target_specification: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
-    """Return a coherent prior release state or reject partial/stale state."""
+    """Return a coherent prior release state or reject partial/stale state.
+
+    When a target is supplied, the old release must satisfy the newly generated
+    contract before any whitelisted value is materialized into that contract.
+    """
 
     if not isinstance(existing_specification, dict):
         return None
@@ -1426,6 +1441,19 @@ def validate_preserved_release_managed_bindings(
     )
     if not has_managed_state:
         return None
+    preserved_source = {
+        "candidate_manifest": candidate,
+        "dataset_evaluator_binding": evaluator,
+        "profile_definition": existing_profile,
+        "scoring_support_profile_definition": support_profile,
+    }
+    tokens = unresolved_release_tokens(preserved_source)
+    if tokens:
+        rendered = [".".join(map(str, location)) for location, _token in tokens]
+        raise ValueError(
+            "preserved release-managed state contains unresolved release tokens: "
+            + ", ".join(rendered)
+        )
     if not isinstance(candidate, dict) or set(candidate) != {
         "status",
         "release_id",
@@ -1462,7 +1490,15 @@ def validate_preserved_release_managed_bindings(
         "file": existing_profile.get("file"),
         "sha256": existing_profile.get("sha256"),
     }
-    validate_profile_v10_binding(profile_binding, existing_profile)
+    validation_specification = (
+        target_specification
+        if isinstance(target_specification, dict)
+        else existing_specification
+    )
+    validation_profile = validation_specification.get("profile_definition")
+    if not isinstance(validation_profile, dict):
+        raise ValueError("target contract has no valid profile-v10 definition")
+    validate_profile_v10_binding(profile_binding, validation_profile)
     ground_truth = support_profile.get("profile_ground_truth")
     validate_profile_ground_truth_binding(ground_truth)
     preserved = {
@@ -1477,7 +1513,7 @@ def validate_preserved_release_managed_bindings(
         "profile_definition_v10": profile_binding,
         "profile_ground_truth": copy.deepcopy(ground_truth),
     }
-    validate_ready_candidate_manifest(preserved, existing_specification)
+    validate_ready_candidate_manifest(preserved, validation_specification)
     return preserved
 
 
@@ -1520,21 +1556,24 @@ def apply_release_managed_bindings(
         )
         return specification
 
-    preserved = validate_preserved_release_managed_bindings(existing_specification)
+    preserved = validate_preserved_release_managed_bindings(
+        existing_specification,
+        target_specification=specification,
+    )
     if preserved is None:
         return specification
-    assert isinstance(existing_specification, dict)
-    existing_support = existing_specification.get("scoring_support")
-    assert isinstance(existing_support, dict)
     support["candidate_manifest"] = copy.deepcopy(
         preserved["candidate_manifest"]
     )
-    existing_evaluator = existing_support.get("dataset_evaluator_binding")
-    assert isinstance(existing_evaluator, dict)
-    support["dataset_evaluator_binding"] = copy.deepcopy(existing_evaluator)
-    existing_support_profile = existing_support.get("profile_definition")
-    assert isinstance(existing_support_profile, dict)
-    support["profile_definition"] = copy.deepcopy(existing_support_profile)
+    support["dataset_evaluator_binding"].update(
+        {
+            "status": "frozen",
+            "evaluator_code_revision": preserved["evaluator"]["code_revision"],
+        }
+    )
+    support["profile_definition"]["profile_ground_truth"] = copy.deepcopy(
+        preserved["profile_ground_truth"]
+    )
     return specification
 
 
