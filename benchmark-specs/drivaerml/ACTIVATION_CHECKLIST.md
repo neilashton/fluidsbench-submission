@@ -1,8 +1,10 @@
 # DrivAerML activation checklist
 
 This checklist separates the participant contract that is now defined from the
-benchmark-owned evidence still needed before AutoCFD5 entrants should submit
-official leaderboard results.
+benchmark-owned evidence still needed before DrivAerML participants should
+submit official FluidsBench leaderboard results. AutoCFD5 is referenced only
+as provenance for the velocity-line geometry; this is not an AutoCFD
+activation checklist.
 
 ## Complete in the candidate
 
@@ -227,8 +229,8 @@ official leaderboard results.
    209-probe artifacts outside that release. Optional native-field artifacts and
    maintainer recomputation records remain outside the activation requirements.
 8. Run at least one end-to-end schema-v3 dry-run submission from an independent
-   AutoCFD5 participant. After dataset-owner review, set scoring support to
-   `official` and only then set `submissions_open` to `true`.
+   DrivAerML FluidsBench participant. After dataset-owner review, set scoring
+   support to `official` and only then set `submissions_open` to `true`.
 
 Until all eight steps pass, the format is suitable for implementation and dry-run
 feedback, but not for official workshop ranking or citation.
