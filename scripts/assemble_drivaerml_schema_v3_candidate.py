@@ -29,8 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from reference.drivaerml.methodology import (
-    DrivAerMethodologyError,
+from reference.methodology import (
+    MethodologyError,
     derived_parameter_count_millions,
     require_methodology,
 )
@@ -156,14 +156,14 @@ def _require_schema(value: Any, relative_path: str, label: str) -> None:
         )
 
 
-def _require_drivaerml_methodology_schema(value: Any) -> None:
-    """Validate the inline DrivAerML fragment before processing large evidence."""
+def _require_methodology_schema(value: Any) -> None:
+    """Validate the common method-record fragment before processing evidence."""
 
     submission_schema = load_json(SCHEMA_ROOT / "v3" / "submission.schema.json")
     fragment = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$defs": submission_schema["$defs"],
-        "$ref": "#/$defs/drivaerml_methodology",
+        "$ref": "#/$defs/fluidsbench_methodology",
     }
     validator = Draft202012Validator(fragment, format_checker=FormatChecker())
     errors = [
@@ -175,7 +175,7 @@ def _require_drivaerml_methodology_schema(value: Any) -> None:
     ]
     if errors:
         raise PackageAssemblyError(
-            "participant methodology does not satisfy the DrivAerML schema: "
+            "participant methodology does not satisfy the FluidsBench schema: "
             + "; ".join(errors)
         )
 
@@ -640,6 +640,10 @@ def assemble_package(
     specification = load_json(specification_path)
     if specification.get("dataset_id") != "drivaerml":
         raise PackageAssemblyError("assembler accepts only the DrivAerML specification")
+    methodology_contract_path = specification_path.parent / "methodology-contract.json"
+    if not methodology_contract_path.is_file():
+        raise PackageAssemblyError("DrivAerML methodology contract is missing")
+    methodology_contract = load_json(methodology_contract_path)
     split_id = config.get("split_id")
     if not isinstance(split_id, str):
         raise PackageAssemblyError("config.split_id must be a string")
@@ -684,16 +688,18 @@ def assemble_package(
     if not isinstance(submission_id, str):
         raise PackageAssemblyError("participant.submission_id must be a string")
     participant_submission = copy.deepcopy(participant)
+    participant_submission["dataset_id"] = "drivaerml"
     try:
         participant_submission["parameter_count_millions"] = (
             derived_parameter_count_millions(participant.get("methodology"))
         )
-        _require_drivaerml_methodology_schema(participant.get("methodology"))
+        _require_methodology_schema(participant.get("methodology"))
         require_methodology(
             participant_submission,
             expected_case_count=len(case_ids),
+            contract=methodology_contract,
         )
-    except DrivAerMethodologyError as error:
+    except MethodologyError as error:
         raise PackageAssemblyError(
             f"participant methodology is invalid: {error}"
         ) from error

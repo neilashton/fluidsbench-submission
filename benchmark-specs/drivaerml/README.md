@@ -83,7 +83,8 @@ maintainer recomputation are neither participant requirements nor activation
 gates.
 
 Every new schema-v3 DrivAerML result also includes the mandatory
-`fluidsbench-drivaerml-method-v1` methodology record. It binds a detailed
+`fluidsbench-method-v1` methodology record and the required outputs in
+[`methodology-contract.json`](methodology-contract.json). It binds a detailed
 multi-component architecture and exact total/submitter-trainable parameter
 counts, input and output definitions, data handling, every submitter or upstream
 training stage, compute for every submitter-performed stage, every exact loaded

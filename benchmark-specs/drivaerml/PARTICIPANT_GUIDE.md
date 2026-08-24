@@ -26,7 +26,8 @@ is encouraged but is not required for approval or ranking.
 ### Submit a reproducible method record
 
 Every schema-v3 DrivAerML package must include
-`methodology.format=fluidsbench-drivaerml-method-v1`. A model name or broad
+`methodology.format=fluidsbench-method-v1` and cover the four outputs in
+[`methodology-contract.json`](methodology-contract.json). A model name or broad
 architecture label is not sufficient. The record must describe:
 
 - the complete architecture as one or more named components, including each

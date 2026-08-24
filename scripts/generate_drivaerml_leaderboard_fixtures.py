@@ -29,6 +29,7 @@ from reference.scores import (
     composite_component_group_scores,
     composite_overall_score,
 )
+from scripts.prototype_methodologies import build_prototype_methodology
 
 
 DATASET_ROOT = ROOT / "benchmark-specs" / "drivaerml"
@@ -871,6 +872,11 @@ def regenerate_submission(
         }
     )
     submission["note"] = PROTOTYPE_NOTE
+    methodology_contract = load_json(DATASET_ROOT / "methodology-contract.json")
+    submission["methodology"] = build_prototype_methodology(
+        submission,
+        methodology_contract,
+    )
     write_json(submission_path, submission)
     return {
         "overall_score": metrics["overall_score"],

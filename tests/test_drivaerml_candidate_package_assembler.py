@@ -30,13 +30,16 @@ def write_json(path: Path, value: object) -> None:
 
 def valid_methodology(*, case_count: int = 2) -> dict:
     return {
-        "format": "fluidsbench-drivaerml-method-v1",
+        "format": "fluidsbench-method-v1",
+        "record_kind": "submitter_reported",
+        "record_note": "Complete test fixture for a submitter-reported method record.",
         "architecture": {
             "description": (
                 "Two coordinate-network heads predict the complete native surface "
                 "and volume fields."
             ),
             "total_parameter_count": 1_234_567,
+            "parameter_count_basis": "exact",
             "submitter_trainable_parameter_count": 1_234_567,
             "components": [
                 {
@@ -69,24 +72,32 @@ def valid_methodology(*, case_count: int = 2) -> dict:
             "predicted_fields": [
                 {
                     "field_id": "surface_native_cells.pMeanTrim",
+                    "domain": "surface",
+                    "component_count": 1,
                     "component_ids": ["joint-predictor"],
                     "production": "direct_model_output",
                     "description": "Native-cell surface pressure prediction.",
                 },
                 {
                     "field_id": "surface_native_cells.wallShearStressMeanTrim",
+                    "domain": "surface",
+                    "component_count": 3,
                     "component_ids": ["joint-predictor"],
                     "production": "direct_model_output",
                     "description": "Native-cell surface wall-shear prediction.",
                 },
                 {
                     "field_id": "volume_native_cells.pMeanTrim",
+                    "domain": "volume",
+                    "component_count": 1,
                     "component_ids": ["joint-predictor"],
                     "production": "direct_model_output",
                     "description": "Native-cell volume pressure prediction.",
                 },
                 {
                     "field_id": "volume_native_cells.UMeanTrim",
+                    "domain": "volume",
+                    "component_count": 3,
                     "component_ids": ["joint-predictor"],
                     "production": "direct_model_output",
                     "description": "Native-cell volume velocity prediction.",
@@ -150,6 +161,7 @@ def valid_methodology(*, case_count: int = 2) -> dict:
             }
         ],
         "inference_compute": {
+            "status": "measured",
             "hardware": "1 x NVIDIA A100 80GB",
             "max_concurrent_device_count": 1,
             "case_count": case_count,
@@ -166,6 +178,10 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
     def make_fixture(self, root: Path) -> dict[str, Path]:
         benchmark = root / "benchmark-specs" / "drivaerml"
         benchmark.mkdir(parents=True)
+        shutil.copyfile(
+            ROOT / "benchmark-specs" / "drivaerml" / "methodology-contract.json",
+            benchmark / "methodology-contract.json",
+        )
         split_path = benchmark / "splits" / "default.json"
         split = {
             "schema_version": "1.0",

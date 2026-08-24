@@ -19,10 +19,13 @@
     "external_pretraining": false,
     "pretraining_data": [],
     "methodology": {
-      "format": "fluidsbench-drivaerml-method-v1",
+      "format": "fluidsbench-method-v1",
+      "record_kind": "submitter_reported",
+      "record_note": "__REPLACE_WITH_METHOD_RECORD_SCOPE_AND_ANY_INTERPRETATION_NOTES__",
       "architecture": {
         "description": "__REPLACE_WITH_ARCHITECTURE_DESCRIPTION__",
         "total_parameter_count": "__REPLACE_WITH_EXACT_TOTAL_LEARNED_PARAMETER_COUNT__",
+        "parameter_count_basis": "exact",
         "submitter_trainable_parameter_count": "__REPLACE_WITH_EXACT_SUBMITTER_TRAINABLE_PARAMETER_COUNT__",
         "components": [
           {
@@ -57,32 +60,40 @@
           }
         ],
         "predicted_fields": [
-          {
-            "field_id": "surface_native_cells.pMeanTrim",
+        {
+          "field_id": "surface_native_cells.pMeanTrim",
+          "domain": "surface",
+          "component_count": 1,
             "component_ids": [
               "__REPLACE_WITH_SURFACE_PREDICTOR_COMPONENT_ID__"
             ],
             "production": "__REPLACE_WITH_DIRECT_OR_DERIVED_MODEL_OUTPUT__",
             "description": "__REPLACE_WITH_SURFACE_PRESSURE_OUTPUT_DESCRIPTION__"
           },
-          {
-            "field_id": "surface_native_cells.wallShearStressMeanTrim",
+        {
+          "field_id": "surface_native_cells.wallShearStressMeanTrim",
+          "domain": "surface",
+          "component_count": 3,
             "component_ids": [
               "__REPLACE_WITH_SURFACE_PREDICTOR_COMPONENT_ID__"
             ],
             "production": "__REPLACE_WITH_DIRECT_OR_DERIVED_MODEL_OUTPUT__",
             "description": "__REPLACE_WITH_SURFACE_WALL_SHEAR_OUTPUT_DESCRIPTION__"
           },
-          {
-            "field_id": "volume_native_cells.pMeanTrim",
+        {
+          "field_id": "volume_native_cells.pMeanTrim",
+          "domain": "volume",
+          "component_count": 1,
             "component_ids": [
               "__REPLACE_WITH_VOLUME_PREDICTOR_COMPONENT_ID__"
             ],
             "production": "__REPLACE_WITH_DIRECT_OR_DERIVED_MODEL_OUTPUT__",
             "description": "__REPLACE_WITH_VOLUME_PRESSURE_OUTPUT_DESCRIPTION__"
           },
-          {
-            "field_id": "volume_native_cells.UMeanTrim",
+        {
+          "field_id": "volume_native_cells.UMeanTrim",
+          "domain": "volume",
+          "component_count": 3,
             "component_ids": [
               "__REPLACE_WITH_VOLUME_PREDICTOR_COMPONENT_ID__"
             ],
@@ -156,7 +167,8 @@
           "selection_rule": "__REPLACE_WITH_PRE_EVALUATION_CHECKPOINT_SELECTION_RULE__"
         }
       ],
-      "inference_compute": {
+    "inference_compute": {
+      "status": "measured",
         "hardware": "__REPLACE_WITH_INFERENCE_HARDWARE__",
         "max_concurrent_device_count": "__REPLACE_WITH_MAX_CONCURRENT_INFERENCE_DEVICE_COUNT__",
         "case_count": "__REPLACE_WITH_MEASURED_OFFICIAL_CASE_COUNT__",

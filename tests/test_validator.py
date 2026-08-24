@@ -49,6 +49,9 @@ def make_real_package(destination: Path, *, approved: bool = False) -> Path:
     commit = "a" * 40
     submission["$schema"] = "https://fluidsbench.org/schemas/v2/submission.schema.json"
     submission["schema_version"] = "2.0"
+    # This helper models a historical v2 contribution, predating the optional
+    # structured method record carried by today's prototype fixtures.
+    submission.pop("methodology", None)
     ground_truth = load_json(ROOT / "leaderboard" / "manifest.json")["data_release"]["profile_ground_truth"]
     submission["profile_data"]["profile_ground_truth_release_id"] = ground_truth["release_id"]
     submission["profile_data"]["profile_ground_truth_manifest_sha256"] = ground_truth["manifest_sha256"]
@@ -401,6 +404,7 @@ class ValidatorTests(unittest.TestCase):
     def test_v3_optional_reproducibility_artifacts_may_be_omitted(self) -> None:
         submission = load_json(V3_TEMPLATE / "submission.json")
         evidence = load_json(V3_TEMPLATE / "evaluation-evidence.json")
+        submission["methodology"]["record_kind"] = "submitter_reported"
         submission.pop("code_url")
         submission["evaluation"].pop("code_revision")
         evidence.pop("code_revision")

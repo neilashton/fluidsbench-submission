@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-071e9792fc3d/ahmedml/medium/dummy-ahmedml-flowformer-v1",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/ahmedml/medium/dummy-ahmedml-flowformer-v1",
   "release": {
-    "id": "prototype-dev-2026-07-15-071e9792fc3d",
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-22T07:12:51Z",
+    "published_at": "2026-08-24T20:08:12Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -53,12 +53,12 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "071e9792fc3d764f85f168826b59b4600ad4cb8e86ecd1c1fa2e08100065a333",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
       "row_index": 1
     },
     "source_submission": {
       "path": "submissions/ahmedml/dummy-ahmedml-flowformer-v1/submission.json",
-      "sha256": "a6c8c945d7a1fe05d3052d2beb50d4c53ad2da0edc0e1c5cc0daeff24b5ad922"
+      "sha256": "06490062c0dcb2228f0f255a5865952994d754c15fb071aa70ba594ed00c0f1c"
     },
     "evaluation_evidence": {
       "path": "submissions/ahmedml/dummy-ahmedml-flowformer-v1/evaluation-evidence.json",

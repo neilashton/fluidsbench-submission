@@ -19,10 +19,16 @@ from tests.test_drivaerml_candidate_package_assembler import valid_methodology
 
 
 ROOT = Path(__file__).resolve().parents[1]
+CONTRACT = json.loads(
+    (ROOT / "benchmark-specs/drivaerml/methodology-contract.json").read_text(
+        encoding="utf-8"
+    )
+)
 
 
 def submission_for(methodology: dict, *, training_regime: str = "from_scratch") -> dict:
     return {
+        "dataset_id": "drivaerml",
         "model_type": "Neural operator",
         "training_regime": training_regime,
         "methodology": methodology,
@@ -37,7 +43,7 @@ def methodology_validator() -> Draft202012Validator:
     fragment = {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "$defs": schema["$defs"],
-        "$ref": "#/$defs/drivaerml_methodology",
+        "$ref": "#/$defs/fluidsbench_methodology",
     }
     return Draft202012Validator(fragment, format_checker=FormatChecker())
 
@@ -51,6 +57,7 @@ class DrivAerMLMethodologyTests(unittest.TestCase):
             methodology_errors(
                 submission_for(methodology, training_regime=training_regime),
                 expected_case_count=case_count,
+                contract=CONTRACT,
             ),
             [],
         )
@@ -249,7 +256,9 @@ class DrivAerMLMethodologyTests(unittest.TestCase):
                 methodology = valid_methodology()
                 mutate(methodology)
                 errors = methodology_errors(
-                    submission_for(methodology), expected_case_count=2
+                    submission_for(methodology),
+                    expected_case_count=2,
+                    contract=CONTRACT,
                 )
                 self.assertIn(expected, "\n".join(errors))
 

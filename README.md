@@ -111,7 +111,7 @@ python3 -m reference.example_calculation
 
 ## 2. Prepare metrics, spatial metadata, and profiles
 
-`submission.json` contains model, submitter, training, dataset, split, aggregate metrics, scoring-support, spatial-discretization,
+`submission.json` contains model, submitter, methodology, dataset, split, aggregate metrics, scoring-support, spatial-discretization,
 case-metric, profile-index, evaluation, and optional open-artifact metadata. New submissions must match
 [`schemas/v3/submission.schema.json`](schemas/v3/submission.schema.json). Historical approved schema-v2 packages remain readable and
 publishable, but the contributor-stage validator rejects new v2 packages because they lack mandatory v3 evidence.
@@ -130,10 +130,12 @@ documentation are optional and do not affect approval, rank, citation, or promot
 to a full commit, model and environment artifacts must be pinned by SHA-256, and code/model licences must use the allowed open SPDX
 identifiers. See [`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md) for the complete eligibility and validation policy.
 
-Schema-v3 DrivAerML packages additionally include a structured methodology record covering architecture components, exact total
-and submitter-trainable parameter counts, inputs and outputs, data handling, training stages, checkpoint selection, and measured
-compute. A SHA-256 digest is required for every checkpoint file actually loaded for inference so the submitted result has an exact
-model identity; publishing those checkpoint bytes, source code, or a model archive remains optional. See the
+Every schema-v3 package includes the same structured methodology record covering architecture components, exact total and
+submitter-trainable parameter counts, inputs and outputs, data handling, training stages, checkpoint selection, and measured
+compute. Each dataset's `methodology-contract.json` names only that benchmark's existing required outputs; it does not change the
+prediction or scoring process. A SHA-256 digest is required for every checkpoint file actually loaded by a parameterized method so
+the result has an exact model identity; publishing those checkpoint bytes, source code, or a model archive remains optional. See
+the repository-wide [`methodology guide`](METHODOLOGY.md) and, for the native-mesh workflow, the
 [`DrivAerML participant guide`](benchmark-specs/drivaerml/PARTICIPANT_GUIDE.md).
 
 The required `metrics/cases.json` records every test case, canonical support, support/scored counts, complete count and weight
