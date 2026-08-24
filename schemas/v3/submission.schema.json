@@ -24,6 +24,7 @@
     "case_set_id",
     "split_sha256",
     "parameter_count_millions",
+    "methodology",
     "submitter_name",
     "institution",
     "paper_url",
@@ -139,11 +140,11 @@
       "$ref": "#/$defs/sha256"
     },
     "parameter_count_millions": {
-      "type": ["number", "null"],
+      "type": "number",
       "minimum": 0
     },
     "methodology": {
-      "type": "object"
+      "$ref": "#/$defs/fluidsbench_methodology"
     },
     "submitter_name": {
       "type": "string",
@@ -334,11 +335,13 @@
     "model_license": {
       "enum": ["Apache-2.0", "MIT", "BSD-2-Clause", "BSD-3-Clause", "ISC", "MPL-2.0", "CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"]
     },
-    "drivaerml_methodology": {
+    "fluidsbench_methodology": {
       "type": "object",
       "additionalProperties": false,
       "required": [
         "format",
+        "record_kind",
+        "record_note",
         "architecture",
         "data_handling",
         "training",
@@ -347,7 +350,15 @@
       ],
       "properties": {
         "format": {
-          "const": "fluidsbench-drivaerml-method-v1"
+          "const": "fluidsbench-method-v1"
+        },
+        "record_kind": {
+          "enum": ["submitter_reported", "prototype_fixture", "format_example"]
+        },
+        "record_note": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
         },
         "architecture": {
           "type": "object",
@@ -355,6 +366,7 @@
           "required": [
             "description",
             "total_parameter_count",
+            "parameter_count_basis",
             "submitter_trainable_parameter_count",
             "components",
             "key_hyperparameters",
@@ -368,10 +380,13 @@
               "maxLength": 4000
             },
             "total_parameter_count": {
-              "$ref": "#/$defs/drivaerml_parameter_count"
+              "$ref": "#/$defs/methodology_parameter_count"
+            },
+            "parameter_count_basis": {
+              "enum": ["exact", "rounded_from_reported_millions"]
             },
             "submitter_trainable_parameter_count": {
-              "$ref": "#/$defs/drivaerml_parameter_count"
+              "$ref": "#/$defs/methodology_parameter_count"
             },
             "components": {
               "type": "array",
@@ -400,7 +415,7 @@
                     "maxLength": 3000
                   },
                   "parameter_count": {
-                    "$ref": "#/$defs/drivaerml_parameter_count"
+                    "$ref": "#/$defs/methodology_parameter_count"
                   }
                 }
               }
@@ -416,7 +431,7 @@
                     "$ref": "#/$defs/safe_id"
                   },
                   "component_ids": {
-                    "$ref": "#/$defs/drivaerml_component_ids"
+                    "$ref": "#/$defs/methodology_component_ids"
                   },
                   "name": {
                     "type": "string",
@@ -453,7 +468,7 @@
                     "$ref": "#/$defs/safe_id"
                   },
                   "component_ids": {
-                    "$ref": "#/$defs/drivaerml_component_ids"
+                    "$ref": "#/$defs/methodology_component_ids"
                   },
                   "name": {
                     "type": "string",
@@ -461,7 +476,7 @@
                     "maxLength": 160
                   },
                   "domain": {
-                    "enum": ["case", "surface", "volume", "global"]
+                    "enum": ["case", "curve", "surface", "volume", "domain", "mesh", "global"]
                   },
                   "component_count": {
                     "type": "integer",
@@ -477,23 +492,32 @@
             },
             "predicted_fields": {
               "type": "array",
-              "minItems": 4,
-              "maxItems": 4,
+              "minItems": 1,
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["field_id", "component_ids", "production", "description"],
+                "required": [
+                  "field_id",
+                  "domain",
+                  "component_count",
+                  "component_ids",
+                  "production",
+                  "description"
+                ],
                 "properties": {
                   "field_id": {
-                    "enum": [
-                      "surface_native_cells.pMeanTrim",
-                      "surface_native_cells.wallShearStressMeanTrim",
-                      "volume_native_cells.pMeanTrim",
-                      "volume_native_cells.UMeanTrim"
-                    ]
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,239}$"
+                  },
+                  "domain": {
+                    "enum": ["case", "curve", "surface", "volume", "domain", "global"]
+                  },
+                  "component_count": {
+                    "type": "integer",
+                    "minimum": 1
                   },
                   "component_ids": {
-                    "$ref": "#/$defs/drivaerml_component_ids"
+                    "$ref": "#/$defs/methodology_component_ids"
                   },
                   "production": {
                     "enum": ["direct_model_output", "derived_from_model_output"]
@@ -504,53 +528,7 @@
                     "maxLength": 1000
                   }
                 }
-              },
-              "allOf": [
-                {
-                  "contains": {
-                    "type": "object",
-                    "properties": {
-                      "field_id": {"const": "surface_native_cells.pMeanTrim"}
-                    },
-                    "required": ["field_id"]
-                  },
-                  "minContains": 1,
-                  "maxContains": 1
-                },
-                {
-                  "contains": {
-                    "type": "object",
-                    "properties": {
-                      "field_id": {"const": "surface_native_cells.wallShearStressMeanTrim"}
-                    },
-                    "required": ["field_id"]
-                  },
-                  "minContains": 1,
-                  "maxContains": 1
-                },
-                {
-                  "contains": {
-                    "type": "object",
-                    "properties": {
-                      "field_id": {"const": "volume_native_cells.pMeanTrim"}
-                    },
-                    "required": ["field_id"]
-                  },
-                  "minContains": 1,
-                  "maxContains": 1
-                },
-                {
-                  "contains": {
-                    "type": "object",
-                    "properties": {
-                      "field_id": {"const": "volume_native_cells.UMeanTrim"}
-                    },
-                    "required": ["field_id"]
-                  },
-                  "minContains": 1,
-                  "maxContains": 1
-                }
-              ]
+              }
             }
           }
         },
@@ -586,8 +564,9 @@
               "minItems": 1,
               "items": {
                 "oneOf": [
-                  {"$ref": "#/$defs/drivaerml_submitter_training_stage"},
-                  {"$ref": "#/$defs/drivaerml_upstream_training_stage"}
+                  {"$ref": "#/$defs/methodology_submitter_training_stage"},
+                  {"$ref": "#/$defs/methodology_upstream_training_stage"},
+                  {"$ref": "#/$defs/methodology_prototype_training_stage"}
                 ]
               }
             }
@@ -595,7 +574,6 @@
         },
         "checkpoints": {
           "type": "array",
-          "minItems": 1,
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -613,7 +591,7 @@
                 "$ref": "#/$defs/safe_id"
               },
               "component_ids": {
-                "$ref": "#/$defs/drivaerml_component_ids"
+                "$ref": "#/$defs/methodology_component_ids"
               },
               "sha256": {
                 "$ref": "#/$defs/sha256"
@@ -640,61 +618,19 @@
           }
         },
         "inference_compute": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "hardware",
-            "max_concurrent_device_count",
-            "case_count",
-            "campaign_wall_time_seconds",
-            "aggregate_device_time_seconds",
-            "includes_preprocessing",
-            "includes_mapping",
-            "measurement_notes"
-          ],
-          "properties": {
-            "hardware": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 1000
-            },
-            "max_concurrent_device_count": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "case_count": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "campaign_wall_time_seconds": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            },
-            "aggregate_device_time_seconds": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            },
-            "includes_preprocessing": {
-              "type": "boolean"
-            },
-            "includes_mapping": {
-              "type": "boolean"
-            },
-            "measurement_notes": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 2000
-            }
-          }
+          "oneOf": [
+            {"$ref": "#/$defs/methodology_measured_inference_compute"},
+            {"$ref": "#/$defs/methodology_unmeasured_inference_compute"}
+          ]
         }
       }
     },
-    "drivaerml_parameter_count": {
+    "methodology_parameter_count": {
       "type": "integer",
       "minimum": 0,
       "maximum": 1000000000000000
     },
-    "drivaerml_component_ids": {
+    "methodology_component_ids": {
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
@@ -702,7 +638,7 @@
         "$ref": "#/$defs/safe_id"
       }
     },
-    "drivaerml_submitter_training_stage": {
+    "methodology_submitter_training_stage": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -724,7 +660,7 @@
           "const": "performed_by_submitter"
         },
         "component_ids": {
-          "$ref": "#/$defs/drivaerml_component_ids"
+          "$ref": "#/$defs/methodology_component_ids"
         },
         "description": {
           "type": "string",
@@ -733,8 +669,8 @@
         },
         "procedure": {
           "oneOf": [
-            {"$ref": "#/$defs/drivaerml_gradient_training_procedure"},
-            {"$ref": "#/$defs/drivaerml_other_training_procedure"}
+            {"$ref": "#/$defs/methodology_gradient_training_procedure"},
+            {"$ref": "#/$defs/methodology_other_training_procedure"}
           ]
         },
         "run_count": {
@@ -751,11 +687,11 @@
           }
         },
         "compute": {
-          "$ref": "#/$defs/drivaerml_training_compute"
+          "$ref": "#/$defs/methodology_training_compute"
         }
       }
     },
-    "drivaerml_upstream_training_stage": {
+    "methodology_upstream_training_stage": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "status", "component_ids", "description", "upstream_reference"],
@@ -767,7 +703,7 @@
           "const": "performed_upstream"
         },
         "component_ids": {
-          "$ref": "#/$defs/drivaerml_component_ids"
+          "$ref": "#/$defs/methodology_component_ids"
         },
         "description": {
           "type": "string",
@@ -781,7 +717,28 @@
         }
       }
     },
-    "drivaerml_gradient_training_procedure": {
+    "methodology_prototype_training_stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "component_ids", "description"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "status": {
+          "const": "prototype_not_recorded"
+        },
+        "component_ids": {
+          "$ref": "#/$defs/methodology_component_ids"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "methodology_gradient_training_procedure": {
       "type": "object",
       "additionalProperties": false,
       "required": ["kind", "loss", "optimizers", "batch", "duration"],
@@ -852,11 +809,11 @@
           }
         },
         "duration": {
-          "$ref": "#/$defs/drivaerml_training_duration"
+          "$ref": "#/$defs/methodology_training_duration"
         }
       }
     },
-    "drivaerml_other_training_procedure": {
+    "methodology_other_training_procedure": {
       "type": "object",
       "additionalProperties": false,
       "required": ["kind", "description", "duration"],
@@ -870,11 +827,11 @@
           "maxLength": 3000
         },
         "duration": {
-          "$ref": "#/$defs/drivaerml_training_duration"
+          "$ref": "#/$defs/methodology_training_duration"
         }
       }
     },
-    "drivaerml_training_duration": {
+    "methodology_training_duration": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -898,7 +855,7 @@
         {"required": ["description"]}
       ]
     },
-    "drivaerml_training_compute": {
+    "methodology_training_compute": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -927,6 +884,73 @@
           "exclusiveMinimum": 0
         },
         "measurement_notes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "methodology_measured_inference_compute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "hardware",
+        "max_concurrent_device_count",
+        "case_count",
+        "campaign_wall_time_seconds",
+        "aggregate_device_time_seconds",
+        "includes_preprocessing",
+        "includes_mapping",
+        "measurement_notes"
+      ],
+      "properties": {
+        "status": {
+          "const": "measured"
+        },
+        "hardware": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "max_concurrent_device_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "case_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "campaign_wall_time_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "aggregate_device_time_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "includes_preprocessing": {
+          "type": "boolean"
+        },
+        "includes_mapping": {
+          "type": "boolean"
+        },
+        "measurement_notes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        }
+      }
+    },
+    "methodology_unmeasured_inference_compute": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason"],
+      "properties": {
+        "status": {
+          "const": "not_measured"
+        },
+        "reason": {
           "type": "string",
           "minLength": 1,
           "maxLength": 2000
@@ -1215,27 +1239,6 @@
         "required": ["scoring_support"]
       },
       "then": { "not": { "required": ["approval"] } }
-    },
-    {
-      "if": {
-        "properties": {
-          "dataset_id": {
-            "const": "drivaerml"
-          }
-        },
-        "required": ["dataset_id"]
-      },
-      "then": {
-        "required": ["methodology"],
-        "properties": {
-          "methodology": {
-            "$ref": "#/$defs/drivaerml_methodology"
-          },
-          "parameter_count_millions": {
-            "type": "number"
-          }
-        }
-      }
     }
   ]
 }

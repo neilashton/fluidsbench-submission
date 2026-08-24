@@ -42,6 +42,25 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
     ) -> tuple[Path, Path, Path]:
         temporary_spec_root = temporary_root / "benchmark-specs"
         dataset_directory = temporary_spec_root / "synthetic"
+        dataset_directory.mkdir(parents=True)
+        methodology_contract = {
+            "$schema": "https://fluidsbench.org/schemas/methodology-contract-v1.schema.json",
+            "format": "fluidsbench-methodology-contract-v1",
+            "dataset_id": "synthetic",
+            "allow_additional_predicted_fields": True,
+            "required_predicted_fields": [
+                {
+                    "field_id": "synthetic-support.pressure",
+                    "domain": "domain",
+                    "component_count": 1,
+                    "description": "Synthetic scalar pressure fixture.",
+                }
+            ],
+        }
+        (dataset_directory / "methodology-contract.json").write_text(
+            json.dumps(methodology_contract, indent=2) + "\n",
+            encoding="utf-8",
+        )
         support_directory = (
             dataset_directory / "scoring-support" / "synthetic-support-v1"
         )

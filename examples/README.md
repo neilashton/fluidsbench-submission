@@ -1,6 +1,7 @@
 # Submission examples
 
-New submissions use schema v3. Start with the synthetic [`v3-template/`](v3-template/) to understand the submission, evaluation
+New submissions use schema v3. Start with the synthetic [`v3-template/`](v3-template/) to understand the submission, detailed
+methodology record, evaluation
 evidence, canonical scoring support, per-case metrics and sufficient statistics, spatial report, optional prediction artifact,
 profiles, maintainer validation, and internal SHA-256 bindings. It is a format fixture, not an official dataset result; use the
 selected dataset's official support release and specification when submissions open.
@@ -11,7 +12,8 @@ fail-closed assembler. It contains explicit unresolved release tokens rather
 than invented hashes and cannot produce a package until the repository
 publishes matching candidate support, evaluator, profile-v10, and profile
 ground-truth bindings. Its config-v2 format for schema-v3 packages also
-requires the DrivAerML methodology disclosure; the filled
+requires the common FluidsBench methodology disclosure with DrivAerML's
+dataset-specific required fields; the filled
 [`methodology.example.json`](drivaerml-v3-candidate/methodology.example.json)
 shows the record's shape but contains illustrative values only.
 

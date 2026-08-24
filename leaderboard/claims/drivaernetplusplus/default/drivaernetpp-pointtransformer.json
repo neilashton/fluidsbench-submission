@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-071e9792fc3d/drivaernetplusplus/default/drivaernetpp-pointtransformer",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/drivaernetplusplus/default/drivaernetpp-pointtransformer",
   "release": {
-    "id": "prototype-dev-2026-07-15-071e9792fc3d",
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-22T07:12:51Z",
+    "published_at": "2026-08-24T20:08:12Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -53,12 +53,12 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "071e9792fc3d764f85f168826b59b4600ad4cb8e86ecd1c1fa2e08100065a333",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
       "row_index": 30
     },
     "source_submission": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-pointtransformer/submission.json",
-      "sha256": "49e23e02f803347e31242c8dfbc18a68fb7c3176619e872c06802137692020e6"
+      "sha256": "832346a1be6355b2858aba4ec07659ea0afc05a4b3590d15f09262960a33df6c"
     },
     "evaluation_evidence": {
       "path": "submissions/drivaernetplusplus/drivaernetpp-pointtransformer/evaluation-evidence.json",

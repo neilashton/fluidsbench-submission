@@ -32,6 +32,7 @@ from reference.weightings import evaluator_weighting  # noqa: E402
 
 SPEC_ROOT = ROOT / "benchmark-specs"
 SCHEMA_ROOT = ROOT / "schemas" / "scoring-support" / "v1"
+METHODOLOGY_CONTRACT_SCHEMA = ROOT / "schemas" / "methodology-contract-v1.schema.json"
 ALLOWED_STATUSES = {"prototype", "owner_review_required", "official", "retired"}
 OFFICIAL_FIELDS = (
     "release_id",
@@ -89,6 +90,43 @@ def schema_errors(value: Any, schema_name: str) -> list[str]:
             key=lambda item: json_path(list(item.absolute_path)),
         )
     ]
+
+
+def validate_methodology_contract(
+    errors: list[str],
+    dataset_directory: Path,
+    dataset_id: str,
+) -> None:
+    """Validate the dataset-owned list of outputs a method must disclose."""
+
+    path = dataset_directory / "methodology-contract.json"
+    label = f"{dataset_id}.methodology_contract"
+    if not path.is_file():
+        errors.append(f"{label} is missing: {path}")
+        return
+    try:
+        contract = load_json(path)
+    except (OSError, UnicodeError, json.JSONDecodeError, DuplicateJSONKeyError) as error:
+        errors.append(f"{label} cannot be read: {error}")
+        return
+    schema = load_json(METHODOLOGY_CONTRACT_SCHEMA)
+    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+    for error in sorted(
+        validator.iter_errors(contract),
+        key=lambda item: json_path(list(item.absolute_path)),
+    ):
+        errors.append(f"{label} {json_path(list(error.absolute_path))}: {error.message}")
+    if not isinstance(contract, dict):
+        return
+    if contract.get("dataset_id") != dataset_id:
+        errors.append(f"{label}.dataset_id must equal {dataset_id!r}")
+    field_ids = [
+        item.get("field_id")
+        for item in contract.get("required_predicted_fields", [])
+        if isinstance(item, dict)
+    ]
+    if len(field_ids) != len(set(field_ids)):
+        errors.append(f"{label}.required_predicted_fields field_id values must be unique")
 
 
 def safe_dataset_path(
@@ -884,6 +922,7 @@ def validate_specification(
         errors.append(
             f"{dataset_id}: specification directory must match its dataset_id"
         )
+    validate_methodology_contract(errors, expected_directory, dataset_id)
     support = specification.get("scoring_support")
     if not isinstance(support, dict):
         return errors + [f"{dataset_id}.scoring_support must be an object"]

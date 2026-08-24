@@ -1,4 +1,4 @@
-"""Semantic checks for the DrivAerML schema-v3 methodology disclosure."""
+"""Semantic checks for the dataset-neutral FluidsBench method record."""
 
 from __future__ import annotations
 
@@ -7,22 +7,18 @@ import re
 from typing import Any, Mapping
 
 
-EXPECTED_PREDICTED_FIELDS = frozenset(
-    {
-        "surface_native_cells.pMeanTrim",
-        "surface_native_cells.wallShearStressMeanTrim",
-        "volume_native_cells.pMeanTrim",
-        "volume_native_cells.UMeanTrim",
-    }
-)
 SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
 # Generous for model reporting while remaining below the exact-integer range of
 # IEEE-754 binary64, which backs the legacy millions-valued display field.
 MAX_PARAMETER_COUNT = 1_000_000_000_000_000
 
 
-class DrivAerMethodologyError(ValueError):
+class MethodologyError(ValueError):
     """Raised when method metadata is inconsistent with its result package."""
+
+
+# Retained for callers of the first, DrivAerML-specific implementation.
+DrivAerMethodologyError = MethodologyError
 
 
 def _named_values(value: Any, key: str) -> list[Any]:
@@ -48,10 +44,10 @@ def derived_parameter_count_millions(methodology: Any) -> float:
     """Return the exact total learned parameter count in millions."""
 
     if not isinstance(methodology, dict):
-        raise DrivAerMethodologyError("methodology must be an object")
+        raise MethodologyError("methodology must be an object")
     architecture = methodology.get("architecture")
     if not isinstance(architecture, dict):
-        raise DrivAerMethodologyError("methodology.architecture must be an object")
+        raise MethodologyError("methodology.architecture must be an object")
     parameter_count = architecture.get("total_parameter_count")
     if (
         not isinstance(parameter_count, int)
@@ -59,19 +55,19 @@ def derived_parameter_count_millions(methodology: Any) -> float:
         or parameter_count < 0
         or parameter_count > MAX_PARAMETER_COUNT
     ):
-        raise DrivAerMethodologyError(
+        raise MethodologyError(
             "methodology.architecture.total_parameter_count must be a nonnegative "
             f"integer no greater than {MAX_PARAMETER_COUNT}"
         )
     try:
         derived = parameter_count / 1_000_000.0
     except OverflowError as error:  # Defensive if the bound changes later.
-        raise DrivAerMethodologyError(
+        raise MethodologyError(
             "methodology.architecture.total_parameter_count cannot be represented "
             "in millions"
         ) from error
     if not math.isfinite(derived):
-        raise DrivAerMethodologyError(
+        raise MethodologyError(
             "methodology.architecture.total_parameter_count cannot be represented "
             "in millions"
         )
@@ -165,7 +161,10 @@ def _compute_capacity_error(
 
 
 def methodology_errors(
-    submission: Mapping[str, Any], *, expected_case_count: int | None = None
+    submission: Mapping[str, Any],
+    *,
+    expected_case_count: int | None = None,
+    contract: Mapping[str, Any] | None = None,
 ) -> list[str]:
     """Return cross-field errors not expressible cleanly in JSON Schema."""
 
@@ -173,6 +172,14 @@ def methodology_errors(
     methodology = submission.get("methodology")
     if not isinstance(methodology, dict):
         return ["methodology must be an object"]
+
+    record_kind = methodology.get("record_kind")
+    if record_kind not in {
+        "submitter_reported",
+        "prototype_fixture",
+        "format_example",
+    }:
+        errors.append("methodology.record_kind is not recognized")
 
     for path in _nonfinite_number_paths(methodology):
         errors.append(f"{path} must be a finite number")
@@ -183,7 +190,7 @@ def methodology_errors(
 
     try:
         expected_millions = derived_parameter_count_millions(methodology)
-    except DrivAerMethodologyError as error:
+    except MethodologyError as error:
         errors.append(str(error))
     else:
         declared_millions = submission.get("parameter_count_millions")
@@ -202,6 +209,21 @@ def methodology_errors(
             )
 
     total_parameter_count = architecture.get("total_parameter_count")
+    parameter_count_basis = architecture.get("parameter_count_basis")
+    if record_kind in {"submitter_reported", "format_example"}:
+        if parameter_count_basis != "exact":
+            errors.append(
+                "methodology.architecture.parameter_count_basis must be exact for "
+                f"record_kind={record_kind!r}"
+            )
+    elif record_kind == "prototype_fixture" and parameter_count_basis not in {
+        "exact",
+        "rounded_from_reported_millions",
+    }:
+        errors.append(
+            "prototype methodology parameter_count_basis must be exact or "
+            "rounded_from_reported_millions"
+        )
     submitter_trainable_count = architecture.get(
         "submitter_trainable_parameter_count"
     )
@@ -244,7 +266,8 @@ def methodology_errors(
                     "sum of architecture.components parameter_count values"
                 )
 
-    predicted_fields = _named_values(architecture.get("predicted_fields"), "field_id")
+    predicted_field_entries = architecture.get("predicted_fields")
+    predicted_fields = _named_values(predicted_field_entries, "field_id")
     if not all(isinstance(value, str) for value in predicted_fields):
         errors.append(
             "methodology.architecture.predicted_fields field_id values must be strings"
@@ -256,11 +279,48 @@ def methodology_errors(
             errors.append(
                 "methodology.architecture.predicted_fields field_id values must be unique"
             )
-    if observed_fields != EXPECTED_PREDICTED_FIELDS:
-        errors.append(
-            "methodology.architecture.predicted_fields must cover exactly the four "
-            "required DrivAerML surface and volume fields"
-        )
+    if contract is not None:
+        contract_dataset_id = contract.get("dataset_id")
+        if contract_dataset_id != submission.get("dataset_id"):
+            errors.append(
+                "methodology contract dataset_id must match submission.dataset_id"
+            )
+        expected_entries = contract.get("required_predicted_fields")
+        expected_by_id = {
+            entry.get("field_id"): entry
+            for entry in expected_entries
+            if isinstance(entry, dict) and isinstance(entry.get("field_id"), str)
+        } if isinstance(expected_entries, list) else {}
+        expected_fields = set(expected_by_id)
+        missing_fields = sorted(expected_fields - observed_fields)
+        if missing_fields:
+            errors.append(
+                "methodology.architecture.predicted_fields is missing required "
+                f"{contract_dataset_id} fields: {missing_fields}"
+            )
+        if contract.get("allow_additional_predicted_fields") is False:
+            additional_fields = sorted(observed_fields - expected_fields)
+            if additional_fields:
+                errors.append(
+                    "methodology.architecture.predicted_fields contains fields not "
+                    f"allowed by the {contract_dataset_id} contract: {additional_fields}"
+                )
+        observed_by_id = {
+            entry.get("field_id"): entry
+            for entry in predicted_field_entries
+            if isinstance(entry, dict) and isinstance(entry.get("field_id"), str)
+        } if isinstance(predicted_field_entries, list) else {}
+        for field_id, expected_entry in expected_by_id.items():
+            observed_entry = observed_by_id.get(field_id)
+            if observed_entry is None:
+                continue
+            for key in ("domain", "component_count"):
+                if observed_entry.get(key) != expected_entry.get(key):
+                    errors.append(
+                        "methodology.architecture.predicted_fields entry "
+                        f"{field_id!r} {key} must equal "
+                        f"{expected_entry.get(key)!r} from the dataset contract"
+                    )
 
     training = methodology.get("training")
     training_stages = training.get("stages") if isinstance(training, dict) else None
@@ -321,6 +381,14 @@ def methodology_errors(
                     if isinstance(component_id, str)
                 )
             if stage.get("status") != "performed_by_submitter":
+                if (
+                    stage.get("status") == "prototype_not_recorded"
+                    and record_kind != "prototype_fixture"
+                ):
+                    errors.append(
+                        f"methodology.training.stages[{index}] may use "
+                        "prototype_not_recorded only for prototype_fixture records"
+                    )
                 continue
             submitter_stage_count += 1
             run_count = stage.get("run_count")
@@ -392,14 +460,27 @@ def methodology_errors(
     missing_checkpoint_components = sorted(
         parameterized_component_ids - checkpoint_component_ids
     )
-    if missing_checkpoint_components:
+    if missing_checkpoint_components and record_kind != "prototype_fixture":
         errors.append(
             "methodology.checkpoints must bind every parameterized architecture "
             f"component; missing: {missing_checkpoint_components}"
         )
 
     inference = methodology.get("inference_compute")
-    if expected_case_count is not None and isinstance(inference, dict):
+    inference_status = inference.get("status") if isinstance(inference, dict) else None
+    if (
+        record_kind in {"submitter_reported", "format_example"}
+        and inference_status != "measured"
+    ):
+        errors.append(
+            "methodology.inference_compute.status must be measured for "
+            f"record_kind={record_kind!r}"
+        )
+    if (
+        expected_case_count is not None
+        and isinstance(inference, dict)
+        and inference_status == "measured"
+    ):
         if inference.get("case_count") != expected_case_count:
             errors.append(
                 "methodology.inference_compute.case_count must equal the official "
@@ -418,10 +499,17 @@ def methodology_errors(
 
 
 def require_methodology(
-    submission: Mapping[str, Any], *, expected_case_count: int | None = None
+    submission: Mapping[str, Any],
+    *,
+    expected_case_count: int | None = None,
+    contract: Mapping[str, Any] | None = None,
 ) -> None:
     """Raise one stable exception containing every semantic inconsistency."""
 
-    errors = methodology_errors(submission, expected_case_count=expected_case_count)
+    errors = methodology_errors(
+        submission,
+        expected_case_count=expected_case_count,
+        contract=contract,
+    )
     if errors:
-        raise DrivAerMethodologyError("; ".join(errors))
+        raise MethodologyError("; ".join(errors))

@@ -135,26 +135,24 @@ class V3SchemaExampleTests(unittest.TestCase):
                     json.loads((TEMPLATE / relative_value).read_text(encoding="utf-8")),
                 )
 
-    def test_methodology_is_required_only_for_drivaerml(self) -> None:
+    def test_methodology_is_required_for_every_schema_v3_dataset(self) -> None:
         schema = json.loads(
             (ROOT / "schemas/v3/submission.schema.json").read_text(encoding="utf-8")
         )
         validator = Draft202012Validator(schema, format_checker=FormatChecker())
         generic = json.loads((TEMPLATE / "submission.json").read_text(encoding="utf-8"))
         self.assertEqual(list(validator.iter_errors(generic)), [])
-        generic_with_dataset_specific_method = copy.deepcopy(generic)
-        generic_with_dataset_specific_method["methodology"] = {
-            "format": "another-dataset-method-v1"
-        }
-        self.assertEqual(
-            list(validator.iter_errors(generic_with_dataset_specific_method)), []
+        generic_without_method = copy.deepcopy(generic)
+        generic_without_method.pop("methodology")
+        self.assertTrue(
+            any(
+                "methodology" in error.message
+                for error in validator.iter_errors(generic_without_method)
+            )
         )
 
         drivaerml = copy.deepcopy(generic)
         drivaerml["dataset_id"] = "drivaerml"
-        missing_errors = list(validator.iter_errors(drivaerml))
-        self.assertTrue(any("methodology" in error.message for error in missing_errors))
-
         methodology = json.loads(
             (
                 ROOT

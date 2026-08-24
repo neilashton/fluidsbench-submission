@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-071e9792fc3d/airfrans/aoa_extrapolation/airfrans-mlp-full",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/airfrans/aoa_extrapolation/airfrans-mlp-full",
   "release": {
-    "id": "prototype-dev-2026-07-15-071e9792fc3d",
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-22T07:12:51Z",
+    "published_at": "2026-08-24T20:08:12Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -53,12 +53,12 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "071e9792fc3d764f85f168826b59b4600ad4cb8e86ecd1c1fa2e08100065a333",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
       "row_index": 12
     },
     "source_submission": {
       "path": "submissions/airfrans/airfrans-mlp-full/submission.json",
-      "sha256": "418c1a109bbe2ccfe44086c5b866944bf74f2928989e01cf2e9bc22f25b7b098"
+      "sha256": "d0c2cc11e945193d65563fda6918e7d49a95ddc2478f92e8b838829df8792d99"
     },
     "evaluation_evidence": {
       "path": "submissions/airfrans/airfrans-mlp-full/evaluation-evidence.json",

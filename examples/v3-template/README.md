@@ -55,3 +55,8 @@ The synthetic `submission.json` also demonstrates optional public code,
 model, environment, and artifact-documentation metadata. A real v3 submission
 may omit those optional fields without affecting eligibility. If included,
 they remain subject to the schema's version, digest, URL, and licence checks.
+Its required `methodology` block demonstrates the common architecture,
+input/output, training, checkpoint, and measured-inference record used by every
+dataset. Replace every fictional value and follow the selected dataset's
+`benchmark-specs/<dataset-id>/methodology-contract.json`; see
+[`METHODOLOGY.md`](../../METHODOLOGY.md).

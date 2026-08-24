@@ -1,8 +1,11 @@
 {
-  "format": "fluidsbench-drivaerml-method-v1",
+  "format": "fluidsbench-method-v1",
+  "record_kind": "format_example",
+  "record_note": "Illustrative values showing the required record shape; this is not a real model or benchmark result.",
   "architecture": {
     "description": "Twelve message-passing operator blocks with 256-wide latent features and separate native-surface and native-volume output heads.",
     "total_parameter_count": 42612345,
+    "parameter_count_basis": "exact",
     "submitter_trainable_parameter_count": 42612345,
     "components": [
       {
@@ -58,6 +61,8 @@
     "predicted_fields": [
       {
         "field_id": "surface_native_cells.pMeanTrim",
+        "domain": "surface",
+        "component_count": 1,
         "component_ids": [
           "joint-predictor"
         ],
@@ -66,6 +71,8 @@
       },
       {
         "field_id": "surface_native_cells.wallShearStressMeanTrim",
+        "domain": "surface",
+        "component_count": 3,
         "component_ids": [
           "joint-predictor"
         ],
@@ -74,6 +81,8 @@
       },
       {
         "field_id": "volume_native_cells.pMeanTrim",
+        "domain": "volume",
+        "component_count": 1,
         "component_ids": [
           "joint-predictor"
         ],
@@ -82,6 +91,8 @@
       },
       {
         "field_id": "volume_native_cells.UMeanTrim",
+        "domain": "volume",
+        "component_count": 3,
         "component_ids": [
           "joint-predictor"
         ],
@@ -156,6 +167,7 @@
     }
   ],
   "inference_compute": {
+    "status": "measured",
     "hardware": "1 x NVIDIA A100 80GB",
     "max_concurrent_device_count": 1,
     "case_count": 50,

@@ -161,9 +161,35 @@ class CandidateDryRunValidatorTests(unittest.TestCase):
 
         submission_path = package / "submission.json"
         submission = load_json(submission_path)
+        write_json(
+            dataset_directory / "methodology-contract.json",
+            {
+                "$schema": (
+                    "https://fluidsbench.org/schemas/"
+                    "methodology-contract-v1.schema.json"
+                ),
+                "format": "fluidsbench-methodology-contract-v1",
+                "dataset_id": "synthetic",
+                "allow_additional_predicted_fields": True,
+                "required_predicted_fields": [
+                    {
+                        "field_id": "synthetic-support.pressure",
+                        "domain": "domain",
+                        "component_count": 1,
+                        "description": (
+                            "Scalar pressure on the synthetic scoring support."
+                        ),
+                    }
+                ],
+            },
+        )
         submission["dataset"] = "Synthetic candidate fixture"
         submission["split"] = "Default"
         submission["split_sha256"] = split_sha256
+        submission["methodology"]["record_kind"] = "submitter_reported"
+        submission["methodology"]["record_note"] = (
+            "Synthetic submitter-reported fixture used to exercise candidate validation."
+        )
         submission["scoring_support"].update(
             {
                 "status": lifecycle,

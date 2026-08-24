@@ -30,7 +30,7 @@ from reference.drivaerml.dataset_scorer import (
     DrivAerDatasetScorerError,
     validate_schema_v3_candidate_nonspatial_metrics,
 )
-from reference.drivaerml.methodology import methodology_errors
+from reference.methodology import methodology_errors
 
 try:
     from jsonschema import Draft202012Validator, FormatChecker
@@ -332,6 +332,27 @@ def schema_errors(value: Any, schema_name: str, *, schema_version: str = "v1") -
     return [
         f"{json_path(list(error.absolute_path))}: {error.message}"
         for error in sorted(validator.iter_errors(value), key=lambda item: json_path(list(item.absolute_path)))
+    ]
+
+
+def methodology_schema_errors(value: Any) -> list[str]:
+    """Validate a method record using the canonical schema-v3 definition."""
+
+    if Draft202012Validator is None:
+        return ["Python dependency jsonschema is missing; run: python3 -m pip install -r requirements.txt"]
+    submission_schema = load_json(SCHEMA_ROOT / "v3" / "submission.schema.json")
+    fragment = {
+        "$schema": submission_schema["$schema"],
+        "$defs": submission_schema["$defs"],
+        "$ref": "#/$defs/fluidsbench_methodology",
+    }
+    validator = Draft202012Validator(fragment, format_checker=FormatChecker())
+    return [
+        f"{json_path(list(error.absolute_path))}: {error.message}"
+        for error in sorted(
+            validator.iter_errors(value),
+            key=lambda item: json_path(list(item.absolute_path)),
+        )
     ]
 
 
@@ -2564,6 +2585,10 @@ def validate_open_reproducibility(
     approval_status = approval.get("status") if isinstance(approval, dict) else None
     reproducibility = submission.get("reproducibility")
     submission_schema_version = submission.get("schema_version")
+    methodology = submission.get("methodology")
+    methodology_kind = (
+        methodology.get("record_kind") if isinstance(methodology, dict) else None
+    )
     if submission_schema_version in {"2.0", "3.0"} and (directory / "maintainer-replay.json").exists():
         add("maintainer-replay.json is not part of the open-reproducibility contract")
 
@@ -2600,6 +2625,13 @@ def validate_open_reproducibility(
             add("prototype dummy data must not claim the open reproducibility contract")
         if submission.get("schema_version") != "1.0":
             add("prototype dummy data must use the historical submission schema_version=1.0")
+        if not isinstance(submission.get("methodology"), dict):
+            add("prototype dummy data must include a structured methodology record")
+        elif methodology_kind != "prototype_fixture":
+            add(
+                "prototype dummy data must use "
+                "methodology.record_kind='prototype_fixture'"
+            )
         return
 
     if evidence_status != "submitted_evaluation":
@@ -2609,6 +2641,14 @@ def validate_open_reproducibility(
         add("submitted_evaluation evidence cannot use approval.status=prototype")
     if submission_schema_version not in {"2.0", "3.0"}:
         add("real submitted data requires submission schema_version=2.0 or 3.0")
+    if (
+        submission_schema_version == "3.0"
+        and methodology_kind != "submitter_reported"
+    ):
+        add(
+            "real schema-v3 submitted data must use "
+            "methodology.record_kind='submitter_reported'"
+        )
     if approval_status not in {None, "approved"}:
         add("a real contributor submission must remain unapproved until maintainer validation")
     if contributor_stage and approval_status == "approved":
@@ -3049,6 +3089,23 @@ def validate_submission_file(
     if dataset_spec.get("dataset_id") != submission["dataset_id"]:
         add("benchmark specification dataset_id does not match submission.json")
         return errors, stats
+    methodology_contract_path = spec_path.parent / "methodology-contract.json"
+    methodology_contract: dict[str, Any] | None = None
+    if not methodology_contract_path.is_file():
+        add(
+            "missing dataset methodology contract: "
+            f"{methodology_contract_path.relative_to(ROOT)}"
+        )
+    else:
+        try:
+            loaded_methodology_contract = load_json(methodology_contract_path)
+        except (OSError, json.JSONDecodeError) as error:
+            add(f"cannot read dataset methodology contract: {error}")
+        else:
+            if isinstance(loaded_methodology_contract, dict):
+                methodology_contract = loaded_methodology_contract
+            else:
+                add("dataset methodology contract must be a JSON object")
     if candidate_dry_run and dataset_spec.get("status") not in {
         "candidate",
         "candidate_scoring_contract",
@@ -3073,6 +3130,18 @@ def validate_submission_file(
             "evaluation.reference_version must equal the evaluator release declared by the benchmark specification"
         )
     validate_metrics(add, submission, dataset, manifest)
+    if submission_schema_version == "3.0" or "methodology" in submission:
+        for error in methodology_schema_errors(submission.get("methodology")):
+            add(f"methodology schema validation failed: {error}")
+        expected_method_case_count = spec_split.get("case_count")
+        if not isinstance(expected_method_case_count, int):
+            expected_method_case_count = None
+        for error in methodology_errors(
+            submission,
+            expected_case_count=expected_method_case_count,
+            contract=methodology_contract,
+        ):
+            add(f"methodology validation failed: {error}")
     if submission_schema_version == "3.0":
         split_path = ROOT / "benchmark-specs" / submission["dataset_id"] / spec_split["index_file"]
         split_case_ids: list[str] = []
@@ -3088,15 +3157,6 @@ def validate_submission_file(
                 ):
                     add("benchmark split index case_ids must be a string array")
                     split_case_ids = []
-        if submission.get("dataset_id") == "drivaerml":
-            expected_method_case_count = (
-                len(split_case_ids) if split_case_ids else None
-            )
-            for error in methodology_errors(
-                submission,
-                expected_case_count=expected_method_case_count,
-            ):
-                add(f"DrivAerML methodology validation failed: {error}")
         support_manifest, support_case_index = validate_v3_scoring_support(
             add,
             submission,

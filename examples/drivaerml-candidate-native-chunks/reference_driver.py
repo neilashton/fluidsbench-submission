@@ -1216,6 +1216,122 @@ def _used_native_representation(
     }
 
 
+def _synthetic_methodology() -> dict[str, Any]:
+    """Describe the parameter-free teaching function without implying ML training."""
+
+    component_id = "deterministic-teaching-function"
+    return {
+        "format": "fluidsbench-method-v1",
+        "record_kind": "prototype_fixture",
+        "record_note": (
+            "Synthetic schema exercise only. The outputs come from a deterministic "
+            "parameter-free teaching function, not a trained model or DrivAerML result."
+        ),
+        "architecture": {
+            "description": (
+                "A parameter-free deterministic function that emits synthetic "
+                "surface and volume fields for package-validation examples."
+            ),
+            "total_parameter_count": 0,
+            "parameter_count_basis": "exact",
+            "submitter_trainable_parameter_count": 0,
+            "components": [
+                {
+                    "id": component_id,
+                    "family": "Deterministic analytic fixture",
+                    "role": "Generate synthetic surface and volume predictions.",
+                    "description": (
+                        "Fixed arithmetic expressions exercise chunk accumulation; "
+                        "there are no learned weights or hidden model layers."
+                    ),
+                    "parameter_count": 0,
+                }
+            ],
+            "key_hyperparameters": [
+                {
+                    "id": "fixture-kind",
+                    "component_ids": [component_id],
+                    "name": "fixture_kind",
+                    "value": "deterministic_synthetic",
+                    "description": "Identifies this output as a teaching fixture.",
+                }
+            ],
+            "input_features": [
+                {
+                    "id": "synthetic-native-coordinates",
+                    "component_ids": [component_id],
+                    "name": "synthetic_native_coordinates",
+                    "domain": "mesh",
+                    "component_count": 3,
+                    "description": (
+                        "Synthetic three-dimensional coordinates and raw entity IDs."
+                    ),
+                }
+            ],
+            "predicted_fields": [
+                {
+                    "field_id": "surface_native_cells.pMeanTrim",
+                    "domain": "surface",
+                    "component_count": 1,
+                    "component_ids": [component_id],
+                    "production": "direct_model_output",
+                    "description": "Synthetic surface-pressure fixture values.",
+                },
+                {
+                    "field_id": "surface_native_cells.wallShearStressMeanTrim",
+                    "domain": "surface",
+                    "component_count": 3,
+                    "component_ids": [component_id],
+                    "production": "direct_model_output",
+                    "description": "Synthetic surface wall-shear fixture values.",
+                },
+                {
+                    "field_id": "volume_native_cells.pMeanTrim",
+                    "domain": "volume",
+                    "component_count": 1,
+                    "component_ids": [component_id],
+                    "production": "direct_model_output",
+                    "description": "Synthetic volume-pressure fixture values.",
+                },
+                {
+                    "field_id": "volume_native_cells.UMeanTrim",
+                    "domain": "volume",
+                    "component_count": 3,
+                    "component_ids": [component_id],
+                    "production": "direct_model_output",
+                    "description": "Synthetic volume-velocity fixture values.",
+                },
+            ],
+        },
+        "data_handling": {
+            "normalization": "No normalization; fixed synthetic values are emitted.",
+            "preprocessing": "Generate the tiny in-memory teaching arrays.",
+            "sampling": "Use every synthetic entity in both teaching cases.",
+        },
+        "training": {
+            "stages": [
+                {
+                    "id": "training-not-applicable",
+                    "status": "prototype_not_recorded",
+                    "component_ids": [component_id],
+                    "description": (
+                        "No training was performed because the fixture is a fixed "
+                        "parameter-free function."
+                    ),
+                }
+            ]
+        },
+        "checkpoints": [],
+        "inference_compute": {
+            "status": "not_measured",
+            "reason": (
+                "Timing a tiny deterministic schema fixture would not represent "
+                "model inference performance."
+            ),
+        },
+    }
+
+
 def _write_submission_package(
     output: Path,
     *,
@@ -1513,7 +1629,8 @@ def _write_submission_package(
             "split_id": SPLIT_ID,
             "case_set_id": CASE_SET_ID,
             "split_sha256": split_sha256,
-            "parameter_count_millions": None,
+            "parameter_count_millions": 0.0,
+            "methodology": _synthetic_methodology(),
             "submitter_name": "FluidsBench synthetic fixture",
             "institution": "No institution; generated test fixture",
             "paper_url": "",

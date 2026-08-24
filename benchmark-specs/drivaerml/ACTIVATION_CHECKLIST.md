@@ -52,8 +52,9 @@ activation checklist.
   profiles and four continuous Cp cuts. No discrete Cp probes or additional
   VTK Cp-cut field are submitted. Sharing full native prediction fields and a
   maintainer recomputation are optional audits, not activation gates.
-- The schema-v3 package requires a machine-validated DrivAerML methodology
-  record: named architecture components, exact total and submitter-trainable
+- The schema-v3 package requires the repository-wide machine-validated
+  methodology record plus DrivAerML's four-field dataset contract:
+  named architecture components, exact total and submitter-trainable
   parameter counts, scoped inputs and outputs, data handling, every submitter
   or upstream training stage, compute for every submitter-performed stage,
   every raw loaded checkpoint-file digest, and complete-split inference compute.
