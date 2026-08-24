@@ -204,6 +204,26 @@ pending. Exact immutable native extraction support for the four Cp cuts is also
 pending. Contributors must not invent replacements for either official
 support.
 
+### Geometry-relative diagnostics candidate (not active)
+
+A separate evaluator-side candidate is being validated in which velocity
+profiles and Cp cuts follow case-specific vehicle landmarks while the fixed
+definitions above remain available as the `constant` view. This does not
+change the participant submission format: the evaluator derives the candidate
+relative velocity profiles from the same native volume `UMeanTrim` prediction
+and the relative Cp cuts from the same native surface `pMeanTrim` prediction.
+Participants do not predict or upload moved coordinates, landmarks, mappings,
+or another Cp field.
+
+Both relative diagnostic families have composite weight `0.0` and are
+report-only. They do not affect submission eligibility or ranking, and the
+current `constant` definitions remain the submission-facing view with their
+candidate weights unchanged. Relative diagnostics remain unavailable in
+participant packages until an immutable all-case manifest covers exactly the
+484 pinned cases with no duplicate, missing, failed-closed, or schema-invalid
+case, owner scientific approval is recorded, and a newly published immutable
+evaluator/support binding makes them available.
+
 The four continuous Cp cuts remain a ranked component with composite weight
 0.10; the velocity profiles retain weight 0.15. The evaluator derives every cut
 from native surface `pMeanTrim`. Participants therefore do not add a Cp-cut
