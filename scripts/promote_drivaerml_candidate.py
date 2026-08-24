@@ -9,13 +9,16 @@ all-case evaluator replays.
 
 from __future__ import annotations
 
+import copy
 import csv
 import hashlib
 import json
 import math
+import re
 import sys
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,12 +29,21 @@ from reference.scores import (
     composite_component_group_scores,
     composite_overall_score,
 )
+from reference.drivaerml.retained_file import RetainedFileError, RetainedVerifiedFile
+from scripts.validate_scoring_supports import validate_candidate_manifest_release
 
 
 BENCHMARK_ROOT = ROOT / "benchmark-specs" / "drivaerml"
 PROPOSAL_ROOT = BENCHMARK_ROOT / "proposal"
 SUBMISSIONS_ROOT = ROOT / "submissions" / "drivaerml"
 MANIFEST_PATH = ROOT / "leaderboard" / "manifest.json"
+CANDIDATE_RELEASE_BINDINGS_PATH = BENCHMARK_ROOT / "candidate-release-bindings.json"
+
+UNRESOLVED_RELEASE_PREFIX = "__UNRESOLVED_DRIVAERML_"
+SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
+GIT_REVISION_PATTERN = re.compile(r"^(?:[a-f0-9]{40}|[a-f0-9]{64})$")
+SAFE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,159}$")
+PROFILE_DEFINITION_V10_ID = "drivaerml-diagnostics-v10-candidate"
 
 DATASET_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
 DATASET_VERSION = "drivaerml-native-v3-candidate"
@@ -149,8 +161,75 @@ RMSE_EQUATION = (
 CASE_RMSE_EQUATION = r"\sqrt{\frac{1}{N}\sum_c(\hat{y}_c-y_c)^2}"
 
 
+class AuthoritativeJSONError(ValueError):
+    """Raised when benchmark-owned JSON is ambiguous or unsafe to consume."""
+
+
+def _reject_duplicate_json_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise AuthoritativeJSONError(
+                f"JSON object contains duplicate key {key!r}"
+            )
+        result[key] = value
+    return result
+
+
+def _reject_nonfinite_json(token: str) -> Any:
+    raise AuthoritativeJSONError(f"JSON contains forbidden non-finite token {token}")
+
+
+def load_json_with_sha256(path: Path, *, label: str) -> tuple[Any, str]:
+    """Hash and parse one retained regular-file descriptor."""
+
+    try:
+        with RetainedVerifiedFile.open(path, label=label) as retained:
+            digest = retained.sha256(chunk_bytes=1024 * 1024)
+            retained.handle.seek(0)
+            value = json.load(
+                retained.handle,
+                object_pairs_hook=_reject_duplicate_json_keys,
+                parse_constant=_reject_nonfinite_json,
+            )
+            retained.assert_unchanged(context="while its JSON was parsed")
+    except AuthoritativeJSONError:
+        raise
+    except RetainedFileError as error:
+        raise AuthoritativeJSONError(str(error)) from error
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise AuthoritativeJSONError(f"cannot read valid {label} JSON: {path}") from error
+    return value, digest
+
+
 def load_json(path: Path) -> Any:
-    return json.loads(path.read_text(encoding="utf-8"))
+    return load_json_with_sha256(path, label=str(path))[0]
+
+
+def resolved_benchmark_file(
+    relative_value: Any,
+    *,
+    label: str,
+    benchmark_root: Path | None = None,
+) -> Path:
+    """Resolve a release-managed path while proving dataset containment."""
+
+    root = BENCHMARK_ROOT if benchmark_root is None else benchmark_root
+    if not isinstance(relative_value, str) or not relative_value:
+        raise ValueError(f"{label} must be a non-empty relative path")
+    relative = Path(relative_value)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"{label} must stay inside DrivAerML")
+    try:
+        resolved_root = root.resolve(strict=True)
+        resolved = (root / relative).resolve(strict=True)
+    except OSError as error:
+        raise ValueError(f"{label} does not exist: {root / relative}") from error
+    if not resolved.is_relative_to(resolved_root):
+        raise ValueError(f"{label} must stay inside DrivAerML")
+    if not resolved.is_file():
+        raise ValueError(f"{label} is not a regular file: {resolved}")
+    return resolved
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -159,6 +238,202 @@ def write_json(path: Path, value: Any) -> None:
         f"{json.dumps(value, indent=2, ensure_ascii=True)}\n",
         encoding="utf-8",
     )
+
+
+def unresolved_release_tokens(
+    value: Any, path: tuple[str | int, ...] = ()
+) -> list[tuple[tuple[str | int, ...], str]]:
+    """Return explicit release blockers without treating them as real values."""
+
+    found: list[tuple[tuple[str | int, ...], str]] = []
+    if isinstance(value, dict):
+        for key in sorted(value):
+            found.extend(unresolved_release_tokens(value[key], (*path, key)))
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            found.extend(unresolved_release_tokens(item, (*path, index)))
+    elif isinstance(value, str) and value.startswith(UNRESOLVED_RELEASE_PREFIX):
+        found.append((path, value))
+    return found
+
+
+def load_candidate_release_bindings(
+    path: Path = CANDIDATE_RELEASE_BINDINGS_PATH,
+) -> dict[str, Any]:
+    """Load the release hand-off while rejecting incoherent partial states.
+
+    An unresolved hand-off may still pin the complete local profile-v10
+    file/SHA-256 pair.  The pair is atomic: both fields must remain explicit
+    unresolved tokens or both must resolve to the exact retained artifact next
+    to this hand-off file.
+    """
+
+    value = load_json(path)
+    if value.get("schema") != "drivaerml-fluidsbench-candidate-release-bindings-v1":
+        raise ValueError("unsupported DrivAerML candidate release-binding schema")
+    if value.get("status") not in {"unresolved", "ready"}:
+        raise ValueError("candidate release-binding status must be unresolved or ready")
+    if value.get("unresolved_token_prefix") != UNRESOLVED_RELEASE_PREFIX:
+        raise ValueError("candidate release-binding unresolved_token_prefix is invalid")
+    required_objects = {
+        "candidate_manifest": {
+            "status", "release_id", "manifest_file", "manifest_url", "manifest_sha256"
+        },
+        "evaluator": {"reference_version", "code_revision"},
+        "profile_definition_v10": {"file", "sha256"},
+        "profile_ground_truth": {"release_id", "manifest_sha256"},
+    }
+    for key, required in required_objects.items():
+        item = value.get(key)
+        if not isinstance(item, dict) or not required.issubset(item):
+            raise ValueError(f"candidate release bindings require {key} fields {sorted(required)}")
+    if value["candidate_manifest"].get("status") != "candidate":
+        raise ValueError("candidate_manifest.status must remain candidate")
+    if value["evaluator"].get("reference_version") != EVALUATOR_VERSION:
+        raise ValueError("candidate evaluator reference version changed unexpectedly")
+    profile_binding = value["profile_definition_v10"]
+    if set(profile_binding) != {"file", "sha256"}:
+        raise ValueError("profile_definition_v10 binding must contain exactly file and sha256")
+    file_is_token = (
+        isinstance(profile_binding.get("file"), str)
+        and profile_binding["file"].startswith(UNRESOLVED_RELEASE_PREFIX)
+    )
+    sha256_is_token = (
+        isinstance(profile_binding.get("sha256"), str)
+        and profile_binding["sha256"].startswith(UNRESOLVED_RELEASE_PREFIX)
+    )
+    if file_is_token != sha256_is_token:
+        raise ValueError(
+            "profile_definition_v10 file and SHA-256 must be resolved together"
+        )
+    if not file_is_token:
+        validate_profile_v10_binding(
+            profile_binding,
+            benchmark_root=path.parent,
+        )
+    tokens = [
+        item
+        for item in unresolved_release_tokens(value)
+        if item[0] != ("unresolved_token_prefix",)
+    ]
+    if value["status"] == "unresolved":
+        if not tokens:
+            raise ValueError("unresolved release bindings must retain explicit blocker tokens")
+        return value
+    if tokens:
+        rendered = [".".join(map(str, location)) for location, _token in tokens]
+        raise ValueError(f"ready release bindings still contain tokens: {rendered}")
+    candidate = value["candidate_manifest"]
+    if (
+        not isinstance(candidate.get("release_id"), str)
+        or not SAFE_ID_PATTERN.fullmatch(candidate["release_id"])
+        or not isinstance(candidate.get("manifest_file"), str)
+        or not isinstance(candidate.get("manifest_url"), str)
+        or not isinstance(candidate.get("manifest_sha256"), str)
+        or not SHA256_PATTERN.fullmatch(candidate["manifest_sha256"])
+    ):
+        raise ValueError("candidate manifest binding is invalid")
+    if (
+        not isinstance(value["evaluator"].get("code_revision"), str)
+        or not GIT_REVISION_PATTERN.fullmatch(value["evaluator"]["code_revision"])
+    ):
+        raise ValueError("candidate evaluator Git revision is invalid")
+    for label, digest in (
+        ("profile_definition_v10", value["profile_definition_v10"]["sha256"]),
+        ("profile_ground_truth", value["profile_ground_truth"]["manifest_sha256"]),
+    ):
+        if not isinstance(digest, str) or not SHA256_PATTERN.fullmatch(digest):
+            raise ValueError(f"{label} SHA-256 is invalid")
+    profile_file_value = value["profile_definition_v10"].get("file")
+    if not isinstance(profile_file_value, str):
+        raise ValueError("profile_definition_v10.file is invalid")
+    profile_file = Path(profile_file_value)
+    if (
+        profile_file.is_absolute()
+        or ".." in profile_file.parts
+        or "v10" not in profile_file.name
+    ):
+        raise ValueError("profile_definition_v10.file must be a safe v10 dataset path")
+    truth_release_id = value["profile_ground_truth"].get("release_id")
+    if (
+        not isinstance(truth_release_id, str)
+        or not SAFE_ID_PATTERN.fullmatch(truth_release_id)
+    ):
+        raise ValueError("profile_ground_truth.release_id is invalid")
+    return value
+
+
+def validate_ready_candidate_manifest(
+    release_bindings: dict[str, Any],
+    specification: dict[str, Any],
+) -> dict[str, Any]:
+    """Validate the exact local candidate bytes and their support semantics."""
+
+    if release_bindings.get("status") != "ready":
+        raise ValueError("candidate manifest materialization requires ready bindings")
+    candidate = release_bindings["candidate_manifest"]
+    release_id = candidate["release_id"]
+    if not SAFE_ID_PATTERN.fullmatch(release_id):
+        raise ValueError("candidate manifest release_id is not a safe ID")
+    manifest_path = resolved_benchmark_file(
+        candidate.get("manifest_file"),
+        label="candidate manifest_file",
+    )
+    manifest, actual_sha256 = load_json_with_sha256(
+        manifest_path,
+        label="candidate scoring-support manifest",
+    )
+    if actual_sha256 != candidate["manifest_sha256"]:
+        raise ValueError("candidate manifest SHA-256 does not match its local file")
+    parsed = urlparse(candidate["manifest_url"])
+    if (
+        parsed.scheme != "https"
+        or not parsed.netloc
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+        or release_id not in [part for part in parsed.path.split("/") if part]
+    ):
+        raise ValueError(
+            "candidate manifest_url must be clean HTTPS and contain release_id "
+            "as an exact path segment"
+        )
+    if not isinstance(manifest, dict):
+        raise ValueError("candidate scoring-support manifest must be a JSON object")
+    manifest_tokens = unresolved_release_tokens(manifest)
+    if manifest_tokens:
+        rendered = [
+            ".".join(map(str, location)) for location, _token in manifest_tokens
+        ]
+        raise ValueError(
+            "candidate scoring-support manifest contains unresolved release tokens: "
+            + ", ".join(rendered)
+        )
+    identities = {
+        "status": "candidate",
+        "release_id": release_id,
+        "dataset_id": "drivaerml",
+        "dataset_version": DATASET_VERSION,
+        "evaluation_reference_version": EVALUATOR_VERSION,
+    }
+    for key, expected in identities.items():
+        if manifest.get(key) != expected:
+            raise ValueError(f"candidate manifest {key} must equal {expected!r}")
+    if "owner_approval" in manifest:
+        raise ValueError("candidate manifest must not claim owner approval")
+    semantic_errors = validate_candidate_manifest_release(
+        specification,
+        BENCHMARK_ROOT,
+        manifest_path,
+        manifest,
+    )
+    if semantic_errors:
+        raise ValueError(
+            "candidate scoring-support manifest is not valid support: "
+            + "; ".join(semantic_errors)
+        )
+    return manifest
 
 
 def upsert_catalog_entries(
@@ -1074,6 +1349,275 @@ def build_specification(
     }
 
 
+def select_generation_profile(
+    release_bindings: dict[str, Any],
+    existing_specification: dict[str, Any] | None,
+) -> tuple[Path, dict[str, Any]]:
+    """Select v9 now, but never regress an already bound v10 profile."""
+
+    if release_bindings["status"] == "ready":
+        return validate_profile_v10_binding(
+            release_bindings["profile_definition_v10"]
+        )
+
+    preserved = validate_preserved_release_managed_bindings(existing_specification)
+    if preserved is None:
+        profile = build_profile_definition()
+        profile_path = BENCHMARK_ROOT / "drivaerml-diagnostics-v9.json"
+        write_json(profile_path, profile)
+        return profile_path, profile
+    return validate_profile_v10_binding(preserved["profile_definition_v10"])
+
+
+def validate_profile_v10_binding(
+    binding: dict[str, Any],
+    expected_definition: dict[str, Any] | None = None,
+    *,
+    benchmark_root: Path | None = None,
+) -> tuple[Path, dict[str, Any]]:
+    """Read, hash, and parse the exact contained profile-v10 artifact."""
+
+    if not isinstance(binding, dict) or set(binding) != {"file", "sha256"}:
+        raise ValueError("profile_definition_v10 binding must be an object")
+    file_value = binding.get("file")
+    digest = binding.get("sha256")
+    if (
+        not isinstance(file_value, str)
+        or "v10" not in Path(file_value).name
+        or not isinstance(digest, str)
+        or not SHA256_PATTERN.fullmatch(digest)
+    ):
+        raise ValueError("profile_definition_v10 binding is incomplete or invalid")
+    profile_path = resolved_benchmark_file(
+        file_value,
+        label="profile_definition_v10.file",
+        benchmark_root=benchmark_root,
+    )
+    profile, actual_sha256 = load_json_with_sha256(
+        profile_path,
+        label="profile-definition-v10 artifact",
+    )
+    if actual_sha256 != digest:
+        raise ValueError(
+            f"release-managed profile SHA-256 changed for {profile_path}: "
+            f"{actual_sha256}"
+        )
+    if (
+        not isinstance(profile, dict)
+        or profile.get("id") != PROFILE_DEFINITION_V10_ID
+    ):
+        raise ValueError(
+            "profile-definition-v10 artifact id must equal "
+            f"{PROFILE_DEFINITION_V10_ID!r}"
+        )
+    if expected_definition is not None:
+        for key, expected in (
+            ("file", file_value),
+            ("sha256", digest),
+            ("id", profile["id"]),
+        ):
+            if expected_definition.get(key) != expected:
+                raise ValueError(
+                    f"active profile_definition.{key} does not match the bound "
+                    "profile-v10 artifact"
+                )
+    return profile_path, profile
+
+
+def validate_profile_ground_truth_binding(binding: dict[str, Any]) -> None:
+    if (
+        not isinstance(binding, dict)
+        or set(binding) != {"release_id", "manifest_sha256"}
+        or not isinstance(binding.get("release_id"), str)
+        or not SAFE_ID_PATTERN.fullmatch(binding["release_id"])
+        or not isinstance(binding.get("manifest_sha256"), str)
+        or not SHA256_PATTERN.fullmatch(binding["manifest_sha256"])
+    ):
+        raise ValueError("profile-ground-truth binding is incomplete or invalid")
+    leaderboard = load_json(MANIFEST_PATH)
+    global_profile_truth = (
+        leaderboard.get("data_release", {}).get("profile_ground_truth")
+        if isinstance(leaderboard, dict)
+        else None
+    )
+    if not isinstance(global_profile_truth, dict):
+        raise ValueError("leaderboard manifest has no global profile-ground-truth binding")
+    for key in ("release_id", "manifest_sha256"):
+        if binding.get(key) != global_profile_truth.get(key):
+            raise ValueError(
+                "DrivAerML candidate profile ground truth must match the global "
+                f"leaderboard binding for {key}"
+            )
+
+
+def validate_preserved_release_managed_bindings(
+    existing_specification: dict[str, Any] | None,
+    *,
+    target_specification: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    """Return a coherent prior release state or reject partial/stale state.
+
+    When a target is supplied, the old release must satisfy the newly generated
+    contract before any whitelisted value is materialized into that contract.
+    """
+
+    if not isinstance(existing_specification, dict):
+        return None
+    existing_support = existing_specification.get("scoring_support")
+    existing_profile = existing_specification.get("profile_definition")
+    if not isinstance(existing_support, dict):
+        return None
+    candidate = existing_support.get("candidate_manifest")
+    evaluator = existing_support.get("dataset_evaluator_binding")
+    support_profile = existing_support.get("profile_definition")
+    has_managed_state = any(
+        (
+            isinstance(candidate, dict),
+            isinstance(evaluator, dict) and evaluator.get("status") == "frozen",
+            isinstance(existing_profile, dict)
+            and "v10" in Path(str(existing_profile.get("file", ""))).name,
+            isinstance(support_profile, dict)
+            and isinstance(support_profile.get("profile_ground_truth"), dict),
+        )
+    )
+    if not has_managed_state:
+        return None
+    preserved_source = {
+        "candidate_manifest": candidate,
+        "dataset_evaluator_binding": evaluator,
+        "profile_definition": existing_profile,
+        "scoring_support_profile_definition": support_profile,
+    }
+    tokens = unresolved_release_tokens(preserved_source)
+    if tokens:
+        rendered = [".".join(map(str, location)) for location, _token in tokens]
+        raise ValueError(
+            "preserved release-managed state contains unresolved release tokens: "
+            + ", ".join(rendered)
+        )
+    if not isinstance(candidate, dict) or set(candidate) != {
+        "status",
+        "release_id",
+        "manifest_file",
+        "manifest_url",
+        "manifest_sha256",
+    }:
+        raise ValueError("preserved candidate manifest binding is incomplete")
+    if (
+        candidate.get("status") != "candidate"
+        or not isinstance(candidate.get("release_id"), str)
+        or not SAFE_ID_PATTERN.fullmatch(candidate["release_id"])
+        or not isinstance(candidate.get("manifest_sha256"), str)
+        or not SHA256_PATTERN.fullmatch(candidate["manifest_sha256"])
+    ):
+        raise ValueError("preserved candidate manifest binding is invalid")
+    if (
+        not isinstance(evaluator, dict)
+        or evaluator.get("status") != "frozen"
+        or evaluator.get("evaluator_reference_version") != EVALUATOR_VERSION
+        or not GIT_REVISION_PATTERN.fullmatch(
+            str(evaluator.get("evaluator_code_revision", ""))
+        )
+    ):
+        raise ValueError("preserved candidate evaluator binding is incomplete or stale")
+    if not isinstance(existing_profile, dict) or not isinstance(support_profile, dict):
+        raise ValueError("preserved profile-v10 binding is incomplete")
+    for key in ("file", "sha256"):
+        if support_profile.get(key) != existing_profile.get(key):
+            raise ValueError(
+                "preserved scoring-support and active profile-v10 bindings disagree"
+            )
+    profile_binding = {
+        "file": existing_profile.get("file"),
+        "sha256": existing_profile.get("sha256"),
+    }
+    validation_specification = (
+        target_specification
+        if isinstance(target_specification, dict)
+        else existing_specification
+    )
+    validation_profile = validation_specification.get("profile_definition")
+    if not isinstance(validation_profile, dict):
+        raise ValueError("target contract has no valid profile-v10 definition")
+    validate_profile_v10_binding(profile_binding, validation_profile)
+    ground_truth = support_profile.get("profile_ground_truth")
+    validate_profile_ground_truth_binding(ground_truth)
+    preserved = {
+        "schema": "drivaerml-fluidsbench-candidate-release-bindings-v1",
+        "status": "ready",
+        "unresolved_token_prefix": UNRESOLVED_RELEASE_PREFIX,
+        "candidate_manifest": copy.deepcopy(candidate),
+        "evaluator": {
+            "reference_version": evaluator["evaluator_reference_version"],
+            "code_revision": evaluator["evaluator_code_revision"],
+        },
+        "profile_definition_v10": profile_binding,
+        "profile_ground_truth": copy.deepcopy(ground_truth),
+    }
+    validate_ready_candidate_manifest(preserved, validation_specification)
+    return preserved
+
+
+def apply_release_managed_bindings(
+    specification: dict[str, Any],
+    release_bindings: dict[str, Any],
+    existing_specification: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Materialize only real bindings and preserve reviewed bindings on rerun.
+
+    The unresolved hand-off file is never copied into the active specification.
+    This prevents token-shaped pseudo releases while also ensuring that a later
+    candidate manifest or v10 ground-truth binding is not erased by rerunning
+    this older promotion generator.
+    """
+
+    support = specification["scoring_support"]
+    if release_bindings["status"] == "ready":
+        validate_ready_candidate_manifest(release_bindings, specification)
+        validate_profile_v10_binding(
+            release_bindings["profile_definition_v10"],
+            specification.get("profile_definition"),
+        )
+        validate_profile_ground_truth_binding(
+            release_bindings["profile_ground_truth"]
+        )
+        support["candidate_manifest"] = copy.deepcopy(
+            release_bindings["candidate_manifest"]
+        )
+        support["dataset_evaluator_binding"].update(
+            {
+                "status": "frozen",
+                "evaluator_code_revision": release_bindings["evaluator"][
+                    "code_revision"
+                ],
+            }
+        )
+        support["profile_definition"]["profile_ground_truth"] = copy.deepcopy(
+            release_bindings["profile_ground_truth"]
+        )
+        return specification
+
+    preserved = validate_preserved_release_managed_bindings(
+        existing_specification,
+        target_specification=specification,
+    )
+    if preserved is None:
+        return specification
+    support["candidate_manifest"] = copy.deepcopy(
+        preserved["candidate_manifest"]
+    )
+    support["dataset_evaluator_binding"].update(
+        {
+            "status": "frozen",
+            "evaluator_code_revision": preserved["evaluator"]["code_revision"],
+        }
+    )
+    support["profile_definition"]["profile_ground_truth"] = copy.deepcopy(
+        preserved["profile_ground_truth"]
+    )
+    return specification
+
+
 def presentation_definition(metric_spec: dict[str, Any]) -> dict[str, Any]:
     metric_id = metric_spec["id"]
     labels = {
@@ -1495,12 +2039,20 @@ def main() -> int:
         if actual != expected:
             raise ValueError(f"proposal source digest changed for {path}: {actual}")
 
-    profile = build_profile_definition()
-    profile_path = BENCHMARK_ROOT / "drivaerml-diagnostics-v9.json"
-    write_json(profile_path, profile)
+    release_bindings = load_candidate_release_bindings()
+    specification_path = BENCHMARK_ROOT / "submission-spec.json"
+    existing_specification = (
+        load_json(specification_path) if specification_path.is_file() else None
+    )
+    profile_path, profile = select_generation_profile(
+        release_bindings, existing_specification
+    )
     split_entries = write_splits()
     specification = build_specification(split_entries, profile_path, profile)
-    write_json(BENCHMARK_ROOT / "submission-spec.json", specification)
+    specification = apply_release_managed_bindings(
+        specification, release_bindings, existing_specification
+    )
+    write_json(specification_path, specification)
     update_manifest(specification, profile)
     directories = sorted(path.parent for path in SUBMISSIONS_ROOT.glob("*/submission.json"))
     for directory in directories:

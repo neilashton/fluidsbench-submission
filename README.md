@@ -130,6 +130,12 @@ documentation are optional and do not affect approval, rank, citation, or promot
 to a full commit, model and environment artifacts must be pinned by SHA-256, and code/model licences must use the allowed open SPDX
 identifiers. See [`OPEN_REPRODUCIBILITY.md`](OPEN_REPRODUCIBILITY.md) for the complete eligibility and validation policy.
 
+Schema-v3 DrivAerML packages additionally include a structured methodology record covering architecture components, exact total
+and submitter-trainable parameter counts, inputs and outputs, data handling, training stages, checkpoint selection, and measured
+compute. A SHA-256 digest is required for every checkpoint file actually loaded for inference so the submitted result has an exact
+model identity; publishing those checkpoint bytes, source code, or a model archive remains optional. See the
+[`DrivAerML participant guide`](benchmark-specs/drivaerml/PARTICIPANT_GUIDE.md).
+
 The required `metrics/cases.json` records every test case, canonical support, support/scored counts, complete count and weight
 coverage, unmapped/extrapolated counts, per-case metric values, and the additive sufficient statistics required by each relative-L2
 metric. Those statistics include numerator, denominator, entity count, and total weight for the unweighted and

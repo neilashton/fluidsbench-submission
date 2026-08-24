@@ -1,0 +1,25 @@
+{
+  "schema": "drivaerml-fluidsbench-candidate-release-bindings-v1",
+  "status": "unresolved",
+  "unresolved_token_prefix": "__UNRESOLVED_DRIVAERML_",
+  "candidate_manifest": {
+    "status": "candidate",
+    "release_id": "__UNRESOLVED_DRIVAERML_CANDIDATE_SUPPORT_RELEASE_ID__",
+    "manifest_file": "__UNRESOLVED_DRIVAERML_CANDIDATE_SUPPORT_MANIFEST_FILE__",
+    "manifest_url": "__UNRESOLVED_DRIVAERML_CANDIDATE_SUPPORT_MANIFEST_URL__",
+    "manifest_sha256": "__UNRESOLVED_DRIVAERML_CANDIDATE_SUPPORT_MANIFEST_SHA256__"
+  },
+  "evaluator": {
+    "reference_version": "drivaerml-evaluator-v3-candidate",
+    "code_revision": "__UNRESOLVED_DRIVAERML_CANDIDATE_EVALUATOR_CODE_REVISION__"
+  },
+  "profile_definition_v10": {
+    "file": "drivaerml-diagnostics-v10.json",
+    "sha256": "9136feac7ac276d91f7cbcfb6c558beffc97cfaf0f0174626fee67a1f2a52bd0"
+  },
+  "profile_ground_truth": {
+    "release_id": "__UNRESOLVED_DRIVAERML_PROFILE_GROUND_TRUTH_RELEASE_ID__",
+    "manifest_sha256": "__UNRESOLVED_DRIVAERML_PROFILE_GROUND_TRUTH_MANIFEST_SHA256__"
+  },
+  "notes": "This file is the release hand-off, not an active scoring-support declaration. The local v10 candidate registry is hash-bound, but scoring support, evaluator, and profile-ground-truth release identities remain unresolved. Change status to ready only after replacing every remaining unresolved token with an immutable owner-published identity."
+}

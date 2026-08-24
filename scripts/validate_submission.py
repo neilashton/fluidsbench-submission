@@ -30,6 +30,7 @@ from reference.drivaerml.dataset_scorer import (
     DrivAerDatasetScorerError,
     validate_schema_v3_candidate_nonspatial_metrics,
 )
+from reference.drivaerml.methodology import methodology_errors
 
 try:
     from jsonschema import Draft202012Validator, FormatChecker
@@ -47,9 +48,37 @@ OPEN_REPRODUCIBILITY_CONTRACTS = {
 LEGACY_V1_SUBMISSION_ID = re.compile(r"^(?P<series>[a-z0-9][a-z0-9-]{2,69})-v1$")
 
 
+class SubmissionJSONError(ValueError):
+    """Raised for JSON constructs forbidden in authoritative submission metadata."""
+
+
+def _reject_submission_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    value: dict[str, Any] = {}
+    for key, item in pairs:
+        if key in value:
+            raise SubmissionJSONError(f"duplicate JSON key {key!r}")
+        value[key] = item
+    return value
+
+
+def _reject_submission_nonfinite(token: str) -> Any:
+    raise SubmissionJSONError(f"forbidden non-finite JSON token {token}")
+
+
 def load_json(path: Path) -> Any:
     with path.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def load_submission_json(path: Path) -> Any:
+    """Load top-level submission metadata without duplicate or non-finite values."""
+
+    with path.open(encoding="utf-8") as handle:
+        return json.load(
+            handle,
+            object_pairs_hook=_reject_submission_duplicate_keys,
+            parse_constant=_reject_submission_nonfinite,
+        )
 
 
 def normalized_result_revision(submission: dict[str, Any]) -> dict[str, Any]:
@@ -2970,8 +2999,8 @@ def validate_submission_file(
         return errors, stats
 
     try:
-        submission = load_json(path)
-    except (OSError, json.JSONDecodeError) as error:
+        submission = load_submission_json(path)
+    except (OSError, json.JSONDecodeError, SubmissionJSONError) as error:
         add(f"cannot read submission JSON: {error}")
         return errors, stats
     submission_schema_version = submission.get("schema_version")
@@ -3059,6 +3088,15 @@ def validate_submission_file(
                 ):
                     add("benchmark split index case_ids must be a string array")
                     split_case_ids = []
+        if submission.get("dataset_id") == "drivaerml":
+            expected_method_case_count = (
+                len(split_case_ids) if split_case_ids else None
+            )
+            for error in methodology_errors(
+                submission,
+                expected_case_count=expected_method_case_count,
+            ):
+                add(f"DrivAerML methodology validation failed: {error}")
         support_manifest, support_case_index = validate_v3_scoring_support(
             add,
             submission,

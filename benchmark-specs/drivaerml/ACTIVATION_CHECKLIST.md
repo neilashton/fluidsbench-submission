@@ -1,8 +1,10 @@
 # DrivAerML activation checklist
 
 This checklist separates the participant contract that is now defined from the
-benchmark-owned evidence still needed before AutoCFD5 entrants should submit
-official leaderboard results.
+benchmark-owned evidence still needed before DrivAerML participants should
+submit official FluidsBench leaderboard results. AutoCFD5 is referenced only
+as provenance for the velocity-line geometry; this is not an AutoCFD
+activation checklist.
 
 ## Complete in the candidate
 
@@ -50,6 +52,12 @@ official leaderboard results.
   profiles and four continuous Cp cuts. No discrete Cp probes or additional
   VTK Cp-cut field are submitted. Sharing full native prediction fields and a
   maintainer recomputation are optional audits, not activation gates.
+- The schema-v3 package requires a machine-validated DrivAerML methodology
+  record: named architecture components, exact total and submitter-trainable
+  parameter counts, scoped inputs and outputs, data handling, every submitter
+  or upstream training stage, compute for every submitter-performed stage,
+  every raw loaded checkpoint-file digest, and complete-split inference compute.
+  Checkpoint publication remains optional.
 - Prototype packages, generated feeds, and leaderboard panels use the new metric,
   split, and profile vocabulary while remaining ineligible dummy data.
 
@@ -227,8 +235,8 @@ official leaderboard results.
    209-probe artifacts outside that release. Optional native-field artifacts and
    maintainer recomputation records remain outside the activation requirements.
 8. Run at least one end-to-end schema-v3 dry-run submission from an independent
-   AutoCFD5 participant. After dataset-owner review, set scoring support to
-   `official` and only then set `submissions_open` to `true`.
+   DrivAerML FluidsBench participant. After dataset-owner review, set scoring
+   support to `official` and only then set `submissions_open` to `true`.
 
 Until all eight steps pass, the format is suitable for implementation and dry-run
 feedback, but not for official workshop ranking or citation.

@@ -294,6 +294,32 @@ class CandidateDryRunValidatorTests(unittest.TestCase):
             self.assertIn("not official acceptance", stdout.getvalue())
             self.assertNotIn("PASS", stdout.getvalue())
 
+    def test_candidate_dry_run_allows_omitted_participant_code_identity(self) -> None:
+        """Evaluator revision belongs to owner support, not evaluation.code_revision."""
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            submission_path = self.make_registered_fixture(root)
+            submission = load_json(submission_path)
+            submission.pop("code_url", None)
+            submission["reproducibility"].pop("code", None)
+            submission["evaluation"].pop("code_revision", None)
+            evidence_path = submission_path.parent / "evaluation-evidence.json"
+            evidence = load_json(evidence_path)
+            evidence.pop("code_revision", None)
+            write_json(evidence_path, evidence)
+            submission["evaluation"]["evidence_sha256"] = validator.sha256_file(
+                evidence_path
+            )
+            write_json(submission_path, submission)
+            with self.repository_view(root):
+                errors, stats = validator.validate_submission_file(
+                    submission_path,
+                    candidate_dry_run=True,
+                )
+            self.assertEqual(errors, [])
+            self.assertEqual(stats, {"cases": 2, "series": 2})
+
     def test_candidate_mode_rejects_unsafe_owner_and_maintainer_states(self) -> None:
         mutations = (
             ("owner official", "owner"),
