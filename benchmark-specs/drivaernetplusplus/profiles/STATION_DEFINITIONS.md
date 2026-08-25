@@ -18,9 +18,16 @@ configuration family (`E_S_*`, `F_S_*`, `N_S_*`, `F_D_WM_WW`).
   normalized by `L` so morphed designs are comparable.
 - Symmetry-plane tolerance: a point belongs to the centreline band when `|y| ≤ 2e-3 · L`.
   (DrivAerNet++ meshes are full-width; the band selects the discrete points nearest y = 0.)
-- Surface-side classification uses the outward point normal `n` (area-weighted average of
-  incident polygon normals, polygons oriented as stored): upper body `n_z > 0.2`,
-  underbody `n_z < −0.2`, rear base `n_x > 0.5`.
+- Surface-side classification uses the outward point normal `n`. **The stored polygon winding
+  is not consistent** — verified on `E_S_WW_WM_075`, where a flat roof patch yields cell
+  normals split exactly 50/50 between `+z` and `−z` — so normals must be built in two steps:
+  first make the winding consistent across each connected component and orient it outward
+  (away from the component centroid), then take the area-weighted sum of the incident oriented
+  polygon normals and normalise to unit length. Thresholds: upper body `n_z > 0.2`, underbody
+  `n_z < −0.2`, rear base `n_x > 0.5`.
+- Points whose incident polygons are degenerate, or whose oriented normals cancel to below a
+  fixed tolerance, are excluded from profile extraction; if a station retains too few valid
+  points, extraction raises an explicit validation error rather than emitting a partial trace.
 - Sampling: select band points, classify, project onto the station coordinate, sort strictly
   ascending, average duplicate coordinates, and emit at least 2 points. Interpolation between
   discrete samples is linear in the station coordinate. No extrapolation.
@@ -42,10 +49,18 @@ configuration family (`E_S_*`, `F_S_*`, `N_S_*`, `F_D_WM_WW`).
   detailed-underbody case.
 
 ### 3. `front_wheelhouse`
-- Geometry: the body-side wheel-arch rim trace. Per design: wheel centre `c = (c_x, c_y, c_z)`
-  and radius `R` from the bounding box of the front-wheel surface patch; cutting plane
-  `y = c_y` intersected with the body (non-wheel) surface, restricted to points within
-  `1.6 · R` of `c` in the x–z plane.
+- Wheel isolation (deterministic, from the released file alone): the surface splits into
+  exactly **5 connected components** — the body plus four wheels — verified on
+  `E_S_WW_WM_075` (body 401,931 points; wheels ~19,800–19,917 points each). The body is the
+  largest component; the four wheel components are classified front/rear by their centroid
+  `x` and left/right by their centroid `y`. On the verified case the front axle sits near
+  `x ≈ 0.00`, the rear near `x ≈ 2.70`, with `R ≈ 0.31 m` at `|y| ≈ 0.76 m`.
+- Geometry: for the chosen front wheel, centre `c` is its component centroid and radius `R`
+  half its x–z extent; the trace is the set of **body-component** points within `2e-3·L` of
+  the plane `y = c_y` and within `1.6 · R` of `c` in the x–z plane.
+- Note: the open boundary edges in the released surface are 18 small loops at `z = 0`
+  (radius ≈ 0.02–0.03 m) — tyre/ground contact patches, not arch openings — so boundary-loop
+  detection is *not* a usable route to the wheel arch; use the component rule above.
 - Coordinate: polar angle `θ` around `c` in the x–z plane, mapped to `s = θ/(2π) ∈ [0, 1)`
   measured from the forward horizontal direction, increasing over the arch (counter-clockwise
   viewed from +y), strictly increasing.
