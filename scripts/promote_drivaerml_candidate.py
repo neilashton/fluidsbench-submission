@@ -44,12 +44,12 @@ SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
 GIT_REVISION_PATTERN = re.compile(r"^(?:[a-f0-9]{40}|[a-f0-9]{64})$")
 SAFE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,159}$")
 PROFILE_DEFINITION_V10_ID = "drivaerml-diagnostics-v10-candidate"
-RELATIVE_DIAGNOSTICS_V2_ID = "drivaerml-relative-diagnostics-v2-candidate"
-RELATIVE_DIAGNOSTICS_V2_SHA256 = (
-    "e61869c68581fc2b77b60054a8684d3be39b668a2b0359551aec22be3f50bc5b"
+RELATIVE_DIAGNOSTICS_V3_ID = "drivaerml-relative-diagnostics-v3-candidate"
+RELATIVE_DIAGNOSTICS_V3_SHA256 = (
+    "c71f2811ec048ad22a27785bcad0b269c84003785dd4abddbb1ec3fd008f725d"
 )
 RELATIVE_PROFILE_SCHEMA_SHA256 = (
-    "5aa5d73d4bbd6883a8231c9460ea0064929997b5d32fac76527c7f450f66dfd1"
+    "ff5c5965bb00633303b9372360879d02535f7946c882b9cfcefe1ee55446a0d2"
 )
 
 DATASET_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
@@ -264,7 +264,7 @@ def unresolved_release_tokens(
     return found
 
 
-def validate_relative_diagnostics_v2_binding(
+def validate_relative_diagnostics_v3_binding(
     binding: Any,
     *,
     bindings_path: Path = CANDIDATE_RELEASE_BINDINGS_PATH,
@@ -279,20 +279,20 @@ def validate_relative_diagnostics_v2_binding(
     }
     if not isinstance(binding, dict) or set(binding) != required:
         raise ValueError(
-            "relative_diagnostics_v2 binding must contain exactly "
+            "relative_diagnostics_v3 binding must contain exactly "
             f"{sorted(required)}"
         )
     contract_path = resolved_benchmark_file(
         binding["file"],
-        label="relative_diagnostics_v2.file",
+        label="relative_diagnostics_v3.file",
         benchmark_root=bindings_path.parent,
     )
     contract, contract_digest = load_json_with_sha256(
         contract_path,
-        label="relative-diagnostics-v2 contract",
+        label="relative-diagnostics-v3 contract",
     )
     if contract_digest != binding["sha256"]:
-        raise ValueError("relative_diagnostics_v2 SHA-256 does not match its file")
+        raise ValueError("relative_diagnostics_v3 SHA-256 does not match its file")
     scoring_and_rollout = (
         contract.get("scoring_and_rollout")
         if isinstance(contract, dict)
@@ -301,18 +301,18 @@ def validate_relative_diagnostics_v2_binding(
     if (
         not isinstance(contract, dict)
         or not isinstance(scoring_and_rollout, dict)
-        or contract.get("id") != "drivaerml-relative-diagnostics-v2-candidate"
+        or contract.get("id") != "drivaerml-relative-diagnostics-v3-candidate"
         or contract.get("dataset_id") != "drivaerml"
         or contract.get("activation_by_this_file") is not False
         or scoring_and_rollout.get("relative_composite_weight") != 0.0
         or scoring_and_rollout.get("constant_family_policy") != "unchanged"
     ):
-        raise ValueError("relative-diagnostics-v2 contract is not fail-closed")
+        raise ValueError("relative-diagnostics-v3 contract is not fail-closed")
 
     repository_root = bindings_path.parent.parent.parent
     schema_path = resolved_benchmark_file(
         binding["profile_chunk_schema_file"],
-        label="relative_diagnostics_v2.profile_chunk_schema_file",
+        label="relative_diagnostics_v3.profile_chunk_schema_file",
         benchmark_root=repository_root,
     )
     schema, schema_digest = load_json_with_sha256(
@@ -357,23 +357,23 @@ def validate_relative_support_bindings(value: Any) -> bool:
         raise ValueError("relative_support.required_case_count must remain 484")
     expected_manifests = {
         "velocity_placement_manifest": {
-            "family_id": "drivaerml-velocity-relative-v2",
+            "family_id": "drivaerml-velocity-relative-v3",
             "producer_file": (
-                "velocity_support_v2/production_campaign_v1/aggregate/"
-                "relative-velocity-v2-production-all484-inputs-v1.json"
+                "velocity_support_v3/production_campaign_v1/aggregate/"
+                "relative-velocity-v3-production-all484-inputs-v1.json"
             ),
             "expected_schema": (
-                "drivaerml-relative-velocity-v2-production-input-manifest-v1"
+                "drivaerml-relative-velocity-v3-production-input-manifest-v1"
             ),
         },
         "velocity_mapping_manifest": {
-            "family_id": "drivaerml-velocity-relative-v2",
+            "family_id": "drivaerml-velocity-relative-v3",
             "producer_file": (
-                "velocity_mapping_v2/aggregate/"
-                "relative-velocity-v2-mapping-all484-v1.json"
+                "velocity_mapping_v3/aggregate/"
+                "relative-velocity-v3-mapping-all484-v1.json"
             ),
             "expected_schema": (
-                "drivaerml-velocity-relative-v2-mapping-aggregate-v1"
+                "drivaerml-velocity-relative-v3-mapping-aggregate-v1"
             ),
         },
         "cp_manifest": {
@@ -401,7 +401,7 @@ def validate_relative_support_bindings(value: Any) -> bool:
         for field, expected_value in expected.items():
             if binding[field] != expected_value:
                 raise ValueError(
-                    f"relative_support.{label}.{field} differs from the v2 contract"
+                    f"relative_support.{label}.{field} differs from the v3 contract"
                 )
         producer_file = Path(binding["producer_file"])
         if producer_file.is_absolute() or ".." in producer_file.parts:
@@ -449,7 +449,7 @@ def load_candidate_release_bindings(
         },
         "evaluator": {"reference_version", "code_revision"},
         "profile_definition_v10": {"file", "sha256"},
-        "relative_diagnostics_v2": {
+        "relative_diagnostics_v3": {
             "file",
             "sha256",
             "profile_chunk_schema_file",
@@ -492,8 +492,8 @@ def load_candidate_release_bindings(
             profile_binding,
             benchmark_root=path.parent,
         )
-    validate_relative_diagnostics_v2_binding(
-        value["relative_diagnostics_v2"],
+    validate_relative_diagnostics_v3_binding(
+        value["relative_diagnostics_v3"],
         bindings_path=path,
     )
     validate_relative_support_bindings(value["relative_support"])
@@ -1488,18 +1488,17 @@ def build_specification(
             "status": "support_pending",
             "profile_format_enabled": False,
             "closed_reason": (
-                "all-484 relative velocity placement/mapping and relative Cp "
-                "manifests, genuine-model sensitivity, owner approval, and an "
-                "immutable evaluator revision are not all bound"
+                "genuine-model sensitivity, owner approval, and an immutable "
+                "evaluator revision are not all bound"
             ),
             "contract": {
-                "id": RELATIVE_DIAGNOSTICS_V2_ID,
-                "file": "drivaerml-relative-diagnostics-v2.json",
-                "sha256": RELATIVE_DIAGNOSTICS_V2_SHA256,
+                "id": RELATIVE_DIAGNOSTICS_V3_ID,
+                "file": "drivaerml-relative-diagnostics-v3.json",
+                "sha256": RELATIVE_DIAGNOSTICS_V3_SHA256,
             },
             "profile_chunk": {
                 "format": (
-                    "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate"
+                    "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
                 ),
                 "schema_file": (
                     "schemas/v1/drivaerml-relative-profile-chunk.schema.json"

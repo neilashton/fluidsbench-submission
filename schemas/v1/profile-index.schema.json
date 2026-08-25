@@ -10,7 +10,7 @@
     "format": {
       "enum": [
         "fluidsbench-profile-chunks-v1",
-        "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate"
+        "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
       ]
     },
     "contract_id": {"type": "string", "minLength": 1},
@@ -41,7 +41,7 @@
       "if": {
         "properties": {
           "format": {
-            "const": "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate"
+            "const": "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
           }
         },
         "required": ["format"]

@@ -2834,8 +2834,8 @@ def validate_profiles(
                 or declaration.get("profile_format_enabled") is not True
             ):
                 add(
-                    "DrivAerML relative profile format is closed until all immutable "
-                    "relative-support bindings are ready"
+                    "DrivAerML relative profile format is closed until all benchmark "
+                    "activation gates are complete"
                 )
     index_path = directory / submission["profile_data"]["index_file"]
     if not index_path.is_file():
@@ -2863,7 +2863,7 @@ def validate_profiles(
         if index.get("format") != RELATIVE_PROFILE_FORMAT:
             add("profiles/index.json format must match profile_data.format")
         if index.get("contract_id") != RELATIVE_PROFILE_CONTRACT_ID:
-            add("profiles/index.json contract_id is not the retained relative-v2 contract")
+            add("profiles/index.json contract_id is not the retained relative-v3 contract")
         if index.get("contract_sha256") != relative_contract_sha256:
             add("profiles/index.json contract_sha256 does not match the benchmark contract")
     elif index.get("format") not in {None, "fluidsbench-profile-chunks-v1"}:

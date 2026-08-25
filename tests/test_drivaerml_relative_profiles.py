@@ -70,7 +70,7 @@ def namespaced_series() -> list[dict]:
         _relative_profile_expected_keys()
     ):
         relative = family_id in {
-            "drivaerml-velocity-relative-v2",
+            "drivaerml-velocity-relative-v3",
             "drivaerml_cp_relative_v1",
         }
         common = {
@@ -153,7 +153,7 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             ROOT
             / "benchmark-specs"
             / "drivaerml"
-            / bindings["relative_diagnostics_v2"]["file"]
+            / bindings["relative_diagnostics_v3"]["file"]
         )
         self.assertEqual(sha256_file(contract_path), RELATIVE_PROFILE_CONTRACT_SHA256)
         contract = json.loads(contract_path.read_text())
@@ -164,7 +164,59 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         self.assertEqual(
             contract["scoring_and_rollout"]["relative_composite_weight"], 0.0
         )
-        self.assertEqual(bindings["relative_support"]["status"], "unresolved")
+        self.assertEqual(
+            contract["status"],
+            "candidate_report_only_manifest_bindings_complete_activation_pending",
+        )
+        self.assertEqual(
+            contract["activation_gates"],
+            {
+                "all_484_velocity_placement_manifest_bound": True,
+                "all_484_velocity_mapping_manifest_bound": True,
+                "all_484_cp_manifest_bound": True,
+                "genuine_model_sensitivity_review_complete": False,
+                "owner_scientific_approval": False,
+                "immutable_evaluator_revision_bound": False,
+            },
+        )
+        self.assertEqual(bindings["relative_support"]["status"], "ready")
+        velocity_contract = contract["support_implementation_bindings"][
+            "relative_velocity_v3"
+        ]["mapping_all484_manifest"]
+        velocity_handoff = bindings["relative_support"][
+            "velocity_mapping_manifest"
+        ]
+        self.assertEqual(
+            velocity_contract,
+            {
+                "producer_path": velocity_handoff["producer_file"],
+                "sha256": velocity_handoff["manifest_sha256"],
+            },
+        )
+        cp_contract = contract["support_implementation_bindings"][
+            "relative_cp_v1"
+        ]["cp_all484_manifest"]
+        cp_handoff = bindings["relative_support"]["cp_manifest"]
+        self.assertEqual(
+            cp_contract,
+            {
+                "producer_path": cp_handoff["producer_file"],
+                "sha256": cp_handoff["manifest_sha256"],
+            },
+        )
+        placement_contract = contract["support_implementation_bindings"][
+            "relative_velocity_v3"
+        ]["placement_all484_manifest"]
+        placement_handoff = bindings["relative_support"][
+            "velocity_placement_manifest"
+        ]
+        self.assertEqual(
+            placement_contract,
+            {
+                "producer_path": placement_handoff["producer_file"],
+                "sha256": placement_handoff["manifest_sha256"],
+            },
+        )
 
     def test_complete_namespaced_chunk_passes_schema_and_semantics(self) -> None:
         document = chunk()
@@ -181,16 +233,21 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         ]
         self.assertEqual(len(aliases), 2)
 
-    def test_semantics_reject_stale_velocity_v1_and_alias_identity_mismatch(self) -> None:
-        stale = chunk()
-        relative_velocity = next(
-            series
-            for series in stale["cases"][0]["series"]
-            if series["family_id"] == "drivaerml-velocity-relative-v2"
-        )
-        relative_velocity["family_id"] = "drivaerml-velocity-relative-v1"
-        with self.assertRaisesRegex(DrivAerDatasetScorerError, "undeclared"):
-            validate_schema_v3_relative_profile_chunk_candidate(stale)
+    def test_semantics_reject_stale_velocity_families_and_alias_identity_mismatch(self) -> None:
+        for stale_family in (
+            "drivaerml-velocity-relative-v1",
+            "drivaerml-velocity-relative-v2",
+        ):
+            with self.subTest(stale_family=stale_family):
+                stale = chunk()
+                relative_velocity = next(
+                    series
+                    for series in stale["cases"][0]["series"]
+                    if series["family_id"] == "drivaerml-velocity-relative-v3"
+                )
+                relative_velocity["family_id"] = stale_family
+                with self.assertRaisesRegex(DrivAerDatasetScorerError, "undeclared"):
+                    validate_schema_v3_relative_profile_chunk_candidate(stale)
 
         mismatched = chunk()
         alias = next(

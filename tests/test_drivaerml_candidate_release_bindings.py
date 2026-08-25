@@ -35,18 +35,18 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             ROOT / "benchmark-specs" / "drivaerml" / profile_path.name,
             profile_path,
         )
-        relative_path = benchmark / bindings["relative_diagnostics_v2"]["file"]
+        relative_path = benchmark / bindings["relative_diagnostics_v3"]["file"]
         shutil.copy2(
             ROOT / "benchmark-specs" / "drivaerml" / relative_path.name,
             relative_path,
         )
         relative_schema = (
             root
-            / bindings["relative_diagnostics_v2"]["profile_chunk_schema_file"]
+            / bindings["relative_diagnostics_v3"]["profile_chunk_schema_file"]
         )
         relative_schema.parent.mkdir(parents=True)
         shutil.copy2(
-            ROOT / bindings["relative_diagnostics_v2"]["profile_chunk_schema_file"],
+            ROOT / bindings["relative_diagnostics_v3"]["profile_chunk_schema_file"],
             relative_schema,
         )
         bindings_path = benchmark / "candidate-release-bindings.json"
@@ -113,12 +113,12 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
         profile_path = benchmark / "drivaerml-diagnostics-v10.json"
         write_json(profile_path, {"id": "drivaerml-diagnostics-v10-candidate"})
         profile_sha256 = promoter.sha256_file(profile_path)
-        relative_contract_path = benchmark / "drivaerml-relative-diagnostics-v2.json"
+        relative_contract_path = benchmark / "drivaerml-relative-diagnostics-v3.json"
         shutil.copy2(
             ROOT
             / "benchmark-specs"
             / "drivaerml"
-            / "drivaerml-relative-diagnostics-v2.json",
+            / "drivaerml-relative-diagnostics-v3.json",
             relative_contract_path,
         )
         relative_schema_path = root / "schemas" / "v1" / "drivaerml-relative-profile-chunk.schema.json"
@@ -196,7 +196,7 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 "file": profile_path.name,
                 "sha256": profile_sha256,
             },
-            "relative_diagnostics_v2": {
+            "relative_diagnostics_v3": {
                 "file": relative_contract_path.name,
                 "sha256": promoter.sha256_file(relative_contract_path),
                 "profile_chunk_schema_file": (
@@ -210,24 +210,24 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 "status": "ready",
                 "required_case_count": 484,
                 "velocity_placement_manifest": {
-                    "family_id": "drivaerml-velocity-relative-v2",
+                    "family_id": "drivaerml-velocity-relative-v3",
                     "producer_file": (
-                        "velocity_support_v2/production_campaign_v1/aggregate/"
-                        "relative-velocity-v2-production-all484-inputs-v1.json"
+                        "velocity_support_v3/production_campaign_v1/aggregate/"
+                        "relative-velocity-v3-production-all484-inputs-v1.json"
                     ),
                     "expected_schema": (
-                        "drivaerml-relative-velocity-v2-production-input-manifest-v1"
+                        "drivaerml-relative-velocity-v3-production-input-manifest-v1"
                     ),
                     "manifest_sha256": "4" * 64,
                 },
                 "velocity_mapping_manifest": {
-                    "family_id": "drivaerml-velocity-relative-v2",
+                    "family_id": "drivaerml-velocity-relative-v3",
                     "producer_file": (
-                        "velocity_mapping_v2/aggregate/"
-                        "relative-velocity-v2-mapping-all484-v1.json"
+                        "velocity_mapping_v3/aggregate/"
+                        "relative-velocity-v3-mapping-all484-v1.json"
                     ),
                     "expected_schema": (
-                        "drivaerml-velocity-relative-v2-mapping-aggregate-v1"
+                        "drivaerml-velocity-relative-v3-mapping-aggregate-v1"
                     ),
                     "manifest_sha256": "5" * 64,
                 },
@@ -250,8 +250,16 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
     def test_checked_in_unresolved_hand_off_never_leaks_into_active_spec(self) -> None:
         bindings = promoter.load_candidate_release_bindings(BINDINGS_PATH)
         self.assertEqual(bindings["status"], "unresolved")
-        tokens = promoter.unresolved_release_tokens(bindings)
-        self.assertGreaterEqual(len(tokens), 8)
+        tokens = [
+            item
+            for item in promoter.unresolved_release_tokens(bindings)
+            if item[0] != ("unresolved_token_prefix",)
+        ]
+        self.assertEqual(len(tokens), 7)
+        self.assertFalse(
+            any(path[:1] == ("relative_support",) for path, _token in tokens)
+        )
+        self.assertEqual(bindings["relative_support"]["status"], "ready")
         active = load_json(ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json")
         self.assertEqual(promoter.unresolved_release_tokens(active), [])
         self.assertNotIn("candidate_manifest", active["scoring_support"])
@@ -370,6 +378,10 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             bindings["relative_support"] = load_json(BINDINGS_PATH)[
                 "relative_support"
             ]
+            bindings["relative_support"]["status"] = "unresolved"
+            bindings["relative_support"]["velocity_mapping_manifest"][
+                "manifest_sha256"
+            ] = "__UNRESOLVED_DRIVAERML_RELATIVE_VELOCITY_V3_MAPPING_MANIFEST_SHA256__"
             bindings_path = benchmark / "candidate-release-bindings.json"
             write_json(bindings_path, bindings)
             loaded = promoter.load_candidate_release_bindings(bindings_path)
@@ -382,6 +394,9 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 Path(temporary)
             )
             bindings["relative_support"]["status"] = "ready"
+            bindings["relative_support"]["velocity_mapping_manifest"][
+                "manifest_sha256"
+            ] = "__UNRESOLVED_DRIVAERML_RELATIVE_VELOCITY_V3_MAPPING_MANIFEST_SHA256__"
             write_json(bindings_path, bindings)
             with self.assertRaisesRegex(ValueError, "still contains unresolved tokens"):
                 promoter.load_candidate_release_bindings(bindings_path)

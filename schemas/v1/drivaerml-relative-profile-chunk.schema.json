@@ -7,8 +7,8 @@
   "additionalProperties": false,
   "required": ["schema_version", "contract_id", "contract_sha256", "cases"],
   "properties": {
-    "schema_version": {"const": "2.0-drivaerml-relative-candidate"},
-    "contract_id": {"const": "drivaerml-relative-diagnostics-v2-candidate"},
+    "schema_version": {"const": "3.0-drivaerml-relative-candidate"},
+    "contract_id": {"const": "drivaerml-relative-diagnostics-v3-candidate"},
     "contract_sha256": {"$ref": "#/$defs/sha256"},
     "cases": {
       "type": "array",
@@ -59,7 +59,7 @@
         "family_id": {
           "enum": [
             "drivaerml-autocfd5-constant-v1",
-            "drivaerml-velocity-relative-v2",
+            "drivaerml-velocity-relative-v3",
             "drivaerml_cp_constant_v1",
             "drivaerml_cp_relative_v1"
           ]
@@ -80,7 +80,7 @@
         {
           "if": {
             "properties": {
-              "family_id": {"enum": ["drivaerml-velocity-relative-v2", "drivaerml_cp_relative_v1"]}
+              "family_id": {"enum": ["drivaerml-velocity-relative-v3", "drivaerml_cp_relative_v1"]}
             },
             "required": ["family_id"]
           },
@@ -104,7 +104,7 @@
           },
           "then": {
             "properties": {
-              "family_id": {"enum": ["drivaerml-autocfd5-constant-v1", "drivaerml-velocity-relative-v2"]},
+              "family_id": {"enum": ["drivaerml-autocfd5-constant-v1", "drivaerml-velocity-relative-v3"]},
               "quantity_id": {"const": "velocity_ratio"}
             }
           },

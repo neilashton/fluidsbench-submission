@@ -1,9 +1,9 @@
 {
-  "schema": "drivaerml-relative-diagnostics-contract-v2",
-  "schema_version": 2,
-  "id": "drivaerml-relative-diagnostics-v2-candidate",
+  "schema": "drivaerml-relative-diagnostics-contract-v3",
+  "schema_version": 3,
+  "id": "drivaerml-relative-diagnostics-v3-candidate",
   "dataset_id": "drivaerml",
-  "status": "candidate_report_only_support_pending",
+  "status": "candidate_report_only_manifest_bindings_complete_activation_pending",
   "activation_by_this_file": false,
   "source_release": {
     "repository": "neashton/drivaerml",
@@ -18,9 +18,9 @@
     "cp_composite_weight": 0.1
   },
   "profile_chunk_contract": {
-    "format": "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate",
+    "format": "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate",
     "schema_file": "schemas/v1/drivaerml-relative-profile-chunk.schema.json",
-    "schema_version": "2.0-drivaerml-relative-candidate",
+    "schema_version": "3.0-drivaerml-relative-candidate",
     "series_per_case": 40,
     "materialized_series_per_case": 38,
     "shared_alias_series_per_case": 2,
@@ -53,7 +53,7 @@
       "composite_policy": "unchanged"
     },
     {
-      "family_id": "drivaerml-velocity-relative-v2",
+      "family_id": "drivaerml-velocity-relative-v3",
       "panel_id": "velocity_profiles",
       "placement_mode": "relative",
       "source_family_id": "drivaerml-autocfd5-constant-v1",
@@ -107,36 +107,80 @@
     }
   ],
   "support_implementation_bindings": {
-    "relative_velocity_v2": {
-      "family_id": "drivaerml-velocity-relative-v2",
-      "placement_rule_id": "drivaerml-relative-velocity-placement-v2",
+    "relative_velocity_v3": {
+      "family_id": "drivaerml-velocity-relative-v3",
+      "placement_rule_id": "drivaerml-relative-velocity-placement-v3",
       "rules_artifact": {
-        "producer_path": "velocity_support_v2/relative_velocity_rules_v2.json",
-        "sha256": "6f656b2ac76f8089318cf0db996b58fe2eb1d3789b56d6720d008fa53a55933f"
+        "producer_path": "velocity_support_v3/relative_velocity_rules_v3.json",
+        "sha256": "cbd10c2095830bfa785c245cf23ab383e8a1256bc84ebd5abf99fed70d5642b3"
+      },
+      "dense_reference": {
+        "producer_path": "velocity_support_v3/dense_baseline_clearance_v1.json",
+        "sha256": "0904bccd851d48ebb4f004fbd62cbfb9c044ae99bf2a704bf7bd7fc1f19e318d"
       },
       "placement_implementation": {
-        "producer_path": "velocity_support_v2/relative_velocity_v2.py",
-        "sha256": "253a5bee98161633a70f58ecbee02f88f8940e20156560fe48f8e7151aa681c3"
+        "producer_path": "velocity_support_v3/relative_velocity_v3.py",
+        "sha256": "185cb7776cbe9572308fb6c9e9d871f0eedd8b252b7836efc7fb36341ec98654"
+      },
+      "placement_generator": {
+        "producer_path": "velocity_support_v3/generate_relative_velocity_v3.py",
+        "sha256": "575d0ee1fb1860c5099006ad32d42085e8b928574b74059af9b31245ba79ec2e"
+      },
+      "placement_validator": {
+        "producer_path": "velocity_support_v3/validate_production_case_v3.py",
+        "sha256": "600d895cf7af2d57700ccc6eee1121ee63ca96bf080ce196bfaa49d77ec7c003"
+      },
+      "placement_materializer": {
+        "producer_path": "velocity_support_v3/materialize_production_cases_v3.py",
+        "sha256": "457daf99852ae3e2633cbcb3e544c090110ca12cea26c0f50b2a3a9c7f028688"
+      },
+      "placement_equivalence_proof": {
+        "producer_path": "velocity_support_v3/production_campaign_v1/aggregate/relative-velocity-v3-v2-success-domain-equivalence-v1.json",
+        "sha256": "2b41623a942777874a28c6e51836acbac4dc2bb3327add57a26bdf28ff97ff87"
+      },
+      "placement_all484_manifest": {
+        "producer_path": "velocity_support_v3/production_campaign_v1/aggregate/relative-velocity-v3-production-all484-inputs-v1.json",
+        "sha256": "70627d6af9e6b254739b29d54d856b470d6152066e09a1097ebe20c034179925"
       },
       "mapping_implementation": {
-        "producer_path": "velocity_mapping_v2/reference/relative_velocity_mapping.py",
-        "sha256": "af726f84f9ce6cd76e64881fb96d2f46bb38f924cd8237b4d93f030f9b3cefdd"
+        "producer_path": "velocity_mapping_v3/reference/relative_velocity_mapping.py",
+        "sha256": "8211650ba5ae180f8afa2313aa5a5525252150e12550b1ee801d78d3a285b2fc"
       },
       "mapping_validator": {
-        "producer_path": "velocity_mapping_v2/reference/validate_relative_velocity_mapping.py",
-        "sha256": "c51901699768d4e93212c73b202601186ab6a72d48a83df80d293a58e6117c97"
+        "producer_path": "velocity_mapping_v3/reference/validate_relative_velocity_mapping.py",
+        "sha256": "9635c317cb218130645e740ee7aaf170986a36bf5fb996230de3b0d0476bb20d"
+      },
+      "mapping_generator": {
+        "producer_path": "velocity_mapping_v3/scripts/generate_relative_velocity_mapping.py",
+        "sha256": "8614611322c0d081a711ae538afd27f856f181f708989f30d818842637141850"
+      },
+      "mapping_validator_cli": {
+        "producer_path": "velocity_mapping_v3/scripts/validate_relative_velocity_mapping.py",
+        "sha256": "090a6f9123ea45246628df3abbafc34bf536475f75e99fdf5f0af1390ac30e53"
+      },
+      "mapping_campaign": {
+        "producer_path": "velocity_mapping_v3/scripts/mapping_campaign.py",
+        "sha256": "d50f850d7f4ae278a250c40a64d352e1270e12dc9ef0d0d0aa80ab28cc31c91b"
       },
       "mapping_aggregator": {
-        "producer_path": "velocity_mapping_v2/scripts/aggregate_relative_velocity_mapping.py",
-        "sha256": "a195755423f247e4ad88c37bc118de36ab2e0d7314f025493561a659249aae86"
+        "producer_path": "velocity_mapping_v3/scripts/aggregate_relative_velocity_mapping.py",
+        "sha256": "727014e637c4d12b073fed58ed0c3c298e16734686b6a7af343033b0ad7b17f2"
       },
       "campaign_preparer": {
-        "producer_path": "velocity_mapping_v2/scripts/prepare_velocity_mapping_campaign.py",
-        "sha256": "51b55c4d4e565b5405761d302a5d687e70c0fc35862c6e2dda58224667cd9bbd"
+        "producer_path": "velocity_mapping_v3/scripts/prepare_velocity_mapping_campaign.py",
+        "sha256": "4bd20d6ae64cbd5c22021b5023a2de98a4f572478511276a1345bfe3e57758e5"
+      },
+      "mapping_runner": {
+        "producer_path": "velocity_mapping_v3/scripts/run_relative_velocity_mapping_case.py",
+        "sha256": "b9b0ee4c89ba24019d23f3430324ae7cad9b4c588ddc1dd4a22efa9abb801b9d"
       },
       "mapping_control": {
-        "producer_path": "velocity_mapping_v2/velocity-mapping-control-v2.json",
-        "sha256": "5f45d5a562010c88d96cf18ff027f23dd814e217b0af3f9b97a65988f9899b77"
+        "producer_path": "velocity_mapping_v3/velocity-mapping-control-v3.json",
+        "sha256": "d20765c7c0c3eab8e1f10be170e0aa9838f22d78e862418f218b752fca594239"
+      },
+      "mapping_all484_manifest": {
+        "producer_path": "velocity_mapping_v3/aggregate/relative-velocity-v3-mapping-all484-v1.json",
+        "sha256": "9b88c36e2268bf72c9baec9418ef2d9afc9faba1d98c9c12ed73b79e683a6a3d"
       },
       "required_mapping_resolutions_mm": [1, 2, 5, 10],
       "required_tolerance_replay_um": [0.5, 1, 2],
@@ -156,6 +200,10 @@
       "case_support_implementation": {
         "producer_path": "cp_support/reference/relative_cp_case_support.py",
         "sha256": "c02ddec0542498a3dff43097411ced8e867fb928396ac147f25638d5f4b1af6d"
+      },
+      "cp_all484_manifest": {
+        "producer_path": "cp_support/campaign_v3/aggregate_v3/all484/relative-cp-native-support-manifest-v3.json",
+        "sha256": "4e6a4c3495ea4938895868162480dcb20b5bbea42114c94013a2c76e26128c90"
       }
     }
   },
@@ -180,9 +228,9 @@
     "submissions_opened_by_this_contract": false
   },
   "activation_gates": {
-    "all_484_velocity_placement_manifest_bound": false,
-    "all_484_velocity_mapping_manifest_bound": false,
-    "all_484_cp_manifest_bound": false,
+    "all_484_velocity_placement_manifest_bound": true,
+    "all_484_velocity_mapping_manifest_bound": true,
+    "all_484_cp_manifest_bound": true,
     "genuine_model_sensitivity_review_complete": false,
     "owner_scientific_approval": false,
     "immutable_evaluator_revision_bound": false

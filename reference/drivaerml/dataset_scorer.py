@@ -180,12 +180,12 @@ _SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 _SAFE_ID_RE = re.compile(r"[a-z0-9][a-z0-9._-]{0,159}\Z")
 
 RELATIVE_PROFILE_FORMAT = (
-    "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate"
+    "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
 )
-RELATIVE_PROFILE_SCHEMA_VERSION = "2.0-drivaerml-relative-candidate"
-RELATIVE_PROFILE_CONTRACT_ID = "drivaerml-relative-diagnostics-v2-candidate"
+RELATIVE_PROFILE_SCHEMA_VERSION = "3.0-drivaerml-relative-candidate"
+RELATIVE_PROFILE_CONTRACT_ID = "drivaerml-relative-diagnostics-v3-candidate"
 RELATIVE_PROFILE_CONTRACT_SHA256 = (
-    "e61869c68581fc2b77b60054a8684d3be39b668a2b0359551aec22be3f50bc5b"
+    "c71f2811ec048ad22a27785bcad0b269c84003785dd4abddbb1ec3fd008f725d"
 )
 RELATIVE_PROFILE_SERIES_PER_CASE = 40
 
@@ -2671,7 +2671,7 @@ def _canonical_json_payload(document: Mapping[str, object]) -> bytes:
 
 
 def _relative_profile_expected_keys() -> tuple[tuple[str, str, str, str, str], ...]:
-    """Return the closed logical namespace for one relative-v2 case."""
+    """Return the closed logical namespace for one relative-v3 case."""
 
     return (
         *(
@@ -2687,7 +2687,7 @@ def _relative_profile_expected_keys() -> tuple[tuple[str, str, str, str, str], .
         *(
             (
                 "velocity_profiles",
-                "drivaerml-velocity-relative-v2",
+                "drivaerml-velocity-relative-v3",
                 station,
                 "velocity_ratio",
                 "materialized",
@@ -2764,7 +2764,7 @@ def _normalize_relative_profile_series(
             f"{label} has an undeclared family/station representation {key}"
         )
     relative = family_id in {
-        "drivaerml-velocity-relative-v2",
+        "drivaerml-velocity-relative-v3",
         "drivaerml_cp_relative_v1",
     }
     expected_mode = "relative" if relative else "constant"
@@ -2861,7 +2861,7 @@ def _normalize_relative_profile_series(
             raise DrivAerDatasetScorerError(
                 f"{label} coordinate identity must be {expected_coordinate}"
             )
-        if family_id == "drivaerml-velocity-relative-v2":
+        if family_id == "drivaerml-velocity-relative-v3":
             if not math.isclose(normalized_coordinates[0], 0.0, rel_tol=0.0, abs_tol=1e-12):
                 raise DrivAerDatasetScorerError(
                     f"{label} normalized arc coordinate must start at 0"
@@ -3027,7 +3027,7 @@ def schema_v3_relative_profile_chunks_candidate_adapter(
         )
     if contract_sha256 != RELATIVE_PROFILE_CONTRACT_SHA256:
         raise DrivAerDatasetScorerError(
-            "relative profile contract SHA-256 is not the retained v2 contract"
+            "relative profile contract SHA-256 is not the retained v3 contract"
         )
     chunk_size = _integer(cases_per_chunk, "cases_per_chunk", minimum=1)
     evidence = evaluation.to_json()
@@ -3664,7 +3664,7 @@ def write_schema_v3_profile_chunks_candidate(
         or index["contract_sha256"] != RELATIVE_PROFILE_CONTRACT_SHA256
     ):
         raise DrivAerDatasetScorerError(
-            "relative candidate profile index does not bind the retained v2 contract"
+            "relative candidate profile index does not bind the retained v3 contract"
         )
     series_count = 0
     for position, ((filename, document), raw_entry) in enumerate(
