@@ -18,9 +18,11 @@ be reproduced independently.
 | Point arrays | `p` only |
 | Points / cells | 481,363 / 442,114 |
 
-The file is **not committed** to this repository: it is CC BY-NC 4.0 upstream data (this
-repository is Apache 2.0) and is publicly available from the pinned DOI above. Only its
-checksum and derived measurements are recorded here.
+This single geometry **is committed**, at `samples/DrivAer_E_S_WW_WM_075.vtk`, with the express
+permission of the dataset author so these checks can be reproduced without a full
+Dataverse/Globus download. It remains **CC BY-NC 4.0** and does not take the repository's
+Apache-2.0 terms — see [`samples/README.md`](samples/README.md) for attribution and reuse
+conditions. Only this one case is included; the full split stays pinned by DOI and checksum.
 
 ## Publisher run
 
