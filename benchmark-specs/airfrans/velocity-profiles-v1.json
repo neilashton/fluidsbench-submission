@@ -99,7 +99,15 @@
   "metric_binding": {
     "panel_id": "velocity_profiles",
     "metric_id": "velocity_profile_r2",
-    "aggregation": "flatten_all_required_profile_samples",
+    "aggregation": "equal_station_equal_quantity_mean_bounded_r2_across_split",
+    "grouping": "calculate_one_r2_for_each_station_quantity_pair_across_all_cases_and_samples",
+    "r2_bounds_before_averaging": [
+      0.0,
+      1.0
+    ],
+    "station_weighting": "equal",
+    "quantity_weighting": "equal",
+    "sample_weighting_within_group": "equal",
     "case_coverage": "all_cases_in_selected_official_split",
     "series_coverage": "both_quantities_at_all_four_stations_for_every_case"
   },

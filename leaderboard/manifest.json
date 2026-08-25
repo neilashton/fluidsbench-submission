@@ -732,6 +732,10 @@
         },
         "surface_wall_shear_rel_l1": {
           "description": "Length-weighted relative L1 error for surface wall shear. Lower is better."
+        },
+        "velocity_profile_r2": {
+          "label": "Balanced velocity profile score",
+          "description": "Equal mean of eight bounded R2 values calculated separately for four chord stations and two Cartesian velocity components across the complete split. Higher is better."
         }
       },
       "ranking": {
@@ -745,7 +749,7 @@
         {
           "id": "velocity_profiles",
           "title": "Velocity profiles",
-          "description": "Required Cartesian velocity components normalized by freestream speed on four extrados-normal sampling lines.",
+          "description": "Required Cartesian velocity components normalized by freestream speed on four extrados-normal sampling lines. The overall profile score gives every station and both components equal weight.",
           "data_key": "velocity_profiles",
           "profile_definition_id": "airfrans-boundary-layer-v1",
           "sample_count": 1001,
@@ -960,7 +964,7 @@
       "profile_definition": {
         "id": "airfrans-boundary-layer-v1",
         "file": "velocity-profiles-v1.json",
-        "sha256": "539e5b34cc9da7c2915453dc45d17b0652c16e42a6bf3363695be82bbd763d54",
+        "sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c",
         "status": "owner_review_required"
       },
       "revision_count": 5

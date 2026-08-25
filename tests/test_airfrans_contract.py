@@ -94,6 +94,28 @@ class AirfransContractTests(unittest.TestCase):
             [quantity["id"] for quantity in self.profile_definition["quantities"]],
         )
 
+        metric_binding = self.profile_definition["metric_binding"]
+        aggregation = "equal_station_equal_quantity_mean_bounded_r2_across_split"
+        self.assertEqual(metric_binding["metric_id"], panel["metric_id"])
+        self.assertEqual(metric_binding["aggregation"], aggregation)
+        self.assertEqual(
+            metric_binding["grouping"],
+            "calculate_one_r2_for_each_station_quantity_pair_across_all_cases_and_samples",
+        )
+        self.assertEqual(metric_binding["r2_bounds_before_averaging"], [0.0, 1.0])
+        self.assertEqual(metric_binding["station_weighting"], "equal")
+        self.assertEqual(metric_binding["quantity_weighting"], "equal")
+        self.assertEqual(metric_binding["sample_weighting_within_group"], "equal")
+
+        metric = next(
+            item for item in self.specification["metrics"] if item["id"] == panel["metric_id"]
+        )
+        self.assertEqual(metric["aggregation"], aggregation)
+        self.assertEqual(
+            metric["weighting"],
+            "stations_equal_quantities_equal_samples_within_each_station_quantity_group",
+        )
+
     def test_profile_runtime_and_reference_fixture_are_hash_bound(self) -> None:
         runtime = self.profile_definition["sampling_runtime"]
         requirements_path = ROOT / runtime["requirements_file"]
@@ -307,6 +329,10 @@ class AirfransContractTests(unittest.TestCase):
         )
         self.assertTrue(panel["required"])
         self.assertFalse(panel["allow_unlisted_stations"])
+        self.assertEqual(
+            dataset["metric_definition_overrides"]["velocity_profile_r2"]["label"],
+            "Balanced velocity profile score",
+        )
 
 
 if __name__ == "__main__":
