@@ -63,3 +63,30 @@ velocity=predicted_velocity)` function performs the same in-memory operation for
 callers that load `extract.py` as a module. The reference path uses
 `reference=True`; the prediction path explicitly uses `reference=False` after
 installing the supplied Cartesian velocity array on `Simulation.velocity`.
+
+## Calculate the profile score
+
+The leaderboard retains one overall velocity-profile score. It does not flatten
+the Cartesian components or chord stations together. Instead, it calculates one
+R2 across the complete selected split for each of the four-station by
+two-component combinations, bounds each group R2 to `[0, 1]`, and averages the
+eight values equally. This gives streamwise and transverse velocity equal total
+weight and prevents the scale of one component from masking another.
+
+Ground truth and predictions may each be supplied as one file or as multiple
+profile chunks:
+
+```bash
+python3 score.py \
+  --ground-truth ground-truth-chunk-*.json \
+  --predictions prediction-chunk-*.json \
+  --split-id full \
+  --output profile-score.json
+```
+
+The output contains `velocity_profile_r2` and the eight raw and bounded group
+R2 diagnostics. Case coverage and coordinates must match exactly. By default,
+the scorer rejects anything except complete coverage of the selected official
+split. `--allow-partial` is available only for explicitly labelled calibration
+checks such as a single-case extractor fixture; its result is not a leaderboard
+score.
