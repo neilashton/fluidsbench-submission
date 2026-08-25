@@ -385,6 +385,25 @@
       "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions"
     ]
   },
+  "relative_diagnostics": {
+    "status": "support_pending",
+    "profile_format_enabled": false,
+    "closed_reason": "all-484 relative velocity placement/mapping and relative Cp manifests, genuine-model sensitivity, owner approval, and an immutable evaluator revision are not all bound",
+    "contract": {
+      "id": "drivaerml-relative-diagnostics-v2-candidate",
+      "file": "drivaerml-relative-diagnostics-v2.json",
+      "sha256": "e61869c68581fc2b77b60054a8684d3be39b668a2b0359551aec22be3f50bc5b"
+    },
+    "profile_chunk": {
+      "format": "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate",
+      "schema_file": "schemas/v1/drivaerml-relative-profile-chunk.schema.json",
+      "schema_sha256": "5aa5d73d4bbd6883a8231c9460ea0064929997b5d32fac76527c7f450f66dfd1",
+      "series_per_case": 40
+    },
+    "constant_scoring_policy": "unchanged",
+    "relative_scoring_role": "report_only",
+    "relative_composite_weight": 0.0
+  },
   "evaluation_reference_version": "drivaerml-evaluator-v3-candidate",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {

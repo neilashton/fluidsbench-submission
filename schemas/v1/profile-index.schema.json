@@ -7,6 +7,14 @@
   "required": ["schema_version", "submission_id", "dataset_id", "split_id", "case_set_id", "case_count", "chunks"],
   "properties": {
     "schema_version": {"const": "1.0"},
+    "format": {
+      "enum": [
+        "fluidsbench-profile-chunks-v1",
+        "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate"
+      ]
+    },
+    "contract_id": {"type": "string", "minLength": 1},
+    "contract_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "submission_id": {"type": "string", "minLength": 1},
     "dataset_id": {"type": "string", "minLength": 1},
     "split_id": {"type": "string", "minLength": 1},
@@ -27,5 +35,28 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "format": {
+            "const": "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate"
+          }
+        },
+        "required": ["format"]
+      },
+      "then": {
+        "required": ["format", "contract_id", "contract_sha256"]
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {"required": ["contract_id"]},
+            {"required": ["contract_sha256"]}
+          ]
+        }
+      }
+    }
+  ]
 }

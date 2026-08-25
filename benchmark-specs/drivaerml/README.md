@@ -200,3 +200,16 @@ it is an ineligible transport and packaging fixture, not an official
 DrivAerML submission. Candidate native-volume support generation uses the exact
 receipt-compatible runtime Python 3.12.13 and NumPy 2.2.6. Surface and velocity
 evidence remains pinned to VTK 9.5.2.
+
+The same hand-off now hash-binds the closed report-only
+[`drivaerml-relative-diagnostics-v2.json`](drivaerml-relative-diagnostics-v2.json)
+contract and its DrivAerML-only namespaced profile-chunk schema. The relative
+velocity family is v2, the relative Cp family remains v1, and both have
+composite weight zero. Their producer paths and expected schemas are fixed;
+only the three not-yet-produced all-484 manifest SHA-256 values remain explicit
+unresolved tokens. Therefore `submission-spec.json` advertises the
+format with `profile_format_enabled=false` and the validator rejects attempts
+to use it. The nested `relative_support` status is independent and does not
+block promotion of the ranked constant candidate. This extension does not
+alter the active constant velocity weight
+0.15, constant Cp weight 0.10, or legacy profile package shape.

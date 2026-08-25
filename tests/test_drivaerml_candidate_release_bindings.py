@@ -35,6 +35,20 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             ROOT / "benchmark-specs" / "drivaerml" / profile_path.name,
             profile_path,
         )
+        relative_path = benchmark / bindings["relative_diagnostics_v2"]["file"]
+        shutil.copy2(
+            ROOT / "benchmark-specs" / "drivaerml" / relative_path.name,
+            relative_path,
+        )
+        relative_schema = (
+            root
+            / bindings["relative_diagnostics_v2"]["profile_chunk_schema_file"]
+        )
+        relative_schema.parent.mkdir(parents=True)
+        shutil.copy2(
+            ROOT / bindings["relative_diagnostics_v2"]["profile_chunk_schema_file"],
+            relative_schema,
+        )
         bindings_path = benchmark / "candidate-release-bindings.json"
         write_json(bindings_path, bindings)
         return bindings, bindings_path, profile_path
@@ -99,6 +113,20 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
         profile_path = benchmark / "drivaerml-diagnostics-v10.json"
         write_json(profile_path, {"id": "drivaerml-diagnostics-v10-candidate"})
         profile_sha256 = promoter.sha256_file(profile_path)
+        relative_contract_path = benchmark / "drivaerml-relative-diagnostics-v2.json"
+        shutil.copy2(
+            ROOT
+            / "benchmark-specs"
+            / "drivaerml"
+            / "drivaerml-relative-diagnostics-v2.json",
+            relative_contract_path,
+        )
+        relative_schema_path = root / "schemas" / "v1" / "drivaerml-relative-profile-chunk.schema.json"
+        relative_schema_path.parent.mkdir(parents=True)
+        shutil.copy2(
+            ROOT / "schemas" / "v1" / "drivaerml-relative-profile-chunk.schema.json",
+            relative_schema_path,
+        )
         metrics = [
             {
                 "id": binding["metric_id"],
@@ -167,6 +195,53 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             "profile_definition_v10": {
                 "file": profile_path.name,
                 "sha256": profile_sha256,
+            },
+            "relative_diagnostics_v2": {
+                "file": relative_contract_path.name,
+                "sha256": promoter.sha256_file(relative_contract_path),
+                "profile_chunk_schema_file": (
+                    "schemas/v1/drivaerml-relative-profile-chunk.schema.json"
+                ),
+                "profile_chunk_schema_sha256": promoter.sha256_file(
+                    relative_schema_path
+                ),
+            },
+            "relative_support": {
+                "status": "ready",
+                "required_case_count": 484,
+                "velocity_placement_manifest": {
+                    "family_id": "drivaerml-velocity-relative-v2",
+                    "producer_file": (
+                        "velocity_support_v2/production_campaign_v1/aggregate/"
+                        "relative-velocity-v2-production-all484-inputs-v1.json"
+                    ),
+                    "expected_schema": (
+                        "drivaerml-relative-velocity-v2-production-input-manifest-v1"
+                    ),
+                    "manifest_sha256": "4" * 64,
+                },
+                "velocity_mapping_manifest": {
+                    "family_id": "drivaerml-velocity-relative-v2",
+                    "producer_file": (
+                        "velocity_mapping_v2/aggregate/"
+                        "relative-velocity-v2-mapping-all484-v1.json"
+                    ),
+                    "expected_schema": (
+                        "drivaerml-velocity-relative-v2-mapping-aggregate-v1"
+                    ),
+                    "manifest_sha256": "5" * 64,
+                },
+                "cp_manifest": {
+                    "family_id": "drivaerml_cp_relative_v1",
+                    "producer_file": (
+                        "cp_support/campaign_v3/aggregate_v3/all484/"
+                        "relative-cp-native-support-manifest-v3.json"
+                    ),
+                    "expected_schema": (
+                        "drivaerml-relative-cp-native-support-manifest-v3"
+                    ),
+                    "manifest_sha256": "6" * 64,
+                },
             },
             "profile_ground_truth": global_truth,
         }
@@ -286,6 +361,30 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                 promoter.apply_release_managed_bindings(
                     copy.deepcopy(generated), bad_truth, None
                 )
+
+    def test_ranked_candidate_readiness_does_not_require_relative_support(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            bindings, benchmark, _global_manifest_path, _generated = (
+                self.make_ready_fixture(Path(temporary))
+            )
+            bindings["relative_support"] = load_json(BINDINGS_PATH)[
+                "relative_support"
+            ]
+            bindings_path = benchmark / "candidate-release-bindings.json"
+            write_json(bindings_path, bindings)
+            loaded = promoter.load_candidate_release_bindings(bindings_path)
+            self.assertEqual(loaded["status"], "ready")
+            self.assertEqual(loaded["relative_support"]["status"], "unresolved")
+
+    def test_relative_support_ready_rejects_pending_manifest_hashes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            bindings, bindings_path, _profile_path = self.make_unresolved_v10_fixture(
+                Path(temporary)
+            )
+            bindings["relative_support"]["status"] = "ready"
+            write_json(bindings_path, bindings)
+            with self.assertRaisesRegex(ValueError, "still contains unresolved tokens"):
+                promoter.load_candidate_release_bindings(bindings_path)
 
     def test_ready_manifest_requires_valid_complete_candidate_support(self) -> None:
         for mutation, message in (

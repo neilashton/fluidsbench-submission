@@ -44,6 +44,13 @@ SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
 GIT_REVISION_PATTERN = re.compile(r"^(?:[a-f0-9]{40}|[a-f0-9]{64})$")
 SAFE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,159}$")
 PROFILE_DEFINITION_V10_ID = "drivaerml-diagnostics-v10-candidate"
+RELATIVE_DIAGNOSTICS_V2_ID = "drivaerml-relative-diagnostics-v2-candidate"
+RELATIVE_DIAGNOSTICS_V2_SHA256 = (
+    "e61869c68581fc2b77b60054a8684d3be39b668a2b0359551aec22be3f50bc5b"
+)
+RELATIVE_PROFILE_SCHEMA_SHA256 = (
+    "5aa5d73d4bbd6883a8231c9460ea0064929997b5d32fac76527c7f450f66dfd1"
+)
 
 DATASET_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
 DATASET_VERSION = "drivaerml-native-v3-candidate"
@@ -257,6 +264,166 @@ def unresolved_release_tokens(
     return found
 
 
+def validate_relative_diagnostics_v2_binding(
+    binding: Any,
+    *,
+    bindings_path: Path = CANDIDATE_RELEASE_BINDINGS_PATH,
+) -> tuple[dict[str, Any], Path]:
+    """Validate the retained report-only contract and its versioned schema."""
+
+    required = {
+        "file",
+        "sha256",
+        "profile_chunk_schema_file",
+        "profile_chunk_schema_sha256",
+    }
+    if not isinstance(binding, dict) or set(binding) != required:
+        raise ValueError(
+            "relative_diagnostics_v2 binding must contain exactly "
+            f"{sorted(required)}"
+        )
+    contract_path = resolved_benchmark_file(
+        binding["file"],
+        label="relative_diagnostics_v2.file",
+        benchmark_root=bindings_path.parent,
+    )
+    contract, contract_digest = load_json_with_sha256(
+        contract_path,
+        label="relative-diagnostics-v2 contract",
+    )
+    if contract_digest != binding["sha256"]:
+        raise ValueError("relative_diagnostics_v2 SHA-256 does not match its file")
+    scoring_and_rollout = (
+        contract.get("scoring_and_rollout")
+        if isinstance(contract, dict)
+        else None
+    )
+    if (
+        not isinstance(contract, dict)
+        or not isinstance(scoring_and_rollout, dict)
+        or contract.get("id") != "drivaerml-relative-diagnostics-v2-candidate"
+        or contract.get("dataset_id") != "drivaerml"
+        or contract.get("activation_by_this_file") is not False
+        or scoring_and_rollout.get("relative_composite_weight") != 0.0
+        or scoring_and_rollout.get("constant_family_policy") != "unchanged"
+    ):
+        raise ValueError("relative-diagnostics-v2 contract is not fail-closed")
+
+    repository_root = bindings_path.parent.parent.parent
+    schema_path = resolved_benchmark_file(
+        binding["profile_chunk_schema_file"],
+        label="relative_diagnostics_v2.profile_chunk_schema_file",
+        benchmark_root=repository_root,
+    )
+    schema, schema_digest = load_json_with_sha256(
+        schema_path,
+        label="relative profile-chunk schema",
+    )
+    if schema_digest != binding["profile_chunk_schema_sha256"]:
+        raise ValueError(
+            "relative profile-chunk schema SHA-256 does not match its file"
+        )
+    if (
+        not isinstance(schema, dict)
+        or schema.get("$id")
+        != "https://fluidsbench.org/schemas/v1/drivaerml-relative-profile-chunk.schema.json"
+    ):
+        raise ValueError("relative profile-chunk schema identity is invalid")
+    return contract, schema_path
+
+
+def validate_relative_support_bindings(value: Any) -> bool:
+    """Validate atomic relative-support manifest bindings.
+
+    Returns true only when every manifest identity is resolved and the local
+    relative-support status is ready.  No manifest is treated as scoring
+    support by this hand-off.
+    """
+
+    required = {
+        "status",
+        "required_case_count",
+        "velocity_placement_manifest",
+        "velocity_mapping_manifest",
+        "cp_manifest",
+    }
+    if not isinstance(value, dict) or set(value) != required:
+        raise ValueError(
+            f"relative_support must contain exactly {sorted(required)}"
+        )
+    if value["status"] not in {"unresolved", "ready"}:
+        raise ValueError("relative_support.status must be unresolved or ready")
+    if value["required_case_count"] != 484:
+        raise ValueError("relative_support.required_case_count must remain 484")
+    expected_manifests = {
+        "velocity_placement_manifest": {
+            "family_id": "drivaerml-velocity-relative-v2",
+            "producer_file": (
+                "velocity_support_v2/production_campaign_v1/aggregate/"
+                "relative-velocity-v2-production-all484-inputs-v1.json"
+            ),
+            "expected_schema": (
+                "drivaerml-relative-velocity-v2-production-input-manifest-v1"
+            ),
+        },
+        "velocity_mapping_manifest": {
+            "family_id": "drivaerml-velocity-relative-v2",
+            "producer_file": (
+                "velocity_mapping_v2/aggregate/"
+                "relative-velocity-v2-mapping-all484-v1.json"
+            ),
+            "expected_schema": (
+                "drivaerml-velocity-relative-v2-mapping-aggregate-v1"
+            ),
+        },
+        "cp_manifest": {
+            "family_id": "drivaerml_cp_relative_v1",
+            "producer_file": (
+                "cp_support/campaign_v3/aggregate_v3/all484/"
+                "relative-cp-native-support-manifest-v3.json"
+            ),
+            "expected_schema": "drivaerml-relative-cp-native-support-manifest-v3",
+        },
+    }
+    manifest_fields = {
+        "family_id",
+        "producer_file",
+        "expected_schema",
+        "manifest_sha256",
+    }
+    all_resolved = True
+    for label, expected in expected_manifests.items():
+        binding = value[label]
+        if not isinstance(binding, dict) or set(binding) != manifest_fields:
+            raise ValueError(
+                f"relative_support.{label} must contain exactly {sorted(manifest_fields)}"
+            )
+        for field, expected_value in expected.items():
+            if binding[field] != expected_value:
+                raise ValueError(
+                    f"relative_support.{label}.{field} differs from the v2 contract"
+                )
+        producer_file = Path(binding["producer_file"])
+        if producer_file.is_absolute() or ".." in producer_file.parts:
+            raise ValueError(
+                f"relative_support.{label}.producer_file must be a safe producer-relative path"
+            )
+        digest = binding["manifest_sha256"]
+        if (
+            isinstance(digest, str)
+            and digest.startswith(UNRESOLVED_RELEASE_PREFIX)
+        ):
+            all_resolved = False
+            continue
+        if not isinstance(digest, str) or SHA256_PATTERN.fullmatch(digest) is None:
+            raise ValueError(f"relative_support.{label} binding is invalid")
+    if value["status"] == "ready" and not all_resolved:
+        raise ValueError("ready relative_support still contains unresolved tokens")
+    if value["status"] == "unresolved" and all_resolved:
+        raise ValueError("resolved relative_support must set status=ready")
+    return value["status"] == "ready"
+
+
 def load_candidate_release_bindings(
     path: Path = CANDIDATE_RELEASE_BINDINGS_PATH,
 ) -> dict[str, Any]:
@@ -265,7 +432,8 @@ def load_candidate_release_bindings(
     An unresolved hand-off may still pin the complete local profile-v10
     file/SHA-256 pair.  The pair is atomic: both fields must remain explicit
     unresolved tokens or both must resolve to the exact retained artifact next
-    to this hand-off file.
+    to this hand-off file.  The nested report-only relative_support lifecycle
+    is validated independently and never blocks the ranked constant candidate.
     """
 
     value = load_json(path)
@@ -281,6 +449,19 @@ def load_candidate_release_bindings(
         },
         "evaluator": {"reference_version", "code_revision"},
         "profile_definition_v10": {"file", "sha256"},
+        "relative_diagnostics_v2": {
+            "file",
+            "sha256",
+            "profile_chunk_schema_file",
+            "profile_chunk_schema_sha256",
+        },
+        "relative_support": {
+            "status",
+            "required_case_count",
+            "velocity_placement_manifest",
+            "velocity_mapping_manifest",
+            "cp_manifest",
+        },
         "profile_ground_truth": {"release_id", "manifest_sha256"},
     }
     for key, required in required_objects.items():
@@ -311,10 +492,16 @@ def load_candidate_release_bindings(
             profile_binding,
             benchmark_root=path.parent,
         )
+    validate_relative_diagnostics_v2_binding(
+        value["relative_diagnostics_v2"],
+        bindings_path=path,
+    )
+    validate_relative_support_bindings(value["relative_support"])
     tokens = [
         item
         for item in unresolved_release_tokens(value)
         if item[0] != ("unresolved_token_prefix",)
+        and item[0][:1] != ("relative_support",)
     ]
     if value["status"] == "unresolved":
         if not tokens:
@@ -1297,6 +1484,33 @@ def build_specification(
         "contract_base_path": "benchmark-specs/drivaerml/",
         "contract_base_path_scope": "repository_relative_contract_artifact_fields_only; upstream_dataset_paths_resolve_within_source_release",
         "scoring_support": build_scoring_support(profile_path),
+        "relative_diagnostics": {
+            "status": "support_pending",
+            "profile_format_enabled": False,
+            "closed_reason": (
+                "all-484 relative velocity placement/mapping and relative Cp "
+                "manifests, genuine-model sensitivity, owner approval, and an "
+                "immutable evaluator revision are not all bound"
+            ),
+            "contract": {
+                "id": RELATIVE_DIAGNOSTICS_V2_ID,
+                "file": "drivaerml-relative-diagnostics-v2.json",
+                "sha256": RELATIVE_DIAGNOSTICS_V2_SHA256,
+            },
+            "profile_chunk": {
+                "format": (
+                    "fluidsbench-drivaerml-relative-profile-chunks-v2-candidate"
+                ),
+                "schema_file": (
+                    "schemas/v1/drivaerml-relative-profile-chunk.schema.json"
+                ),
+                "schema_sha256": RELATIVE_PROFILE_SCHEMA_SHA256,
+                "series_per_case": 40,
+            },
+            "constant_scoring_policy": "unchanged",
+            "relative_scoring_role": "report_only",
+            "relative_composite_weight": 0.0,
+        },
         "evaluation_reference_version": EVALUATOR_VERSION,
         "default_field_reduction": "per_geometry_then_macro_average",
         "ranking": {
