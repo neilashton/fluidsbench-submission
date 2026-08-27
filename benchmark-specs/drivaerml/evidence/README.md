@@ -38,13 +38,29 @@ extraction evidence and support that is not supplied by these probe artifacts.
 | [`cp-stl-inventory-run1-run44-pilot.json`](cp-stl-inventory-run1-run44-pilot.json) | `db2b4031bf0051a51c4709f90e11eaee8b3886b858ce96649aa381778c9c5b0a` | Inactive discovery-only two-case named-STL research inventory. The file declares itself incomplete with `public_evidence_eligible=false` and `public_scoring_support_eligible=false`. It has no role in the current submission or activation. |
 | [`transolver-run419-relative-cp-evaluator-smoke-v1.json`](transolver-run419-relative-cp-evaluator-smoke-v1.json) | `70851f3b1204255773f895a725156cb33d6c3bff7fabe6995c0ab2c64e552e5f` | Byte-identical retained Cp-cut evaluator report from real Transolver checkpoint inference for `run_419`. It exhausted and hash-verified all eight surface prediction chunks and records the four real relative Cp series, including their evaluator-produced support identities. It is a one-case positive integration fixture only: report-only weight remains zero, it does not itself freeze the evaluator or bind checkpoint identity, and it is not a submission, quality claim, sensitivity review, approval, or activation artifact. |
 | [`transolver-run419-relative-velocity-evaluator-smoke-v1.json`](transolver-run419-relative-velocity-evaluator-smoke-v1.json) | `b6c35ba11938506e5d4897a81ad459db1383e56472207d489d63a843ae4be417` | Byte-identical retained velocity-profile evaluator report from real Transolver checkpoint inference for `run_419`. It exhausted and hash-verified all 122 volume prediction chunks and contains prediction/truth series for all 16 relative velocity stations. This report predates per-station support and placement-receipt identity emission; only family-level mapping and receipt hashes are present, so it cannot by itself exercise the relative submission semantic identity fields. It is a one-case report-only smoke fixture, not all-case sensitivity, scoring support, approval, or activation evidence. |
+| [`transolver-run419-current-relative-profile-v3/current-case-evaluation.json`](transolver-run419-current-relative-profile-v3/current-case-evaluation.json) | `6aa349290049ad5498dd3a578865fc14aee5521be1ebc43208b43082a7a24bdf` | Complete current core-evaluator replay for the original real Transolver `run_419` predictions. It verifies the pinned native surface/volume sources, fixed surface areas, all eight surface chunks and all 122 volume chunks, and the native-cell reductions. It is compact regression evidence, not an official submission or scoring result. |
+| [`transolver-run419-current-relative-profile-v3/current-case-implementation-receipt.json`](transolver-run419-current-relative-profile-v3/current-case-implementation-receipt.json) | `26b9b67be887fd991c63bbab04c68192768edceac65813815b2d1073a4568be1` | Deterministic path-free receipt binding the preceding evidence bytes and runtime to evaluator commit `b9db402a3fa0efbb94fe36be2ba1fe6f7b4bc1e1`, with preflight and postflight implementation-byte verification. |
+| [`transolver-run419-current-relative-profile-v3/profiles/index.json`](transolver-run419-current-relative-profile-v3/profiles/index.json) | `654d5afec080e0f89ba3fa5a50135e72af23eef4af0f9b1ba1bf22a3f757c548` | One-case candidate profile index for the current schema-v3 regression fixture. It remains candidate-only and does not replace the public v1 dummy submission. |
+| [`transolver-run419-current-relative-profile-v3/profiles/chunk-000.json`](transolver-run419-current-relative-profile-v3/profiles/chunk-000.json) | `3a5bca4c5f8730dcae4e29f69f415dc393050c6ebca6cf6e1303d307985bf262` | Real evaluator-produced 40-series `run_419` fixture: 16 constant and 16 relative velocity profiles, four constant Cp cuts, two shared centreline Cp aliases, and two materialized moving Cp cuts. Every materialized series is bound to retained support, placement-receipt, coordinate and prediction arrays; the two aliases use `shared_support_ref`. |
+| [`transolver-run419-current-relative-profile-v3/provenance.json`](transolver-run419-current-relative-profile-v3/provenance.json) | `62ef43e1f5b8fe30c8b03fc36d315c4ad1b6faa242b0ec56c1ee0cb41cd5576a` | Reproducible path-free provenance for the current fixture. It binds dataset revision `7a5c0948ce27be709b1116a3a190f806e7a8f79f`, model revision `96477aeb86d24c26ccf0797bca1b3851268017d0`, every prediction chunk, all retained relative-support manifests and indices, evaluator implementation, series lineage and non-activation claims. |
 
-The two `run_419` files above deliberately retain the evaluator's exact bytes,
+The two historical `run_419` report files above deliberately retain the evaluator's exact bytes,
 including its own scope-limit declarations. The Cp report can be checked directly
 against the all-case support index for all four relative Cp support identities.
 For velocity, only station coverage and real prediction/truth transport can be
 checked: adding missing per-station identities after the fact would fabricate
 evidence, so the fixture records that limitation instead.
+
+The new current-format directory resolves that regression-fixture limitation by
+replaying the producer supports and propagating their identities through the
+current assembler. It deliberately emits only producer rows with valid native
+support. The constant and relative velocity arrays therefore preserve known
+interior gaps and must remain report-only until any future activation review
+defines explicit gap semantics. Only one genuine trained checkpoint pair and
+one prediction case were available. At least two additional distinct trained
+DrivAerML checkpoints, with predictions over a common multi-case official
+cohort, are still required for the three-model 10,000-replicate paired-bootstrap
+sensitivity gate.
 
 ## Current blockers
 

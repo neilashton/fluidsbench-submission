@@ -137,6 +137,41 @@
       "scope": "run_419_real_checkpoint_single_case_smoke",
       "role": "byte_identical_real_checkpoint_relative_velocity_evaluator_positive_integration_fixture_report_only_per_station_identity_fields_not_emitted_nonactivation",
       "public_scoring_support_eligible": false
+    },
+    {
+      "file": "transolver-run419-current-relative-profile-v3/current-case-evaluation.json",
+      "sha256": "6aa349290049ad5498dd3a578865fc14aee5521be1ebc43208b43082a7a24bdf",
+      "scope": "run_419_real_checkpoint_current_evaluator_single_case_regression",
+      "role": "complete_current_core_evaluator_surface_and_volume_replay_report_only_nonactivation",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "transolver-run419-current-relative-profile-v3/current-case-implementation-receipt.json",
+      "sha256": "26b9b67be887fd991c63bbab04c68192768edceac65813815b2d1073a4568be1",
+      "scope": "run_419_real_checkpoint_current_evaluator_single_case_regression",
+      "role": "path_free_evidence_to_exact_evaluator_commit_binding_report_only_nonactivation",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "transolver-run419-current-relative-profile-v3/profiles/index.json",
+      "sha256": "654d5afec080e0f89ba3fa5a50135e72af23eef4af0f9b1ba1bf22a3f757c548",
+      "scope": "run_419_real_checkpoint_current_format_40_series_regression",
+      "role": "current_schema_v3_candidate_profile_fixture_index_report_only_nonactivation",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "transolver-run419-current-relative-profile-v3/profiles/chunk-000.json",
+      "sha256": "3a5bca4c5f8730dcae4e29f69f415dc393050c6ebca6cf6e1303d307985bf262",
+      "scope": "run_419_real_checkpoint_current_format_40_series_regression",
+      "role": "current_schema_v3_real_model_profile_fixture_with_retained_series_identities_report_only_nonactivation",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "transolver-run419-current-relative-profile-v3/provenance.json",
+      "sha256": "62ef43e1f5b8fe30c8b03fc36d315c4ad1b6faa242b0ec56c1ee0cb41cd5576a",
+      "scope": "run_419_real_checkpoint_current_format_40_series_regression",
+      "role": "exact_dataset_model_prediction_support_evaluator_and_fixture_identity_provenance_report_only_nonactivation",
+      "public_scoring_support_eligible": false
     }
   ]
 }

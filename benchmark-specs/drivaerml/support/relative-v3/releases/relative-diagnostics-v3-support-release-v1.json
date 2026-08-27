@@ -42,15 +42,15 @@
     },
     "series_support_index": {
       "file": "support/relative-v3/series-support-index.json",
-      "sha256": "7df6ce95c5d6d4fef5ecd94e5d1dad0cda9ca2d491cd4223bbf6c55aacb6dbcc",
-      "schema": "drivaerml-relative-series-support-index-v1",
+      "sha256": "ff7b8bdb0b963611ce7ecb2055090b6861d42477ff47976d7b164ff131d82632",
+      "schema": "drivaerml-relative-series-support-index-v2",
       "case_count": 484
     }
   },
   "evaluator": {
     "status": "frozen",
     "repository": "https://github.com/neilashton/fluidsbench-submission",
-    "git_revision": "a85b10f38cab4514b71ce6d64c73c001ba2407f9",
+    "git_revision": "b9db402a3fa0efbb94fe36be2ba1fe6f7b4bc1e1",
     "reference_version": "drivaerml-evaluator-v3-candidate"
   },
   "sensitivity_evidence": {

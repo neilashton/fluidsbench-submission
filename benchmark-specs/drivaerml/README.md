@@ -211,7 +211,7 @@ velocity-mapping, and relative-Cp manifests are retained under
 producer outputs, and checked against the ordered official 484-case registry.
 The nested `relative_support` hand-off is therefore ready. A separate immutable
 pending release record binds those files, the per-case relative-series identity
-index, and evaluator revision `a85b10f38cab4514b71ce6d64c73c001ba2407f9`.
+index, and evaluator revision `b9db402a3fa0efbb94fe36be2ba1fe6f7b4bc1e1`.
 It records genuine-model sensitivity and owner scientific approval as pending.
 `submission-spec.json` consequently keeps `profile_format_enabled=false`, and
 the validator rejects the format unless every activation gate is complete.
