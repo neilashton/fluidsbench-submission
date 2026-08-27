@@ -46,7 +46,7 @@ SAFE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,159}$")
 PROFILE_DEFINITION_V10_ID = "drivaerml-diagnostics-v10-candidate"
 RELATIVE_DIAGNOSTICS_V3_ID = "drivaerml-relative-diagnostics-v3-candidate"
 RELATIVE_DIAGNOSTICS_V3_SHA256 = (
-    "b447edc49889fc184c472372e9a7debd44c234820b81b6e92df4f6c774b8b39d"
+    "a6066fa83a7af0d18b84a18c11079f020023a6aed81292c4251186c14fc0461a"
 )
 RELATIVE_PROFILE_SCHEMA_SHA256 = (
     "ff5c5965bb00633303b9372360879d02535f7946c882b9cfcefe1ee55446a0d2"
@@ -332,12 +332,18 @@ def validate_relative_diagnostics_v3_binding(
     return contract, schema_path
 
 
-def validate_relative_support_bindings(value: Any) -> bool:
+def validate_relative_support_bindings(
+    value: Any,
+    *,
+    relative_contract: Any,
+    bindings_path: Path = CANDIDATE_RELEASE_BINDINGS_PATH,
+) -> bool:
     """Validate atomic relative-support manifest bindings.
 
-    Returns true only when every manifest identity is resolved and the local
-    relative-support status is ready.  No manifest is treated as scoring
-    support by this hand-off.
+    Returns true only when every manifest identity is resolved, every retained
+    manifest byte stream and its complete official case scope have been
+    verified, and the local relative-support status is ready.  No manifest is
+    treated as scoring support by this hand-off.
     """
 
     required = {
@@ -365,6 +371,12 @@ def validate_relative_support_bindings(value: Any) -> bool:
             "expected_schema": (
                 "drivaerml-relative-velocity-v3-production-input-manifest-v1"
             ),
+            "expected_schema_version": 1,
+            "manifest_file": (
+                "support/relative-v3/manifests/velocity-placement-all484-v1.json"
+            ),
+            "contract_family": "relative_velocity_v3",
+            "contract_binding": "placement_all484_manifest",
         },
         "velocity_mapping_manifest": {
             "family_id": "drivaerml-velocity-relative-v3",
@@ -375,6 +387,12 @@ def validate_relative_support_bindings(value: Any) -> bool:
             "expected_schema": (
                 "drivaerml-velocity-relative-v3-mapping-aggregate-v1"
             ),
+            "expected_schema_version": 1,
+            "manifest_file": (
+                "support/relative-v3/manifests/velocity-mapping-all484-v1.json"
+            ),
+            "contract_family": "relative_velocity_v3",
+            "contract_binding": "mapping_all484_manifest",
         },
         "cp_manifest": {
             "family_id": "drivaerml_cp_relative_v1",
@@ -383,14 +401,150 @@ def validate_relative_support_bindings(value: Any) -> bool:
                 "relative-cp-native-support-manifest-v3.json"
             ),
             "expected_schema": "drivaerml-relative-cp-native-support-manifest-v3",
+            "expected_schema_version": 3,
+            "manifest_file": (
+                "support/relative-v3/manifests/cp-native-support-all484-v3.json"
+            ),
+            "contract_family": "relative_cp_v1",
+            "contract_binding": "cp_all484_manifest",
         },
     }
     manifest_fields = {
         "family_id",
         "producer_file",
+        "manifest_file",
         "expected_schema",
         "manifest_sha256",
     }
+    support_implementations = (
+        relative_contract.get("support_implementation_bindings")
+        if isinstance(relative_contract, dict)
+        else None
+    )
+    if not isinstance(support_implementations, dict):
+        raise ValueError(
+            "relative-diagnostics-v3 contract has no support implementation bindings"
+        )
+
+    official_case_ids: tuple[str, ...] | None = None
+
+    def load_official_case_ids() -> tuple[str, ...]:
+        nonlocal official_case_ids
+        if official_case_ids is not None:
+            return official_case_ids
+        pin_path = resolved_benchmark_file(
+            "proposal/native-source-pin.json",
+            label="relative_support official native-source pin",
+            benchmark_root=bindings_path.parent,
+        )
+        pin, pin_digest = load_json_with_sha256(
+            pin_path,
+            label="relative_support official native-source pin",
+        )
+        if pin_digest != SOURCE_PIN_SHA256:
+            raise ValueError(
+                "relative_support official native-source pin SHA-256 changed"
+            )
+        raw_cases = pin.get("cases") if isinstance(pin, dict) else None
+        if (
+            not isinstance(pin, dict)
+            or pin.get("schema")
+            != "drivaerml-fluidsbench-public-native-source-pin-v1"
+            or pin.get("schema_version") != 1
+            or pin.get("repository", {}).get("repo_id") != "neashton/drivaerml"
+            or pin.get("repository", {}).get("revision") != DATASET_REVISION
+            or not isinstance(raw_cases, list)
+            or len(raw_cases) != 484
+        ):
+            raise ValueError(
+                "relative_support official native-source pin identity is invalid"
+            )
+        case_ids: list[str] = []
+        for position, case in enumerate(raw_cases):
+            case_id = case.get("case_id") if isinstance(case, dict) else None
+            if not isinstance(case_id, str) or re.fullmatch(
+                r"run_[1-9][0-9]*", case_id
+            ) is None:
+                raise ValueError(
+                    "relative_support official native-source pin contains an "
+                    f"invalid case ID at position {position}"
+                )
+            case_ids.append(case_id)
+        if len(case_ids) != len(set(case_ids)):
+            raise ValueError(
+                "relative_support official native-source pin contains duplicate case IDs"
+            )
+        official_case_ids = tuple(case_ids)
+        return official_case_ids
+
+    def validate_manifest_cases(
+        label: str,
+        manifest: dict[str, Any],
+        expected_case_ids: tuple[str, ...],
+    ) -> None:
+        raw_cases = manifest.get("cases")
+        if not isinstance(raw_cases, list):
+            raise ValueError(f"relative_support.{label} cases must be an array")
+        observed: list[str] = []
+        for position, case in enumerate(raw_cases):
+            case_id = case.get("case_id") if isinstance(case, dict) else None
+            if not isinstance(case_id, str):
+                raise ValueError(
+                    f"relative_support.{label} case {position} has no case_id"
+                )
+            observed.append(case_id)
+        if len(observed) != len(set(observed)):
+            raise ValueError(
+                f"relative_support.{label} contains duplicate case IDs"
+            )
+        if tuple(observed) != expected_case_ids:
+            expected_set = set(expected_case_ids)
+            observed_set = set(observed)
+            raise ValueError(
+                f"relative_support.{label} case coverage/order differs from the "
+                "official 484-case set "
+                f"(missing={sorted(expected_set - observed_set)[:5]}, "
+                f"unexpected={sorted(observed_set - expected_set)[:5]})"
+            )
+
+        if label == "velocity_placement_manifest":
+            if (
+                manifest.get("case_count") != 484
+                or manifest.get("case_ids") != list(expected_case_ids)
+                or manifest.get("case_indices") != list(range(484))
+                or any(
+                    not isinstance(case, dict)
+                    or case.get("case_index") != position
+                    for position, case in enumerate(raw_cases)
+                )
+            ):
+                raise ValueError(
+                    "relative_support.velocity_placement_manifest count/order "
+                    "fields differ from the official 484-case set"
+                )
+        elif label == "velocity_mapping_manifest":
+            if (
+                manifest.get("official_case_count") != 484
+                or manifest.get("included_case_count") != 484
+                or manifest.get("complete_official_case_coverage") is not True
+            ):
+                raise ValueError(
+                    "relative_support.velocity_mapping_manifest count/completion "
+                    "fields differ from the official 484-case set"
+                )
+        elif (
+            manifest.get("case_count") != 484
+            or manifest.get("all_official_cases_generated_and_replayed") is not True
+            or any(
+                not isinstance(case, dict) or case.get("case_index") != position
+                for position, case in enumerate(raw_cases)
+            )
+        ):
+            raise ValueError(
+                "relative_support.cp_manifest count/order fields differ from the "
+                "official 484-case set"
+            )
+
     all_resolved = True
     for label, expected in expected_manifests.items():
         binding = value[label]
@@ -398,7 +552,8 @@ def validate_relative_support_bindings(value: Any) -> bool:
             raise ValueError(
                 f"relative_support.{label} must contain exactly {sorted(manifest_fields)}"
             )
-        for field, expected_value in expected.items():
+        for field in ("family_id", "producer_file", "expected_schema", "manifest_file"):
+            expected_value = expected[field]
             if binding[field] != expected_value:
                 raise ValueError(
                     f"relative_support.{label}.{field} differs from the v3 contract"
@@ -407,6 +562,25 @@ def validate_relative_support_bindings(value: Any) -> bool:
         if producer_file.is_absolute() or ".." in producer_file.parts:
             raise ValueError(
                 f"relative_support.{label}.producer_file must be a safe producer-relative path"
+            )
+        manifest_file = Path(binding["manifest_file"])
+        if manifest_file.is_absolute() or ".." in manifest_file.parts:
+            raise ValueError(
+                f"relative_support.{label}.manifest_file must stay inside DrivAerML"
+            )
+        contract_family = support_implementations.get(expected["contract_family"])
+        contract_binding = (
+            contract_family.get(expected["contract_binding"])
+            if isinstance(contract_family, dict)
+            else None
+        )
+        if (
+            not isinstance(contract_binding, dict)
+            or contract_binding.get("producer_path") != binding["producer_file"]
+        ):
+            raise ValueError(
+                f"relative_support.{label} producer path differs from the "
+                "relative-diagnostics-v3 contract"
             )
         digest = binding["manifest_sha256"]
         if (
@@ -417,6 +591,36 @@ def validate_relative_support_bindings(value: Any) -> bool:
             continue
         if not isinstance(digest, str) or SHA256_PATTERN.fullmatch(digest) is None:
             raise ValueError(f"relative_support.{label} binding is invalid")
+        retained_path = resolved_benchmark_file(
+            binding["manifest_file"],
+            label=f"relative_support.{label}.manifest_file",
+            benchmark_root=bindings_path.parent,
+        )
+        manifest, actual_digest = load_json_with_sha256(
+            retained_path,
+            label=f"relative_support.{label} retained manifest",
+        )
+        if actual_digest != digest:
+            raise ValueError(
+                f"relative_support.{label} SHA-256 does not match its retained file"
+            )
+        if contract_binding.get("sha256") != actual_digest:
+            raise ValueError(
+                f"relative_support.{label} SHA-256 differs from the "
+                "relative-diagnostics-v3 contract"
+            )
+        if (
+            not isinstance(manifest, dict)
+            or manifest.get("schema") != binding["expected_schema"]
+            or manifest.get("schema_version") != expected["expected_schema_version"]
+            or manifest.get("dataset_id") != "drivaerml"
+            or manifest.get("family_id") != binding["family_id"]
+            or manifest.get("public_dataset_revision") != DATASET_REVISION
+        ):
+            raise ValueError(
+                f"relative_support.{label} retained manifest schema/identity is invalid"
+            )
+        validate_manifest_cases(label, manifest, load_official_case_ids())
     if value["status"] == "ready" and not all_resolved:
         raise ValueError("ready relative_support still contains unresolved tokens")
     if value["status"] == "unresolved" and all_resolved:
@@ -492,11 +696,15 @@ def load_candidate_release_bindings(
             profile_binding,
             benchmark_root=path.parent,
         )
-    validate_relative_diagnostics_v3_binding(
+    relative_contract, _relative_schema_path = validate_relative_diagnostics_v3_binding(
         value["relative_diagnostics_v3"],
         bindings_path=path,
     )
-    validate_relative_support_bindings(value["relative_support"])
+    validate_relative_support_bindings(
+        value["relative_support"],
+        relative_contract=relative_contract,
+        bindings_path=path,
+    )
     tokens = [
         item
         for item in unresolved_release_tokens(value)
@@ -1771,6 +1979,62 @@ def validate_preserved_release_managed_bindings(
     return preserved
 
 
+def preserve_relative_activation_declaration(
+    specification: dict[str, Any],
+    existing_specification: dict[str, Any] | None,
+) -> None:
+    """Preserve only a fully verified relative activation-release declaration.
+
+    The activation record contains the evaluator revision, so it is added in a
+    follow-up commit and cannot be hard-coded into the evaluator commit without
+    creating a self-reference.  A later promotion rerun must nevertheless keep
+    that reviewed record.  Validate its complete local chain before copying the
+    lifecycle fields; ordinary unresolved or absent declarations are ignored.
+    """
+
+    if not isinstance(existing_specification, dict):
+        return
+    existing = existing_specification.get("relative_diagnostics")
+    if not isinstance(existing, dict) or "activation_release" not in existing:
+        return
+
+    # Local import avoids coupling the normal promotion module import path to
+    # the optional submission-schema runtime.
+    from scripts.validate_submission import (
+        validate_drivaerml_relative_activation_release,
+    )
+
+    problems: list[str] = []
+    claims_activation = (
+        existing.get("status") == "activated"
+        or existing.get("profile_format_enabled") is True
+    )
+    repository_root = BENCHMARK_ROOT.parents[1]
+    if not validate_drivaerml_relative_activation_release(
+        problems.append,
+        existing_specification,
+        existing,
+        repository_root=repository_root,
+        require_active=claims_activation,
+    ):
+        raise ValueError(
+            "existing relative activation release is invalid: "
+            + "; ".join(problems)
+        )
+
+    target = specification.get("relative_diagnostics")
+    if not isinstance(target, dict):
+        raise ValueError("generated specification has no relative_diagnostics")
+    for field in (
+        "status",
+        "profile_format_enabled",
+        "closed_reason",
+        "activation_release",
+    ):
+        if field in existing:
+            target[field] = copy.deepcopy(existing[field])
+
+
 def apply_release_managed_bindings(
     specification: dict[str, Any],
     release_bindings: dict[str, Any],
@@ -1784,6 +2048,10 @@ def apply_release_managed_bindings(
     this older promotion generator.
     """
 
+    preserve_relative_activation_declaration(
+        specification,
+        existing_specification,
+    )
     support = specification["scoring_support"]
     if release_bindings["status"] == "ready":
         validate_ready_candidate_manifest(release_bindings, specification)

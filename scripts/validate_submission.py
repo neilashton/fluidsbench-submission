@@ -51,6 +51,44 @@ OPEN_REPRODUCIBILITY_CONTRACTS = {
 }
 LEGACY_V1_SUBMISSION_ID = re.compile(r"^(?P<series>[a-z0-9][a-z0-9-]{2,69})-v1$")
 
+DRIVAERML_RELATIVE_ACTIVATION_RECORD_SCHEMA = (
+    "drivaerml-relative-diagnostics-activation-release-v1"
+)
+DRIVAERML_RELATIVE_SUPPORT_INDEX_SCHEMA = (
+    "drivaerml-relative-series-support-index-v1"
+)
+DRIVAERML_OFFICIAL_CASE_REGISTRY_SCHEMA = (
+    "drivaerml-fluidsbench-public-native-source-pin-v1"
+)
+DRIVAERML_RELATIVE_ACTIVATION_GATE_IDS = (
+    "all_484_velocity_placement_manifest_bound",
+    "all_484_velocity_mapping_manifest_bound",
+    "all_484_cp_manifest_bound",
+    "genuine_model_sensitivity_review_complete",
+    "owner_scientific_approval",
+    "immutable_evaluator_revision_bound",
+)
+DRIVAERML_RELATIVE_MANIFEST_SCHEMAS = {
+    "velocity_placement_manifest": (
+        "drivaerml-relative-velocity-v3-production-input-manifest-v1"
+    ),
+    "velocity_mapping_manifest": (
+        "drivaerml-velocity-relative-v3-mapping-aggregate-v1"
+    ),
+    "cp_manifest": "drivaerml-relative-cp-native-support-manifest-v3",
+}
+DRIVAERML_RELATIVE_MANIFEST_FAMILIES = {
+    "velocity_placement_manifest": "drivaerml-velocity-relative-v3",
+    "velocity_mapping_manifest": "drivaerml-velocity-relative-v3",
+    "cp_manifest": "drivaerml_cp_relative_v1",
+}
+DRIVAERML_RELATIVE_SENSITIVITY_SCHEMA = (
+    "drivaerml-relative-diagnostics-sensitivity-evidence-v1"
+)
+DRIVAERML_OFFICIAL_CASE_COUNT = 484
+LOWER_SHA256 = re.compile(r"^[a-f0-9]{64}$")
+LOWER_GIT_SHA1 = re.compile(r"^[a-f0-9]{40}$")
+
 
 class SubmissionJSONError(ValueError):
     """Raised for JSON constructs forbidden in authoritative submission metadata."""
@@ -358,6 +396,842 @@ def methodology_schema_errors(value: Any) -> list[str]:
             key=lambda item: json_path(list(item.absolute_path)),
         )
     ]
+
+
+def _load_drivaerml_release_json(path: Path, *, label: str) -> tuple[Any, str]:
+    """Load and hash one immutable local release document from identical bytes."""
+
+    try:
+        payload = path.read_bytes()
+        value = json.loads(
+            payload.decode("utf-8"),
+            object_pairs_hook=_reject_submission_duplicate_keys,
+            parse_constant=_reject_submission_nonfinite,
+        )
+    except (OSError, UnicodeError, json.JSONDecodeError, SubmissionJSONError) as error:
+        raise SubmissionJSONError(f"cannot load {label}: {error}") from error
+    return value, hashlib.sha256(payload).hexdigest()
+
+
+def _drivaerml_release_path(
+    value: Any,
+    *,
+    base: Path,
+    repository_root: Path,
+    label: str,
+    confined_to_base: bool = False,
+) -> Path:
+    """Resolve a release path locally, permitting no repository escape."""
+
+    if not isinstance(value, str) or not value:
+        raise SubmissionJSONError(f"{label} must be a non-empty relative path")
+    relative = Path(value)
+    if relative.is_absolute():
+        raise SubmissionJSONError(f"{label} must be relative")
+    try:
+        resolved_root = repository_root.resolve(strict=True)
+        resolved_base = base.resolve(strict=True)
+        resolved = (resolved_base / relative).resolve(strict=True)
+    except OSError as error:
+        raise SubmissionJSONError(f"{label} does not resolve to a retained file") from error
+    allowed_root = resolved_base if confined_to_base else resolved_root
+    if not resolved.is_relative_to(allowed_root):
+        scope = "the DrivAerML benchmark directory" if confined_to_base else "the repository"
+        raise SubmissionJSONError(f"{label} must remain inside {scope}")
+    if not resolved.is_file():
+        raise SubmissionJSONError(f"{label} is not a retained regular file")
+    return resolved
+
+
+def _drivaerml_case_ids(document: Any, *, label: str) -> list[str]:
+    if not isinstance(document, dict) or not isinstance(document.get("cases"), list):
+        raise SubmissionJSONError(f"{label}.cases must be an array")
+    case_ids: list[str] = []
+    for position, case in enumerate(document["cases"]):
+        if not isinstance(case, dict) or not isinstance(case.get("case_id"), str):
+            raise SubmissionJSONError(f"{label}.cases[{position}].case_id is invalid")
+        case_ids.append(case["case_id"])
+    if len(case_ids) != len(set(case_ids)):
+        raise SubmissionJSONError(f"{label} contains duplicate case IDs")
+    return case_ids
+
+
+def validate_drivaerml_relative_activation_release(
+    add: Any,
+    dataset_spec: dict[str, Any],
+    declaration: dict[str, Any],
+    *,
+    repository_root: Path | None = None,
+    require_active: bool = True,
+) -> bool:
+    """Verify the complete local release chain authorizing relative profiles.
+
+    The declaration contains only a path and raw-byte digest.  Every referenced
+    artifact is loaded from the repository, hashed from the bytes that were
+    parsed, and cross-checked before an activation record can authorize the
+    format.  No URL is fetched and a pending support-publication record is
+    never treated as activation.
+    """
+
+    errors: list[str] = []
+
+    def problem(message: str) -> None:
+        errors.append(f"DrivAerML relative activation release: {message}")
+
+    root = (ROOT if repository_root is None else repository_root).resolve()
+    dataset_directory = root / "benchmark-specs" / "drivaerml"
+
+    pointer = declaration.get("activation_release")
+    if not isinstance(pointer, dict) or set(pointer) != {"file", "sha256"}:
+        problem("relative_diagnostics.activation_release must contain exactly file and sha256")
+        for message in errors:
+            add(message)
+        return False
+    pointer_digest = pointer.get("sha256")
+    if (
+        not isinstance(pointer_digest, str)
+        or LOWER_SHA256.fullmatch(pointer_digest) is None
+        or pointer_digest == "0" * 64
+    ):
+        problem("activation_release.sha256 must be a nonzero lowercase SHA-256")
+        for message in errors:
+            add(message)
+        return False
+    try:
+        record_path = _drivaerml_release_path(
+            pointer.get("file"),
+            base=dataset_directory,
+            repository_root=root,
+            label="activation_release.file",
+            confined_to_base=True,
+        )
+        record, actual_record_digest = _load_drivaerml_release_json(
+            record_path,
+            label="relative activation release record",
+        )
+    except SubmissionJSONError as error:
+        problem(str(error))
+        for message in errors:
+            add(message)
+        return False
+    if actual_record_digest != pointer_digest:
+        problem("activation_release.sha256 does not match the retained record bytes")
+    if not isinstance(record, dict):
+        problem("activation release record must be an object")
+        for message in errors:
+            add(message)
+        return False
+
+    record_fields = {
+        "schema",
+        "schema_version",
+        "release_id",
+        "dataset_id",
+        "status",
+        "profile_format_authorized",
+        "submissions_opened_by_this_record",
+        "relative_composite_weight",
+        "bindings",
+        "evaluator",
+        "sensitivity_evidence",
+        "owner_approval",
+        "activation_gates",
+    }
+    if set(record) != record_fields:
+        problem(f"record fields must be exactly {sorted(record_fields)}")
+    if record.get("schema") != DRIVAERML_RELATIVE_ACTIVATION_RECORD_SCHEMA:
+        problem("record schema is unsupported")
+    if record.get("schema_version") != 1:
+        problem("record schema_version must equal 1")
+    if record.get("dataset_id") != "drivaerml":
+        problem("record dataset_id must equal 'drivaerml'")
+    release_id = record.get("release_id")
+    if not isinstance(release_id, str) or re.fullmatch(r"[a-z0-9][a-z0-9._-]{2,159}", release_id) is None:
+        problem("record release_id is invalid")
+    if record.get("status") not in {"support_verified_activation_pending", "activated"}:
+        problem("record status must be support_verified_activation_pending or activated")
+    if not isinstance(record.get("profile_format_authorized"), bool):
+        problem("record profile_format_authorized must be boolean")
+    if record.get("submissions_opened_by_this_record") is not False:
+        problem("record must not open submissions")
+    relative_weight = record.get("relative_composite_weight")
+    if isinstance(relative_weight, bool) or relative_weight != 0.0:
+        problem("record relative_composite_weight must remain 0.0")
+
+    bindings = record.get("bindings")
+    binding_names = {
+        "contract",
+        "profile_chunk_schema",
+        "official_case_registry",
+        "velocity_placement_manifest",
+        "velocity_mapping_manifest",
+        "cp_manifest",
+        "series_support_index",
+    }
+    if not isinstance(bindings, dict) or set(bindings) != binding_names:
+        problem(f"record bindings must be exactly {sorted(binding_names)}")
+        bindings = {}
+
+    loaded: dict[str, tuple[dict[str, Any], Path, str]] = {}
+    simple_bindings = {"contract", "profile_chunk_schema"}
+    for name in sorted(binding_names):
+        binding = bindings.get(name)
+        expected_fields = {"file", "sha256"} if name in simple_bindings else {
+            "file",
+            "sha256",
+            "schema",
+            "case_count",
+        }
+        if not isinstance(binding, dict) or set(binding) != expected_fields:
+            problem(f"bindings.{name} must contain exactly {sorted(expected_fields)}")
+            continue
+        digest = binding.get("sha256")
+        if (
+            not isinstance(digest, str)
+            or LOWER_SHA256.fullmatch(digest) is None
+            or digest == "0" * 64
+        ):
+            problem(f"bindings.{name}.sha256 must be a nonzero lowercase SHA-256")
+            continue
+        try:
+            path = _drivaerml_release_path(
+                binding.get("file"),
+                base=dataset_directory,
+                repository_root=root,
+                label=f"bindings.{name}.file",
+            )
+            document, actual_digest = _load_drivaerml_release_json(
+                path,
+                label=f"bindings.{name}",
+            )
+        except SubmissionJSONError as error:
+            problem(str(error))
+            continue
+        if actual_digest != digest:
+            problem(f"bindings.{name}.sha256 does not match the retained bytes")
+        if not isinstance(document, dict):
+            problem(f"bindings.{name} must contain a JSON object")
+            continue
+        loaded[name] = (document, path, actual_digest)
+
+    contract_entry = loaded.get("contract")
+    contract = contract_entry[0] if contract_entry is not None else {}
+    contract_binding = bindings.get("contract") if isinstance(bindings, dict) else None
+    declared_contract = declaration.get("contract")
+    if not isinstance(declared_contract, dict):
+        problem("relative_diagnostics.contract must be an object")
+    elif isinstance(contract_binding, dict):
+        if declared_contract.get("sha256") != contract_binding.get("sha256"):
+            problem("record contract digest differs from relative_diagnostics.contract")
+        try:
+            declared_contract_path = _drivaerml_release_path(
+                declared_contract.get("file"),
+                base=dataset_directory,
+                repository_root=root,
+                label="relative_diagnostics.contract.file",
+                confined_to_base=True,
+            )
+        except SubmissionJSONError as error:
+            problem(str(error))
+        else:
+            if contract_entry is not None and declared_contract_path != contract_entry[1]:
+                problem("record contract file differs from relative_diagnostics.contract")
+    if contract:
+        if contract.get("id") != RELATIVE_PROFILE_CONTRACT_ID:
+            problem("contract ID differs from the relative profile format")
+        if contract.get("dataset_id") != "drivaerml":
+            problem("contract dataset_id must equal 'drivaerml'")
+        if contract.get("activation_by_this_file") is not False:
+            problem("the relative contract must not activate itself")
+        rollout = contract.get("scoring_and_rollout")
+        if (
+            not isinstance(rollout, dict)
+            or rollout.get("relative_composite_weight") != 0.0
+            or rollout.get("submissions_opened_by_this_contract") is not False
+        ):
+            problem("the relative contract scoring rollout is not fail-closed")
+
+    schema_entry = loaded.get("profile_chunk_schema")
+    if schema_entry is not None:
+        schema_document, schema_path, _digest = schema_entry
+        if schema_document.get("$id") != (
+            "https://fluidsbench.org/schemas/v1/"
+            "drivaerml-relative-profile-chunk.schema.json"
+        ):
+            problem("profile chunk schema has the wrong $id")
+        profile_declaration = declaration.get("profile_chunk")
+        if not isinstance(profile_declaration, dict):
+            problem("relative_diagnostics.profile_chunk must be an object")
+        else:
+            if profile_declaration.get("schema_sha256") != bindings.get(
+                "profile_chunk_schema", {}
+            ).get("sha256"):
+                problem("record profile schema digest differs from the benchmark declaration")
+            try:
+                declared_schema_path = _drivaerml_release_path(
+                    profile_declaration.get("schema_file"),
+                    base=root,
+                    repository_root=root,
+                    label="relative_diagnostics.profile_chunk.schema_file",
+                )
+            except SubmissionJSONError as error:
+                problem(str(error))
+            else:
+                if declared_schema_path != schema_path:
+                    problem("record profile schema file differs from the benchmark declaration")
+        profile_contract = contract.get("profile_chunk_contract")
+        if isinstance(profile_contract, dict):
+            try:
+                contract_schema_path = _drivaerml_release_path(
+                    profile_contract.get("schema_file"),
+                    base=root,
+                    repository_root=root,
+                    label="contract profile_chunk_contract.schema_file",
+                )
+            except SubmissionJSONError as error:
+                problem(str(error))
+            else:
+                if contract_schema_path != schema_path:
+                    problem("record profile schema file differs from the contract")
+
+    registry_entry = loaded.get("official_case_registry")
+    official_case_ids: list[str] = []
+    source_revision: str | None = None
+    if registry_entry is not None:
+        registry, _path, _digest = registry_entry
+        registry_binding = bindings.get("official_case_registry", {})
+        if registry_binding.get("schema") != DRIVAERML_OFFICIAL_CASE_REGISTRY_SCHEMA:
+            problem("official_case_registry declares the wrong schema")
+        if registry.get("schema") != registry_binding.get("schema"):
+            problem("official_case_registry schema does not match its binding")
+        if registry_binding.get("case_count") != DRIVAERML_OFFICIAL_CASE_COUNT:
+            problem("official_case_registry binding must declare 484 cases")
+        try:
+            official_case_ids = _drivaerml_case_ids(
+                registry,
+                label="official_case_registry",
+            )
+        except SubmissionJSONError as error:
+            problem(str(error))
+        if len(official_case_ids) != DRIVAERML_OFFICIAL_CASE_COUNT:
+            problem("official_case_registry must contain exactly 484 cases")
+        case_scope = registry.get("case_scope")
+        if not isinstance(case_scope, dict) or case_scope.get("case_count") != 484:
+            problem("official_case_registry case_scope must declare 484 cases")
+        repository = registry.get("repository")
+        if isinstance(repository, dict) and isinstance(repository.get("revision"), str):
+            source_revision = repository["revision"]
+        else:
+            problem("official_case_registry repository revision is missing")
+
+    manifest_digests: dict[str, str] = {}
+    for name, expected_schema in DRIVAERML_RELATIVE_MANIFEST_SCHEMAS.items():
+        entry = loaded.get(name)
+        if entry is None:
+            continue
+        manifest, _path, actual_digest = entry
+        binding = bindings.get(name, {})
+        if binding.get("schema") != expected_schema:
+            problem(f"bindings.{name}.schema differs from the required producer schema")
+        if manifest.get("schema") != expected_schema:
+            problem(f"{name} has the wrong producer schema")
+        if binding.get("case_count") != DRIVAERML_OFFICIAL_CASE_COUNT:
+            problem(f"bindings.{name}.case_count must equal 484")
+        if manifest.get("family_id") != DRIVAERML_RELATIVE_MANIFEST_FAMILIES[name]:
+            problem(f"{name} has the wrong family_id")
+        if source_revision is not None and manifest.get("public_dataset_revision") != source_revision:
+            problem(f"{name} targets a different public dataset revision")
+        try:
+            manifest_case_ids = _drivaerml_case_ids(manifest, label=name)
+        except SubmissionJSONError as error:
+            problem(str(error))
+            manifest_case_ids = []
+        if official_case_ids and manifest_case_ids != official_case_ids:
+            problem(f"{name} cases must exactly match the ordered official 484-case registry")
+        if name in {"velocity_placement_manifest", "cp_manifest"}:
+            if manifest.get("case_count") != DRIVAERML_OFFICIAL_CASE_COUNT:
+                problem(f"{name}.case_count must equal 484")
+        elif (
+            manifest.get("official_case_count") != DRIVAERML_OFFICIAL_CASE_COUNT
+            or manifest.get("included_case_count") != DRIVAERML_OFFICIAL_CASE_COUNT
+            or manifest.get("complete_official_case_coverage") is not True
+        ):
+            problem("velocity_mapping_manifest does not claim complete 484-case coverage")
+        if name == "velocity_placement_manifest" and manifest.get("case_ids") != official_case_ids:
+            problem("velocity_placement_manifest.case_ids must match its case records")
+        if name == "cp_manifest" and manifest.get(
+            "all_official_cases_generated_and_replayed"
+        ) is not True:
+            problem("cp_manifest does not claim all official cases were generated and replayed")
+        manifest_digests[name] = actual_digest
+
+    implementation_bindings = contract.get("support_implementation_bindings")
+    if isinstance(implementation_bindings, dict):
+        velocity = implementation_bindings.get("relative_velocity_v3")
+        cp = implementation_bindings.get("relative_cp_v1")
+        expected_contract_digests = {
+            "velocity_placement_manifest": (
+                velocity.get("placement_all484_manifest", {}).get("sha256")
+                if isinstance(velocity, dict)
+                else None
+            ),
+            "velocity_mapping_manifest": (
+                velocity.get("mapping_all484_manifest", {}).get("sha256")
+                if isinstance(velocity, dict)
+                else None
+            ),
+            "cp_manifest": (
+                cp.get("cp_all484_manifest", {}).get("sha256")
+                if isinstance(cp, dict)
+                else None
+            ),
+        }
+        for name, digest in manifest_digests.items():
+            if expected_contract_digests.get(name) != digest:
+                problem(f"{name} digest differs from the retained relative contract")
+    elif contract:
+        problem("contract support_implementation_bindings are missing")
+
+    index_entry = loaded.get("series_support_index")
+    if index_entry is not None:
+        support_index, _path, _digest = index_entry
+        index_binding = bindings.get("series_support_index", {})
+        index_fields = {
+            "case_count",
+            "cases",
+            "contract_id",
+            "dataset_id",
+            "schema",
+            "schema_version",
+            "scope",
+            "series_per_case",
+            "source_bindings",
+        }
+        if set(support_index) != index_fields:
+            problem(f"series_support_index fields must be exactly {sorted(index_fields)}")
+        if index_binding.get("schema") != DRIVAERML_RELATIVE_SUPPORT_INDEX_SCHEMA:
+            problem("series_support_index binding declares the wrong schema")
+        if support_index.get("schema") != DRIVAERML_RELATIVE_SUPPORT_INDEX_SCHEMA:
+            problem("series_support_index has the wrong schema")
+        if support_index.get("schema_version") != 1:
+            problem("series_support_index schema_version must equal 1")
+        if support_index.get("contract_id") != RELATIVE_PROFILE_CONTRACT_ID:
+            problem("series_support_index contract_id differs from the relative contract")
+        if support_index.get("scope") != "relative_families_only":
+            problem("series_support_index scope must equal relative_families_only")
+        if index_binding.get("case_count") != 484 or support_index.get("case_count") != 484:
+            problem("series_support_index must declare exactly 484 cases")
+        if support_index.get("series_per_case") != 20:
+            problem("series_support_index must declare exactly 20 relative series per case")
+        if support_index.get("dataset_id") != "drivaerml":
+            problem("series_support_index dataset_id must equal 'drivaerml'")
+
+        source_bindings = support_index.get("source_bindings")
+        source_binding_fields = {
+            "manifests",
+            "producer_identity_fields",
+            "public_dataset",
+        }
+        if (
+            not isinstance(source_bindings, dict)
+            or set(source_bindings) != source_binding_fields
+        ):
+            problem(
+                "series_support_index.source_bindings must contain exactly "
+                f"{sorted(source_binding_fields)}"
+            )
+            source_bindings = {}
+
+        public_dataset = source_bindings.get("public_dataset")
+        public_dataset_fields = {
+            "native_source_pin_path",
+            "native_source_pin_sha256",
+            "repository",
+            "revision",
+        }
+        if (
+            not isinstance(public_dataset, dict)
+            or set(public_dataset) != public_dataset_fields
+        ):
+            problem(
+                "series_support_index.source_bindings.public_dataset must contain "
+                f"exactly {sorted(public_dataset_fields)}"
+            )
+        elif registry_entry is not None:
+            registry, registry_path, registry_digest = registry_entry
+            registry_repository = registry.get("repository")
+            expected_repository = (
+                registry_repository.get("repo_id")
+                if isinstance(registry_repository, dict)
+                else None
+            )
+            expected_public_dataset = {
+                "native_source_pin_path": registry_path.relative_to(root).as_posix(),
+                "native_source_pin_sha256": registry_digest,
+                "repository": expected_repository,
+                "revision": source_revision,
+            }
+            if public_dataset != expected_public_dataset:
+                problem(
+                    "series_support_index public-dataset provenance differs from "
+                    "the retained official case registry"
+                )
+
+        manifest_roles = {
+            "velocity_placement_manifest": "velocity_placement",
+            "velocity_mapping_manifest": "velocity_mapping",
+            "cp_manifest": "cp",
+        }
+        expected_index_manifests: list[dict[str, Any]] = []
+        for manifest_name, role in manifest_roles.items():
+            manifest_entry = loaded.get(manifest_name)
+            if manifest_entry is None:
+                continue
+            manifest, manifest_path, manifest_digest = manifest_entry
+            expected_index_manifests.append(
+                {
+                    "path": manifest_path.relative_to(root).as_posix(),
+                    "role": role,
+                    "schema": manifest.get("schema"),
+                    "schema_version": manifest.get("schema_version"),
+                    "sha256": manifest_digest,
+                }
+            )
+        index_manifests = source_bindings.get("manifests")
+        if index_manifests != expected_index_manifests:
+            problem(
+                "series_support_index manifest provenance differs from the three "
+                "retained release manifest bindings"
+            )
+        expected_identity_fields = {
+            "relative_cp_moving_support": (
+                "support.moving_cuts[].support_identity_sha256"
+            ),
+            "relative_cp_placement_receipt": "receipt_identity.sha256",
+            "relative_cp_shared_alias_support": (
+                "support.centerline_aliases[].canonical_cut_support_sha256"
+            ),
+            "relative_velocity_placement_receipt": (
+                "sha256(exact placement receipt bytes)"
+            ),
+            "relative_velocity_support": (
+                "profiles[].coordinates_binary64_be_sha256"
+            ),
+        }
+        if source_bindings.get("producer_identity_fields") != expected_identity_fields:
+            problem(
+                "series_support_index producer_identity_fields differ from the "
+                "frozen producer identity definitions"
+            )
+
+        expected_series: dict[tuple[str, str], str] = {}
+        raw_families = contract.get("families")
+        if isinstance(raw_families, list):
+            shared_aliases = {
+                str(group.get("alias_member", "")).split(":", 1)[1]
+                for group in contract.get("shared_support_groups", [])
+                if isinstance(group, dict)
+                and isinstance(group.get("alias_member"), str)
+                and ":" in group["alias_member"]
+            }
+            for family in raw_families:
+                if not isinstance(family, dict) or family.get("family_id") not in {
+                    "drivaerml-velocity-relative-v3",
+                    "drivaerml_cp_relative_v1",
+                }:
+                    continue
+                family_id = family["family_id"]
+                station_ids = family.get("station_ids")
+                if not isinstance(station_ids, list):
+                    continue
+                for station_id in station_ids:
+                    if not isinstance(station_id, str):
+                        continue
+                    representation = (
+                        "shared_alias"
+                        if family_id == "drivaerml_cp_relative_v1"
+                        and station_id in shared_aliases
+                        else "materialized"
+                    )
+                    expected_series[(family_id, station_id)] = representation
+        if len(expected_series) != 20:
+            problem("contract must define exactly 20 relative family/station keys")
+        try:
+            index_case_ids = _drivaerml_case_ids(
+                support_index,
+                label="series_support_index",
+            )
+        except SubmissionJSONError as error:
+            problem(str(error))
+            index_case_ids = []
+        if official_case_ids and index_case_ids != official_case_ids:
+            problem("series_support_index cases must exactly match the official registry")
+        for case_position, case in enumerate(support_index.get("cases", [])):
+            if not isinstance(case, dict) or set(case) != {"case_id", "series"}:
+                problem(f"series_support_index.cases[{case_position}] fields are invalid")
+                continue
+            series = case.get("series")
+            if not isinstance(series, list) or len(series) != 20:
+                problem(f"series_support_index {case.get('case_id')} must contain 20 entries")
+                continue
+            observed: dict[tuple[str, str], str] = {}
+            for series_position, item in enumerate(series):
+                expected_fields = {
+                    "family_id",
+                    "station_id",
+                    "representation",
+                    "support_identity_sha256",
+                    "placement_receipt_identity_sha256",
+                }
+                if not isinstance(item, dict) or set(item) != expected_fields:
+                    problem(
+                        f"series_support_index {case.get('case_id')} series "
+                        f"{series_position} fields are invalid"
+                    )
+                    continue
+                key = (item.get("family_id"), item.get("station_id"))
+                if key in observed:
+                    problem(f"series_support_index {case.get('case_id')} repeats {key}")
+                observed[key] = item.get("representation")
+                for digest_field in (
+                    "support_identity_sha256",
+                    "placement_receipt_identity_sha256",
+                ):
+                    digest = item.get(digest_field)
+                    if (
+                        not isinstance(digest, str)
+                        or LOWER_SHA256.fullmatch(digest) is None
+                        or digest == "0" * 64
+                    ):
+                        problem(
+                            f"series_support_index {case.get('case_id')} {key} "
+                            f"has an invalid {digest_field}"
+                        )
+            if observed != expected_series:
+                problem(
+                    f"series_support_index {case.get('case_id')} does not exactly "
+                    "cover the relative contract namespace"
+                )
+
+    evaluator_error_count = len(errors)
+    evaluator = record.get("evaluator")
+    evaluator_fields = {"status", "repository", "git_revision", "reference_version"}
+    if not isinstance(evaluator, dict) or set(evaluator) != evaluator_fields:
+        problem(f"record evaluator must contain exactly {sorted(evaluator_fields)}")
+        evaluator = {}
+    evaluator_revision = evaluator.get("git_revision")
+    if evaluator.get("status") != "frozen":
+        problem("record evaluator status must be frozen")
+    if evaluator.get("repository") != "https://github.com/neilashton/fluidsbench-submission":
+        problem("record evaluator repository is invalid")
+    if (
+        not isinstance(evaluator_revision, str)
+        or LOWER_GIT_SHA1.fullmatch(evaluator_revision) is None
+        or evaluator_revision == "0" * 40
+    ):
+        problem("record evaluator git_revision must be an exact nonzero 40-hex commit")
+    if evaluator.get("reference_version") != dataset_spec.get("evaluation_reference_version"):
+        problem("record evaluator reference_version differs from the benchmark specification")
+    evaluator_is_valid = len(errors) == evaluator_error_count
+    evaluator_binding = dataset_spec.get("scoring_support", {}).get(
+        "dataset_evaluator_binding"
+    )
+    if (require_active or record.get("status") == "activated") and (
+        not isinstance(evaluator_binding, dict)
+        or evaluator_binding.get("status") != "frozen"
+        or evaluator_binding.get("repository_url") != evaluator.get("repository")
+        or evaluator_binding.get("evaluator_reference_version")
+        != evaluator.get("reference_version")
+        or evaluator_binding.get("evaluator_code_revision") != evaluator_revision
+    ):
+        problem("an active release requires the benchmark frozen evaluator binding")
+
+    sensitivity_error_count = len(errors)
+    sensitivity = record.get("sensitivity_evidence")
+    sensitivity_fields = {
+        "status",
+        "file",
+        "sha256",
+        "schema",
+        "model_checkpoint_count",
+        "bootstrap_replicate_count",
+    }
+    if not isinstance(sensitivity, dict) or set(sensitivity) != sensitivity_fields:
+        problem(
+            f"record sensitivity_evidence must contain exactly {sorted(sensitivity_fields)}"
+        )
+        sensitivity = {}
+    if sensitivity.get("schema") != DRIVAERML_RELATIVE_SENSITIVITY_SCHEMA:
+        problem("record sensitivity_evidence schema is invalid")
+    if sensitivity.get("status") not in {"pending", "passed"}:
+        problem("record sensitivity_evidence status must be pending or passed")
+    if sensitivity.get("status") == "pending":
+        if (
+            sensitivity.get("file") is not None
+            or sensitivity.get("sha256") is not None
+            or sensitivity.get("model_checkpoint_count") != 0
+            or sensitivity.get("bootstrap_replicate_count") != 0
+        ):
+            problem("pending sensitivity evidence must use null files/digests and zero counts")
+    elif sensitivity.get("status") == "passed":
+        digest = sensitivity.get("sha256")
+        if (
+            not isinstance(digest, str)
+            or LOWER_SHA256.fullmatch(digest) is None
+            or digest == "0" * 64
+        ):
+            problem("passed sensitivity evidence requires a nonzero lowercase SHA-256")
+        else:
+            try:
+                evidence_path = _drivaerml_release_path(
+                    sensitivity.get("file"),
+                    base=dataset_directory,
+                    repository_root=root,
+                    label="sensitivity_evidence.file",
+                )
+                evidence, evidence_digest = _load_drivaerml_release_json(
+                    evidence_path,
+                    label="sensitivity evidence",
+                )
+            except SubmissionJSONError as error:
+                problem(str(error))
+            else:
+                if evidence_digest != digest:
+                    problem("sensitivity evidence SHA-256 does not match its retained bytes")
+                if (
+                    not isinstance(evidence, dict)
+                    or evidence.get("schema") != DRIVAERML_RELATIVE_SENSITIVITY_SCHEMA
+                    or evidence.get("status") != "passed"
+                    or evidence.get("model_checkpoint_count")
+                    != sensitivity.get("model_checkpoint_count")
+                    or evidence.get("bootstrap_replicate_count")
+                    != sensitivity.get("bootstrap_replicate_count")
+                ):
+                    problem("sensitivity evidence semantics differ from the release record")
+        if (
+            not isinstance(sensitivity.get("model_checkpoint_count"), int)
+            or isinstance(sensitivity.get("model_checkpoint_count"), bool)
+            or sensitivity["model_checkpoint_count"] < 3
+            or not isinstance(sensitivity.get("bootstrap_replicate_count"), int)
+            or isinstance(sensitivity.get("bootstrap_replicate_count"), bool)
+            or sensitivity["bootstrap_replicate_count"] < 10000
+        ):
+            problem("passed sensitivity evidence requires >=3 checkpoints and >=10000 bootstrap replicates")
+    sensitivity_is_valid_and_passed = (
+        sensitivity.get("status") == "passed"
+        and len(errors) == sensitivity_error_count
+    )
+
+    approval_error_count = len(errors)
+    approval = record.get("owner_approval")
+    approval_fields = {"status", "approved_by", "approved_at", "pull_request_url"}
+    if not isinstance(approval, dict) or set(approval) != approval_fields:
+        problem(f"record owner_approval must contain exactly {sorted(approval_fields)}")
+        approval = {}
+    if approval.get("status") not in {"pending", "approved"}:
+        problem("record owner_approval status must be pending or approved")
+    if approval.get("status") == "pending":
+        if any(
+            approval.get(field) is not None
+            for field in ("approved_by", "approved_at", "pull_request_url")
+        ):
+            problem("pending owner approval metadata must be null")
+    elif approval.get("status") == "approved":
+        for field in ("approved_by", "approved_at", "pull_request_url"):
+            if not isinstance(approval.get(field), str) or not approval[field].strip():
+                problem(f"approved owner_approval.{field} must be a non-empty string")
+        try:
+            date.fromisoformat(str(approval.get("approved_at")))
+        except ValueError:
+            problem("owner_approval.approved_at must be an ISO date")
+        pull_request_url = approval.get("pull_request_url")
+        if isinstance(pull_request_url, str) and re.fullmatch(
+            r"https://github\.com/neilashton/fluidsbench-submission/pull/[1-9][0-9]*",
+            pull_request_url,
+        ) is None:
+            problem("owner_approval.pull_request_url must identify the approving repository PR")
+    owner_is_valid_and_approved = (
+        approval.get("status") == "approved"
+        and len(errors) == approval_error_count
+    )
+
+    gates = record.get("activation_gates")
+    expected_gate_keys = set(DRIVAERML_RELATIVE_ACTIVATION_GATE_IDS)
+    if not isinstance(gates, dict) or set(gates) != expected_gate_keys:
+        problem(f"record activation_gates must be exactly {sorted(expected_gate_keys)}")
+        gates = {}
+    elif any(not isinstance(value, bool) for value in gates.values()):
+        problem("record activation_gates values must be booleans")
+
+    contract_gates = contract.get("activation_gates")
+    if (
+        not isinstance(contract_gates, dict)
+        or set(contract_gates) != expected_gate_keys
+        or any(not isinstance(value, bool) for value in contract_gates.values())
+    ):
+        problem("the retained contract activation_gates are invalid")
+        contract_gates = {}
+    if gates and contract_gates and gates != contract_gates:
+        problem("record activation_gates must exactly equal the retained contract gates")
+
+    support_gate_names = {
+        "all_484_velocity_placement_manifest_bound",
+        "all_484_velocity_mapping_manifest_bound",
+        "all_484_cp_manifest_bound",
+    }
+    if gates and any(gates.get(gate) is not True for gate in support_gate_names):
+        problem("a support-verified release record must bind all three 484-case manifests")
+    expected_state_gates = {
+        "immutable_evaluator_revision_bound": evaluator_is_valid,
+        "genuine_model_sensitivity_review_complete": sensitivity_is_valid_and_passed,
+        "owner_scientific_approval": owner_is_valid_and_approved,
+    }
+    if gates:
+        for gate, expected in expected_state_gates.items():
+            if gates.get(gate) is not expected:
+                problem(f"activation gate {gate} disagrees with its validated release state")
+
+    record_status = record.get("status")
+    if record_status == "support_verified_activation_pending":
+        if declaration.get("status") != "support_verified_activation_pending":
+            problem(
+                "a pending release record requires the benchmark declaration "
+                "status support_verified_activation_pending"
+            )
+        if declaration.get("profile_format_enabled") is not False:
+            problem(
+                "a pending release record requires profile_format_enabled=false"
+            )
+        if record.get("profile_format_authorized") is not False:
+            problem("a pending release record must not authorize the relative format")
+        if sensitivity.get("status") != "pending":
+            problem("a pending release record must retain pending sensitivity evidence")
+        if approval.get("status") != "pending":
+            problem("a pending release record must retain pending owner approval")
+    elif record_status == "activated":
+        if declaration.get("status") != "activated":
+            problem("an active release record requires declaration status activated")
+        if declaration.get("profile_format_enabled") is not True:
+            problem("an active release record requires profile_format_enabled=true")
+        if record.get("profile_format_authorized") is not True:
+            problem("record does not authorize the relative profile format")
+        if not gates or any(gates.get(gate) is not True for gate in expected_gate_keys):
+            problem("every activation gate must be true")
+        if not contract_gates or any(
+            contract_gates.get(gate) is not True for gate in expected_gate_keys
+        ):
+            problem("the retained contract does not mark every activation gate complete")
+        if not sensitivity_is_valid_and_passed:
+            problem("genuine-model sensitivity evidence is not passed")
+        if not owner_is_valid_and_approved:
+            problem("owner scientific approval is not approved")
+
+    if require_active and record_status != "activated":
+        problem("record status is not activated")
+
+    for message in errors:
+        add(message)
+    return not errors
 
 
 def safe_submission_path(
@@ -2819,19 +3693,45 @@ def validate_profiles(
         add(f"unsupported profile_data.format {profile_format!r}")
         return {"cases": 0, "series": 0}
     relative_contract_sha256 = RELATIVE_PROFILE_CONTRACT_SHA256
+    declaration = dataset_spec.get("relative_diagnostics")
+    release_valid = False
+    release_was_checked = False
+    if (
+        submission.get("dataset_id") == "drivaerml"
+        and isinstance(declaration, dict)
+        and "activation_release" in declaration
+    ):
+        declaration_claims_activation = (
+            declaration.get("status") == "activated"
+            or declaration.get("profile_format_enabled") is True
+        )
+        release_valid = validate_drivaerml_relative_activation_release(
+            add,
+            dataset_spec,
+            declaration,
+            require_active=relative_profile or declaration_claims_activation,
+        )
+        release_was_checked = True
     if relative_profile:
         if submission.get("dataset_id") != "drivaerml":
             add("the relative profile format is available only for DrivAerML")
-        declaration = dataset_spec.get("relative_diagnostics")
         if not isinstance(declaration, dict):
             add("DrivAerML relative profile format has no benchmark contract declaration")
         else:
             contract = declaration.get("contract")
             if isinstance(contract, dict) and isinstance(contract.get("sha256"), str):
                 relative_contract_sha256 = contract["sha256"]
+            if not release_was_checked:
+                release_valid = validate_drivaerml_relative_activation_release(
+                    add,
+                    dataset_spec,
+                    declaration,
+                    require_active=True,
+                )
             if (
-                declaration.get("status") != "candidate_support_ready"
+                declaration.get("status") != "activated"
                 or declaration.get("profile_format_enabled") is not True
+                or not release_valid
             ):
                 add(
                     "DrivAerML relative profile format is closed until all benchmark "

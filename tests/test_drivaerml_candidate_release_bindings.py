@@ -15,6 +15,28 @@ ROOT = Path(__file__).resolve().parents[1]
 BINDINGS_PATH = ROOT / "benchmark-specs" / "drivaerml" / "candidate-release-bindings.json"
 TEMPLATE = ROOT / "examples" / "v3-template"
 
+RELATIVE_MANIFEST_FILES = {
+    "velocity_placement_manifest": (
+        "support/relative-v3/manifests/velocity-placement-all484-v1.json"
+    ),
+    "velocity_mapping_manifest": (
+        "support/relative-v3/manifests/velocity-mapping-all484-v1.json"
+    ),
+    "cp_manifest": "support/relative-v3/manifests/cp-native-support-all484-v3.json",
+}
+
+RELATIVE_CONTRACT_BINDINGS = {
+    "velocity_placement_manifest": (
+        "relative_velocity_v3",
+        "placement_all484_manifest",
+    ),
+    "velocity_mapping_manifest": (
+        "relative_velocity_v3",
+        "mapping_all484_manifest",
+    ),
+    "cp_manifest": ("relative_cp_v1", "cp_all484_manifest"),
+}
+
 
 def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -26,6 +48,109 @@ def write_json(path: Path, value: object) -> None:
 
 
 class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
+    def write_relative_support_fixture(
+        self,
+        benchmark: Path,
+        relative_contract_path: Path,
+    ) -> dict[str, str]:
+        pin_path = benchmark / "proposal" / "native-source-pin.json"
+        pin_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(
+            ROOT
+            / "benchmark-specs"
+            / "drivaerml"
+            / "proposal"
+            / "native-source-pin.json",
+            pin_path,
+        )
+        case_ids = [case["case_id"] for case in load_json(pin_path)["cases"]]
+        self.assertEqual(len(case_ids), 484)
+
+        common = {
+            "dataset_id": "drivaerml",
+            "public_dataset_revision": promoter.DATASET_REVISION,
+        }
+        manifests = {
+            "velocity_placement_manifest": {
+                **common,
+                "schema": (
+                    "drivaerml-relative-velocity-v3-production-input-manifest-v1"
+                ),
+                "schema_version": 1,
+                "family_id": "drivaerml-velocity-relative-v3",
+                "case_count": 484,
+                "case_ids": case_ids,
+                "case_indices": list(range(484)),
+                "cases": [
+                    {"case_id": case_id, "case_index": case_index}
+                    for case_index, case_id in enumerate(case_ids)
+                ],
+            },
+            "velocity_mapping_manifest": {
+                **common,
+                "schema": (
+                    "drivaerml-velocity-relative-v3-mapping-aggregate-v1"
+                ),
+                "schema_version": 1,
+                "family_id": "drivaerml-velocity-relative-v3",
+                "official_case_count": 484,
+                "included_case_count": 484,
+                "complete_official_case_coverage": True,
+                "cases": [{"case_id": case_id} for case_id in case_ids],
+            },
+            "cp_manifest": {
+                **common,
+                "schema": "drivaerml-relative-cp-native-support-manifest-v3",
+                "schema_version": 3,
+                "family_id": "drivaerml_cp_relative_v1",
+                "case_count": 484,
+                "all_official_cases_generated_and_replayed": True,
+                "cases": [
+                    {"case_id": case_id, "case_index": case_index}
+                    for case_index, case_id in enumerate(case_ids)
+                ],
+            },
+        }
+
+        digests: dict[str, str] = {}
+        for label, manifest in manifests.items():
+            manifest_path = benchmark / RELATIVE_MANIFEST_FILES[label]
+            write_json(manifest_path, manifest)
+            digests[label] = promoter.sha256_file(manifest_path)
+
+        relative_contract = load_json(relative_contract_path)
+        support_bindings = relative_contract["support_implementation_bindings"]
+        for label, (family, binding) in RELATIVE_CONTRACT_BINDINGS.items():
+            support_bindings[family][binding]["sha256"] = digests[label]
+        write_json(relative_contract_path, relative_contract)
+        return digests
+
+    def rewrite_relative_support_manifest(
+        self,
+        bindings: dict,
+        benchmark: Path,
+        label: str,
+        manifest: dict,
+    ) -> None:
+        manifest_binding = bindings["relative_support"][label]
+        manifest_path = benchmark / manifest_binding["manifest_file"]
+        write_json(manifest_path, manifest)
+        digest = promoter.sha256_file(manifest_path)
+        manifest_binding["manifest_sha256"] = digest
+
+        relative_contract_path = (
+            benchmark / bindings["relative_diagnostics_v3"]["file"]
+        )
+        relative_contract = load_json(relative_contract_path)
+        family, contract_binding = RELATIVE_CONTRACT_BINDINGS[label]
+        relative_contract["support_implementation_bindings"][family][
+            contract_binding
+        ]["sha256"] = digest
+        write_json(relative_contract_path, relative_contract)
+        bindings["relative_diagnostics_v3"]["sha256"] = promoter.sha256_file(
+            relative_contract_path
+        )
+
     def make_unresolved_v10_fixture(self, root: Path) -> tuple[dict, Path, Path]:
         benchmark = root / "benchmark-specs" / "drivaerml"
         benchmark.mkdir(parents=True)
@@ -49,6 +174,27 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             ROOT / bindings["relative_diagnostics_v3"]["profile_chunk_schema_file"],
             relative_schema,
         )
+        source_pin = (
+            ROOT
+            / "benchmark-specs"
+            / "drivaerml"
+            / "proposal"
+            / "native-source-pin.json"
+        )
+        retained_pin = benchmark / "proposal" / "native-source-pin.json"
+        retained_pin.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_pin, retained_pin)
+        for label in RELATIVE_MANIFEST_FILES:
+            manifest_file = bindings["relative_support"][label].get(
+                "manifest_file"
+            )
+            if not isinstance(manifest_file, str):
+                continue
+            source_manifest = ROOT / "benchmark-specs" / "drivaerml" / manifest_file
+            if source_manifest.is_file():
+                retained_manifest = benchmark / manifest_file
+                retained_manifest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source_manifest, retained_manifest)
         bindings_path = benchmark / "candidate-release-bindings.json"
         write_json(bindings_path, bindings)
         return bindings, bindings_path, profile_path
@@ -126,6 +272,10 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
         shutil.copy2(
             ROOT / "schemas" / "v1" / "drivaerml-relative-profile-chunk.schema.json",
             relative_schema_path,
+        )
+        relative_manifest_digests = self.write_relative_support_fixture(
+            benchmark,
+            relative_contract_path,
         )
         metrics = [
             {
@@ -218,7 +368,12 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                     "expected_schema": (
                         "drivaerml-relative-velocity-v3-production-input-manifest-v1"
                     ),
-                    "manifest_sha256": "4" * 64,
+                    "manifest_file": RELATIVE_MANIFEST_FILES[
+                        "velocity_placement_manifest"
+                    ],
+                    "manifest_sha256": relative_manifest_digests[
+                        "velocity_placement_manifest"
+                    ],
                 },
                 "velocity_mapping_manifest": {
                     "family_id": "drivaerml-velocity-relative-v3",
@@ -229,7 +384,12 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                     "expected_schema": (
                         "drivaerml-velocity-relative-v3-mapping-aggregate-v1"
                     ),
-                    "manifest_sha256": "5" * 64,
+                    "manifest_file": RELATIVE_MANIFEST_FILES[
+                        "velocity_mapping_manifest"
+                    ],
+                    "manifest_sha256": relative_manifest_digests[
+                        "velocity_mapping_manifest"
+                    ],
                 },
                 "cp_manifest": {
                     "family_id": "drivaerml_cp_relative_v1",
@@ -240,7 +400,8 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                     "expected_schema": (
                         "drivaerml-relative-cp-native-support-manifest-v3"
                     ),
-                    "manifest_sha256": "6" * 64,
+                    "manifest_file": RELATIVE_MANIFEST_FILES["cp_manifest"],
+                    "manifest_sha256": relative_manifest_digests["cp_manifest"],
                 },
             },
             "profile_ground_truth": global_truth,
@@ -255,11 +416,11 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             for item in promoter.unresolved_release_tokens(bindings)
             if item[0] != ("unresolved_token_prefix",)
         ]
-        self.assertEqual(len(tokens), 10)
-        self.assertTrue(
+        self.assertEqual(len(tokens), 7)
+        self.assertFalse(
             any(path[:1] == ("relative_support",) for path, _token in tokens)
         )
-        self.assertEqual(bindings["relative_support"]["status"], "unresolved")
+        self.assertEqual(bindings["relative_support"]["status"], "ready")
         active = load_json(ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json")
         self.assertEqual(promoter.unresolved_release_tokens(active), [])
         self.assertNotIn("candidate_manifest", active["scoring_support"])
@@ -375,9 +536,6 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             bindings, benchmark, _global_manifest_path, _generated = (
                 self.make_ready_fixture(Path(temporary))
             )
-            bindings["relative_support"] = load_json(BINDINGS_PATH)[
-                "relative_support"
-            ]
             bindings["relative_support"]["status"] = "unresolved"
             bindings["relative_support"]["velocity_mapping_manifest"][
                 "manifest_sha256"
@@ -399,6 +557,88 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             ] = "__UNRESOLVED_DRIVAERML_RELATIVE_VELOCITY_V3_MAPPING_MANIFEST_SHA256__"
             write_json(bindings_path, bindings)
             with self.assertRaisesRegex(ValueError, "still contains unresolved tokens"):
+                promoter.load_candidate_release_bindings(bindings_path)
+
+    def test_relative_support_rejects_false_hash_shaped_manifest_digest(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            bindings, benchmark, _global_manifest_path, _generated = (
+                self.make_ready_fixture(Path(temporary))
+            )
+            bindings["relative_support"]["velocity_placement_manifest"][
+                "manifest_sha256"
+            ] = "0" * 64
+            bindings_path = benchmark / "candidate-release-bindings.json"
+            write_json(bindings_path, bindings)
+            with self.assertRaisesRegex(ValueError, "does not match its retained file"):
+                promoter.load_candidate_release_bindings(bindings_path)
+
+    def test_relative_support_rejects_483_case_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            bindings, benchmark, _global_manifest_path, _generated = (
+                self.make_ready_fixture(Path(temporary))
+            )
+            label = "velocity_placement_manifest"
+            manifest_path = (
+                benchmark / bindings["relative_support"][label]["manifest_file"]
+            )
+            manifest = load_json(manifest_path)
+            manifest["cases"].pop()
+            manifest["case_ids"].pop()
+            manifest["case_indices"].pop()
+            manifest["case_count"] = 483
+            self.rewrite_relative_support_manifest(
+                bindings,
+                benchmark,
+                label,
+                manifest,
+            )
+            bindings_path = benchmark / "candidate-release-bindings.json"
+            write_json(bindings_path, bindings)
+            with self.assertRaisesRegex(ValueError, "official 484-case set"):
+                promoter.load_candidate_release_bindings(bindings_path)
+
+    def test_relative_support_rejects_duplicate_case(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            bindings, benchmark, _global_manifest_path, _generated = (
+                self.make_ready_fixture(Path(temporary))
+            )
+            label = "velocity_mapping_manifest"
+            manifest_path = (
+                benchmark / bindings["relative_support"][label]["manifest_file"]
+            )
+            manifest = load_json(manifest_path)
+            manifest["cases"][-1]["case_id"] = manifest["cases"][0]["case_id"]
+            self.rewrite_relative_support_manifest(
+                bindings,
+                benchmark,
+                label,
+                manifest,
+            )
+            bindings_path = benchmark / "candidate-release-bindings.json"
+            write_json(bindings_path, bindings)
+            with self.assertRaisesRegex(ValueError, "duplicate case IDs"):
+                promoter.load_candidate_release_bindings(bindings_path)
+
+    def test_relative_support_rejects_wrong_case(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            bindings, benchmark, _global_manifest_path, _generated = (
+                self.make_ready_fixture(Path(temporary))
+            )
+            label = "cp_manifest"
+            manifest_path = (
+                benchmark / bindings["relative_support"][label]["manifest_file"]
+            )
+            manifest = load_json(manifest_path)
+            manifest["cases"][-1]["case_id"] = "run_999"
+            self.rewrite_relative_support_manifest(
+                bindings,
+                benchmark,
+                label,
+                manifest,
+            )
+            bindings_path = benchmark / "candidate-release-bindings.json"
+            write_json(bindings_path, bindings)
+            with self.assertRaisesRegex(ValueError, "official 484-case set"):
                 promoter.load_candidate_release_bindings(bindings_path)
 
     def test_ready_manifest_requires_valid_complete_candidate_support(self) -> None:

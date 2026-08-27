@@ -24,6 +24,7 @@ import shutil
 import tempfile
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -185,9 +186,26 @@ RELATIVE_PROFILE_FORMAT = (
 RELATIVE_PROFILE_SCHEMA_VERSION = "3.0-drivaerml-relative-candidate"
 RELATIVE_PROFILE_CONTRACT_ID = "drivaerml-relative-diagnostics-v3-candidate"
 RELATIVE_PROFILE_CONTRACT_SHA256 = (
-    "b447edc49889fc184c472372e9a7debd44c234820b81b6e92df4f6c774b8b39d"
+    "a6066fa83a7af0d18b84a18c11079f020023a6aed81292c4251186c14fc0461a"
 )
 RELATIVE_PROFILE_SERIES_PER_CASE = 40
+RELATIVE_SERIES_SUPPORT_INDEX_SCHEMA = (
+    "drivaerml-relative-series-support-index-v1"
+)
+RELATIVE_SERIES_SUPPORT_INDEX_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "benchmark-specs"
+    / "drivaerml"
+    / "support"
+    / "relative-v3"
+    / "series-support-index.json"
+)
+# Updated only when a separately reviewed retained index changes bytes.
+RELATIVE_SERIES_SUPPORT_INDEX_SHA256 = (
+    "7df6ce95c5d6d4fef5ecd94e5d1dad0cda9ca2d491cd4223bbf6c55aacb6dbcc"
+)
+RELATIVE_SERIES_SUPPORT_PER_CASE = 20
+_ZERO_SHA256 = "0" * 64
 
 _CONSTANT_VELOCITY_STATIONS = tuple(
     f"autocfd5_{station.lower()}"
@@ -2717,6 +2735,264 @@ def _relative_profile_expected_keys() -> tuple[tuple[str, str, str, str, str], .
     )
 
 
+def _relative_support_expected_keys() -> tuple[tuple[str, str, str], ...]:
+    """Return the relative family/station/representation identity namespace."""
+
+    return tuple(
+        (family_id, station_id, representation)
+        for _panel_id, family_id, station_id, _quantity_id, representation in (
+            _relative_profile_expected_keys()
+        )
+        if family_id
+        in {"drivaerml-velocity-relative-v3", "drivaerml_cp_relative_v1"}
+    )
+
+
+@lru_cache(maxsize=4)
+def _load_relative_series_support_index_cached(
+    index_path_text: str,
+    expected_sha256: str,
+) -> Mapping[tuple[str, str, str], Mapping[str, str]]:
+    """Load and fully validate the immutable all-case relative support index."""
+
+    expected_digest = _sha256(
+        expected_sha256,
+        "retained relative series support index SHA-256",
+    )
+    index_path = Path(index_path_text)
+    root, _source, actual_digest = _read_json(
+        index_path,
+        "retained relative series support index",
+    )
+    if actual_digest != expected_digest:
+        raise DrivAerDatasetScorerError(
+            "retained relative series support index SHA-256 mismatch"
+        )
+    root = _exact_keys(
+        root,
+        {
+            "schema",
+            "schema_version",
+            "dataset_id",
+            "contract_id",
+            "scope",
+            "case_count",
+            "series_per_case",
+            "source_bindings",
+            "cases",
+        },
+        "retained relative series support index",
+    )
+    if (
+        root["schema"] != RELATIVE_SERIES_SUPPORT_INDEX_SCHEMA
+        or root["schema_version"] != 1
+        or root["dataset_id"] != "drivaerml"
+        or root["contract_id"] != RELATIVE_PROFILE_CONTRACT_ID
+        or root["scope"] != "relative_families_only"
+        or root["case_count"] != 484
+        or root["series_per_case"] != RELATIVE_SERIES_SUPPORT_PER_CASE
+        or not isinstance(root["source_bindings"], Mapping)
+    ):
+        raise DrivAerDatasetScorerError(
+            "retained relative series support index identity is invalid"
+        )
+    source_bindings = _exact_keys(
+        root["source_bindings"],
+        {"manifests", "producer_identity_fields", "public_dataset"},
+        "retained relative series support index source_bindings",
+    )
+    expected_manifest_bindings = [
+        {
+            "path": (
+                "benchmark-specs/drivaerml/support/relative-v3/manifests/"
+                "velocity-placement-all484-v1.json"
+            ),
+            "role": "velocity_placement",
+            "schema": "drivaerml-relative-velocity-v3-production-input-manifest-v1",
+            "schema_version": 1,
+            "sha256": "70627d6af9e6b254739b29d54d856b470d6152066e09a1097ebe20c034179925",
+        },
+        {
+            "path": (
+                "benchmark-specs/drivaerml/support/relative-v3/manifests/"
+                "velocity-mapping-all484-v1.json"
+            ),
+            "role": "velocity_mapping",
+            "schema": "drivaerml-velocity-relative-v3-mapping-aggregate-v1",
+            "schema_version": 1,
+            "sha256": "9b88c36e2268bf72c9baec9418ef2d9afc9faba1d98c9c12ed73b79e683a6a3d",
+        },
+        {
+            "path": (
+                "benchmark-specs/drivaerml/support/relative-v3/manifests/"
+                "cp-native-support-all484-v3.json"
+            ),
+            "role": "cp",
+            "schema": "drivaerml-relative-cp-native-support-manifest-v3",
+            "schema_version": 3,
+            "sha256": "4e6a4c3495ea4938895868162480dcb20b5bbea42114c94013a2c76e26128c90",
+        },
+    ]
+    if source_bindings["manifests"] != expected_manifest_bindings:
+        raise DrivAerDatasetScorerError(
+            "retained relative series support index manifest provenance is invalid"
+        )
+    expected_identity_fields = {
+        "relative_cp_moving_support": (
+            "support.moving_cuts[].support_identity_sha256"
+        ),
+        "relative_cp_placement_receipt": "receipt_identity.sha256",
+        "relative_cp_shared_alias_support": (
+            "support.centerline_aliases[].canonical_cut_support_sha256"
+        ),
+        "relative_velocity_placement_receipt": (
+            "sha256(exact placement receipt bytes)"
+        ),
+        "relative_velocity_support": (
+            "profiles[].coordinates_binary64_be_sha256"
+        ),
+    }
+    if source_bindings["producer_identity_fields"] != expected_identity_fields:
+        raise DrivAerDatasetScorerError(
+            "retained relative series support index identity provenance is invalid"
+        )
+    expected_public_dataset = {
+        "native_source_pin_path": (
+            "benchmark-specs/drivaerml/proposal/native-source-pin.json"
+        ),
+        "native_source_pin_sha256": OFFICIAL_NATIVE_SOURCE_PIN_SHA256,
+        "repository": OFFICIAL_REPOSITORY_ID,
+        "revision": OFFICIAL_REPOSITORY_REVISION,
+    }
+    if source_bindings["public_dataset"] != expected_public_dataset:
+        raise DrivAerDatasetScorerError(
+            "retained relative series support index dataset provenance is invalid"
+        )
+
+    benchmark_root = index_path.parents[2]
+    pin, _pin_source, pin_digest = _read_json(
+        benchmark_root / "proposal" / "native-source-pin.json",
+        "official DrivAerML native-source pin",
+    )
+    raw_official_cases = pin.get("cases")
+    if (
+        pin_digest != OFFICIAL_NATIVE_SOURCE_PIN_SHA256
+        or pin.get("schema")
+        != "drivaerml-fluidsbench-public-native-source-pin-v1"
+        or pin.get("schema_version") != 1
+        or not isinstance(raw_official_cases, list)
+    ):
+        raise DrivAerDatasetScorerError(
+            "official DrivAerML native-source pin identity is invalid"
+        )
+    official_case_ids = tuple(
+        _case_id(
+            case.get("case_id") if isinstance(case, Mapping) else None,
+            f"official DrivAerML case {position}",
+        )
+        for position, case in enumerate(raw_official_cases)
+    )
+    if len(official_case_ids) != 484 or len(set(official_case_ids)) != 484:
+        raise DrivAerDatasetScorerError(
+            "official DrivAerML native-source pin does not contain 484 unique cases"
+        )
+
+    raw_cases = root["cases"]
+    if not isinstance(raw_cases, list) or len(raw_cases) != 484:
+        raise DrivAerDatasetScorerError(
+            "retained relative series support index must contain exactly 484 cases"
+        )
+    expected_series_keys = _relative_support_expected_keys()
+    result: dict[tuple[str, str, str], Mapping[str, str]] = {}
+    observed_case_ids: list[str] = []
+    for case_position, raw_case in enumerate(raw_cases):
+        case = _exact_keys(
+            raw_case,
+            {"case_id", "series"},
+            f"retained relative support case {case_position}",
+        )
+        case_id = _case_id(
+            case["case_id"],
+            f"retained relative support case {case_position} ID",
+        )
+        observed_case_ids.append(case_id)
+        raw_series = case["series"]
+        if (
+            not isinstance(raw_series, list)
+            or len(raw_series) != RELATIVE_SERIES_SUPPORT_PER_CASE
+        ):
+            raise DrivAerDatasetScorerError(
+                f"retained relative support case {case_id} must contain exactly "
+                f"{RELATIVE_SERIES_SUPPORT_PER_CASE} series"
+            )
+        observed_series_keys: list[tuple[str, str, str]] = []
+        for series_position, raw_series_item in enumerate(raw_series):
+            label = (
+                f"retained relative support {case_id} series {series_position}"
+            )
+            series = _exact_keys(
+                raw_series_item,
+                {
+                    "family_id",
+                    "station_id",
+                    "representation",
+                    "support_identity_sha256",
+                    "placement_receipt_identity_sha256",
+                },
+                label,
+            )
+            family_id = _string(series["family_id"], f"{label} family_id")
+            station_id = _string(series["station_id"], f"{label} station_id")
+            representation = _string(
+                series["representation"], f"{label} representation"
+            )
+            logical_key = (family_id, station_id, representation)
+            observed_series_keys.append(logical_key)
+            support_digest = _sha256(
+                series["support_identity_sha256"],
+                f"{label} support identity",
+            )
+            receipt_digest = _sha256(
+                series["placement_receipt_identity_sha256"],
+                f"{label} placement receipt identity",
+            )
+            if support_digest == _ZERO_SHA256 or receipt_digest == _ZERO_SHA256:
+                raise DrivAerDatasetScorerError(
+                    f"{label} contains an all-zero identity"
+                )
+            result[(case_id, family_id, station_id)] = {
+                "representation": representation,
+                "support_identity_sha256": support_digest,
+                "placement_receipt_identity_sha256": receipt_digest,
+            }
+        if tuple(observed_series_keys) != expected_series_keys:
+            raise DrivAerDatasetScorerError(
+                f"retained relative support {case_id} series coverage/order "
+                "differs from the relative-v3 contract"
+            )
+    if tuple(observed_case_ids) != official_case_ids:
+        raise DrivAerDatasetScorerError(
+            "retained relative series support index case coverage/order differs "
+            "from the official 484-case set"
+        )
+    if len(result) != 484 * RELATIVE_SERIES_SUPPORT_PER_CASE:
+        raise DrivAerDatasetScorerError(
+            "retained relative series support index contains duplicate logical keys"
+        )
+    return result
+
+
+def _relative_series_support_index() -> Mapping[
+    tuple[str, str, str], Mapping[str, str]
+]:
+    """Return the release-pinned relative support lookup used by submissions."""
+
+    return _load_relative_series_support_index_cached(
+        str(RELATIVE_SERIES_SUPPORT_INDEX_PATH),
+        RELATIVE_SERIES_SUPPORT_INDEX_SHA256,
+    )
+
+
 def _normalize_relative_profile_series(
     raw_series: object,
     *,
@@ -2778,9 +3054,13 @@ def _normalize_relative_profile_series(
             f"{label} scoring_role must be {expected_role!r}"
         )
     receipt_digest = series["placement_receipt_identity_sha256"]
-    if not isinstance(receipt_digest, str) or _SHA256_RE.fullmatch(receipt_digest) is None:
+    if (
+        not isinstance(receipt_digest, str)
+        or _SHA256_RE.fullmatch(receipt_digest) is None
+        or receipt_digest == _ZERO_SHA256
+    ):
         raise DrivAerDatasetScorerError(
-            f"{label} placement receipt identity must be a lowercase SHA-256"
+            f"{label} placement receipt identity must be a nonzero lowercase SHA-256"
         )
 
     normalized = dict(series)
@@ -2803,6 +3083,7 @@ def _normalize_relative_profile_series(
             or not isinstance(reference["canonical_support_identity_sha256"], str)
             or _SHA256_RE.fullmatch(reference["canonical_support_identity_sha256"])
             is None
+            or reference["canonical_support_identity_sha256"] == _ZERO_SHA256
         ):
             raise DrivAerDatasetScorerError(
                 f"{label} shared alias does not bind its canonical constant Cp support"
@@ -2811,9 +3092,13 @@ def _normalize_relative_profile_series(
         return key, normalized
 
     support_digest = series["support_identity_sha256"]
-    if not isinstance(support_digest, str) or _SHA256_RE.fullmatch(support_digest) is None:
+    if (
+        not isinstance(support_digest, str)
+        or _SHA256_RE.fullmatch(support_digest) is None
+        or support_digest == _ZERO_SHA256
+    ):
         raise DrivAerDatasetScorerError(
-            f"{label} support identity must be a lowercase SHA-256"
+            f"{label} support identity must be a nonzero lowercase SHA-256"
         )
     coordinates = series["coordinate"]
     predictions = series["prediction"]
@@ -2930,6 +3215,7 @@ def validate_schema_v3_relative_profile_chunk_candidate(
     if not isinstance(raw_cases, list) or not raw_cases:
         raise DrivAerDatasetScorerError("relative profile chunk cases must be non-empty")
     expected_keys = set(_relative_profile_expected_keys())
+    retained_support = _relative_series_support_index()
     normalized_cases: list[dict[str, object]] = []
     seen_cases: set[str] = set()
     for case_position, raw_case in enumerate(raw_cases):
@@ -2962,6 +3248,43 @@ def validate_schema_v3_relative_profile_chunk_candidate(
             observed_keys.append(key)
             normalized_series.append(normalized)
             panel_id, family_id, station_id, _quantity_id, representation = key
+            if family_id in {
+                "drivaerml-velocity-relative-v3",
+                "drivaerml_cp_relative_v1",
+            }:
+                expected_identity = retained_support.get(
+                    (case_id, family_id, station_id)
+                )
+                if expected_identity is None:
+                    raise DrivAerDatasetScorerError(
+                        f"{case_id}/{family_id}/{station_id} is absent from the "
+                        "retained relative support index"
+                    )
+                if expected_identity["representation"] != representation:
+                    raise DrivAerDatasetScorerError(
+                        f"{case_id}/{family_id}/{station_id} representation differs "
+                        "from the retained relative support index"
+                    )
+                if (
+                    normalized["placement_receipt_identity_sha256"]
+                    != expected_identity["placement_receipt_identity_sha256"]
+                ):
+                    raise DrivAerDatasetScorerError(
+                        f"{case_id}/{family_id}/{station_id} placement receipt "
+                        "identity differs from the retained relative support index"
+                    )
+                submitted_support = (
+                    normalized["shared_support_ref"][
+                        "canonical_support_identity_sha256"
+                    ]
+                    if representation == "shared_alias"
+                    else normalized["support_identity_sha256"]
+                )
+                if submitted_support != expected_identity["support_identity_sha256"]:
+                    raise DrivAerDatasetScorerError(
+                        f"{case_id}/{family_id}/{station_id} support identity "
+                        "differs from the retained relative support index"
+                    )
             if (
                 panel_id == "pressure_profiles"
                 and family_id == "drivaerml_cp_constant_v1"

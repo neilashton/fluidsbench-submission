@@ -123,6 +123,20 @@
       "scope": "run_1_run_44_discovery_pilot",
       "role": "inactive_discrete_cp_probe_named_stl_discovery_evidence_no_submission_or_cp_cut_support_role",
       "public_scoring_support_eligible": false
+    },
+    {
+      "file": "transolver-run419-relative-cp-evaluator-smoke-v1.json",
+      "sha256": "70851f3b1204255773f895a725156cb33d6c3bff7fabe6995c0ab2c64e552e5f",
+      "scope": "run_419_real_checkpoint_single_case_smoke",
+      "role": "byte_identical_real_checkpoint_relative_cp_evaluator_positive_integration_fixture_report_only_nonactivation",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "transolver-run419-relative-velocity-evaluator-smoke-v1.json",
+      "sha256": "b6c35ba11938506e5d4897a81ad459db1383e56472207d489d63a843ae4be417",
+      "scope": "run_419_real_checkpoint_single_case_smoke",
+      "role": "byte_identical_real_checkpoint_relative_velocity_evaluator_positive_integration_fixture_report_only_per_station_identity_fields_not_emitted_nonactivation",
+      "public_scoring_support_eligible": false
     }
   ]
 }

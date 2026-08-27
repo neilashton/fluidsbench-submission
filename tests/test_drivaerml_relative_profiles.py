@@ -26,6 +26,20 @@ from scripts.validate_submission import sha256_file, validate_profiles
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SUPPORT_INDEX_PATH = (
+    ROOT
+    / "benchmark-specs"
+    / "drivaerml"
+    / "support"
+    / "relative-v3"
+    / "series-support-index.json"
+)
+SUPPORT_INDEX = json.loads(SUPPORT_INDEX_PATH.read_text(encoding="utf-8"))
+SUPPORT_IDENTITIES = {
+    (case["case_id"], series["family_id"], series["station_id"]): series
+    for case in SUPPORT_INDEX["cases"]
+    for series in case["series"]
+}
 
 
 def write_json(path: Path, value: object) -> None:
@@ -63,7 +77,7 @@ def constant_interval_end(station_id: str) -> float:
     }[station]
 
 
-def namespaced_series() -> list[dict]:
+def namespaced_series(case_id: str = "run_1") -> list[dict]:
     result: list[dict] = []
     canonical_cp_digests: dict[str, str] = {}
     for panel_id, family_id, station_id, quantity_id, representation in (
@@ -73,6 +87,11 @@ def namespaced_series() -> list[dict]:
             "drivaerml-velocity-relative-v3",
             "drivaerml_cp_relative_v1",
         }
+        retained_identity = (
+            SUPPORT_IDENTITIES[(case_id, family_id, station_id)]
+            if relative
+            else None
+        )
         common = {
             "panel_id": panel_id,
             "family_id": family_id,
@@ -81,8 +100,10 @@ def namespaced_series() -> list[dict]:
             "quantity_id": quantity_id,
             "scoring_role": "report_only" if relative else "inherits_parent_candidate",
             "representation": representation,
-            "placement_receipt_identity_sha256": digest(
-                f"receipt:{family_id}:{station_id}"
+            "placement_receipt_identity_sha256": (
+                retained_identity["placement_receipt_identity_sha256"]
+                if retained_identity is not None
+                else digest(f"receipt:{family_id}:{station_id}")
             ),
         }
         if representation == "shared_alias":
@@ -94,10 +115,22 @@ def namespaced_series() -> list[dict]:
                 "shared_support_id": shared_id,
                 "canonical_family_id": "drivaerml_cp_constant_v1",
                 "canonical_station_id": station_id,
-                "canonical_support_identity_sha256": canonical_cp_digests[station_id],
+                "canonical_support_identity_sha256": retained_identity[
+                    "support_identity_sha256"
+                ],
             }
         else:
-            support_digest = digest(f"support:{family_id}:{station_id}")
+            if retained_identity is not None:
+                support_digest = retained_identity["support_identity_sha256"]
+            elif (
+                family_id == "drivaerml_cp_constant_v1"
+                and station_id in {"upperbody_centerline", "underbody_centerline"}
+            ):
+                support_digest = SUPPORT_IDENTITIES[
+                    (case_id, "drivaerml_cp_relative_v1", station_id)
+                ]["support_identity_sha256"]
+            else:
+                support_digest = digest(f"support:{family_id}:{station_id}")
             common["support_identity_sha256"] = support_digest
             if family_id == "drivaerml_cp_constant_v1" and station_id in {
                 "upperbody_centerline",
@@ -140,7 +173,7 @@ def chunk(case_id: str = "run_1") -> dict:
         "schema_version": RELATIVE_PROFILE_SCHEMA_VERSION,
         "contract_id": RELATIVE_PROFILE_CONTRACT_ID,
         "contract_sha256": RELATIVE_PROFILE_CONTRACT_SHA256,
-        "cases": [{"case_id": case_id, "series": namespaced_series()}],
+        "cases": [{"case_id": case_id, "series": namespaced_series(case_id)}],
     }
 
 
@@ -166,20 +199,20 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         )
         self.assertEqual(
             contract["status"],
-            "candidate_report_only_support_manifest_publication_and_activation_pending",
+            "candidate_report_only_support_artifacts_verified_activation_pending",
         )
         self.assertEqual(
             contract["activation_gates"],
             {
-                "all_484_velocity_placement_manifest_bound": False,
-                "all_484_velocity_mapping_manifest_bound": False,
-                "all_484_cp_manifest_bound": False,
+                "all_484_velocity_placement_manifest_bound": True,
+                "all_484_velocity_mapping_manifest_bound": True,
+                "all_484_cp_manifest_bound": True,
                 "genuine_model_sensitivity_review_complete": False,
                 "owner_scientific_approval": False,
-                "immutable_evaluator_revision_bound": False,
+                "immutable_evaluator_revision_bound": True,
             },
         )
-        self.assertEqual(bindings["relative_support"]["status"], "unresolved")
+        self.assertEqual(bindings["relative_support"]["status"], "ready")
         velocity_contract = contract["support_implementation_bindings"][
             "relative_velocity_v3"
         ]["mapping_all484_manifest"]
@@ -189,18 +222,18 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         self.assertEqual(
             velocity_contract["producer_path"], velocity_handoff["producer_file"]
         )
-        self.assertTrue(
-            velocity_handoff["manifest_sha256"].startswith(
-                "__UNRESOLVED_DRIVAERML_"
-            )
+        self.assertEqual(
+            velocity_handoff["manifest_sha256"],
+            sha256_file(ROOT / "benchmark-specs" / "drivaerml" / velocity_handoff["manifest_file"]),
         )
         cp_contract = contract["support_implementation_bindings"][
             "relative_cp_v1"
         ]["cp_all484_manifest"]
         cp_handoff = bindings["relative_support"]["cp_manifest"]
         self.assertEqual(cp_contract["producer_path"], cp_handoff["producer_file"])
-        self.assertTrue(
-            cp_handoff["manifest_sha256"].startswith("__UNRESOLVED_DRIVAERML_")
+        self.assertEqual(
+            cp_handoff["manifest_sha256"],
+            sha256_file(ROOT / "benchmark-specs" / "drivaerml" / cp_handoff["manifest_file"]),
         )
         placement_contract = contract["support_implementation_bindings"][
             "relative_velocity_v3"
@@ -211,10 +244,9 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         self.assertEqual(
             placement_contract["producer_path"], placement_handoff["producer_file"]
         )
-        self.assertTrue(
-            placement_handoff["manifest_sha256"].startswith(
-                "__UNRESOLVED_DRIVAERML_"
-            )
+        self.assertEqual(
+            placement_handoff["manifest_sha256"],
+            sha256_file(ROOT / "benchmark-specs" / "drivaerml" / placement_handoff["manifest_file"]),
         )
 
     def test_complete_namespaced_chunk_passes_schema_and_semantics(self) -> None:
@@ -257,7 +289,7 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         alias["shared_support_ref"]["canonical_support_identity_sha256"] = digest(
             "wrong-canonical-support"
         )
-        with self.assertRaisesRegex(DrivAerDatasetScorerError, "alias identity differs"):
+        with self.assertRaisesRegex(DrivAerDatasetScorerError, "retained relative support index"):
             validate_schema_v3_relative_profile_chunk_candidate(mismatched)
 
         drifted = chunk()
@@ -277,6 +309,46 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         with self.assertRaisesRegex(DrivAerDatasetScorerError, "exactly 40"):
             validate_schema_v3_relative_profile_chunk_candidate(incomplete)
 
+    def test_semantics_reject_wrong_and_all_zero_relative_identities(self) -> None:
+        for mutation in (
+            "wrong_support",
+            "zero_support",
+            "wrong_receipt",
+            "zero_receipt",
+            "zero_alias_support",
+        ):
+            with self.subTest(mutation=mutation):
+                document = chunk()
+                if mutation == "zero_alias_support":
+                    series = next(
+                        item
+                        for item in document["cases"][0]["series"]
+                        if item["representation"] == "shared_alias"
+                    )
+                    series["shared_support_ref"][
+                        "canonical_support_identity_sha256"
+                    ] = "0" * 64
+                else:
+                    series = next(
+                        item
+                        for item in document["cases"][0]["series"]
+                        if item["family_id"] == "drivaerml-velocity-relative-v3"
+                    )
+                    if mutation.endswith("support"):
+                        series["support_identity_sha256"] = (
+                            "0" * 64
+                            if mutation.startswith("zero")
+                            else digest("hash-shaped-but-wrong-support")
+                        )
+                    else:
+                        series["placement_receipt_identity_sha256"] = (
+                            "0" * 64
+                            if mutation.startswith("zero")
+                            else digest("hash-shaped-but-wrong-receipt")
+                        )
+                with self.assertRaises(DrivAerDatasetScorerError):
+                    validate_schema_v3_relative_profile_chunk_candidate(document)
+
     def test_adapter_writes_40_series_per_case_without_changing_legacy_writer(self) -> None:
         evaluation = CandidateDatasetEvaluation(
             {
@@ -291,8 +363,8 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             evaluation,
             submission_id="relative-profile-test",
             namespaced_series_by_case={
-                "run_1": namespaced_series(),
-                "run_2": namespaced_series(),
+                "run_1": namespaced_series("run_1"),
+                "run_2": namespaced_series("run_2"),
             },
             cases_per_chunk=1,
         )
@@ -304,7 +376,7 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         self.assertEqual(receipt["case_count"], 2)
         self.assertEqual(receipt["series_count"], 80)
 
-    def test_submission_validator_is_fail_closed_until_benchmark_gate_is_ready(self) -> None:
+    def test_submission_validator_rejects_two_flag_activation_bypass(self) -> None:
         evaluation = CandidateDatasetEvaluation(
             {
                 "split": {
@@ -317,7 +389,7 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         package = schema_v3_relative_profile_chunks_candidate_adapter(
             evaluation,
             submission_id="relative-profile-test",
-            namespaced_series_by_case={"run_1": namespaced_series()},
+            namespaced_series_by_case={"run_1": namespaced_series("run_1")},
         )
         with tempfile.TemporaryDirectory() as temporary:
             temporary_root = Path(temporary)
@@ -354,10 +426,10 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                 "case_id_status": "official",
                 "case_count": 1,
             }
-            ready_spec = {
+            bypass_spec = {
                 "profile_panels": [],
                 "relative_diagnostics": {
-                    "status": "candidate_support_ready",
+                    "status": "activated",
                     "profile_format_enabled": True,
                     "contract": {"sha256": RELATIVE_PROFILE_CONTRACT_SHA256},
                 },
@@ -368,13 +440,15 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                     errors.append,
                     directory,
                     submission,
-                    ready_spec,
+                    bypass_spec,
                     split_entry,
                 )
-            self.assertEqual(errors, [])
             self.assertEqual(stats, {"cases": 1, "series": 40})
+            joined = "\n".join(errors)
+            self.assertIn("activation_release must contain exactly", joined)
+            self.assertIn("relative profile format is closed", joined)
 
-            pending_spec = copy.deepcopy(ready_spec)
+            pending_spec = copy.deepcopy(bypass_spec)
             pending_spec["relative_diagnostics"].update(
                 {"status": "support_pending", "profile_format_enabled": False}
             )
