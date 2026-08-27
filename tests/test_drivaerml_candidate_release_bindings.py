@@ -255,11 +255,11 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             for item in promoter.unresolved_release_tokens(bindings)
             if item[0] != ("unresolved_token_prefix",)
         ]
-        self.assertEqual(len(tokens), 7)
-        self.assertFalse(
+        self.assertEqual(len(tokens), 10)
+        self.assertTrue(
             any(path[:1] == ("relative_support",) for path, _token in tokens)
         )
-        self.assertEqual(bindings["relative_support"]["status"], "ready")
+        self.assertEqual(bindings["relative_support"]["status"], "unresolved")
         active = load_json(ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json")
         self.assertEqual(promoter.unresolved_release_tokens(active), [])
         self.assertNotIn("candidate_manifest", active["scoring_support"])

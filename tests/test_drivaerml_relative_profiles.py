@@ -166,20 +166,20 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         )
         self.assertEqual(
             contract["status"],
-            "candidate_report_only_manifest_bindings_complete_activation_pending",
+            "candidate_report_only_support_manifest_publication_and_activation_pending",
         )
         self.assertEqual(
             contract["activation_gates"],
             {
-                "all_484_velocity_placement_manifest_bound": True,
-                "all_484_velocity_mapping_manifest_bound": True,
-                "all_484_cp_manifest_bound": True,
+                "all_484_velocity_placement_manifest_bound": False,
+                "all_484_velocity_mapping_manifest_bound": False,
+                "all_484_cp_manifest_bound": False,
                 "genuine_model_sensitivity_review_complete": False,
                 "owner_scientific_approval": False,
                 "immutable_evaluator_revision_bound": False,
             },
         )
-        self.assertEqual(bindings["relative_support"]["status"], "ready")
+        self.assertEqual(bindings["relative_support"]["status"], "unresolved")
         velocity_contract = contract["support_implementation_bindings"][
             "relative_velocity_v3"
         ]["mapping_all484_manifest"]
@@ -187,22 +187,20 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             "velocity_mapping_manifest"
         ]
         self.assertEqual(
-            velocity_contract,
-            {
-                "producer_path": velocity_handoff["producer_file"],
-                "sha256": velocity_handoff["manifest_sha256"],
-            },
+            velocity_contract["producer_path"], velocity_handoff["producer_file"]
+        )
+        self.assertTrue(
+            velocity_handoff["manifest_sha256"].startswith(
+                "__UNRESOLVED_DRIVAERML_"
+            )
         )
         cp_contract = contract["support_implementation_bindings"][
             "relative_cp_v1"
         ]["cp_all484_manifest"]
         cp_handoff = bindings["relative_support"]["cp_manifest"]
-        self.assertEqual(
-            cp_contract,
-            {
-                "producer_path": cp_handoff["producer_file"],
-                "sha256": cp_handoff["manifest_sha256"],
-            },
+        self.assertEqual(cp_contract["producer_path"], cp_handoff["producer_file"])
+        self.assertTrue(
+            cp_handoff["manifest_sha256"].startswith("__UNRESOLVED_DRIVAERML_")
         )
         placement_contract = contract["support_implementation_bindings"][
             "relative_velocity_v3"
@@ -211,11 +209,12 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             "velocity_placement_manifest"
         ]
         self.assertEqual(
-            placement_contract,
-            {
-                "producer_path": placement_handoff["producer_file"],
-                "sha256": placement_handoff["manifest_sha256"],
-            },
+            placement_contract["producer_path"], placement_handoff["producer_file"]
+        )
+        self.assertTrue(
+            placement_handoff["manifest_sha256"].startswith(
+                "__UNRESOLVED_DRIVAERML_"
+            )
         )
 
     def test_complete_namespaced_chunk_passes_schema_and_semantics(self) -> None:

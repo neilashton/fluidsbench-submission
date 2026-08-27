@@ -46,7 +46,7 @@ SAFE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,159}$")
 PROFILE_DEFINITION_V10_ID = "drivaerml-diagnostics-v10-candidate"
 RELATIVE_DIAGNOSTICS_V3_ID = "drivaerml-relative-diagnostics-v3-candidate"
 RELATIVE_DIAGNOSTICS_V3_SHA256 = (
-    "c71f2811ec048ad22a27785bcad0b269c84003785dd4abddbb1ec3fd008f725d"
+    "b447edc49889fc184c472372e9a7debd44c234820b81b6e92df4f6c774b8b39d"
 )
 RELATIVE_PROFILE_SCHEMA_SHA256 = (
     "ff5c5965bb00633303b9372360879d02535f7946c882b9cfcefe1ee55446a0d2"

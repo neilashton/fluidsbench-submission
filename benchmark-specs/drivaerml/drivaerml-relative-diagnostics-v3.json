@@ -3,7 +3,7 @@
   "schema_version": 3,
   "id": "drivaerml-relative-diagnostics-v3-candidate",
   "dataset_id": "drivaerml",
-  "status": "candidate_report_only_manifest_bindings_complete_activation_pending",
+  "status": "candidate_report_only_support_manifest_publication_and_activation_pending",
   "activation_by_this_file": false,
   "source_release": {
     "repository": "neashton/drivaerml",
@@ -228,9 +228,9 @@
     "submissions_opened_by_this_contract": false
   },
   "activation_gates": {
-    "all_484_velocity_placement_manifest_bound": true,
-    "all_484_velocity_mapping_manifest_bound": true,
-    "all_484_cp_manifest_bound": true,
+    "all_484_velocity_placement_manifest_bound": false,
+    "all_484_velocity_mapping_manifest_bound": false,
+    "all_484_cp_manifest_bound": false,
     "genuine_model_sensitivity_review_complete": false,
     "owner_scientific_approval": false,
     "immutable_evaluator_revision_bound": false
