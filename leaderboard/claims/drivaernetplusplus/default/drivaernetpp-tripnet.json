@@ -1,0 +1,72 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/drivaernetplusplus/default/drivaernetpp-tripnet",
+  "release": {
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-08-24T20:08:12Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaernetpp-tripnet",
+    "result_revision": {
+      "series_id": "drivaernetpp-tripnet",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-tripnet",
+      "version_count": 1
+    },
+    "model": "TriPNet",
+    "dataset": "DrivAerNet++",
+    "dataset_id": "drivaernetplusplus",
+    "split": "Default",
+    "split_id": "default",
+    "submission_schema_version": "1.0"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 83.591837,
+    "ranked_value": 83.6,
+    "display_value": "83.6",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 6,
+    "ranked_result_count": 12,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
+      "row_index": 35
+    },
+    "source_submission": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-tripnet/submission.json",
+      "sha256": "cc799bb0475f60e2f527e3cb11c1860bf92bc6241df7aa4fe30418c7603ddb54"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-tripnet/evaluation-evidence.json",
+      "sha256": "e66233fed309bf9cd25ae53d3b40f7f07bf7a0d163a097fe3939a28adab9067a"
+    },
+    "profile_index": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-tripnet/profiles/index.json",
+      "sha256": "eb89319cb2fe72bb412a2570dd4d4182753c4adca94f7bf62de1c6a407b5e4fb"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/drivaerml/full/drivaerml-transolver",
+  "release": {
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-08-24T20:08:12Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaerml-transolver",
+    "result_revision": {
+      "series_id": "drivaerml-transolver",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-transolver",
+      "version_count": 1
+    },
+    "model": "Transolver",
+    "dataset": "DrivAerML",
+    "dataset_id": "drivaerml",
+    "split": "Full",
+    "split_id": "full",
+    "submission_schema_version": "1.0"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 73.93262975656,
+    "ranked_value": 73.9,
+    "display_value": "73.9",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 2,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
+      "row_index": 22
+    },
+    "source_submission": {
+      "path": "submissions/drivaerml/drivaerml-transolver/submission.json",
+      "sha256": "42709bdf8b2133e8cb151a5ad0390d060f352293684411ea5a9fa1147c58e112"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaerml/drivaerml-transolver/evaluation-evidence.json",
+      "sha256": "d2057d81c5211be5440235abe7d65b1570f4e3326c342be19a8ed9ba465f41ae"
+    },
+    "profile_index": {
+      "path": "submissions/drivaerml/drivaerml-transolver/profiles/index.json",
+      "sha256": "a1b8d2b7c69881b8887983de61c1378667730ebcf4c091c1b40adc533681ad13"
+    }
+  }
+}

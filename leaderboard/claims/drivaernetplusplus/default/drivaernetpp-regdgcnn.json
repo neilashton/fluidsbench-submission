@@ -1,0 +1,72 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/drivaernetplusplus/default/drivaernetpp-regdgcnn",
+  "release": {
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-08-24T20:08:12Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "drivaernetpp-regdgcnn",
+    "result_revision": {
+      "series_id": "drivaernetpp-regdgcnn",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "drivaernetpp-regdgcnn",
+      "version_count": 1
+    },
+    "model": "RegDGCNN",
+    "dataset": "DrivAerNet++",
+    "dataset_id": "drivaernetplusplus",
+    "split": "Default",
+    "split_id": "default",
+    "submission_schema_version": "1.0"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 78.65957399999999,
+    "ranked_value": 78.7,
+    "display_value": "78.7",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 8,
+    "ranked_result_count": 12,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
+      "row_index": 31
+    },
+    "source_submission": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-regdgcnn/submission.json",
+      "sha256": "9900bebcb4ba542fa4875f967d6b7d7e22acab4de15386e05153aa2a097fd1bf"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-regdgcnn/evaluation-evidence.json",
+      "sha256": "51ba54abf9b56376cd7e23c7e6b8968e93a614935ec0c6cd624fcf1edb612185"
+    },
+    "profile_index": {
+      "path": "submissions/drivaernetplusplus/drivaernetpp-regdgcnn/profiles/index.json",
+      "sha256": "ee3fb36c3ea8504c1949f01336d6a9387fe7c7fd5df3dcb02b79ef17b10e5d84"
+    }
+  }
+}

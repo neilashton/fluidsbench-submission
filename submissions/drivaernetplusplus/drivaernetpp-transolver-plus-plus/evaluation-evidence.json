@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "submission_id": "drivaernetpp-transolver-plus-plus",
+  "dataset_id": "drivaernetplusplus",
+  "split_id": "default",
+  "reference_version": "prototype-1",
+  "code_revision": "prototype-dummy-data",
+  "generated_at": "2025-11-25T00:00:00Z",
+  "status": "prototype_dummy_data",
+  "metric_values": {
+    "overall_score": 84.72815499999999,
+    "surface_pressure_rel_l2": 15.271845,
+    "surface_pressure_equal_entity_rel_l2": 15.73,
+    "surface_pressure_rel_l1": 11.326,
+    "surface_pressure_r2": 0.954
+  },
+  "profile_index_sha256": "8e275b411a5a745c76d44e9851e97bb137e7150afccd81267f141ee917b504a6",
+  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
+  "command": "not-applicable (illustrative dummy data)"
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "submission_id": "drivaernetpp-pointtransformer",
+  "dataset_id": "drivaernetplusplus",
+  "split_id": "default",
+  "reference_version": "prototype-1",
+  "code_revision": "prototype-dummy-data",
+  "generated_at": "2025-11-25T00:00:00Z",
+  "status": "prototype_dummy_data",
+  "metric_values": {
+    "overall_score": 80.717172,
+    "surface_pressure_rel_l2": 19.282828,
+    "surface_pressure_equal_entity_rel_l2": 19.09,
+    "surface_pressure_rel_l1": 13.745,
+    "surface_pressure_r2": 0.936
+  },
+  "profile_index_sha256": "482f8c64e3a283ceb9a8babe29b2a498653e95209b598ed70a9e85e40fcca287",
+  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
+  "command": "not-applicable (illustrative dummy data)"
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "submission_id": "drivaernetpp-pointnet",
+  "dataset_id": "drivaernetplusplus",
+  "split_id": "default",
+  "reference_version": "prototype-1",
+  "code_revision": "prototype-dummy-data",
+  "generated_at": "2025-11-25T00:00:00Z",
+  "status": "prototype_dummy_data",
+  "metric_values": {
+    "overall_score": 64.122642,
+    "surface_pressure_rel_l2": 35.877358,
+    "surface_pressure_equal_entity_rel_l2": 38.03,
+    "surface_pressure_rel_l1": 27.382,
+    "surface_pressure_r2": 0.764
+  },
+  "profile_index_sha256": "bda2c08ddba8253365e4af4fbd81db1f2215745b4addadc3c05e567495bf72c5",
+  "notes": "Illustrative evidence metadata for dummy-data pipeline testing; not a scientific evaluation record. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
+  "command": "not-applicable (illustrative dummy data)"
+}

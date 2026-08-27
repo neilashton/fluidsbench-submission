@@ -1,0 +1,72 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout",
+  "release": {
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-08-24T20:08:12Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "blendednet-prototype-geometry-holdout",
+    "result_revision": {
+      "series_id": "blendednet-prototype-geometry-holdout",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "blendednet-prototype-geometry-holdout",
+      "version_count": 1
+    },
+    "model": "UPT",
+    "dataset": "BlendedNet",
+    "dataset_id": "blendednet",
+    "split": "geometry_holdout",
+    "split_id": "geometry_holdout",
+    "submission_schema_version": "1.0"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 89.16262125,
+    "ranked_value": 89.2,
+    "display_value": "89.2",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
+      "row_index": 71
+    },
+    "source_submission": {
+      "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/submission.json",
+      "sha256": "d4713d69c08cb94be59c45c9f286a13974a95a2460ad7f93872254df7e805c43"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/evaluation-evidence.json",
+      "sha256": "979eb8ec7bcf0b8182a55818683a2d9bc78269caa39708a4da2b84dbf7e3fd37"
+    },
+    "profile_index": {
+      "path": "submissions/blendednet/blendednet-prototype-geometry-holdout/profiles/index.json",
+      "sha256": "126e045845c8e0e4553fa6b00d3558ee4a84176a4d04ddab09570e46d7dbde4d"
+    }
+  }
+}

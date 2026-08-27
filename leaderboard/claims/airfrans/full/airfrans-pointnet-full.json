@@ -1,0 +1,72 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/airfrans/full/airfrans-pointnet-full",
+  "release": {
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-08-24T20:08:12Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "airfrans-pointnet-full",
+    "result_revision": {
+      "series_id": "airfrans-pointnet-full",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "airfrans-pointnet-full",
+      "version_count": 1
+    },
+    "model": "PointNet",
+    "dataset": "AirfRANS",
+    "dataset_id": "airfrans",
+    "split": "Full",
+    "split_id": "full",
+    "submission_schema_version": "1.0"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 37.06166666666667,
+    "ranked_value": 37.1,
+    "display_value": "37.1",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 2,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
+      "row_index": 13
+    },
+    "source_submission": {
+      "path": "submissions/airfrans/airfrans-pointnet-full/submission.json",
+      "sha256": "076af83fe2305ae229eb8976ff8e77decd4d067fc75fcbdbb2eac85c6f745bda"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/airfrans/airfrans-pointnet-full/evaluation-evidence.json",
+      "sha256": "f86a4297c70e0cbb88e53a7a5c18f5a743178dd5c4c504da5b3bd11ed77630bc"
+    },
+    "profile_index": {
+      "path": "submissions/airfrans/airfrans-pointnet-full/profiles/index.json",
+      "sha256": "d641a1354733cad42bbc4fb56f0df533fc42394fe963f14dfab4bbd238945754"
+    }
+  }
+}

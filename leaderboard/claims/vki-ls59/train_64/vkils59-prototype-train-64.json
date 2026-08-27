@@ -1,0 +1,72 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/vki-ls59/train_64/vkils59-prototype-train-64",
+  "release": {
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-08-24T20:08:12Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "vkils59-prototype-train-64",
+    "result_revision": {
+      "series_id": "vkils59-prototype-train-64",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "vkils59-prototype-train-64",
+      "version_count": 1
+    },
+    "model": "Transolver",
+    "dataset": "VKI-LS59",
+    "dataset_id": "vki-ls59",
+    "split": "train_64",
+    "split_id": "train_64",
+    "submission_schema_version": "1.0"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 94.484,
+    "ranked_value": 94.5,
+    "display_value": "94.5",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
+      "row_index": 61
+    },
+    "source_submission": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-64/submission.json",
+      "sha256": "14364831dfec8420b5803a8cba065d8be64a6eac321a2b3cc44cfc553d87047c"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-64/evaluation-evidence.json",
+      "sha256": "8978ce6fbbce20b4321d246246e41c88c76f9480ff65c4b440ffa3bddf5a69a8"
+    },
+    "profile_index": {
+      "path": "submissions/vki-ls59/vkils59-prototype-train-64/profiles/index.json",
+      "sha256": "276165871bc61fb5d435fd96852dc6ae1ace17d1b1c6f87e50f602c2d8342e7e"
+    }
+  }
+}

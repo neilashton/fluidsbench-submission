@@ -1,0 +1,72 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/rotor37/train_8/rotor37-prototype-train-8",
+  "release": {
+    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-08-24T20:08:12Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "rotor37-prototype-train-8",
+    "result_revision": {
+      "series_id": "rotor37-prototype-train-8",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": null,
+      "is_latest": true,
+      "latest_submission_id": "rotor37-prototype-train-8",
+      "version_count": 1
+    },
+    "model": "MeshGraphNets",
+    "dataset": "Rotor37",
+    "dataset_id": "rotor37",
+    "split": "train_8",
+    "split_id": "train_8",
+    "submission_schema_version": "1.0"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 92.06416666666667,
+    "ranked_value": 92.1,
+    "display_value": "92.1",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "prototype_dummy_data",
+    "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
+      "row_index": 70
+    },
+    "source_submission": {
+      "path": "submissions/rotor37/rotor37-prototype-train-8/submission.json",
+      "sha256": "981049f57b9ed950422a79c01458f2115d9f21a82e1f151b08b9f47b50ea4f28"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/rotor37/rotor37-prototype-train-8/evaluation-evidence.json",
+      "sha256": "9ca4ae51b4d0229f5e764f1f0834e4d278427788a981f50749eae92892d99933"
+    },
+    "profile_index": {
+      "path": "submissions/rotor37/rotor37-prototype-train-8/profiles/index.json",
+      "sha256": "b88e38096e5e29326ec7bca6f9c1219339e0db6f5b8f618c1ff52369f75de502"
+    }
+  }
+}

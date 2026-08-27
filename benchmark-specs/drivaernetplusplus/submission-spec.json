@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.1",
+  "dataset_id": "drivaernetplusplus",
+  "dataset_name": "DrivAerNet++",
+  "dataset_version": "prototype-1",
+  "status": "prototype_dummy_data",
+  "scoring_support": {
+    "status": "owner_review_required",
+    "submissions_open": false,
+    "closed_reason": "Submissions are currently closed.",
+    "coverage_contract": {
+      "dimensionality": "3D surface pressure; other supports pending",
+      "rule": "complete_original_public_release_entities",
+      "inference_may_be_chunked": true,
+      "chunk_metrics_must_use_additive_sufficient_statistics": true,
+      "complete_case_and_entity_coverage_required": true,
+      "full_prediction_artifact_required": false,
+      "case_aggregation": "calculate_each_case_then_macro_average_cases_equally",
+      "public_ground_truth": "Ground-truth fields are in the public dataset release."
+    },
+    "public_supports": [
+      {
+        "id": "surface-pressure-native",
+        "public_file": "SurfacePressureVTK/<design>.vtk in Dataverse DOI 10.7910/DVN/K7PWNJ",
+        "format": "legacy VTK surface mesh",
+        "domain": "three_dimensional_vehicle_surface",
+        "association": "PointData",
+        "entities": "all_native_surface_points",
+        "arrays": [
+          "p"
+        ],
+        "units_note": "The confirmed public task uses the dataset-native kinematic-pressure array; absolute-unit metrics remain disabled until the release-bound convention is pinned.",
+        "physical_weight": "mass_lumped_dual_surface_area",
+        "verification": "confirmed_by_official_loader"
+      },
+      {
+        "id": "future-wss-and-flow-domain",
+        "public_file": "Dataverse WSS DOI 10.7910/DVN/PCZYL4 and full CFD DOI 10.7910/DVN/EEYHUA",
+        "format": "VTK archives",
+        "domain": "future_surface_and_three_dimensional_flow_domain",
+        "association": "pending_owner_inspection",
+        "entities": "not_active_until_one_official_file_from_each_archive_is_inspected",
+        "physical_weight": "pending_association_confirmation",
+        "verification": "owner_review_required"
+      }
+    ],
+    "relative_l2_policy": {
+      "surface_or_curve_primary": "physical_measure_weighted",
+      "surface_or_curve_secondary": "equal_native_entity",
+      "flow_domain_primary": "equal_native_entity",
+      "flow_domain_secondary": "physical_measure_weighted",
+      "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+      "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
+      "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
+    },
+    "owner_decisions_required": [
+      "pin_exact_public_release_files_revisions_and_hashes",
+      "confirm_array_names_entity_associations_masks_and_order",
+      "publish_authoritative_physical_weights_and_stable_entity_ids",
+      "approve_public_ground_truth_case_set_and_split_bindings",
+      "approve_loader_evaluator_and_immutable_scoring_support_manifest"
+    ]
+  },
+  "evaluation_reference_version": "prototype-1",
+  "default_field_reduction": "per_geometry_then_macro_average",
+  "ranking": {
+    "metric_id": "overall_score",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition"
+  },
+  "overall_score_composite": {
+    "metric_id": "overall_score",
+    "operation": "weighted_component_scores",
+    "components": [
+      {
+        "metric_id": "surface_pressure_rel_l2",
+        "weight": 1.0,
+        "transform": "bounded_error",
+        "cap": 100.0
+      }
+    ],
+    "tolerance": 1e-06
+  },
+  "metrics": [
+    {
+      "id": "overall_score",
+      "unit": "",
+      "direction": "higher",
+      "kind": "score",
+      "equation": "\\sum_k \\alpha_k S_k,\\quad \\sum_k \\alpha_k=1",
+      "aggregation": "derived_score_equation",
+      "weighting": "dataset_declared_component_weights"
+    },
+    {
+      "id": "surface_pressure_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i w_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i w_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_point_dual_area"
+    },
+    {
+      "id": "surface_pressure_equal_entity_rel_l2",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sqrt{\\sum_i(\\hat{y}_i-y_i)^2}}{\\sqrt{\\sum_i y_i^2}}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_points_equal"
+    },
+    {
+      "id": "surface_pressure_rel_l1",
+      "unit": "%",
+      "direction": "lower",
+      "kind": "error",
+      "equation": "100\\,\\frac{\\sum_i w_i\\lvert\\hat{y}_i-y_i\\rvert}{\\sum_i w_i\\lvert y_i\\rvert}",
+      "aggregation": "per_geometry_then_macro_average",
+      "weighting": "surface_point_dual_area"
+    },
+    {
+      "id": "surface_pressure_r2",
+      "unit": "",
+      "direction": "higher",
+      "kind": "r2",
+      "equation": "1-\\frac{\\sum_i(y_i-\\hat{y}_i)^2}{\\sum_i(y_i-\\bar{y})^2}",
+      "aggregation": "flatten_all_aligned_field_values",
+      "weighting": "surface_points_equal"
+    }
+  ],
+  "profile_panels": [
+    {
+      "id": "pressure_profiles",
+      "required": false,
+      "allow_unlisted_stations": false,
+      "minimum_points": 2,
+      "coordinate_order": "strictly_increasing",
+      "station_ids": [
+        "upper_body_centerline",
+        "underbody_centerline",
+        "front_wheelhouse",
+        "rear_body_centerline"
+      ],
+      "quantity_ids": [
+        "cp"
+      ]
+    }
+  ],
+  "splits": [
+    {
+      "id": "default",
+      "label": "Default",
+      "index_file": "splits/default.json",
+      "case_count": 1,
+      "case_set_id": "default",
+      "case_id_status": "prototype_generated",
+      "sha256": "6ae0138c4ea9482f36592ed6064c37be44370134cc2b747f3fc8b735780d6334"
+    }
+  ]
+}

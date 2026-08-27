@@ -1,0 +1,215 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/v1/submission.schema.json",
+  "schema_version": "1.0",
+  "submission_id": "rotor37-prototype-train-64",
+  "model": "MeshGraphNets",
+  "model_type": "GNN",
+  "model_types": [
+    "GNN"
+  ],
+  "training_regime": "from_scratch",
+  "target_data_used": "official_train",
+  "external_pretraining": false,
+  "pretraining_data": [],
+  "dataset": "Rotor37",
+  "dataset_id": "rotor37",
+  "dataset_version": "prototype-1",
+  "split": "train_64",
+  "split_id": "train_64",
+  "case_set_id": "source_evaluation_prototype",
+  "split_sha256": "00907949fd12775cfd3ade06605d3be94efde5a4fb336f1802465b90b741ab35",
+  "parameter_count_millions": 8.2,
+  "submitter_name": "Neil Ashton",
+  "institution": "FluidsBench dummy data",
+  "paper_url": "",
+  "code_url": "",
+  "submitted_at": "2026-07-15",
+  "evaluation": {
+    "reference_version": "prototype-1",
+    "code_revision": "prototype-dummy-data",
+    "command": "not-applicable (illustrative dummy data)",
+    "evidence_file": "evaluation-evidence.json",
+    "evidence_sha256": "30095f4d083f1e3b1d065ce82b8b40828b73241ff486a22cf435fb62fa78fcf9"
+  },
+  "approval": {
+    "status": "prototype",
+    "note": "Illustrative dummy data; not scientifically reviewed or approved."
+  },
+  "metric_values": {
+    "overall_score": 94.85733333333332,
+    "rotor_density_rrmse": 0.05278,
+    "rotor_density_rel_l2": 5.561,
+    "rotor_density_rel_l1": 3.913,
+    "rotor_density_r2": 0.951,
+    "rotor_density_mae": 0.0244,
+    "rotor_density_rmse": 0.0336,
+    "rotor_pressure_rrmse": 0.06496,
+    "rotor_pressure_rel_l2": 6.865,
+    "rotor_pressure_rel_l1": 4.852,
+    "rotor_pressure_r2": 0.9351,
+    "rotor_pressure_mae": 2436,
+    "rotor_pressure_rmse": 3538,
+    "rotor_temperature_rrmse": 0.04524,
+    "rotor_temperature_rel_l2": 4.758,
+    "rotor_temperature_rel_l1": 3.339,
+    "rotor_temperature_r2": 0.9602,
+    "rotor_temperature_mae": 3.712,
+    "rotor_temperature_rmse": 5.278,
+    "rotor_massflow_rrmse": 0.04176,
+    "rotor_massflow_rel_l2": 4.388,
+    "rotor_massflow_rel_l1": 3.075,
+    "rotor_massflow_r2": 0.9643,
+    "rotor_massflow_mae": 0.4756,
+    "rotor_massflow_rmse": 0.6612,
+    "rotor_compression_ratio_rrmse": 0.04814,
+    "rotor_compression_ratio_rel_l2": 5.066,
+    "rotor_compression_ratio_rel_l1": 3.559,
+    "rotor_compression_ratio_r2": 0.9567,
+    "rotor_compression_ratio_mae": 0.018,
+    "rotor_compression_ratio_rmse": 0.0255,
+    "rotor_efficiency_rrmse": 0.05568,
+    "rotor_efficiency_rel_l2": 5.871,
+    "rotor_efficiency_rel_l1": 4.135,
+    "rotor_efficiency_r2": 0.9473,
+    "rotor_efficiency_mae": 0.011,
+    "rotor_efficiency_rmse": 0.0157,
+    "total_error": 0.05143,
+    "rotor_density_area_rel_l2": 5.853684,
+    "rotor_pressure_area_rel_l2": 7.226316,
+    "rotor_temperature_area_rel_l2": 5.008421
+  },
+  "profile_data": {
+    "format": "fluidsbench-profile-chunks-v1",
+    "index_file": "profiles/index.json",
+    "case_count": 200,
+    "case_set_id": "source_evaluation_prototype"
+  },
+  "note": "Illustrative dummy result for frontend and submission-pipeline testing. It is not a published benchmark result. Prototype dual-weight values are illustrative policy fixtures, not recomputations from public fields.",
+  "methodology": {
+    "format": "fluidsbench-method-v1",
+    "record_kind": "prototype_fixture",
+    "record_note": "Leaderboard interface fixture only. The model name, broad family, and nominal parameter count mirror the prototype row; component breakdown, hyperparameters, training run, checkpoint, and timing were not submitted or independently verified. This record must not be cited as the authors' methodology.",
+    "architecture": {
+      "description": "MeshGraphNets prototype row (GNN). Encode-process-decode message-passing graph-network family. The repository does not contain a verified layer-by-layer configuration, so the nominal parameter count is represented as one aggregate component.",
+      "total_parameter_count": 8200000,
+      "parameter_count_basis": "rounded_from_reported_millions",
+      "submitter_trainable_parameter_count": 0,
+      "components": [
+        {
+          "id": "prototype-surrogate",
+          "family": "GNN",
+          "role": "Prototype rotor37 field predictor.",
+          "description": "Aggregate placeholder for the named MeshGraphNets architecture. Encode-process-decode message-passing graph-network family. No unverified internal split is invented.",
+          "parameter_count": 8200000
+        }
+      ],
+      "key_hyperparameters": [
+        {
+          "id": "reported-model-variant",
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "name": "reported_model_variant",
+          "value": "MeshGraphNets",
+          "description": "Only the named prototype model variant is recorded; exact depth, width, attention, neighborhood, and optimizer settings were not encoded in this dummy submission."
+        }
+      ],
+      "input_features": [
+        {
+          "id": "native-geometry",
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "name": "native_geometry_coordinates",
+          "domain": "mesh",
+          "component_count": 3,
+          "description": "3D geometry or mesh coordinates associated with the dataset's official supports. Exact feature engineering was not recorded for this prototype row."
+        }
+      ],
+      "predicted_fields": [
+        {
+          "field_id": "blade-surface-native.Density",
+          "domain": "surface",
+          "component_count": 1,
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "production": "direct_model_output",
+          "description": "Prototype declaration for Density on every official Rotor37 blade-surface vertex. The fixture does not retain executable predictions proving whether the named architecture produced this quantity directly."
+        },
+        {
+          "field_id": "blade-surface-native.Pressure",
+          "domain": "surface",
+          "component_count": 1,
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "production": "direct_model_output",
+          "description": "Prototype declaration for Pressure on every official Rotor37 blade-surface vertex. The fixture does not retain executable predictions proving whether the named architecture produced this quantity directly."
+        },
+        {
+          "field_id": "blade-surface-native.Temperature",
+          "domain": "surface",
+          "component_count": 1,
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "production": "direct_model_output",
+          "description": "Prototype declaration for Temperature on every official Rotor37 blade-surface vertex. The fixture does not retain executable predictions proving whether the named architecture produced this quantity directly."
+        },
+        {
+          "field_id": "case.massflow",
+          "domain": "case",
+          "component_count": 1,
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "production": "derived_from_model_output",
+          "description": "Prototype declaration for Per-case mass-flow scalar, whether predicted directly or derived from the submitted field state. The fixture does not retain executable predictions proving whether the named architecture produced this quantity directly."
+        },
+        {
+          "field_id": "case.compression_ratio",
+          "domain": "case",
+          "component_count": 1,
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "production": "derived_from_model_output",
+          "description": "Prototype declaration for Per-case compression-ratio scalar, whether predicted directly or derived from the submitted field state. The fixture does not retain executable predictions proving whether the named architecture produced this quantity directly."
+        },
+        {
+          "field_id": "case.efficiency",
+          "domain": "case",
+          "component_count": 1,
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "production": "derived_from_model_output",
+          "description": "Prototype declaration for Per-case efficiency scalar, whether predicted directly or derived from the submitted field state. The fixture does not retain executable predictions proving whether the named architecture produced this quantity directly."
+        }
+      ]
+    },
+    "data_handling": {
+      "normalization": "Not recorded for this prototype fixture; no normalization statistics are asserted.",
+      "preprocessing": "Not recorded for this prototype fixture; no remeshing or feature construction procedure is asserted.",
+      "sampling": "Not recorded for this prototype fixture; the leaderboard's dummy coverage must not be interpreted as the named model's sampling policy."
+    },
+    "training": {
+      "stages": [
+        {
+          "id": "prototype-training-not-recorded",
+          "status": "prototype_not_recorded",
+          "component_ids": [
+            "prototype-surrogate"
+          ],
+          "description": "No executable training run, optimizer configuration, random seed, or training-compute receipt accompanies this dummy row."
+        }
+      ]
+    },
+    "checkpoints": [],
+    "inference_compute": {
+      "status": "not_measured",
+      "reason": "The prototype leaderboard row was not produced by a retained model checkpoint, so end-to-end inference time and hardware are unavailable."
+    }
+  }
+}
