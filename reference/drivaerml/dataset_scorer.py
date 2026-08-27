@@ -178,6 +178,62 @@ ALL_RELATIVE_L2_METRIC_IDS = tuple(
 _CASE_RE = re.compile(r"run_([1-9][0-9]*)\Z")
 _SHA256_RE = re.compile(r"[0-9a-f]{64}\Z")
 _SAFE_ID_RE = re.compile(r"[a-z0-9][a-z0-9._-]{0,159}\Z")
+
+RELATIVE_PROFILE_FORMAT = (
+    "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
+)
+RELATIVE_PROFILE_SCHEMA_VERSION = "3.0-drivaerml-relative-candidate"
+RELATIVE_PROFILE_CONTRACT_ID = "drivaerml-relative-diagnostics-v3-candidate"
+RELATIVE_PROFILE_CONTRACT_SHA256 = (
+    "b447edc49889fc184c472372e9a7debd44c234820b81b6e92df4f6c774b8b39d"
+)
+RELATIVE_PROFILE_SERIES_PER_CASE = 40
+
+_CONSTANT_VELOCITY_STATIONS = tuple(
+    f"autocfd5_{station.lower()}"
+    for station in (
+        "V1", "V2", "V3", "V4", "V5", "V6",
+        "U1", "U2", "U3", "U4", "U5", "U6",
+        "L1", "R1", "R2", "R3",
+    )
+)
+_RELATIVE_VELOCITY_STATIONS = (
+    "V1", "V2", "V3", "V4", "V5", "V6",
+    "U1", "U2", "U3", "U4", "U5", "U6",
+    "L1", "R1", "R2", "R3",
+)
+_VELOCITY_SAMPLE_COUNTS = {
+    **{station: 201 for station in ("V1", "V2", "V3", "V4", "V5", "V6")},
+    **{station: 301 for station in ("U1", "U2", "U3", "U4", "U5", "U6")},
+    "L1": 651,
+    "R1": 31,
+    "R2": 31,
+    "R3": 31,
+}
+_CONSTANT_VELOCITY_INTERVAL_ENDS = {
+    **{station: 2.0 for station in ("V1", "V2", "V3", "V4", "V5", "V6")},
+    **{station: 3.0 for station in ("U1", "U2", "U3", "U4", "U5", "U6")},
+    "L1": 6.5,
+    "R1": 0.300000876107,
+    "R2": 0.300000877067,
+    "R3": 0.300000591286,
+}
+_CONSTANT_CP_STATIONS = (
+    "upperbody_centerline",
+    "underbody_centerline",
+    "sidewall_z_0_15",
+    "front_left_wheelhouse_y_neg_0_6",
+)
+_RELATIVE_CP_STATIONS = (
+    "upperbody_centerline",
+    "underbody_centerline",
+    "sidewall_front_wheelhouse_relative",
+    "front_left_wheelhouse_relative",
+)
+_SHARED_CP_SUPPORT_IDS = {
+    "upperbody_centerline": "drivaerml-cp-upperbody-centerline-y0-v1",
+    "underbody_centerline": "drivaerml-cp-underbody-centerline-y0-v1",
+}
 _SUBMISSION_ID_RE = re.compile(r"[a-z0-9][a-z0-9-]{2,79}\Z")
 _WINDOWS_ABSOLUTE_RE = re.compile(r"[A-Za-z]:[\\/]")
 
@@ -2614,6 +2670,430 @@ def _canonical_json_payload(document: Mapping[str, object]) -> bytes:
     ).encode("utf-8")
 
 
+def _relative_profile_expected_keys() -> tuple[tuple[str, str, str, str, str], ...]:
+    """Return the closed logical namespace for one relative-v3 case."""
+
+    return (
+        *(
+            (
+                "velocity_profiles",
+                "drivaerml-autocfd5-constant-v1",
+                station,
+                "velocity_ratio",
+                "materialized",
+            )
+            for station in _CONSTANT_VELOCITY_STATIONS
+        ),
+        *(
+            (
+                "velocity_profiles",
+                "drivaerml-velocity-relative-v3",
+                station,
+                "velocity_ratio",
+                "materialized",
+            )
+            for station in _RELATIVE_VELOCITY_STATIONS
+        ),
+        *(
+            (
+                "pressure_profiles",
+                "drivaerml_cp_constant_v1",
+                station,
+                "cp",
+                "materialized",
+            )
+            for station in _CONSTANT_CP_STATIONS
+        ),
+        *(
+            (
+                "pressure_profiles",
+                "drivaerml_cp_relative_v1",
+                station,
+                "cp",
+                "shared_alias" if station in _SHARED_CP_SUPPORT_IDS else "materialized",
+            )
+            for station in _RELATIVE_CP_STATIONS
+        ),
+    )
+
+
+def _normalize_relative_profile_series(
+    raw_series: object,
+    *,
+    case_id: str,
+    position: int,
+) -> tuple[tuple[str, str, str, str, str], dict[str, object]]:
+    """Validate one namespaced series and return its logical key and JSON form."""
+
+    label = f"{case_id} relative profile series {position}"
+    series = _mapping(raw_series, label)
+    representation = _string(series.get("representation"), f"{label} representation")
+    common = {
+        "panel_id",
+        "family_id",
+        "placement_mode",
+        "station_id",
+        "quantity_id",
+        "scoring_role",
+        "representation",
+        "placement_receipt_identity_sha256",
+    }
+    if representation == "materialized":
+        expected_fields = common | {
+            "coordinate_id",
+            "coordinate_unit",
+            "coordinate",
+            "prediction",
+            "support_identity_sha256",
+        }
+    elif representation == "shared_alias":
+        expected_fields = common | {"shared_support_ref"}
+    else:
+        raise DrivAerDatasetScorerError(
+            f"{label} representation must be materialized or shared_alias"
+        )
+    series = _exact_keys(series, expected_fields, label)
+    panel_id = _string(series["panel_id"], f"{label} panel_id")
+    family_id = _string(series["family_id"], f"{label} family_id")
+    station_id = _string(series["station_id"], f"{label} station_id")
+    quantity_id = _string(series["quantity_id"], f"{label} quantity_id")
+    key = (panel_id, family_id, station_id, quantity_id, representation)
+    expected_keys = set(_relative_profile_expected_keys())
+    if key not in expected_keys:
+        raise DrivAerDatasetScorerError(
+            f"{label} has an undeclared family/station representation {key}"
+        )
+    relative = family_id in {
+        "drivaerml-velocity-relative-v3",
+        "drivaerml_cp_relative_v1",
+    }
+    expected_mode = "relative" if relative else "constant"
+    expected_role = "report_only" if relative else "inherits_parent_candidate"
+    if series["placement_mode"] != expected_mode:
+        raise DrivAerDatasetScorerError(
+            f"{label} placement_mode must be {expected_mode!r}"
+        )
+    if series["scoring_role"] != expected_role:
+        raise DrivAerDatasetScorerError(
+            f"{label} scoring_role must be {expected_role!r}"
+        )
+    receipt_digest = series["placement_receipt_identity_sha256"]
+    if not isinstance(receipt_digest, str) or _SHA256_RE.fullmatch(receipt_digest) is None:
+        raise DrivAerDatasetScorerError(
+            f"{label} placement receipt identity must be a lowercase SHA-256"
+        )
+
+    normalized = dict(series)
+    if representation == "shared_alias":
+        reference = _exact_keys(
+            series["shared_support_ref"],
+            {
+                "shared_support_id",
+                "canonical_family_id",
+                "canonical_station_id",
+                "canonical_support_identity_sha256",
+            },
+            f"{label} shared_support_ref",
+        )
+        expected_shared_id = _SHARED_CP_SUPPORT_IDS[station_id]
+        if (
+            reference["shared_support_id"] != expected_shared_id
+            or reference["canonical_family_id"] != "drivaerml_cp_constant_v1"
+            or reference["canonical_station_id"] != station_id
+            or not isinstance(reference["canonical_support_identity_sha256"], str)
+            or _SHA256_RE.fullmatch(reference["canonical_support_identity_sha256"])
+            is None
+        ):
+            raise DrivAerDatasetScorerError(
+                f"{label} shared alias does not bind its canonical constant Cp support"
+            )
+        normalized["shared_support_ref"] = dict(reference)
+        return key, normalized
+
+    support_digest = series["support_identity_sha256"]
+    if not isinstance(support_digest, str) or _SHA256_RE.fullmatch(support_digest) is None:
+        raise DrivAerDatasetScorerError(
+            f"{label} support identity must be a lowercase SHA-256"
+        )
+    coordinates = series["coordinate"]
+    predictions = series["prediction"]
+    if (
+        not isinstance(coordinates, list)
+        or not isinstance(predictions, list)
+        or len(coordinates) < 2
+        or len(coordinates) != len(predictions)
+    ):
+        raise DrivAerDatasetScorerError(
+            f"{label} coordinate and prediction arrays must have equal length >= 2"
+        )
+    normalized_coordinates = [
+        _finite(value, f"{label} coordinate {index}")
+        for index, value in enumerate(coordinates)
+    ]
+    normalized_predictions = [
+        _finite(value, f"{label} prediction {index}")
+        for index, value in enumerate(predictions)
+    ]
+    if any(
+        right <= left
+        for left, right in zip(normalized_coordinates, normalized_coordinates[1:])
+    ):
+        raise DrivAerDatasetScorerError(
+            f"{label} coordinates must be strictly increasing"
+        )
+    if panel_id == "velocity_profiles":
+        station_key = (
+            station_id.removeprefix("autocfd5_").upper()
+            if family_id == "drivaerml-autocfd5-constant-v1"
+            else station_id
+        )
+        expected_count = _VELOCITY_SAMPLE_COUNTS[station_key]
+        if len(normalized_coordinates) != expected_count:
+            raise DrivAerDatasetScorerError(
+                f"{label} must contain exactly {expected_count} samples"
+            )
+        expected_coordinate = (
+            ("distance_m", "m")
+            if family_id == "drivaerml-autocfd5-constant-v1"
+            else ("normalized_arc_length", "1")
+        )
+        if (series["coordinate_id"], series["coordinate_unit"]) != expected_coordinate:
+            raise DrivAerDatasetScorerError(
+                f"{label} coordinate identity must be {expected_coordinate}"
+            )
+        if family_id == "drivaerml-velocity-relative-v3":
+            if not math.isclose(normalized_coordinates[0], 0.0, rel_tol=0.0, abs_tol=1e-12):
+                raise DrivAerDatasetScorerError(
+                    f"{label} normalized arc coordinate must start at 0"
+                )
+            if not math.isclose(normalized_coordinates[-1], 1.0, rel_tol=0.0, abs_tol=1e-12):
+                raise DrivAerDatasetScorerError(
+                    f"{label} normalized arc coordinate must end at 1"
+                )
+            denominator = expected_count - 1
+            if any(
+                not math.isclose(value, index / denominator, rel_tol=0.0, abs_tol=1e-12)
+                for index, value in enumerate(normalized_coordinates)
+            ):
+                raise DrivAerDatasetScorerError(
+                    f"{label} normalized arc coordinates must use the fixed sample index"
+                )
+        else:
+            interval_end = _CONSTANT_VELOCITY_INTERVAL_ENDS[station_key]
+            denominator = expected_count - 1
+            if any(
+                not math.isclose(
+                    value,
+                    interval_end * index / denominator,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                )
+                for index, value in enumerate(normalized_coordinates)
+            ):
+                raise DrivAerDatasetScorerError(
+                    f"{label} must preserve the frozen constant coordinate grid"
+                )
+    elif (series["coordinate_id"], series["coordinate_unit"]) != ("arc_length_m", "m"):
+        raise DrivAerDatasetScorerError(
+            f"{label} Cp coordinate identity must be ('arc_length_m', 'm')"
+        )
+    normalized["coordinate"] = normalized_coordinates
+    normalized["prediction"] = normalized_predictions
+    return key, normalized
+
+
+def validate_schema_v3_relative_profile_chunk_candidate(
+    document: Mapping[str, object],
+    *,
+    expected_contract_sha256: str = RELATIVE_PROFILE_CONTRACT_SHA256,
+) -> dict[str, object]:
+    """Validate one complete DrivAerML constant+relative candidate chunk."""
+
+    root = _exact_keys(
+        document,
+        {"schema_version", "contract_id", "contract_sha256", "cases"},
+        "relative profile chunk",
+    )
+    if root["schema_version"] != RELATIVE_PROFILE_SCHEMA_VERSION:
+        raise DrivAerDatasetScorerError("relative profile chunk schema_version is invalid")
+    if root["contract_id"] != RELATIVE_PROFILE_CONTRACT_ID:
+        raise DrivAerDatasetScorerError("relative profile chunk contract_id is invalid")
+    if (
+        not isinstance(expected_contract_sha256, str)
+        or _SHA256_RE.fullmatch(expected_contract_sha256) is None
+        or root["contract_sha256"] != expected_contract_sha256
+    ):
+        raise DrivAerDatasetScorerError(
+            "relative profile chunk contract_sha256 does not match the retained contract"
+        )
+    raw_cases = root["cases"]
+    if not isinstance(raw_cases, list) or not raw_cases:
+        raise DrivAerDatasetScorerError("relative profile chunk cases must be non-empty")
+    expected_keys = set(_relative_profile_expected_keys())
+    normalized_cases: list[dict[str, object]] = []
+    seen_cases: set[str] = set()
+    for case_position, raw_case in enumerate(raw_cases):
+        case = _exact_keys(
+            raw_case,
+            {"case_id", "series"},
+            f"relative profile case {case_position}",
+        )
+        case_id = _case_id(case["case_id"], f"relative profile case {case_position} ID")
+        if case_id in seen_cases:
+            raise DrivAerDatasetScorerError(
+                f"relative profile chunk contains duplicate case {case_id}"
+            )
+        seen_cases.add(case_id)
+        raw_series = case["series"]
+        if not isinstance(raw_series, list) or len(raw_series) != RELATIVE_PROFILE_SERIES_PER_CASE:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} must provide exactly {RELATIVE_PROFILE_SERIES_PER_CASE} namespaced series"
+            )
+        normalized_series: list[dict[str, object]] = []
+        observed_keys: list[tuple[str, str, str, str, str]] = []
+        canonical_supports: dict[str, str] = {}
+        aliases: list[tuple[str, Mapping[str, Any]]] = []
+        for series_position, raw_item in enumerate(raw_series):
+            key, normalized = _normalize_relative_profile_series(
+                raw_item,
+                case_id=case_id,
+                position=series_position,
+            )
+            observed_keys.append(key)
+            normalized_series.append(normalized)
+            panel_id, family_id, station_id, _quantity_id, representation = key
+            if (
+                panel_id == "pressure_profiles"
+                and family_id == "drivaerml_cp_constant_v1"
+                and station_id in _SHARED_CP_SUPPORT_IDS
+            ):
+                canonical_supports[station_id] = str(
+                    normalized["support_identity_sha256"]
+                )
+            if representation == "shared_alias":
+                aliases.append((station_id, normalized["shared_support_ref"]))
+        if len(observed_keys) != len(set(observed_keys)):
+            raise DrivAerDatasetScorerError(
+                f"{case_id} contains duplicate namespaced profile series"
+            )
+        missing = sorted(expected_keys - set(observed_keys))
+        unexpected = sorted(set(observed_keys) - expected_keys)
+        if missing or unexpected:
+            raise DrivAerDatasetScorerError(
+                f"{case_id} relative profile coverage differs from the closed contract "
+                f"(missing={missing}, unexpected={unexpected})"
+            )
+        for station_id, reference in aliases:
+            if reference["canonical_support_identity_sha256"] != canonical_supports.get(station_id):
+                raise DrivAerDatasetScorerError(
+                    f"{case_id}/{station_id} shared alias identity differs from its canonical constant Cp support"
+                )
+        normalized_cases.append({"case_id": case_id, "series": normalized_series})
+    result: dict[str, object] = {
+        "schema_version": RELATIVE_PROFILE_SCHEMA_VERSION,
+        "contract_id": RELATIVE_PROFILE_CONTRACT_ID,
+        "contract_sha256": expected_contract_sha256,
+        "cases": normalized_cases,
+    }
+    _assert_no_absolute_paths(result)
+    return result
+
+
+def schema_v3_relative_profile_chunks_candidate_adapter(
+    evaluation: CandidateDatasetEvaluation,
+    *,
+    submission_id: str,
+    namespaced_series_by_case: Mapping[str, Sequence[Mapping[str, object]]],
+    contract_sha256: str = RELATIVE_PROFILE_CONTRACT_SHA256,
+    cases_per_chunk: int = 16,
+) -> CandidateProfileChunks:
+    """Package evaluator-derived constant and report-only relative diagnostics.
+
+    Geometry placement and field sampling remain evaluator responsibilities.
+    This boundary accepts only the complete, namespaced 40-series result for
+    every selected case and therefore cannot fabricate or subset-reduce a
+    missing relative family.
+    """
+
+    if not isinstance(evaluation, CandidateDatasetEvaluation):
+        raise DrivAerDatasetScorerError("evaluation must be CandidateDatasetEvaluation")
+    if not isinstance(submission_id, str) or _SUBMISSION_ID_RE.fullmatch(submission_id) is None:
+        raise DrivAerDatasetScorerError("submission_id is not schema-v3 compatible")
+    if not isinstance(namespaced_series_by_case, Mapping):
+        raise DrivAerDatasetScorerError("namespaced_series_by_case must be an object")
+    if any(not isinstance(case_id, str) for case_id in namespaced_series_by_case):
+        raise DrivAerDatasetScorerError(
+            "namespaced_series_by_case keys must be case-ID strings"
+        )
+    if contract_sha256 != RELATIVE_PROFILE_CONTRACT_SHA256:
+        raise DrivAerDatasetScorerError(
+            "relative profile contract SHA-256 is not the retained v3 contract"
+        )
+    chunk_size = _integer(cases_per_chunk, "cases_per_chunk", minimum=1)
+    evidence = evaluation.to_json()
+    split = _mapping(evidence.get("split"), "candidate dataset split")
+    raw_case_ids = split.get("case_ids")
+    if not isinstance(raw_case_ids, list) or not raw_case_ids:
+        raise DrivAerDatasetScorerError("candidate split case IDs are malformed")
+    case_ids = tuple(_case_id(value, "candidate split case ID") for value in raw_case_ids)
+    if set(namespaced_series_by_case) != set(case_ids):
+        missing = sorted(set(case_ids) - set(namespaced_series_by_case))
+        unexpected = sorted(set(namespaced_series_by_case) - set(case_ids))
+        raise DrivAerDatasetScorerError(
+            "namespaced relative profile cases differ from the selected split "
+            f"(missing={missing}, unexpected={unexpected})"
+        )
+    packaged_cases = [
+        {
+            "case_id": case_id,
+            "series": list(namespaced_series_by_case[case_id]),
+        }
+        for case_id in case_ids
+    ]
+    chunk_count = math.ceil(len(packaged_cases) / chunk_size)
+    if chunk_count > 1000:
+        raise DrivAerDatasetScorerError(
+            "cases_per_chunk would exceed the three-digit profile chunk namespace"
+        )
+    chunks: list[tuple[str, Mapping[str, object]]] = []
+    chunk_index: list[dict[str, object]] = []
+    for chunk_number, start in enumerate(range(0, len(packaged_cases), chunk_size)):
+        filename = f"chunk-{chunk_number:03d}.json"
+        document = validate_schema_v3_relative_profile_chunk_candidate(
+            {
+                "schema_version": RELATIVE_PROFILE_SCHEMA_VERSION,
+                "contract_id": RELATIVE_PROFILE_CONTRACT_ID,
+                "contract_sha256": contract_sha256,
+                "cases": packaged_cases[start : start + chunk_size],
+            },
+            expected_contract_sha256=contract_sha256,
+        )
+        digest = hashlib.sha256(_canonical_json_payload(document)).hexdigest()
+        chunks.append((filename, document))
+        chunk_index.append(
+            {
+                "file": filename,
+                "case_ids": [case["case_id"] for case in document["cases"]],
+                "sha256": digest,
+            }
+        )
+    index: dict[str, object] = {
+        "schema_version": "1.0",
+        "format": RELATIVE_PROFILE_FORMAT,
+        "contract_id": RELATIVE_PROFILE_CONTRACT_ID,
+        "contract_sha256": contract_sha256,
+        "submission_id": submission_id,
+        "dataset_id": "drivaerml",
+        "split_id": split["split_id"],
+        "case_set_id": split["case_set_id"],
+        "case_count": len(packaged_cases),
+        "case_id_status": "official",
+        "chunks": chunk_index,
+    }
+    _assert_no_absolute_paths(index)
+    return CandidateProfileChunks(index=index, chunks=tuple(chunks))
+
+
 def schema_v3_profile_chunks_candidate_adapter(
     evaluation: CandidateDatasetEvaluation,
     *,
@@ -3154,20 +3634,20 @@ def write_schema_v3_profile_chunks_candidate(
         raise DrivAerDatasetScorerError(
             "package must be CandidateProfileChunks"
         )
-    index = _exact_keys(
-        package.index,
-        {
-            "schema_version",
-            "submission_id",
-            "dataset_id",
-            "split_id",
-            "case_set_id",
-            "case_count",
-            "case_id_status",
-            "chunks",
-        },
-        "candidate profile index",
-    )
+    relative_format = package.index.get("format") == RELATIVE_PROFILE_FORMAT
+    index_fields = {
+        "schema_version",
+        "submission_id",
+        "dataset_id",
+        "split_id",
+        "case_set_id",
+        "case_count",
+        "case_id_status",
+        "chunks",
+    }
+    if relative_format:
+        index_fields |= {"format", "contract_id", "contract_sha256"}
+    index = _exact_keys(package.index, index_fields, "candidate profile index")
     raw_index_chunks = index["chunks"]
     if (
         index["schema_version"] != "1.0"
@@ -3179,6 +3659,14 @@ def write_schema_v3_profile_chunks_candidate(
         raise DrivAerDatasetScorerError(
             "candidate profile package index is inconsistent"
         )
+    if relative_format and (
+        index["contract_id"] != RELATIVE_PROFILE_CONTRACT_ID
+        or index["contract_sha256"] != RELATIVE_PROFILE_CONTRACT_SHA256
+    ):
+        raise DrivAerDatasetScorerError(
+            "relative candidate profile index does not bind the retained v3 contract"
+        )
+    series_count = 0
     for position, ((filename, document), raw_entry) in enumerate(
         zip(package.chunks, raw_index_chunks, strict=True)
     ):
@@ -3187,11 +3675,14 @@ def write_schema_v3_profile_chunks_candidate(
             {"file", "case_ids", "sha256"},
             f"candidate profile index chunk {position}",
         )
-        chunk = _exact_keys(
-            document,
-            {"schema_version", "cases"},
-            f"candidate profile chunk {position}",
-        )
+        if relative_format:
+            chunk = validate_schema_v3_relative_profile_chunk_candidate(document)
+        else:
+            chunk = _exact_keys(
+                document,
+                {"schema_version", "cases"},
+                f"candidate profile chunk {position}",
+            )
         cases = chunk["cases"]
         if not isinstance(cases, list) or not cases:
             raise DrivAerDatasetScorerError(
@@ -3208,7 +3699,11 @@ def write_schema_v3_profile_chunks_candidate(
         ]
         digest = hashlib.sha256(_canonical_json_payload(document)).hexdigest()
         if (
-            chunk["schema_version"] != "1.0"
+            (
+                chunk["schema_version"] != RELATIVE_PROFILE_SCHEMA_VERSION
+                if relative_format
+                else chunk["schema_version"] != "1.0"
+            )
             or entry["file"] != filename
             or entry["case_ids"] != case_ids
             or entry["sha256"] != digest
@@ -3216,6 +3711,10 @@ def write_schema_v3_profile_chunks_candidate(
             raise DrivAerDatasetScorerError(
                 f"candidate profile chunk {position} differs from its index binding"
             )
+        series_count += sum(
+            len(_mapping(case, "candidate profile case").get("series", []))
+            for case in cases
+        )
     destination = Path(directory)
     if destination.exists() or destination.is_symlink():
         raise DrivAerDatasetScorerError(
@@ -3254,7 +3753,7 @@ def write_schema_v3_profile_chunks_candidate(
         "index_sha256": hashlib.sha256(index_payload).hexdigest(),
         "chunk_count": len(package.chunks),
         "case_count": package.index["case_count"],
-        "series_count": int(package.index["case_count"]) * 20,
+        "series_count": series_count,
         "chunks": chunk_receipts,
         "candidate_only": True,
         "official_submission": False,

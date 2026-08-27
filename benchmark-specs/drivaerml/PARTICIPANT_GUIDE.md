@@ -207,7 +207,7 @@ support.
 
 ### Geometry-relative diagnostics candidate (not active)
 
-A separate evaluator-side candidate is being validated in which velocity
+A hash-bound evaluator-side candidate is being validated in which velocity
 profiles and Cp cuts follow case-specific vehicle landmarks while the fixed
 definitions above remain available as the `constant` view. This does not
 change the participant submission format: the evaluator derives the candidate
@@ -219,11 +219,31 @@ or another Cp field.
 Both relative diagnostic families have composite weight `0.0` and are
 report-only. They do not affect submission eligibility or ranking, and the
 current `constant` definitions remain the submission-facing view with their
-candidate weights unchanged. Relative diagnostics remain unavailable in
-participant packages until an immutable all-case manifest covers exactly the
-484 pinned cases with no duplicate, missing, failed-closed, or schema-invalid
-case, owner scientific approval is recorded, and a newly published immutable
-evaluator/support binding makes them available.
+candidate weights unchanged. Candidate identities for the all-case
+velocity-placement, velocity-mapping, and relative-Cp manifests are retained,
+but the manifests have not yet been published and release-verified; the nested
+`relative_support` hand-off remains unresolved. Relative diagnostics remain
+unavailable in participant packages until those manifests are published and
+verified, genuine-model sensitivity is reviewed, owner scientific approval is
+recorded, and a newly published immutable evaluator/support binding makes them
+available.
+
+The retained candidate is
+[`drivaerml-relative-diagnostics-v3.json`](drivaerml-relative-diagnostics-v3.json).
+It binds `drivaerml-velocity-relative-v3` and
+`drivaerml_cp_relative_v1`; the earlier relative-velocity-v1 and v2 families
+are not accepted. Its additive profile format,
+`fluidsbench-drivaerml-relative-profile-chunks-v3-candidate`, is defined by
+[`drivaerml-relative-profile-chunk.schema.json`](../../schemas/v1/drivaerml-relative-profile-chunk.schema.json).
+Each complete case has 40 namespaced logical series: 20 unchanged constant
+series, 16 materialized relative-velocity series, two moved relative Cp cuts,
+and two relative Cp aliases that reference the materialized constant
+centrelines without copying their arrays. The submission specification keeps
+`profile_format_enabled=false`; the validator therefore rejects this format.
+The velocity-placement, velocity-mapping, and Cp manifest SHA-256 identities
+are retained as candidate values, but their release bindings remain unresolved
+and do not activate the format. The legacy 20-series format and its score are
+unchanged.
 
 The four continuous Cp cuts remain a ranked component with composite weight
 0.10; the velocity profiles retain weight 0.15. The evaluator derives every cut

@@ -28,7 +28,11 @@ from reference.scores import (
 from reference.weightings import evaluator_weighting
 from reference.drivaerml.dataset_scorer import (
     DrivAerDatasetScorerError,
+    RELATIVE_PROFILE_CONTRACT_ID,
+    RELATIVE_PROFILE_CONTRACT_SHA256,
+    RELATIVE_PROFILE_FORMAT,
     validate_schema_v3_candidate_nonspatial_metrics,
+    validate_schema_v3_relative_profile_chunk_candidate,
 )
 from reference.methodology import methodology_errors
 
@@ -2804,6 +2808,35 @@ def validate_profiles(
     dataset_spec: dict[str, Any],
     split_spec_entry: dict[str, Any],
 ) -> dict[str, int]:
+    profile_format = submission["profile_data"].get(
+        "format", "fluidsbench-profile-chunks-v1"
+    )
+    relative_profile = profile_format == RELATIVE_PROFILE_FORMAT
+    if profile_format not in {
+        "fluidsbench-profile-chunks-v1",
+        RELATIVE_PROFILE_FORMAT,
+    }:
+        add(f"unsupported profile_data.format {profile_format!r}")
+        return {"cases": 0, "series": 0}
+    relative_contract_sha256 = RELATIVE_PROFILE_CONTRACT_SHA256
+    if relative_profile:
+        if submission.get("dataset_id") != "drivaerml":
+            add("the relative profile format is available only for DrivAerML")
+        declaration = dataset_spec.get("relative_diagnostics")
+        if not isinstance(declaration, dict):
+            add("DrivAerML relative profile format has no benchmark contract declaration")
+        else:
+            contract = declaration.get("contract")
+            if isinstance(contract, dict) and isinstance(contract.get("sha256"), str):
+                relative_contract_sha256 = contract["sha256"]
+            if (
+                declaration.get("status") != "candidate_support_ready"
+                or declaration.get("profile_format_enabled") is not True
+            ):
+                add(
+                    "DrivAerML relative profile format is closed until all benchmark "
+                    "activation gates are complete"
+                )
     index_path = directory / submission["profile_data"]["index_file"]
     if not index_path.is_file():
         add(f"missing profile index: {index_path.relative_to(ROOT)}")
@@ -2826,6 +2859,15 @@ def validate_profiles(
     for key, expected in identities.items():
         if index.get(key) != expected:
             add(f"profiles/index.json {key} must equal {expected!r}")
+    if relative_profile:
+        if index.get("format") != RELATIVE_PROFILE_FORMAT:
+            add("profiles/index.json format must match profile_data.format")
+        if index.get("contract_id") != RELATIVE_PROFILE_CONTRACT_ID:
+            add("profiles/index.json contract_id is not the retained relative-v3 contract")
+        if index.get("contract_sha256") != relative_contract_sha256:
+            add("profiles/index.json contract_sha256 does not match the benchmark contract")
+    elif index.get("format") not in {None, "fluidsbench-profile-chunks-v1"}:
+        add("profiles/index.json format must match profile_data.format")
 
     split_path = ROOT / "benchmark-specs" / submission["dataset_id"] / split_spec_entry["index_file"]
     if not split_path.is_file():
@@ -2883,12 +2925,36 @@ def validate_profiles(
         except (OSError, json.JSONDecodeError) as error:
             add(f"cannot read {filename}: {error}")
             continue
-        for error in schema_errors(chunk, "profile-chunk.schema.json"):
+        chunk_schema = (
+            "drivaerml-relative-profile-chunk.schema.json"
+            if relative_profile
+            else "profile-chunk.schema.json"
+        )
+        for error in schema_errors(chunk, chunk_schema):
             add(f"profiles/{filename} {error}")
+        normalized_relative_chunk: dict[str, Any] | None = None
+        if relative_profile:
+            try:
+                normalized_relative_chunk = (
+                    validate_schema_v3_relative_profile_chunk_candidate(
+                        chunk,
+                        expected_contract_sha256=relative_contract_sha256,
+                    )
+                )
+            except DrivAerDatasetScorerError as error:
+                add(f"profiles/{filename} {error}")
         chunk_case_ids = [case.get("case_id") for case in chunk.get("cases", []) if isinstance(case, dict)]
         if chunk_case_ids != chunk_entry.get("case_ids"):
             add(f"{filename} case order does not match profiles/index.json")
         loaded_case_ids.extend(chunk_case_ids)
+
+        if relative_profile:
+            if normalized_relative_chunk is not None:
+                series_count += sum(
+                    len(case["series"])
+                    for case in normalized_relative_chunk["cases"]
+                )
+            continue
 
         for case in chunk.get("cases", []):
             if not isinstance(case, dict):

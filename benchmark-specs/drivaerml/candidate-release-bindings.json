@@ -17,9 +17,37 @@
     "file": "drivaerml-diagnostics-v10.json",
     "sha256": "9136feac7ac276d91f7cbcfb6c558beffc97cfaf0f0174626fee67a1f2a52bd0"
   },
+  "relative_diagnostics_v3": {
+    "file": "drivaerml-relative-diagnostics-v3.json",
+    "sha256": "b447edc49889fc184c472372e9a7debd44c234820b81b6e92df4f6c774b8b39d",
+    "profile_chunk_schema_file": "schemas/v1/drivaerml-relative-profile-chunk.schema.json",
+    "profile_chunk_schema_sha256": "ff5c5965bb00633303b9372360879d02535f7946c882b9cfcefe1ee55446a0d2"
+  },
+  "relative_support": {
+    "status": "unresolved",
+    "required_case_count": 484,
+    "velocity_placement_manifest": {
+      "family_id": "drivaerml-velocity-relative-v3",
+      "producer_file": "velocity_support_v3/production_campaign_v1/aggregate/relative-velocity-v3-production-all484-inputs-v1.json",
+      "expected_schema": "drivaerml-relative-velocity-v3-production-input-manifest-v1",
+      "manifest_sha256": "__UNRESOLVED_DRIVAERML_RELATIVE_VELOCITY_PLACEMENT_MANIFEST_SHA256__"
+    },
+    "velocity_mapping_manifest": {
+      "family_id": "drivaerml-velocity-relative-v3",
+      "producer_file": "velocity_mapping_v3/aggregate/relative-velocity-v3-mapping-all484-v1.json",
+      "expected_schema": "drivaerml-velocity-relative-v3-mapping-aggregate-v1",
+      "manifest_sha256": "__UNRESOLVED_DRIVAERML_RELATIVE_VELOCITY_MAPPING_MANIFEST_SHA256__"
+    },
+    "cp_manifest": {
+      "family_id": "drivaerml_cp_relative_v1",
+      "producer_file": "cp_support/campaign_v3/aggregate_v3/all484/relative-cp-native-support-manifest-v3.json",
+      "expected_schema": "drivaerml-relative-cp-native-support-manifest-v3",
+      "manifest_sha256": "__UNRESOLVED_DRIVAERML_RELATIVE_CP_MANIFEST_SHA256__"
+    }
+  },
   "profile_ground_truth": {
     "release_id": "__UNRESOLVED_DRIVAERML_PROFILE_GROUND_TRUTH_RELEASE_ID__",
     "manifest_sha256": "__UNRESOLVED_DRIVAERML_PROFILE_GROUND_TRUTH_MANIFEST_SHA256__"
   },
-  "notes": "This file is the release hand-off, not an active scoring-support declaration. The local v10 candidate registry is hash-bound, but scoring support, evaluator, and profile-ground-truth release identities remain unresolved. Change status to ready only after replacing every remaining unresolved token with an immutable owner-published identity."
+  "notes": "This file is the release hand-off, not an active scoring-support declaration. The local constant-v10 and report-only relative-v3 contract and schema are hash-bound, but the all-484 velocity-placement, velocity-mapping, and relative-Cp manifests have not yet been published and release-verified; the nested relative_support hand-off therefore remains unresolved. Top-level status governs the ranked constant candidate and remains unresolved until its scoring-support, evaluator, and profile-ground-truth identities resolve; relative_support has its own independent status and never blocks the constant candidate. Relative families retain weight 0 and their format remains closed pending publication and verification of those manifests, genuine-model sensitivity, owner approval, and an immutable evaluator revision."
 }

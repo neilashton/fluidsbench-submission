@@ -1206,7 +1206,10 @@
       "required": ["format", "index_file", "case_count", "case_set_id", "profile_ground_truth_release_id", "profile_ground_truth_manifest_sha256"],
       "properties": {
         "format": {
-          "const": "fluidsbench-profile-chunks-v1"
+          "enum": [
+            "fluidsbench-profile-chunks-v1",
+            "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
+          ]
         },
         "index_file": {
           "const": "profiles/index.json"
