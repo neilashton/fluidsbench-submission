@@ -12,6 +12,9 @@ from reference.drivaerml.dataset_scorer import (
     RELATIVE_PROFILE_CONTRACT_ID,
     RELATIVE_PROFILE_FORMAT,
 )
+from scripts.promote_drivaerml_candidate import (
+    preserve_relative_activation_declaration,
+)
 from scripts.validate_submission import (
     DRIVAERML_OFFICIAL_CASE_REGISTRY_SCHEMA,
     DRIVAERML_RELATIVE_ACTIVATION_GATE_IDS,
@@ -48,6 +51,67 @@ def file_sha256(path: Path) -> str:
 
 
 class DrivAerMLActivationReleaseTests(unittest.TestCase):
+    def test_promotion_rerun_preserves_verified_pending_release(self) -> None:
+        existing = json.loads(
+            (ROOT / DATASET_PREFIX / "submission-spec.json").read_text()
+        )
+        generated = {
+            "relative_diagnostics": copy.deepcopy(
+                existing["relative_diagnostics"]
+            )
+        }
+        generated_declaration = generated["relative_diagnostics"]
+        generated_declaration.pop("activation_release")
+        generated_declaration["status"] = "support_pending"
+        generated_declaration.pop("closed_reason")
+
+        preserve_relative_activation_declaration(generated, existing)
+
+        for field in (
+            "status",
+            "profile_format_enabled",
+            "closed_reason",
+            "activation_release",
+        ):
+            self.assertEqual(
+                generated_declaration[field],
+                existing["relative_diagnostics"][field],
+            )
+
+    def test_checked_in_pending_release_is_verified_and_fail_closed(self) -> None:
+        spec = json.loads(
+            (ROOT / DATASET_PREFIX / "submission-spec.json").read_text()
+        )
+        declaration = spec["relative_diagnostics"]
+        errors: list[str] = []
+        self.assertTrue(
+            validate_drivaerml_relative_activation_release(
+                errors.append,
+                spec,
+                declaration,
+                repository_root=ROOT,
+                require_active=False,
+            ),
+            "\n".join(errors),
+        )
+        self.assertEqual(errors, [])
+        self.assertEqual(
+            declaration["status"], "support_verified_activation_pending"
+        )
+        self.assertIs(declaration["profile_format_enabled"], False)
+
+        errors = []
+        self.assertFalse(
+            validate_drivaerml_relative_activation_release(
+                errors.append,
+                spec,
+                declaration,
+                repository_root=ROOT,
+                require_active=True,
+            )
+        )
+        self.assertIn("record status is not activated", "\n".join(errors))
+
     def build_release(self, root: Path, *, active: bool) -> tuple[dict, Path]:
         retained_files = [
             Path("schemas/v1/drivaerml-relative-profile-chunk.schema.json"),

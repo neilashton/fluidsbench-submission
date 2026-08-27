@@ -205,14 +205,17 @@ The same hand-off hash-binds the closed report-only
 [`drivaerml-relative-diagnostics-v3.json`](drivaerml-relative-diagnostics-v3.json)
 contract and its DrivAerML-only namespaced profile-chunk schema. The relative
 velocity family is v3, the relative Cp family remains v1, and both have
-composite weight zero. Candidate identities for the all-484 velocity-placement,
-velocity-mapping, and relative-Cp manifests are retained in the contract, but
-the manifests are not yet published and release-verified; the nested
-`relative_support` hand-off therefore remains unresolved. `submission-spec.json`
-continues to advertise the format with `profile_format_enabled=false`, and the
-validator rejects attempts to use it until those manifests are published and
-verified and genuine-model sensitivity, owner approval, and an immutable
-evaluator revision are bound. The nested status is independent and does not
-block promotion of the ranked constant candidate. This extension does not
-alter the active constant velocity weight
+composite weight zero. Exact copies of the all-484 velocity-placement,
+velocity-mapping, and relative-Cp manifests are retained under
+[`support/relative-v3/`](support/relative-v3/), byte-verified against their
+producer outputs, and checked against the ordered official 484-case registry.
+The nested `relative_support` hand-off is therefore ready. A separate immutable
+pending release record binds those files, the per-case relative-series identity
+index, and evaluator revision `a85b10f38cab4514b71ce6d64c73c001ba2407f9`.
+It records genuine-model sensitivity and owner scientific approval as pending.
+`submission-spec.json` consequently keeps `profile_format_enabled=false`, and
+the validator rejects the format unless every activation gate is complete.
+Support publication is not scientific activation. The nested status is
+independent and does not block promotion of the ranked constant candidate.
+This extension does not alter the active constant velocity weight
 0.15, constant Cp weight 0.10, or legacy profile package shape.

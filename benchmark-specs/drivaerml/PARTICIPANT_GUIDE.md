@@ -219,14 +219,14 @@ or another Cp field.
 Both relative diagnostic families have composite weight `0.0` and are
 report-only. They do not affect submission eligibility or ranking, and the
 current `constant` definitions remain the submission-facing view with their
-candidate weights unchanged. Candidate identities for the all-case
-velocity-placement, velocity-mapping, and relative-Cp manifests are retained,
-but the manifests have not yet been published and release-verified; the nested
-`relative_support` hand-off remains unresolved. Relative diagnostics remain
-unavailable in participant packages until those manifests are published and
-verified, genuine-model sensitivity is reviewed, owner scientific approval is
-recorded, and a newly published immutable evaluator/support binding makes them
-available.
+candidate weights unchanged. Exact all-case velocity-placement,
+velocity-mapping, and relative-Cp manifests are now retained and verified, and
+the nested `relative_support` hand-off is ready. A separate pending release
+record binds those bytes, their per-case relative-series identities, and an
+exact evaluator Git revision. Relative diagnostics remain unavailable in
+participant packages because genuine-model sensitivity and owner scientific
+approval are still pending. Artifact publication alone does not activate the
+format.
 
 The retained candidate is
 [`drivaerml-relative-diagnostics-v3.json`](drivaerml-relative-diagnostics-v3.json).
@@ -240,10 +240,10 @@ series, 16 materialized relative-velocity series, two moved relative Cp cuts,
 and two relative Cp aliases that reference the materialized constant
 centrelines without copying their arrays. The submission specification keeps
 `profile_format_enabled=false`; the validator therefore rejects this format.
-The velocity-placement, velocity-mapping, and Cp manifest SHA-256 identities
-are retained as candidate values, but their release bindings remain unresolved
-and do not activate the format. The legacy 20-series format and its score are
-unchanged.
+The velocity-placement, velocity-mapping, and Cp manifest bytes and SHA-256
+identities are retained under [`support/relative-v3/`](support/relative-v3/),
+but their verified publication does not activate the format. The legacy
+20-series format and its score are unchanged.
 
 The four continuous Cp cuts remain a ranked component with composite weight
 0.10; the velocity profiles retain weight 0.15. The evaluator derives every cut
