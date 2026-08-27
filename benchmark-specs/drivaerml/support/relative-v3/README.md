@@ -12,7 +12,7 @@ on the producer workspace.
 | `manifests/cp-native-support-all484-v3.json` | `4e6a4c3495ea4938895868162480dcb20b5bbea42114c94013a2c76e26128c90` |
 | `series-support-index.json` | `ff7b8bdb0b963611ce7ecb2055090b6861d42477ff47976d7b164ff131d82632` |
 | `run419-constant-series-support-index.json` | `c66adf17b73fbe0c4cba080e2ee44e2046f7c69cc7e5a5e797b2b973c826b211` |
-| `releases/relative-diagnostics-v3-support-release-v1.json` | `a5a64ee180d1dbfb91f9e5f7270e4f6b7ac96cc9655a7388e749568a5f74452c` |
+| `releases/relative-diagnostics-v3-support-release-v1.json` | `ec853a95ec113a1387c0cadad384c0feac39b5f9a92a5c3c43ed75d6c7f9a151` |
 
 Each manifest contains exactly the ordered 484 unique cases from
 `proposal/native-source-pin.json` at public dataset revision
@@ -62,7 +62,7 @@ constant velocity grid.
 
 The release record binds the contract, profile schema, official case registry,
 all three manifests, the series index, and evaluator Git revision
-`a85b10f38cab4514b71ce6d64c73c001ba2407f9`. It records sensitivity evidence
+`b9db402a3fa0efbb94fe36be2ba1fe6f7b4bc1e1`. It records sensitivity evidence
 and owner approval as pending. Consequently it has
 `profile_format_authorized=false`, keeps the relative composite weight at
 `0.0`, and does not open submissions. Publishing and verifying support bytes is
