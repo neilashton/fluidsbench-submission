@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import re
+import subprocess
 import sys
 from copy import deepcopy
 from datetime import date, datetime
@@ -55,7 +56,7 @@ DRIVAERML_RELATIVE_ACTIVATION_RECORD_SCHEMA = (
     "drivaerml-relative-diagnostics-activation-release-v1"
 )
 DRIVAERML_RELATIVE_SUPPORT_INDEX_SCHEMA = (
-    "drivaerml-relative-series-support-index-v1"
+    "drivaerml-relative-series-support-index-v2"
 )
 DRIVAERML_OFFICIAL_CASE_REGISTRY_SCHEMA = (
     "drivaerml-fluidsbench-public-native-source-pin-v1"
@@ -84,6 +85,23 @@ DRIVAERML_RELATIVE_MANIFEST_FAMILIES = {
 }
 DRIVAERML_RELATIVE_SENSITIVITY_SCHEMA = (
     "drivaerml-relative-diagnostics-sensitivity-evidence-v1"
+)
+DRIVAERML_TRAINED_CHECKPOINT_PROVENANCE_SCHEMA = (
+    "drivaerml-trained-checkpoint-provenance-v1"
+)
+DRIVAERML_SENSITIVITY_PREDICTION_MANIFEST_SCHEMA = (
+    "drivaerml-sensitivity-prediction-manifest-v1"
+)
+DRIVAERML_RELATIVE_OWNER_APPROVAL_SCHEMA = (
+    "drivaerml-relative-diagnostics-owner-approval-v1"
+)
+DRIVAERML_EVALUATOR_REPOSITORY = (
+    "https://github.com/neilashton/fluidsbench-submission"
+)
+DRIVAERML_RELATIVE_OWNER_APPROVERS = frozenset({"neilashton"})
+DRIVAERML_RELATIVE_APPROVAL_TRUSTED_REF = "refs/remotes/origin/dev"
+DRIVAERML_RELATIVE_PROFILE_CHUNK_SCHEMA_SHA256 = (
+    "ff5c5965bb00633303b9372360879d02535f7946c882b9cfcefe1ee55446a0d2"
 )
 DRIVAERML_OFFICIAL_CASE_COUNT = 484
 LOWER_SHA256 = re.compile(r"^[a-f0-9]{64}$")
@@ -456,6 +474,180 @@ def _drivaerml_case_ids(document: Any, *, label: str) -> list[str]:
     return case_ids
 
 
+def _drivaerml_git_commit_is_bound(repository_root: Path, revision: str) -> bool:
+    """Return whether ``revision`` is a real commit reachable from local HEAD.
+
+    Activation validation is intentionally offline.  A syntactically plausible
+    object ID is not evidence: the exact commit must be available in this clone
+    and belong to the checked-out repository history.
+    """
+
+    try:
+        object_type = subprocess.run(
+            ["git", "-C", str(repository_root), "cat-file", "-t", revision],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=10,
+        )
+        if object_type.returncode != 0 or object_type.stdout.strip() != "commit":
+            return False
+        reachable = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repository_root),
+                "merge-base",
+                "--is-ancestor",
+                revision,
+                "HEAD",
+            ],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return reachable.returncode == 0
+
+
+def _drivaerml_git_commit_is_ancestor(
+    repository_root: Path,
+    ancestor: str,
+    descendant: str,
+) -> bool:
+    """Return whether two retained commits have the required ancestry."""
+
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repository_root),
+                "merge-base",
+                "--is-ancestor",
+                ancestor,
+                descendant,
+            ],
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0
+
+
+def _drivaerml_git_commit_is_on_trusted_dev(
+    repository_root: Path,
+    revision: str,
+) -> bool:
+    """Bind owner approval to the fetched upstream development branch.
+
+    Reachability from ``HEAD`` alone is not an approval boundary: a pull-request
+    author controls new commits on that history.  The approval record must
+    already be present on the locally fetched ``origin/dev`` from the expected
+    evaluator repository.  Validation remains offline; callers must fetch the
+    full upstream history before checking an activated release.
+    """
+
+    try:
+        remote = subprocess.run(
+            ["git", "-C", str(repository_root), "remote", "get-url", "origin"],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    if remote.returncode != 0:
+        return False
+    parsed = urlparse(remote.stdout.strip())
+    if (
+        parsed.scheme != "https"
+        or (parsed.hostname or "").lower() != "github.com"
+        or parsed.path.rstrip("/").removesuffix(".git")
+        != "/neilashton/fluidsbench-submission"
+    ):
+        return False
+    return _drivaerml_git_commit_is_ancestor(
+        repository_root,
+        revision,
+        DRIVAERML_RELATIVE_APPROVAL_TRUSTED_REF,
+    )
+
+
+def _drivaerml_git_blob_sha256(
+    repository_root: Path,
+    revision: str,
+    path: Path,
+) -> str | None:
+    """Hash the exact repository-relative file bytes retained by a commit."""
+
+    try:
+        relative = path.resolve(strict=True).relative_to(
+            repository_root.resolve(strict=True)
+        )
+    except (OSError, ValueError):
+        return None
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repository_root),
+                "cat-file",
+                "blob",
+                f"{revision}:{relative.as_posix()}",
+            ],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if result.returncode != 0:
+        return None
+    return hashlib.sha256(result.stdout).hexdigest()
+
+
+def _drivaerml_hex_looks_placeholder(value: str) -> bool:
+    """Reject low-entropy or short-period hex strings used as fake identities."""
+
+    if len(set(value)) < 8:
+        return True
+    for period in range(1, min(16, len(value) // 2) + 1):
+        if value == (value[:period] * ((len(value) + period - 1) // period))[: len(value)]:
+            return True
+    return False
+
+
+def _drivaerml_text_looks_placeholder(value: str) -> bool:
+    """Return whether a repository/path identity contains an explicit fake token."""
+
+    placeholder_tokens = {
+        "dummy",
+        "example",
+        "fake",
+        "placeholder",
+        "synthetic",
+        "test",
+        "testing",
+    }
+    tokens = {
+        token
+        for token in re.split(r"[^a-z0-9]+", value.lower())
+        if token
+    }
+    return bool(tokens & placeholder_tokens)
+
+
 def validate_drivaerml_relative_activation_release(
     add: Any,
     dataset_spec: dict[str, Any],
@@ -617,6 +809,14 @@ def validate_drivaerml_relative_activation_release(
     contract_entry = loaded.get("contract")
     contract = contract_entry[0] if contract_entry is not None else {}
     contract_binding = bindings.get("contract") if isinstance(bindings, dict) else None
+    if (
+        not isinstance(contract_binding, dict)
+        or contract_binding.get("sha256") != RELATIVE_PROFILE_CONTRACT_SHA256
+    ):
+        problem(
+            "record contract digest differs from the independently pinned "
+            "candidate-release contract"
+        )
     declared_contract = declaration.get("contract")
     if not isinstance(declared_contract, dict):
         problem("relative_diagnostics.contract must be an object")
@@ -654,6 +854,13 @@ def validate_drivaerml_relative_activation_release(
     schema_entry = loaded.get("profile_chunk_schema")
     if schema_entry is not None:
         schema_document, schema_path, _digest = schema_entry
+        if bindings.get("profile_chunk_schema", {}).get("sha256") != (
+            DRIVAERML_RELATIVE_PROFILE_CHUNK_SCHEMA_SHA256
+        ):
+            problem(
+                "record profile schema digest differs from the independently "
+                "pinned candidate-release schema"
+            )
         if schema_document.get("$id") != (
             "https://fluidsbench.org/schemas/v1/"
             "drivaerml-relative-profile-chunk.schema.json"
@@ -813,8 +1020,8 @@ def validate_drivaerml_relative_activation_release(
             problem("series_support_index binding declares the wrong schema")
         if support_index.get("schema") != DRIVAERML_RELATIVE_SUPPORT_INDEX_SCHEMA:
             problem("series_support_index has the wrong schema")
-        if support_index.get("schema_version") != 1:
-            problem("series_support_index schema_version must equal 1")
+        if support_index.get("schema_version") != 2:
+            problem("series_support_index schema_version must equal 2")
         if support_index.get("contract_id") != RELATIVE_PROFILE_CONTRACT_ID:
             problem("series_support_index contract_id differs from the relative contract")
         if support_index.get("scope") != "relative_families_only":
@@ -904,6 +1111,10 @@ def validate_drivaerml_relative_activation_release(
                 "retained release manifest bindings"
             )
         expected_identity_fields = {
+            "relative_cp_materialized_coordinate": (
+                "support.moving_cuts[].rows[].interval_arc_end_m encoded by "
+                "fluidsbench-drivaerml-coordinate-array-v1"
+            ),
             "relative_cp_moving_support": (
                 "support.moving_cuts[].support_identity_sha256"
             ),
@@ -913,6 +1124,11 @@ def validate_drivaerml_relative_activation_release(
             ),
             "relative_velocity_placement_receipt": (
                 "sha256(exact placement receipt bytes)"
+            ),
+            "relative_velocity_materialized_coordinate": (
+                "placement CSV line_fraction selected in order by valid rows from "
+                "the aggregate-bound 10mm mapping, encoded by "
+                "fluidsbench-drivaerml-coordinate-array-v1"
             ),
             "relative_velocity_support": (
                 "profiles[].coordinates_binary64_be_sha256"
@@ -927,9 +1143,13 @@ def validate_drivaerml_relative_activation_release(
         expected_series: dict[tuple[str, str], str] = {}
         raw_families = contract.get("families")
         if isinstance(raw_families, list):
+            raw_shared_support_groups = contract.get("shared_support_groups")
+            if not isinstance(raw_shared_support_groups, list):
+                problem("contract shared_support_groups must be an array")
+                raw_shared_support_groups = []
             shared_aliases = {
                 str(group.get("alias_member", "")).split(":", 1)[1]
-                for group in contract.get("shared_support_groups", [])
+                for group in raw_shared_support_groups
                 if isinstance(group, dict)
                 and isinstance(group.get("alias_member"), str)
                 and ":" in group["alias_member"]
@@ -966,7 +1186,12 @@ def validate_drivaerml_relative_activation_release(
             index_case_ids = []
         if official_case_ids and index_case_ids != official_case_ids:
             problem("series_support_index cases must exactly match the official registry")
-        for case_position, case in enumerate(support_index.get("cases", [])):
+        raw_index_cases = support_index.get("cases")
+        if not isinstance(raw_index_cases, list):
+            # _drivaerml_case_ids already records the precise schema error.  Keep
+            # iterating over an empty fail-closed value instead of raising here.
+            raw_index_cases = []
+        for case_position, case in enumerate(raw_index_cases):
             if not isinstance(case, dict) or set(case) != {"case_id", "series"}:
                 problem(f"series_support_index.cases[{case_position}] fields are invalid")
                 continue
@@ -976,13 +1201,22 @@ def validate_drivaerml_relative_activation_release(
                 continue
             observed: dict[tuple[str, str], str] = {}
             for series_position, item in enumerate(series):
-                expected_fields = {
+                common_fields = {
                     "family_id",
                     "station_id",
                     "representation",
                     "support_identity_sha256",
                     "placement_receipt_identity_sha256",
                 }
+                representation = (
+                    item.get("representation") if isinstance(item, dict) else None
+                )
+                expected_fields = (
+                    common_fields
+                    | {"coordinate_count", "coordinate_identity_sha256"}
+                    if representation == "materialized"
+                    else common_fields
+                )
                 if not isinstance(item, dict) or set(item) != expected_fields:
                     problem(
                         f"series_support_index {case.get('case_id')} series "
@@ -1007,6 +1241,27 @@ def validate_drivaerml_relative_activation_release(
                             f"series_support_index {case.get('case_id')} {key} "
                             f"has an invalid {digest_field}"
                         )
+                if representation == "materialized":
+                    coordinate_count = item.get("coordinate_count")
+                    if (
+                        not isinstance(coordinate_count, int)
+                        or isinstance(coordinate_count, bool)
+                        or coordinate_count < 2
+                    ):
+                        problem(
+                            f"series_support_index {case.get('case_id')} {key} "
+                            "has an invalid coordinate_count"
+                        )
+                    coordinate_digest = item.get("coordinate_identity_sha256")
+                    if (
+                        not isinstance(coordinate_digest, str)
+                        or LOWER_SHA256.fullmatch(coordinate_digest) is None
+                        or coordinate_digest == "0" * 64
+                    ):
+                        problem(
+                            f"series_support_index {case.get('case_id')} {key} "
+                            "has an invalid coordinate_identity_sha256"
+                        )
             if observed != expected_series:
                 problem(
                     f"series_support_index {case.get('case_id')} does not exactly "
@@ -1022,7 +1277,7 @@ def validate_drivaerml_relative_activation_release(
     evaluator_revision = evaluator.get("git_revision")
     if evaluator.get("status") != "frozen":
         problem("record evaluator status must be frozen")
-    if evaluator.get("repository") != "https://github.com/neilashton/fluidsbench-submission":
+    if evaluator.get("repository") != DRIVAERML_EVALUATOR_REPOSITORY:
         problem("record evaluator repository is invalid")
     if (
         not isinstance(evaluator_revision, str)
@@ -1030,6 +1285,11 @@ def validate_drivaerml_relative_activation_release(
         or evaluator_revision == "0" * 40
     ):
         problem("record evaluator git_revision must be an exact nonzero 40-hex commit")
+    elif not _drivaerml_git_commit_is_bound(root, evaluator_revision):
+        problem(
+            "record evaluator git_revision is not a commit reachable in the "
+            "local repository"
+        )
     if evaluator.get("reference_version") != dataset_spec.get("evaluation_reference_version"):
         problem("record evaluator reference_version differs from the benchmark specification")
     evaluator_is_valid = len(errors) == evaluator_error_count
@@ -1047,6 +1307,11 @@ def validate_drivaerml_relative_activation_release(
         problem("an active release requires the benchmark frozen evaluator binding")
 
     sensitivity_error_count = len(errors)
+    # An approved release must prove that the owner-reviewed Git commit saw
+    # these exact compact evidence bytes.  The large checkpoint/prediction
+    # artifacts remain external and are identified by their immutable locator
+    # and SHA-256; their retained provenance and manifests are small.
+    sensitivity_review_artifacts: list[tuple[str, Path, str]] = []
     sensitivity = record.get("sensitivity_evidence")
     sensitivity_fields = {
         "status",
@@ -1098,25 +1363,626 @@ def validate_drivaerml_relative_activation_release(
             else:
                 if evidence_digest != digest:
                     problem("sensitivity evidence SHA-256 does not match its retained bytes")
-                if (
-                    not isinstance(evidence, dict)
-                    or evidence.get("schema") != DRIVAERML_RELATIVE_SENSITIVITY_SCHEMA
-                    or evidence.get("status") != "passed"
-                    or evidence.get("model_checkpoint_count")
-                    != sensitivity.get("model_checkpoint_count")
-                    or evidence.get("bootstrap_replicate_count")
-                    != sensitivity.get("bootstrap_replicate_count")
+                sensitivity_review_artifacts.append(
+                    ("sensitivity evidence", evidence_path, digest)
+                )
+                evidence_fields = {
+                    "schema",
+                    "schema_version",
+                    "status",
+                    "dataset_revision",
+                    "evaluator",
+                    "case_scope",
+                    "model_checkpoint_count",
+                    "checkpoints",
+                    "bootstrap_replicate_count",
+                    "paired_bootstrap",
+                    "conclusion",
+                }
+                if not isinstance(evidence, dict) or set(evidence) != evidence_fields:
+                    problem(
+                        "sensitivity evidence must implement the complete v1 schema "
+                        f"with exactly {sorted(evidence_fields)}"
+                    )
+                    evidence = {}
+                if evidence.get("schema") != DRIVAERML_RELATIVE_SENSITIVITY_SCHEMA:
+                    problem("sensitivity evidence has the wrong schema")
+                if evidence.get("schema_version") != 1:
+                    problem("sensitivity evidence schema_version must equal 1")
+                if evidence.get("status") != "passed":
+                    problem("sensitivity evidence status must equal passed")
+                if source_revision is None or evidence.get("dataset_revision") != source_revision:
+                    problem(
+                        "sensitivity evidence dataset_revision must equal the retained "
+                        "official dataset revision"
+                    )
+
+                evidence_evaluator = evidence.get("evaluator")
+                expected_evidence_evaluator = {
+                    "repository": evaluator.get("repository"),
+                    "git_revision": evaluator_revision,
+                    "reference_version": evaluator.get("reference_version"),
+                }
+                if evidence_evaluator != expected_evidence_evaluator:
+                    problem(
+                        "sensitivity evidence evaluator must exactly equal the frozen "
+                        "release evaluator"
+                    )
+
+                case_scope = evidence.get("case_scope")
+                case_scope_fields = {
+                    "case_count",
+                    "case_ids",
+                    "case_ids_sha256",
+                }
+                sensitivity_case_ids: list[str] = []
+                if not isinstance(case_scope, dict) or set(case_scope) != case_scope_fields:
+                    problem(
+                        "sensitivity evidence case_scope must contain exactly "
+                        f"{sorted(case_scope_fields)}"
+                    )
+                    case_scope = {}
+                raw_sensitivity_case_ids = case_scope.get("case_ids")
+                if not isinstance(raw_sensitivity_case_ids, list):
+                    problem("sensitivity evidence case_scope.case_ids must be an array")
+                else:
+                    for position, case_id in enumerate(raw_sensitivity_case_ids):
+                        if not isinstance(case_id, str):
+                            problem(
+                                "sensitivity evidence case_scope.case_ids contains an "
+                                f"invalid value at position {position}"
+                            )
+                            continue
+                        sensitivity_case_ids.append(case_id)
+                    if len(sensitivity_case_ids) < 2:
+                        problem(
+                            "sensitivity evidence must use at least two official cases"
+                        )
+                    if len(sensitivity_case_ids) != len(set(sensitivity_case_ids)):
+                        problem("sensitivity evidence case scope contains duplicate cases")
+                    if official_case_ids:
+                        sensitivity_case_set = set(sensitivity_case_ids)
+                        expected_order = [
+                            case_id
+                            for case_id in official_case_ids
+                            if case_id in sensitivity_case_set
+                        ]
+                        if sensitivity_case_ids != expected_order:
+                            problem(
+                                "sensitivity evidence case scope must be an ordered unique "
+                                "subset of the official registry"
+                            )
+                if case_scope.get("case_count") != len(sensitivity_case_ids):
+                    problem(
+                        "sensitivity evidence case_scope.case_count must equal its "
+                        "case_ids length"
+                    )
+                if case_scope.get("case_ids_sha256") != canonical_json_sha256(
+                    sensitivity_case_ids
                 ):
-                    problem("sensitivity evidence semantics differ from the release record")
+                    problem(
+                        "sensitivity evidence case_scope.case_ids_sha256 must bind "
+                        "the ordered case IDs"
+                    )
+
+                checkpoints = evidence.get("checkpoints")
+                checkpoint_ids: list[str] = []
+                checkpoint_hashes: list[str] = []
+                training_run_ids: list[str] = []
+                checkpoint_locators: list[tuple[str, str, str]] = []
+                checkpoint_provenance_hashes: list[str] = []
+                prediction_manifest_hashes: list[str] = []
+                prediction_identity_sets: list[tuple[tuple[str, str], ...]] = []
+                checkpoint_fields = {
+                    "checkpoint_id",
+                    "model_family",
+                    "training_run_id",
+                    "artifact_kind",
+                    "checkpoint_repository",
+                    "checkpoint_revision",
+                    "checkpoint_path",
+                    "checkpoint_sha256",
+                    "checkpoint_provenance_file",
+                    "checkpoint_provenance_sha256",
+                    "prediction_manifest_file",
+                    "prediction_manifest_sha256",
+                }
+                if not isinstance(checkpoints, list) or len(checkpoints) < 3:
+                    problem(
+                        "sensitivity evidence must describe at least three trained checkpoints"
+                    )
+                    checkpoints = []
+                for position, checkpoint in enumerate(checkpoints):
+                    label = f"sensitivity evidence checkpoints[{position}]"
+                    if not isinstance(checkpoint, dict) or set(checkpoint) != checkpoint_fields:
+                        problem(
+                            f"{label} must contain exactly {sorted(checkpoint_fields)}"
+                        )
+                        continue
+                    checkpoint_id = checkpoint.get("checkpoint_id")
+                    model_family = checkpoint.get("model_family")
+                    training_run_id = checkpoint.get("training_run_id")
+                    if (
+                        not isinstance(checkpoint_id, str)
+                        or re.fullmatch(r"[a-z0-9][a-z0-9._-]{2,159}", checkpoint_id)
+                        is None
+                    ):
+                        problem(f"{label}.checkpoint_id is invalid")
+                    else:
+                        checkpoint_ids.append(checkpoint_id)
+                    if not isinstance(model_family, str) or not model_family.strip():
+                        problem(f"{label}.model_family must be non-empty")
+                    if (
+                        not isinstance(training_run_id, str)
+                        or re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._/-]{1,199}", training_run_id)
+                        is None
+                    ):
+                        problem(f"{label}.training_run_id is invalid")
+                    elif _drivaerml_text_looks_placeholder(training_run_id):
+                        problem(f"{label}.training_run_id looks placeholder-shaped")
+                    else:
+                        training_run_ids.append(training_run_id)
+                    if checkpoint.get("artifact_kind") != "trained_model_checkpoint":
+                        problem(
+                            f"{label}.artifact_kind must equal trained_model_checkpoint"
+                        )
+                    checkpoint_repository = checkpoint.get("checkpoint_repository")
+                    parsed_repository = (
+                        urlparse(checkpoint_repository)
+                        if isinstance(checkpoint_repository, str)
+                        else None
+                    )
+                    if (
+                        parsed_repository is None
+                        or parsed_repository.scheme != "https"
+                        or not parsed_repository.netloc
+                    ):
+                        problem(f"{label}.checkpoint_repository must be an HTTPS repository")
+                    elif (
+                        parsed_repository.hostname is None
+                        or parsed_repository.hostname.lower()
+                        in {"example.com", "example.net", "example.org", "localhost"}
+                        or parsed_repository.hostname.lower().endswith(
+                            (".example", ".invalid", ".localhost", ".test")
+                        )
+                        or _drivaerml_text_looks_placeholder(parsed_repository.path)
+                    ):
+                        problem(
+                            f"{label}.checkpoint_repository looks placeholder-shaped"
+                        )
+                    checkpoint_revision = checkpoint.get("checkpoint_revision")
+                    if (
+                        not isinstance(checkpoint_revision, str)
+                        or re.fullmatch(r"[a-f0-9]{40}|[a-f0-9]{64}", checkpoint_revision)
+                        is None
+                    ):
+                        problem(f"{label}.checkpoint_revision must be immutable")
+                    elif _drivaerml_hex_looks_placeholder(checkpoint_revision):
+                        problem(f"{label}.checkpoint_revision looks placeholder-shaped")
+                    checkpoint_path = checkpoint.get("checkpoint_path")
+                    if (
+                        not isinstance(checkpoint_path, str)
+                        or not checkpoint_path
+                        or Path(checkpoint_path).is_absolute()
+                        or ".." in Path(checkpoint_path).parts
+                    ):
+                        problem(f"{label}.checkpoint_path must be a safe relative path")
+                    elif _drivaerml_text_looks_placeholder(checkpoint_path):
+                        problem(f"{label}.checkpoint_path looks placeholder-shaped")
+                    if (
+                        isinstance(checkpoint_repository, str)
+                        and isinstance(checkpoint_revision, str)
+                        and isinstance(checkpoint_path, str)
+                    ):
+                        checkpoint_locators.append(
+                            (
+                                checkpoint_repository.rstrip("/"),
+                                checkpoint_revision,
+                                checkpoint_path,
+                            )
+                        )
+                    for field, collected in (
+                        ("checkpoint_sha256", checkpoint_hashes),
+                        ("prediction_manifest_sha256", prediction_manifest_hashes),
+                    ):
+                        value = checkpoint.get(field)
+                        if (
+                            not isinstance(value, str)
+                            or LOWER_SHA256.fullmatch(value) is None
+                        ):
+                            problem(f"{label}.{field} must be a nonzero SHA-256")
+                        elif _drivaerml_hex_looks_placeholder(value):
+                            problem(f"{label}.{field} looks placeholder-shaped")
+                        else:
+                            collected.append(value)
+
+                    provenance_digest = checkpoint.get(
+                        "checkpoint_provenance_sha256"
+                    )
+                    if (
+                        not isinstance(provenance_digest, str)
+                        or LOWER_SHA256.fullmatch(provenance_digest) is None
+                    ):
+                        problem(
+                            f"{label}.checkpoint_provenance_sha256 must be a "
+                            "nonzero SHA-256"
+                        )
+                    elif _drivaerml_hex_looks_placeholder(provenance_digest):
+                        problem(
+                            f"{label}.checkpoint_provenance_sha256 looks "
+                            "placeholder-shaped"
+                        )
+                    else:
+                        checkpoint_provenance_hashes.append(provenance_digest)
+                    try:
+                        provenance_path = _drivaerml_release_path(
+                            checkpoint.get("checkpoint_provenance_file"),
+                            base=dataset_directory,
+                            repository_root=root,
+                            label=f"{label}.checkpoint_provenance_file",
+                            confined_to_base=True,
+                        )
+                        provenance, actual_provenance_digest = (
+                            _load_drivaerml_release_json(
+                                provenance_path,
+                                label=f"{label} checkpoint provenance",
+                            )
+                        )
+                    except SubmissionJSONError as error:
+                        problem(str(error))
+                    else:
+                        if actual_provenance_digest != provenance_digest:
+                            problem(
+                                f"{label}.checkpoint_provenance_sha256 does not "
+                                "match the retained bytes"
+                            )
+                        if isinstance(provenance_digest, str):
+                            sensitivity_review_artifacts.append(
+                                (
+                                    f"{label} checkpoint provenance",
+                                    provenance_path,
+                                    provenance_digest,
+                                )
+                            )
+                        provenance_fields = {
+                            "schema",
+                            "schema_version",
+                            "dataset_id",
+                            "dataset_revision",
+                            "artifact_kind",
+                            "checkpoint_id",
+                            "model_family",
+                            "training_run_id",
+                            "checkpoint_repository",
+                            "checkpoint_revision",
+                            "checkpoint_path",
+                            "checkpoint_sha256",
+                            "training_completed",
+                            "training_case_count",
+                            "optimizer_step_count",
+                        }
+                        if (
+                            not isinstance(provenance, dict)
+                            or set(provenance) != provenance_fields
+                        ):
+                            problem(
+                                f"{label} checkpoint provenance must contain exactly "
+                                f"{sorted(provenance_fields)}"
+                            )
+                            provenance = {}
+                        expected_provenance = {
+                            "schema": DRIVAERML_TRAINED_CHECKPOINT_PROVENANCE_SCHEMA,
+                            "schema_version": 1,
+                            "dataset_id": "drivaerml",
+                            "dataset_revision": source_revision,
+                            "artifact_kind": "trained_model_checkpoint",
+                            "checkpoint_id": checkpoint_id,
+                            "model_family": model_family,
+                            "training_run_id": training_run_id,
+                            "checkpoint_repository": checkpoint_repository,
+                            "checkpoint_revision": checkpoint_revision,
+                            "checkpoint_path": checkpoint_path,
+                            "checkpoint_sha256": checkpoint.get(
+                                "checkpoint_sha256"
+                            ),
+                        }
+                        for field, expected_value in expected_provenance.items():
+                            if provenance.get(field) != expected_value:
+                                problem(
+                                    f"{label} checkpoint provenance {field} differs "
+                                    "from the sensitivity binding"
+                                )
+                        if provenance.get("training_completed") is not True:
+                            problem(
+                                f"{label} checkpoint provenance must attest completed "
+                                "training"
+                            )
+                        for field in ("training_case_count", "optimizer_step_count"):
+                            count = provenance.get(field)
+                            if (
+                                not isinstance(count, int)
+                                or isinstance(count, bool)
+                                or count < 1
+                            ):
+                                problem(
+                                    f"{label} checkpoint provenance {field} must be "
+                                    "a positive integer"
+                                )
+
+                    prediction_digest = checkpoint.get(
+                        "prediction_manifest_sha256"
+                    )
+                    try:
+                        prediction_path = _drivaerml_release_path(
+                            checkpoint.get("prediction_manifest_file"),
+                            base=dataset_directory,
+                            repository_root=root,
+                            label=f"{label}.prediction_manifest_file",
+                            confined_to_base=True,
+                        )
+                        prediction_manifest, actual_prediction_digest = (
+                            _load_drivaerml_release_json(
+                                prediction_path,
+                                label=f"{label} prediction manifest",
+                            )
+                        )
+                    except SubmissionJSONError as error:
+                        problem(str(error))
+                    else:
+                        if actual_prediction_digest != prediction_digest:
+                            problem(
+                                f"{label}.prediction_manifest_sha256 does not match "
+                                "the retained bytes"
+                            )
+                        if isinstance(prediction_digest, str):
+                            sensitivity_review_artifacts.append(
+                                (
+                                    f"{label} prediction manifest",
+                                    prediction_path,
+                                    prediction_digest,
+                                )
+                            )
+                        prediction_fields = {
+                            "schema",
+                            "schema_version",
+                            "dataset_id",
+                            "dataset_revision",
+                            "evaluator",
+                            "checkpoint_id",
+                            "checkpoint_sha256",
+                            "case_scope",
+                            "cases",
+                        }
+                        if (
+                            not isinstance(prediction_manifest, dict)
+                            or set(prediction_manifest) != prediction_fields
+                        ):
+                            problem(
+                                f"{label} prediction manifest must contain exactly "
+                                f"{sorted(prediction_fields)}"
+                            )
+                            prediction_manifest = {}
+                        expected_prediction_fields = {
+                            "schema": (
+                                DRIVAERML_SENSITIVITY_PREDICTION_MANIFEST_SCHEMA
+                            ),
+                            "schema_version": 1,
+                            "dataset_id": "drivaerml",
+                            "dataset_revision": source_revision,
+                            "evaluator": expected_evidence_evaluator,
+                            "checkpoint_id": checkpoint_id,
+                            "checkpoint_sha256": checkpoint.get(
+                                "checkpoint_sha256"
+                            ),
+                            "case_scope": case_scope,
+                        }
+                        for field, expected_value in expected_prediction_fields.items():
+                            if prediction_manifest.get(field) != expected_value:
+                                problem(
+                                    f"{label} prediction manifest {field} differs "
+                                    "from the sensitivity binding"
+                                )
+                        prediction_cases = prediction_manifest.get("cases")
+                        if not isinstance(prediction_cases, list):
+                            problem(f"{label} prediction manifest cases must be an array")
+                            prediction_cases = []
+                        observed_prediction_cases: list[str] = []
+                        observed_prediction_identities: list[tuple[str, str]] = []
+                        prediction_case_fields = {
+                            "case_id",
+                            "surface_prediction_sha256",
+                            "volume_prediction_sha256",
+                        }
+                        for case_position, prediction_case in enumerate(
+                            prediction_cases
+                        ):
+                            case_label = (
+                                f"{label} prediction manifest cases[{case_position}]"
+                            )
+                            if (
+                                not isinstance(prediction_case, dict)
+                                or set(prediction_case) != prediction_case_fields
+                            ):
+                                problem(
+                                    f"{case_label} must contain exactly "
+                                    f"{sorted(prediction_case_fields)}"
+                                )
+                                continue
+                            observed_prediction_cases.append(
+                                prediction_case.get("case_id")
+                            )
+                            case_prediction_identities: list[str] = []
+                            for field in (
+                                "surface_prediction_sha256",
+                                "volume_prediction_sha256",
+                            ):
+                                value = prediction_case.get(field)
+                                if (
+                                    not isinstance(value, str)
+                                    or LOWER_SHA256.fullmatch(value) is None
+                                ):
+                                    problem(f"{case_label}.{field} is invalid")
+                                elif _drivaerml_hex_looks_placeholder(value):
+                                    problem(
+                                        f"{case_label}.{field} looks "
+                                        "placeholder-shaped"
+                                    )
+                                else:
+                                    case_prediction_identities.append(value)
+                            if len(case_prediction_identities) == 2:
+                                observed_prediction_identities.append(
+                                    (
+                                        case_prediction_identities[0],
+                                        case_prediction_identities[1],
+                                    )
+                                )
+                        if observed_prediction_cases != sensitivity_case_ids:
+                            problem(
+                                f"{label} prediction manifest cases must exactly "
+                                "match the sensitivity case scope"
+                            )
+                        elif len(observed_prediction_identities) == len(
+                            sensitivity_case_ids
+                        ):
+                            prediction_identity_sets.append(
+                                tuple(observed_prediction_identities)
+                            )
+                for values, label in (
+                    (checkpoint_ids, "checkpoint IDs"),
+                    (checkpoint_hashes, "checkpoint hashes"),
+                    (training_run_ids, "training run IDs"),
+                    (checkpoint_locators, "immutable checkpoint locators"),
+                    (checkpoint_provenance_hashes, "checkpoint-provenance hashes"),
+                    (prediction_manifest_hashes, "prediction-manifest hashes"),
+                    (prediction_identity_sets, "prediction artifact identity sets"),
+                ):
+                    if len(values) != len(set(values)):
+                        problem(f"sensitivity evidence {label} must be distinct")
+                if evidence.get("model_checkpoint_count") != len(checkpoints):
+                    problem(
+                        "sensitivity evidence model_checkpoint_count must equal its "
+                        "checkpoint array length"
+                    )
+                if evidence.get("model_checkpoint_count") != sensitivity.get(
+                    "model_checkpoint_count"
+                ):
+                    problem(
+                        "sensitivity evidence model_checkpoint_count differs from "
+                        "the release record"
+                    )
+
+                bootstrap = evidence.get("paired_bootstrap")
+                bootstrap_fields = {
+                    "paired",
+                    "replicate_count",
+                    "random_seed",
+                    "resampling_unit",
+                    "comparisons",
+                }
+                if not isinstance(bootstrap, dict) or set(bootstrap) != bootstrap_fields:
+                    problem(
+                        "sensitivity evidence paired_bootstrap must contain exactly "
+                        f"{sorted(bootstrap_fields)}"
+                    )
+                    bootstrap = {}
+                if bootstrap.get("paired") is not True:
+                    problem("sensitivity bootstrap must be paired")
+                if bootstrap.get("replicate_count") != 10000:
+                    problem("sensitivity paired bootstrap must use exactly 10000 replicates")
+                random_seed = bootstrap.get("random_seed")
+                if (
+                    not isinstance(random_seed, int)
+                    or isinstance(random_seed, bool)
+                    or random_seed < 0
+                ):
+                    problem("sensitivity paired bootstrap random_seed must be non-negative")
+                if bootstrap.get("resampling_unit") != "official_case_id":
+                    problem(
+                        "sensitivity paired bootstrap resampling_unit must equal "
+                        "official_case_id"
+                    )
+                comparison_fields = {
+                    "left_checkpoint_id",
+                    "right_checkpoint_id",
+                    "metric_id",
+                    "observed_delta",
+                    "confidence_interval_95",
+                    "replicate_count",
+                }
+                comparisons = bootstrap.get("comparisons")
+                compared_checkpoint_ids: set[str] = set()
+                if not isinstance(comparisons, list) or not comparisons:
+                    problem("sensitivity paired bootstrap comparisons must be non-empty")
+                    comparisons = []
+                for position, comparison in enumerate(comparisons):
+                    label = f"sensitivity paired_bootstrap.comparisons[{position}]"
+                    if not isinstance(comparison, dict) or set(comparison) != comparison_fields:
+                        problem(f"{label} must contain exactly {sorted(comparison_fields)}")
+                        continue
+                    left = comparison.get("left_checkpoint_id")
+                    right = comparison.get("right_checkpoint_id")
+                    if left not in checkpoint_ids or right not in checkpoint_ids or left == right:
+                        problem(f"{label} must reference two distinct retained checkpoints")
+                    else:
+                        compared_checkpoint_ids.update((left, right))
+                    if (
+                        not isinstance(comparison.get("metric_id"), str)
+                        or not comparison["metric_id"].strip()
+                    ):
+                        problem(f"{label}.metric_id must be non-empty")
+                    if not is_number(comparison.get("observed_delta")):
+                        problem(f"{label}.observed_delta must be finite")
+                    interval = comparison.get("confidence_interval_95")
+                    if (
+                        not isinstance(interval, list)
+                        or len(interval) != 2
+                        or not all(is_number(value) for value in interval)
+                        or interval[0] > interval[1]
+                    ):
+                        problem(f"{label}.confidence_interval_95 is invalid")
+                    if comparison.get("replicate_count") != 10000:
+                        problem(f"{label}.replicate_count must equal 10000")
+                if checkpoint_ids and compared_checkpoint_ids != set(checkpoint_ids):
+                    problem(
+                        "sensitivity paired bootstrap comparisons must cover every checkpoint"
+                    )
+                if evidence.get("bootstrap_replicate_count") != 10000:
+                    problem(
+                        "sensitivity evidence bootstrap_replicate_count must equal 10000"
+                    )
+                if evidence.get("bootstrap_replicate_count") != sensitivity.get(
+                    "bootstrap_replicate_count"
+                ):
+                    problem(
+                        "sensitivity evidence bootstrap count differs from the release record"
+                    )
+
+                conclusion = evidence.get("conclusion")
+                conclusion_fields = {"outcome", "summary"}
+                if not isinstance(conclusion, dict) or set(conclusion) != conclusion_fields:
+                    problem(
+                        "sensitivity evidence conclusion must contain exactly outcome and summary"
+                    )
+                else:
+                    if conclusion.get("outcome") != "passed":
+                        problem("sensitivity evidence conclusion outcome must equal passed")
+                    if (
+                        not isinstance(conclusion.get("summary"), str)
+                        or not conclusion["summary"].strip()
+                    ):
+                        problem("sensitivity evidence conclusion summary must be non-empty")
         if (
             not isinstance(sensitivity.get("model_checkpoint_count"), int)
             or isinstance(sensitivity.get("model_checkpoint_count"), bool)
             or sensitivity["model_checkpoint_count"] < 3
             or not isinstance(sensitivity.get("bootstrap_replicate_count"), int)
             or isinstance(sensitivity.get("bootstrap_replicate_count"), bool)
-            or sensitivity["bootstrap_replicate_count"] < 10000
+            or sensitivity["bootstrap_replicate_count"] != 10000
         ):
-            problem("passed sensitivity evidence requires >=3 checkpoints and >=10000 bootstrap replicates")
+            problem(
+                "passed sensitivity evidence requires >=3 checkpoints and exactly "
+                "10000 paired bootstrap replicates"
+            )
     sensitivity_is_valid_and_passed = (
         sensitivity.get("status") == "passed"
         and len(errors) == sensitivity_error_count
@@ -1124,32 +1990,187 @@ def validate_drivaerml_relative_activation_release(
 
     approval_error_count = len(errors)
     approval = record.get("owner_approval")
-    approval_fields = {"status", "approved_by", "approved_at", "pull_request_url"}
-    if not isinstance(approval, dict) or set(approval) != approval_fields:
-        problem(f"record owner_approval must contain exactly {sorted(approval_fields)}")
+    if not isinstance(approval, dict):
+        problem("record owner_approval must be an object")
         approval = {}
     if approval.get("status") not in {"pending", "approved"}:
         problem("record owner_approval status must be pending or approved")
     if approval.get("status") == "pending":
+        approval_fields = {"status", "approved_by", "approved_at", "pull_request_url"}
+        if set(approval) != approval_fields:
+            problem(
+                "pending owner_approval must contain exactly "
+                f"{sorted(approval_fields)}"
+            )
         if any(
             approval.get(field) is not None
             for field in ("approved_by", "approved_at", "pull_request_url")
         ):
             problem("pending owner approval metadata must be null")
     elif approval.get("status") == "approved":
-        for field in ("approved_by", "approved_at", "pull_request_url"):
+        approval_fields = {"status", "approved_by", "approved_at", "approval_record"}
+        if set(approval) != approval_fields:
+            problem(
+                "approved owner_approval must bind a committed approval record and "
+                f"contain exactly {sorted(approval_fields)}"
+            )
+        for field in ("approved_by", "approved_at"):
             if not isinstance(approval.get(field), str) or not approval[field].strip():
                 problem(f"approved owner_approval.{field} must be a non-empty string")
+        if approval.get("approved_by") not in DRIVAERML_RELATIVE_OWNER_APPROVERS:
+            problem(
+                "owner_approval.approved_by is not an independently pinned "
+                "benchmark owner"
+            )
         try:
             date.fromisoformat(str(approval.get("approved_at")))
         except ValueError:
             problem("owner_approval.approved_at must be an ISO date")
-        pull_request_url = approval.get("pull_request_url")
-        if isinstance(pull_request_url, str) and re.fullmatch(
-            r"https://github\.com/neilashton/fluidsbench-submission/pull/[1-9][0-9]*",
-            pull_request_url,
-        ) is None:
-            problem("owner_approval.pull_request_url must identify the approving repository PR")
+        approval_binding = approval.get("approval_record")
+        approval_binding_fields = {"file", "sha256", "schema", "git_revision"}
+        if (
+            not isinstance(approval_binding, dict)
+            or set(approval_binding) != approval_binding_fields
+        ):
+            problem(
+                "owner_approval.approval_record must contain exactly "
+                f"{sorted(approval_binding_fields)}"
+            )
+            approval_binding = {}
+        if approval_binding.get("schema") != DRIVAERML_RELATIVE_OWNER_APPROVAL_SCHEMA:
+            problem("owner approval record binding has the wrong schema")
+        approval_digest = approval_binding.get("sha256")
+        if (
+            not isinstance(approval_digest, str)
+            or LOWER_SHA256.fullmatch(approval_digest) is None
+            or approval_digest == "0" * 64
+        ):
+            problem("owner approval record binding requires a nonzero SHA-256")
+        approval_revision = approval_binding.get("git_revision")
+        if (
+            not isinstance(approval_revision, str)
+            or LOWER_GIT_SHA1.fullmatch(approval_revision) is None
+            or approval_revision == "0" * 40
+            or not _drivaerml_git_commit_is_bound(root, approval_revision)
+        ):
+            problem(
+                "owner approval record git_revision must be a real commit "
+                "reachable in the local repository"
+            )
+        else:
+            if not _drivaerml_git_commit_is_on_trusted_dev(
+                root,
+                approval_revision,
+            ):
+                problem(
+                    "owner approval record git_revision must already be retained "
+                    "on fetched origin/dev from the evaluator repository"
+                )
+            if (
+                not isinstance(evaluator_revision, str)
+                or LOWER_GIT_SHA1.fullmatch(evaluator_revision) is None
+                or evaluator_revision == approval_revision
+                or not _drivaerml_git_commit_is_ancestor(
+                    root,
+                    evaluator_revision,
+                    approval_revision,
+                )
+            ):
+                problem(
+                    "owner approval record must be committed after the frozen "
+                    "evaluator revision"
+                )
+        try:
+            approval_path = _drivaerml_release_path(
+                approval_binding.get("file"),
+                base=dataset_directory,
+                repository_root=root,
+                label="owner_approval.approval_record.file",
+                confined_to_base=True,
+            )
+            approval_document, actual_approval_digest = _load_drivaerml_release_json(
+                approval_path,
+                label="owner approval record",
+            )
+        except SubmissionJSONError as error:
+            problem(str(error))
+        else:
+            if actual_approval_digest != approval_digest:
+                problem("owner approval record SHA-256 does not match its retained bytes")
+            if (
+                isinstance(approval_revision, str)
+                and LOWER_GIT_SHA1.fullmatch(approval_revision) is not None
+                and _drivaerml_git_blob_sha256(root, approval_revision, approval_path)
+                != actual_approval_digest
+            ):
+                problem(
+                    "owner approval record bytes are not retained by the bound Git commit"
+                )
+            if (
+                isinstance(approval_revision, str)
+                and LOWER_GIT_SHA1.fullmatch(approval_revision) is not None
+            ):
+                for artifact_label, artifact_path, artifact_digest in (
+                    sensitivity_review_artifacts
+                ):
+                    if (
+                        _drivaerml_git_blob_sha256(
+                            root,
+                            approval_revision,
+                            artifact_path,
+                        )
+                        != artifact_digest
+                    ):
+                        problem(
+                            f"{artifact_label} bytes were not retained by the "
+                            "owner approval commit"
+                        )
+            approval_document_fields = {
+                "schema",
+                "schema_version",
+                "activation_release_schema",
+                "activation_release_schema_version",
+                "dataset_id",
+                "release_id",
+                "status",
+                "approved_by",
+                "approved_at",
+                "contract_sha256",
+                "evaluator_git_revision",
+                "release_bindings_sha256",
+                "sensitivity_evidence_sha256",
+            }
+            if (
+                not isinstance(approval_document, dict)
+                or set(approval_document) != approval_document_fields
+            ):
+                problem(
+                    "owner approval record must implement the complete v1 schema "
+                    f"with exactly {sorted(approval_document_fields)}"
+                )
+                approval_document = {}
+            expected_approval_values = {
+                "schema": DRIVAERML_RELATIVE_OWNER_APPROVAL_SCHEMA,
+                "schema_version": 1,
+                "activation_release_schema": (
+                    DRIVAERML_RELATIVE_ACTIVATION_RECORD_SCHEMA
+                ),
+                "activation_release_schema_version": 1,
+                "dataset_id": "drivaerml",
+                "release_id": release_id,
+                "status": "approved",
+                "approved_by": approval.get("approved_by"),
+                "approved_at": approval.get("approved_at"),
+                "contract_sha256": bindings.get("contract", {}).get("sha256"),
+                "evaluator_git_revision": evaluator_revision,
+                "release_bindings_sha256": canonical_json_sha256(bindings),
+                "sensitivity_evidence_sha256": sensitivity.get("sha256"),
+            }
+            if approval_document != expected_approval_values:
+                problem(
+                    "owner approval record does not exactly bind this release, "
+                    "contract, evaluator, and sensitivity evidence"
+                )
     owner_is_valid_and_approved = (
         approval.get("status") == "approved"
         and len(errors) == approval_error_count

@@ -5,11 +5,16 @@ import hashlib
 import json
 import tempfile
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
 from jsonschema import Draft202012Validator
 
+from reference.drivaerml.coordinate_identity import (
+    CoordinateIdentityError,
+    coordinate_array_identity_sha256,
+)
 from reference.drivaerml.dataset_scorer import (
     CandidateDatasetEvaluation,
     DrivAerDatasetScorerError,
@@ -39,6 +44,21 @@ SUPPORT_IDENTITIES = {
     (case["case_id"], series["family_id"], series["station_id"]): series
     for case in SUPPORT_INDEX["cases"]
     for series in case["series"]
+}
+CONSTANT_SUPPORT_INDEX_PATH = (
+    ROOT
+    / "benchmark-specs"
+    / "drivaerml"
+    / "support"
+    / "relative-v3"
+    / "run419-constant-series-support-index.json"
+)
+CONSTANT_SUPPORT_INDEX = json.loads(
+    CONSTANT_SUPPORT_INDEX_PATH.read_text(encoding="utf-8")
+)
+CONSTANT_SUPPORT_IDENTITIES = {
+    (series["family_id"], series["station_id"]): series
+    for series in CONSTANT_SUPPORT_INDEX["series"]
 }
 
 
@@ -177,7 +197,134 @@ def chunk(case_id: str = "run_1") -> dict:
     }
 
 
+def synthetic_retained_support(document: dict) -> dict:
+    """Bind synthetic unit-test coordinates without weakening production pins."""
+
+    retained = {key: dict(value) for key, value in SUPPORT_IDENTITIES.items()}
+    for case in document["cases"]:
+        for series in case["series"]:
+            if (
+                series["representation"] == "materialized"
+                and series["family_id"]
+                in {
+                    "drivaerml-velocity-relative-v3",
+                    "drivaerml_cp_relative_v1",
+                }
+            ):
+                identity = retained[
+                    (case["case_id"], series["family_id"], series["station_id"])
+                ]
+                identity["coordinate_count"] = len(series["coordinate"])
+                identity["coordinate_identity_sha256"] = (
+                    coordinate_array_identity_sha256(series["coordinate"])
+                )
+    return retained
+
+
+def synthetic_run419_constant_support(document: dict) -> dict:
+    """Bind synthetic constant arrays while exercising the production checks."""
+
+    retained = {
+        key: dict(value) for key, value in CONSTANT_SUPPORT_IDENTITIES.items()
+    }
+    for case in document["cases"]:
+        if case["case_id"] != "run_419":
+            continue
+        for series in case["series"]:
+            if (
+                series["representation"] == "materialized"
+                and series["family_id"]
+                in {
+                    "drivaerml-autocfd5-constant-v1",
+                    "drivaerml_cp_constant_v1",
+                }
+            ):
+                identity = retained[(series["family_id"], series["station_id"])]
+                identity["support_identity_sha256"] = series[
+                    "support_identity_sha256"
+                ]
+                identity["placement_receipt_identity_sha256"] = series[
+                    "placement_receipt_identity_sha256"
+                ]
+                identity["coordinate_count"] = len(series["coordinate"])
+                identity["coordinate_identity_sha256"] = (
+                    coordinate_array_identity_sha256(series["coordinate"])
+                )
+    return retained
+
+
+@contextmanager
+def synthetic_support_patch(document: dict):
+    with patch(
+        "reference.drivaerml.dataset_scorer._relative_series_support_index",
+        return_value=synthetic_retained_support(document),
+    ), patch(
+        "reference.drivaerml.dataset_scorer._run419_constant_series_support_index",
+        return_value=synthetic_run419_constant_support(document),
+    ):
+        yield
+
+
+def validate_synthetic_chunk(document: dict) -> dict:
+    with synthetic_support_patch(document):
+        return validate_schema_v3_relative_profile_chunk_candidate(document)
+
+
 class DrivAerMLRelativeProfileTests(unittest.TestCase):
+    def test_coordinate_identity_encoding_is_canonical_and_fail_closed(self) -> None:
+        self.assertEqual(
+            coordinate_array_identity_sha256([0.0, 1.0]),
+            "a6102c31dbc506d4e846fb590395fbbf677b50a7f554d0703b7f01077f4e4b0d",
+        )
+        self.assertEqual(
+            coordinate_array_identity_sha256([-0.0, 1.0]),
+            coordinate_array_identity_sha256([0.0, 1]),
+        )
+        self.assertNotEqual(
+            coordinate_array_identity_sha256([0.0, 1.0]),
+            coordinate_array_identity_sha256([0.0, 1.0, 0.0]),
+        )
+        for invalid in ([True, 1.0], [float("nan")], [float("inf")], ["0.0"]):
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(CoordinateIdentityError):
+                    coordinate_array_identity_sha256(invalid)
+
+    def test_retained_index_v2_binds_only_materialized_coordinates(self) -> None:
+        self.assertEqual(
+            SUPPORT_INDEX["schema"],
+            "drivaerml-relative-series-support-index-v2",
+        )
+        self.assertEqual(SUPPORT_INDEX["schema_version"], 2)
+        for case in SUPPORT_INDEX["cases"]:
+            for series in case["series"]:
+                if series["representation"] == "materialized":
+                    self.assertGreaterEqual(series["coordinate_count"], 2)
+                    self.assertRegex(
+                        series["coordinate_identity_sha256"], r"^[0-9a-f]{64}$"
+                    )
+                else:
+                    self.assertNotIn("coordinate_count", series)
+                    self.assertNotIn("coordinate_identity_sha256", series)
+
+    def test_retained_run419_constant_index_binds_all_materialized_series(self) -> None:
+        self.assertEqual(
+            CONSTANT_SUPPORT_INDEX["schema"],
+            "drivaerml-run419-constant-series-support-index-v1",
+        )
+        self.assertEqual(CONSTANT_SUPPORT_INDEX["case_id"], "run_419")
+        self.assertEqual(CONSTANT_SUPPORT_INDEX["series_count"], 20)
+        self.assertEqual(len(CONSTANT_SUPPORT_IDENTITIES), 20)
+        for series in CONSTANT_SUPPORT_INDEX["series"]:
+            self.assertEqual(series["representation"], "materialized")
+            self.assertGreaterEqual(series["coordinate_count"], 2)
+            for field in (
+                "support_identity_sha256",
+                "placement_receipt_identity_sha256",
+                "coordinate_identity_sha256",
+            ):
+                self.assertRegex(series[field], r"^[0-9a-f]{64}$")
+                self.assertNotEqual(series[field], "0" * 64)
+
     def test_contract_schema_and_closed_scoring_policy_are_bound(self) -> None:
         bindings = json.loads(
             (ROOT / "benchmark-specs" / "drivaerml" / "candidate-release-bindings.json").read_text()
@@ -255,7 +402,7 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             (ROOT / "schemas" / "v1" / "drivaerml-relative-profile-chunk.schema.json").read_text()
         )
         self.assertEqual(list(Draft202012Validator(schema).iter_errors(document)), [])
-        normalized = validate_schema_v3_relative_profile_chunk_candidate(document)
+        normalized = validate_synthetic_chunk(document)
         self.assertEqual(len(normalized["cases"][0]["series"]), 40)
         aliases = [
             series
@@ -263,6 +410,126 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             if series["representation"] == "shared_alias"
         ]
         self.assertEqual(len(aliases), 2)
+
+    def test_materialized_relative_coordinate_mutations_are_rejected(self) -> None:
+        cp_document = chunk()
+        retained = synthetic_retained_support(cp_document)
+        relative_cp = next(
+            series
+            for series in cp_document["cases"][0]["series"]
+            if series["family_id"] == "drivaerml_cp_relative_v1"
+            and series["representation"] == "materialized"
+        )
+        relative_cp["coordinate"][0] = 1234.0
+        with patch(
+            "reference.drivaerml.dataset_scorer._relative_series_support_index",
+            return_value=retained,
+        ):
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError, "coordinate identity differs"
+            ):
+                validate_schema_v3_relative_profile_chunk_candidate(cp_document)
+
+        velocity_document = chunk()
+        retained = synthetic_retained_support(velocity_document)
+        relative_velocity = next(
+            series
+            for series in velocity_document["cases"][0]["series"]
+            if series["family_id"] == "drivaerml-velocity-relative-v3"
+        )
+        relative_velocity["coordinate"][1] += 1.0e-6
+        with patch(
+            "reference.drivaerml.dataset_scorer._relative_series_support_index",
+            return_value=retained,
+        ):
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError, "coordinate identity differs"
+            ):
+                validate_schema_v3_relative_profile_chunk_candidate(
+                    velocity_document
+                )
+
+    def test_constant_velocity_rejects_unretained_subsets_for_other_cases(self) -> None:
+        document = chunk()
+        validate_synthetic_chunk(document)
+        constant_velocity = next(
+            series
+            for series in document["cases"][0]["series"]
+            if series["family_id"] == "drivaerml-autocfd5-constant-v1"
+        )
+        constant_velocity["coordinate"] = constant_velocity["coordinate"][:2]
+        constant_velocity["prediction"] = constant_velocity["prediction"][:2]
+        with self.assertRaisesRegex(
+            DrivAerDatasetScorerError,
+            "must provide the complete frozen constant coordinate grid",
+        ):
+            validate_synthetic_chunk(document)
+
+    def test_run419_constant_series_require_exact_retained_bindings(self) -> None:
+        synthetic = chunk("run_419")
+        validate_synthetic_chunk(synthetic)
+
+        wrong_support = copy.deepcopy(synthetic)
+        constant_velocity = next(
+            series
+            for series in wrong_support["cases"][0]["series"]
+            if series["family_id"] == "drivaerml-autocfd5-constant-v1"
+        )
+        retained_relative = synthetic_retained_support(wrong_support)
+        retained_constant = synthetic_run419_constant_support(wrong_support)
+        constant_velocity["support_identity_sha256"] = digest("wrong-run419-support")
+        with patch(
+            "reference.drivaerml.dataset_scorer._relative_series_support_index",
+            return_value=retained_relative,
+        ), patch(
+            "reference.drivaerml.dataset_scorer._run419_constant_series_support_index",
+            return_value=retained_constant,
+        ):
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "support identity differs from the retained run_419 constant",
+            ):
+                validate_schema_v3_relative_profile_chunk_candidate(wrong_support)
+
+        sparse = chunk("run_419")
+        sparse_velocity = next(
+            series
+            for series in sparse["cases"][0]["series"]
+            if series["family_id"] == "drivaerml-autocfd5-constant-v1"
+        )
+        sparse_velocity["coordinate"] = [0.0, 0.02, 0.04]
+        sparse_velocity["prediction"] = [0.5, 0.5, 0.5]
+        retained_relative = synthetic_retained_support(sparse)
+        retained_constant = synthetic_run419_constant_support(sparse)
+        with patch(
+            "reference.drivaerml.dataset_scorer._relative_series_support_index",
+            return_value=retained_relative,
+        ), patch(
+            "reference.drivaerml.dataset_scorer._run419_constant_series_support_index",
+            return_value=retained_constant,
+        ):
+            validate_schema_v3_relative_profile_chunk_candidate(sparse)
+            sparse_velocity["coordinate"][1] = 0.03
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "coordinate identity differs from the retained run_419 constant",
+            ):
+                validate_schema_v3_relative_profile_chunk_candidate(sparse)
+
+        full_grid_with_unbound_identities = chunk("run_419")
+        with patch(
+            "reference.drivaerml.dataset_scorer._relative_series_support_index",
+            return_value=synthetic_retained_support(
+                full_grid_with_unbound_identities
+            ),
+        ):
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "differs from the retained run_419 constant support index",
+            ):
+                validate_schema_v3_relative_profile_chunk_candidate(
+                    full_grid_with_unbound_identities
+                )
 
     def test_semantics_reject_stale_velocity_families_and_alias_identity_mismatch(self) -> None:
         for stale_family in (
@@ -276,9 +543,14 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                     for series in stale["cases"][0]["series"]
                     if series["family_id"] == "drivaerml-velocity-relative-v3"
                 )
+                retained = synthetic_retained_support(stale)
                 relative_velocity["family_id"] = stale_family
                 with self.assertRaisesRegex(DrivAerDatasetScorerError, "undeclared"):
-                    validate_schema_v3_relative_profile_chunk_candidate(stale)
+                    with patch(
+                        "reference.drivaerml.dataset_scorer._relative_series_support_index",
+                        return_value=retained,
+                    ):
+                        validate_schema_v3_relative_profile_chunk_candidate(stale)
 
         mismatched = chunk()
         alias = next(
@@ -290,7 +562,7 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             "wrong-canonical-support"
         )
         with self.assertRaisesRegex(DrivAerDatasetScorerError, "retained relative support index"):
-            validate_schema_v3_relative_profile_chunk_candidate(mismatched)
+            validate_synthetic_chunk(mismatched)
 
         drifted = chunk()
         constant_velocity = next(
@@ -302,12 +574,12 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         with self.assertRaisesRegex(
             DrivAerDatasetScorerError, "preserve the frozen constant coordinate grid"
         ):
-            validate_schema_v3_relative_profile_chunk_candidate(drifted)
+            validate_synthetic_chunk(drifted)
 
         incomplete = chunk()
         incomplete["cases"][0]["series"].pop()
         with self.assertRaisesRegex(DrivAerDatasetScorerError, "exactly 40"):
-            validate_schema_v3_relative_profile_chunk_candidate(incomplete)
+            validate_synthetic_chunk(incomplete)
 
     def test_semantics_reject_wrong_and_all_zero_relative_identities(self) -> None:
         for mutation in (
@@ -347,7 +619,7 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                             else digest("hash-shaped-but-wrong-receipt")
                         )
                 with self.assertRaises(DrivAerDatasetScorerError):
-                    validate_schema_v3_relative_profile_chunk_candidate(document)
+                    validate_synthetic_chunk(document)
 
     def test_adapter_writes_40_series_per_case_without_changing_legacy_writer(self) -> None:
         evaluation = CandidateDatasetEvaluation(
@@ -359,20 +631,29 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                 }
             }
         )
-        package = schema_v3_relative_profile_chunks_candidate_adapter(
-            evaluation,
-            submission_id="relative-profile-test",
-            namespaced_series_by_case={
-                "run_1": namespaced_series("run_1"),
-                "run_2": namespaced_series("run_2"),
-            },
-            cases_per_chunk=1,
-        )
-        self.assertEqual(package.index["format"], RELATIVE_PROFILE_FORMAT)
-        with tempfile.TemporaryDirectory() as temporary:
-            receipt = write_schema_v3_profile_chunks_candidate(
-                package, Path(temporary) / "profiles"
+        series_by_case = {
+            "run_1": namespaced_series("run_1"),
+            "run_2": namespaced_series("run_2"),
+        }
+        synthetic_document = {
+            "cases": [
+                {"case_id": case_id, "series": series}
+                for case_id, series in series_by_case.items()
+            ]
+        }
+        with synthetic_support_patch(synthetic_document):
+            package = schema_v3_relative_profile_chunks_candidate_adapter(
+                evaluation,
+                submission_id="relative-profile-test",
+                namespaced_series_by_case=series_by_case,
+                cases_per_chunk=1,
             )
+        self.assertEqual(package.index["format"], RELATIVE_PROFILE_FORMAT)
+        with synthetic_support_patch(synthetic_document):
+            with tempfile.TemporaryDirectory() as temporary:
+                receipt = write_schema_v3_profile_chunks_candidate(
+                    package, Path(temporary) / "profiles"
+                )
         self.assertEqual(receipt["case_count"], 2)
         self.assertEqual(receipt["series_count"], 80)
 
@@ -386,15 +667,24 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                 }
             }
         )
-        package = schema_v3_relative_profile_chunks_candidate_adapter(
-            evaluation,
-            submission_id="relative-profile-test",
-            namespaced_series_by_case={"run_1": namespaced_series("run_1")},
-        )
+        run_1_series = namespaced_series("run_1")
+        with synthetic_support_patch(
+            {"cases": [{"case_id": "run_1", "series": run_1_series}]}
+        ):
+            package = schema_v3_relative_profile_chunks_candidate_adapter(
+                evaluation,
+                submission_id="relative-profile-test",
+                namespaced_series_by_case={"run_1": run_1_series},
+            )
         with tempfile.TemporaryDirectory() as temporary:
             temporary_root = Path(temporary)
             directory = temporary_root / "submissions" / "drivaerml" / "relative-profile-test"
-            write_schema_v3_profile_chunks_candidate(package, directory / "profiles")
+            with synthetic_support_patch(
+                {"cases": [{"case_id": "run_1", "series": run_1_series}]}
+            ):
+                write_schema_v3_profile_chunks_candidate(
+                    package, directory / "profiles"
+                )
             split_path = temporary_root / "benchmark-specs" / "drivaerml" / "splits" / "full.json"
             split = {
                 "schema_version": "1.0",
@@ -435,14 +725,17 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                 },
             }
             errors: list[str] = []
-            with patch("scripts.validate_submission.ROOT", temporary_root):
-                stats = validate_profiles(
-                    errors.append,
-                    directory,
-                    submission,
-                    bypass_spec,
-                    split_entry,
-                )
+            with synthetic_support_patch(
+                {"cases": [{"case_id": "run_1", "series": run_1_series}]}
+            ):
+                with patch("scripts.validate_submission.ROOT", temporary_root):
+                    stats = validate_profiles(
+                        errors.append,
+                        directory,
+                        submission,
+                        bypass_spec,
+                        split_entry,
+                    )
             self.assertEqual(stats, {"cases": 1, "series": 40})
             joined = "\n".join(errors)
             self.assertIn("activation_release must contain exactly", joined)
@@ -453,14 +746,17 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                 {"status": "support_pending", "profile_format_enabled": False}
             )
             errors = []
-            with patch("scripts.validate_submission.ROOT", temporary_root):
-                validate_profiles(
-                    errors.append,
-                    directory,
-                    submission,
-                    pending_spec,
-                    split_entry,
-                )
+            with synthetic_support_patch(
+                {"cases": [{"case_id": "run_1", "series": run_1_series}]}
+            ):
+                with patch("scripts.validate_submission.ROOT", temporary_root):
+                    validate_profiles(
+                        errors.append,
+                        directory,
+                        submission,
+                        pending_spec,
+                        split_entry,
+                    )
             self.assertIn("relative profile format is closed", "\n".join(errors))
 
 

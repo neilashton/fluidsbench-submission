@@ -12,10 +12,22 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import re
 import struct
+import sys
 from pathlib import Path
 from typing import Any, Mapping
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from reference.drivaerml.coordinate_identity import (  # noqa: E402
+    CoordinateIdentityError,
+    coordinate_array_identity_sha256,
+)
 
 
 DATASET_REVISION = "7a5c0948ce27be709b1116a3a190f806e7a8f79f"
@@ -208,10 +220,17 @@ def official_case_ids(repo_root: Path) -> list[str]:
     return result  # type: ignore[return-value]
 
 
-def profile_coordinate_hashes(csv_path: Path) -> dict[str, str]:
+def velocity_coordinate_rows(
+    csv_path: Path,
+) -> tuple[dict[str, str], dict[str, list[dict[str, object]]]]:
+    """Replay placement hashes and retain typed rows for exact mapping joins."""
+
     regular(csv_path, "velocity coordinate CSV")
     hashers = {station: hashlib.sha256() for station in VELOCITY_STATIONS}
     counts = {station: 0 for station in VELOCITY_STATIONS}
+    rows: dict[str, list[dict[str, object]]] = {
+        station: [] for station in VELOCITY_STATIONS
+    }
     with csv_path.open("r", encoding="utf-8", newline="") as stream:
         reader = csv.DictReader(stream)
         expected_fields = [
@@ -228,9 +247,25 @@ def profile_coordinate_hashes(csv_path: Path) -> dict[str, str]:
                 raise IndexError("velocity coordinate CSV namespace differs")
             if int(row["sample_index"]) != counts[station]:
                 raise IndexError(f"velocity coordinate CSV {station} order differs")
-            hashers[station].update(struct.pack(
-                ">ddd", float(row["x_m"]), float(row["y_m"]), float(row["z_m"])
-            ))
+            expected_count = int(row["point_count"])
+            line_fraction = float(row["line_fraction"])
+            distance_m = float(row["distance_m"])
+            point_m = [float(row[field]) for field in ("x_m", "y_m", "z_m")]
+            if (
+                expected_count < 2
+                or not all(math.isfinite(value) for value in (line_fraction, distance_m, *point_m))
+            ):
+                raise IndexError(f"velocity coordinate CSV {station} contains invalid numerics")
+            hashers[station].update(struct.pack(">ddd", *point_m))
+            rows[station].append(
+                {
+                    "sample_index": counts[station],
+                    "point_count": expected_count,
+                    "line_fraction": line_fraction,
+                    "distance_m": distance_m,
+                    "point_m": point_m,
+                }
+            )
             counts[station] += 1
     expected_counts = {
         **{station: 201 for station in VELOCITY_STATIONS[:6]},
@@ -242,7 +277,204 @@ def profile_coordinate_hashes(csv_path: Path) -> dict[str, str]:
     }
     if counts != expected_counts:
         raise IndexError(f"velocity coordinate CSV counts differ: {counts}")
-    return {station: hashers[station].hexdigest() for station in VELOCITY_STATIONS}
+    for station, expected_count in expected_counts.items():
+        station_rows = rows[station]
+        if (
+            any(row["point_count"] != expected_count for row in station_rows)
+            or station_rows[0]["line_fraction"] != 0.0
+            or station_rows[-1]["line_fraction"] != 1.0
+            or any(
+                right["line_fraction"] <= left["line_fraction"]
+                for left, right in zip(station_rows, station_rows[1:])
+            )
+        ):
+            raise IndexError(f"velocity coordinate CSV {station} normalized grid differs")
+    return (
+        {station: hashers[station].hexdigest() for station in VELOCITY_STATIONS},
+        rows,
+    )
+
+
+def verified_velocity_valid_coordinates(
+    producer_root: Path,
+    case_id: str,
+    mapping_row: Mapping[str, object],
+    coordinate_rows: Mapping[str, list[dict[str, object]]],
+) -> dict[str, list[float]]:
+    """Verify the aggregate-bound 10 mm map and return its valid fractions."""
+
+    case_root = producer_root / "velocity_mapping_v3/cases" / case_id
+    mapping_path = regular(
+        case_root / "velocity-relative-v3-cell-mapping-10mm.json",
+        f"{case_id} velocity 10 mm mapping",
+    )
+    receipt_path = regular(case_root / "receipt.json", f"{case_id} velocity mapping receipt")
+    artifacts = mapping_row.get("artifacts")
+    if not isinstance(artifacts, list):
+        raise IndexError(f"{case_id} aggregate mapping artifacts differ")
+    ten_mm_bindings = [
+        item
+        for item in artifacts
+        if isinstance(item, dict) and item.get("nominal_spacing_mm") == 10
+    ]
+    if len(ten_mm_bindings) != 1:
+        raise IndexError(f"{case_id} aggregate must bind one 10 mm mapping")
+    aggregate_mapping_sha = digest(
+        ten_mm_bindings[0].get("sha256"), f"{case_id} aggregate 10 mm mapping"
+    )
+    if sha256_file(mapping_path) != aggregate_mapping_sha:
+        raise IndexError(f"{case_id} 10 mm mapping bytes differ from aggregate")
+    if sha256_file(receipt_path) != digest(
+        mapping_row.get("receipt_sha256"), f"{case_id} aggregate mapping receipt"
+    ):
+        raise IndexError(f"{case_id} mapping receipt bytes differ from aggregate")
+
+    receipt = load_json(receipt_path, f"{case_id} velocity mapping receipt")
+    if (
+        receipt.get("schema")
+        != "drivaerml-velocity-relative-v3-cell-mapping-case-v1"
+        or receipt.get("schema_version") != 1
+        or receipt.get("dataset_id") != "drivaerml"
+        or receipt.get("case_id") != case_id
+        or receipt.get("family_id") != VELOCITY_FAMILY
+        or receipt.get("placement_mode") != "relative"
+        or receipt.get("public_dataset_revision") != DATASET_REVISION
+    ):
+        raise IndexError(f"{case_id} mapping receipt declaration differs")
+    receipt_artifacts = receipt.get("artifacts")
+    if not isinstance(receipt_artifacts, list):
+        raise IndexError(f"{case_id} mapping receipt artifacts differ")
+    receipt_ten_mm = [
+        item
+        for item in receipt_artifacts
+        if isinstance(item, dict) and item.get("nominal_spacing_mm") == 10
+    ]
+    if (
+        len(receipt_ten_mm) != 1
+        or receipt_ten_mm[0].get("artifact")
+        != "velocity-relative-v3-cell-mapping-10mm.json"
+        or receipt_ten_mm[0].get("sha256") != aggregate_mapping_sha
+        or receipt_ten_mm[0].get("assignment_evidence_sha256")
+        != ten_mm_bindings[0].get("assignment_evidence_sha256")
+    ):
+        raise IndexError(f"{case_id} mapping receipt/aggregate 10 mm binding differs")
+
+    mapping = load_json(mapping_path, f"{case_id} velocity 10 mm mapping")
+    relative_support = mapping.get("relative_placement_support")
+    resolution = mapping.get("resolution")
+    coverage = mapping.get("coverage")
+    raw_rows = mapping.get("rows")
+    expected_rows = [
+        (station, row)
+        for station in VELOCITY_STATIONS
+        for row in coordinate_rows[station]
+    ]
+    expected_per_profile_counts = {
+        station: len(coordinate_rows[station]) for station in VELOCITY_STATIONS
+    }
+    if (
+        mapping.get("schema") != "drivaerml-velocity-relative-v3-cell-mapping-v1"
+        or mapping.get("schema_version") != 1
+        or mapping.get("dataset_id") != "drivaerml"
+        or mapping.get("case_id") != case_id
+        or mapping.get("family_id") != VELOCITY_FAMILY
+        or mapping.get("placement_mode") != "relative"
+        or mapping.get("assignment_evidence_sha256")
+        != ten_mm_bindings[0].get("assignment_evidence_sha256")
+        or mapping.get("row_fields")
+        != [
+            "profile_id",
+            "sample_index",
+            "point_m",
+            "distance_m",
+            "valid",
+            "reason",
+            "raw_vtk_cell_id",
+            "candidate_count",
+        ]
+        or not isinstance(relative_support, dict)
+        or relative_support.get("coordinate_csv_sha256")
+        != mapping_row.get("coordinate_csv_sha256")
+        or relative_support.get("placement_receipt_sha256")
+        != mapping_row.get("placement_receipt_sha256")
+        or not isinstance(resolution, dict)
+        or resolution.get("nominal_spacing_mm") != 10
+        or resolution.get("sample_namespace") != "fixed_normalized_arc_index"
+        or resolution.get("sample_count") != len(expected_rows)
+        or resolution.get("per_profile_counts") != expected_per_profile_counts
+        or resolution.get("line_count") != len(VELOCITY_STATIONS)
+        or not isinstance(coverage, dict)
+        or coverage.get("complete_duplicate_free_no_omissions") is not True
+        or coverage.get("actual_sample_count") != len(expected_rows)
+        or coverage.get("expected_sample_count") != len(expected_rows)
+        or coverage.get("unique_profile_sample_key_count") != len(expected_rows)
+        or not isinstance(raw_rows, list)
+        or len(raw_rows) != len(expected_rows)
+    ):
+        raise IndexError(f"{case_id} 10 mm mapping declaration differs")
+
+    valid_coordinates = {station: [] for station in VELOCITY_STATIONS}
+    valid_count = 0
+    invalid_count = 0
+    invalid_reason_counts: dict[str, int] = {}
+    for position, (raw_row, expected_row) in enumerate(
+        zip(raw_rows, expected_rows, strict=True)
+    ):
+        expected_station, coordinate_row = expected_row
+        if not isinstance(raw_row, list) or len(raw_row) != 8:
+            raise IndexError(f"{case_id} mapping row {position} shape differs")
+        (
+            station,
+            sample_index,
+            point_m,
+            distance_m,
+            valid,
+            reason,
+            raw_vtk_cell_id,
+            candidate_count,
+        ) = raw_row
+        if (
+            station != expected_station
+            or sample_index != coordinate_row["sample_index"]
+            or point_m != coordinate_row["point_m"]
+            or distance_m != coordinate_row["distance_m"]
+            or not isinstance(valid, bool)
+            or isinstance(candidate_count, bool)
+            or not isinstance(candidate_count, int)
+            or candidate_count < 0
+        ):
+            raise IndexError(f"{case_id} mapping row {position} differs from placement CSV")
+        if valid:
+            if (
+                reason != ""
+                or isinstance(raw_vtk_cell_id, bool)
+                or not isinstance(raw_vtk_cell_id, int)
+                or raw_vtk_cell_id < 0
+                or candidate_count < 1
+            ):
+                raise IndexError(f"{case_id} valid mapping row {position} is malformed")
+            valid_coordinates[station].append(float(coordinate_row["line_fraction"]))
+            valid_count += 1
+        else:
+            if not isinstance(reason, str) or not reason or raw_vtk_cell_id is not None:
+                raise IndexError(f"{case_id} invalid mapping row {position} is malformed")
+            invalid_count += 1
+            invalid_reason_counts[reason] = invalid_reason_counts.get(reason, 0) + 1
+    if (
+        coverage.get("valid_count") != valid_count
+        or coverage.get("invalid_count") != invalid_count
+        or receipt_ten_mm[0].get("valid_count") != valid_count
+        or receipt_ten_mm[0].get("invalid_count") != invalid_count
+        or receipt_ten_mm[0].get("sample_count") != valid_count + invalid_count
+        or coverage.get("invalid_reason_counts") != invalid_reason_counts
+    ):
+        raise IndexError(f"{case_id} mapping valid/invalid counts differ")
+    if any(
+        len(values) < 2 or any(right <= left for left, right in zip(values, values[1:]))
+        for values in valid_coordinates.values()
+    ):
+        raise IndexError(f"{case_id} mapping has an unusable valid coordinate subset")
+    return valid_coordinates
 
 
 def velocity_series(
@@ -250,7 +482,7 @@ def velocity_series(
     case_id: str,
     placement_row: Mapping[str, object],
     mapping_row: Mapping[str, object],
-) -> list[dict[str, str]]:
+) -> list[dict[str, object]]:
     case_root = producer_root / "velocity_support_v3/production_campaign_v1/cases" / case_id
     receipt_path = regular(
         case_root / f"{case_id}-relative-v3-velocity-receipt.json",
@@ -288,8 +520,14 @@ def velocity_series(
         != list(VELOCITY_STATIONS)
     ):
         raise IndexError(f"{case_id} velocity receipt declaration differs")
-    replayed = profile_coordinate_hashes(csv_path)
-    result: list[dict[str, str]] = []
+    replayed, coordinate_rows = velocity_coordinate_rows(csv_path)
+    valid_coordinates = verified_velocity_valid_coordinates(
+        producer_root,
+        case_id,
+        mapping_row,
+        coordinate_rows,
+    )
+    result: list[dict[str, object]] = []
     for profile in profiles:
         if not isinstance(profile, dict):
             raise IndexError(f"{case_id} velocity profile must be an object")
@@ -300,12 +538,21 @@ def velocity_series(
         )
         if support_sha != replayed[station]:
             raise IndexError(f"{case_id}/{station} velocity support identity does not replay")
+        coordinates = valid_coordinates[station]
+        try:
+            coordinate_identity = coordinate_array_identity_sha256(coordinates)
+        except CoordinateIdentityError as error:
+            raise IndexError(
+                f"{case_id}/{station} velocity coordinate identity cannot be encoded: {error}"
+            ) from error
         result.append({
             "family_id": VELOCITY_FAMILY,
             "station_id": station,
             "representation": "materialized",
             "support_identity_sha256": support_sha,
             "placement_receipt_identity_sha256": receipt_sha,
+            "coordinate_count": len(coordinates),
+            "coordinate_identity_sha256": coordinate_identity,
         })
     return result
 
@@ -325,7 +572,7 @@ def cp_series(
     producer_root: Path,
     case_id: str,
     aggregate_row: Mapping[str, object],
-) -> list[dict[str, str]]:
+) -> list[dict[str, object]]:
     case_root = producer_root / "cp_support/campaign_v3/native_support_v3/cases" / case_id
     support_path = regular(case_root / "relative-case-support.json", f"{case_id} Cp support")
     placement_path = regular(case_root / "placement-receipt.json", f"{case_id} Cp placement receipt")
@@ -389,7 +636,7 @@ def cp_series(
         raise IndexError(f"{case_id} Cp alias station order differs")
     if [row.get("station_id") for row in moving if isinstance(row, dict)] != list(CP_MOVING_STATIONS):
         raise IndexError(f"{case_id} Cp moving station order differs")
-    result: list[dict[str, str]] = []
+    result: list[dict[str, object]] = []
     for alias in aliases:
         if not isinstance(alias, dict):
             raise IndexError(f"{case_id} Cp alias must be an object")
@@ -415,12 +662,30 @@ def cp_series(
         )
         if support_identity != sha256_bytes(cp_canonical_bytes(cut_body)):
             raise IndexError(f"{case_id}/{station} moving Cp support identity does not replay")
+        rows = cut.get("rows")
+        if not isinstance(rows, list) or len(rows) < 2:
+            raise IndexError(f"{case_id}/{station} moving Cp rows differ")
+        coordinates: list[object] = []
+        for position, row in enumerate(rows):
+            if not isinstance(row, dict) or "interval_arc_end_m" not in row:
+                raise IndexError(
+                    f"{case_id}/{station} moving Cp row {position} differs"
+                )
+            coordinates.append(row["interval_arc_end_m"])
+        try:
+            coordinate_identity = coordinate_array_identity_sha256(coordinates)
+        except CoordinateIdentityError as error:
+            raise IndexError(
+                f"{case_id}/{station} moving Cp coordinate identity cannot be encoded: {error}"
+            ) from error
         result.append({
             "family_id": CP_FAMILY,
             "station_id": station,
             "representation": "materialized",
             "support_identity_sha256": support_identity,
             "placement_receipt_identity_sha256": placement_identity,
+            "coordinate_count": len(coordinates),
+            "coordinate_identity_sha256": coordinate_identity,
         })
     return result
 
@@ -470,7 +735,16 @@ def generate(repo_root: Path, producer_root: Path) -> dict[str, object]:
             for role, binding in MANIFESTS.items()
         ],
         "producer_identity_fields": {
+            "relative_cp_materialized_coordinate": (
+                "support.moving_cuts[].rows[].interval_arc_end_m encoded by "
+                "fluidsbench-drivaerml-coordinate-array-v1"
+            ),
             "relative_velocity_support": "profiles[].coordinates_binary64_be_sha256",
+            "relative_velocity_materialized_coordinate": (
+                "placement CSV line_fraction selected in order by valid rows from the "
+                "aggregate-bound 10mm mapping, encoded by "
+                "fluidsbench-drivaerml-coordinate-array-v1"
+            ),
             "relative_velocity_placement_receipt": "sha256(exact placement receipt bytes)",
             "relative_cp_moving_support": "support.moving_cuts[].support_identity_sha256",
             "relative_cp_shared_alias_support": (
@@ -480,8 +754,8 @@ def generate(repo_root: Path, producer_root: Path) -> dict[str, object]:
         },
     }
     return {
-        "schema": "drivaerml-relative-series-support-index-v1",
-        "schema_version": 1,
+        "schema": "drivaerml-relative-series-support-index-v2",
+        "schema_version": 2,
         "dataset_id": "drivaerml",
         "contract_id": CONTRACT_ID,
         "scope": "relative_families_only",
