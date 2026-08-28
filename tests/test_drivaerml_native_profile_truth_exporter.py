@@ -258,6 +258,110 @@ class DrivAerMLNativeProfileTruthExporterTests(unittest.TestCase):
                 mutated[field] = replacement
                 self.assertNotEqual(supplied, exporter.series_identity_sha256(mutated))
 
+    def test_materialized_cp_binds_aligned_physical_x_for_display_only(self) -> None:
+        series = exporter.materialized_series(
+            panel_id="pressure_profiles",
+            family_id=exporter.CONSTANT_CP_FAMILY,
+            placement_mode="constant",
+            station_id="upperbody_centerline",
+            quantity_id="cp",
+            quantity="pressure_coefficient",
+            units="1",
+            scoring_role="inherits_parent_candidate",
+            support_identity_sha256="1" * 64,
+            placement_receipt_identity_sha256="2" * 64,
+            coordinate_id="arc_length_m",
+            coordinate_unit="m",
+            sample_index=[0, 1, 2],
+            raw_native_cell_id=[7, 11, 13],
+            coordinate=[0.1, 0.2, 0.3],
+            value=[-0.2, 0.1, 0.4],
+            segments=exporter.compact_segments(
+                [0, 1, 2], [0.1, 0.2, 0.3], labels=["cut"] * 3
+            ),
+            unsupported_samples=[],
+            display_coordinate_id=exporter.CP_DISPLAY_COORDINATE_ID,
+            display_coordinate_unit=exporter.CP_DISPLAY_COORDINATE_UNIT,
+            display_coordinate=[-0.0, 1.25, -3.5],
+        )
+        self.assertEqual(series["coordinate"], [0.1, 0.2, 0.3])
+        self.assertEqual(
+            series["display_coordinate_identity_sha256"],
+            "f971e8e435f0cbcb4820ad42f57bf5c20d068befcdf1953e9479f8151b967ca0",
+        )
+        body = dict(series)
+        supplied = body.pop("series_identity_sha256")
+        self.assertEqual(supplied, exporter.series_identity_sha256(body))
+
+        stale = copy.deepcopy(body)
+        stale["display_coordinate"][1] = 1234.0
+        self.assertEqual(supplied, exporter.series_identity_sha256(stale))
+        self.assertNotEqual(
+            stale["display_coordinate_identity_sha256"],
+            coordinate_array_identity_sha256(stale["display_coordinate"]),
+        )
+        rebound = copy.deepcopy(stale)
+        rebound["display_coordinate_identity_sha256"] = coordinate_array_identity_sha256(
+            rebound["display_coordinate"]
+        )
+        self.assertNotEqual(supplied, exporter.series_identity_sha256(rebound))
+
+        common = dict(
+            panel_id="pressure_profiles",
+            family_id=exporter.CONSTANT_CP_FAMILY,
+            placement_mode="constant",
+            station_id="upperbody_centerline",
+            quantity_id="cp",
+            quantity="pressure_coefficient",
+            units="1",
+            scoring_role="inherits_parent_candidate",
+            support_identity_sha256="1" * 64,
+            placement_receipt_identity_sha256="2" * 64,
+            coordinate_id="arc_length_m",
+            coordinate_unit="m",
+            sample_index=[0, 1],
+            raw_native_cell_id=[7, 11],
+            coordinate=[0.1, 0.2],
+            value=[-0.2, 0.1],
+            segments=exporter.compact_segments([0, 1], [0.1, 0.2]),
+            unsupported_samples=[],
+        )
+        with self.assertRaisesRegex(exporter.ExportError, "supplied together"):
+            exporter.materialized_series(
+                **common,
+                display_coordinate_id=exporter.CP_DISPLAY_COORDINATE_ID,
+            )
+        with self.assertRaisesRegex(exporter.ExportError, "align"):
+            exporter.materialized_series(
+                **common,
+                display_coordinate_id=exporter.CP_DISPLAY_COORDINATE_ID,
+                display_coordinate_unit="m",
+                display_coordinate=[0.0],
+            )
+        with self.assertRaisesRegex(exporter.ExportError, "finite"):
+            exporter.materialized_series(
+                **common,
+                display_coordinate_id=exporter.CP_DISPLAY_COORDINATE_ID,
+                display_coordinate_unit="m",
+                display_coordinate=[0.0, float("nan")],
+            )
+
+    def test_cp_display_coordinate_uses_retained_segment_midpoint_x(self) -> None:
+        row = {
+            "endpoint_start_m": [-0.75, 0.0, 0.2],
+            "endpoint_end_m": [-0.25, 0.0, 0.2],
+            "length_m": 0.5,
+        }
+        self.assertEqual(exporter.cp_display_coordinate_x(row, "test row"), -0.5)
+        for mutation, message in (
+            ({"endpoint_start_m": [-0.75, 0.0]}, "three coordinates"),
+            ({"endpoint_end_m": [-0.25, float("inf"), 0.2]}, "finite"),
+            ({"length_m": 0.6}, "does not replay"),
+        ):
+            with self.subTest(mutation=mutation):
+                with self.assertRaisesRegex(exporter.ExportError, message):
+                    exporter.cp_display_coordinate_x({**row, **mutation}, "test row")
+
     def test_alias_uses_only_the_exact_shared_support_reference(self) -> None:
         shared = {
             "canonical_family_id": exporter.CONSTANT_CP_FAMILY,
@@ -273,16 +377,42 @@ class DrivAerMLNativeProfileTruthExporterTests(unittest.TestCase):
         self.assertEqual(alias["representation"], "shared_alias")
         self.assertEqual(alias["shared_support_ref"], shared)
         self.assertNotIn("coordinate", alias)
+        self.assertNotIn("display_coordinate", alias)
         self.assertNotIn("value", alias)
         body = dict(alias)
         supplied = body.pop("series_identity_sha256")
         self.assertEqual(supplied, exporter.series_identity_sha256(body))
+        malformed_body = copy.deepcopy(body)
+        malformed_body["shared_support_ref"]["display_coordinate"] = [1234.0]
+        with self.assertRaisesRegex(exporter.ExportError, "reference shape differs"):
+            exporter.series_identity_sha256(malformed_body)
         with self.assertRaisesRegex(exporter.ExportError, "shape differs"):
             exporter.alias_series(
                 station_id="upperbody_centerline",
                 placement_receipt_identity_sha256="4" * 64,
                 shared_support_ref={**shared, "unexpected": True},
             )
+
+    def test_run419_display_validator_rejects_rebound_interior_coordinate(self) -> None:
+        original = [-0.8, 0.25, 3.6]
+        original_identity = coordinate_array_identity_sha256(original)
+        with mock.patch.object(
+            truth_validator,
+            "RUN419_CP_DISPLAY_IDENTITY",
+            {"test_station": {"count": 3, "sha256": original_identity}},
+        ):
+            truth_validator._validate_run419_cp_display(
+                "test_station", original, original_identity, "test series"
+            )
+            mutated = [-0.8, 1234.0, 3.6]
+            rebound_identity = coordinate_array_identity_sha256(mutated)
+            with self.assertRaisesRegex(
+                truth_validator.TruthValidationError,
+                "exact retained producer midpoint array",
+            ):
+                truth_validator._validate_run419_cp_display(
+                    "test_station", mutated, rebound_identity, "test series"
+                )
 
     def test_direct_seek_reader_skips_prior_inline_array_and_gathers_exact_cells(self) -> None:
         target = np.asarray(
@@ -407,6 +537,7 @@ class DrivAerMLNativeProfileTruthExporterTests(unittest.TestCase):
                         f"pressure:{case_id}".encode("ascii")
                     ).hexdigest(),
                 },
+                "series": [],
             }
             return document, {
                 "path": f"cases/{case_id}.json",
