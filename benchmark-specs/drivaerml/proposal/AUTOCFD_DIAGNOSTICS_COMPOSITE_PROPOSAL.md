@@ -1,9 +1,21 @@
 # AutoCFD velocity, FluidsBench Cp-cut, and composite proposal for DrivAerML
 
-Status: **review source promoted into the participant-facing closed candidate;
-profile support and official ranking still require activation validation**
+Status: **historical review source; the profile science and all-case support
+were owner-approved on 2026-08-28, while production release and ranking gates
+remain open**
 
 Prepared: 2026-08-19
+
+> Current-state note (2026-08-28): this file preserves the pre-approval
+> rationale and proposed experiments. The published v10/native-v3 profile
+> support, 10 mm velocity grid, explicit gaps, numerical tolerances, and four
+> continuous Cp cuts are now scientifically approved. The 1/2/5/10 mm
+> convergence and 0.5/1/2 micrometre tolerance campaigns described below are
+> no longer activation requirements; this is an owner decision, not a claim
+> that those experiments ran. Follow the current
+> [`../ACTIVATION_CHECKLIST.md`](../ACTIVATION_CHECKLIST.md) and
+> [`../evidence/owner-scientific-approval-2026-08-28.json`](../evidence/owner-scientific-approval-2026-08-28.json),
+> not the historical “before activation” wording below.
 
 Scoring update (2026-08-21): the earlier physics-null proposal in this review
 record is superseded by the active machine-readable definition in
@@ -17,8 +29,10 @@ Owner scope update: **on 2026-08-21 the benchmark owner removed the 209
 discrete Cp probes from DrivAerML submissions and scoring.** This does not
 remove the four continuous Cp cuts: upperbody centreline, underbody centreline,
 sidewall at `z=0.15 m`, and front-left wheelhouse at `y=-0.6 m`. The
-submission-facing registry is `drivaerml-diagnostics-v9.json`; the Cp cuts still
-require separate frozen extraction support. The 209-probe
+historical submission-facing registry was `drivaerml-diagnostics-v9.json`; the
+all-case continuous-cut support has since been published and scientifically
+approved in the v10/native-v3 candidate, but still awaits final release
+binding. The 209-probe
 definitions, mappings, atlases, and replays documented below are retained only
 as inactive research evidence. They are not participant inputs or outputs,
 evaluator dependencies, composite components, scoring support, or activation
@@ -43,8 +57,9 @@ The submission-facing v9 registry incorporates the velocity lines
 `sha256:6eb1528034e27a75ab1949551d58c8a161331bf6d343ca7fb4324f0800ca4d12`,
 expanded 10 mm velocity samples
 `sha256:5f1bcf84a633aa6bfdd776764c3295d5d624ef0b6c3649f67de446281ae5ba97`.
-It also names the four retained continuous Cp cuts, whose generated extraction
-support and hashes remain an activation task.
+It also names the four retained continuous Cp cuts. Their all-case extraction
+support and hashes were subsequently published and scientifically approved;
+only immutable production-release binding remains open.
 For historical research reproducibility only, the inactive unique Cp taps are
 `sha256:2c1e216ef5693b26d43b9b4f55586ca35516224af0ad874987e5902c67f08e6f`,
 and Cp panel membership

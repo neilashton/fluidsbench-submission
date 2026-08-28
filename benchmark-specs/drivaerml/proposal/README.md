@@ -5,6 +5,13 @@ evidence. The participant-facing decisions have since been promoted into the
 closed candidate [`../submission-spec.json`](../submission-spec.json), while
 the files here remain non-activating source evidence: they do not by themselves
 open submissions, activate the composite, or make historical dummy rows real.
+Neil Ashton recorded dataset-owner scientific approval of the completed
+candidate evidence and profile decisions on 2026-08-28. The current approval
+and remaining release gates are in
+[`../evidence/owner-scientific-approval-2026-08-28.json`](../evidence/owner-scientific-approval-2026-08-28.json)
+and [`../ACTIVATION_CHECKLIST.md`](../ACTIVATION_CHECKLIST.md); pending scientific
+statements retained in proposal files describe their historical pre-approval
+state.
 The machine-readable proposal includes the 2026-08-21 scoring update: fixed
 15%/20%/12%/15% field-error caps and bounded global R2 for the three force and
 two profile components. A physics-null prediction may still be retained as an
@@ -35,12 +42,12 @@ measurements.
 On 2026-08-21 the benchmark owner removed the 209 discrete Cp probes from the
 current DrivAerML submission and score, while retaining four true continuous Cp
 cuts: upperbody centreline, underbody centreline, sidewall at `z=0.15 m`, and
-front-left wheelhouse at `y=-0.6 m`. The submission-facing diagnostic registry
-is `../drivaerml-diagnostics-v9.json`. The probe files in this proposal directory
+front-left wheelhouse at `y=-0.6 m`. The probe files in this proposal directory
 and the generated probe evidence are retained only as inactive research
 records; they are not participant requirements, scoring support, composite
-components, or activation gates. Separate continuous-cut extraction and
-scoring support remains an activation task.
+components, or activation gates. All-case continuous-cut extraction and truth
+have since been published and scientifically approved in the v10/native-v3
+candidate; final immutable release binding remains open.
 
 Files:
 
@@ -50,8 +57,8 @@ Files:
   machine-readable form;
 - [`force-definition-audit-all484.json`](force-definition-audit-all484.json):
   the all-public-case coefficient closure, constant-reference, and
-  moment-origin consistency audit (not a substitute for the pending all-case
-  native-field replay);
+  moment-origin consistency audit; it predates and does not replace the now
+  completed all-case native-field replay in `../evidence/`;
 - [`run-1-force-axle-replay-summary.json`](run-1-force-axle-replay-summary.json):
   the golden native-polygon force and pitch-moment replay for `Cd`, `Cl`,
   `Clf`, and `Clr` in run 1;
@@ -77,10 +84,10 @@ Files:
 - `split-index-candidates/`: FluidsBench-shaped test indexes derived without
   changing the owner-published order; and
 - `native-source-pin.json`: immutable canonical boundary/volume and existing
-  support-file identities for the 484 public cases (the named case-STL pin is
-  an explicit remaining activation gate).
+  support-file identities for the 484 public cases. Named case-STL material is
+  retained for inactive discrete-probe research and is not an activation gate.
 
-The active candidate must remain closed until the blockers in
-`SCIENTIFIC_CONTRACT.md` and [`../ACTIVATION_CHECKLIST.md`](../ACTIVATION_CHECKLIST.md)
-are resolved and the dataset owner approves one immutable scoring-support
-release.
+The active candidate remains closed until the reduced release-gate list in
+[`../ACTIVATION_CHECKLIST.md`](../ACTIVATION_CHECKLIST.md) is complete and the
+dataset owner can approve the final immutable release after its sensitivity
+evidence exists.

@@ -1,10 +1,12 @@
 # DrivAerML submission contract
 
 The reviewed proposal is now the participant-facing candidate contract.
-It uses the exact public DrivAerML release and the eight owner-published splits,
-but submissions remain closed while the benchmark-owned evaluator and reference
-artifacts complete their final scientific validation. Existing rows are clearly
-labelled structural dummy fixtures and are not rankable results.
+It uses the exact public DrivAerML release and the eight owner-published splits.
+Neil Ashton, acting as dataset owner, approved the candidate's native-field,
+force, velocity-profile, continuous-Cp, sampling, and tolerance decisions on
+2026-08-28. Submissions remain closed only while the immutable production
+release, multi-model sensitivity study, and independent full-submission dry run
+are completed. Existing leaderboard rows remain non-rankable prototype fixtures.
 
 ## Public data and split use
 
@@ -104,8 +106,13 @@ unavailable. Every row remains explicit: the evaluator never snaps, silently
 omits, interpolates, extrapolates, or bridges across an excluded point. The
 candidate `1e-3` steradian polyhedron test is an angular numerical tolerance,
 separate from the `1e-6 m` boundary tolerance; intermediate solid-angle results
-fail closed. The all-case mask, tolerance replay, and owner approval are still
-pending.
+fail closed. The published all-case support, explicit unsupported rows and
+segment breaks, 10 mm grid, and those tolerances are scientifically approved.
+The earlier proposed resolution and tolerance campaigns are no longer separate
+activation gates; this is an owner decision and not a claim that those
+superseded experiments ran. Velocity truth is exact zeroth-order native
+`CellData`, so visible stair steps are expected and must not be smoothed or
+interpolated in truth or scoring.
 
 The primary leaderboard definition has nine components: four global fields,
 three independently ranked field-integrated coefficients, the velocity
@@ -124,6 +131,23 @@ history and paper-parity definitions remain in [`proposal/`](proposal/). The
 exact work still needed before opening submissions is tracked in
 [`ACTIVATION_CHECKLIST.md`](ACTIVATION_CHECKLIST.md).
 
+## Dataset-owner scientific approval
+
+The machine-readable approval record is
+[`evidence/owner-scientific-approval-2026-08-28.json`](evidence/owner-scientific-approval-2026-08-28.json)
+(SHA-256
+`448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3`).
+It binds the pinned dataset, all-case native array and force evidence, the v10
+profile candidate, all-case fixed/relative support, published native-v3 truth,
+and the real `run_419` validation. It also records that surface arc length is
+the Cp scoring coordinate and native segment-midpoint streamwise x is display
+only.
+
+This scientific approval is deliberately distinct from the final
+release-specific approval. The latter cannot be issued until it can bind the
+frozen evaluator, scoring-support and truth release IDs, three-model
+sensitivity evidence, and approving release commit.
+
 ## Prototype leaderboard fixtures
 
 The ten checked-in DrivAerML leaderboard rows can be regenerated with:
@@ -133,24 +157,24 @@ python3 scripts/generate_drivaerml_leaderboard_fixtures.py
 python3 scripts/manage_leaderboard.py build
 ```
 
-The generator uses every official test case and writes all 16 AutoCFD5 lines
-on the exact station-specific 10 mm candidate grids (3,756 velocity samples per
-case). It also writes dense, case-varying arc-length arrays for all four
-continuous Cp cuts. Because the immutable native Cp-cut support is still an
-activation gate, those cut coordinates and every profile value are explicitly
-analytical CFD-like display data, not extracted DrivAerML truth or model
-predictions. Diagnostic RMSE and R2 metrics are recomputed from the generated
-curves, the Cp error is dimensionally tied to the pressure-field fixture
-through `Cp = 2 pMeanTrim / 38.889^2`, and force R2 is tied to the exact pinned
-force table through
+The fixture generator uses every official test case and writes all 16 AutoCFD5
+lines on the exact station-specific 10 mm candidate grids (3,756 velocity
+samples per case) plus four continuous Cp curves. Those checked-in submission
+predictions remain analytical CFD-like prototype data, not trained-model
+predictions. Separately, the leaderboard now loads the published native-v3 CFD
+ground truth for all 484 cases and overlays it only when exact support and
+coordinate identities match. Diagnostic RMSE and R2 metrics for the prototype
+rows are recomputed from their generated curves, the Cp error is dimensionally
+tied to the pressure-field fixture through `Cp = 2 pMeanTrim / 38.889^2`, and
+force R2 is tied to the exact pinned force table through
 [`force-r2-truth-statistics.json`](force-r2-truth-statistics.json). The
 displayed bounded scores are therefore internally consistent, while all rows
 remain labelled non-rankable prototype data.
 
 The candidate evaluator's all-484 native-surface force replay is recorded in
 [`evidence/force-replay-all484.json`](evidence/force-replay-all484.json). This
-passing implementation evidence does not constitute owner approval or open
-submissions.
+passing implementation evidence is included in the 2026-08-28 scientific
+approval. It does not by itself freeze the evaluator or open submissions.
 
 The path-free native-volume evidence now includes both the original two-case
 implementation pilot and the strict
@@ -166,22 +190,18 @@ remain indexed in [`evidence/README.md`](evidence/README.md) for research
 provenance only. They are not participant instructions, submission artifacts,
 or scoring support, and their unresolved rows do not block a submission
 contract that otherwise becomes eligible. Exact immutable native extraction
-support for the four continuous Cp cuts is still pending and remains a separate
-activation requirement.
+support and native truth for the four continuous Cp cuts are now complete for
+all 484 cases and scientifically approved. They still need to be bound into the
+final immutable scoring-support and profile-ground-truth release identities.
 
-The prescribed 1, 2, 5, and 10 mm profile study can be checked with
-[`proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md`](proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md).
-The prediction-based reference command described there can verify complete
-native chunk manifests, stream the pinned multipart `UMeanTrim` truth, and
-construct the loss tensor itself. Reduced case pilots always remain
-ineligible; owner-review eligibility additionally requires the exact ordered
-484-case scope and the pending immutable owner validity-mask binding.
-Activation evidence still requires complete all-case velocity mappings and
-genuine outputs from at least three distinct trained models. Those model
-predictions are not currently available and remain an owner input; publishing
-their complete native fields is not required. No real-model sensitivity result
-is claimed. The bounded-score sensitivity review and bootstrap remain pending
-until the evaluator is frozen.
+The earlier proposed 1, 2, 5, and 10 mm profile study is retained in
+[`proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md`](proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md)
+as historical review methodology. The owner has accepted the published
+deterministic 10 mm support without requiring that separate campaign for
+activation. The remaining sensitivity gate is different: it requires genuine
+outputs from at least three distinct trained models on a common official cohort
+and the paired 10,000-replicate bootstrap after the evaluator is frozen.
+Publishing those models' complete native fields is not required.
 
 FluidsBench contributors can follow the bounded-memory native-mesh and closed
 candidate package workflow in
@@ -212,7 +232,10 @@ producer outputs, and checked against the ordered official 484-case registry.
 The nested `relative_support` hand-off is therefore ready. A separate immutable
 pending release record binds those files, the per-case relative-series identity
 index, and evaluator revision `b9db402a3fa0efbb94fe36be2ba1fe6f7b4bc1e1`.
-It records genuine-model sensitivity and owner scientific approval as pending.
+The underlying scientific support is covered by the 2026-08-28 owner approval.
+The release record still correctly retains its release-specific approval as
+pending because that schema requires the approval to bind the not-yet-produced
+genuine-model sensitivity evidence and the final approving commit.
 `submission-spec.json` consequently keeps `profile_format_enabled=false`, and
 the validator rejects the format unless every activation gate is complete.
 Support publication is not scientific activation. The nested status is

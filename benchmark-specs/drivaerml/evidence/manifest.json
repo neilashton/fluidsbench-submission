@@ -3,7 +3,13 @@
   "schema_version": 2,
   "status": "candidate_evidence_not_scoring_support",
   "official_submission_scoring_enabled": false,
-  "owner_scientific_approval": false,
+  "owner_scientific_approval": true,
+  "scientific_approval_record": {
+    "file": "owner-scientific-approval-2026-08-28.json",
+    "sha256": "448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3",
+    "schema": "drivaerml-owner-scientific-approval-v1",
+    "activation_effect": "none_until_remaining_release_gates_complete"
+  },
   "artifacts": [
     {
       "file": "force-replay-all484.json",
@@ -171,6 +177,20 @@
       "sha256": "62ef43e1f5b8fe30c8b03fc36d315c4ad1b6faa242b0ec56c1ee0cb41cd5576a",
       "scope": "run_419_real_checkpoint_current_format_40_series_regression",
       "role": "exact_dataset_model_prediction_support_evaluator_and_fixture_identity_provenance_report_only_nonactivation",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "drivaerml-native-profile-truth-run419-validation-v1.json",
+      "sha256": "ea614d5404a5a0c83283d2bc19d5153214297863a009cf7ff469921d86b8edf6",
+      "scope": "run_419_real_checkpoint_all_40_series_against_all_case_native_truth",
+      "role": "array_level_native_profile_truth_validation_nonactivation",
+      "public_scoring_support_eligible": false
+    },
+    {
+      "file": "owner-scientific-approval-2026-08-28.json",
+      "sha256": "448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3",
+      "scope": "dataset_owner_scientific_review_of_cited_candidate_evidence_and_decisions",
+      "role": "scientific_approval_nonactivation_release_gates_unchanged",
       "public_scoring_support_eligible": false
     }
   ]

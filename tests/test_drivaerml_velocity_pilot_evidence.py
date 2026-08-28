@@ -999,14 +999,15 @@ class DrivAerMLVelocityPilotEvidenceTests(unittest.TestCase):
         self.assertIsNone(binding["evaluator_code_revision"])
         self.assertEqual(
             support["activation_gates"]["velocity_profiles"],
-            "definition_complete_mapping_and_convergence_pending",
+            "all_484_fixed_and_relative_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
         )
         self.assertEqual(
             support["activation_gates"]["independent_participant_dry_run"],
             "pending",
         )
         self.assertEqual(
-            support["activation_gates"]["owner_evaluator_approval"], "pending"
+            support["activation_gates"]["owner_evaluator_approval"],
+            "scientific_method_approved_final_immutable_release_binding_pending",
         )
 
 

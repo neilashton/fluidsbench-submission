@@ -196,14 +196,15 @@ evaluator proves that each row agrees exactly with the aggregate table. This
 does not change any target value or score; it provides one hash-bound source of
 truth while retaining the per-case files for convenient local processing.
 
-The submission-facing
-[`drivaerml-diagnostics-v9.json`](drivaerml-diagnostics-v9.json) registry contains 16
-velocity lines and four continuous Cp cuts: upperbody centreline (`y=0`),
+The current closed package still names
+[`drivaerml-diagnostics-v9.json`](drivaerml-diagnostics-v9.json); the
+owner-approved successor awaiting immutable release binding is
+[`drivaerml-diagnostics-v10.json`](drivaerml-diagnostics-v10.json). It contains
+16 velocity lines and four continuous Cp cuts: upper-body centreline (`y=0`),
 underbody centreline (`y=0`), sidewall (`z=0.15 m`), and front-left wheelhouse
-(`y=-0.6 m`). All-case velocity mappings and their resolution study are still
-pending. Exact immutable native extraction support for the four Cp cuts is also
-pending. Contributors must not invent replacements for either official
-support.
+(`y=-0.6 m`). All-case native velocity and continuous-Cp support and truth are
+published and scientifically approved. Contributors must use the frozen
+release when it is issued and must not invent replacement support.
 
 ### Geometry-relative diagnostics candidate (not active)
 
@@ -224,9 +225,10 @@ velocity-mapping, and relative-Cp manifests are now retained and verified, and
 the nested `relative_support` hand-off is ready. A separate pending release
 record binds those bytes, their per-case relative-series identities, and an
 exact evaluator Git revision. Relative diagnostics remain unavailable in
-participant packages because genuine-model sensitivity and owner scientific
-approval are still pending. Artifact publication alone does not activate the
-format.
+participant packages because genuine-model sensitivity and the final
+release-specific approval record are still pending. The underlying support is
+included in the 2026-08-28 scientific approval, but artifact publication or
+scientific approval alone does not activate this report-only format.
 
 The retained candidate is
 [`drivaerml-relative-diagnostics-v3.json`](drivaerml-relative-diagnostics-v3.json).
@@ -279,11 +281,11 @@ frozen evaluator will apply the owner-published mask and containing-cell
 assignments and emit the JSON profile series to include in the package. Only
 `inside_morphed_solid` and `outside_released_fluid_domain` are permitted owner
 exclusion reasons. An unresolved containing-cell or cell-evaluation failure is
-not an automatic exclusion: it makes the required line unavailable until the
-support is corrected. Owner-excluded coordinates remain explicit and remove
-only their point and adjacent trapezoidal edges; gaps are never bridged. No
-mask has yet been approved, so the current candidate evaluator conservatively
-makes a velocity result unavailable when a mapping row is invalid.
+not an automatic exclusion: it makes the required line unavailable. Excluded
+or unsupported coordinates remain explicit and remove only their point and
+adjacent trapezoidal edges; gaps are never bridged. The owner has approved the
+published all-case support and this fail-closed behavior. The final evaluator
+must bind and reproduce the identical support rather than infer a new mask.
 
 ## 5. Install and run the candidate tools
 

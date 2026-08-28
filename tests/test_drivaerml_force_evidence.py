@@ -38,7 +38,7 @@ class DrivAerMLForceEvidenceTests(unittest.TestCase):
         ]
         self.assertEqual(binding["file"], "evidence/force-replay-all484.json")
         self.assertEqual(binding["sha256"], EXPECTED_SHA256)
-        self.assertFalse(binding["owner_scientific_approval"])
+        self.assertTrue(binding["owner_scientific_approval"])
         self.assertEqual(_sha256(EVIDENCE_PATH), EXPECTED_SHA256)
 
     def test_all_case_surface_force_and_area_replay_is_complete_but_candidate(self) -> None:

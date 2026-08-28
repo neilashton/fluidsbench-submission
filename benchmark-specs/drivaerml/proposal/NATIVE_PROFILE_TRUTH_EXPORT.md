@@ -6,6 +6,12 @@ retained producer support before reading truth values and emits compact,
 hash-bound JSON. It does not change a scoring weight, enable the relative
 profile format, open submissions, or complete owner approval.
 
+The publication receipt correctly preserves that non-approval state at its
+generation time. Neil Ashton subsequently approved the cited native profile
+evidence and scientific decisions on 2026-08-28 in
+[`../evidence/owner-scientific-approval-2026-08-28.json`](../evidence/owner-scientific-approval-2026-08-28.json).
+That later approval does not rewrite this immutable receipt or open submissions.
+
 ## Inputs
 
 The command requires explicit paths to all six authorities:
@@ -201,4 +207,6 @@ identity field removed.
 The release receipt deliberately states
 `relative_scoring_activated=false`, `submissions_opened=false`, and
 `owner_approval_complete=false`. Native truth publication is reproducibility
-evidence, not scientific activation.
+evidence, not scientific activation. Those fields describe the release receipt
+when generated; the later owner scientific approval is a separate record and
+the production release gates remain closed.

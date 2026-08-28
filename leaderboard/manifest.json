@@ -1157,7 +1157,7 @@
               "id": "upperbody_centerline",
               "label": "Upper-body centreline (y = 0 m)",
               "x_label": "Arc length along continuous native-surface cut, m",
-              "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+          "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
               "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
               "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
@@ -1165,7 +1165,7 @@
               "id": "underbody_centerline",
               "label": "Underbody centreline (y = 0 m)",
               "x_label": "Arc length along continuous native-surface cut, m",
-              "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+          "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
               "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
               "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
@@ -1173,7 +1173,7 @@
               "id": "sidewall_z_0_15",
               "label": "Sidewall (z = 0.15 m)",
               "x_label": "Arc length along continuous native-surface cut, m",
-              "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+          "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
               "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
               "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
@@ -1181,7 +1181,7 @@
               "id": "front_left_wheelhouse_y_neg_0_6",
               "label": "Front-left wheelhouse (y = -0.6 m)",
               "x_label": "Arc length along continuous native-surface cut, m",
-              "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+          "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
               "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
               "source_url": "https://github.com/neilashton/fluidsbench-submission"
             }
@@ -1197,7 +1197,7 @@
         {
           "id": "velocity_profiles",
           "title": "AutoCFD5 velocity profiles",
-          "description": "Sixteen fixed lines scored on the pinned 10 mm grid using arc-length trapezoidal RMSE of |U|/Uinf.",
+          "description": "Sixteen fixed lines scored on the pinned 10 mm grid using equal-line global R2 with normalized trapezoidal arc-length support.",
           "data_key": "velocity_profiles",
           "profile_definition_id": "drivaerml-diagnostics-v9-candidate",
           "coordinate_unit": "m",
@@ -1359,7 +1359,25 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "The participant contract, official splits, and bounded scoring equation are published, but ranking remains closed until all-case velocity replay, immutable native Cp-cut extraction support, genuine-model sensitivity analysis, force-replay review, and immutable evaluator/scoring-support owner approval are complete.",
+        "closed_reason": "The participant contract, all-case native evidence and profile truth, scientific review, and bounded scoring equation are complete, but ranking remains closed until the production evaluator/scoring-support/truth release identities are frozen, the three-model sensitivity gate passes, and an independent full schema-v3 submission dry run is approved.",
+        "scientific_approval": {
+          "status": "approved",
+          "approved_by": "neilashton",
+          "approved_at": "2026-08-28",
+          "approval_record": {
+            "file": "evidence/owner-scientific-approval-2026-08-28.json",
+            "sha256": "448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3",
+            "schema": "drivaerml-owner-scientific-approval-v1"
+          },
+          "activation_effect": "scientific_review_complete_release_gates_unchanged"
+        },
+        "owner_approved_successor_profile": {
+          "id": "drivaerml-diagnostics-v10-candidate",
+          "file": "drivaerml-diagnostics-v10.json",
+          "sha256": "9136feac7ac276d91f7cbcfb6c558beffc97cfaf0f0174626fee67a1f2a52bd0",
+          "status": "scientifically_approved_pending_immutable_release_binding",
+          "published_native_v3_truth_index_sha256": "e7cf14f161fc7dbf22794e6f66db4e157329be960d2a4368140e08cf0608a5ae"
+        },
         "candidate_evidence_index_file": "evidence/README.md",
         "candidate_evidence_manifest_file": "evidence/manifest.json",
         "dataset_evaluator_binding": {
@@ -1487,7 +1505,7 @@
               "native_cell_count": 68949662110,
               "equal_native_cell_weighting_exercised": true,
               "complete_all_484_cases": true,
-              "owner_scientific_approval": false
+              "owner_scientific_approval": true
             },
             "candidate_primary_pilot_evidence": {
               "file": "evidence/native-volume-run1-run44-equal-cell-primary-pilot.json",
@@ -1621,7 +1639,7 @@
             "file": "evidence/force-replay-all484.json",
             "sha256": "631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17",
             "status": "all_484_cases_passed_candidate_evaluator",
-            "owner_scientific_approval": false
+            "owner_scientific_approval": true
           }
         },
         "profile_definition": {
@@ -1715,23 +1733,18 @@
           "pinned_native_files": "complete",
           "surface_area_weights": "complete_public_all_484_pinned_order_count_hash_and_value_audit_passed",
           "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
-          "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
-          "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
-          "cp_cuts": "four_continuous_cut_definitions_complete_immutable_native_extraction_support_and_all_case_replay_pending",
+          "force_evaluator": "all_484_candidate_replay_passed_owner_scientifically_approved_release_binding_pending",
+          "velocity_profiles": "all_484_fixed_and_relative_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
+          "cp_cuts": "all_484_four_cut_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
           "bounded_score_definition": "complete_fixed_field_error_caps_and_bounded_force_profile_R2",
           "composite_sensitivity_and_bootstrap": "pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
-          "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_frozen_evaluator_revision_and_owner_approval_pending",
+          "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_scientifically_approved_frozen_release_identity_pending",
           "independent_participant_dry_run": "pending",
-          "owner_evaluator_approval": "pending"
+          "owner_evaluator_approval": "scientific_method_approved_final_immutable_release_binding_pending"
         },
         "owner_decisions_required": [
-          "approve_all_case_native_array_inventory_and_exclusion_policy",
-          "approve_all_484_case_force_replay_and_chunk_invariance",
-          "approve_velocity_assignment_and_resolution_convergence",
-          "approve_immutable_native_surface_extraction_support_for_all_four_continuous_cp_cuts",
           "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
           "review_fixed_field_error_caps_and_bounded_R2_sensitivity_with_genuine_model_predictions_and_publish_bootstrap_indexes",
-          "approve_the_candidate_schema_v3_participant_authored_metrics_case_evidence_and_profile_validation",
           "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions"
         ]
       },
