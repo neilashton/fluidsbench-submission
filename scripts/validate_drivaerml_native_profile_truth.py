@@ -86,7 +86,24 @@ CP_COUNT_BY_STATION = {
     "sidewall_z_0_15": 1953,
     "front_left_wheelhouse_y_neg_0_6": 595,
 }
-RECEIPT_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-run419-validation-v1"
+RUN419_CP_DISPLAY_RANGE = {
+    "upperbody_centerline": (-0.8331868945998707, 3.6396731134620603),
+    "underbody_centerline": (-0.8331869840450868, 3.639718889923447),
+    "sidewall_z_0_15": (-0.8208888126595923, 3.6357615293629575),
+    "front_left_wheelhouse_y_neg_0_6": (
+        -0.3792471834540514,
+        0.4087099569235014,
+    ),
+    "sidewall_front_wheelhouse_relative": (
+        -0.8209005267002477,
+        3.6357573498755116,
+    ),
+    "front_left_wheelhouse_relative": (
+        -0.35074854500754504,
+        0.39064587559344227,
+    ),
+}
+RECEIPT_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-run419-validation-v2"
 
 
 class TruthValidationError(ValueError):
@@ -163,6 +180,8 @@ def _validate_generated_series(case: Mapping[str, object]) -> None:
         "materialized",
         "materialized",
     ]
+    materialized_by_key: dict[tuple[str, str], dict] = {}
+    aliases: list[dict] = []
     for item, representation in zip(series, expected_representations):
         key = f"{item.get('family_id')}/{item.get('station_id')}"
         _require(item.get("representation") == representation, f"{key} representation differs")
@@ -171,6 +190,19 @@ def _validate_generated_series(case: Mapping[str, object]) -> None:
         body.pop("series_identity_sha256", None)
         _require(supplied == exporter.series_identity_sha256(body), f"{key} identity differs")
         if representation == "shared_alias":
+            aliases.append(item)
+            _require(
+                not any(
+                    field in item
+                    for field in (
+                        "coordinate",
+                        "display_coordinate",
+                        "value",
+                        "raw_native_cell_id",
+                    )
+                ),
+                f"{key} alias duplicates materialized arrays",
+            )
             continue
         coordinates = _finite_array(item.get("coordinate"), f"{key} coordinates")
         values = _finite_array(item.get("value"), f"{key} values")
@@ -191,6 +223,56 @@ def _validate_generated_series(case: Mapping[str, object]) -> None:
             item.get("value_identity_sha256")
             == exporter.binary64_array_identity_sha256(values),
             f"{key} value identity differs",
+        )
+        if item.get("quantity_id") == "cp":
+            display = _finite_array(
+                item.get("display_coordinate"), f"{key} display coordinates"
+            )
+            _require(
+                item.get("coordinate_id") == "arc_length_m"
+                and item.get("coordinate_unit") == "m"
+                and item.get("display_coordinate_id")
+                == exporter.CP_DISPLAY_COORDINATE_ID
+                and item.get("display_coordinate_unit")
+                == exporter.CP_DISPLAY_COORDINATE_UNIT
+                and len(display) == len(coordinates)
+                and item.get("display_coordinate_identity_sha256")
+                == exporter.coordinate_array_identity_sha256(display),
+                f"{key} display coordinate binding differs",
+            )
+            expected_range = RUN419_CP_DISPLAY_RANGE.get(str(item.get("station_id")))
+            _require(expected_range is not None, f"{key} display range authority is missing")
+            _require(
+                min(display) == expected_range[0] and max(display) == expected_range[1],
+                f"{key} physical-x range differs",
+            )
+        else:
+            _require(
+                not any(
+                    field in item
+                    for field in (
+                        "display_coordinate_id",
+                        "display_coordinate_unit",
+                        "display_coordinate_identity_sha256",
+                        "display_coordinate",
+                    )
+                ),
+                f"{key} velocity series unexpectedly has display coordinates",
+            )
+        materialized_by_key[(str(item.get("family_id")), str(item.get("station_id")))] = item
+    for alias in aliases:
+        reference = alias.get("shared_support_ref")
+        _require(isinstance(reference, dict), "Cp alias reference differs")
+        canonical_key = (
+            str(reference.get("canonical_family_id")),
+            str(reference.get("canonical_station_id")),
+        )
+        canonical = materialized_by_key.get(canonical_key)
+        _require(canonical is not None, f"{canonical_key} alias target is missing")
+        _require(
+            reference.get("canonical_support_identity_sha256")
+            == canonical.get("support_identity_sha256"),
+            f"{canonical_key} alias support differs",
         )
 
 
@@ -542,6 +624,14 @@ def validate_constant_cp(
                 "segment_length_weighted_rmse": rmse,
                 "historical_evaluator_rmse": historical_rmse,
                 "absolute_delta_from_historical": abs(rmse - historical_rmse),
+                "display_coordinate_id": truth["display_coordinate_id"],
+                "display_coordinate_identity_sha256": truth[
+                    "display_coordinate_identity_sha256"
+                ],
+                "physical_x_min_m": min(truth["display_coordinate"]),
+                "physical_x_max_m": max(truth["display_coordinate"]),
+                "prediction_uses_reference_display_coordinate": True,
+                "scoring_arc_coordinate_unchanged": True,
             }
         )
     mean_rmse = math.fsum(rmse_values) / len(rmse_values)
@@ -664,7 +754,7 @@ def validate(output_dir: Path) -> dict[str, object]:
     return exporter.identity_bound_document(
         {
             "schema": RECEIPT_SCHEMA,
-            "schema_version": 1,
+            "schema_version": 2,
             "status": "passed_real_run419_array_level_validation",
             "case_id": RUN419,
             "truth_source": dict(exporter.TRUTH_SOURCE),
@@ -714,6 +804,9 @@ def validate(output_dir: Path) -> dict[str, object]:
                 "all_40_series_cross_bound": True,
                 "both_velocity_families_independently_verified": True,
                 "cp_rmse_recomputed_from_truth_and_prediction_arrays": True,
+                "cp_physical_x_bound_to_retained_cut_segment_midpoints": True,
+                "current_prediction_format_requires_no_display_coordinate": True,
+                "arc_length_scoring_coordinate_unchanged": True,
                 "scientific_activation": False,
             },
         },

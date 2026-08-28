@@ -60,13 +60,13 @@ RUN419_SELECTED_VALUES_SHA256 = (
     "a1cd9c5bad71b720e6434fbb821aa480fc2f7555516375329bfd02ced43752d0"
 )
 
-CASE_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-case-v2"
-CHUNK_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-chunk-v2"
-INDEX_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-index-v2"
-SPLIT_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-split-index-v2"
-PROVENANCE_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-provenance-v2"
-RELEASE_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-release-v2"
-SCHEMA_VERSION = "2.0"
+CASE_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-case-v3"
+CHUNK_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-chunk-v3"
+INDEX_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-index-v3"
+SPLIT_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-split-index-v3"
+PROVENANCE_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-provenance-v3"
+RELEASE_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-release-v3"
+SCHEMA_VERSION = "3.0"
 
 CONSTANT_VELOCITY_FAMILY = "drivaerml-autocfd5-constant-v1"
 RELATIVE_VELOCITY_FAMILY = "drivaerml-velocity-relative-v3"
@@ -137,7 +137,13 @@ GIT_COMMIT_RE = re.compile(r"[0-9a-f]{40}\Z")
 CASE_ID_RE = re.compile(r"run_([1-9][0-9]*)\Z")
 VALUE_ARRAY_DOMAIN = b"fluidsbench-drivaerml-native-value-array-v1\x00"
 INTEGER_ARRAY_DOMAIN = b"fluidsbench-drivaerml-native-id-array-v1\x00"
-SERIES_IDENTITY_SCHEMA = "fluidsbench-drivaerml-native-series-identity-v1"
+SERIES_IDENTITY_SCHEMA_V1 = "fluidsbench-drivaerml-native-series-identity-v1"
+SERIES_IDENTITY_SCHEMA_V2 = "fluidsbench-drivaerml-native-series-identity-v2"
+CP_DISPLAY_COORDINATE_ID = "streamwise_x_m"
+CP_DISPLAY_COORDINATE_UNIT = "m"
+CP_DISPLAY_COORDINATE_DEFINITION = (
+    "retained_plane_intersection_segment_endpoint_midpoint_x"
+)
 TRUTH_SOURCE = {
     "source_kind": "native_cfd",
     "analytical_dummy": False,
@@ -149,24 +155,28 @@ EXPECTED_ALL484_COVERAGE = {
         "shared_alias_series_count": 0,
         "sample_count": 1_766_227,
         "unsupported_sample_count": 51_677,
+        "display_coordinate_sample_count": 0,
     },
     RELATIVE_VELOCITY_FAMILY: {
         "materialized_series_count": 484 * 16,
         "shared_alias_series_count": 0,
         "sample_count": 1_779_592,
         "unsupported_sample_count": 38_312,
+        "display_coordinate_sample_count": 0,
     },
     CONSTANT_CP_FAMILY: {
         "materialized_series_count": 484 * 4,
         "shared_alias_series_count": 0,
         "sample_count": 2_768_745,
         "unsupported_sample_count": 0,
+        "display_coordinate_sample_count": 2_768_745,
     },
     RELATIVE_CP_FAMILY: {
         "materialized_series_count": 484 * 2,
         "shared_alias_series_count": 484 * 2,
         "sample_count": 739_775,
         "unsupported_sample_count": 0,
+        "display_coordinate_sample_count": 739_775,
     },
 }
 
@@ -317,10 +327,7 @@ def series_identity_sha256(series: Mapping[str, object]) -> str:
             "placement_receipt_identity_sha256",
         )
     }
-    projection: dict[str, object] = {
-        "schema": SERIES_IDENTITY_SCHEMA,
-        **common,
-    }
+    projection: dict[str, object] = {"schema": SERIES_IDENTITY_SCHEMA_V1, **common}
     if representation == "materialized":
         sample_index = series.get("sample_index")
         raw_ids = series.get("raw_native_cell_id")
@@ -345,6 +352,29 @@ def series_identity_sha256(series: Mapping[str, object]) -> str:
                 "unsupported_samples": series["unsupported_samples"],
             }
         )
+        display_keys = {
+            "display_coordinate_id",
+            "display_coordinate_unit",
+            "display_coordinate",
+            "display_coordinate_identity_sha256",
+        }
+        present_display_keys = display_keys.intersection(series)
+        if present_display_keys:
+            if present_display_keys != display_keys:
+                raise ExportError("materialized display coordinate fields must be complete")
+            display_coordinate = series["display_coordinate"]
+            if not isinstance(display_coordinate, list) or len(display_coordinate) != count:
+                raise ExportError("materialized display coordinate must be aligned")
+            projection["schema"] = SERIES_IDENTITY_SCHEMA_V2
+            projection.update(
+                {
+                    "display_coordinate_id": series["display_coordinate_id"],
+                    "display_coordinate_unit": series["display_coordinate_unit"],
+                    "display_coordinate_identity_sha256": series[
+                        "display_coordinate_identity_sha256"
+                    ],
+                }
+            )
     elif representation == "shared_alias":
         projection["shared_support_ref"] = series["shared_support_ref"]
     else:
@@ -1678,6 +1708,32 @@ class VerifiedCp:
     input_bindings: Mapping[str, object]
 
 
+def cp_display_coordinate_x(row: Mapping[str, object], label: str) -> float:
+    """Return raw streamwise x at the retained cut-segment midpoint.
+
+    Both producer families retain the exact plane-intersection segment
+    endpoints represented by each row.  Their midpoint is therefore on the
+    precise cut segment used to construct the scoring arc-length support.
+    """
+
+    endpoints: list[list[float]] = []
+    for field in ("endpoint_start_m", "endpoint_end_m"):
+        raw = row.get(field)
+        if not isinstance(raw, list) or len(raw) != 3:
+            raise ExportError(f"{label} {field} must contain three coordinates")
+        endpoints.append(
+            [finite(component, f"{label} {field}[{axis}]") for axis, component in enumerate(raw)]
+        )
+    midpoint_x = 0.5 * (endpoints[0][0] + endpoints[1][0])
+    retained_length = finite(row.get("length_m"), f"{label} length_m")
+    replayed_length = math.sqrt(
+        sum((right - left) ** 2 for left, right in zip(*endpoints))
+    )
+    if not math.isclose(retained_length, replayed_length, rel_tol=1e-12, abs_tol=1e-15):
+        raise ExportError(f"{label} retained segment length does not replay endpoints")
+    return finite(midpoint_x, f"{label} display streamwise x")
+
+
 def _verify_cp_rows(
     rows: object,
     *,
@@ -1695,6 +1751,7 @@ def _verify_cp_rows(
         raw_id = row.get("raw_polygon_id")
         pressure = finite(row.get("pMeanTrim"), "pMeanTrim")
         coordinate = finite(row.get(coordinate_key), coordinate_key)
+        cp_display_coordinate_x(row, f"{case}/{station} Cp row {position}")
         expected_cp = float(cp_from_kinematic_pressure(pressure))
         if (
             isinstance(ordinal, bool)
@@ -1956,6 +2013,9 @@ def materialized_series(
     value: Sequence[float],
     segments: Sequence[Mapping[str, object]],
     unsupported_samples: Sequence[Mapping[str, object]],
+    display_coordinate_id: str | None = None,
+    display_coordinate_unit: str | None = None,
+    display_coordinate: Sequence[float] | None = None,
 ) -> dict[str, object]:
     samples = list(sample_index)
     raw_ids = list(raw_native_cell_id)
@@ -2005,6 +2065,35 @@ def materialized_series(
         "segments": [dict(item) for item in segments],
         "unsupported_samples": [dict(item) for item in unsupported_samples],
     }
+    display_inputs = (
+        display_coordinate_id,
+        display_coordinate_unit,
+        display_coordinate,
+    )
+    if any(item is not None for item in display_inputs):
+        if (
+            not isinstance(display_coordinate_id, str)
+            or not display_coordinate_id
+            or not isinstance(display_coordinate_unit, str)
+            or not display_coordinate_unit
+            or display_coordinate is None
+        ):
+            raise ExportError("display coordinate id, unit, and array must be supplied together")
+        display_coordinates = [
+            finite(item, "series display coordinate") for item in display_coordinate
+        ]
+        if len(display_coordinates) != len(samples):
+            raise ExportError("display coordinate must align with every materialized sample")
+        result.update(
+            {
+                "display_coordinate_id": display_coordinate_id,
+                "display_coordinate_unit": display_coordinate_unit,
+                "display_coordinate_identity_sha256": coordinate_array_identity_sha256(
+                    display_coordinates
+                ),
+                "display_coordinate": display_coordinates,
+            }
+        )
     result["series_identity_sha256"] = series_identity_sha256(result)
     return result
 
@@ -2140,6 +2229,10 @@ def _constant_cp_series(
         rows = cut["segments"]
         samples = [int(row["ordinal"]) for row in rows]
         coordinates = [float(row["arc_length_end_m"]) for row in rows]
+        display_coordinates = [
+            cp_display_coordinate_x(row, f"{station} constant Cp row {position}")
+            for position, row in enumerate(rows)
+        ]
         raw_ids = [int(row["raw_polygon_id"]) for row in rows]
         values = _native_cp_values(rows, position_by_id, sparse_pressure)
         output.append(
@@ -2164,6 +2257,9 @@ def _constant_cp_series(
                     samples, coordinates, labels=["native_cut_path"] * len(samples)
                 ),
                 unsupported_samples=[],
+                display_coordinate_id=CP_DISPLAY_COORDINATE_ID,
+                display_coordinate_unit=CP_DISPLAY_COORDINATE_UNIT,
+                display_coordinate=display_coordinates,
             )
         )
     return output
@@ -2196,6 +2292,10 @@ def _relative_cp_series(
         station = str(cut["station_id"])
         samples = [int(row["ordinal"]) for row in rows]
         coordinates = [float(row["interval_arc_end_m"]) for row in rows]
+        display_coordinates = [
+            cp_display_coordinate_x(row, f"{station} relative Cp row {position}")
+            for position, row in enumerate(rows)
+        ]
         raw_ids = [int(row["raw_polygon_id"]) for row in rows]
         values = _native_cp_values(rows, position_by_id, sparse_pressure)
         output.append(
@@ -2222,6 +2322,9 @@ def _relative_cp_series(
                     labels=[str(row["interval_id"]) for row in rows],
                 ),
                 unsupported_samples=[],
+                display_coordinate_id=CP_DISPLAY_COORDINATE_ID,
+                display_coordinate_unit=CP_DISPLAY_COORDINATE_UNIT,
+                display_coordinate=display_coordinates,
             )
         )
     return output
@@ -2435,6 +2538,19 @@ def export_case(context: InputContext, case: str) -> dict[str, object]:
             "selected_values_sha256": boundary_selected_sha,
             "producer_value_crosscheck": "exact_float_equality_all_referenced_rows",
         },
+        "cp_display_coordinate": {
+            "coordinate_id": CP_DISPLAY_COORDINATE_ID,
+            "coordinate_unit": CP_DISPLAY_COORDINATE_UNIT,
+            "definition": CP_DISPLAY_COORDINATE_DEFINITION,
+            "source": "retained_cp_plane_intersection_segment_endpoints",
+            "native_coordinate_frame": "raw_vtp_coordinates_metres",
+            "transformation": "none_no_shift_normalization_sort_or_resampling",
+            "materialized_row_count": len(cp_rows),
+            "endpoint_geometry_verification": (
+                "three_finite_binary64_components_and_replayed_segment_length_all_rows"
+            ),
+            "purpose": "display_only_arc_length_remains_scoring_coordinate",
+        },
         "input_bindings": {
             "constant_velocity": constant_velocity.input_bindings,
             "relative_velocity": relative_velocity.input_bindings,
@@ -2488,7 +2604,12 @@ def _load_case_artifact(
     document_identity_sha256(document, "case_identity")
     pin_boundary = context.pin_by_case[expected_case].get("boundary")
     native_boundary = document.get("native_boundary")
-    if not isinstance(pin_boundary, dict) or not isinstance(native_boundary, dict):
+    cp_display = document.get("cp_display_coordinate")
+    if (
+        not isinstance(pin_boundary, dict)
+        or not isinstance(native_boundary, dict)
+        or not isinstance(cp_display, dict)
+    ):
         raise ExportError(f"{expected_case} native boundary binding is missing")
     boundary_tuple_count = positive_integer(
         native_boundary.get("tuple_count"), f"{expected_case} boundary tuple count"
@@ -2521,6 +2642,20 @@ def _load_case_artifact(
         != "exact_float_equality_all_referenced_rows"
     ):
         raise ExportError(f"{expected_case} native boundary binding differs")
+    if cp_display != {
+        "coordinate_id": CP_DISPLAY_COORDINATE_ID,
+        "coordinate_unit": CP_DISPLAY_COORDINATE_UNIT,
+        "definition": CP_DISPLAY_COORDINATE_DEFINITION,
+        "source": "retained_cp_plane_intersection_segment_endpoints",
+        "native_coordinate_frame": "raw_vtp_coordinates_metres",
+        "transformation": "none_no_shift_normalization_sort_or_resampling",
+        "materialized_row_count": boundary_producer_rows,
+        "endpoint_geometry_verification": (
+            "three_finite_binary64_components_and_replayed_segment_length_all_rows"
+        ),
+        "purpose": "display_only_arc_length_remains_scoring_coordinate",
+    }:
+        raise ExportError(f"{expected_case} Cp display coordinate declaration differs")
     digest(
         native_boundary.get("selected_values_sha256"),
         f"{expected_case} native boundary selected values",
@@ -2566,6 +2701,85 @@ def _load_case_artifact(
                 raise ExportError(
                     f"{expected_case}/{item.get('family_id')}/{item.get('station_id')} component identity differs"
                 )
+            display_fields = {
+                "display_coordinate_id",
+                "display_coordinate_unit",
+                "display_coordinate_identity_sha256",
+                "display_coordinate",
+            }
+            present_display_fields = display_fields.intersection(item)
+            is_cp = item.get("quantity_id") == "cp"
+            if is_cp:
+                display_coordinates = item.get("display_coordinate")
+                if (
+                    present_display_fields != display_fields
+                    or item.get("coordinate_id") != "arc_length_m"
+                    or item.get("coordinate_unit") != "m"
+                    or item.get("display_coordinate_id") != CP_DISPLAY_COORDINATE_ID
+                    or item.get("display_coordinate_unit") != CP_DISPLAY_COORDINATE_UNIT
+                    or not isinstance(display_coordinates, list)
+                    or len(display_coordinates) != len(coordinates)
+                    or item.get("display_coordinate_identity_sha256")
+                    != coordinate_array_identity_sha256(display_coordinates)
+                ):
+                    raise ExportError(
+                        f"{expected_case}/{item.get('family_id')}/{item.get('station_id')} "
+                        "Cp display coordinate differs"
+                    )
+            elif present_display_fields:
+                raise ExportError(
+                    f"{expected_case}/{item.get('family_id')}/{item.get('station_id')} "
+                    "non-Cp series must not contain a display coordinate"
+                )
+    verified_cp = verify_cp(context, expected_case)
+    expected_display: dict[tuple[str, str], tuple[list[float], str, str]] = {}
+    for cut in verified_cp.constant_cuts:
+        station = str(cut["definition"]["cut_id"])
+        rows = cut["segments"]
+        expected_display[(CONSTANT_CP_FAMILY, station)] = (
+            [
+                cp_display_coordinate_x(
+                    row, f"{expected_case}/{station} retained constant Cp row {position}"
+                )
+                for position, row in enumerate(rows)
+            ],
+            sha256_bytes(canonical_json_bytes(cut)),
+            verified_cp.constant_receipt_identity_sha256,
+        )
+    for cut in verified_cp.relative_moving_cuts:
+        station = str(cut["station_id"])
+        rows = cut["rows"]
+        expected_display[(RELATIVE_CP_FAMILY, station)] = (
+            [
+                cp_display_coordinate_x(
+                    row, f"{expected_case}/{station} retained relative Cp row {position}"
+                )
+                for position, row in enumerate(rows)
+            ],
+            str(cut["support_identity_sha256"]),
+            verified_cp.relative_placement_identity_sha256,
+        )
+    cp_materialized = {
+        (str(item["family_id"]), str(item["station_id"])): item
+        for item in series
+        if item.get("representation") == "materialized"
+        and item.get("quantity_id") == "cp"
+    }
+    if set(cp_materialized) != set(expected_display):
+        raise ExportError(f"{expected_case} materialized Cp display series set differs")
+    for key, (coordinates, support_identity, placement_identity) in expected_display.items():
+        item = cp_materialized[key]
+        if (
+            item.get("display_coordinate") != coordinates
+            or item.get("display_coordinate_identity_sha256")
+            != coordinate_array_identity_sha256(coordinates)
+            or item.get("support_identity_sha256") != support_identity
+            or item.get("placement_receipt_identity_sha256") != placement_identity
+        ):
+            raise ExportError(
+                f"{expected_case}/{key[0]}/{key[1]} display coordinate does not "
+                "replay retained producer segment midpoints"
+            )
     return document, {
         "path": f"cases/{expected_case}.json",
         "sha256": sha256_bytes(payload),
@@ -2591,6 +2805,7 @@ def _all484_coverage_summary(
             "sample_count": 0,
             "unsupported_sample_count": 0,
             "segment_count": 0,
+            "display_coordinate_sample_count": 0,
         }
         for family in EXPECTED_ALL484_COVERAGE
     }
@@ -2617,6 +2832,20 @@ def _all484_coverage_summary(
             family["sample_count"] += len(samples)
             family["unsupported_sample_count"] += len(unsupported)
             family["segment_count"] += len(segments)
+            display_coordinates = item.get("display_coordinate")
+            if item.get("quantity_id") == "cp":
+                if (
+                    not isinstance(display_coordinates, list)
+                    or len(display_coordinates) != len(samples)
+                    or item.get("display_coordinate_id") != CP_DISPLAY_COORDINATE_ID
+                    or item.get("display_coordinate_unit") != CP_DISPLAY_COORDINATE_UNIT
+                    or item.get("display_coordinate_identity_sha256")
+                    != coordinate_array_identity_sha256(display_coordinates)
+                ):
+                    raise ExportError("materialized Cp display coordinate coverage differs")
+                family["display_coordinate_sample_count"] += len(display_coordinates)
+            elif display_coordinates is not None:
+                raise ExportError("velocity series unexpectedly has a display coordinate")
     for family_id, expected in EXPECTED_ALL484_COVERAGE.items():
         observed = families[family_id]
         for field, expected_value in expected.items():
@@ -2637,6 +2866,7 @@ def _all484_coverage_summary(
             "unsupported_sample_count",
             "requested_sample_count",
             "segment_count",
+            "display_coordinate_sample_count",
         )
     }
     return {
@@ -2742,6 +2972,26 @@ def assemble(context: InputContext, *, cases_per_chunk: int, check: bool) -> dic
         }
         for document in case_documents
     ]
+    cp_display_coordinate_inventory = [
+        {
+            "case_id": document["case_id"],
+            "series": [
+                {
+                    "family_id": item["family_id"],
+                    "station_id": item["station_id"],
+                    "sample_count": len(item["display_coordinate"]),
+                    "display_coordinate_identity_sha256": item[
+                        "display_coordinate_identity_sha256"
+                    ],
+                    "series_identity_sha256": item["series_identity_sha256"],
+                }
+                for item in document["series"]
+                if item.get("representation") == "materialized"
+                and item.get("quantity_id") == "cp"
+            ],
+        }
+        for document in case_documents
+    ]
     provenance = identity_bound_document(
         {
             "schema": PROVENANCE_SCHEMA,
@@ -2767,17 +3017,33 @@ def assemble(context: InputContext, *, cases_per_chunk: int, check: bool) -> dic
             "native_boundary_selected_values_inventory_sha256": sha256_bytes(
                 canonical_json_bytes(native_boundary_inventory)
             ),
+            "cp_display_coordinate_inventory_sha256": sha256_bytes(
+                canonical_json_bytes(cp_display_coordinate_inventory)
+            ),
             "coverage_summary": coverage_summary,
             "run_419_selected_values_sha256": RUN419_SELECTED_VALUES_SHA256,
             "truth_definitions": {
                 "velocity_ratio": "numpy.linalg.norm(Float32 UMeanTrim cast exactly to binary64, axis=-1) / 38.889",
                 "cp": "2.0 * binary64(directly selected native boundary Float32 pMeanTrim) / (38.889 * 38.889)",
+                "cp_display_coordinate": (
+                    "binary64 midpoint x = 0.5 * (endpoint_start_m[0] + "
+                    "endpoint_end_m[0]) from each retained producer plane-intersection "
+                    "segment, in source order and raw VTP metres; display only, with no "
+                    "shift, normalization, sorting, interpolation, or resampling"
+                ),
+                "cp_scoring_coordinate": (
+                    "the unchanged retained arc_length_m array and its existing identity"
+                ),
                 "sampling": "zeroth-order native CellData/raw polygon CellData; every boundary file is fully SHA-256 verified against the immutable pin; producer pMeanTrim is exact-cross-checked but is not the published value source; no interpolation, snapping, remeshing, or gap filling",
             },
             "identity_encodings": {
                 "coordinate": (
                     "ASCII domain fluidsbench-drivaerml-coordinate-array-v1 plus NUL, "
                     "uint64_be count, finite IEEE-754 binary64_be values, signed zero normalized"
+                ),
+                "display_coordinate": (
+                    "the same platform-independent coordinate-array encoding as coordinate; "
+                    "its SHA-256 is bound into native-series-identity-v2"
                 ),
                 "value": (
                     "ASCII domain fluidsbench-drivaerml-native-value-array-v1 plus NUL, "
@@ -2788,9 +3054,10 @@ def assemble(context: InputContext, *, cases_per_chunk: int, check: bool) -> dic
                     "uint64_be count, non-negative uint64_be IDs"
                 ),
                 "series": (
-                    "SHA-256 of UTF-8 sorted-key compact JSON plus LF over schema "
-                    "fluidsbench-drivaerml-native-series-identity-v1 descriptors, "
-                    "component identities/counts, segments, and unsupported_samples"
+                    "SHA-256 of UTF-8 sorted-key compact JSON plus LF; velocity and aliases "
+                    "retain native-series-identity-v1, while materialized Cp uses "
+                    "native-series-identity-v2 to additionally bind display coordinate "
+                    "id, unit, and identity"
                 ),
             },
         },
@@ -2866,6 +3133,14 @@ def assemble(context: InputContext, *, cases_per_chunk: int, check: bool) -> dic
                 RELATIVE_VELOCITY_FAMILY: 16,
                 CONSTANT_CP_FAMILY: 4,
                 RELATIVE_CP_FAMILY: 4,
+            },
+            "cp_display_coordinate": {
+                "coordinate_id": CP_DISPLAY_COORDINATE_ID,
+                "coordinate_unit": CP_DISPLAY_COORDINATE_UNIT,
+                "definition": CP_DISPLAY_COORDINATE_DEFINITION,
+                "default_website_axis": True,
+                "display_only": True,
+                "scoring_coordinate_unchanged": "arc_length_m",
             },
             "coverage_summary": coverage_summary,
             "chunks": chunk_bindings,
