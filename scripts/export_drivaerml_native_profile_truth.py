@@ -376,7 +376,19 @@ def series_identity_sha256(series: Mapping[str, object]) -> str:
                 }
             )
     elif representation == "shared_alias":
-        projection["shared_support_ref"] = series["shared_support_ref"]
+        shared_support_ref = series.get("shared_support_ref")
+        if not isinstance(shared_support_ref, Mapping) or set(shared_support_ref) != {
+            "canonical_family_id",
+            "canonical_station_id",
+            "canonical_support_identity_sha256",
+            "shared_support_id",
+        }:
+            raise ExportError("shared alias support reference shape differs")
+        digest(
+            shared_support_ref.get("canonical_support_identity_sha256"),
+            "shared alias canonical support identity",
+        )
+        projection["shared_support_ref"] = dict(shared_support_ref)
     else:
         raise ExportError("series representation differs")
     return sha256_bytes(canonical_json_bytes(projection))
@@ -2820,6 +2832,37 @@ def _load_case_artifact(
             raise ExportError(
                 f"{expected_case}/{key[0]}/{key[1]} display coordinate does not "
                 "replay retained producer segment midpoints"
+            )
+    expected_aliases = {
+        str(alias["station_id"]): {
+            "canonical_family_id": alias["canonical_family_id"],
+            "canonical_station_id": alias["canonical_station_id"],
+            "canonical_support_identity_sha256": alias[
+                "canonical_cut_support_sha256"
+            ],
+            "shared_support_id": alias["shared_support_id"],
+        }
+        for alias in verified_cp.relative_aliases
+    }
+    actual_aliases = {
+        str(item["station_id"]): item
+        for item in series
+        if item.get("representation") == "shared_alias"
+    }
+    if set(actual_aliases) != set(expected_aliases):
+        raise ExportError(f"{expected_case} shared Cp alias station set differs")
+    for station, expected_reference in expected_aliases.items():
+        item = actual_aliases[station]
+        if (
+            item.get("family_id") != RELATIVE_CP_FAMILY
+            or item.get("placement_mode") != "relative"
+            or item.get("quantity_id") != "cp"
+            or item.get("shared_support_ref") != expected_reference
+            or item.get("placement_receipt_identity_sha256")
+            != verified_cp.relative_placement_identity_sha256
+        ):
+            raise ExportError(
+                f"{expected_case}/{station} shared Cp alias does not replay retained producer support"
             )
     return document, {
         "path": f"cases/{expected_case}.json",

@@ -103,6 +103,32 @@ RUN419_CP_DISPLAY_RANGE = {
         0.39064587559344227,
     ),
 }
+RUN419_CP_DISPLAY_IDENTITY = {
+    "upperbody_centerline": {
+        "count": 1434,
+        "sha256": "8407666b92d559f699117d56e86c617ff8b085f275443cab601c41d7ac172748",
+    },
+    "underbody_centerline": {
+        "count": 1470,
+        "sha256": "53032020bf0b166361432d3d403851a560466713148c09acfc14f620bb28a8e7",
+    },
+    "sidewall_z_0_15": {
+        "count": 1953,
+        "sha256": "7056a50589527d5aba7f6369576f49a77a900df5c61ae8639332bb464cf7e31f",
+    },
+    "front_left_wheelhouse_y_neg_0_6": {
+        "count": 595,
+        "sha256": "1db6ba671f6c2635cab43e4d837aa008aa7d5003de6c8bd5f9df07edffd8db28",
+    },
+    "sidewall_front_wheelhouse_relative": {
+        "count": 886,
+        "sha256": "99a0085d61ef021708ef671d9c088208476c8a788d15ebbff33ee381fbe91e45",
+    },
+    "front_left_wheelhouse_relative": {
+        "count": 583,
+        "sha256": "8a1811385f25c403f934344b96ad09a09f1f01b31554f155a2094da030366415",
+    },
+}
 RECEIPT_SCHEMA = "fluidsbench-drivaerml-native-profile-truth-run419-validation-v2"
 
 
@@ -153,6 +179,22 @@ def _series_map(case: Mapping[str, object], label: str) -> dict[tuple[str, str],
     if len(result) != len(raw):
         raise TruthValidationError(f"{label} contains duplicate family/station series")
     return result
+
+
+def _validate_run419_cp_display(
+    station: str,
+    display: Sequence[float],
+    supplied_identity: object,
+    label: str,
+) -> None:
+    expected = RUN419_CP_DISPLAY_IDENTITY.get(station)
+    _require(expected is not None, f"{label} display identity authority is missing")
+    actual_identity = exporter.coordinate_array_identity_sha256(display)
+    _require(
+        len(display) == expected["count"]
+        and supplied_identity == actual_identity == expected["sha256"],
+        f"{label} display coordinate differs from the exact retained producer midpoint array",
+    )
 
 
 def _safe_output_file(output_dir: Path, relative: object, label: str) -> Path:
@@ -279,6 +321,12 @@ def _validate_generated_series(case: Mapping[str, object]) -> None:
             )
             expected_range = RUN419_CP_DISPLAY_RANGE.get(str(item.get("station_id")))
             _require(expected_range is not None, f"{key} display range authority is missing")
+            _validate_run419_cp_display(
+                str(item.get("station_id")),
+                display,
+                item.get("display_coordinate_identity_sha256"),
+                key,
+            )
             _require(
                 min(display) == expected_range[0] and max(display) == expected_range[1],
                 f"{key} physical-x range differs",

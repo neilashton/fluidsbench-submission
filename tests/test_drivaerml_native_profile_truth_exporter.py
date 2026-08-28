@@ -382,12 +382,37 @@ class DrivAerMLNativeProfileTruthExporterTests(unittest.TestCase):
         body = dict(alias)
         supplied = body.pop("series_identity_sha256")
         self.assertEqual(supplied, exporter.series_identity_sha256(body))
+        malformed_body = copy.deepcopy(body)
+        malformed_body["shared_support_ref"]["display_coordinate"] = [1234.0]
+        with self.assertRaisesRegex(exporter.ExportError, "reference shape differs"):
+            exporter.series_identity_sha256(malformed_body)
         with self.assertRaisesRegex(exporter.ExportError, "shape differs"):
             exporter.alias_series(
                 station_id="upperbody_centerline",
                 placement_receipt_identity_sha256="4" * 64,
                 shared_support_ref={**shared, "unexpected": True},
             )
+
+    def test_run419_display_validator_rejects_rebound_interior_coordinate(self) -> None:
+        original = [-0.8, 0.25, 3.6]
+        original_identity = coordinate_array_identity_sha256(original)
+        with mock.patch.object(
+            truth_validator,
+            "RUN419_CP_DISPLAY_IDENTITY",
+            {"test_station": {"count": 3, "sha256": original_identity}},
+        ):
+            truth_validator._validate_run419_cp_display(
+                "test_station", original, original_identity, "test series"
+            )
+            mutated = [-0.8, 1234.0, 3.6]
+            rebound_identity = coordinate_array_identity_sha256(mutated)
+            with self.assertRaisesRegex(
+                truth_validator.TruthValidationError,
+                "exact retained producer midpoint array",
+            ):
+                truth_validator._validate_run419_cp_display(
+                    "test_station", mutated, rebound_identity, "test series"
+                )
 
     def test_direct_seek_reader_skips_prior_inline_array_and_gathers_exact_cells(self) -> None:
         target = np.asarray(
