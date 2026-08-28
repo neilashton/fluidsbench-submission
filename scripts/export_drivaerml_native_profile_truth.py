@@ -2680,6 +2680,47 @@ def _load_case_artifact(
                 f"{expected_case}/{item.get('family_id')}/{item.get('station_id')} "
                 "representation differs"
             )
+        common_fields = {
+            "panel_id",
+            "family_id",
+            "placement_mode",
+            "station_id",
+            "quantity_id",
+            "quantity",
+            "units",
+            "scoring_role",
+            "representation",
+            "placement_receipt_identity_sha256",
+            "series_identity_sha256",
+        }
+        if expected_representation == "shared_alias":
+            expected_fields = common_fields | {"shared_support_ref"}
+        else:
+            expected_fields = common_fields | {
+                "support_identity_sha256",
+                "coordinate_id",
+                "coordinate_unit",
+                "coordinate_identity_sha256",
+                "value_identity_sha256",
+                "sample_index",
+                "raw_native_cell_id",
+                "coordinate",
+                "value",
+                "segments",
+                "unsupported_samples",
+            }
+            if item.get("quantity_id") == "cp":
+                expected_fields |= {
+                    "display_coordinate_id",
+                    "display_coordinate_unit",
+                    "display_coordinate_identity_sha256",
+                    "display_coordinate",
+                }
+        if set(item) != expected_fields:
+            raise ExportError(
+                f"{expected_case}/{item.get('family_id')}/{item.get('station_id')} "
+                "series fields differ from the native-v3 contract"
+            )
         supplied = item.get("series_identity_sha256")
         body = dict(item)
         body.pop("series_identity_sha256", None)
