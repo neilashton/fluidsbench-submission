@@ -136,7 +136,7 @@ class DrivAerNativeVolumeEvidenceTests(unittest.TestCase):
         )
         self.assertTrue(binding["complete_all_484_cases"])
         self.assertTrue(binding["equal_native_cell_weighting_exercised"])
-        self.assertFalse(binding["owner_scientific_approval"])
+        self.assertTrue(binding["owner_scientific_approval"])
         self.assertEqual(support["weighting"], "one_per_native_cell")
         self.assertFalse(support["geometric_cell_volume_weights_required"])
         self.assertNotIn("candidate_secondary_weight_status", support)

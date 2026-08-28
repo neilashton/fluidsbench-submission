@@ -52,5 +52,16 @@
     "release_id": "__UNRESOLVED_DRIVAERML_PROFILE_GROUND_TRUTH_RELEASE_ID__",
     "manifest_sha256": "__UNRESOLVED_DRIVAERML_PROFILE_GROUND_TRUTH_MANIFEST_SHA256__"
   },
-  "notes": "This file is the release hand-off, not an active scoring-support declaration. The local constant-v10 and report-only relative-v3 contract and schema are hash-bound. Exact retained copies of the all-484 velocity-placement, velocity-mapping, and relative-Cp manifests are byte-hashed, schema-checked, and verified against the official 484-case registry, so the independent nested relative_support hand-off is ready. Top-level status governs the ranked constant candidate and remains unresolved until its scoring-support, evaluator, and profile-ground-truth identities resolve; relative_support never blocks the constant candidate. Relative families retain weight 0 and their format remains closed pending a complete immutable activation record, genuine-model sensitivity, and owner approval."
+  "scientific_approval": {
+    "status": "approved",
+    "approved_by": "neilashton",
+    "approved_at": "2026-08-28",
+    "approval_record": {
+      "file": "evidence/owner-scientific-approval-2026-08-28.json",
+      "sha256": "448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3",
+      "schema": "drivaerml-owner-scientific-approval-v1"
+    },
+    "release_activation_effect": "none_until_remaining_release_gates_complete"
+  },
+  "notes": "This file is the release hand-off, not an active scoring-support declaration. The local constant-v10 and report-only relative-v3 contract and schema are hash-bound. Exact retained copies of the all-484 velocity-placement, velocity-mapping, and relative-Cp manifests are byte-hashed, schema-checked, and verified against the official 484-case registry, so the independent nested relative_support hand-off is ready. The dataset owner approved the cited scientific evidence and profile decisions on 2026-08-28. Top-level status governs the ranked constant candidate and remains unresolved only until its scoring-support, evaluator, and profile-ground-truth identities resolve; relative_support never blocks the constant candidate. Relative families retain weight 0 and their format remains closed pending genuine-model sensitivity and a final release-specific approval record that binds that evidence."
 }

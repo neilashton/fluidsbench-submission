@@ -421,6 +421,14 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
             any(path[:1] == ("relative_support",) for path, _token in tokens)
         )
         self.assertEqual(bindings["relative_support"]["status"], "ready")
+        approval = bindings["scientific_approval"]
+        self.assertEqual(approval["status"], "approved")
+        self.assertEqual(approval["approved_by"], "neilashton")
+        approval_path = BINDINGS_PATH.parent / approval["approval_record"]["file"]
+        self.assertEqual(
+            approval["approval_record"]["sha256"],
+            promoter.sha256_file(approval_path),
+        )
         active = load_json(ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json")
         self.assertEqual(promoter.unresolved_release_tokens(active), [])
         self.assertNotIn("candidate_manifest", active["scoring_support"])
@@ -435,6 +443,42 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
         self.assertEqual(profile["dataset_id"], "drivaerml")
         self.assertEqual(profile["pressure_cuts"]["truth_source_array"], "CpMeanTrim")
         self.assertEqual(profile["pressure_cuts"]["prediction_source_array"], "pMeanTrim")
+
+    def test_scientific_approval_binding_is_exact_and_nonactivating(self) -> None:
+        bindings = load_json(BINDINGS_PATH)
+        promoter.validate_scientific_approval_binding(
+            bindings["scientific_approval"],
+            bindings_path=BINDINGS_PATH,
+            release_bindings=bindings,
+        )
+        approval_path = (
+            BINDINGS_PATH.parent
+            / bindings["scientific_approval"]["approval_record"]["file"]
+        )
+        approval = load_json(approval_path)
+        self.assertTrue(
+            all(
+                approval["non_activation"][field] is False
+                for field in (
+                    "submissions_opened",
+                    "official_ranking_enabled",
+                    "production_evaluator_release_bound",
+                    "scoring_support_release_bound",
+                    "genuine_three_model_sensitivity_complete",
+                    "independent_full_submission_dry_run_complete",
+                    "relative_profile_format_authorized",
+                )
+            )
+        )
+
+        changed = copy.deepcopy(bindings["scientific_approval"])
+        changed["approval_record"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "not the reviewed record"):
+            promoter.validate_scientific_approval_binding(
+                changed,
+                bindings_path=BINDINGS_PATH,
+                release_bindings=bindings,
+            )
 
     def test_unresolved_generator_preserves_later_candidate_and_v10_bindings(self) -> None:
         bindings = promoter.load_candidate_release_bindings(BINDINGS_PATH)
@@ -800,7 +844,8 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
                     bindings, existing
                 )
             self.assertEqual(
-                selected_path, benchmark / "drivaerml-diagnostics-v10.json"
+                selected_path,
+                (benchmark / "drivaerml-diagnostics-v10.json").resolve(),
             )
             self.assertEqual(
                 selected_profile["id"], "drivaerml-diagnostics-v10-candidate"

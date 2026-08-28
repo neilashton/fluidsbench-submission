@@ -60,6 +60,15 @@ SOURCE_PIN_SHA256 = "4fc9077f8f23f4994c98f4d0e7a17aef7b998de4c996638e3a8a616b6d9
 SURFACE_AREA_MANIFEST_SHA256 = "1401c7e80bd86f3aa2d640289db9b088ce1e0825327e18eeb1ab2852de04323e"
 FORCE_TABLE_SHA256 = "4e9e003da38ccdcacad359451079888361eae221d3c8dad7fd5682250d257865"
 FORCE_R2_STATISTICS_SHA256 = "6deb7f61ef472eb1d6891927147bf9aafe7125ed6da4f96f0dcc05e0ba178b55"
+OWNER_SCIENTIFIC_APPROVAL_SHA256 = (
+    "448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3"
+)
+PROFILE_DEFINITION_V10_SHA256 = (
+    "9136feac7ac276d91f7cbcfb6c558beffc97cfaf0f0174626fee67a1f2a52bd0"
+)
+NATIVE_V3_TRUTH_INDEX_SHA256 = (
+    "e7cf14f161fc7dbf22794e6f66db4e157329be960d2a4368140e08cf0608a5ae"
+)
 
 RETIRED_DRIVAER_PHYSICAL_VOLUME_METRIC_IDS = frozenset(
     {
@@ -628,6 +637,123 @@ def validate_relative_support_bindings(
     return value["status"] == "ready"
 
 
+def validate_scientific_approval_binding(
+    value: Any,
+    *,
+    bindings_path: Path,
+    release_bindings: dict[str, Any],
+) -> None:
+    """Validate the non-activating dataset-owner scientific approval."""
+
+    required = {
+        "status",
+        "approved_by",
+        "approved_at",
+        "approval_record",
+        "release_activation_effect",
+    }
+    if not isinstance(value, dict) or set(value) != required:
+        raise ValueError(
+            "scientific_approval must contain exactly " f"{sorted(required)}"
+        )
+    if (
+        value["status"] != "approved"
+        or value["approved_by"] != "neilashton"
+        or value["approved_at"] != "2026-08-28"
+        or value["release_activation_effect"]
+        != "none_until_remaining_release_gates_complete"
+    ):
+        raise ValueError("scientific_approval decision metadata is invalid")
+    record_binding = value["approval_record"]
+    record_fields = {"file", "sha256", "schema"}
+    if not isinstance(record_binding, dict) or set(record_binding) != record_fields:
+        raise ValueError(
+            "scientific_approval.approval_record must contain exactly "
+            f"{sorted(record_fields)}"
+        )
+    if record_binding["schema"] != "drivaerml-owner-scientific-approval-v1":
+        raise ValueError("scientific approval record schema is invalid")
+    if (
+        record_binding["file"]
+        != "evidence/owner-scientific-approval-2026-08-28.json"
+        or record_binding["sha256"] != OWNER_SCIENTIFIC_APPROVAL_SHA256
+    ):
+        raise ValueError("scientific approval record identity is not the reviewed record")
+    record_path = resolved_benchmark_file(
+        record_binding["file"],
+        label="scientific_approval.approval_record.file",
+        benchmark_root=bindings_path.parent,
+    )
+    record, record_digest = load_json_with_sha256(
+        record_path,
+        label="DrivAerML scientific approval record",
+    )
+    if record_digest != record_binding["sha256"]:
+        raise ValueError("scientific approval record SHA-256 does not match its file")
+    if (
+        not isinstance(record, dict)
+        or record.get("schema") != record_binding["schema"]
+        or record.get("schema_version") != 1
+        or record.get("dataset_id") != "drivaerml"
+        or record.get("status") != value["status"]
+        or record.get("approved_by") != value["approved_by"]
+        or record.get("approved_at") != value["approved_at"]
+        or record.get("authority") != "dataset_owner"
+    ):
+        raise ValueError("scientific approval record identity is invalid")
+    evidence = record.get("evidence_bindings")
+    non_activation = record.get("non_activation")
+    if not isinstance(evidence, dict) or not isinstance(non_activation, dict):
+        raise ValueError("scientific approval record is incomplete")
+    expected_evidence = {
+        "profile_definition_v10": release_bindings["profile_definition_v10"],
+        "velocity_placement_all484": {
+            "file": release_bindings["relative_support"][
+                "velocity_placement_manifest"
+            ]["manifest_file"],
+            "sha256": release_bindings["relative_support"][
+                "velocity_placement_manifest"
+            ]["manifest_sha256"],
+        },
+        "velocity_mapping_all484": {
+            "file": release_bindings["relative_support"][
+                "velocity_mapping_manifest"
+            ]["manifest_file"],
+            "sha256": release_bindings["relative_support"][
+                "velocity_mapping_manifest"
+            ]["manifest_sha256"],
+        },
+        "cp_support_all484": {
+            "file": release_bindings["relative_support"]["cp_manifest"][
+                "manifest_file"
+            ],
+            "sha256": release_bindings["relative_support"]["cp_manifest"][
+                "manifest_sha256"
+            ],
+        },
+    }
+    for label, expected in expected_evidence.items():
+        if evidence.get(label) != expected:
+            raise ValueError(
+                f"scientific approval {label} differs from the release hand-off"
+            )
+    for field in (
+        "submissions_opened",
+        "official_ranking_enabled",
+        "production_evaluator_release_bound",
+        "scoring_support_release_bound",
+        "genuine_three_model_sensitivity_complete",
+        "independent_full_submission_dry_run_complete",
+        "relative_profile_format_authorized",
+    ):
+        if non_activation.get(field) is not False:
+            raise ValueError(
+                f"scientific approval must keep non_activation.{field}=false"
+            )
+    if non_activation.get("relative_composite_weight") != 0.0:
+        raise ValueError("scientific approval must keep relative composite weight zero")
+
+
 def load_candidate_release_bindings(
     path: Path = CANDIDATE_RELEASE_BINDINGS_PATH,
 ) -> dict[str, Any]:
@@ -705,6 +831,12 @@ def load_candidate_release_bindings(
         relative_contract=relative_contract,
         bindings_path=path,
     )
+    if "scientific_approval" in value:
+        validate_scientific_approval_binding(
+            value["scientific_approval"],
+            bindings_path=path,
+            release_bindings=value,
+        )
     tokens = [
         item
         for item in unresolved_release_tokens(value)
@@ -1433,11 +1565,34 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
         "status": "owner_review_required",
         "submissions_open": False,
         "closed_reason": (
-            "The participant contract, official splits, and bounded scoring equation are published, but ranking remains closed until "
-            "all-case velocity replay, immutable native Cp-cut extraction support, "
-            "genuine-model sensitivity analysis, force-replay review, and immutable "
-            "evaluator/scoring-support owner approval are complete."
+            "The participant contract, all-case native evidence and profile truth, "
+            "scientific review, and bounded scoring equation are complete, but "
+            "ranking remains closed until the production evaluator/scoring-support/"
+            "truth release identities are frozen, the three-model sensitivity gate "
+            "passes, and an independent full schema-v3 submission dry run is approved."
         ),
+        "scientific_approval": {
+            "status": "approved",
+            "approved_by": "neilashton",
+            "approved_at": "2026-08-28",
+            "approval_record": {
+                "file": "evidence/owner-scientific-approval-2026-08-28.json",
+                "sha256": OWNER_SCIENTIFIC_APPROVAL_SHA256,
+                "schema": "drivaerml-owner-scientific-approval-v1",
+            },
+            "activation_effect": (
+                "scientific_review_complete_release_gates_unchanged"
+            ),
+        },
+        "owner_approved_successor_profile": {
+            "id": PROFILE_DEFINITION_V10_ID,
+            "file": "drivaerml-diagnostics-v10.json",
+            "sha256": PROFILE_DEFINITION_V10_SHA256,
+            "status": "scientifically_approved_pending_immutable_release_binding",
+            "published_native_v3_truth_index_sha256": (
+                NATIVE_V3_TRUTH_INDEX_SHA256
+            ),
+        },
         "candidate_evidence_index_file": "evidence/README.md",
         "candidate_evidence_manifest_file": "evidence/manifest.json",
         "dataset_evaluator_binding": {
@@ -1532,7 +1687,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                     "native_cell_count": 68949662110,
                     "equal_native_cell_weighting_exercised": True,
                     "complete_all_484_cases": True,
-                    "owner_scientific_approval": False,
+                    "owner_scientific_approval": True,
                 },
                 "candidate_primary_pilot_evidence": {
                     "file": "evidence/native-volume-run1-run44-equal-cell-primary-pilot.json",
@@ -1628,7 +1783,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
                 "file": "evidence/force-replay-all484.json",
                 "sha256": "631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17",
                 "status": "all_484_cases_passed_candidate_evaluator",
-                "owner_scientific_approval": False,
+                "owner_scientific_approval": True,
             },
         },
         "profile_definition": {
@@ -1650,6 +1805,7 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
             "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
             "derive field-integrated forces, AutoCFD5 velocity diagnostics, and FluidsBench continuous Cp cuts from the participant's complete native predictions using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
+            "record the repository-wide schema-v3 FluidsBench methodology disclosure and DrivAerML output-field contract with named architecture components, exact total and submitter-trainable parameter counts, scoped inputs and outputs, data handling, every submitter or upstream training stage, compute for every submitter-performed stage, every raw loaded checkpoint-file SHA-256 and selection rule, and complete-split inference compute; checkpoint publication remains optional",
             "submit participant-authored scalar metrics, per-case force coefficients and evidence, and complete velocity-profile and continuous-Cp-cut JSON chunks through the current FluidsBench schema; sharing revision-pinned prediction artifacts and maintainer native-evaluator recomputation are optional audits and do not affect approval, rank, citation, or promotion eligibility",
         ],
         "activation_gates": {
@@ -1657,23 +1813,18 @@ def build_scoring_support(profile_path: Path) -> dict[str, Any]:
             "pinned_native_files": "complete",
             "surface_area_weights": "complete_public_all_484_pinned_order_count_hash_and_value_audit_passed",
             "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
-            "force_evaluator": "all_484_candidate_replay_passed_owner_approval_pending",
-            "velocity_profiles": "definition_complete_mapping_and_convergence_pending",
-            "cp_cuts": "four_continuous_cut_definitions_complete_immutable_native_extraction_support_and_all_case_replay_pending",
+            "force_evaluator": "all_484_candidate_replay_passed_owner_scientifically_approved_release_binding_pending",
+            "velocity_profiles": "all_484_fixed_and_relative_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
+            "cp_cuts": "all_484_four_cut_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
             "bounded_score_definition": "complete_fixed_field_error_caps_and_bounded_force_profile_R2",
             "composite_sensitivity_and_bootstrap": "pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
-            "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_frozen_evaluator_revision_and_owner_approval_pending",
+            "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_scientifically_approved_frozen_release_identity_pending",
             "independent_participant_dry_run": "pending",
-            "owner_evaluator_approval": "pending",
+            "owner_evaluator_approval": "scientific_method_approved_final_immutable_release_binding_pending",
         },
         "owner_decisions_required": [
-            "approve_all_case_native_array_inventory_and_exclusion_policy",
-            "approve_all_484_case_force_replay_and_chunk_invariance",
-            "approve_velocity_assignment_and_resolution_convergence",
-            "approve_immutable_native_surface_extraction_support_for_all_four_continuous_cp_cuts",
             "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
             "review_fixed_field_error_caps_and_bounded_R2_sensitivity_with_genuine_model_predictions_and_publish_bootstrap_indexes",
-            "approve_the_candidate_schema_v3_participant_authored_metrics_case_evidence_and_profile_validation",
             "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions",
         ],
     }
@@ -2170,7 +2321,7 @@ def diagnostic_panels(profile: dict[str, Any]) -> list[dict[str, Any]]:
             "id": station["id"],
             "label": station["label"],
             "x_label": "Arc length along continuous native-surface cut, m",
-            "description": "Continuous native-surface Cp cut; immutable extraction support is pending.",
+            "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
             "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
             "source_url": cut_source_url,
         }

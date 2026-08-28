@@ -1,11 +1,22 @@
 # DrivAerML benchmark contract proposed for scientific review
 
-Status: **owner policy decisions recorded; activation validation required;
-submissions remain closed**
+Status: **dataset-owner scientific approval recorded 2026-08-28; production
+release, sensitivity, and independent dry-run gates remain; submissions closed**
 
 Prepared: 2026-08-19
 
 Scope: the public `neashton/drivaerml` release pinned in this directory
+
+> Current-state note (2026-08-28): this file preserves the reasoning and the
+> proposed pre-approval requirements as a historical review record. The owner
+> has since approved the completed all-case native, force, velocity, and
+> continuous-Cp evidence and has accepted the published deterministic 10 mm
+> velocity support and tolerances. Statements below that owner confirmation,
+> all-case profile support, or the proposed resolution/tolerance campaigns are
+> still pending are superseded by
+> [`../evidence/owner-scientific-approval-2026-08-28.json`](../evidence/owner-scientific-approval-2026-08-28.json)
+> and the current [`../ACTIVATION_CHECKLIST.md`](../ACTIVATION_CHECKLIST.md).
+> The remaining release gates are not superseded.
 
 ## Decision in one paragraph
 
@@ -405,10 +416,13 @@ replace the pending frozen evaluator and immutable scoring-support release.
   replay are not activation requirements and must not be substituted for the
   continuous-cut support.
 
-## Approval blockers
+## Historical approval blockers
 
-FluidsBench must not open submissions or activate official ranking until one or
-more reviewed pull requests supply and owner-approve all of the following:
+The following list was the pre-approval review plan. Items 1-6 and the
+scientific support portions of item 8 are now satisfied or explicitly
+superseded by the 2026-08-28 owner decision. The sensitivity work in item 7 and
+the immutable release binding/final release approval in item 8 remain open; see
+the current activation checklist.
 
 1. an all-case VTK inventory proving required array association, tuple count,
    component count, finiteness, units, pressure gauge, wall-shear sign, and the

@@ -3,6 +3,15 @@
 This is a candidate evidence format. It does not activate scoring or open
 submissions.
 
+> Current-state note (2026-08-28): this checker and the proposed 1/2/5/10 mm
+> campaign are retained as optional research tooling, not as current activation
+> requirements. The dataset owner accepted the published deterministic 10 mm
+> support, explicit gaps, and numerical tolerances without claiming that the
+> superseded campaign ran. See
+> [`../evidence/owner-scientific-approval-2026-08-28.json`](../evidence/owner-scientific-approval-2026-08-28.json)
+> and [`../ACTIVATION_CHECKLIST.md`](../ACTIVATION_CHECKLIST.md). The
+> owner-review language below describes the historical checker contract.
+
 Run the checker with:
 
 ```bash

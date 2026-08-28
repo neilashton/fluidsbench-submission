@@ -40,6 +40,19 @@ class DrivAerMLContractTests(unittest.TestCase):
         support = self.specification["scoring_support"]
         self.assertEqual(support["status"], "owner_review_required")
         self.assertFalse(support["submissions_open"])
+        scientific_approval = support["scientific_approval"]
+        self.assertEqual(scientific_approval["status"], "approved")
+        self.assertEqual(scientific_approval["approved_by"], "neilashton")
+        approval_binding = scientific_approval["approval_record"]
+        approval_path = DATASET_ROOT / approval_binding["file"]
+        self.assertTrue(approval_path.is_file())
+        self.assertEqual(sha256_file(approval_path), approval_binding["sha256"])
+        approval = load_json(approval_path)
+        self.assertEqual(approval["status"], "approved")
+        self.assertFalse(approval["non_activation"]["submissions_opened"])
+        self.assertFalse(
+            approval["non_activation"]["genuine_three_model_sensitivity_complete"]
+        )
         self.assertTrue(support["owner_decisions_required"])
         self.assertFalse(
             support["coverage_contract"]["full_prediction_artifact_required"]
@@ -101,7 +114,10 @@ class DrivAerMLContractTests(unittest.TestCase):
             manifest["status"], "candidate_evidence_not_scoring_support"
         )
         self.assertFalse(manifest["official_submission_scoring_enabled"])
-        self.assertFalse(manifest["owner_scientific_approval"])
+        self.assertTrue(manifest["owner_scientific_approval"])
+        approval_record = manifest["scientific_approval_record"]
+        approval_path = DATASET_ROOT / "evidence" / approval_record["file"]
+        self.assertEqual(sha256_file(approval_path), approval_record["sha256"])
         files = [item["file"] for item in manifest["artifacts"]]
         self.assertEqual(len(files), len(set(files)))
         for artifact in manifest["artifacts"]:

@@ -1,13 +1,15 @@
 # DrivAerML candidate evidence index
 
-This directory contains implementation evidence and diagnostic pilot records
-for the closed DrivAerML candidate contract. Presence here does not make an
-artifact official scoring support, owner-approved evidence, or an accepted
-submission. Repository-relative proposal, profile, and evidence paths in the
-machine contract resolve from `benchmark-specs/drivaerml/`; upstream dataset
-paths instead resolve within the pinned `neashton/drivaerml` release.
-The same file identities and non-activation status are available to tooling in
-[`manifest.json`](manifest.json).
+This directory contains implementation evidence, diagnostic pilot records, and
+the dataset-owner scientific approval for the closed DrivAerML candidate
+contract. Presence here does not make an artifact official scoring support or
+an accepted submission. The exception is the explicitly scoped approval record
+indexed below: it approves the cited scientific evidence and decisions but does
+not activate submissions or official ranking. Repository-relative proposal,
+profile, and evidence paths in the machine contract resolve from
+`benchmark-specs/drivaerml/`; upstream dataset paths instead resolve within the
+pinned `neashton/drivaerml` release. Historical evidence keeps the claims it
+made when generated and is not rewritten after approval.
 
 The benchmark owner decided on 2026-08-21 that the 209 discrete Cp probes are
 excluded from the current participant submission and score. Every discrete-
@@ -19,7 +21,8 @@ extraction evidence and support that is not supplied by these probe artifacts.
 
 | Artifact | SHA-256 | Scope and eligibility |
 | --- | --- | --- |
-| [`force-replay-all484.json`](force-replay-all484.json) | `631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17` | Passing candidate evaluator replay for all 484 cases, including fixed-area audit and chunk invariance. Dataset-owner scientific approval remains pending; this does not activate scoring. |
+| [`owner-scientific-approval-2026-08-28.json`](owner-scientific-approval-2026-08-28.json) | `448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3` | Neil Ashton's dataset-owner approval of the cited native support, force convention, 10 mm velocity support and tolerances, four continuous Cp cuts, native-v3 truth, display/scoring coordinates, and expected zeroth-order velocity stair steps. It explicitly does not freeze a production release, complete multi-model sensitivity, open submissions, or enable ranking. |
+| [`force-replay-all484.json`](force-replay-all484.json) | `631cd02c3a4215b254489652c1d93dfd781ecdb9478ff1ab11f24294743e8a17` | Passing candidate evaluator replay for all 484 cases, including fixed-area audit and chunk invariance. It is covered by the 2026-08-28 scientific approval but does not by itself freeze a release or activate scoring. |
 | [`native-volume-run1-run44-equal-cell-primary-pilot.json`](native-volume-run1-run44-equal-cell-primary-pilot.json) | `d009b6ac708fa320d21492b4cc44fc846b61e99b445836b5dedc704a934592d7` | Two-case implementation evidence for multipart reconstruction, native fields, raw order, complete coverage, and equal-cell metric invariance. It covers only `run_1` and `run_44` and is not scoring support. |
 | [`native-volume-equal-cell-primary-all484.json`](native-volume-equal-cell-primary-all484.json) | `bda42a125ffb4d6484756e77ac7e495974f39d4bce3e663154322e9e560827c7` | Passing all-484 audit of 978 pinned VTU segments, native `CellData`, tuple/component counts, finite values, declared units, raw-cell order and complete duplicate-free coverage. Two chunk partitions agree within `2.22e-16` for additive statistics and `5.69e-14` for metrics. This directly exercises the equal-native-cell volume contract; it is not a physics-null baseline, model result, or scoring support. |
 | [`native-volume-equal-cell-primary-all484-provenance.json`](native-volume-equal-cell-primary-all484-provenance.json) | `b5ffe2234bb1597cf041ff5d97458f3d0d6e81db7a30591a7e26f51ebc032fde` | Path-free provenance for the all-484 audit: exact committed generator revision and source hashes, Python/NumPy runtime, launcher hash, scheduler scope, aggregate hash, and a canonical digest over all 484 external case-receipt identities. It does not turn the audit into scoring support or bundle the 10.7 MB receipt set. |
@@ -43,6 +46,7 @@ extraction evidence and support that is not supplied by these probe artifacts.
 | [`transolver-run419-current-relative-profile-v3/profiles/index.json`](transolver-run419-current-relative-profile-v3/profiles/index.json) | `654d5afec080e0f89ba3fa5a50135e72af23eef4af0f9b1ba1bf22a3f757c548` | One-case candidate profile index for the current schema-v3 regression fixture. It remains candidate-only and does not replace the public v1 dummy submission. |
 | [`transolver-run419-current-relative-profile-v3/profiles/chunk-000.json`](transolver-run419-current-relative-profile-v3/profiles/chunk-000.json) | `3a5bca4c5f8730dcae4e29f69f415dc393050c6ebca6cf6e1303d307985bf262` | Real evaluator-produced 40-series `run_419` fixture: 16 constant and 16 relative velocity profiles, four constant Cp cuts, two shared centreline Cp aliases, and two materialized moving Cp cuts. Every materialized series is bound to retained support, placement-receipt, coordinate and prediction arrays; the two aliases use `shared_support_ref`. |
 | [`transolver-run419-current-relative-profile-v3/provenance.json`](transolver-run419-current-relative-profile-v3/provenance.json) | `62ef43e1f5b8fe30c8b03fc36d315c4ad1b6faa242b0ec56c1ee0cb41cd5576a` | Reproducible path-free provenance for the current fixture. It binds dataset revision `7a5c0948ce27be709b1116a3a190f806e7a8f79f`, model revision `96477aeb86d24c26ccf0797bca1b3851268017d0`, every prediction chunk, all retained relative-support manifests and indices, evaluator implementation, series lineage and non-activation claims. |
+| [`drivaerml-native-profile-truth-run419-validation-v1.json`](drivaerml-native-profile-truth-run419-validation-v1.json) | `ea614d5404a5a0c83283d2bc19d5153214297863a009cf7ff469921d86b8edf6` | Passing array-level validation of the first all-484 native profile truth publication against all 40 real Transolver `run_419` series. The companion native-v3 publication adds physical-x display coordinates without changing the approved values, scoring coordinates, support, or segment topology. |
 
 The two historical `run_419` report files above deliberately retain the evaluator's exact bytes,
 including its own scope-limit declarations. The Cp report can be checked directly
@@ -64,33 +68,28 @@ sensitivity gate.
 
 ## Current blockers
 
-The owner selected equal-native-cell volume scoring on 2026-08-20. Geometric
-cell-volume generation is therefore not an activation gate. The retained VTK
-experiments above are historical provenance only and must not be interpreted as
-current scoring support.
+The dataset-owner scientific review is complete. All-case native field, force,
+fixed/relative velocity, and four-cut continuous-Cp evidence are published and
+approved. The proposed resolution/tolerance campaigns are no longer separate
+activation requirements; the owner accepted the published deterministic 10 mm
+support and its explicit gap/tolerance semantics. Historical artifacts retain
+their original non-approval claims because immutable evidence is not rewritten
+after a later decision.
 
-The all-case Cp research sweep, source inventory, truth replay, review atlas,
-and two-case pilots remain hash-bound for provenance. The 875 invalid rows and
-999 review flags remain visible, but resolving them and signing off the atlas
-are no longer activation blockers because the discrete probes are outside the
-submission and score. These artifacts must not be promoted into the current
-scoring-support release or treated as support for the retained continuous Cp
-cuts. Freezing and validating the distinct four-cut extraction remains an
-activation task.
+Only release and ranking-validation work remains:
 
-The two-case velocity pilot exercises the deterministic candidate-v7 geometry
-kernel. Its compact aggregate accounts for all 4,489 invalid rows, while the
-hash-bound external row-level files retain them explicitly. It does not cover
-the other 482 cases, replay the required 0.5, 1, and 2 micrometre tolerances,
-establish prediction convergence or method ordering, or supply an owner
-validity mask. The candidate `1e-3` steradian polyhedron-classification
-tolerance also remains subject to owner scientific approval.
+1. bind the final production evaluator revision, scoring-support manifest and
+   profile-ground-truth release identities in `candidate-release-bindings.json`;
+2. run the three-genuine-model, paired 10,000-replicate sensitivity/bootstrap
+   gate on a common official cohort;
+3. run one independent full-split schema-v3 participant dry run against those
+   frozen identities; and
+4. create the final release-specific approval record, open submissions, replace
+   prototype leaderboard status, and promote `dev` to production.
 
-The required real-input two-case reference-driver pilot has now passed and is
-hash-bound above. This closes only that implementation subgate: it uses a
-deterministic all-zero transport fixture, covers two of 484 cases, and is not a
-trained-model result, physics-null denominator, independent participant dry
-run, frozen evaluator release, or owner-approved scoring support.
+The final release-specific approval remains pending by design: its schema must
+bind the not-yet-produced sensitivity evidence and the approving release
+commit. That does not undo the scientific approval recorded above.
 
 ## Provenance limits
 
