@@ -18,6 +18,7 @@ from scripts.promote_drivaerml_candidate import (
     preserve_relative_activation_declaration,
 )
 from scripts.validate_submission import (
+    DRIVAERML_CONSTANT_SUPPORT_INDEX_SCHEMA,
     DRIVAERML_OFFICIAL_CASE_REGISTRY_SCHEMA,
     DRIVAERML_RELATIVE_ACTIVATION_GATE_IDS,
     DRIVAERML_RELATIVE_ACTIVATION_RECORD_SCHEMA,
@@ -359,6 +360,7 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
             Path("schemas/v1/drivaerml-relative-profile-chunk.schema.json"),
             DATASET_PREFIX / "proposal/native-source-pin.json",
             DATASET_PREFIX / "support/relative-v3/series-support-index.json",
+            DATASET_PREFIX / "support/relative-v3/constant-series-support-index.json",
             *(DATASET_PREFIX / value for value in MANIFEST_FILES.values()),
         ]
         for relative in retained_files:
@@ -398,6 +400,10 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
         schema_file = root / "schemas/v1/drivaerml-relative-profile-chunk.schema.json"
         registry_file = dataset_directory / "proposal/native-source-pin.json"
         index_file = dataset_directory / "support/relative-v3/series-support-index.json"
+        constant_index_file = (
+            dataset_directory
+            / "support/relative-v3/constant-series-support-index.json"
+        )
         bindings: dict[str, dict] = {
             "contract": {
                 "file": "drivaerml-relative-diagnostics-v3.json",
@@ -417,6 +423,12 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
                 "file": "support/relative-v3/series-support-index.json",
                 "sha256": file_sha256(index_file),
                 "schema": DRIVAERML_RELATIVE_SUPPORT_INDEX_SCHEMA,
+                "case_count": 484,
+            },
+            "constant_series_support_index": {
+                "file": "support/relative-v3/constant-series-support-index.json",
+                "sha256": file_sha256(constant_index_file),
+                "schema": DRIVAERML_CONSTANT_SUPPORT_INDEX_SCHEMA,
                 "case_count": 484,
             },
         }

@@ -11,8 +11,9 @@ on the producer workspace.
 | `manifests/velocity-mapping-all484-v1.json` | `9b88c36e2268bf72c9baec9418ef2d9afc9faba1d98c9c12ed73b79e683a6a3d` |
 | `manifests/cp-native-support-all484-v3.json` | `4e6a4c3495ea4938895868162480dcb20b5bbea42114c94013a2c76e26128c90` |
 | `series-support-index.json` | `ff7b8bdb0b963611ce7ecb2055090b6861d42477ff47976d7b164ff131d82632` |
+| `constant-series-support-index.json` | `056b6488230c2224dfca07fca5e00eaab349bd0cda22cadffc0e609eb8a611e2` |
 | `run419-constant-series-support-index.json` | `c66adf17b73fbe0c4cba080e2ee44e2046f7c69cc7e5a5e797b2b973c826b211` |
-| `releases/relative-diagnostics-v3-support-release-v1.json` | `ec853a95ec113a1387c0cadad384c0feac39b5f9a92a5c3c43ed75d6c7f9a151` |
+| `releases/relative-diagnostics-v3-support-release-v1.json` | `6e4be42b91fdf82a0523826d597dc7fd340cb2c8931f9658f3dacaf882fe1fe9` |
 
 Each manifest contains exactly the ordered 484 unique cases from
 `proposal/native-source-pin.json` at public dataset revision
@@ -22,8 +23,17 @@ relative Cp stations. For each materialized relative series it retains the
 producer-derived coordinate count and coordinate identity; shared centreline
 aliases intentionally omit both and continue to reference their canonical
 constant supports. It records only identities replayed from the three producer
-releases. It does not reconstruct per-station constant-family identities that
-those releases do not expose.
+releases.
+
+`constant-series-support-index.json` separately binds all 20 materialized
+constant-family series for every one of the same 484 cases to the published
+native-v3 truth index with SHA-256
+`e7cf14f161fc7dbf22794e6f66db4e157329be960d2a4368140e08cf0608a5ae`.
+It retains each exact support identity, placement-receipt identity, coordinate
+count, and coordinate-array identity. This lets submission validation accept
+only the case-specific valid native samples—including explicit unsupported
+rows and interior gaps—without copying the large truth arrays into this
+repository or weakening the contract to arbitrary sparse arrays.
 
 ## Canonical coordinate-array identity
 
@@ -46,7 +56,15 @@ ordered `rows[].interval_arc_end_m` values. This preserves declared local arc
 resets between sidewall intervals; the exact producer order is protected by the
 identity rather than rewritten into a different coordinate convention.
 
-## Real run_419 constant-series fixture binding
+## All-case constant-series binding and real run_419 fixture
+
+The all-case constant index is now the validation authority for constant
+profiles in the 40-series candidate format. Constant velocity coordinates must
+still lie on their frozen 10 mm grids in increasing order; their retained
+case-specific count, coordinate identity, support identity, and receipt
+identity must also match. Constant Cp cuts receive the same four identity
+checks against their unchanged native arc-length support. No padding,
+interpolation, smoothing, extrapolation, or gap bridging is permitted.
 
 `run419-constant-series-support-index.json` binds the 20 materialized constant
 series used by the real Transolver regression fixture: 16 constant velocity
@@ -54,14 +72,14 @@ profiles and four constant Cp cuts. Each entry records the verified producer
 support identity, placement-receipt identity, coordinate count, and canonical
 coordinate-array identity. The constant velocity producer maps 3,684 of its
 3,756 frozen-grid rows and explicitly marks 72 as unsupported. The fixture
-therefore emits only ordered valid points and may preserve interior gaps. Such
-sparse arrays are accepted only for `run_419` when all four retained bindings
-match; they are report-only regression evidence and do not activate or alter
-constant-family scoring support. Other cases must provide the complete frozen
-constant velocity grid.
+therefore emits only ordered valid points and may preserve interior gaps. It is
+retained as a compact historical regression subset and must agree exactly with
+the `run_419` entries in the all-case index. It does not activate or alter
+constant-family scoring support.
 
 The release record binds the contract, profile schema, official case registry,
-all three manifests, the series index, and evaluator Git revision
+all three producer manifests, the relative and constant series indexes, and
+evaluator Git revision
 `b9db402a3fa0efbb94fe36be2ba1fe6f7b4bc1e1`. It records sensitivity evidence
 and owner approval as pending. Consequently it has
 `profile_format_authorized=false`, keeps the relative composite weight at
@@ -80,6 +98,16 @@ Maintainers with the producer workspace can replay the index with:
 ```bash
 python scripts/generate_drivaerml_relative_support_index.py \
   --producer-root /path/to/drivaerml_relative_diagnostics_candidate_v1_20260824 \
+  --check
+```
+
+The all-case constant binding can be reproduced from the checksum-verified
+native-v3 website truth release with:
+
+```bash
+python scripts/build_drivaerml_constant_series_support_index.py \
+  --ground-truth-root /path/to/fluidsbench/assets/data/profile-ground-truth/datasets/drivaerml/native-v3 \
+  --output benchmark-specs/drivaerml/support/relative-v3/constant-series-support-index.json \
   --check
 ```
 

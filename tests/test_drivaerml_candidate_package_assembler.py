@@ -175,6 +175,33 @@ def valid_methodology(*, case_count: int = 2) -> dict:
 
 
 class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
+    def test_profile_copy_accepts_closed_relative_candidate_format(self) -> None:
+        source = (
+            ROOT
+            / "benchmark-specs"
+            / "drivaerml"
+            / "evidence"
+            / "transolver-run419-current-relative-profile-v3"
+            / "profiles"
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            destination = Path(temporary) / "profiles"
+            index_sha256, profile_format = assembler._copy_profiles(
+                source,
+                destination,
+                submission_id="transolver-run419-current-relative-fixture",
+                split_id="run419-regression",
+                case_set_id="standard",
+                case_ids=["run_419"],
+                required_series=[],
+                relative_contract_sha256=(
+                    "a6066fa83a7af0d18b84a18c11079f020023a6aed81292c4251186c14fc0461a"
+                ),
+            )
+            self.assertEqual(profile_format, assembler.RELATIVE_PROFILE_FORMAT)
+            self.assertEqual(index_sha256, assembler.sha256_file(destination / "index.json"))
+            self.assertTrue((destination / "chunk-000.json").is_file())
+
     def make_fixture(self, root: Path) -> dict[str, Path]:
         benchmark = root / "benchmark-specs" / "drivaerml"
         benchmark.mkdir(parents=True)

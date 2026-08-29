@@ -34,6 +34,12 @@ from reference.methodology import (
     derived_parameter_count_millions,
     require_methodology,
 )
+from reference.drivaerml.dataset_scorer import (
+    RELATIVE_PROFILE_CONTRACT_ID,
+    RELATIVE_PROFILE_FORMAT,
+    DrivAerDatasetScorerError,
+    validate_schema_v3_relative_profile_chunk_candidate,
+)
 from reference.drivaerml.retained_file import RetainedFileError, RetainedVerifiedFile
 from scripts.validate_scoring_supports import validate_candidate_manifest_release
 
@@ -482,8 +488,25 @@ def _copy_profiles(
     case_set_id: str,
     case_ids: list[str],
     required_series: list[tuple[str, str, str]],
-) -> str:
+    relative_contract_sha256: str | None = None,
+) -> tuple[str, str]:
     index = load_json(source / "index.json")
+    profile_format = index.get("format") or "fluidsbench-profile-chunks-v1"
+    if profile_format not in {
+        "fluidsbench-profile-chunks-v1",
+        RELATIVE_PROFILE_FORMAT,
+    }:
+        raise PackageAssemblyError(f"unsupported profile index format {profile_format!r}")
+    relative_profile = profile_format == RELATIVE_PROFILE_FORMAT
+    if relative_profile:
+        if (
+            not isinstance(relative_contract_sha256, str)
+            or index.get("contract_id") != RELATIVE_PROFILE_CONTRACT_ID
+            or index.get("contract_sha256") != relative_contract_sha256
+        ):
+            raise PackageAssemblyError(
+                "relative profile index does not match the retained benchmark contract"
+            )
     index_identities = {
         "submission_id": submission_id,
         "dataset_id": "drivaerml",
@@ -506,25 +529,44 @@ def _copy_profiles(
                 f"source {expected_name} SHA-256 does not match its input index binding"
             )
         chunk = load_json(source_chunk)
-        _require_schema(chunk, "v1/profile-chunk.schema.json", expected_name)
+        if relative_profile:
+            _require_schema(
+                chunk,
+                "v1/drivaerml-relative-profile-chunk.schema.json",
+                expected_name,
+            )
+            try:
+                chunk = validate_schema_v3_relative_profile_chunk_candidate(
+                    chunk,
+                    expected_contract_sha256=relative_contract_sha256,
+                )
+            except DrivAerDatasetScorerError as error:
+                raise PackageAssemblyError(
+                    f"{expected_name} relative profile contract is invalid: {error}"
+                ) from error
+        else:
+            _require_schema(chunk, "v1/profile-chunk.schema.json", expected_name)
         chunk_case_ids = [case.get("case_id") for case in chunk["cases"]]
         if binding.get("case_ids") != chunk_case_ids:
             raise PackageAssemblyError(f"{expected_name} case IDs do not match its index binding")
         for case in chunk["cases"]:
-            by_identity = {
-                (series["panel_id"], series["station_id"], series["quantity_id"]): series
-                for series in case["series"]
-            }
-            if (
-                len(by_identity) != len(case["series"])
-                or set(by_identity) != set(required_series)
-            ):
-                raise PackageAssemblyError(
-                    f"profile case {case['case_id']} must contain each required series exactly once"
-                )
-            case["series"] = [by_identity[identity] for identity in required_series]
+            if not relative_profile:
+                by_identity = {
+                    (series["panel_id"], series["station_id"], series["quantity_id"]): series
+                    for series in case["series"]
+                }
+                if (
+                    len(by_identity) != len(case["series"])
+                    or set(by_identity) != set(required_series)
+                ):
+                    raise PackageAssemblyError(
+                        f"profile case {case['case_id']} must contain each required series exactly once"
+                    )
+                case["series"] = [by_identity[identity] for identity in required_series]
             for series in case["series"]:
-                if len(series["coordinate"]) != len(series["prediction"]):
+                if series.get("representation", "materialized") == "materialized" and (
+                    len(series["coordinate"]) != len(series["prediction"])
+                ):
                     raise PackageAssemblyError(
                         f"profile case {case['case_id']} has unequal coordinate/prediction lengths"
                     )
@@ -544,7 +586,7 @@ def _copy_profiles(
     _require_schema(index, "v1/profile-index.schema.json", "profiles/index.json")
     index_path = destination / "index.json"
     write_json(index_path, index)
-    return sha256_file(index_path)
+    return sha256_file(index_path), profile_format
 
 
 def _normalize_discretization_cases(
@@ -757,7 +799,18 @@ def assemble_package(
         write_json(discretization_path, discretization)
         discretization_sha256 = sha256_file(discretization_path)
 
-        profile_index_sha256 = _copy_profiles(
+        relative_declaration = specification.get("relative_diagnostics", {})
+        relative_contract = (
+            relative_declaration.get("contract")
+            if isinstance(relative_declaration, dict)
+            else None
+        )
+        relative_contract_sha256 = (
+            relative_contract.get("sha256")
+            if isinstance(relative_contract, dict)
+            else None
+        )
+        profile_index_sha256, profile_format = _copy_profiles(
             profiles_path,
             staging / "profiles",
             submission_id=submission_id,
@@ -765,6 +818,7 @@ def assemble_package(
             case_set_id=split["case_set_id"],
             case_ids=case_ids,
             required_series=_required_profile_series(specification),
+            relative_contract_sha256=relative_contract_sha256,
         )
 
         evaluation = config.get("evaluation")
@@ -843,7 +897,7 @@ def assemble_package(
             },
             "metric_values": case_metrics["metric_values"],
             "profile_data": {
-                "format": "fluidsbench-profile-chunks-v1",
+                "format": profile_format,
                 "index_file": "profiles/index.json",
                 "case_count": len(case_ids),
                 "case_set_id": split["case_set_id"],
