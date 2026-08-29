@@ -58,6 +58,9 @@ DRIVAERML_RELATIVE_ACTIVATION_RECORD_SCHEMA = (
 DRIVAERML_RELATIVE_SUPPORT_INDEX_SCHEMA = (
     "drivaerml-relative-series-support-index-v2"
 )
+DRIVAERML_CONSTANT_SUPPORT_INDEX_SCHEMA = (
+    "drivaerml-constant-series-support-index-v1"
+)
 DRIVAERML_OFFICIAL_CASE_REGISTRY_SCHEMA = (
     "drivaerml-fluidsbench-public-native-source-pin-v1"
 )
@@ -759,6 +762,7 @@ def validate_drivaerml_relative_activation_release(
         "velocity_mapping_manifest",
         "cp_manifest",
         "series_support_index",
+        "constant_series_support_index",
     }
     if not isinstance(bindings, dict) or set(bindings) != binding_names:
         problem(f"record bindings must be exactly {sorted(binding_names)}")
@@ -1266,6 +1270,224 @@ def validate_drivaerml_relative_activation_release(
                 problem(
                     f"series_support_index {case.get('case_id')} does not exactly "
                     "cover the relative contract namespace"
+                )
+
+    constant_index_entry = loaded.get("constant_series_support_index")
+    if constant_index_entry is not None:
+        constant_index, _constant_path, _constant_digest = constant_index_entry
+        constant_binding = bindings.get("constant_series_support_index", {})
+        constant_fields = {
+            "case_count",
+            "cases",
+            "contract_id",
+            "dataset_id",
+            "schema",
+            "schema_version",
+            "scope",
+            "series_per_case",
+            "source_bindings",
+        }
+        if set(constant_index) != constant_fields:
+            problem(
+                "constant_series_support_index fields must be exactly "
+                f"{sorted(constant_fields)}"
+            )
+        if constant_binding.get("schema") != DRIVAERML_CONSTANT_SUPPORT_INDEX_SCHEMA:
+            problem("constant_series_support_index binding declares the wrong schema")
+        if constant_index.get("schema") != DRIVAERML_CONSTANT_SUPPORT_INDEX_SCHEMA:
+            problem("constant_series_support_index has the wrong schema")
+        if constant_index.get("schema_version") != 1:
+            problem("constant_series_support_index schema_version must equal 1")
+        if constant_index.get("contract_id") != RELATIVE_PROFILE_CONTRACT_ID:
+            problem("constant_series_support_index contract_id differs from the contract")
+        if constant_index.get("scope") != "constant_families_all_official_cases":
+            problem(
+                "constant_series_support_index scope must equal "
+                "constant_families_all_official_cases"
+            )
+        if (
+            constant_binding.get("case_count") != 484
+            or constant_index.get("case_count") != 484
+        ):
+            problem("constant_series_support_index must declare exactly 484 cases")
+        if constant_index.get("series_per_case") != 20:
+            problem(
+                "constant_series_support_index must declare exactly 20 series per case"
+            )
+        if constant_index.get("dataset_id") != "drivaerml":
+            problem("constant_series_support_index dataset_id must equal 'drivaerml'")
+
+        constant_sources = constant_index.get("source_bindings")
+        expected_constant_source_fields = {
+            "coordinate_identity_encoding",
+            "native_profile_truth",
+            "public_dataset",
+        }
+        if (
+            not isinstance(constant_sources, dict)
+            or set(constant_sources) != expected_constant_source_fields
+        ):
+            problem(
+                "constant_series_support_index.source_bindings must contain exactly "
+                f"{sorted(expected_constant_source_fields)}"
+            )
+            constant_sources = {}
+        expected_native_truth = {
+            "master_index_path": (
+                "assets/data/profile-ground-truth/datasets/drivaerml/"
+                "native-v3/index.json"
+            ),
+            "master_index_sha256": (
+                "e7cf14f161fc7dbf22794e6f66db4e157329be960d2a4368140e08cf0608a5ae"
+            ),
+            "provenance_sha256": (
+                "6030df1dce11c4fbf6028d4e17ab39394cfdd3e7bb4d5a7ff81f33408849f221"
+            ),
+            "release_receipt_sha256": (
+                "ef59ca838c828ac1c5505ef4d35f1b91a55e07ad90df359491599114ec0d878c"
+            ),
+            "dataset_repository": "neashton/drivaerml",
+            "dataset_revision": source_revision,
+        }
+        if constant_sources.get("native_profile_truth") != expected_native_truth:
+            problem(
+                "constant_series_support_index native-profile-truth provenance "
+                "differs from the published native-v3 release"
+            )
+        if constant_sources.get("coordinate_identity_encoding") != (
+            "fluidsbench-drivaerml-coordinate-array-v1"
+        ):
+            problem(
+                "constant_series_support_index coordinate identity encoding is invalid"
+            )
+        constant_public_dataset = constant_sources.get("public_dataset")
+        if registry_entry is not None:
+            registry, registry_path, registry_digest = registry_entry
+            registry_repository = registry.get("repository")
+            expected_repository = (
+                registry_repository.get("repo_id")
+                if isinstance(registry_repository, dict)
+                else None
+            )
+            expected_constant_public_dataset = {
+                "native_source_pin_path": registry_path.relative_to(root).as_posix(),
+                "native_source_pin_sha256": registry_digest,
+                "repository": expected_repository,
+                "revision": source_revision,
+            }
+            if constant_public_dataset != expected_constant_public_dataset:
+                problem(
+                    "constant_series_support_index public-dataset provenance "
+                    "differs from the official registry"
+                )
+
+        expected_constant_series: set[tuple[str, str]] = set()
+        raw_families = contract.get("families")
+        if isinstance(raw_families, list):
+            for family in raw_families:
+                if not isinstance(family, dict) or family.get("family_id") not in {
+                    "drivaerml-autocfd5-constant-v1",
+                    "drivaerml_cp_constant_v1",
+                }:
+                    continue
+                station_ids = family.get("station_ids")
+                if not isinstance(station_ids, list):
+                    continue
+                expected_constant_series.update(
+                    (family["family_id"], station_id)
+                    for station_id in station_ids
+                    if isinstance(station_id, str)
+                )
+        if len(expected_constant_series) != 20:
+            problem("contract must define exactly 20 constant family/station keys")
+        try:
+            constant_case_ids = _drivaerml_case_ids(
+                constant_index,
+                label="constant_series_support_index",
+            )
+        except SubmissionJSONError as error:
+            problem(str(error))
+            constant_case_ids = []
+        if official_case_ids and constant_case_ids != official_case_ids:
+            problem(
+                "constant_series_support_index cases must exactly match the "
+                "official registry"
+            )
+        raw_constant_cases = constant_index.get("cases")
+        if not isinstance(raw_constant_cases, list):
+            raw_constant_cases = []
+        constant_item_fields = {
+            "family_id",
+            "station_id",
+            "representation",
+            "support_identity_sha256",
+            "placement_receipt_identity_sha256",
+            "coordinate_count",
+            "coordinate_identity_sha256",
+        }
+        for case_position, case in enumerate(raw_constant_cases):
+            if not isinstance(case, dict) or set(case) != {"case_id", "series"}:
+                problem(
+                    "constant_series_support_index.cases"
+                    f"[{case_position}] fields are invalid"
+                )
+                continue
+            series = case.get("series")
+            if not isinstance(series, list) or len(series) != 20:
+                problem(
+                    f"constant_series_support_index {case.get('case_id')} must "
+                    "contain 20 entries"
+                )
+                continue
+            observed_constant: set[tuple[str, str]] = set()
+            for series_position, item in enumerate(series):
+                if not isinstance(item, dict) or set(item) != constant_item_fields:
+                    problem(
+                        f"constant_series_support_index {case.get('case_id')} "
+                        f"series {series_position} fields are invalid"
+                    )
+                    continue
+                key = (item.get("family_id"), item.get("station_id"))
+                if key in observed_constant:
+                    problem(
+                        f"constant_series_support_index {case.get('case_id')} "
+                        f"repeats {key}"
+                    )
+                observed_constant.add(key)
+                if item.get("representation") != "materialized":
+                    problem(
+                        f"constant_series_support_index {case.get('case_id')} "
+                        f"{key} must be materialized"
+                    )
+                for digest_field in (
+                    "support_identity_sha256",
+                    "placement_receipt_identity_sha256",
+                    "coordinate_identity_sha256",
+                ):
+                    digest = item.get(digest_field)
+                    if (
+                        not isinstance(digest, str)
+                        or LOWER_SHA256.fullmatch(digest) is None
+                        or digest == "0" * 64
+                    ):
+                        problem(
+                            f"constant_series_support_index {case.get('case_id')} "
+                            f"{key} has an invalid {digest_field}"
+                        )
+                coordinate_count = item.get("coordinate_count")
+                if (
+                    not isinstance(coordinate_count, int)
+                    or isinstance(coordinate_count, bool)
+                    or coordinate_count < 2
+                ):
+                    problem(
+                        f"constant_series_support_index {case.get('case_id')} "
+                        f"{key} has an invalid coordinate_count"
+                    )
+            if observed_constant != expected_constant_series:
+                problem(
+                    f"constant_series_support_index {case.get('case_id')} does "
+                    "not exactly cover the constant contract namespace"
                 )
 
     evaluator_error_count = len(errors)
@@ -4702,6 +4924,8 @@ def validate_profiles(
     submission: dict[str, Any],
     dataset_spec: dict[str, Any],
     split_spec_entry: dict[str, Any],
+    *,
+    candidate_dry_run: bool = False,
 ) -> dict[str, int]:
     profile_format = submission["profile_data"].get(
         "format", "fluidsbench-profile-chunks-v1"
@@ -4730,7 +4954,10 @@ def validate_profiles(
             add,
             dataset_spec,
             declaration,
-            require_active=relative_profile or declaration_claims_activation,
+            require_active=(
+                declaration_claims_activation
+                or (relative_profile and not candidate_dry_run)
+            ),
         )
         release_was_checked = True
     if relative_profile:
@@ -4747,9 +4974,9 @@ def validate_profiles(
                     add,
                     dataset_spec,
                     declaration,
-                    require_active=True,
+                    require_active=not candidate_dry_run,
                 )
-            if (
+            if not candidate_dry_run and (
                 declaration.get("status") != "activated"
                 or declaration.get("profile_format_enabled") is not True
                 or not release_valid
@@ -5189,7 +5416,14 @@ def validate_submission_file(
         contributor_stage=contributor_stage,
         candidate_dry_run=candidate_dry_run,
     )
-    stats = validate_profiles(add, path.parent, submission, dataset_spec, spec_split)
+    stats = validate_profiles(
+        add,
+        path.parent,
+        submission,
+        dataset_spec,
+        spec_split,
+        candidate_dry_run=candidate_dry_run,
+    )
     return errors, stats
 
 

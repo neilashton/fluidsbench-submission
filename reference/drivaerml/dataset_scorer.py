@@ -209,6 +209,22 @@ RELATIVE_SERIES_SUPPORT_INDEX_SHA256 = (
     "ff7b8bdb0b963611ce7ecb2055090b6861d42477ff47976d7b164ff131d82632"
 )
 RELATIVE_SERIES_SUPPORT_PER_CASE = 20
+CONSTANT_SERIES_SUPPORT_INDEX_SCHEMA = (
+    "drivaerml-constant-series-support-index-v1"
+)
+CONSTANT_SERIES_SUPPORT_INDEX_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "benchmark-specs"
+    / "drivaerml"
+    / "support"
+    / "relative-v3"
+    / "constant-series-support-index.json"
+)
+# Updated only when the separately reviewed native-v3 truth release changes.
+CONSTANT_SERIES_SUPPORT_INDEX_SHA256 = (
+    "056b6488230c2224dfca07fca5e00eaab349bd0cda22cadffc0e609eb8a611e2"
+)
+CONSTANT_SERIES_SUPPORT_PER_CASE = 20
 RUN419_CONSTANT_SERIES_SUPPORT_INDEX_SCHEMA = (
     "drivaerml-run419-constant-series-support-index-v1"
 )
@@ -2767,6 +2783,20 @@ def _relative_support_expected_keys() -> tuple[tuple[str, str, str], ...]:
     )
 
 
+def _constant_support_expected_keys() -> tuple[tuple[str, str], ...]:
+    """Return the constant family/station identity namespace."""
+
+    return tuple(
+        (family_id, station_id)
+        for _panel_id, family_id, station_id, _quantity_id, representation in (
+            _relative_profile_expected_keys()
+        )
+        if representation == "materialized"
+        and family_id
+        in {"drivaerml-autocfd5-constant-v1", "drivaerml_cp_constant_v1"}
+    )
+
+
 @lru_cache(maxsize=4)
 def _load_relative_series_support_index_cached(
     index_path_text: str,
@@ -3049,6 +3079,224 @@ def _relative_series_support_index() -> Mapping[
     return _load_relative_series_support_index_cached(
         str(RELATIVE_SERIES_SUPPORT_INDEX_PATH),
         RELATIVE_SERIES_SUPPORT_INDEX_SHA256,
+    )
+
+
+@lru_cache(maxsize=4)
+def _load_constant_series_support_index_cached(
+    index_path_text: str,
+    expected_sha256: str,
+) -> Mapping[tuple[str, str, str], Mapping[str, object]]:
+    """Load the immutable all-case constant support identities."""
+
+    expected_digest = _sha256(
+        expected_sha256,
+        "retained constant series support index SHA-256",
+    )
+    index_path = Path(index_path_text)
+    root, _source, actual_digest = _read_json(
+        index_path,
+        "retained constant series support index",
+    )
+    if actual_digest != expected_digest:
+        raise DrivAerDatasetScorerError(
+            "retained constant series support index SHA-256 mismatch"
+        )
+    root = _exact_keys(
+        root,
+        {
+            "schema",
+            "schema_version",
+            "dataset_id",
+            "contract_id",
+            "scope",
+            "case_count",
+            "series_per_case",
+            "source_bindings",
+            "cases",
+        },
+        "retained constant series support index",
+    )
+    if (
+        root["schema"] != CONSTANT_SERIES_SUPPORT_INDEX_SCHEMA
+        or root["schema_version"] != 1
+        or root["dataset_id"] != "drivaerml"
+        or root["contract_id"] != RELATIVE_PROFILE_CONTRACT_ID
+        or root["scope"] != "constant_families_all_official_cases"
+        or root["case_count"] != 484
+        or root["series_per_case"] != CONSTANT_SERIES_SUPPORT_PER_CASE
+    ):
+        raise DrivAerDatasetScorerError(
+            "retained constant series support index identity is invalid"
+        )
+    expected_sources = {
+        "native_profile_truth": {
+            "master_index_path": (
+                "assets/data/profile-ground-truth/datasets/drivaerml/"
+                "native-v3/index.json"
+            ),
+            "master_index_sha256": (
+                "e7cf14f161fc7dbf22794e6f66db4e157329be960d2a4368140e08cf0608a5ae"
+            ),
+            "provenance_sha256": (
+                "6030df1dce11c4fbf6028d4e17ab39394cfdd3e7bb4d5a7ff81f33408849f221"
+            ),
+            "release_receipt_sha256": (
+                "ef59ca838c828ac1c5505ef4d35f1b91a55e07ad90df359491599114ec0d878c"
+            ),
+            "dataset_repository": OFFICIAL_REPOSITORY_ID,
+            "dataset_revision": OFFICIAL_REPOSITORY_REVISION,
+        },
+        "public_dataset": {
+            "native_source_pin_path": (
+                "benchmark-specs/drivaerml/proposal/native-source-pin.json"
+            ),
+            "native_source_pin_sha256": OFFICIAL_NATIVE_SOURCE_PIN_SHA256,
+            "repository": OFFICIAL_REPOSITORY_ID,
+            "revision": OFFICIAL_REPOSITORY_REVISION,
+        },
+        "coordinate_identity_encoding": (
+            "fluidsbench-drivaerml-coordinate-array-v1"
+        ),
+    }
+    if root["source_bindings"] != expected_sources:
+        raise DrivAerDatasetScorerError(
+            "retained constant series support provenance is invalid"
+        )
+
+    benchmark_root = index_path.parents[2]
+    pin, _pin_source, pin_digest = _read_json(
+        benchmark_root / "proposal" / "native-source-pin.json",
+        "official DrivAerML native-source pin",
+    )
+    raw_official_cases = pin.get("cases")
+    if (
+        pin_digest != OFFICIAL_NATIVE_SOURCE_PIN_SHA256
+        or pin.get("schema")
+        != "drivaerml-fluidsbench-public-native-source-pin-v1"
+        or pin.get("schema_version") != 1
+        or not isinstance(raw_official_cases, list)
+    ):
+        raise DrivAerDatasetScorerError(
+            "official DrivAerML native-source pin identity is invalid"
+        )
+    official_case_ids = tuple(
+        _case_id(
+            case.get("case_id") if isinstance(case, Mapping) else None,
+            f"official DrivAerML case {position}",
+        )
+        for position, case in enumerate(raw_official_cases)
+    )
+    if len(official_case_ids) != 484 or len(set(official_case_ids)) != 484:
+        raise DrivAerDatasetScorerError(
+            "official DrivAerML native-source pin does not contain 484 unique cases"
+        )
+
+    raw_cases = root["cases"]
+    if not isinstance(raw_cases, list) or len(raw_cases) != 484:
+        raise DrivAerDatasetScorerError(
+            "retained constant series support index must contain exactly 484 cases"
+        )
+    expected_series_keys = _constant_support_expected_keys()
+    result: dict[tuple[str, str, str], Mapping[str, object]] = {}
+    observed_case_ids: list[str] = []
+    for case_position, raw_case in enumerate(raw_cases):
+        case = _exact_keys(
+            raw_case,
+            {"case_id", "series"},
+            f"retained constant support case {case_position}",
+        )
+        case_id = _case_id(
+            case["case_id"],
+            f"retained constant support case {case_position} ID",
+        )
+        observed_case_ids.append(case_id)
+        raw_series = case["series"]
+        if (
+            not isinstance(raw_series, list)
+            or len(raw_series) != CONSTANT_SERIES_SUPPORT_PER_CASE
+        ):
+            raise DrivAerDatasetScorerError(
+                f"retained constant support case {case_id} must contain exactly "
+                f"{CONSTANT_SERIES_SUPPORT_PER_CASE} series"
+            )
+        observed_series_keys: list[tuple[str, str]] = []
+        for series_position, raw_item in enumerate(raw_series):
+            label = f"retained constant support {case_id} series {series_position}"
+            item = _exact_keys(
+                raw_item,
+                {
+                    "family_id",
+                    "station_id",
+                    "representation",
+                    "support_identity_sha256",
+                    "placement_receipt_identity_sha256",
+                    "coordinate_count",
+                    "coordinate_identity_sha256",
+                },
+                label,
+            )
+            family_id = _string(item["family_id"], f"{label} family_id")
+            station_id = _string(item["station_id"], f"{label} station_id")
+            key = (family_id, station_id)
+            observed_series_keys.append(key)
+            if item["representation"] != "materialized":
+                raise DrivAerDatasetScorerError(f"{label} must be materialized")
+            support_digest = _sha256(
+                item["support_identity_sha256"], f"{label} support identity"
+            )
+            receipt_digest = _sha256(
+                item["placement_receipt_identity_sha256"],
+                f"{label} placement receipt identity",
+            )
+            coordinate_digest = _sha256(
+                item["coordinate_identity_sha256"],
+                f"{label} coordinate identity",
+            )
+            if _ZERO_SHA256 in {
+                support_digest,
+                receipt_digest,
+                coordinate_digest,
+            }:
+                raise DrivAerDatasetScorerError(
+                    f"{label} contains an all-zero identity"
+                )
+            result[(case_id, family_id, station_id)] = {
+                "representation": "materialized",
+                "support_identity_sha256": support_digest,
+                "placement_receipt_identity_sha256": receipt_digest,
+                "coordinate_count": _integer(
+                    item["coordinate_count"],
+                    f"{label} coordinate count",
+                    minimum=2,
+                ),
+                "coordinate_identity_sha256": coordinate_digest,
+            }
+        if tuple(observed_series_keys) != expected_series_keys:
+            raise DrivAerDatasetScorerError(
+                f"retained constant support {case_id} series coverage/order "
+                "differs from the contract"
+            )
+    if tuple(observed_case_ids) != official_case_ids:
+        raise DrivAerDatasetScorerError(
+            "retained constant series support index case coverage/order differs "
+            "from the official 484-case set"
+        )
+    if len(result) != 484 * CONSTANT_SERIES_SUPPORT_PER_CASE:
+        raise DrivAerDatasetScorerError(
+            "retained constant series support index contains duplicate logical keys"
+        )
+    return result
+
+
+def _constant_series_support_index() -> Mapping[
+    tuple[str, str, str], Mapping[str, object]
+]:
+    """Return the native-v3-bound constant support lookup."""
+
+    return _load_constant_series_support_index_cached(
+        str(CONSTANT_SERIES_SUPPORT_INDEX_PATH),
+        CONSTANT_SERIES_SUPPORT_INDEX_SHA256,
     )
 
 
@@ -3421,12 +3669,6 @@ def _normalize_relative_profile_series(
                     f"{label} frozen constant coordinate-grid indices must be unique "
                     "and increasing"
                 )
-            if len(grid_indices) != full_grid_count and case_id != "run_419":
-                raise DrivAerDatasetScorerError(
-                    f"{label} must provide the complete frozen constant coordinate "
-                    "grid; sparse valid-point arrays are retained only for the "
-                    "report-only run_419 regression fixture"
-                )
     elif (series["coordinate_id"], series["coordinate_unit"]) != ("arc_length_m", "m"):
         raise DrivAerDatasetScorerError(
             f"{label} Cp coordinate identity must be ('arc_length_m', 'm')"
@@ -3465,9 +3707,7 @@ def validate_schema_v3_relative_profile_chunk_candidate(
         raise DrivAerDatasetScorerError("relative profile chunk cases must be non-empty")
     expected_keys = set(_relative_profile_expected_keys())
     retained_support = _relative_series_support_index()
-    retained_run419_constant: Mapping[
-        tuple[str, str], Mapping[str, object]
-    ] | None = None
+    retained_constant_support = _constant_series_support_index()
     normalized_cases: list[dict[str, object]] = []
     seen_cases: set[str] = set()
     for case_position, raw_case in enumerate(raw_cases):
@@ -3566,24 +3806,17 @@ def validate_schema_v3_relative_profile_chunk_candidate(
                             f"{case_id}/{family_id}/{station_id} coordinate identity "
                             "differs from the retained relative support index"
                         )
-            if (
-                case_id == "run_419"
-                and representation == "materialized"
-                and family_id
-                in {
-                    "drivaerml-autocfd5-constant-v1",
-                    "drivaerml_cp_constant_v1",
-                }
-            ):
-                if retained_run419_constant is None:
-                    retained_run419_constant = _run419_constant_series_support_index()
-                expected_constant = retained_run419_constant.get(
-                    (family_id, station_id)
+            if representation == "materialized" and family_id in {
+                "drivaerml-autocfd5-constant-v1",
+                "drivaerml_cp_constant_v1",
+            }:
+                expected_constant = retained_constant_support.get(
+                    (case_id, family_id, station_id)
                 )
                 if expected_constant is None:
                     raise DrivAerDatasetScorerError(
                         f"{case_id}/{family_id}/{station_id} is absent from the "
-                        "retained run_419 constant support index"
+                        "retained all-case constant support index"
                     )
                 if (
                     normalized["placement_receipt_identity_sha256"]
@@ -3591,7 +3824,7 @@ def validate_schema_v3_relative_profile_chunk_candidate(
                 ):
                     raise DrivAerDatasetScorerError(
                         f"{case_id}/{family_id}/{station_id} placement receipt "
-                        "identity differs from the retained run_419 constant "
+                        "identity differs from the retained all-case constant "
                         "support index"
                     )
                 if (
@@ -3600,7 +3833,7 @@ def validate_schema_v3_relative_profile_chunk_candidate(
                 ):
                     raise DrivAerDatasetScorerError(
                         f"{case_id}/{family_id}/{station_id} support identity "
-                        "differs from the retained run_419 constant support index"
+                        "differs from the retained all-case constant support index"
                     )
                 submitted_constant_coordinates = normalized["coordinate"]
                 if (
@@ -3609,7 +3842,7 @@ def validate_schema_v3_relative_profile_chunk_candidate(
                 ):
                     raise DrivAerDatasetScorerError(
                         f"{case_id}/{family_id}/{station_id} coordinate count "
-                        "differs from the retained run_419 constant support index"
+                        "differs from the retained all-case constant support index"
                     )
                 try:
                     submitted_constant_coordinate_identity = (
@@ -3628,7 +3861,7 @@ def validate_schema_v3_relative_profile_chunk_candidate(
                 ):
                     raise DrivAerDatasetScorerError(
                         f"{case_id}/{family_id}/{station_id} coordinate identity "
-                        "differs from the retained run_419 constant support index"
+                        "differs from the retained all-case constant support index"
                     )
             if (
                 panel_id == "pressure_profiles"

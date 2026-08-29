@@ -45,6 +45,12 @@
       "sha256": "ff7b8bdb0b963611ce7ecb2055090b6861d42477ff47976d7b164ff131d82632",
       "schema": "drivaerml-relative-series-support-index-v2",
       "case_count": 484
+    },
+    "constant_series_support_index": {
+      "file": "support/relative-v3/constant-series-support-index.json",
+      "sha256": "056b6488230c2224dfca07fca5e00eaab349bd0cda22cadffc0e609eb8a611e2",
+      "schema": "drivaerml-constant-series-support-index-v1",
+      "case_count": 484
     }
   },
   "evaluator": {

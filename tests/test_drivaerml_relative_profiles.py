@@ -60,6 +60,22 @@ CONSTANT_SUPPORT_IDENTITIES = {
     (series["family_id"], series["station_id"]): series
     for series in CONSTANT_SUPPORT_INDEX["series"]
 }
+ALL_CONSTANT_SUPPORT_INDEX_PATH = (
+    ROOT
+    / "benchmark-specs"
+    / "drivaerml"
+    / "support"
+    / "relative-v3"
+    / "constant-series-support-index.json"
+)
+ALL_CONSTANT_SUPPORT_INDEX = json.loads(
+    ALL_CONSTANT_SUPPORT_INDEX_PATH.read_text(encoding="utf-8")
+)
+ALL_CONSTANT_SUPPORT_IDENTITIES = {
+    (case["case_id"], series["family_id"], series["station_id"]): series
+    for case in ALL_CONSTANT_SUPPORT_INDEX["cases"]
+    for series in case["series"]
+}
 
 
 def write_json(path: Path, value: object) -> None:
@@ -221,15 +237,13 @@ def synthetic_retained_support(document: dict) -> dict:
     return retained
 
 
-def synthetic_run419_constant_support(document: dict) -> dict:
-    """Bind synthetic constant arrays while exercising the production checks."""
+def synthetic_constant_support(document: dict) -> dict:
+    """Bind synthetic constant arrays while exercising production checks."""
 
     retained = {
-        key: dict(value) for key, value in CONSTANT_SUPPORT_IDENTITIES.items()
+        key: dict(value) for key, value in ALL_CONSTANT_SUPPORT_IDENTITIES.items()
     }
     for case in document["cases"]:
-        if case["case_id"] != "run_419":
-            continue
         for series in case["series"]:
             if (
                 series["representation"] == "materialized"
@@ -239,7 +253,9 @@ def synthetic_run419_constant_support(document: dict) -> dict:
                     "drivaerml_cp_constant_v1",
                 }
             ):
-                identity = retained[(series["family_id"], series["station_id"])]
+                identity = retained[
+                    (case["case_id"], series["family_id"], series["station_id"])
+                ]
                 identity["support_identity_sha256"] = series[
                     "support_identity_sha256"
                 ]
@@ -259,8 +275,8 @@ def synthetic_support_patch(document: dict):
         "reference.drivaerml.dataset_scorer._relative_series_support_index",
         return_value=synthetic_retained_support(document),
     ), patch(
-        "reference.drivaerml.dataset_scorer._run419_constant_series_support_index",
-        return_value=synthetic_run419_constant_support(document),
+        "reference.drivaerml.dataset_scorer._constant_series_support_index",
+        return_value=synthetic_constant_support(document),
     ):
         yield
 
@@ -324,6 +340,20 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             ):
                 self.assertRegex(series[field], r"^[0-9a-f]{64}$")
                 self.assertNotEqual(series[field], "0" * 64)
+
+    def test_all_case_constant_index_binds_native_v3_support(self) -> None:
+        self.assertEqual(
+            ALL_CONSTANT_SUPPORT_INDEX["schema"],
+            "drivaerml-constant-series-support-index-v1",
+        )
+        self.assertEqual(ALL_CONSTANT_SUPPORT_INDEX["case_count"], 484)
+        self.assertEqual(ALL_CONSTANT_SUPPORT_INDEX["series_per_case"], 20)
+        self.assertEqual(len(ALL_CONSTANT_SUPPORT_IDENTITIES), 484 * 20)
+        for key, run419_identity in CONSTANT_SUPPORT_IDENTITIES.items():
+            self.assertEqual(
+                ALL_CONSTANT_SUPPORT_IDENTITIES[("run_419", *key)],
+                run419_identity,
+            )
 
     def test_contract_schema_and_closed_scoring_policy_are_bound(self) -> None:
         bindings = json.loads(
@@ -424,6 +454,9 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         with patch(
             "reference.drivaerml.dataset_scorer._relative_series_support_index",
             return_value=retained,
+        ), patch(
+            "reference.drivaerml.dataset_scorer._constant_series_support_index",
+            return_value=synthetic_constant_support(cp_document),
         ):
             with self.assertRaisesRegex(
                 DrivAerDatasetScorerError, "coordinate identity differs"
@@ -441,6 +474,9 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         with patch(
             "reference.drivaerml.dataset_scorer._relative_series_support_index",
             return_value=retained,
+        ), patch(
+            "reference.drivaerml.dataset_scorer._constant_series_support_index",
+            return_value=synthetic_constant_support(velocity_document),
         ):
             with self.assertRaisesRegex(
                 DrivAerDatasetScorerError, "coordinate identity differs"
@@ -449,9 +485,11 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                     velocity_document
                 )
 
-    def test_constant_velocity_rejects_unretained_subsets_for_other_cases(self) -> None:
+    def test_constant_velocity_rejects_unbound_subsets_for_every_case(self) -> None:
         document = chunk()
         validate_synthetic_chunk(document)
+        retained_relative = synthetic_retained_support(document)
+        retained_constant = synthetic_constant_support(document)
         constant_velocity = next(
             series
             for series in document["cases"][0]["series"]
@@ -459,11 +497,18 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         )
         constant_velocity["coordinate"] = constant_velocity["coordinate"][:2]
         constant_velocity["prediction"] = constant_velocity["prediction"][:2]
-        with self.assertRaisesRegex(
-            DrivAerDatasetScorerError,
-            "must provide the complete frozen constant coordinate grid",
+        with patch(
+            "reference.drivaerml.dataset_scorer._relative_series_support_index",
+            return_value=retained_relative,
+        ), patch(
+            "reference.drivaerml.dataset_scorer._constant_series_support_index",
+            return_value=retained_constant,
         ):
-            validate_synthetic_chunk(document)
+            with self.assertRaisesRegex(
+                DrivAerDatasetScorerError,
+                "coordinate count differs from the retained all-case constant",
+            ):
+                validate_schema_v3_relative_profile_chunk_candidate(document)
 
     def test_run419_constant_series_require_exact_retained_bindings(self) -> None:
         synthetic = chunk("run_419")
@@ -476,18 +521,18 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
             if series["family_id"] == "drivaerml-autocfd5-constant-v1"
         )
         retained_relative = synthetic_retained_support(wrong_support)
-        retained_constant = synthetic_run419_constant_support(wrong_support)
+        retained_constant = synthetic_constant_support(wrong_support)
         constant_velocity["support_identity_sha256"] = digest("wrong-run419-support")
         with patch(
             "reference.drivaerml.dataset_scorer._relative_series_support_index",
             return_value=retained_relative,
         ), patch(
-            "reference.drivaerml.dataset_scorer._run419_constant_series_support_index",
+            "reference.drivaerml.dataset_scorer._constant_series_support_index",
             return_value=retained_constant,
         ):
             with self.assertRaisesRegex(
                 DrivAerDatasetScorerError,
-                "support identity differs from the retained run_419 constant",
+                "support identity differs from the retained all-case constant",
             ):
                 validate_schema_v3_relative_profile_chunk_candidate(wrong_support)
 
@@ -500,19 +545,19 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         sparse_velocity["coordinate"] = [0.0, 0.02, 0.04]
         sparse_velocity["prediction"] = [0.5, 0.5, 0.5]
         retained_relative = synthetic_retained_support(sparse)
-        retained_constant = synthetic_run419_constant_support(sparse)
+        retained_constant = synthetic_constant_support(sparse)
         with patch(
             "reference.drivaerml.dataset_scorer._relative_series_support_index",
             return_value=retained_relative,
         ), patch(
-            "reference.drivaerml.dataset_scorer._run419_constant_series_support_index",
+            "reference.drivaerml.dataset_scorer._constant_series_support_index",
             return_value=retained_constant,
         ):
             validate_schema_v3_relative_profile_chunk_candidate(sparse)
             sparse_velocity["coordinate"][1] = 0.03
             with self.assertRaisesRegex(
                 DrivAerDatasetScorerError,
-                "coordinate identity differs from the retained run_419 constant",
+                "coordinate identity differs from the retained all-case constant",
             ):
                 validate_schema_v3_relative_profile_chunk_candidate(sparse)
 
@@ -525,7 +570,7 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
         ):
             with self.assertRaisesRegex(
                 DrivAerDatasetScorerError,
-                "differs from the retained run_419 constant support index",
+                "differs from the retained all-case constant support index",
             ):
                 validate_schema_v3_relative_profile_chunk_candidate(
                     full_grid_with_unbound_identities
@@ -549,6 +594,9 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                     with patch(
                         "reference.drivaerml.dataset_scorer._relative_series_support_index",
                         return_value=retained,
+                    ), patch(
+                        "reference.drivaerml.dataset_scorer._constant_series_support_index",
+                        return_value=synthetic_constant_support(stale),
                     ):
                         validate_schema_v3_relative_profile_chunk_candidate(stale)
 
@@ -758,6 +806,26 @@ class DrivAerMLRelativeProfileTests(unittest.TestCase):
                         split_entry,
                     )
             self.assertIn("relative profile format is closed", "\n".join(errors))
+
+            candidate_errors: list[str] = []
+            with synthetic_support_patch(
+                {"cases": [{"case_id": "run_1", "series": run_1_series}]}
+            ), patch("scripts.validate_submission.ROOT", temporary_root), patch(
+                "scripts.validate_submission.validate_drivaerml_relative_activation_release",
+                return_value=True,
+            ):
+                candidate_stats = validate_profiles(
+                    candidate_errors.append,
+                    directory,
+                    submission,
+                    pending_spec,
+                    split_entry,
+                    candidate_dry_run=True,
+                )
+            self.assertEqual(candidate_stats, {"cases": 1, "series": 40})
+            self.assertNotIn(
+                "relative profile format is closed", "\n".join(candidate_errors)
+            )
 
 
 if __name__ == "__main__":
