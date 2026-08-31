@@ -532,9 +532,10 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             }
         if kind == "core":
             return {
-                "schema": "drivaerml-candidate-case-evaluation-v2",
-                "schema_version": 2,
+                "schema": "drivaerml-candidate-case-evaluation-v4",
+                "schema_version": 4,
                 "case_id": case_id,
+                "prediction_scope": "surface_and_volume",
                 "source": {
                     "native_source_pin_sha256": native_source_pin_sha256,
                     "surface_native": {"vtk_version": "9.5.2"},
@@ -543,8 +544,9 @@ class DrivAerMLParticipantDriverTests(unittest.TestCase):
             }
         return {
             "schema": self.real_driver.DIAGNOSTIC_EVIDENCE_SCHEMA,
-            "schema_version": 3,
+            "schema_version": 4,
             "case_id": case_id,
+            "prediction_scope": "surface_and_volume",
             "mapping_inputs": {
                 "velocity_10mm": {
                     "profile_sha256": diagnostic_profile_sha256,

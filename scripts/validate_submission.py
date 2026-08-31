@@ -35,6 +35,12 @@ from reference.drivaerml.dataset_scorer import (
     validate_schema_v3_candidate_nonspatial_metrics,
     validate_schema_v3_relative_profile_chunk_candidate,
 )
+from reference.drivaerml.regional_aggregate import (
+    AGGREGATE_REGIONAL_REPORT_SCHEMA,
+    REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
+    RegionalAggregateError,
+    validate_aggregate_regional_diagnostics,
+)
 from reference.methodology import methodology_errors
 
 try:
@@ -2621,13 +2627,43 @@ def validate_metadata(
 def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, Any], manifest: dict[str, Any]) -> None:
     values = submission.get("metric_values", {})
     expected_ids = set(dataset.get("metric_ids", []))
+    fixed_zero_components: set[str] = set()
+    surface_only = (
+        submission.get("dataset_id") == "drivaerml"
+        and submission.get("prediction_scope") == "surface_only"
+    )
+    if surface_only:
+        policy = dataset.get("overall_score_composite", {}).get("surface_only_policy", {})
+        unavailable = policy.get("unavailable_component_metric_ids")
+        if (
+            not isinstance(unavailable, list)
+            or set(unavailable)
+            != {
+                "volume_velocity_rel_l2",
+                "volume_pressure_rel_l2",
+                "velocity_profile_r2",
+            }
+            or policy.get("unavailable_component_score") != 0.0
+            or policy.get("component_weight_renormalization") is not False
+            or policy.get("maximum_overall_score") != 60.0
+        ):
+            add("DrivAerML surface-only scoring policy is malformed")
+        else:
+            fixed_zero_components = set(unavailable)
     actual_ids = set(values)
-    missing = sorted(expected_ids - actual_ids)
+    missing = sorted((expected_ids - fixed_zero_components) - actual_ids)
     unknown = sorted(actual_ids - expected_ids)
     if missing:
         add(f"metric_values is missing: {', '.join(missing)}")
     if unknown:
         add(f"metric_values contains unknown metrics: {', '.join(unknown)}")
+    if surface_only:
+        fabricated = sorted(actual_ids & fixed_zero_components)
+        if fabricated:
+            add(
+                "surface_only metric_values must omit unavailable raw metrics: "
+                + ", ".join(fabricated)
+            )
     definitions = {definition["id"]: definition for definition in manifest["metric_definitions"]}
     composite = dataset.get("overall_score_composite")
     component_groups = dataset.get("component_score_groups")
@@ -2706,11 +2742,19 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
         ):
             add("dataset overall_score_composite does not reference a valid target and component metric set")
         elif composite_status == "active" and all(
-            isinstance(metric_id, str) and is_number(values.get(metric_id))
+            isinstance(metric_id, str)
+            and (
+                metric_id in fixed_zero_components
+                or is_number(values.get(metric_id))
+            )
             for metric_id in component_ids
         ):
             try:
-                expected = composite_overall_score(values, composite)
+                expected = composite_overall_score(
+                    values,
+                    composite,
+                    fixed_zero_component_ids=tuple(fixed_zero_components),
+                )
             except (KeyError, TypeError, ValueError) as exc:
                 add(f"dataset overall_score_composite is invalid: {exc}")
             else:
@@ -2759,13 +2803,18 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
         elif (
             isinstance(composite, dict)
             and composite.get("status", "active") == "active"
-            and all(is_number(values.get(metric_id)) for metric_id in grouped_component_ids)
+            and all(
+                metric_id in fixed_zero_components
+                or is_number(values.get(metric_id))
+                for metric_id in grouped_component_ids
+            )
         ):
             try:
                 expected_scores = composite_component_group_scores(
                     values,
                     composite,
                     component_groups,
+                    fixed_zero_component_ids=tuple(fixed_zero_components),
                 )
             except (KeyError, TypeError, ValueError) as exc:
                 add(f"dataset component_score_groups is invalid: {exc}")
@@ -3310,6 +3359,16 @@ def validate_v3_case_metrics(
 ) -> dict[str, Any] | None:
     """Validate the per-case metric evidence and its aggregate scalar binding."""
 
+    surface_only = (
+        submission.get("dataset_id") == "drivaerml"
+        and submission.get("prediction_scope") == "surface_only"
+    )
+    unavailable_metric_ids = (
+        {"volume_velocity_rel_l2", "volume_pressure_rel_l2", "velocity_profile_r2"}
+        if surface_only
+        else set()
+    )
+
     declaration = submission["case_metrics"]
     path = safe_submission_path(
         add,
@@ -3399,13 +3458,22 @@ def validate_v3_case_metrics(
     per_case_values: dict[str, list[float]] = {
         metric_id: []
         for metric_id, binding in bound_metric_bindings.items()
-        if binding.get("case_evidence") == "metric_value"
+        if (
+            binding.get("case_evidence") == "metric_value"
+            and metric_id not in unavailable_metric_ids
+        )
     }
     for case in cases:
         if not isinstance(case, dict):
             continue
         case_id = case.get("case_id")
         expected_for_case = expected_instances.get(case_id, {})
+        if surface_only:
+            expected_for_case = {
+                support_id: count
+                for support_id, count in expected_for_case.items()
+                if support_id != "volume_native_cells"
+            }
         observed_support_ids: set[str] = set()
         for support in case.get("supports", []):
             if not isinstance(support, dict):
@@ -3465,7 +3533,10 @@ def validate_v3_case_metrics(
                 add(f"{declaration['file']} {case_id}/{support_id} requires weight_coverage_fraction=1.0")
             metric_values = support.get("metric_values", {})
             observed_metric_ids = set(metric_values) if isinstance(metric_values, dict) else set()
-            expected_metric_ids = bound_metrics_by_support.get(support_id, set())
+            expected_metric_ids = (
+                bound_metrics_by_support.get(support_id, set())
+                - unavailable_metric_ids
+            )
             if observed_metric_ids != expected_metric_ids:
                 missing_metrics = sorted(expected_metric_ids - observed_metric_ids)
                 unexpected_metrics = sorted(observed_metric_ids - expected_metric_ids)
@@ -3607,7 +3678,7 @@ def validate_v3_case_metrics(
                 f"metric_values.{metric_id} must equal the macro-average of its submitted "
                 "per-case values"
             )
-    if submission.get("dataset_id") == "drivaerml":
+    if submission.get("dataset_id") == "drivaerml" and not surface_only:
         try:
             validate_schema_v3_candidate_nonspatial_metrics(case_metrics)
         except DrivAerDatasetScorerError as error:
@@ -3627,6 +3698,11 @@ def validate_v3_discretization(
     support_case_index: dict[str, Any] | None,
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     """Validate the spatial summary and ordered per-evaluation-case JSONL records."""
+
+    surface_only = (
+        submission.get("dataset_id") == "drivaerml"
+        and submission.get("prediction_scope") == "surface_only"
+    )
 
     declaration = submission["spatial_discretization"]
     path = safe_submission_path(
@@ -3815,6 +3891,8 @@ def validate_v3_discretization(
         for support in (support_manifest or {}).get("supports", [])
         if isinstance(support, dict) and isinstance(support.get("id"), str)
     }
+    if surface_only:
+        official_supports.pop("volume_native_cells", None)
     for mapping in summary_mappings:
         if not isinstance(mapping, dict):
             continue
@@ -3870,6 +3948,8 @@ def validate_v3_discretization(
         for support in (support_manifest or {}).get("supports", [])
         if isinstance(support, dict) and isinstance(support.get("id"), str)
     }
+    if surface_only:
+        official_support_ids.discard("volume_native_cells")
     extrapolation_policies = {
         support.get("id"): support.get("extrapolation_policy")
         for support in (support_manifest or {}).get("supports", [])
@@ -3884,6 +3964,15 @@ def validate_v3_discretization(
         for case in (support_case_index or {}).get("_loaded_cases", [])
         if isinstance(case, dict)
     }
+    if surface_only:
+        expected_support_counts = {
+            case_id: {
+                support_id: count
+                for support_id, count in counts.items()
+                if support_id != "volume_native_cells"
+            }
+            for case_id, counts in expected_support_counts.items()
+        }
     for line_number, record in enumerate(records, start=1):
         for error in schema_errors(record, "discretization-case.schema.json", schema_version="v3"):
             add(f"{case_manifest.get('file')} line {line_number} {error}")
@@ -4629,6 +4718,10 @@ def validate_evaluation_evidence(
     for key, expected in identities.items():
         if evidence.get(key) != expected:
             add(f"evaluation-evidence.json {key} must equal {expected!r}")
+    if submission.get("dataset_id") == "drivaerml":
+        expected_scope = submission.get("prediction_scope", "surface_and_volume")
+        if evidence.get("prediction_scope", "surface_and_volume") != expected_scope:
+            add("evaluation-evidence.json prediction_scope must match submission.json")
     if submission.get("schema_version") == "3.0":
         reproducibility = submission.get("reproducibility", {})
         structured_code = (
@@ -4683,6 +4776,68 @@ def validate_evaluation_evidence(
     if profile_index_path.is_file() and evidence.get("profile_index_sha256") != sha256_file(profile_index_path):
         add("evaluation-evidence.json profile_index_sha256 does not match profiles/index.json")
     return evidence
+
+
+def validate_regional_diagnostics(
+    add: Any,
+    directory: Path,
+    submission: dict[str, Any],
+    dataset_spec: dict[str, Any],
+    split_case_ids: list[str],
+    evidence: dict[str, Any] | None,
+) -> None:
+    """Validate the optional cross-project DrivAerML zero-weight report."""
+
+    contract = dataset_spec.get("regional_diagnostics")
+    required = (
+        submission.get("dataset_id") == "drivaerml"
+        and isinstance(contract, dict)
+        and contract.get("required_for_new_submissions") is True
+    )
+    declaration = submission.get("regional_diagnostics")
+    if not isinstance(declaration, dict):
+        if required:
+            add(
+                "DrivAerML schema-v3 submissions require "
+                "regional_diagnostics metadata"
+            )
+        return
+    expected_contract = {
+        "format": AGGREGATE_REGIONAL_REPORT_SCHEMA,
+        "contract_sha256": REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
+        "role": "report_only",
+        "weight": 0.0,
+        "official_score_changed": False,
+    }
+    for key, expected in expected_contract.items():
+        if declaration.get(key) != expected:
+            add(f"regional_diagnostics.{key} must equal {expected!r}")
+    if declaration.get("case_count") != len(split_case_ids):
+        add("regional_diagnostics.case_count must match the selected split")
+    filename = declaration.get("file")
+    if filename != "regional-diagnostics.json":
+        add("regional_diagnostics.file must be regional-diagnostics.json")
+        return
+    report_path = directory / filename
+    if not report_path.is_file():
+        add("missing regional-diagnostics.json")
+        return
+    digest = sha256_file(report_path)
+    if declaration.get("sha256") != digest:
+        add("regional-diagnostics.json does not match regional_diagnostics.sha256")
+    if evidence is not None and evidence.get("regional_diagnostics_sha256") != digest:
+        add(
+            "evaluation-evidence.json regional_diagnostics_sha256 must match "
+            "regional-diagnostics.json"
+        )
+    try:
+        report = load_json(report_path)
+        validate_aggregate_regional_diagnostics(
+            report,
+            expected_case_ids=split_case_ids,
+        )
+    except (OSError, json.JSONDecodeError, RegionalAggregateError) as error:
+        add(f"regional-diagnostics.json is invalid: {error}")
 
 
 def validate_open_reproducibility(
@@ -4912,6 +5067,21 @@ def validate_open_reproducibility(
         for key, expected in validation_v3_bindings.items():
             if validation.get(key) != expected:
                 add(f"maintainer-validation.json {key} must match submission metadata")
+        regional = submission.get("regional_diagnostics")
+        if isinstance(regional, dict):
+            if (
+                validation.get("regional_diagnostics_sha256")
+                != regional.get("sha256")
+            ):
+                add(
+                    "maintainer-validation.json regional_diagnostics_sha256 "
+                    "must match submission metadata"
+                )
+        elif "regional_diagnostics_sha256" in validation:
+            add(
+                "maintainer-validation.json regional_diagnostics_sha256 must "
+                "be absent when the submission has no regional report"
+            )
         if submission.get("dataset_id") == "drivaerml":
             validate_drivaerml_maintainer_receipt_hash(
                 add, directory, validation
@@ -5211,6 +5381,12 @@ def validate_profiles(
                 series_count += 1
             provided_set = set(provided)
             for panel_id, panel in panels.items():
+                if (
+                    submission.get("dataset_id") == "drivaerml"
+                    and submission.get("prediction_scope") == "surface_only"
+                    and panel_id == "velocity_profiles"
+                ):
+                    continue
                 if not panel.get("required", True):
                     continue
                 expected = {
@@ -5356,9 +5532,9 @@ def validate_submission_file(
             contract=methodology_contract,
         ):
             add(f"methodology validation failed: {error}")
+    split_case_ids: list[str] = []
     if submission_schema_version == "3.0":
         split_path = ROOT / "benchmark-specs" / submission["dataset_id"] / spec_split["index_file"]
-        split_case_ids: list[str] = []
         if split_path.is_file():
             try:
                 split_index = load_json(split_path)
@@ -5405,6 +5581,15 @@ def validate_submission_file(
             dataset_spec=dataset_spec,
         )
     evidence = validate_evaluation_evidence(add, path.parent, submission)
+    if submission_schema_version == "3.0":
+        validate_regional_diagnostics(
+            add,
+            path.parent,
+            submission,
+            dataset_spec,
+            split_case_ids,
+            evidence,
+        )
     validate_open_reproducibility(
         add,
         path.parent,

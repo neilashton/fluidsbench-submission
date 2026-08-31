@@ -18,6 +18,7 @@ from reference.drivaerml.evaluator import (
     NativeSourceContract,
     _evaluate_surface_chunks,
     evaluate_candidate_case,
+    evaluate_surface_only_candidate_case,
     write_candidate_case_evidence,
 )
 from reference.drivaerml.native_surface import (
@@ -496,9 +497,9 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
             payload = json.loads(first.read_text(encoding="utf-8"))
             self.assertEqual(payload["schema"], CANDIDATE_EVIDENCE_SCHEMA)
             self.assertEqual(
-                payload["schema"], "drivaerml-candidate-case-evaluation-v2"
+                payload["schema"], "drivaerml-candidate-case-evaluation-v4"
             )
-            self.assertEqual(payload["schema_version"], 2)
+            self.assertEqual(payload["schema_version"], 4)
             self.assertEqual(payload["status"], CANDIDATE_STATUS)
             self.assertFalse(payload["official_submission"])
             self.assertTrue(
@@ -528,6 +529,44 @@ class DrivAerMLCandidateEvaluatorTests(unittest.TestCase):
             )
             self.assertNotIn(
                 "volume_velocity_physical_rel_l2", payload["metric_values"]
+            )
+
+    def test_surface_only_evaluation_never_requires_volume_inputs(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = SyntheticCase(Path(directory))
+            surface_manifest, _ = fixture.manifests("surface-only", (2, 3))
+
+            evaluation = evaluate_surface_only_candidate_case(
+                case_id="run_1",
+                native_source_pin=fixture.pin,
+                native_surface=fixture.surface,
+                fixed_surface_areas=fixture.surface_areas,
+                surface_prediction_manifest=surface_manifest,
+                maximum_prediction_chunk_rows=10,
+                hash_chunk_bytes=17,
+                validation_block_rows=2,
+                source_contract=fixture.source_contract,
+            )
+
+            payload = evaluation.to_json()
+            self.assertEqual(payload["prediction_scope"], "surface_only")
+            self.assertEqual(
+                payload["source"]["volume_native"],
+                {
+                    "status": "not_loaded_surface_only",
+                    "scientific_metric_values_fabricated": False,
+                },
+            )
+            self.assertEqual(
+                payload["coverage"]["volume"],
+                {
+                    "status": "not_submitted_surface_only",
+                    "component_score": 0.0,
+                },
+            )
+            self.assertNotIn("volume_native_cells", payload["prediction_inputs"])
+            self.assertFalse(
+                any(metric_id.startswith("volume_") for metric_id in payload["metric_values"])
             )
 
     def test_case_support_count_and_chunk_limit_reject(self) -> None:

@@ -317,6 +317,16 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
                     )
             case_metrics_path = path.parent / submission["case_metrics"]["file"]
             row["case_metrics"]["file"] = str(case_metrics_path.relative_to(ROOT))
+            regional = row.get("regional_diagnostics")
+            if isinstance(regional, dict):
+                regional_path = path.parent / regional["file"]
+                row["regional_diagnostics"]["file"] = str(
+                    regional_path.relative_to(ROOT)
+                )
+                if regional_path.is_file():
+                    row["regional_diagnostics"]["sha256"] = sha256_file(
+                        regional_path
+                    )
 
             declared_artifacts = submission.get("prediction_artifacts", [])
             checks_path = path.parent / "prediction-artifact-checks.json"
@@ -657,6 +667,9 @@ def build_claim_record(manifest: dict[str, Any], row: dict[str, Any], row_index:
             / row["spatial_discretization"]["summary"]["case_manifest"]["file"],
             "case_metrics": ROOT / row["case_metrics"]["file"],
         }
+        regional = row.get("regional_diagnostics")
+        if isinstance(regional, dict):
+            v3_binding_paths["regional_diagnostics"] = ROOT / regional["file"]
         for binding_name, binding_path in v3_binding_paths.items():
             binding = available_file_binding(binding_path)
             if binding is None:
@@ -703,6 +716,14 @@ def build_claim_record(manifest: dict[str, Any], row: dict[str, Any], row_index:
             "split": row["split"],
             "split_id": row["split_id"],
             "submission_schema_version": row.get("schema_version", "1.0"),
+            **(
+                {"prediction_scope": row["prediction_scope"]}
+                if row.get("prediction_scope") in {
+                    "surface_and_volume",
+                    "surface_only",
+                }
+                else {}
+            ),
         },
         "ranking": deepcopy(row["ranking"]),
         "eligibility": deepcopy(row["claim_eligibility"]),
@@ -1162,6 +1183,9 @@ def approval_documents(
         "discretization_sha256": reviewed_submission["spatial_discretization"]["sha256"],
         "case_metrics_sha256": reviewed_submission["case_metrics"]["sha256"],
     }
+    regional = reviewed_submission.get("regional_diagnostics")
+    if isinstance(regional, dict):
+        validation["regional_diagnostics_sha256"] = regional["sha256"]
     validation_path = directory / "maintainer-validation.json"
     approved_submission = deepcopy(reviewed_submission)
     approved_submission["approval"] = {

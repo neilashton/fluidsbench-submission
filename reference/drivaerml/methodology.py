@@ -285,7 +285,16 @@ def methodology_errors(
             errors.append(
                 "methodology contract dataset_id must match submission.dataset_id"
             )
-        expected_entries = contract.get("required_predicted_fields")
+        prediction_scope = submission.get("prediction_scope")
+        scoped_entries = contract.get("required_predicted_fields_by_prediction_scope")
+        if (
+            isinstance(prediction_scope, str)
+            and isinstance(scoped_entries, Mapping)
+            and isinstance(scoped_entries.get(prediction_scope), list)
+        ):
+            expected_entries = scoped_entries[prediction_scope]
+        else:
+            expected_entries = contract.get("required_predicted_fields")
         expected_by_id = {
             entry.get("field_id"): entry
             for entry in expected_entries

@@ -2,9 +2,9 @@
 """Evaluate one candidate DrivAerML diagnostic case.
 
 The command consumes strict 10 mm velocity mapping evidence, a complete volume
-prediction chunk manifest, and immutable native truth. Continuous Cp cuts stay
-explicitly unavailable until the benchmark owner publishes immutable cut
-support. The legacy 209 discrete Cp probes are not accepted.
+prediction chunk manifest, and immutable native truth for a full submission.
+For an explicit surface-only submission it opens none of those volume inputs,
+and emits an explicit unavailable velocity-profile component instead.
 """
 
 from __future__ import annotations
@@ -25,6 +25,7 @@ from reference.drivaerml.diagnostic_evaluator import (  # noqa: E402
     DrivAerDiagnosticEvaluatorError,
     SparseNativeField,
     evaluate_loaded_case_diagnostics,
+    evaluate_surface_only_case_diagnostics,
     gather_sparse_inline_native_field,
     load_strict_velocity_10mm_mapping,
     write_candidate_diagnostic_evidence,
@@ -73,11 +74,16 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--native-source-pin", type=Path, required=True)
     parser.add_argument("--dataset-root", type=Path, required=True)
+    parser.add_argument(
+        "--prediction-scope",
+        choices=("surface_and_volume", "surface_only"),
+        default="surface_and_volume",
+    )
     parser.add_argument("--diagnostic-profile", type=Path, default=DEFAULT_PROFILE)
-    parser.add_argument("--velocity-mapping-json", type=Path, required=True)
-    parser.add_argument("--velocity-receipt-json", type=Path, required=True)
-    parser.add_argument("--volume-prediction-manifest", type=Path, required=True)
-    transport = parser.add_mutually_exclusive_group(required=True)
+    parser.add_argument("--velocity-mapping-json", type=Path)
+    parser.add_argument("--velocity-receipt-json", type=Path)
+    parser.add_argument("--volume-prediction-manifest", type=Path)
+    transport = parser.add_mutually_exclusive_group()
     transport.add_argument(
         "--multipart",
         action="store_true",
@@ -109,6 +115,29 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def run(args: argparse.Namespace) -> dict[str, object]:
     """Run one exact candidate case and return the output file identity."""
 
+    if args.prediction_scope == "surface_only":
+        supplied = (
+            args.velocity_mapping_json,
+            args.velocity_receipt_json,
+            args.volume_prediction_manifest,
+            args.monolithic_vtu,
+        )
+        if args.multipart or any(value is not None for value in supplied):
+            raise DrivAerDiagnosticEvaluatorError(
+                "surface_only scope must not receive velocity or native-volume inputs"
+            )
+        return write_candidate_diagnostic_evidence(
+            evaluate_surface_only_case_diagnostics(case_id=args.case_id), args.output
+        )
+    if (
+        args.velocity_mapping_json is None
+        or args.velocity_receipt_json is None
+        or args.volume_prediction_manifest is None
+        or (not args.multipart and args.monolithic_vtu is None)
+    ):
+        raise DrivAerDiagnosticEvaluatorError(
+            "surface_and_volume scope requires velocity mapping, volume manifest, and volume transport"
+        )
     pin_path = args.native_source_pin.expanduser().resolve()
     pin = load_native_source_pin(pin_path)
     pin_sha256 = validate_native_source_contract(pin)

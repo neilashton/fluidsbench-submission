@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 from reference.drivaerml.evaluator import (  # noqa: E402
     DrivAerCandidateEvaluatorError,
     evaluate_candidate_case,
+    evaluate_surface_only_candidate_case,
     validate_native_source_contract,
     write_candidate_case_evidence,
 )
@@ -56,9 +57,13 @@ CORE_EVALUATOR_GIT_PATHS = (
     "reference/drivaerml/native_fields.py",
     "reference/drivaerml/native_surface.py",
     "reference/drivaerml/prediction_chunks.py",
+    "reference/drivaerml/regional_aggregate.py",
+    "reference/drivaerml/regional_diagnostics.py",
     "reference/drivaerml/retained_file.py",
     "reference/drivaerml/source.py",
     "reference/drivaerml/surface_forces.py",
+    "reference/drivaerml/volume_regions.py",
+    "benchmark-specs/drivaerml/regional-diagnostics-v1.json",
 )
 
 
@@ -206,8 +211,8 @@ def _evidence_identity(
         ) from error
     if (
         not isinstance(document, dict)
-        or document.get("schema") != "drivaerml-candidate-case-evaluation-v2"
-        or document.get("schema_version") != 2
+        or document.get("schema") != "drivaerml-candidate-case-evaluation-v4"
+        or document.get("schema_version") != 4
         or document.get("case_id") != case_id
         or document.get("official_submission") is not False
     ):
@@ -343,8 +348,17 @@ def parse_args() -> argparse.Namespace:
         help="Open and concatenate the pinned .part files without materializing a VTU.",
     )
     parser.add_argument("--surface-area-npy", type=Path, required=True)
+    parser.add_argument(
+        "--prediction-scope",
+        choices=("surface_and_volume", "surface_only"),
+        default="surface_and_volume",
+        help=(
+            "surface_only evaluates only complete native-surface predictions; "
+            "the volume prediction and velocity-profile components remain zero."
+        ),
+    )
     parser.add_argument("--surface-prediction-manifest", type=Path, required=True)
-    parser.add_argument("--volume-prediction-manifest", type=Path, required=True)
+    parser.add_argument("--volume-prediction-manifest", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument(
         "--evaluator-git-revision",
@@ -382,6 +396,20 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "--evaluator-git-revision and --implementation-receipt must be "
             "supplied together"
         )
+    if (
+        args.prediction_scope == "surface_and_volume"
+        and args.volume_prediction_manifest is None
+    ):
+        raise DrivAerCandidateEvaluatorError(
+            "surface_and_volume scope requires --volume-prediction-manifest"
+        )
+    if (
+        args.prediction_scope == "surface_only"
+        and args.volume_prediction_manifest is not None
+    ):
+        raise DrivAerCandidateEvaluatorError(
+            "surface_only scope must not receive --volume-prediction-manifest"
+        )
     implementation_binding: tuple[
         str, tuple[dict[str, object], ...]
     ] | None = None
@@ -404,40 +432,56 @@ def run(args: argparse.Namespace) -> dict[str, object]:
         expected_area_sha256=case.surface_cell_area.sha256,
         source_boundary_sha256=case.surface_cell_area.source_boundary_sha256,
     )
-    if args.multipart:
-        volume_stream = open_verified_multipart(
-            resolved,
-            verification_chunk_size=args.io_chunk_bytes,
-        )
-    else:
-        volume_stream = open_verified_monolithic(
-            resolved,
-            args.monolithic_vtu,
-            verification_chunk_size=args.io_chunk_bytes,
-        )
-    with closing(volume_stream) as stream:
-        vtk_index = index_inline_binary_vtk_xml(
-            stream,
-            scan_chunk_size=args.io_chunk_bytes,
-        )
-        if len(vtk_index.pieces) != 1:
+    if args.prediction_scope == "surface_only":
+        if args.multipart or args.monolithic_vtu is not None:
             raise DrivAerCandidateEvaluatorError(
-                "native DrivAerML volume must contain exactly one Piece"
+                "surface_only scope must not receive a native volume transport"
             )
-        evaluation = evaluate_candidate_case(
+        evaluation = evaluate_surface_only_candidate_case(
             case_id=args.case_id,
             native_source_pin=pin,
             native_surface=surface,
             fixed_surface_areas=areas,
-            volume_stream=stream,
-            volume_vtk_index=vtk_index,
             surface_prediction_manifest=args.surface_prediction_manifest,
-            volume_prediction_manifest=args.volume_prediction_manifest,
             maximum_prediction_chunk_rows=args.maximum_prediction_chunk_rows,
             hash_chunk_bytes=args.io_chunk_bytes,
             validation_block_rows=args.maximum_prediction_chunk_rows,
-            encoded_chunk_bytes=args.io_chunk_bytes,
         )
+    else:
+        if args.multipart:
+            volume_stream = open_verified_multipart(
+                resolved,
+                verification_chunk_size=args.io_chunk_bytes,
+            )
+        else:
+            volume_stream = open_verified_monolithic(
+                resolved,
+                args.monolithic_vtu,
+                verification_chunk_size=args.io_chunk_bytes,
+            )
+        with closing(volume_stream) as stream:
+            vtk_index = index_inline_binary_vtk_xml(
+                stream,
+                scan_chunk_size=args.io_chunk_bytes,
+            )
+            if len(vtk_index.pieces) != 1:
+                raise DrivAerCandidateEvaluatorError(
+                    "native DrivAerML volume must contain exactly one Piece"
+                )
+            evaluation = evaluate_candidate_case(
+                case_id=args.case_id,
+                native_source_pin=pin,
+                native_surface=surface,
+                fixed_surface_areas=areas,
+                volume_stream=stream,
+                volume_vtk_index=vtk_index,
+                surface_prediction_manifest=args.surface_prediction_manifest,
+                volume_prediction_manifest=args.volume_prediction_manifest,
+                maximum_prediction_chunk_rows=args.maximum_prediction_chunk_rows,
+                hash_chunk_bytes=args.io_chunk_bytes,
+                validation_block_rows=args.maximum_prediction_chunk_rows,
+                encoded_chunk_bytes=args.io_chunk_bytes,
+            )
     identity = write_candidate_case_evidence(evaluation, args.output)
     if implementation_binding is None:
         return identity

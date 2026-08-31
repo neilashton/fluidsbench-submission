@@ -93,7 +93,7 @@ from .velocity_assignments import (
 )
 
 
-CANDIDATE_SCHEMA = "drivaerml-case-diagnostics-candidate-v3"
+CANDIDATE_SCHEMA = "drivaerml-case-diagnostics-candidate-v4"
 CANDIDATE_STATUS = "candidate_diagnostics_not_active_or_official_submission"
 CP_SUPPORT_SCHEMA = "drivaerml-autocfd5-cp-case-support-candidate-v1"
 CP_SUPPORT_STATUS = "candidate_not_owner_approved_not_active_scoring_support"
@@ -3544,9 +3544,10 @@ def evaluate_loaded_case_diagnostics(
     }
     evidence: dict[str, object] = {
         "schema": CANDIDATE_SCHEMA,
-        "schema_version": 3,
+        "schema_version": 4,
         "status": CANDIDATE_STATUS,
         "case_id": case_id,
+        "prediction_scope": "surface_and_volume",
         "official_submission": False,
         "mapping_inputs": {
             "velocity_10mm": {
@@ -3586,6 +3587,121 @@ def evaluate_loaded_case_diagnostics(
             "velocity_profile_experimental_subset_uinf_rmse": experimental_metric,
         },
         "profile_series": profile_series,
+        "claims": dict(OUTPUT_FALSE_CLAIMS),
+    }
+    _assert_no_absolute_paths(evidence)
+    return CandidateCaseDiagnostics(MappingProxyType(evidence))
+
+
+def evaluate_surface_only_case_diagnostics(*, case_id: str) -> CandidateCaseDiagnostics:
+    """Emit explicit zero-contribution volume diagnostics without loading volume.
+
+    Cp-cut support is retained as unavailable until its independent immutable
+    support release exists.  Velocity profiles are unavailable specifically
+    because a surface-only prediction has no volume velocity field; no mapped
+    volume cell, truth value, or placeholder prediction is read or emitted.
+    """
+
+    if not isinstance(case_id, str) or re.fullmatch(r"run_[1-9][0-9]*", case_id) is None:
+        raise DrivAerDiagnosticEvaluatorError("surface-only diagnostic case ID is invalid")
+    cp_cut_reason = {
+        "diagnostic": "cp_cut_rmse",
+        "stage": "benchmark_support",
+        "reason": "immutable_native_cp_cut_extraction_support_not_published",
+    }
+
+    def unavailable(metric_id: str, *, experimental: bool) -> dict[str, object]:
+        common: dict[str, object] = {
+            "metric_id": metric_id,
+            "required_line_count": (
+                len(_EXPERIMENTAL_VELOCITY_PROFILE_IDS)
+                if experimental
+                else VELOCITY_LINE_COUNT
+            ),
+            "unavailable_reasons": [
+                {
+                    "diagnostic": metric_id,
+                    "stage": "prediction_scope",
+                    "reason": "not_submitted_surface_only",
+                    "profile_id": None,
+                    "sample_index": None,
+                }
+            ],
+            "line_rmse": [],
+            "quantity": "magnitude(UMeanTrim)/Uinf",
+            "Uinf_m_per_s": U_INF_M_PER_S,
+            "arc_rule": "trapezoidal_squared_error_over_owner_included_mapped_arc_no_gap_bridging",
+            "aggregation": (
+                "equal_case_equal_experimental_line_macro_average"
+                if experimental
+                else "equal_case_equal_line_macro_average"
+            ),
+            "weighting": "trapezoidal_arc_length_within_line",
+        }
+        if experimental:
+            common.update(
+                {
+                    "value_available": False,
+                    "required_profile_ids": list(_EXPERIMENTAL_VELOCITY_PROFILE_IDS),
+                    "case_equal_experimental_line_mean_rmse": None,
+                }
+            )
+        else:
+            common.update(
+                {
+                    "ranked_value_available": False,
+                    "required_sample_count": VELOCITY_SAMPLE_COUNT,
+                    "case_equal_line_mean_rmse": None,
+                }
+            )
+        return common
+
+    evidence: dict[str, object] = {
+        "schema": CANDIDATE_SCHEMA,
+        "schema_version": 4,
+        "status": CANDIDATE_STATUS,
+        "case_id": case_id,
+        "prediction_scope": "surface_only",
+        "official_submission": False,
+        "mapping_inputs": {
+            "velocity_10mm": {
+                "status": "not_loaded_surface_only",
+                "scientific_metric_values_fabricated": False,
+            }
+        },
+        "sparse_gather_evidence": {
+            "volume_prediction": {
+                "status": "not_submitted_surface_only",
+                "scientific_metric_values_fabricated": False,
+            },
+            "volume_native_truth": {
+                "status": "not_loaded_surface_only",
+                "scientific_metric_values_fabricated": False,
+            },
+            "only_unique_mapped_raw_ids_retained": False,
+            "prediction_manifest_fully_consumed": False,
+        },
+        "metrics": {
+            "cp_cut_rmse": {
+                "metric_id": "cp_cut_rmse",
+                "ranked_value_available": False,
+                "required_cut_count": 4,
+                "unavailable_reasons": [cp_cut_reason],
+                "case_equal_cut_mean_rmse": None,
+                "cut_rmse": [],
+                "aggregation": "equal_case_equal_cut_macro_average",
+                "weighting": "native_cut_intersection_segment_length",
+                "support_status": "pending_immutable_owner_release",
+                "discrete_cp_probe_fallback_used": False,
+            },
+            "velocity_profile_uinf_rmse": unavailable(
+                "velocity_profile_uinf_rmse", experimental=False
+            ),
+            "velocity_profile_experimental_subset_uinf_rmse": unavailable(
+                "velocity_profile_experimental_subset_uinf_rmse", experimental=True
+            ),
+        },
+        "profile_series": [],
         "claims": dict(OUTPUT_FALSE_CLAIMS),
     }
     _assert_no_absolute_paths(evidence)
@@ -3676,6 +3792,7 @@ __all__ = [
     "VelocityMappingRow",
     "evaluate_case_diagnostics",
     "evaluate_loaded_case_diagnostics",
+    "evaluate_surface_only_case_diagnostics",
     "gather_mapped_prediction_field",
     "gather_sparse_inline_native_field",
     "load_strict_velocity_10mm_mapping",

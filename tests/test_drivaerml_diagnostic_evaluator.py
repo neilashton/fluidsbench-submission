@@ -35,6 +35,7 @@ from reference.drivaerml.diagnostic_evaluator import (
     SparseNativeField,
     _evaluate_loaded_probe_research_diagnostics as evaluate_loaded_case_diagnostics,
     evaluate_loaded_case_diagnostics as evaluate_loaded_submission_diagnostics,
+    evaluate_surface_only_case_diagnostics,
     gather_mapped_prediction_field,
     gather_sparse_inline_native_field,
     load_strict_cp_case_support,
@@ -678,6 +679,23 @@ class DiagnosticFixture:
 
 
 class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
+    def test_surface_only_diagnostics_emit_no_volume_or_velocity_predictions(self) -> None:
+        result = evaluate_surface_only_case_diagnostics(case_id=CASE_ID).to_json()
+
+        self.assertEqual(result["schema"], "drivaerml-case-diagnostics-candidate-v4")
+        self.assertEqual(result["prediction_scope"], "surface_only")
+        self.assertEqual(
+            result["mapping_inputs"]["velocity_10mm"]["status"],
+            "not_loaded_surface_only",
+        )
+        self.assertEqual(result["profile_series"], [])
+        self.assertEqual(
+            result["metrics"]["velocity_profile_uinf_rmse"]["unavailable_reasons"][0][
+                "reason"
+            ],
+            "not_submitted_surface_only",
+        )
+
     def test_v9_submission_path_is_probe_free_and_cp_cuts_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             fixture = DiagnosticFixture(
@@ -703,8 +721,9 @@ class DrivAerMLDiagnosticEvaluatorTests(unittest.TestCase):
                 native_volume_velocity=native_volume,
                 maximum_prediction_chunk_rows=VOLUME_COUNT,
             ).to_json()
-            self.assertEqual(result["schema"], "drivaerml-case-diagnostics-candidate-v3")
-            self.assertEqual(result["schema_version"], 3)
+            self.assertEqual(result["schema"], "drivaerml-case-diagnostics-candidate-v4")
+            self.assertEqual(result["schema_version"], 4)
+            self.assertEqual(result["prediction_scope"], "surface_and_volume")
             self.assertEqual(set(result["mapping_inputs"]), {"velocity_10mm"})
             self.assertEqual(
                 set(result["sparse_gather_evidence"]),

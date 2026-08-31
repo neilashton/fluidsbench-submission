@@ -1,9 +1,9 @@
 """Candidate one-case evaluator for native DrivAerML prediction chunks.
 
 This module joins the local candidate NPZ transport to the pinned native
-surface and volume sources.  It is deliberately not an official FluidsBench
-submission evaluator.  Prediction files are opened one at a time, reduced to
-additive statistics, and released before the next NPZ is opened.
+surface and volume sources. Prediction files are opened one at a time, reduced
+to additive statistics and zero-weight regional diagnostics, and released
+before the next NPZ is opened.
 """
 
 from __future__ import annotations
@@ -19,6 +19,7 @@ from typing import BinaryIO, Iterator
 
 import numpy as np
 
+from .regional_aggregate import RegionalAggregateError, build_case_regional_envelope
 from .accumulators import (
     DrivAerAccumulatorError,
     FinalizedFieldStatistics,
@@ -34,6 +35,15 @@ from .prediction_chunks import (
     PredictionChunkManifest,
     iter_prediction_chunks,
     load_prediction_chunk_manifest,
+)
+from .regional_diagnostics import (
+    SURFACE_REGION_DEFINITION,
+    VOLUME_REGION_DEFINITION,
+    RegionAssignmentHasher,
+    RegionalDiagnosticError,
+    RegionalFieldAccumulator,
+    build_regional_report,
+    classify_surface_geometry,
 )
 from .source import (
     InlineBinaryDecodeError,
@@ -51,10 +61,20 @@ from .surface_forces import (
     force_moment_chunk,
     surface_geometry_chunk_validated,
 )
+from .volume_regions import (
+    VolumeRegionGeometryError,
+    VolumeRegionSupport,
+    build_volume_region_support,
+)
 
 
-CANDIDATE_EVIDENCE_SCHEMA = "drivaerml-candidate-case-evaluation-v2"
+CANDIDATE_EVIDENCE_SCHEMA = "drivaerml-candidate-case-evaluation-v4"
 CANDIDATE_STATUS = "candidate_evaluator_evidence_not_official_submission"
+PREDICTION_SCOPE_FULL = "surface_and_volume"
+PREDICTION_SCOPE_SURFACE_ONLY = "surface_only"
+PREDICTION_SCOPES = frozenset(
+    {PREDICTION_SCOPE_FULL, PREDICTION_SCOPE_SURFACE_ONLY}
+)
 DEFAULT_MAX_PREDICTION_CHUNK_ROWS = 1_000_000
 DEFAULT_ENCODED_CHUNK_BYTES = 8 * 1024 * 1024
 SURFACE_AREA_RELATIVE_TOLERANCE = 6.0e-8
@@ -91,6 +111,7 @@ class _VolumeFieldResult:
     source_payload_sha256: str
     source_payload_bytes: int
     statistics: FinalizedFieldStatistics
+    regional_statistics: dict[str, object]
 
 
 @dataclass(frozen=True)
@@ -120,15 +141,17 @@ class CandidateCaseEvaluation:
     metric_sufficient_statistics: dict[str, dict[str, float | int | str]]
     additive_sums: dict[str, dict[str, dict[str, float | int]]]
     force_coefficients: dict[str, float | int | list[float]]
+    report_only_regional_diagnostics: dict[str, object]
     execution: dict[str, int]
 
     def to_json(self) -> dict[str, object]:
         return {
             "schema": CANDIDATE_EVIDENCE_SCHEMA,
-            "schema_version": 2,
+            "schema_version": 4,
             "status": CANDIDATE_STATUS,
             "official_submission": False,
             "case_id": self.case_id,
+            "prediction_scope": PREDICTION_SCOPE_FULL,
             "source": {
                 "native_source_pin_sha256": self.source_pin_sha256,
                 "repository_id": self.repository_id,
@@ -171,6 +194,77 @@ class CandidateCaseEvaluation:
             "metric_sufficient_statistics": self.metric_sufficient_statistics,
             "additive_sums": self.additive_sums,
             "force_coefficients": self.force_coefficients,
+            "report_only_regional_diagnostics": self.report_only_regional_diagnostics,
+            "execution": self.execution,
+        }
+
+
+@dataclass(frozen=True)
+class SurfaceOnlyCaseEvaluation:
+    """Complete native-surface evidence with volume components unavailable."""
+
+    case_id: str
+    source_pin_sha256: str
+    repository_id: str
+    repository_revision: str
+    boundary_sha256: str
+    surface_native_audit: dict[str, object]
+    surface_area_audit: dict[str, object]
+    surface_prediction_manifest_sha256: str
+    surface_prediction_chunk_sha256: tuple[str, ...]
+    surface_entity_count: int
+    surface_chunk_count: int
+    metric_values: dict[str, float]
+    metric_sufficient_statistics: dict[str, dict[str, float | int | str]]
+    additive_sums: dict[str, dict[str, dict[str, float | int]]]
+    force_coefficients: dict[str, float | int | list[float]]
+    report_only_regional_diagnostics: dict[str, object]
+    execution: dict[str, int]
+
+    def to_json(self) -> dict[str, object]:
+        return {
+            "schema": CANDIDATE_EVIDENCE_SCHEMA,
+            "schema_version": 4,
+            "status": CANDIDATE_STATUS,
+            "official_submission": False,
+            "case_id": self.case_id,
+            "prediction_scope": PREDICTION_SCOPE_SURFACE_ONLY,
+            "source": {
+                "native_source_pin_sha256": self.source_pin_sha256,
+                "repository_id": self.repository_id,
+                "repository_revision": self.repository_revision,
+                "boundary_sha256": self.boundary_sha256,
+                "surface_native": self.surface_native_audit,
+                "surface_area": self.surface_area_audit,
+                "volume_native": {
+                    "status": "not_loaded_surface_only",
+                    "scientific_metric_values_fabricated": False,
+                },
+            },
+            "prediction_inputs": {
+                "surface_native_cells": {
+                    "manifest_sha256": self.surface_prediction_manifest_sha256,
+                    "chunk_sha256": list(self.surface_prediction_chunk_sha256),
+                    "chunk_count": self.surface_chunk_count,
+                    "entity_count": self.surface_entity_count,
+                }
+            },
+            "coverage": {
+                "surface": {
+                    "raw_cell_id_start": 0,
+                    "raw_cell_id_stop": self.surface_entity_count,
+                    "complete_gap_free_duplicate_free": True,
+                },
+                "volume": {
+                    "status": "not_submitted_surface_only",
+                    "component_score": 0.0,
+                },
+            },
+            "metric_values": self.metric_values,
+            "metric_sufficient_statistics": self.metric_sufficient_statistics,
+            "additive_sums": self.additive_sums,
+            "force_coefficients": self.force_coefficients,
+            "report_only_regional_diagnostics": self.report_only_regional_diagnostics,
             "execution": self.execution,
         }
 
@@ -375,10 +469,25 @@ def _evaluate_surface_chunks(
     FinalizedFieldStatistics,
     dict[str, float | int | list[float]],
     dict[str, float | int],
+    dict[str, object],
 ]:
     count = surface.polygon_count
     pressure = StreamingFieldAccumulator(count, component_count=1)
     shear = StreamingFieldAccumulator(count, component_count=3)
+    regional_pressure = RegionalFieldAccumulator(
+        SURFACE_REGION_DEFINITION,
+        count,
+        ("p",),
+    )
+    regional_shear = RegionalFieldAccumulator(
+        SURFACE_REGION_DEFINITION,
+        count,
+        ("x", "y", "z"),
+    )
+    regional_assignment = RegionAssignmentHasher(
+        SURFACE_REGION_DEFINITION,
+        count,
+    )
     force_chunks = []
     area_audits: list[dict[str, float | int]] = []
     iterator = iter_prediction_chunks(
@@ -408,23 +517,47 @@ def _evaluate_surface_chunks(
                     rtol=SURFACE_AREA_RELATIVE_TOLERANCE,
                 )
             )
+            region_codes = classify_surface_geometry(
+                geometry.centres_m,
+                geometry.oriented_area_vectors_m2,
+                geometry.areas_m2,
+            )
+            regional_assignment.add_chunk(start, region_codes)
+            pressure_truth = surface.pressure_m2_per_s2[start:stop]
+            pressure_prediction = chunk.field("pMeanTrim")
+            shear_truth = surface.wall_shear_m2_per_s2[start:stop]
+            shear_prediction = chunk.field("wallShearStressMeanTrim")
             pressure.add_chunk(
                 chunk.raw_cell_id,
-                surface.pressure_m2_per_s2[start:stop],
-                chunk.field("pMeanTrim"),
+                pressure_truth,
+                pressure_prediction,
                 weights,
             )
             shear.add_chunk(
                 chunk.raw_cell_id,
-                surface.wall_shear_m2_per_s2[start:stop],
-                chunk.field("wallShearStressMeanTrim"),
+                shear_truth,
+                shear_prediction,
+                weights,
+            )
+            regional_pressure.add_chunk(
+                start,
+                region_codes,
+                pressure_truth,
+                pressure_prediction,
+                weights,
+            )
+            regional_shear.add_chunk(
+                start,
+                region_codes,
+                shear_truth,
+                shear_prediction,
                 weights,
             )
             force_chunks.append(
                 force_moment_chunk(
                     geometry,
-                    chunk.field("pMeanTrim"),
-                    chunk.field("wallShearStressMeanTrim"),
+                    pressure_prediction,
+                    shear_prediction,
                 )
             )
         finally:
@@ -455,11 +588,39 @@ def _evaluate_surface_chunks(
         "raw_order_correspondence_verified": True,
         "published_values_role": "fixed_input_audited_not_regenerated",
     }
+    pressure_statistics = pressure.finalize()
+    shear_statistics = shear.finalize()
+    regional_support = {
+        "definition": SURFACE_REGION_DEFINITION.to_json(),
+        "definition_sha256": SURFACE_REGION_DEFINITION.sha256,
+        "assignment": regional_assignment.finalize(),
+        "fields": {
+            "surface_pressure": {
+                "quantity": "pMeanTrim",
+                "unit": "m2 s-2",
+                "primary_weighting": "physical",
+                "statistics": regional_pressure.finalize(
+                    expected_uniform=pressure_statistics.uniform,
+                    expected_physical=pressure_statistics.physical,
+                ),
+            },
+            "surface_wall_shear": {
+                "quantity": "wallShearStressMeanTrim",
+                "unit": "m2 s-2",
+                "primary_weighting": "physical",
+                "statistics": regional_shear.finalize(
+                    expected_uniform=shear_statistics.uniform,
+                    expected_physical=shear_statistics.physical,
+                ),
+            },
+        },
+    }
     return (
-        pressure.finalize(),
-        shear.finalize(),
+        pressure_statistics,
+        shear_statistics,
         finalize_force_coefficients(force_chunks, expected_entity_count=count),
         area_audit,
+        regional_support,
     )
 
 
@@ -473,6 +634,7 @@ class _VolumePredictionSink:
         array: VTKDataArrayIndex,
         manifest: PredictionChunkManifest,
         field_name: str,
+        region_codes: np.ndarray,
         hash_chunk_bytes: int,
         validation_block_rows: int,
     ) -> None:
@@ -485,11 +647,32 @@ class _VolumePredictionSink:
         self.components = array.number_of_components
         self.tuple_bytes = self.dtype.itemsize * self.components
         self.field_name = field_name
+        if region_codes.shape != (manifest.total_row_count,) or region_codes.dtype != np.uint8:
+            raise DrivAerCandidateEvaluatorError(
+                "volume region codes must contain one native-order uint8 per cell"
+            )
+        self.region_codes = region_codes
         self.pending = bytearray()
         self.cursor = 0
         self.accumulator = StreamingFieldAccumulator(
             manifest.total_row_count,
             component_count=self.components,
+        )
+        if field_name == "pMeanTrim" and self.components == 1:
+            component_labels = ("p",)
+            velocity_diagnostics = False
+        elif field_name == "UMeanTrim" and self.components == 3:
+            component_labels = ("Ux", "Uy", "Uz")
+            velocity_diagnostics = True
+        else:
+            raise DrivAerCandidateEvaluatorError(
+                f"unsupported regional volume field shape for {field_name!r}"
+            )
+        self.regional_accumulator = RegionalFieldAccumulator(
+            VOLUME_REGION_DEFINITION,
+            manifest.total_row_count,
+            component_labels,
+            velocity_diagnostics=velocity_diagnostics,
         )
         self.iterator = iter_prediction_chunks(
             manifest,
@@ -530,6 +713,15 @@ class _VolumePredictionSink:
             prediction,
             weights,
         )
+        self.regional_accumulator.add_chunk(
+            descriptor.raw_cell_id_start,
+            self.region_codes[
+                descriptor.raw_cell_id_start : descriptor.raw_cell_id_stop
+            ],
+            truth,
+            prediction,
+            weights,
+        )
         self.cursor = descriptor.raw_cell_id_stop
         self.current = None
         del weights, prediction, truth, complete, chunk
@@ -549,7 +741,7 @@ class _VolumePredictionSink:
             )
         return len(payload)
 
-    def finish(self) -> FinalizedFieldStatistics:
+    def finish(self) -> tuple[FinalizedFieldStatistics, dict[str, object]]:
         if self.pending:
             raise DrivAerCandidateEvaluatorError(
                 f"native truth field {self.field_name!r} ends within a prediction chunk"
@@ -558,7 +750,12 @@ class _VolumePredictionSink:
             raise DrivAerCandidateEvaluatorError(
                 f"prediction coverage exceeds native truth field {self.field_name!r}"
             )
-        return self.accumulator.finalize()
+        statistics = self.accumulator.finalize()
+        regional = self.regional_accumulator.finalize(
+            expected_uniform=statistics.uniform,
+            expected_physical=statistics.physical,
+        )
+        return statistics, regional
 
 
 def _evaluate_volume_field(
@@ -566,6 +763,7 @@ def _evaluate_volume_field(
     vtk_index: VTKXMLIndex,
     array: VTKDataArrayIndex,
     manifest: PredictionChunkManifest,
+    region_codes: np.ndarray,
     *,
     hash_chunk_bytes: int,
     validation_block_rows: int,
@@ -578,6 +776,7 @@ def _evaluate_volume_field(
         array=array,
         manifest=manifest,
         field_name=array.name,
+        region_codes=region_codes,
         hash_chunk_bytes=hash_chunk_bytes,
         validation_block_rows=validation_block_rows,
     )
@@ -589,7 +788,7 @@ def _evaluate_volume_field(
             sink,
             encoded_chunk_size=encoded_chunk_bytes,
         )
-        statistics = sink.finish()
+        statistics, regional_statistics = sink.finish()
     except (InlineBinaryDecodeError, DrivAerAccumulatorError) as error:
         raise DrivAerCandidateEvaluatorError(str(error)) from error
     if payload.tuple_count != statistics.entity_count:
@@ -601,17 +800,16 @@ def _evaluate_volume_field(
         source_payload_sha256=payload.payload_sha256,
         source_payload_bytes=payload.decoded_payload_bytes,
         statistics=statistics,
+        regional_statistics=regional_statistics,
     )
 
 
-def _validate_case_sources(
+def _validate_surface_sources(
     pin: NativeSourcePin,
     case: NativeCaseRecord,
     surface: NativeSurface,
     areas: FixedSurfaceAreas,
-    volume_stream: SegmentedReader,
-    vtk_index: VTKXMLIndex,
-) -> int:
+) -> None:
     areas.assert_source_unchanged(context="before candidate evaluation")
     if surface.boundary_sha256 != case.boundary.sha256:
         raise DrivAerCandidateEvaluatorError(
@@ -630,6 +828,20 @@ def _validate_case_sources(
         raise DrivAerCandidateEvaluatorError(
             "fixed surface areas differ from the native-source case binding"
         )
+    if pin.case(case.case_id) is not case:
+        # NativeSourcePin.case returns the exact immutable record held by the pin.
+        raise DrivAerCandidateEvaluatorError("case record is not owned by the source pin")
+
+
+def _validate_case_sources(
+    pin: NativeSourcePin,
+    case: NativeCaseRecord,
+    surface: NativeSurface,
+    areas: FixedSurfaceAreas,
+    volume_stream: SegmentedReader,
+    vtk_index: VTKXMLIndex,
+) -> int:
+    _validate_surface_sources(pin, case, surface, areas)
     if not isinstance(volume_stream, SegmentedReader):
         raise DrivAerCandidateEvaluatorError(
             "volume_stream must come from open_verified_multipart or open_verified_monolithic"
@@ -660,9 +872,6 @@ def _validate_case_sources(
     volume_count = vtk_index.pieces[0].number_of_cells
     if volume_count < 1:
         raise DrivAerCandidateEvaluatorError("native volume contains no cells")
-    if pin.case(case.case_id) is not case:
-        # NativeSourcePin.case returns the exact immutable record held by the pin.
-        raise DrivAerCandidateEvaluatorError("case record is not owned by the source pin")
     return volume_count
 
 
@@ -733,11 +942,18 @@ def evaluate_candidate_case(
             volume_vtk_index,
             encoded_chunk_size=encoded_bytes,
         )
+        volume_region_support: VolumeRegionSupport = build_volume_region_support(
+            volume_stream,
+            volume_vtk_index,
+            encoded_chunk_size=encoded_bytes,
+            calculation_block_cells=maximum_rows,
+        )
         (
             surface_pressure,
             surface_shear,
             coefficients,
             surface_geometry_area_audit,
+            surface_regional_support,
         ) = _evaluate_surface_chunks(
             surface_manifest,
             native_surface,
@@ -756,6 +972,7 @@ def evaluate_candidate_case(
             volume_vtk_index,
             pressure_array,
             volume_manifest,
+            volume_region_support.codes,
             hash_chunk_bytes=hash_rows,
             validation_block_rows=validation_rows,
             encoded_chunk_bytes=encoded_bytes,
@@ -765,6 +982,7 @@ def evaluate_candidate_case(
             volume_vtk_index,
             velocity_array,
             volume_manifest,
+            volume_region_support.codes,
             hash_chunk_bytes=hash_rows,
             validation_block_rows=validation_rows,
             encoded_chunk_bytes=encoded_bytes,
@@ -774,6 +992,8 @@ def evaluate_candidate_case(
         DrivAerSurfaceForceError,
         NativeFieldAuditError,
         PredictionChunkError,
+        RegionalDiagnosticError,
+        VolumeRegionGeometryError,
     ) as error:
         raise DrivAerCandidateEvaluatorError(str(error)) from error
     for name, result in (
@@ -791,6 +1011,58 @@ def evaluate_candidate_case(
         "volume_pressure": volume_pressure.statistics,
         "volume_velocity": volume_velocity.statistics,
     }
+    official_additive_sums = {
+        name: _additive_sums(
+            value,
+            include_physical=not name.startswith("volume_"),
+        )
+        for name, value in statistics.items()
+    }
+    try:
+        volume_assignment = RegionAssignmentHasher(
+            VOLUME_REGION_DEFINITION,
+            volume_count,
+        )
+        for start in range(0, volume_count, maximum_rows):
+            stop = min(start + maximum_rows, volume_count)
+            volume_assignment.add_chunk(
+                start, volume_region_support.codes[start:stop]
+            )
+        volume_regional_support = {
+            "definition": VOLUME_REGION_DEFINITION.to_json(),
+            "definition_sha256": VOLUME_REGION_DEFINITION.sha256,
+            "assignment": volume_assignment.finalize(),
+            "fields": {
+                "volume_pressure": {
+                    "quantity": "pMeanTrim",
+                    "unit": "m2 s-2",
+                    "primary_weighting": "equal_entity",
+                    "statistics": volume_pressure.regional_statistics,
+                },
+                "volume_velocity": {
+                    "quantity": "UMeanTrim",
+                    "unit": "m s-1",
+                    "primary_weighting": "equal_entity",
+                    "statistics": volume_velocity.regional_statistics,
+                },
+            },
+        }
+        regional_case_report = build_regional_report(
+            case_id=case_id,
+            supports={
+                SURFACE_REGION_DEFINITION.definition_id: surface_regional_support,
+                VOLUME_REGION_DEFINITION.definition_id: volume_regional_support,
+            },
+        )
+        regional_envelope = build_case_regional_envelope(
+            case_id=case_id,
+            case_report=regional_case_report,
+            prediction_scope=PREDICTION_SCOPE_FULL,
+            volume_geometry_audit=volume_region_support.audit,
+            official_additive_sums=official_additive_sums,
+        )
+    except (RegionalAggregateError, RegionalDiagnosticError) as error:
+        raise DrivAerCandidateEvaluatorError(str(error)) from error
     try:
         metric_values: dict[str, float] = {}
         metric_values.update(
@@ -924,14 +1196,9 @@ def evaluate_candidate_case(
         },
         metric_values=metric_values,
         metric_sufficient_statistics=sufficient_statistics,
-        additive_sums={
-            name: _additive_sums(
-                value,
-                include_physical=not name.startswith("volume_"),
-            )
-            for name, value in statistics.items()
-        },
+        additive_sums=official_additive_sums,
         force_coefficients=coefficients,
+        report_only_regional_diagnostics=regional_envelope,
         execution={
             "maximum_prediction_chunk_rows": maximum_rows,
             "hash_chunk_bytes": hash_rows,
@@ -941,13 +1208,183 @@ def evaluate_candidate_case(
     )
 
 
+def evaluate_surface_only_candidate_case(
+    *,
+    case_id: str,
+    native_source_pin: NativeSourcePin,
+    native_surface: NativeSurface,
+    fixed_surface_areas: FixedSurfaceAreas,
+    surface_prediction_manifest: PredictionChunkManifest | Path | str,
+    maximum_prediction_chunk_rows: int = DEFAULT_MAX_PREDICTION_CHUNK_ROWS,
+    hash_chunk_bytes: int = DEFAULT_HASH_CHUNK_BYTES,
+    validation_block_rows: int = DEFAULT_VALIDATION_BLOCK_ROWS,
+    source_contract: NativeSourceContract = OFFICIAL_NATIVE_SOURCE_CONTRACT,
+) -> SurfaceOnlyCaseEvaluation:
+    """Evaluate a surface-only case without opening native-volume data.
+
+    The omitted volume field and velocity-profile components are deliberately
+    absent from the evidence.  A downstream scoring release can therefore
+    assign their fixed zero contribution without any fabricated values or
+    weight renormalisation.
+    """
+
+    if not isinstance(native_source_pin, NativeSourcePin):
+        raise DrivAerCandidateEvaluatorError(
+            "native_source_pin must be a validated NativeSourcePin"
+        )
+    source_pin_sha256 = validate_native_source_contract(
+        native_source_pin, source_contract
+    )
+    case = native_source_pin.case(case_id)
+    maximum_rows = _positive_integer(
+        maximum_prediction_chunk_rows, "maximum_prediction_chunk_rows"
+    )
+    hash_rows = _positive_integer(hash_chunk_bytes, "hash_chunk_bytes")
+    validation_rows = _positive_integer(
+        validation_block_rows, "validation_block_rows"
+    )
+    _validate_surface_sources(
+        native_source_pin,
+        case,
+        native_surface,
+        fixed_surface_areas,
+    )
+    surface_manifest = _manifest(surface_prediction_manifest)
+    surface_manifest_sha256 = surface_manifest.sha256
+    _validate_manifest_binding(
+        surface_manifest,
+        case_id=case_id,
+        support_id="surface_native_cells",
+        expected_count=native_surface.polygon_count,
+        maximum_chunk_rows=maximum_rows,
+    )
+    try:
+        (
+            surface_pressure,
+            surface_shear,
+            coefficients,
+            surface_geometry_area_audit,
+            surface_regional_support,
+        ) = _evaluate_surface_chunks(
+            surface_manifest,
+            native_surface,
+            fixed_surface_areas,
+            hash_chunk_bytes=hash_rows,
+            validation_block_rows=validation_rows,
+        )
+    except (
+        DrivAerAccumulatorError,
+        DrivAerSurfaceForceError,
+        PredictionChunkError,
+        RegionalDiagnosticError,
+    ) as error:
+        raise DrivAerCandidateEvaluatorError(str(error)) from error
+
+    statistics = {
+        "surface_pressure": surface_pressure,
+        "surface_wall_shear": surface_shear,
+    }
+    official_additive_sums = {
+        name: _additive_sums(value) for name, value in statistics.items()
+    }
+    try:
+        regional_case_report = build_regional_report(
+            case_id=case_id,
+            supports={
+                SURFACE_REGION_DEFINITION.definition_id: surface_regional_support,
+            },
+        )
+        regional_envelope = build_case_regional_envelope(
+            case_id=case_id,
+            case_report=regional_case_report,
+            prediction_scope=PREDICTION_SCOPE_SURFACE_ONLY,
+            volume_geometry_audit=None,
+            official_additive_sums=official_additive_sums,
+        )
+    except (RegionalAggregateError, RegionalDiagnosticError) as error:
+        raise DrivAerCandidateEvaluatorError(str(error)) from error
+    try:
+        metric_values: dict[str, float] = {}
+        metric_values.update(
+            _field_metric_values(
+                "surface_pressure", surface_pressure, physical_first=True
+            )
+        )
+        metric_values.update(
+            _field_metric_values(
+                "surface_wall_shear", surface_shear, physical_first=True
+            )
+        )
+        sufficient_statistics: dict[str, dict[str, float | int | str]] = {}
+        sufficient_statistics.update(
+            _relative_l2_evidence(
+                "surface_pressure_rel_l2",
+                surface_pressure,
+                physical_first=True,
+                physical_dataset_weighting="surface_face_area",
+                uniform_dataset_weighting="surface_entities_equal",
+            )
+        )
+        sufficient_statistics.update(
+            _relative_l2_evidence(
+                "surface_wall_shear_rel_l2",
+                surface_shear,
+                physical_first=True,
+                physical_dataset_weighting="surface_face_area",
+                uniform_dataset_weighting="surface_entities_equal",
+            )
+        )
+    except DrivAerAccumulatorError as error:
+        raise DrivAerCandidateEvaluatorError(str(error)) from error
+
+    if _sha256_file(native_source_pin.source_path) != source_pin_sha256:
+        raise DrivAerCandidateEvaluatorError(
+            "native-source pin changed during candidate evaluation"
+        )
+    fixed_surface_areas.assert_source_unchanged(
+        context="while candidate surface metrics were reduced"
+    )
+    if _sha256_file(surface_manifest.path) != surface_manifest_sha256:
+        raise DrivAerCandidateEvaluatorError(
+            "surface prediction manifest changed during candidate evaluation"
+        )
+    return SurfaceOnlyCaseEvaluation(
+        case_id=case_id,
+        source_pin_sha256=source_pin_sha256,
+        repository_id=native_source_pin.repository_id,
+        repository_revision=native_source_pin.repository_revision,
+        boundary_sha256=native_surface.boundary_sha256,
+        surface_native_audit=native_surface.audit_record(),
+        surface_area_audit={
+            **fixed_surface_areas.audit_record(),
+            "native_geometry_order_audit": surface_geometry_area_audit,
+        },
+        surface_prediction_manifest_sha256=surface_manifest_sha256,
+        surface_prediction_chunk_sha256=tuple(
+            descriptor.sha256 for descriptor in surface_manifest.chunks
+        ),
+        surface_entity_count=native_surface.polygon_count,
+        surface_chunk_count=len(surface_manifest.chunks),
+        metric_values=metric_values,
+        metric_sufficient_statistics=sufficient_statistics,
+        additive_sums=official_additive_sums,
+        force_coefficients=coefficients,
+        report_only_regional_diagnostics=regional_envelope,
+        execution={
+            "maximum_prediction_chunk_rows": maximum_rows,
+            "hash_chunk_bytes": hash_rows,
+            "validation_block_rows": validation_rows,
+        },
+    )
+
+
 def write_candidate_case_evidence(
-    evaluation: CandidateCaseEvaluation,
+    evaluation: CandidateCaseEvaluation | SurfaceOnlyCaseEvaluation,
     path: Path | str,
 ) -> dict[str, object]:
     """Atomically write deterministic compact JSON and return its identity."""
 
-    if not isinstance(evaluation, CandidateCaseEvaluation):
+    if not isinstance(evaluation, CandidateCaseEvaluation | SurfaceOnlyCaseEvaluation):
         raise DrivAerCandidateEvaluatorError(
             "evaluation must be a CandidateCaseEvaluation"
         )
@@ -995,11 +1432,13 @@ __all__ = [
     "DEFAULT_ENCODED_CHUNK_BYTES",
     "DEFAULT_MAX_PREDICTION_CHUNK_ROWS",
     "CandidateCaseEvaluation",
+    "SurfaceOnlyCaseEvaluation",
     "DrivAerCandidateEvaluatorError",
     "NativeSourceContract",
     "OFFICIAL_NATIVE_SOURCE_CONTRACT",
     "OFFICIAL_NATIVE_SOURCE_PIN_SHA256",
     "evaluate_candidate_case",
+    "evaluate_surface_only_candidate_case",
     "validate_native_source_contract",
     "write_candidate_case_evidence",
 ]

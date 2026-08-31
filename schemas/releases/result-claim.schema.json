@@ -44,6 +44,7 @@
         "dataset_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
         "split": { "type": "string", "minLength": 1 },
         "split_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_]*$" },
+        "prediction_scope": { "enum": ["surface_and_volume", "surface_only"] },
         "submission_schema_version": { "enum": ["1.0", "2.0", "3.0"] }
       }
     },
@@ -94,6 +95,7 @@
         "spatial_discretization": { "$ref": "#/$defs/file_binding" },
         "discretization_cases": { "$ref": "#/$defs/file_binding" },
         "case_metrics": { "$ref": "#/$defs/file_binding" },
+        "regional_diagnostics": { "$ref": "#/$defs/file_binding" },
         "prediction_artifact_checks": { "$ref": "#/$defs/file_binding" },
         "maintainer_validation": {
           "type": "object",

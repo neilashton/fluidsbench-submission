@@ -371,14 +371,16 @@ def _validated_case_provenance(
 
     if (
         core_document.get("schema") != CORE_EVIDENCE_SCHEMA
-        or core_document.get("schema_version") != 2
+        or core_document.get("schema_version") != 4
+        or core_document.get("prediction_scope") != "surface_and_volume"
     ):
         raise RealReferenceDriverError(
             f"{case_id} core evidence schema differs from the candidate evaluator"
         )
     if (
         diagnostic_document.get("schema") != DIAGNOSTIC_EVIDENCE_SCHEMA
-        or diagnostic_document.get("schema_version") != 3
+        or diagnostic_document.get("schema_version") != 4
+        or diagnostic_document.get("prediction_scope") != "surface_and_volume"
     ):
         raise RealReferenceDriverError(
             f"{case_id} diagnostic evidence schema differs from the candidate evaluator"

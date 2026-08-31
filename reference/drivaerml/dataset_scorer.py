@@ -32,6 +32,11 @@ from .coordinate_identity import (
     CoordinateIdentityError,
     coordinate_array_identity_sha256,
 )
+from .regional_aggregate import (
+    RegionalAggregateError,
+    aggregate_regional_diagnostics,
+    validate_case_regional_envelope,
+)
 from .retained_file import RetainedFileError, RetainedVerifiedFile
 from .source import (
     NativeCaseRecord,
@@ -39,13 +44,16 @@ from .source import (
     NativeSourcePin,
     load_native_source_pin,
 )
-CANDIDATE_DATASET_SCHEMA = "drivaerml-candidate-dataset-evaluation-v3"
+CANDIDATE_DATASET_SCHEMA = "drivaerml-candidate-dataset-evaluation-v4"
+LEGACY_CANDIDATE_DATASET_SCHEMA = "drivaerml-candidate-dataset-evaluation-v3"
 CANDIDATE_DATASET_STATUS = (
     "candidate_dataset_evidence_not_active_or_official_submission"
 )
-CORE_CASE_SCHEMA = "drivaerml-candidate-case-evaluation-v2"
+CORE_CASE_SCHEMA = "drivaerml-candidate-case-evaluation-v4"
+LEGACY_CORE_CASE_SCHEMA = "drivaerml-candidate-case-evaluation-v2"
 CORE_CASE_STATUS = "candidate_evaluator_evidence_not_official_submission"
-DIAGNOSTIC_CASE_SCHEMA = "drivaerml-case-diagnostics-candidate-v3"
+DIAGNOSTIC_CASE_SCHEMA = "drivaerml-case-diagnostics-candidate-v4"
+LEGACY_DIAGNOSTIC_CASE_SCHEMA = "drivaerml-case-diagnostics-candidate-v3"
 DIAGNOSTIC_CASE_STATUS = "candidate_diagnostics_not_active_or_official_submission"
 
 OFFICIAL_REPOSITORY_ID = "neashton/drivaerml"
@@ -69,6 +77,11 @@ PRIMARY_FIELD_METRIC_IDS = (
     "surface_wall_shear_rel_l2",
     "volume_velocity_rel_l2",
     "volume_pressure_rel_l2",
+)
+PREDICTION_SCOPE_FULL = "surface_and_volume"
+PREDICTION_SCOPE_SURFACE_ONLY = "surface_only"
+PREDICTION_SCOPES = frozenset(
+    {PREDICTION_SCOPE_FULL, PREDICTION_SCOPE_SURFACE_ONLY}
 )
 RANKED_FORCE_METRIC_IDS = (
     "field_integrated_cd_rmse",
@@ -300,6 +313,7 @@ class CandidateDatasetEvaluation:
     """One deterministic, explicitly ineligible dataset-level result."""
 
     evidence: Mapping[str, object]
+    regional_diagnostics: Mapping[str, object] | None = None
 
     def to_json(self) -> dict[str, object]:
         result = dict(self.evidence)
@@ -383,18 +397,20 @@ class _CoreCase:
     case_id: str
     input_file: str
     input_sha256: str
+    prediction_scope: str
     surface_count: int
-    volume_count: int
+    volume_count: int | None
     field_metrics: Mapping[str, float]
     relative_l2_statistics: Mapping[str, Mapping[str, object]]
     force_coefficients: Mapping[str, float]
     surface_prediction_manifest_sha256: str
-    volume_prediction_manifest_sha256: str
+    volume_prediction_manifest_sha256: str | None
     surface_prediction_chunk_sha256: tuple[str, ...]
-    volume_prediction_chunk_sha256: tuple[str, ...]
+    volume_prediction_chunk_sha256: tuple[str, ...] | None
     boundary_sha256: str
     surface_area_sha256: str
-    volume_part_sha256: tuple[str, ...]
+    volume_part_sha256: tuple[str, ...] | None
+    regional_diagnostics: Mapping[str, object] | None
 
 
 @dataclass(frozen=True)
@@ -404,8 +420,8 @@ class _DiagnosticCase:
     input_sha256: str
     values: Mapping[str, float | None]
     unavailable_reasons: Mapping[str, tuple[Mapping[str, object], ...]]
-    velocity_mapping_sha256: str
-    velocity_receipt_sha256: str
+    velocity_mapping_sha256: str | None
+    velocity_receipt_sha256: str | None
     profile_series: tuple[Mapping[str, object], ...]
 
 
@@ -1067,26 +1083,44 @@ def _validate_field_metrics(
     root: Mapping[str, Any],
     *,
     surface_count: int,
-    volume_count: int,
+    volume_count: int | None,
+    prediction_scope: str = PREDICTION_SCOPE_FULL,
 ) -> tuple[dict[str, float], dict[str, Mapping[str, object]]]:
+    if prediction_scope not in PREDICTION_SCOPES:
+        raise DrivAerDatasetScorerError("core prediction scope differs")
+    prefixes = tuple(
+        prefix
+        for prefix, layout in _FIELD_LAYOUT.items()
+        if prediction_scope == PREDICTION_SCOPE_FULL
+        or layout["support"] == "surface_native_cells"
+    )
+    expected_metric_ids = tuple(
+        metric_id for prefix in prefixes for metric_id in _field_metric_ids(prefix)
+    )
+    expected_relative_ids = tuple(
+        metric_id for metric_id in expected_metric_ids if metric_id.endswith("_rel_l2")
+    )
     metric_values = _exact_keys(
-        root.get("metric_values"), ALL_FIELD_METRIC_IDS, "core metric_values"
+        root.get("metric_values"), expected_metric_ids, "core metric_values"
     )
     normalized_values = {
         metric_id: _finite(value, f"core metric_values.{metric_id}", nonnegative=True)
         for metric_id, value in metric_values.items()
     }
     additive = _exact_keys(
-        root.get("additive_sums"), _FIELD_LAYOUT, "core additive_sums"
+        root.get("additive_sums"), prefixes, "core additive_sums"
     )
     sufficient = _exact_keys(
         root.get("metric_sufficient_statistics"),
-        ALL_RELATIVE_L2_METRIC_IDS,
+        expected_relative_ids,
         "core metric_sufficient_statistics",
     )
     normalized_statistics: dict[str, Mapping[str, object]] = {}
-    for prefix, layout in _FIELD_LAYOUT.items():
+    for prefix in prefixes:
+        layout = _FIELD_LAYOUT[prefix]
         entity_count = surface_count if layout["support"] == "surface_native_cells" else volume_count
+        if entity_count is None:
+            raise DrivAerDatasetScorerError("volume field metrics require volume coverage")
         expected_weightings = (
             ("uniform", "physical")
             if layout["support"] == "surface_native_cells"
@@ -1188,6 +1222,230 @@ def _validate_field_metrics(
     return normalized_values, normalized_statistics
 
 
+def _validate_surface_only_core_case(
+    root: Mapping[str, Any],
+    path: Path,
+    digest: str,
+    *,
+    contract: _Contract,
+    pinned: NativeCaseRecord,
+) -> _CoreCase:
+    """Validate v4 surface-only evidence without inspecting native volume data."""
+
+    case_id = pinned.case_id
+    source = _exact_keys(
+        root["source"],
+        {
+            "native_source_pin_sha256", "repository_id", "repository_revision",
+            "boundary_sha256", "surface_native", "surface_area", "volume_native",
+        },
+        f"core evidence {case_id}.source",
+    )
+    if (
+        source["native_source_pin_sha256"] != contract.native_source_pin_sha256
+        or source["repository_id"] != contract.native_source_pin.repository_id
+        or source["repository_revision"] != contract.native_source_pin.repository_revision
+        or source["boundary_sha256"] != pinned.boundary.sha256
+    ):
+        raise DrivAerDatasetScorerError(f"core evidence {case_id} source identity mismatch")
+    if source["volume_native"] != {
+        "status": "not_loaded_surface_only",
+        "scientific_metric_values_fabricated": False,
+    }:
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} surface-only volume status differs"
+        )
+    surface_native = _exact_keys(
+        source["surface_native"],
+        {
+            "source_file", "boundary_sha256", "vtk_version", "point_count",
+            "polygon_count", "raw_cell_order", "association", "arrays",
+            "available_point_arrays", "available_cell_arrays",
+        },
+        f"core evidence {case_id}.surface_native",
+    )
+    surface_count = _integer(
+        surface_native["polygon_count"], f"{case_id} surface count", minimum=1
+    )
+    if (
+        surface_native["source_file"] != pinned.boundary.path.name
+        or surface_native["boundary_sha256"] != pinned.boundary.sha256
+        or surface_native["raw_cell_order"] != "zero_based_native_vtk_polygon_order_unchanged"
+        or surface_native["association"] != "CellData"
+        or surface_count != pinned.surface_cell_area.element_count
+    ):
+        raise DrivAerDatasetScorerError(f"core evidence {case_id} native surface mismatch")
+    arrays = _mapping(surface_native["arrays"], f"{case_id} surface arrays")
+    if set(arrays) != {"pMeanTrim", "wallShearStressMeanTrim"}:
+        raise DrivAerDatasetScorerError(f"core evidence {case_id} surface arrays mismatch")
+    for name, components in (("pMeanTrim", 1), ("wallShearStressMeanTrim", 3)):
+        item = _mapping(arrays[name], f"{case_id} surface array {name}")
+        if (
+            item.get("components") != components
+            or item.get("tuples") != surface_count
+            or item.get("unit") != "m^2/s^2"
+        ):
+            raise DrivAerDatasetScorerError(
+                f"core evidence {case_id} surface array {name} mismatch"
+            )
+    surface_area = _exact_keys(
+        source["surface_area"],
+        {
+            "source_path", "sha256", "source_boundary_sha256", "entity_count",
+            "area_sum_m2", "area_min_m2", "area_max_m2", "dtype", "role",
+            "native_geometry_order_audit",
+        },
+        f"core evidence {case_id}.surface_area",
+    )
+    area_sum = _finite(surface_area["area_sum_m2"], f"{case_id} area sum")
+    area_min = _finite(surface_area["area_min_m2"], f"{case_id} minimum area")
+    area_max = _finite(surface_area["area_max_m2"], f"{case_id} maximum area")
+    if (
+        surface_area["source_path"] != pinned.surface_cell_area.path.name
+        or surface_area["sha256"] != pinned.surface_cell_area.sha256
+        or surface_area["source_boundary_sha256"] != pinned.boundary.sha256
+        or surface_area["entity_count"] != surface_count
+        or surface_area["dtype"] != "<f4"
+        or surface_area["role"] != "fixed_external_input_not_regenerated"
+        or area_min <= 0.0
+        or area_max < area_min
+        or area_sum <= 0.0
+    ):
+        raise DrivAerDatasetScorerError(f"core evidence {case_id} fixed surface-area mismatch")
+    geometry_area = _exact_keys(
+        surface_area["native_geometry_order_audit"],
+        {
+            "entity_count", "relative_tolerance", "calculated_sum_m2",
+            "published_sum_m2", "maximum_absolute_difference_m2",
+            "maximum_relative_difference", "raw_order_correspondence_verified",
+            "published_values_role",
+        },
+        f"core evidence {case_id}.surface area geometry audit",
+    )
+    if (
+        geometry_area["entity_count"] != surface_count
+        or not _same_float(
+            _finite(geometry_area["relative_tolerance"], f"{case_id} area tolerance"),
+            SURFACE_AREA_GEOMETRY_RELATIVE_TOLERANCE,
+        )
+        or not _same_float(
+            _finite(geometry_area["published_sum_m2"], f"{case_id} published area"),
+            area_sum,
+        )
+        or _finite(geometry_area["calculated_sum_m2"], f"{case_id} calculated area") <= 0.0
+        or _finite(geometry_area["maximum_absolute_difference_m2"], f"{case_id} area difference", nonnegative=True) < 0.0
+        or _finite(geometry_area["maximum_relative_difference"], f"{case_id} area relative difference", nonnegative=True) > SURFACE_AREA_GEOMETRY_RELATIVE_TOLERANCE
+        or geometry_area["raw_order_correspondence_verified"] is not True
+        or geometry_area["published_values_role"] != "fixed_input_audited_not_regenerated"
+    ):
+        raise DrivAerDatasetScorerError(f"core evidence {case_id} geometry-area audit mismatch")
+
+    predictions = _exact_keys(
+        root["prediction_inputs"], {"surface_native_cells"},
+        f"core evidence {case_id}.prediction_inputs",
+    )
+    record = _exact_keys(
+        predictions["surface_native_cells"],
+        {"manifest_sha256", "chunk_sha256", "chunk_count", "entity_count"},
+        f"core evidence {case_id}.surface prediction",
+    )
+    chunks = record["chunk_sha256"]
+    if not isinstance(chunks, list) or not chunks:
+        raise DrivAerDatasetScorerError(f"{case_id} surface chunks must be non-empty")
+    surface_chunks = tuple(
+        _sha256(item, f"{case_id} surface chunk SHA-256") for item in chunks
+    )
+    if record["chunk_count"] != len(surface_chunks) or record["entity_count"] != surface_count:
+        raise DrivAerDatasetScorerError(f"{case_id} surface prediction coverage mismatch")
+    surface_manifest = _sha256(record["manifest_sha256"], f"{case_id} surface manifest SHA-256")
+    coverage = _exact_keys(root["coverage"], {"surface", "volume"}, f"core evidence {case_id}.coverage")
+    surface_coverage = _mapping(coverage["surface"], f"{case_id} surface coverage")
+    if (
+        surface_coverage.get("raw_cell_id_start") != 0
+        or surface_coverage.get("raw_cell_id_stop") != surface_count
+        or surface_coverage.get("complete_gap_free_duplicate_free") is not True
+        or coverage["volume"] != {
+            "status": "not_submitted_surface_only", "component_score": 0.0
+        }
+    ):
+        raise DrivAerDatasetScorerError(f"core evidence {case_id} surface-only coverage mismatch")
+    field_metrics, relative_statistics = _validate_field_metrics(
+        root,
+        surface_count=surface_count,
+        volume_count=None,
+        prediction_scope=PREDICTION_SCOPE_SURFACE_ONLY,
+    )
+    force = _exact_keys(
+        root["force_coefficients"],
+        {"entity_count", "force_n", "moment_about_forces_cor_n_m", "Cd", "Cl", "Cs", "CmPitch", "Clf", "Clr", "lift_closure_abs"},
+        f"core evidence {case_id}.force_coefficients",
+    )
+    if force["entity_count"] != surface_count:
+        raise DrivAerDatasetScorerError(f"core evidence {case_id} force entity count mismatch")
+    normalized_force = {
+        key: _finite(force[key], f"{case_id} predicted {key}")
+        for key in ("Cd", "Cl", "Cs", "CmPitch", "Clf", "Clr", "lift_closure_abs")
+    }
+    vectors: dict[str, tuple[float, float, float]] = {}
+    for key in ("force_n", "moment_about_forces_cor_n_m"):
+        raw = force[key]
+        if not isinstance(raw, list) or len(raw) != 3:
+            raise DrivAerDatasetScorerError(f"{case_id} {key} must have three values")
+        vectors[key] = tuple(_finite(value, f"{case_id} {key}") for value in raw)
+    u_inf = _finite(contract.force_constants.get("freestream_velocity_m_per_s"), "force freestream velocity", nonnegative=True)
+    density = _finite(contract.force_constants.get("density_kg_per_m3"), "force density", nonnegative=True)
+    area = _finite(contract.force_constants.get("reference_area_m2"), "force reference area", nonnegative=True)
+    length = _finite(contract.force_constants.get("reference_length_m"), "force reference length", nonnegative=True)
+    if min(u_inf, density, area, length) <= 0.0:
+        raise DrivAerDatasetScorerError("force normalization constants must be positive")
+    q_area = 0.5 * density * u_inf**2 * area
+    for key, expected in {
+        "Cd": vectors["force_n"][0] / q_area,
+        "Cl": vectors["force_n"][2] / q_area,
+        "Cs": vectors["force_n"][1] / q_area,
+        "CmPitch": vectors["moment_about_forces_cor_n_m"][1] / (q_area * length),
+    }.items():
+        _require_same_float(normalized_force[key], expected, f"{case_id} predicted {key}")
+    _require_same_float(normalized_force["Clf"], normalized_force["Cl"] / 2.0 + normalized_force["CmPitch"], f"{case_id} predicted Clf")
+    _require_same_float(normalized_force["Clr"], normalized_force["Cl"] / 2.0 - normalized_force["CmPitch"], f"{case_id} predicted Clr")
+    _require_same_float(normalized_force["lift_closure_abs"], abs(normalized_force["Cl"] - normalized_force["Clf"] - normalized_force["Clr"]), f"{case_id} predicted lift closure")
+    execution = _exact_keys(
+        root["execution"],
+        {"maximum_prediction_chunk_rows", "hash_chunk_bytes", "validation_block_rows"},
+        f"core evidence {case_id}.execution",
+    )
+    for key, value in execution.items():
+        _integer(value, f"core evidence {case_id}.execution.{key}", minimum=1)
+    regional = _mapping(root["report_only_regional_diagnostics"], f"core evidence {case_id} regional diagnostics")
+    try:
+        validate_case_regional_envelope(
+            regional, expected_case_id=case_id, expected_additive_sums=root["additive_sums"]
+        )
+    except RegionalAggregateError as error:
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} regional diagnostics are invalid: {error}"
+        ) from error
+    return _CoreCase(
+        case_id=case_id,
+        input_file=path.name,
+        input_sha256=digest,
+        prediction_scope=PREDICTION_SCOPE_SURFACE_ONLY,
+        surface_count=surface_count,
+        volume_count=None,
+        field_metrics=field_metrics,
+        relative_l2_statistics=relative_statistics,
+        force_coefficients=normalized_force,
+        surface_prediction_manifest_sha256=surface_manifest,
+        volume_prediction_manifest_sha256=None,
+        surface_prediction_chunk_sha256=surface_chunks,
+        volume_prediction_chunk_sha256=None,
+        boundary_sha256=pinned.boundary.sha256,
+        surface_area_sha256=pinned.surface_cell_area.sha256,
+        volume_part_sha256=None,
+        regional_diagnostics=dict(regional),
+    )
+
+
 def _validate_core_case(
     document: Mapping[str, Any],
     path: Path,
@@ -1197,23 +1455,38 @@ def _validate_core_case(
     pinned: NativeCaseRecord,
 ) -> _CoreCase:
     case_id = pinned.case_id
-    root = _exact_keys(
-        document,
-        {
-            "schema", "schema_version", "status", "official_submission", "case_id",
-            "source", "prediction_inputs", "coverage", "metric_values",
-            "metric_sufficient_statistics", "additive_sums", "force_coefficients", "execution",
-        },
-        f"core evidence {case_id}",
+    legacy_keys = {
+        "schema", "schema_version", "status", "official_submission", "case_id",
+        "source", "prediction_inputs", "coverage", "metric_values",
+        "metric_sufficient_statistics", "additive_sums", "force_coefficients",
+        "execution",
+    }
+    v4_keys = legacy_keys | {"prediction_scope", "report_only_regional_diagnostics"}
+    root = _mapping(document, f"core evidence {case_id}")
+    legacy = set(root) == legacy_keys
+    if set(root) != legacy_keys and set(root) != v4_keys:
+        raise DrivAerDatasetScorerError(
+            f"core evidence {case_id} keys differ from the frozen candidate schema"
+        )
+    prediction_scope = (
+        PREDICTION_SCOPE_FULL if legacy else root.get("prediction_scope")
     )
     if (
-        root["schema"] != CORE_CASE_SCHEMA
-        or root["schema_version"] != 2
+        (legacy and (root["schema"] != LEGACY_CORE_CASE_SCHEMA or root["schema_version"] != 2))
+        or (
+            not legacy
+            and (root["schema"] != CORE_CASE_SCHEMA or root["schema_version"] != 4)
+        )
         or root["status"] != CORE_CASE_STATUS
         or root["official_submission"] is not False
         or root["case_id"] != case_id
+        or prediction_scope not in PREDICTION_SCOPES
     ):
         raise DrivAerDatasetScorerError(f"core evidence {case_id} schema/status mismatch")
+    if prediction_scope == PREDICTION_SCOPE_SURFACE_ONLY:
+        return _validate_surface_only_core_case(
+            root, path, digest, contract=contract, pinned=pinned
+        )
     source = _exact_keys(
         root["source"],
         {
@@ -1417,7 +1690,10 @@ def _validate_core_case(
             raise DrivAerDatasetScorerError(f"core evidence {case_id} {key} coverage mismatch")
 
     field_metrics, relative_statistics = _validate_field_metrics(
-        root, surface_count=surface_count, volume_count=volume_count
+        root,
+        surface_count=surface_count,
+        volume_count=volume_count,
+        prediction_scope=PREDICTION_SCOPE_FULL,
     )
     force = _exact_keys(
         root["force_coefficients"],
@@ -1487,10 +1763,27 @@ def _validate_core_case(
     )
     for key, value in execution.items():
         _integer(value, f"core evidence {case_id}.execution.{key}", minimum=1)
+    regional_diagnostics: Mapping[str, object] | None = None
+    if "report_only_regional_diagnostics" in root:
+        regional_diagnostics = _mapping(
+            root["report_only_regional_diagnostics"],
+            f"core evidence {case_id}.report_only_regional_diagnostics",
+        )
+        try:
+            validate_case_regional_envelope(
+                regional_diagnostics,
+                expected_case_id=case_id,
+                expected_additive_sums=root["additive_sums"],
+            )
+        except RegionalAggregateError as error:
+            raise DrivAerDatasetScorerError(
+                f"core evidence {case_id} regional diagnostics are invalid: {error}"
+            ) from error
     return _CoreCase(
         case_id=case_id,
         input_file=path.name,
         input_sha256=digest,
+        prediction_scope=PREDICTION_SCOPE_FULL,
         surface_count=surface_count,
         volume_count=volume_count,
         field_metrics=field_metrics,
@@ -1503,6 +1796,9 @@ def _validate_core_case(
         boundary_sha256=pinned.boundary.sha256,
         surface_area_sha256=pinned.surface_cell_area.sha256,
         volume_part_sha256=expected_parts,
+        regional_diagnostics=(
+            dict(regional_diagnostics) if regional_diagnostics is not None else None
+        ),
     )
 
 
@@ -1692,6 +1988,127 @@ def _validate_diagnostic_profile_series(
     return tuple(normalized)
 
 
+def _validate_surface_only_diagnostic_case(
+    root: Mapping[str, Any],
+    path: Path,
+    digest: str,
+    *,
+    contract: _Contract,
+    pinned: NativeCaseRecord,
+    core: _CoreCase,
+) -> _DiagnosticCase:
+    """Validate the deliberate absence of every volume-derived diagnostic."""
+
+    case_id = pinned.case_id
+    if core.prediction_scope != PREDICTION_SCOPE_SURFACE_ONLY:
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} prediction scope differs from core evidence"
+        )
+    mappings = _exact_keys(root["mapping_inputs"], {"velocity_10mm"}, f"{case_id} mapping_inputs")
+    if mappings["velocity_10mm"] != {
+        "status": "not_loaded_surface_only",
+        "scientific_metric_values_fabricated": False,
+    }:
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} surface-only mapping state differs"
+        )
+    sparse = _exact_keys(
+        root["sparse_gather_evidence"],
+        {
+            "volume_prediction", "volume_native_truth",
+            "only_unique_mapped_raw_ids_retained", "prediction_manifest_fully_consumed",
+        },
+        f"{case_id} sparse gather evidence",
+    )
+    omitted = {
+        "status": "not_submitted_surface_only",
+        "scientific_metric_values_fabricated": False,
+    }
+    not_loaded = {
+        "status": "not_loaded_surface_only",
+        "scientific_metric_values_fabricated": False,
+    }
+    if (
+        sparse["volume_prediction"] != omitted
+        or sparse["volume_native_truth"] != not_loaded
+        or sparse["only_unique_mapped_raw_ids_retained"] is not False
+        or sparse["prediction_manifest_fully_consumed"] is not False
+    ):
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} surface-only sparse state differs"
+        )
+    metrics = _exact_keys(
+        root["metrics"],
+        {
+            "cp_cut_rmse", "velocity_profile_uinf_rmse",
+            "velocity_profile_experimental_subset_uinf_rmse",
+        },
+        f"{case_id} diagnostics metrics",
+    )
+    cp = _mapping(metrics["cp_cut_rmse"], f"{case_id} Cp-cut metric")
+    if (
+        cp.get("metric_id") != "cp_cut_rmse"
+        or cp.get("ranked_value_available") is not False
+        or cp.get("case_equal_cut_mean_rmse") is not None
+        or cp.get("cut_rmse") != []
+        or cp.get("support_status") != "pending_immutable_owner_release"
+    ):
+        raise DrivAerDatasetScorerError(f"diagnostic evidence {case_id} Cp-cut state differs")
+    expected_reason = {
+        "diagnostic": "cp_cut_rmse",
+        "stage": "benchmark_support",
+        "reason": "immutable_native_cp_cut_extraction_support_not_published",
+    }
+    if cp.get("unavailable_reasons") != [expected_reason]:
+        raise DrivAerDatasetScorerError(f"diagnostic evidence {case_id} Cp-cut reason differs")
+    values: dict[str, float | None] = {"cp_cut_rmse": None}
+    reasons: dict[str, tuple[Mapping[str, object], ...]] = {
+        "cp_cut_rmse": (expected_reason,)
+    }
+    for metric_id, availability_key, value_key in (
+        ("velocity_profile_uinf_rmse", "ranked_value_available", "case_equal_line_mean_rmse"),
+        (
+            "velocity_profile_experimental_subset_uinf_rmse",
+            "value_available",
+            "case_equal_experimental_line_mean_rmse",
+        ),
+    ):
+        metric = _mapping(metrics[metric_id], f"{case_id} {metric_id}")
+        expected = {
+            "diagnostic": metric_id,
+            "stage": "prediction_scope",
+            "reason": "not_submitted_surface_only",
+            "profile_id": None,
+            "sample_index": None,
+        }
+        if (
+            metric.get("metric_id") != metric_id
+            or metric.get(availability_key) is not False
+            or metric.get(value_key) is not None
+            or metric.get("line_rmse") != []
+            or metric.get("unavailable_reasons") != [expected]
+        ):
+            raise DrivAerDatasetScorerError(
+                f"diagnostic evidence {case_id} {metric_id} surface-only state differs"
+            )
+        values[metric_id] = None
+        reasons[metric_id] = (expected,)
+    if root.get("profile_series") != []:
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} surface-only profile series must be empty"
+        )
+    return _DiagnosticCase(
+        case_id=case_id,
+        input_file=path.name,
+        input_sha256=digest,
+        values=values,
+        unavailable_reasons=reasons,
+        velocity_mapping_sha256=None,
+        velocity_receipt_sha256=None,
+        profile_series=(),
+    )
+
+
 def _validate_diagnostic_case(
     document: Mapping[str, Any],
     path: Path,
@@ -1717,7 +2134,7 @@ def _validate_diagnostic_case(
     }
     root = _mapping(document, f"diagnostic evidence {case_id}")
     observed_root_keys = set(root)
-    allowed_root_keys = required_root_keys | {"profile_series"}
+    allowed_root_keys = required_root_keys | {"profile_series", "prediction_scope"}
     if not required_root_keys.issubset(observed_root_keys) or not observed_root_keys.issubset(
         allowed_root_keys
     ):
@@ -1726,15 +2143,32 @@ def _validate_diagnostic_case(
             f"schema (missing={sorted(required_root_keys - observed_root_keys)}, "
             f"unexpected={sorted(observed_root_keys - allowed_root_keys)})"
         )
+    legacy = (
+        root["schema"] == LEGACY_DIAGNOSTIC_CASE_SCHEMA
+        and root["schema_version"] == 3
+        and "prediction_scope" not in root
+    )
+    current = (
+        root["schema"] == DIAGNOSTIC_CASE_SCHEMA
+        and root["schema_version"] == 4
+    )
     if (
-        root["schema"] != DIAGNOSTIC_CASE_SCHEMA
-        or root["schema_version"] != 3
+        not (legacy or current)
         or root["status"] != DIAGNOSTIC_CASE_STATUS
         or root["case_id"] != case_id
+        or root.get("prediction_scope", PREDICTION_SCOPE_FULL) not in PREDICTION_SCOPES
         or root["official_submission"] is not False
     ):
         raise DrivAerDatasetScorerError(
             f"diagnostic evidence {case_id} schema/status mismatch"
+        )
+    if root.get("prediction_scope", PREDICTION_SCOPE_FULL) == PREDICTION_SCOPE_SURFACE_ONLY:
+        return _validate_surface_only_diagnostic_case(
+            root, path, digest, contract=contract, pinned=pinned, core=core
+        )
+    if core.prediction_scope != PREDICTION_SCOPE_FULL:
+        raise DrivAerDatasetScorerError(
+            f"diagnostic evidence {case_id} prediction scope differs from core evidence"
         )
     claims = _exact_keys(
         root["claims"],
@@ -2307,9 +2741,33 @@ def evaluate_candidate_dataset(
         core_cases.append(core)
         diagnostic_cases.append(diagnostic)
 
+    prediction_scopes = {case.prediction_scope for case in core_cases}
+    if len(prediction_scopes) != 1:
+        raise DrivAerDatasetScorerError(
+            "all cases in a candidate split must use one prediction scope"
+        )
+    prediction_scope = prediction_scopes.pop()
+    active_field_metric_ids = tuple(
+        metric_id
+        for prefix in _FIELD_LAYOUT
+        if (
+            prediction_scope == PREDICTION_SCOPE_FULL
+            or _FIELD_LAYOUT[prefix]["support"] == "surface_native_cells"
+        )
+        for metric_id in _field_metric_ids(prefix)
+    )
+    active_primary_field_metric_ids = tuple(
+        metric_id
+        for metric_id in PRIMARY_FIELD_METRIC_IDS
+        if (
+            prediction_scope == PREDICTION_SCOPE_FULL
+            or not metric_id.startswith("volume_")
+        )
+    )
+
     field_metric_values = {
         metric_id: _macro([case.field_metrics[metric_id] for case in core_cases])
-        for metric_id in ALL_FIELD_METRIC_IDS
+        for metric_id in active_field_metric_ids
     }
     force_errors: dict[str, list[float]] = {
         key: [] for key in ("Cd", "Cl", "CmPitch", "Clf", "Clr")
@@ -2407,20 +2865,36 @@ def evaluate_candidate_dataset(
                 "source_support": {
                     "boundary_sha256": core.boundary_sha256,
                     "surface_area_sha256": core.surface_area_sha256,
-                    "volume_part_sha256": list(core.volume_part_sha256),
-                    "volume_weighting": {
-                        "weighting": "one_per_native_cell",
-                        "entity_count": core.volume_count,
-                        "total_weight": float(core.volume_count),
-                        "geometric_cell_volume_weights_used": False,
-                    },
+                    **(
+                        {
+                            "volume_part_sha256": list(core.volume_part_sha256 or ()),
+                            "volume_weighting": {
+                                "weighting": "one_per_native_cell",
+                                "entity_count": core.volume_count,
+                                "total_weight": float(core.volume_count or 0),
+                                "geometric_cell_volume_weights_used": False,
+                            },
+                        }
+                        if prediction_scope == PREDICTION_SCOPE_FULL
+                        else {
+                            "volume_native": {
+                                "status": "not_loaded_surface_only",
+                                "scientific_metric_values_fabricated": False,
+                            }
+                        }
+                    ),
                     "velocity_mapping_sha256": diagnostic.velocity_mapping_sha256,
                     "velocity_receipt_sha256": diagnostic.velocity_receipt_sha256,
                 },
                 "support_counts": {
                     "surface_native_cells": core.surface_count,
-                    "volume_native_cells": core.volume_count,
+                    **(
+                        {"volume_native_cells": core.volume_count}
+                        if prediction_scope == PREDICTION_SCOPE_FULL
+                        else {}
+                    ),
                 },
+                "prediction_scope": prediction_scope,
                 "field_metric_values": dict(core.field_metrics),
                 "field_metric_sufficient_statistics": {
                     key: dict(value) for key, value in core.relative_l2_statistics.items()
@@ -2432,7 +2906,7 @@ def evaluate_candidate_dataset(
         )
 
     reductions: dict[str, object] = {}
-    for metric_id in ALL_FIELD_METRIC_IDS:
+    for metric_id in active_field_metric_ids:
         reductions[metric_id] = {
             "operation": "complete_case_then_equal_case_macro_average",
             "case_count": len(core_cases),
@@ -2497,9 +2971,18 @@ def evaluate_candidate_dataset(
             "support_scope": diagnostic_scopes[metric_id],
         }
 
+    uses_legacy_evidence = all(
+        core.prediction_scope == PREDICTION_SCOPE_FULL
+        and core.regional_diagnostics is None
+        for core in core_cases
+    )
     evidence: dict[str, object] = {
-        "schema": CANDIDATE_DATASET_SCHEMA,
-        "schema_version": 3,
+        "schema": (
+            LEGACY_CANDIDATE_DATASET_SCHEMA
+            if uses_legacy_evidence
+            else CANDIDATE_DATASET_SCHEMA
+        ),
+        "schema_version": 3 if uses_legacy_evidence else 4,
         "status": CANDIDATE_DATASET_STATUS,
         "eligibility": {
             "official_submission": False,
@@ -2509,6 +2992,7 @@ def evaluate_candidate_dataset(
             "component_scores_available": False,
             "reason": "immutable profile support and owner activation approval are not frozen",
         },
+        "prediction_scope": prediction_scope,
         "split": {
             "split_id": contract.split_id,
             "case_set_id": contract.case_set_id,
@@ -2542,7 +3026,7 @@ def evaluate_candidate_dataset(
             "force_truth_sha256": contract.force_truth_sha256,
         },
         "metric_values": metric_values,
-        "primary_field_metric_ids": list(PRIMARY_FIELD_METRIC_IDS),
+        "primary_field_metric_ids": list(active_primary_field_metric_ids),
         "ranked_force_metric_ids": list(RANKED_FORCE_METRIC_IDS),
         "report_only_force_metric_ids": list(REPORT_ONLY_FORCE_METRIC_IDS),
         "diagnostic_metric_ids": list(DIAGNOSTIC_METRIC_IDS),
@@ -2572,8 +3056,34 @@ def evaluate_candidate_dataset(
             "independent_participant_dry_run": False,
         },
     }
+    regional_diagnostics: Mapping[str, object] | None = None
+    if all(core.regional_diagnostics is not None for core in core_cases):
+        try:
+            regional_diagnostics = aggregate_regional_diagnostics(
+                [
+                    {
+                        "case_id": core.case_id,
+                        "core": {
+                            "report_only_regional_diagnostics": dict(
+                                core.regional_diagnostics or {}
+                            )
+                        },
+                    }
+                    for core in core_cases
+                ],
+                case_ids=contract.case_ids,
+            )
+        except RegionalAggregateError as error:
+            raise DrivAerDatasetScorerError(
+                f"cannot aggregate zero-weight regional diagnostics: {error}"
+            ) from error
     _assert_no_absolute_paths(evidence)
-    return CandidateDatasetEvaluation(evidence=evidence)
+    if regional_diagnostics is not None:
+        _assert_no_absolute_paths(regional_diagnostics)
+    return CandidateDatasetEvaluation(
+        evidence=evidence,
+        regional_diagnostics=regional_diagnostics,
+    )
 
 
 def schema_v3_case_metrics_candidate_adapter(
@@ -2608,6 +3118,9 @@ def schema_v3_case_metrics_candidate_adapter(
         candidate_support_manifest_sha256, "candidate support manifest SHA-256"
     )
     evidence = evaluation.to_json()
+    prediction_scope = evidence.get("prediction_scope")
+    if prediction_scope not in PREDICTION_SCOPES:
+        raise DrivAerDatasetScorerError("candidate dataset prediction scope is invalid")
     split = _mapping(evidence["split"], "candidate dataset split")
     aggregate_values = _mapping(evidence["metric_values"], "candidate metric_values")
     numeric_aggregate = {
@@ -2652,10 +3165,10 @@ def schema_v3_case_metrics_candidate_adapter(
             if metric_id not in unavailable_diagnostics:
                 nonspatial[metric_id] = float(diagnostics[metric_id])
         supports = []
-        for support_id, metric_ids in (
-            ("surface_native_cells", surface_ids),
-            ("volume_native_cells", volume_ids),
-        ):
+        support_layout = [("surface_native_cells", surface_ids)]
+        if prediction_scope == PREDICTION_SCOPE_FULL:
+            support_layout.append(("volume_native_cells", volume_ids))
+        for support_id, metric_ids in support_layout:
             count = _integer(counts[support_id], f"{case['case_id']}/{support_id} count", minimum=1)
             support_statistics = {
                 metric_id: dict(statistics[metric_id])
@@ -3918,6 +4431,10 @@ def schema_v3_relative_profile_chunks_candidate_adapter(
 
     if not isinstance(evaluation, CandidateDatasetEvaluation):
         raise DrivAerDatasetScorerError("evaluation must be CandidateDatasetEvaluation")
+    if evaluation.to_json().get("prediction_scope") == PREDICTION_SCOPE_SURFACE_ONLY:
+        raise DrivAerDatasetScorerError(
+            "surface-only submissions have no velocity profiles to package"
+        )
     if not isinstance(submission_id, str) or _SUBMISSION_ID_RE.fullmatch(submission_id) is None:
         raise DrivAerDatasetScorerError("submission_id is not schema-v3 compatible")
     if not isinstance(namespaced_series_by_case, Mapping):
@@ -4003,10 +4520,11 @@ def schema_v3_profile_chunks_candidate_adapter(
 ) -> CandidateProfileChunks:
     """Project complete evaluator series into FluidsBench profile chunks.
 
-    This adapter deliberately has no partial-output mode.  Every selected case
-    must contain all sixteen velocity lines and all four continuous Cp cuts in
-    the evaluator's canonical order.  In particular, current evidence with
-    unavailable Cp-cut support raises instead of fabricating display values.
+    Every selected full-field case must contain all sixteen velocity lines and
+    all four continuous Cp cuts in the evaluator's canonical order. A
+    surface-only case contains the four Cp cuts only: velocity is explicitly
+    unavailable and is never replaced by dummy series. In either scope,
+    unavailable Cp support raises instead of fabricating display values.
     """
 
     if not isinstance(evaluation, CandidateDatasetEvaluation):
@@ -4022,6 +4540,9 @@ def schema_v3_profile_chunks_candidate_adapter(
         )
     chunk_size = _integer(cases_per_chunk, "cases_per_chunk", minimum=1)
     evidence = evaluation.to_json()
+    prediction_scope = evidence.get("prediction_scope")
+    if prediction_scope not in PREDICTION_SCOPES:
+        raise DrivAerDatasetScorerError("candidate dataset prediction scope is invalid")
     split = _mapping(evidence.get("split"), "candidate dataset split")
     source_contract = _mapping(
         evidence.get("source_contract"), "candidate source contract"
@@ -4074,9 +4595,13 @@ def schema_v3_profile_chunks_candidate_adapter(
         )
     expected_keys = tuple(
         ("pressure_profiles", station_id, "cp") for station_id in pressure_ids
-    ) + tuple(
-        ("velocity_profiles", station_id, "velocity_ratio")
-        for station_id in velocity_ids
+    ) + (
+        tuple(
+            ("velocity_profiles", station_id, "velocity_ratio")
+            for station_id in velocity_ids
+        )
+        if prediction_scope == PREDICTION_SCOPE_FULL
+        else ()
     )
     expected_counts = {
         ("velocity_profiles", station_id, "velocity_ratio"): sample_count
@@ -4105,9 +4630,12 @@ def schema_v3_profile_chunks_candidate_adapter(
             case.get("diagnostic_metric_values"),
             f"candidate case {case_id} diagnostic values",
         )
+        required_diagnostics = ["cp_cut_rmse"]
+        if prediction_scope == PREDICTION_SCOPE_FULL:
+            required_diagnostics.insert(0, "velocity_profile_uinf_rmse")
         unavailable = [
             metric_id
-            for metric_id in ("velocity_profile_uinf_rmse", "cp_cut_rmse")
+            for metric_id in required_diagnostics
             if diagnostics.get(metric_id) is None
         ]
         if unavailable:
@@ -4115,7 +4643,7 @@ def schema_v3_profile_chunks_candidate_adapter(
                 f"cannot package {case_id} profiles because required diagnostics "
                 f"are unavailable: {unavailable}"
             )
-        for metric_id in ("velocity_profile_uinf_rmse", "cp_cut_rmse"):
+        for metric_id in required_diagnostics:
             _finite(
                 diagnostics[metric_id],
                 f"{case_id}/{metric_id}",
@@ -4128,7 +4656,7 @@ def schema_v3_profile_chunks_candidate_adapter(
             )
         if len(raw_series) != len(expected_keys):
             raise DrivAerDatasetScorerError(
-                f"candidate case {case_id} must provide exactly four Cp cuts and sixteen velocity lines"
+                f"candidate case {case_id} must provide the complete profile series for its prediction scope"
             )
         normalized_series: list[dict[str, object]] = []
         observed_keys: list[tuple[str, str, str]] = []
@@ -4481,6 +5009,53 @@ def write_candidate_dataset_evidence(
         "size_bytes": len(payload),
         "status": CANDIDATE_DATASET_STATUS,
         "official_submission": False,
+    }
+
+
+def write_regional_diagnostics(
+    evaluation: CandidateDatasetEvaluation,
+    path: Path | str,
+) -> dict[str, object]:
+    """Atomically write the compact zero-weight split-level regional report."""
+
+    if not isinstance(evaluation, CandidateDatasetEvaluation):
+        raise DrivAerDatasetScorerError(
+            "evaluation must be CandidateDatasetEvaluation"
+        )
+    if evaluation.regional_diagnostics is None:
+        raise DrivAerDatasetScorerError(
+            "candidate evaluation does not contain regional diagnostics"
+        )
+    destination = Path(path)
+    if destination.name != "regional-diagnostics.json":
+        raise DrivAerDatasetScorerError(
+            "regional diagnostics output must be named regional-diagnostics.json"
+        )
+    payload = _canonical_json_payload(evaluation.regional_diagnostics)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    handle = tempfile.NamedTemporaryFile(
+        mode="wb",
+        prefix=f".{destination.name}.",
+        dir=destination.parent,
+        delete=False,
+    )
+    temporary = Path(handle.name)
+    try:
+        with handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, destination)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+    return {
+        "file": destination.name,
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "size_bytes": len(payload),
+        "role": "report_only",
+        "weight": 0.0,
+        "official_score_changed": False,
     }
 
 

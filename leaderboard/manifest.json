@@ -1359,6 +1359,24 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
+        "prediction_scopes": {
+          "surface_and_volume": {
+            "surface_predictions_required": true,
+            "volume_predictions_required": true
+          },
+          "surface_only": {
+            "surface_predictions_required": true,
+            "volume_predictions_forbidden": true,
+            "unavailable_component_metric_ids": [
+              "volume_velocity_rel_l2",
+              "volume_pressure_rel_l2",
+              "velocity_profile_r2"
+            ],
+            "unavailable_component_score": 0.0,
+            "component_weight_renormalization": false,
+            "maximum_overall_score": 60.0
+          }
+        },
         "closed_reason": "The participant contract, all-case native evidence and profile truth, scientific review, and bounded scoring equation are complete, but ranking remains closed until the production evaluator/scoring-support/truth release identities are frozen, the three-model sensitivity gate passes, and an independent full schema-v3 submission dry run is approved.",
         "scientific_approval": {
           "status": "approved",
@@ -1721,10 +1739,10 @@
         "participant_process": [
           "select one official split and use only its train list for fitting and training statistics",
           "load every required boundary VTP CellData tuple and its same-order public area array",
-          "reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling",
-          "retain raw native cell IDs so chunks form one complete duplicate-free case partition",
-          "accumulate additive sufficient statistics per chunk and reduce only after the complete case is assembled logically",
-          "derive field-integrated forces, AutoCFD5 velocity diagnostics, and FluidsBench continuous Cp cuts from the participant's complete native predictions using the candidate evaluator for implementation evidence; official submissions must use the future frozen owner-approved evaluator",
+          "choose either surface_and_volume or surface_only before evaluation; every submission must predict every native surface CellData tuple exactly once",
+          "for surface_and_volume, reconstruct each logical volume VTU from the exact per-case part list; process native cells in bounded-memory chunks without resampling, retain raw IDs, and reduce additive statistics only after each complete case",
+          "for surface_only, do not provide or manufacture volume-field or velocity-profile data; their fixed score contributions are zero and all published component weights remain unchanged",
+          "derive field-integrated forces and continuous Cp cuts from complete surface predictions, and derive velocity diagnostics only for surface_and_volume predictions, using the frozen reference evaluator",
           "record the repository-wide schema-v3 FluidsBench methodology disclosure and DrivAerML output-field contract with named architecture components, exact total and submitter-trainable parameter counts, scoped inputs and outputs, data handling, every submitter or upstream training stage, compute for every submitter-performed stage, every raw loaded checkpoint-file SHA-256 and selection rule, and complete-split inference compute; checkpoint publication remains optional",
           "submit participant-authored scalar metrics, per-case force coefficients and evidence, and complete velocity-profile and continuous-Cp-cut JSON chunks through the current FluidsBench schema; sharing revision-pinned prediction artifacts and maintainer native-evaluator recomputation are optional audits and do not affect approval, rank, citation, or promotion eligibility"
         ],
@@ -1807,6 +1825,16 @@
             "transform": "bounded_quality"
           }
         ],
+        "surface_only_policy": {
+          "unavailable_component_metric_ids": [
+            "volume_velocity_rel_l2",
+            "volume_pressure_rel_l2",
+            "velocity_profile_r2"
+          ],
+          "unavailable_component_score": 0.0,
+          "component_weight_renormalization": false,
+          "maximum_overall_score": 60.0
+        },
         "tolerance": 1e-06
       },
       "component_score_groups": {

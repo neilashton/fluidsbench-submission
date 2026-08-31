@@ -39,7 +39,10 @@ def arithmetic_mean(values: Mapping[str, float], metric_ids: Sequence[str]) -> f
 
 
 def _transformed_components(
-    values: Mapping[str, float], declaration: Mapping[str, Any]
+    values: Mapping[str, float],
+    declaration: Mapping[str, Any],
+    *,
+    fixed_zero_component_ids: Sequence[str] = (),
 ) -> dict[str, tuple[float, float]]:
     """Return ``metric_id -> (weight, transformed component score)``."""
 
@@ -50,6 +53,7 @@ def _transformed_components(
         raise ValueError("overall-score composite requires at least one component")
 
     result: dict[str, tuple[float, float]] = {}
+    fixed_zero = set(fixed_zero_component_ids)
     for component in components:
         if not isinstance(component, Mapping):
             raise ValueError("overall-score components must be objects")
@@ -59,6 +63,12 @@ def _transformed_components(
         weight = float(component.get("weight"))
         if not math.isfinite(weight) or weight < 0.0:
             raise ValueError("overall-score component weights must be finite and non-negative")
+        if metric_id in fixed_zero:
+            # Scope-unavailable components retain their published weight and
+            # contribute a literal zero score.  Their raw field/profile metric
+            # is intentionally absent rather than represented by fake data.
+            result[metric_id] = (weight, 0.0)
+            continue
         source_value = float(values[metric_id])
         if not math.isfinite(source_value):
             raise ValueError("overall-score component values must be finite")
@@ -98,7 +108,12 @@ def _require_normalized_weights(components: Mapping[str, tuple[float, float]]) -
         raise ValueError("overall-score component weights must sum to one")
 
 
-def composite_overall_score(values: Mapping[str, float], declaration: Mapping[str, Any]) -> float:
+def composite_overall_score(
+    values: Mapping[str, float],
+    declaration: Mapping[str, Any],
+    *,
+    fixed_zero_component_ids: Sequence[str] = (),
+) -> float:
     """Evaluate a dataset-declared weighted composite score.
 
     ``bounded_error`` components convert an error ``e`` with published cap
@@ -111,7 +126,9 @@ def composite_overall_score(values: Mapping[str, float], declaration: Mapping[st
     one.
     """
 
-    components = _transformed_components(values, declaration)
+    components = _transformed_components(
+        values, declaration, fixed_zero_component_ids=fixed_zero_component_ids
+    )
     _require_normalized_weights(components)
     return sum(weight * score for weight, score in components.values())
 
@@ -120,6 +137,8 @@ def composite_component_group_scores(
     values: Mapping[str, float],
     overall_declaration: Mapping[str, Any],
     group_declaration: Mapping[str, Any],
+    *,
+    fixed_zero_component_ids: Sequence[str] = (),
 ) -> dict[str, float]:
     """Evaluate normalized intermediate scores from overall-score components.
 
@@ -135,7 +154,11 @@ def composite_component_group_scores(
     if not isinstance(groups, Sequence) or isinstance(groups, (str, bytes)) or not groups:
         raise ValueError("component-score declaration requires at least one group")
 
-    components = _transformed_components(values, overall_declaration)
+    components = _transformed_components(
+        values,
+        overall_declaration,
+        fixed_zero_component_ids=fixed_zero_component_ids,
+    )
     _require_normalized_weights(components)
     results: dict[str, float] = {}
     grouped_component_ids: list[str] = []

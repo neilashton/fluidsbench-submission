@@ -20,6 +20,7 @@ from reference.drivaerml.dataset_scorer import (  # noqa: E402
     schema_v3_case_metrics_candidate_adapter,
     schema_v3_profile_chunks_candidate_adapter,
     write_candidate_dataset_evidence,
+    write_regional_diagnostics,
     write_schema_v3_case_metrics_candidate,
     write_schema_v3_profile_chunks_candidate,
 )
@@ -48,6 +49,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--submission-specification", type=Path, default=DEFAULT_SPECIFICATION
     )
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--regional-diagnostics-output",
+        type=Path,
+        help=(
+            "Write the compact zero-weight split report. Defaults to "
+            "regional-diagnostics.json beside --output."
+        ),
+    )
     parser.add_argument(
         "--schema-v3-case-metrics-output",
         type=Path,
@@ -125,6 +134,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     result: dict[str, object] = {
         "dataset_evidence": write_candidate_dataset_evidence(evaluation, args.output)
     }
+    regional_output = args.regional_diagnostics_output or (
+        args.output.parent / "regional-diagnostics.json"
+    )
+    result["regional_diagnostics"] = write_regional_diagnostics(
+        evaluation,
+        regional_output,
+    )
     if args.schema_v3_case_metrics_output is not None:
         adapter = schema_v3_case_metrics_candidate_adapter(
             evaluation,

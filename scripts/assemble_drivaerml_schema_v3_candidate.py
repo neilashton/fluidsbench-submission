@@ -40,6 +40,12 @@ from reference.drivaerml.dataset_scorer import (
     DrivAerDatasetScorerError,
     validate_schema_v3_relative_profile_chunk_candidate,
 )
+from reference.drivaerml.regional_aggregate import (
+    AGGREGATE_REGIONAL_REPORT_SCHEMA,
+    REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
+    RegionalAggregateError,
+    validate_aggregate_regional_diagnostics,
+)
 from reference.drivaerml.retained_file import RetainedFileError, RetainedVerifiedFile
 from scripts.validate_scoring_supports import validate_candidate_manifest_release
 
@@ -466,10 +472,14 @@ def _normalize_case_metrics(
     return value
 
 
-def _required_profile_series(specification: dict[str, Any]) -> list[tuple[str, str, str]]:
+def _required_profile_series(
+    specification: dict[str, Any], *, prediction_scope: str
+) -> list[tuple[str, str, str]]:
     result: list[tuple[str, str, str]] = []
     for panel in specification.get("profile_panels", []):
         if not panel.get("required"):
+            continue
+        if prediction_scope == "surface_only" and panel.get("id") == "velocity_profiles":
             continue
         for station in panel.get("station_ids", []):
             for quantity in panel.get("quantity_ids", []):
@@ -477,6 +487,38 @@ def _required_profile_series(specification: dict[str, Any]) -> list[tuple[str, s
     if not result:
         raise PackageAssemblyError("DrivAerML specification has no required profile series")
     return result
+
+
+def _copy_regional_diagnostics(
+    source: Path,
+    destination: Path,
+    *,
+    case_ids: list[str],
+) -> tuple[str, dict[str, Any]]:
+    """Validate and copy one compact report without changing its values."""
+
+    report = load_json(source)
+    try:
+        validate_aggregate_regional_diagnostics(
+            report,
+            expected_case_ids=case_ids,
+        )
+    except RegionalAggregateError as error:
+        raise PackageAssemblyError(
+            f"regional-diagnostics.json is invalid: {error}"
+        ) from error
+    write_json(destination, report)
+    digest = sha256_file(destination)
+    return digest, {
+        "format": AGGREGATE_REGIONAL_REPORT_SCHEMA,
+        "file": "regional-diagnostics.json",
+        "sha256": digest,
+        "contract_sha256": REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
+        "case_count": len(case_ids),
+        "role": "report_only",
+        "weight": 0.0,
+        "official_score_changed": False,
+    }
 
 
 def _copy_profiles(
@@ -666,6 +708,7 @@ def assemble_package(
     profiles_path: Path,
     discretization_cases_path: Path,
     output_path: Path,
+    regional_diagnostics_path: Path | None = None,
 ) -> dict[str, Any]:
     config = load_json(config_path)
     if config.get("schema") != CONFIG_SCHEMA:
@@ -690,6 +733,40 @@ def assemble_package(
     if not isinstance(split_id, str):
         raise PackageAssemblyError("config.split_id must be a string")
     split, case_ids = _find_split(specification, specification_path, split_id)
+    prediction_scope = config.get("prediction_scope", "surface_and_volume")
+    scope_declarations = specification.get("scoring_support", {}).get(
+        "prediction_scopes", {}
+    )
+    if not isinstance(scope_declarations, dict):
+        scope_declarations = {}
+    if prediction_scope not in {"surface_and_volume", "surface_only"} or (
+        prediction_scope == "surface_only"
+        and not isinstance(scope_declarations.get(prediction_scope), dict)
+    ):
+        raise PackageAssemblyError(
+            "config.prediction_scope must be a supported DrivAerML prediction scope"
+        )
+    regional_contract = specification.get("regional_diagnostics")
+    regional_required = (
+        isinstance(regional_contract, dict)
+        and regional_contract.get("required_for_new_submissions") is True
+    )
+    if isinstance(regional_contract, dict) and (
+        regional_contract.get("format") != AGGREGATE_REGIONAL_REPORT_SCHEMA
+        or regional_contract.get("contract_sha256")
+        != REGIONAL_DIAGNOSTICS_CONTRACT_SHA256
+        or regional_contract.get("role") != "report_only"
+        or regional_contract.get("weight") != 0.0
+        or regional_contract.get("affects_official_score") is not False
+    ):
+        raise PackageAssemblyError(
+            "the DrivAerML regional diagnostics declaration differs from the "
+            "frozen zero-weight contract"
+        )
+    if regional_required and regional_diagnostics_path is None:
+        raise PackageAssemblyError(
+            "the DrivAerML specification requires --regional-diagnostics"
+        )
     candidate, evaluator, ground_truth = _release_binding(
         config, specification, specification_path
     )
@@ -721,6 +798,7 @@ def assemble_package(
         "dataset", "dataset_id", "dataset_version", "split", "split_id",
         "case_set_id", "split_sha256", "evaluation", "scoring_support",
         "spatial_discretization", "case_metrics", "metric_values", "profile_data",
+        "regional_diagnostics",
         "approval", "prediction_artifacts", "parameter_count_millions",
     }
     overlap = sorted(forbidden.intersection(participant))
@@ -731,6 +809,7 @@ def assemble_package(
         raise PackageAssemblyError("participant.submission_id must be a string")
     participant_submission = copy.deepcopy(participant)
     participant_submission["dataset_id"] = "drivaerml"
+    participant_submission["prediction_scope"] = prediction_scope
     try:
         participant_submission["parameter_count_millions"] = (
             derived_parameter_count_millions(participant.get("methodology"))
@@ -745,7 +824,18 @@ def assemble_package(
         raise PackageAssemblyError(
             f"participant methodology is invalid: {error}"
         ) from error
-    required_metric_ids = [metric["id"] for metric in specification.get("metrics", [])]
+    unavailable_metric_ids = set(
+        scope_declarations.get(prediction_scope, {}).get(
+            "unavailable_component_metric_ids", []
+        )
+        if prediction_scope == "surface_only"
+        else []
+    )
+    required_metric_ids = [
+        metric["id"]
+        for metric in specification.get("metrics", [])
+        if metric["id"] not in unavailable_metric_ids
+    ]
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     staging = Path(tempfile.mkdtemp(prefix=f".{output_path.name}.staging-", dir=output_path.parent))
@@ -817,9 +907,20 @@ def assemble_package(
             split_id=split_id,
             case_set_id=split["case_set_id"],
             case_ids=case_ids,
-            required_series=_required_profile_series(specification),
+            required_series=_required_profile_series(
+                specification, prediction_scope=prediction_scope
+            ),
             relative_contract_sha256=relative_contract_sha256,
         )
+
+        regional_sha256: str | None = None
+        regional_declaration: dict[str, Any] | None = None
+        if regional_diagnostics_path is not None:
+            regional_sha256, regional_declaration = _copy_regional_diagnostics(
+                regional_diagnostics_path,
+                staging / "regional-diagnostics.json",
+                case_ids=case_ids,
+            )
 
         evaluation = config.get("evaluation")
         if not isinstance(evaluation, dict):
@@ -833,6 +934,7 @@ def assemble_package(
             "split_id": split_id,
             "split_sha256": split["sha256"],
             "case_set_id": split["case_set_id"],
+            "prediction_scope": prediction_scope,
             "reference_version": evaluator["reference_version"],
             "command": evaluation.get("command"),
             "generated_at": evaluation.get("generated_at"),
@@ -846,6 +948,8 @@ def assemble_package(
             "discretization_sha256": discretization_sha256,
             "case_metrics_sha256": case_metrics_sha256,
         }
+        if regional_sha256 is not None:
+            evidence["regional_diagnostics_sha256"] = regional_sha256
         reproducibility = participant.get("reproducibility")
         reproducibility_code = (
             reproducibility.get("code") if isinstance(reproducibility, dict) else None
@@ -872,6 +976,7 @@ def assemble_package(
             "split_id": split_id,
             "case_set_id": split["case_set_id"],
             "split_sha256": split["sha256"],
+            "prediction_scope": prediction_scope,
             "evaluation": {
                 "reference_version": evaluator["reference_version"],
                 "command": evaluation.get("command"),
@@ -905,6 +1010,8 @@ def assemble_package(
                 "profile_ground_truth_manifest_sha256": ground_truth["manifest_sha256"],
             },
         }
+        if regional_declaration is not None:
+            submission["regional_diagnostics"] = regional_declaration
         if participant_code_revision is not None:
             submission["evaluation"]["code_revision"] = participant_code_revision
         _require_schema(submission, "v3/submission.schema.json", "submission.json")
@@ -933,6 +1040,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--submission-specification", type=Path, default=DEFAULT_SPECIFICATION)
     parser.add_argument("--case-metrics", type=Path)
     parser.add_argument("--profiles", type=Path)
+    parser.add_argument(
+        "--regional-diagnostics",
+        type=Path,
+        help="Split-level zero-weight regional-diagnostics.json from the evaluator.",
+    )
     parser.add_argument("--discretization-cases", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument(
@@ -980,6 +1092,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             profiles_path=args.profiles,
             discretization_cases_path=args.discretization_cases,
             output_path=args.output,
+            regional_diagnostics_path=args.regional_diagnostics,
         )
     except PackageAssemblyError as error:
         print(json.dumps({"status": "blocked", "error": str(error)}, sort_keys=True), file=__import__("sys").stderr)

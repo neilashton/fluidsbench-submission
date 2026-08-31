@@ -71,6 +71,24 @@ class DrivAerMLMethodologyTests(unittest.TestCase):
         )
         self.assert_semantically_valid(methodology, case_count=50)
 
+    def test_surface_only_requires_only_the_two_native_surface_outputs(self) -> None:
+        methodology = valid_methodology()
+        methodology["architecture"]["predicted_fields"] = [
+            field
+            for field in methodology["architecture"]["predicted_fields"]
+            if field["field_id"].startswith("surface_native_cells.")
+        ]
+        submission = submission_for(methodology)
+        submission["prediction_scope"] = "surface_only"
+        self.assertEqual(
+            methodology_errors(
+                submission,
+                expected_case_count=2,
+                contract=CONTRACT,
+            ),
+            [],
+        )
+
     def test_training_actor_is_independent_of_target_data_regime(self) -> None:
         submitter_pretrained = valid_methodology()
         self.assert_semantically_valid(

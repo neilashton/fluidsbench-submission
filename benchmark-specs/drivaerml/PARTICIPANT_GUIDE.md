@@ -23,12 +23,29 @@ revision, checkpoint hashes, and preprocessing configuration. Record the model
 commit locally as well; publishing that commit through optional code metadata
 is encouraged but is not required for approval or ranking.
 
+### Choose the prediction scope before inference
+
+Every submission must predict the complete native surface: `pMeanTrim` and
+three-component `wallShearStressMeanTrim` for every native boundary polygon in
+unchanged raw VTK order. Select one scope for the entire evaluated split:
+
+- `surface_and_volume` also predicts `pMeanTrim` and `UMeanTrim` on every
+  native volume cell and produces the velocity-profile diagnostics.
+- `surface_only` supplies no volume prediction, no reconstructed volume VTU,
+  and no velocity-profile values. Its volume-velocity, volume-pressure, and
+  velocity-profile components score exactly zero with their published weights
+  retained; weights are not renormalized, so its maximum overall score is 60.
+
+Do not fill omitted components with dummy values. The evaluator records their
+unavailable scope explicitly.
+
 ### Submit a reproducible method record
 
 Every schema-v3 DrivAerML package must include
-`methodology.format=fluidsbench-method-v1` and cover the four outputs in
-[`methodology-contract.json`](methodology-contract.json). A model name or broad
-architecture label is not sufficient. The record must describe:
+`methodology.format=fluidsbench-method-v1`. It must cover the two mandatory
+surface outputs in [`methodology-contract.json`](methodology-contract.json),
+and, in `surface_and_volume` scope, the two volume outputs as well. A model
+name or broad architecture label is not sufficient. The record must describe:
 
 - the complete architecture as one or more named components, including each
   component's specific family, role, layer/operator description, parameter
@@ -36,8 +53,10 @@ architecture label is not sufficient. The record must describe:
 - the exact total number of learned scalar parameters loaded for inference and
   the subset updated by the submitter, plus every input feature and the
   component that consumes it;
-- whether each of the four required native fields is a direct output or is
-  deterministically derived from an output, and which component produces it;
+- whether every required native field for the selected scope is a direct output
+  or is deterministically derived from an output, and which component produces
+  it; in `surface_only` scope, state explicitly that the two volume fields are
+  not submitted rather than assigning them dummy outputs;
 - normalization, preprocessing, and training-time sampling or downsampling;
 - every training stage and the components it affected; a submitter-performed
   stage records either its gradient recipe (loss and term weights, optimizer
@@ -121,11 +140,11 @@ For each evaluated case:
    polygon `CellData` in zero-based raw VTK cell order. Load the corresponding
    public area payload in that identical order; do not calculate a replacement
    from a processed surface.
-2. Byte-concatenate the pinned `.00.part`, `.01.part`, and optional `.02.part`
+2. For `surface_and_volume`, byte-concatenate the pinned `.00.part`, `.01.part`, and optional `.02.part`
    files in that exact order, with no delimiter or transformation. Ten cases
    have three parts. A seekable segmented reader may present the same logical
    bytes without writing a roughly 50 GB reconstructed VTU.
-3. Read the reconstructed unstructured grid without remeshing. Predict scalar
+3. For `surface_and_volume`, read the reconstructed unstructured grid without remeshing. Predict scalar
    `pMeanTrim` and three-component `UMeanTrim` for every native volume
    `CellData` cell in zero-based raw VTK cell order.
 
@@ -148,7 +167,7 @@ signed-int64 `raw_cell_id` and exactly these Float32 or Float64 arrays:
 | Support | Required arrays |
 | --- | --- |
 | `surface_native_cells` | `pMeanTrim: [N]`, `wallShearStressMeanTrim: [N,3]` |
-| `volume_native_cells` | `pMeanTrim: [N]`, `UMeanTrim: [N,3]` |
+| `volume_native_cells` (`surface_and_volume` only) | `pMeanTrim: [N]`, `UMeanTrim: [N,3]` |
 
 For bounded validation, each NPZ chunk may contain at most 512 MiB across the
 sum of all archive members' declared uncompressed byte sizes; this is not a
@@ -166,7 +185,9 @@ chunk-local relative-L2, MAE, or RMSE values.
 The primary surface metrics use the fixed published same-order polygon areas;
 equal-polygon metrics are mandatory secondary values. The primary volume
 metrics weight every native cell equally; no geometric cell-volume array or
-volume-weighted secondary metric is required. The evaluator audits, but never
+volume-weighted secondary metric is required. In `surface_only` mode the
+volume metrics are absent, rather than replaced by zeros, and their fixed
+score contributions are zero. The evaluator audits, but never
 regenerates, the fixed surface-area inputs.
 
 ## 4. Run the FluidsBench reference evaluator locally
@@ -177,13 +198,16 @@ substitute hand-calculated force conventions or independently defined profile
 extraction. The evaluator integrates the participant's native surface pressure
 and wall shear to produce per-case `Cd`, `Cl`, `CmPitch`, and report-only
 `Clf`/`Clr`, together with their submitted metrics. It uses the approved
-mappings and extraction support to produce the complete JSON series for the 16
-AutoCFD5 velocity profiles and the four FluidsBench continuous Cp cuts. Include
-those derived coefficients, metrics, and profile series in the submission
-package. The AutoCFD5 name identifies the source line geometry only; this JSON
-belongs to the DrivAerML FluidsBench package and is not submitted to AutoCFD.
-This keeps truth and predictions on the same geometry, raw IDs, force
-convention, validity masks, and reductions.
+mappings and extraction support to produce the 16 AutoCFD5 velocity profiles
+for `surface_and_volume`; a `surface_only` evaluation emits their explicit
+unavailable/zero-score status without opening a volume source. It derives the
+four FluidsBench continuous Cp cuts from the submitted surface pressure in
+either scope when the frozen support is active. Include the evaluator-produced
+coefficients, metrics, and applicable profile series in the submission package.
+The AutoCFD5 name identifies the source line geometry only; this JSON belongs
+to the DrivAerML FluidsBench package and is not submitted to AutoCFD. This
+keeps truth and predictions on the same geometry, raw IDs, force convention,
+validity masks, and reductions.
 
 For schema v3, each case in `metrics/cases.json` carries the evaluator-produced
 prediction object `force_coefficients` with exactly `cd`, `cl`, `cm_pitch`,
@@ -275,10 +299,11 @@ metric is calculated. The combined v8 registry and existing 209-probe files in
 the proposal and evidence directories are retained only as inactive,
 non-normative research records.
 
-Participants run the evaluator over their complete native `UMeanTrim`
-prediction and do not create or modify velocity-profile validity masks. The
-frozen evaluator will apply the owner-published mask and containing-cell
-assignments and emit the JSON profile series to include in the package. Only
+For `surface_and_volume`, participants run the evaluator over their complete
+native `UMeanTrim` prediction and do not create or modify velocity-profile
+validity masks. The frozen evaluator will apply the owner-published mask and
+containing-cell assignments and emit the JSON profile series to include in the
+package. `surface_only` has no velocity-profile series. Only
 `inside_morphed_solid` and `outside_released_fluid_domain` are permitted owner
 exclusion reasons. An unresolved containing-cell or cell-evaluation failure is
 not an automatic exclusion: it makes the required line unavailable. Excluded
@@ -342,9 +367,11 @@ unregistered `synthetic-drivaerml-shaped` namespace is not accepted by the
 repository's official-dataset semantic validator. That validator must remain
 fail-closed for real DrivAerML packages until the owner activates the contract.
 
-For a real case, first create or obtain candidate surface and volume prediction
-manifests. The zero-field generator is a transport test only, never a model or
-published baseline:
+For a real `surface_and_volume` case, first create or obtain candidate surface
+and volume prediction manifests. For `surface_only`, create only the surface
+manifest and pass `--prediction-scope surface_only`; do not provide a volume
+manifest, reconstructed volume file, or `--multipart`. The zero-field generator
+is a transport test only, never a model or published baseline:
 
 ```bash
 .venv-drivaerml/bin/python scripts/create_drivaerml_dummy_predictions.py \
@@ -355,9 +382,9 @@ published baseline:
   --output-root /tmp/drivaerml-run1-zero
 ```
 
-The real-case interface consumes the actual native surface and reconstructed
-volume plus prediction manifests. Volume errors are accumulated with one equal
-weight per raw native cell:
+The `surface_and_volume` real-case interface consumes the actual native surface
+and reconstructed volume plus prediction manifests. Volume errors are
+accumulated with one equal weight per raw native cell:
 
 ```bash
 .venv-drivaerml/bin/python scripts/evaluate_drivaerml_candidate_case.py \
@@ -375,6 +402,11 @@ Use `--multipart` instead of `--monolithic-vtu` when the pinned part files are
 present below `--dataset-root`. The evaluator verifies raw native-cell coverage
 and accumulates equal-cell sufficient statistics directly; participants do not
 supply a geometric volume-weight file.
+
+For surface-only evaluation, use the same command with the volume arguments
+removed and add `--prediction-scope surface_only`. This path validates and
+scores only the native surface; it deliberately does not open a volume VTK or
+prediction stream.
 
 For the real two-case pilot, copy the example configuration and run
 [`real_reference_driver.py`](../../examples/drivaerml-candidate-native-chunks/real_reference_driver.py).

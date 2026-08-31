@@ -35,6 +35,7 @@
     "split_id": { "$ref": "#/$defs/safe_id" },
     "split_sha256": { "$ref": "#/$defs/sha256" },
     "case_set_id": { "$ref": "#/$defs/safe_id" },
+    "prediction_scope": { "enum": ["surface_and_volume", "surface_only"] },
     "reference_version": { "type": "string", "minLength": 1, "maxLength": 160 },
     "code_revision": { "type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$" },
     "command": { "type": "string", "minLength": 1, "maxLength": 2000 },
@@ -52,6 +53,7 @@
     "scoring_support_manifest_sha256": { "$ref": "#/$defs/sha256" },
     "discretization_sha256": { "$ref": "#/$defs/sha256" },
     "case_metrics_sha256": { "$ref": "#/$defs/sha256" },
+    "regional_diagnostics_sha256": { "$ref": "#/$defs/sha256" },
     "notes": { "type": "string" }
   },
   "$defs": {
