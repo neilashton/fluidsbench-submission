@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-07-15-458ba87ddd59/rotor37/train_16/rotor37-prototype-train-16",
+  "claim_id": "prototype-dev-2026-08-31-80674967510e/rotor37/train_16/rotor37-prototype-train-16",
   "release": {
-    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "id": "prototype-dev-2026-08-31-80674967510e",
     "status": "prototype_dummy_data",
-    "published_at": "2026-08-24T20:08:12Z",
+    "published_at": "2026-08-31T12:44:17Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -53,8 +53,8 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
-      "row_index": 65
+      "feed_sha256": "80674967510e1159a031e6d67d6bc98135e5ce8a8f39a6e8ac69e4fd5728bc3d",
+      "row_index": 56
     },
     "source_submission": {
       "path": "submissions/rotor37/rotor37-prototype-train-16/submission.json",

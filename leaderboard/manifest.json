@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-08-24T20:08:12Z",
+  "generated_at": "2026-08-31T12:44:17Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-07-15-458ba87ddd59",
+    "id": "prototype-dev-2026-08-31-80674967510e",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-08-24T20:08:12Z",
+    "generated_at": "2026-08-31T12:44:17Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "458ba87ddd59ff34e7bdef9b03ef66489a7e78b1e9db703033c763f09f621049",
+    "feed_sha256": "80674967510e1159a031e6d67d6bc98135e5ce8a8f39a6e8ac69e4fd5728bc3d",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,16 +51,16 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "7138bb4f07bdb0546cdb8e0b091c70275fcbad995ace4dd33113887e7bac9fd9",
-      "record_count": 72,
+      "index_sha256": "66c5ba45305aa0ba4977d1b990c52434bc017671aedf3ffb1ef617f79e3d2026",
+      "record_count": 63,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "21edebacf64896d28e99d14f649a2e1cf0cd88a89909182f8a44e493a0f230e5",
-      "record_count": 72,
-      "series_count": 72
+      "sha256": "ccf0f649c290bb9a09df414b8ceef6af96294e9f23d23ffe8dac06bd329aaa93",
+      "record_count": 63,
+      "series_count": 63
     }
   },
   "all_file": "leaderboard/all.json",
@@ -975,8 +975,8 @@
       "file": "leaderboard/datasets/drivaerml.json",
       "contract_base_path": "benchmark-specs/drivaerml/",
       "contract_base_path_scope": "repository_relative_contract_artifact_fields_only; upstream_dataset_paths_resolve_within_source_release",
-      "submission_count": 10,
-      "updated_at": "2026-07-08",
+      "submission_count": 1,
+      "updated_at": "2026-08-31",
       "submission_population": {
         "feed_row_count": 10,
         "prototype_ineligible_fixture_count": 10,
@@ -1157,7 +1157,7 @@
               "id": "upperbody_centerline",
               "label": "Upper-body centreline (y = 0 m)",
               "x_label": "Arc length along continuous native-surface cut, m",
-          "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
+              "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
               "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
               "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
@@ -1165,7 +1165,7 @@
               "id": "underbody_centerline",
               "label": "Underbody centreline (y = 0 m)",
               "x_label": "Arc length along continuous native-surface cut, m",
-          "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
+              "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
               "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
               "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
@@ -1173,7 +1173,7 @@
               "id": "sidewall_z_0_15",
               "label": "Sidewall (z = 0.15 m)",
               "x_label": "Arc length along continuous native-surface cut, m",
-          "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
+              "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
               "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
               "source_url": "https://github.com/neilashton/fluidsbench-submission"
             },
@@ -1181,7 +1181,7 @@
               "id": "front_left_wheelhouse_y_neg_0_6",
               "label": "Front-left wheelhouse (y = -0.6 m)",
               "x_label": "Arc length along continuous native-surface cut, m",
-          "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
+              "description": "Continuous native-surface Cp cut on published owner-approved all-case support; immutable production release binding is pending.",
               "basis": "candidate_fluidsbench_v9_continuous_cp_cut",
               "source_url": "https://github.com/neilashton/fluidsbench-submission"
             }
@@ -1874,7 +1874,7 @@
         "status": "candidate_velocity_and_continuous_cp_cut_support_pending_all_case_validation",
         "velocity_validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1"
       },
-      "revision_count": 10
+      "revision_count": 1
     },
     {
       "name": "DrivAerNet++",

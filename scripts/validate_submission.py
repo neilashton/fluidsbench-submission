@@ -4910,6 +4910,15 @@ def validate_open_reproducibility(
             )
         return
 
+    if evidence_status == "pre_release_reference":
+        if approval_status != "prototype":
+            add("pre_release_reference evidence requires approval.status=prototype")
+        if reproducibility is not None:
+            add("pre-release reference data must not claim the open reproducibility contract")
+        if submission_schema_version != "1.0":
+            add("pre-release reference data must use the historical submission schema_version=1.0")
+        return
+
     if evidence_status != "submitted_evaluation":
         return
 
@@ -5101,8 +5110,12 @@ def validate_profiles(
         "format", "fluidsbench-profile-chunks-v1"
     )
     relative_profile = profile_format == RELATIVE_PROFILE_FORMAT
+    physical_coordinate_profile = (
+        profile_format == "fluidsbench-drivaerml-physical-profile-chunks-v1"
+    )
     if profile_format not in {
         "fluidsbench-profile-chunks-v1",
+        "fluidsbench-drivaerml-physical-profile-chunks-v1",
         RELATIVE_PROFILE_FORMAT,
     }:
         add(f"unsupported profile_data.format {profile_format!r}")
@@ -5184,6 +5197,9 @@ def validate_profiles(
             add("profiles/index.json contract_id is not the retained relative-v3 contract")
         if index.get("contract_sha256") != relative_contract_sha256:
             add("profiles/index.json contract_sha256 does not match the benchmark contract")
+    elif physical_coordinate_profile:
+        if index.get("format") != "fluidsbench-drivaerml-physical-profile-chunks-v1":
+            add("profiles/index.json format must match profile_data.format")
     elif index.get("format") not in {None, "fluidsbench-profile-chunks-v1"}:
         add("profiles/index.json format must match profile_data.format")
 
@@ -5337,7 +5353,8 @@ def validate_profiles(
                     if interval is None:
                         interval = panel.get("coordinate_interval")
                     if (
-                        isinstance(interval, list)
+                        not physical_coordinate_profile
+                        and isinstance(interval, list)
                         and len(interval) == 2
                         and all(is_number(value) for value in interval)
                         and len(coordinates) >= 2
@@ -5533,13 +5550,14 @@ def validate_submission_file(
         ):
             add(f"methodology validation failed: {error}")
     split_case_ids: list[str] = []
-    if submission_schema_version == "3.0":
+    has_regional_diagnostics = isinstance(submission.get("regional_diagnostics"), dict)
+    if submission_schema_version == "3.0" or has_regional_diagnostics:
         split_path = ROOT / "benchmark-specs" / submission["dataset_id"] / spec_split["index_file"]
         if split_path.is_file():
             try:
                 split_index = load_json(split_path)
             except (OSError, json.JSONDecodeError) as error:
-                add(f"cannot read benchmark split index for schema v3 evidence: {error}")
+                add(f"cannot read benchmark split index for submitted evidence: {error}")
             else:
                 split_case_ids = split_index.get("case_ids", [])
                 if not isinstance(split_case_ids, list) or any(
@@ -5547,41 +5565,42 @@ def validate_submission_file(
                 ):
                     add("benchmark split index case_ids must be a string array")
                     split_case_ids = []
-        support_manifest, support_case_index = validate_v3_scoring_support(
-            add,
-            submission,
-            dataset_spec,
-            spec_split,
-            candidate_dry_run=candidate_dry_run,
-        )
-        case_metrics = validate_v3_case_metrics(
-            add,
-            path.parent,
-            submission,
-            split_case_ids,
-            support_manifest,
-            support_case_index,
-        )
-        validate_v3_discretization(
-            add,
-            path.parent,
-            submission,
-            split_case_ids,
-            support_manifest,
-            support_case_index,
-        )
-        validate_v3_prediction_metadata(
-            add,
-            path.parent,
-            submission,
-            split_case_ids,
-            contributor_stage=contributor_stage,
-            candidate_dry_run=candidate_dry_run,
-            case_metrics=case_metrics,
-            dataset_spec=dataset_spec,
-        )
+        if submission_schema_version == "3.0":
+            support_manifest, support_case_index = validate_v3_scoring_support(
+                add,
+                submission,
+                dataset_spec,
+                spec_split,
+                candidate_dry_run=candidate_dry_run,
+            )
+            case_metrics = validate_v3_case_metrics(
+                add,
+                path.parent,
+                submission,
+                split_case_ids,
+                support_manifest,
+                support_case_index,
+            )
+            validate_v3_discretization(
+                add,
+                path.parent,
+                submission,
+                split_case_ids,
+                support_manifest,
+                support_case_index,
+            )
+            validate_v3_prediction_metadata(
+                add,
+                path.parent,
+                submission,
+                split_case_ids,
+                contributor_stage=contributor_stage,
+                candidate_dry_run=candidate_dry_run,
+                case_metrics=case_metrics,
+                dataset_spec=dataset_spec,
+            )
     evidence = validate_evaluation_evidence(add, path.parent, submission)
-    if submission_schema_version == "3.0":
+    if submission_schema_version == "3.0" or has_regional_diagnostics:
         validate_regional_diagnostics(
             add,
             path.parent,

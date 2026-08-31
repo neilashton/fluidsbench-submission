@@ -303,6 +303,14 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
         profile_index_path = ROOT / row["profile_data"]["index_file"]
         if profile_index_path.is_file():
             row["profile_data"]["index_sha256"] = sha256_file(profile_index_path)
+        regional = row.get("regional_diagnostics")
+        if isinstance(regional, dict):
+            regional_path = path.parent / regional["file"]
+            row["regional_diagnostics"]["file"] = str(
+                regional_path.relative_to(ROOT)
+            )
+            if regional_path.is_file():
+                row["regional_diagnostics"]["sha256"] = sha256_file(regional_path)
         if submission.get("schema_version") == "3.0":
             discretization_path = path.parent / submission["spatial_discretization"]["file"]
             row["spatial_discretization"]["file"] = str(discretization_path.relative_to(ROOT))
@@ -317,17 +325,6 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
                     )
             case_metrics_path = path.parent / submission["case_metrics"]["file"]
             row["case_metrics"]["file"] = str(case_metrics_path.relative_to(ROOT))
-            regional = row.get("regional_diagnostics")
-            if isinstance(regional, dict):
-                regional_path = path.parent / regional["file"]
-                row["regional_diagnostics"]["file"] = str(
-                    regional_path.relative_to(ROOT)
-                )
-                if regional_path.is_file():
-                    row["regional_diagnostics"]["sha256"] = sha256_file(
-                        regional_path
-                    )
-
             declared_artifacts = submission.get("prediction_artifacts", [])
             checks_path = path.parent / "prediction-artifact-checks.json"
             prediction_status: dict[str, Any] = {
@@ -487,6 +484,17 @@ def published_metric_value(value: int | float, decimal_places: int) -> tuple[Dec
 
 def claim_eligibility(release_status: str, row: dict[str, Any]) -> dict[str, Any]:
     if release_status == "prototype_dummy_data":
+        if row.get("record_type") == "pre_release_reference":
+            return {
+                "academic_citation": False,
+                "promotion": False,
+                "reason_code": "pre_release_reference",
+                "reason": (
+                    "Genuine pre-release reference data retained to validate the "
+                    "DrivAerML workflow before submissions open; it is not an "
+                    "official benchmark result or ranking claim."
+                ),
+            }
         return {
             "academic_citation": False,
             "promotion": False,

@@ -71,6 +71,7 @@
     "paper_url": {"type": "string", "pattern": "^$|^https?://"},
     "code_url": {"type": "string", "pattern": "^$|^https?://"},
     "submitted_at": {"type": "string", "format": "date"},
+    "record_type": {"enum": ["pre_release_reference"]},
     "note": {"type": "string"},
     "evaluation": {
       "type": "object",
@@ -172,10 +173,30 @@
       "additionalProperties": false,
       "required": ["format", "index_file", "case_count", "case_set_id"],
       "properties": {
-        "format": {"const": "fluidsbench-profile-chunks-v1"},
+        "format": {
+          "enum": [
+            "fluidsbench-profile-chunks-v1",
+            "fluidsbench-drivaerml-physical-profile-chunks-v1"
+          ]
+        },
         "index_file": {"const": "profiles/index.json"},
         "case_count": {"type": "integer", "minimum": 1},
         "case_set_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "regional_diagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "file", "sha256", "contract_sha256", "case_count", "role", "weight", "official_score_changed"],
+      "properties": {
+        "format": {"const": "drivaerml-regional-aggregate-v2"},
+        "file": {"const": "regional-diagnostics.json"},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "contract_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "case_count": {"type": "integer", "minimum": 1},
+        "role": {"const": "report_only"},
+        "weight": {"const": 0.0},
+        "official_score_changed": {"const": false}
       }
     }
   },
