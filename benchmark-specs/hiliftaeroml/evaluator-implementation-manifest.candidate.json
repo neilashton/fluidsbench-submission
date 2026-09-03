@@ -1,6 +1,6 @@
 {
   "activation_effect": "none",
-  "content_fingerprint": "bdf14fb306dec9d712e83a8561f7f043739a76afcf1fa0b7adc115d07e80a00e",
+  "content_fingerprint": "18d2f621a0a864302ebfb82bfea4f3b9105e337108de75349a81571b28317b03",
   "dataset_id": "hiliftaeroml",
   "excluded_by_design": [
     {
@@ -143,11 +143,11 @@
         {
           "identity_mode": "raw_bytes_sha256",
           "path": "tools/postprocess_full360_candidate.py",
-          "sha256": "4fd181cb2c2102ddfe405fef56a20fc3256b88aa730b3a034275a32460af8e24",
-          "size_bytes": 36751
+          "sha256": "e4a4b54a33a2287823c77f96d2a7e581cc46a5109f56680989b8137ccbaf8cd9",
+          "size_bytes": 37610
         }
       ],
-      "group_fingerprint": "9a17edd072f4b30a02d89f2a0b7fa8760197ac2882ecc53546d7318db4c307b8",
+      "group_fingerprint": "82a7d7f7bd468a050468b421399cd5f0915dca1fd8f11520338cd28f36b7cda3",
       "group_id": "native_submission_execution",
       "purpose": "Exact native surface/volume/profile execution and deterministic case-set aggregation.",
       "root_id": "native_submission"
@@ -5359,7 +5359,7 @@
     "normalized_json_exception_mode": "canonical_json_sha256_excluding_lifecycle_v1",
     "purpose": "Prevent the later evaluator-revision metadata commit from invalidating its own implementation freeze while retaining all HiLift scientific, split, metric, profile, and scoring-support content."
   },
-  "source_inventory_fingerprint": "6f23e6e636852a69961579e466d51062250c1f9fad07d6f9b1918ddbcccb0967",
+  "source_inventory_fingerprint": "07074fb0e64290693e256effbace39ceba990f62cf57ed31b8dd01d89312bac2",
   "source_roots": {
     "fluidsbench_adapter": {
       "repository": "https://github.com/neilashton/fluidsbench-submission",
