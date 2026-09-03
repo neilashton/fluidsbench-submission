@@ -7,12 +7,19 @@ from pathlib import Path
 import pytest
 
 import scripts.assemble_hiliftaeroml_schema_v3_candidate as assembler
+from scripts import validate_submission as submission_validator
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASET = ROOT / "benchmark-specs" / "hiliftaeroml"
 SPECIFICATION = DATASET / "submission-spec.json"
 TEMPLATE = ROOT / "examples" / "hiliftaeroml-v3-candidate" / "package-config.template.json"
+RESOLVED_CONFIG = (
+    ROOT
+    / "examples"
+    / "hiliftaeroml-v3-candidate"
+    / "transolver-full360-candidate-config.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -194,6 +201,186 @@ def test_package_config_envelope_is_exact_and_typed() -> None:
     config["profile_cases_per_chunk"] = "10"
     with pytest.raises(assembler.HiLiftPackageAssemblyError, match="positive integer"):
         assembler._validate_config_envelope(config)
+
+
+def test_case_discretization_records_match_summary_ids_order_and_semantics(
+    tmp_path: Path,
+) -> None:
+    configured_inference = load(RESOLVED_CONFIG)["spatial_discretization"]["inference"]
+    assert "case_record_id" not in configured_inference["surface_input"]
+    assert "case_record_id" not in configured_inference["volume_input"]
+
+    inference = assembler._prepare_inference_discretization(configured_inference)
+    expected_input_ids = [
+        inference[name]["case_record_id"]
+        for name in ("surface_input", "volume_input")
+        if inference[name]["used"]
+    ]
+    expected_output_ids = [output["id"] for output in inference["direct_outputs"]]
+    assert expected_input_ids == ["surface-native-input", "volume-native-input"]
+    assert expected_output_ids == ["surface-native-output", "volume-native-output"]
+
+    case_ids = ["case-one", "case-two"]
+    support_counts = {
+        "case-one": {
+            assembler.SURFACE_SUPPORT_ID: 11,
+            assembler.VOLUME_SUPPORT_ID: 19,
+            assembler.SCALAR_SUPPORT_ID: 1,
+        },
+        "case-two": {
+            assembler.SURFACE_SUPPORT_ID: 23,
+            assembler.VOLUME_SUPPORT_ID: 29,
+            assembler.SCALAR_SUPPORT_ID: 1,
+        },
+    }
+    case_metrics = {
+        "cases": [
+            {
+                "case_id": case_id,
+                "supports": [
+                    {"support_id": support_id, "support_count": count}
+                    for support_id, count in support_counts[case_id].items()
+                ],
+            }
+            for case_id in case_ids
+        ]
+    }
+    case_lines = assembler._case_discretization_records(
+        submission_id="test-submission",
+        split_id="full",
+        case_ids=case_ids,
+        case_metrics=case_metrics,
+        inference_summary=inference,
+    )
+    records = [json.loads(line) for line in case_lines.splitlines()]
+
+    assert [record["case_id"] for record in records] == case_ids
+    expected_mapping_ids = [
+        (mapping["support_id"], mapping["source_output_id"])
+        for mapping in inference["mappings"]
+    ]
+    for record in records:
+        case_id = record["case_id"]
+        case_inference = record["inference"]
+        assert [item["id"] for item in case_inference["inputs"]] == expected_input_ids
+        assert [item["id"] for item in case_inference["direct_outputs"]] == (
+            expected_output_ids
+        )
+        assert [
+            (mapping["support_id"], mapping["source_output_id"])
+            for mapping in case_inference["mappings"]
+        ] == expected_mapping_ids
+
+        expected_counts = [
+            support_counts[case_id][assembler.SURFACE_SUPPORT_ID],
+            support_counts[case_id][assembler.VOLUME_SUPPORT_ID],
+        ]
+        for collection_name in ("inputs", "direct_outputs"):
+            representations = case_inference[collection_name]
+            assert [item["entity_counts"][0]["count"] for item in representations] == (
+                expected_counts
+            )
+            assert [
+                item["native_entity_counts"][0]["count"] for item in representations
+            ] == expected_counts
+            assert [item["native_fractions"] for item in representations] == [
+                [{"entity": "points", "fraction": 1.0}],
+                [{"entity": "points", "fraction": 1.0}],
+            ]
+            assert [item["domain"] for item in representations] == [
+                {"kind": "full_dataset_domain"},
+                {"kind": "full_dataset_domain"},
+            ]
+
+    count_summaries = {
+        "surface": {"kind": "per_case", "minimum": 11, "median": 17, "maximum": 23},
+        "volume": {"kind": "per_case", "minimum": 19, "median": 24, "maximum": 29},
+    }
+    for input_name, domain in (("surface_input", "surface"), ("volume_input", "volume")):
+        representation = inference[input_name]
+        representation["entity_counts"][0]["count"] = count_summaries[domain]
+        representation["native_comparison"]["native_entity_counts"][0][
+            "count"
+        ] = count_summaries[domain]
+    for output in inference["direct_outputs"]:
+        representation = output["representation"]
+        representation["entity_counts"][0]["count"] = count_summaries[
+            output["domain"]
+        ]
+        representation["native_comparison"]["native_entity_counts"][0][
+            "count"
+        ] = count_summaries[output["domain"]]
+
+    cases_path = tmp_path / "discretization" / "cases.jsonl"
+    cases_path.parent.mkdir()
+    cases_path.write_bytes(case_lines)
+    config = load(RESOLVED_CONFIG)
+    support_release_id = "test-support-v1"
+    support_manifest_sha256 = "a" * 64
+    discretization = {
+        "$schema": "https://fluidsbench.org/schemas/v3/discretization.schema.json",
+        "schema_version": "1.0",
+        "submission_id": "test-submission",
+        "dataset_id": "hiliftaeroml",
+        "split_id": "full",
+        "scoring_support_release_id": support_release_id,
+        "scoring_support_manifest_sha256": support_manifest_sha256,
+        "training": config["spatial_discretization"]["training"],
+        "inference": inference,
+        "case_manifest": {
+            "format": "jsonl",
+            "file": "discretization/cases.jsonl",
+            "sha256": digest(cases_path),
+            "case_count": len(case_ids),
+        },
+    }
+    discretization_path = tmp_path / "discretization.json"
+    write_json(discretization_path, discretization)
+    submission = {
+        "submission_id": "test-submission",
+        "dataset_id": "hiliftaeroml",
+        "split_id": "full",
+        "scoring_support": {
+            "release_id": support_release_id,
+            "manifest_sha256": support_manifest_sha256,
+        },
+        "spatial_discretization": {
+            "file": "discretization.json",
+            "sha256": digest(discretization_path),
+        },
+    }
+    support_manifest = {
+        "supports": [
+            {"id": support_id, "extrapolation_policy": "forbidden"}
+            for support_id in (
+                assembler.SURFACE_SUPPORT_ID,
+                assembler.VOLUME_SUPPORT_ID,
+                assembler.SCALAR_SUPPORT_ID,
+            )
+        ]
+    }
+    support_case_index = {
+        "_loaded_cases": [
+            {
+                "case_id": case_id,
+                "support_instances": [
+                    {"support_id": support_id, "entity_count": count}
+                    for support_id, count in support_counts[case_id].items()
+                ],
+            }
+            for case_id in case_ids
+        ]
+    }
+    errors: list[str] = []
+    submission_validator.validate_v3_discretization(
+        errors.append,
+        tmp_path,
+        submission,
+        case_ids,
+        support_manifest,
+        support_case_index,
+    )
+    assert errors == []
 
 
 def test_force_gate_refuses_unavailable_case_without_imputation(tmp_path: Path) -> None:

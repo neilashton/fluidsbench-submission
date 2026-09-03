@@ -303,6 +303,29 @@ class CandidateDryRunValidatorTests(unittest.TestCase):
             self.assertIn("submissions are closed", "\n".join(normal_errors))
             self.assertIn("submissions are closed", "\n".join(contributor_errors))
 
+    def test_candidate_mode_validates_an_isolated_assembled_package(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            registered_path = self.make_registered_fixture(root)
+            isolated_package = root / "candidate-build" / registered_path.parent.name
+            isolated_package.parent.mkdir()
+            shutil.move(registered_path.parent, isolated_package)
+            submission_path = isolated_package / "submission.json"
+
+            with self.repository_view(root):
+                candidate_errors, stats = validator.validate_submission_file(
+                    submission_path,
+                    candidate_dry_run=True,
+                )
+                normal_errors, _ = validator.validate_submission_file(submission_path)
+
+            self.assertEqual(candidate_errors, [])
+            self.assertEqual(stats, {"cases": 2, "series": 2})
+            self.assertIn(
+                "submission.json must be stored at submissions/synthetic/",
+                "\n".join(normal_errors),
+            )
+
     def test_candidate_cli_never_prints_official_pass(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

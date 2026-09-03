@@ -2620,9 +2620,11 @@ def validate_metadata(
     submission: dict[str, Any],
     dataset: dict[str, Any],
     split: dict[str, Any],
+    *,
+    require_registered_path: bool = True,
 ) -> None:
     expected_parent = ROOT / "submissions" / dataset["slug"] / submission["submission_id"]
-    if path.parent.resolve() != expected_parent.resolve():
+    if require_registered_path and path.parent.resolve() != expected_parent.resolve():
         add(f"submission.json must be stored at {expected_parent.relative_to(ROOT)}/submission.json")
     if submission.get("dataset") != dataset["name"]:
         add(f"dataset must be {dataset['name']!r} for dataset_id {dataset['slug']!r}")
@@ -6167,7 +6169,14 @@ def validate_submission_file(
         add(f"benchmark specification does not define split {split['id']!r}")
         return errors, stats
 
-    validate_metadata(add, path, submission, dataset, split)
+    validate_metadata(
+        add,
+        path,
+        submission,
+        dataset,
+        split,
+        require_registered_path=not candidate_dry_run,
+    )
     if submission.get("dataset_version") != dataset_spec.get("dataset_version"):
         add(f"dataset_version must equal {dataset_spec.get('dataset_version')!r} from the benchmark specification")
     if submission.get("evaluation", {}).get("reference_version") != dataset_spec.get("evaluation_reference_version"):

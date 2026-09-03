@@ -1,6 +1,6 @@
 {
   "activation_effect": "none",
-  "content_fingerprint": "18d2f621a0a864302ebfb82bfea4f3b9105e337108de75349a81571b28317b03",
+  "content_fingerprint": "55d201297d3a71517a65b9021e2b458d99a0d642304c6b8d5c73933bb2e0e924",
   "dataset_id": "hiliftaeroml",
   "excluded_by_design": [
     {
@@ -4598,8 +4598,8 @@
         {
           "identity_mode": "raw_bytes_sha256",
           "path": "scripts/assemble_hiliftaeroml_schema_v3_candidate.py",
-          "sha256": "45c0e72d68d188f41e88ef8c1d816f3817b0b228535926f0f3ebc1a23983ad91",
-          "size_bytes": 113572
+          "sha256": "68f3b3654f4850ab19126effaa164decab0d34293792606ab9a9ea1483326195",
+          "size_bytes": 117046
         },
         {
           "identity_mode": "raw_bytes_sha256",
@@ -4616,11 +4616,11 @@
         {
           "identity_mode": "raw_bytes_sha256",
           "path": "scripts/validate_submission.py",
-          "sha256": "c481c1348c677fc8c8ecf254c66ec1fb63928391ad7d2589d7cafaac176a3613",
-          "size_bytes": 289039
+          "sha256": "718a225e0265158882e4eb14def90624fa1e9c55a98cb619d6db5c30e5dc4569",
+          "size_bytes": 289218
         }
       ],
-      "group_fingerprint": "3db365902150a1ce4e4833d15844e4e60ac1968152325895c918419e980e03d4",
+      "group_fingerprint": "607b09aa805c5d846529c8fac6109f7ff9faccf9e44e72b5df53eb234db91e6e",
       "group_id": "fluidsbench_assembler_scorer_validator",
       "purpose": "HiLift package assembly/scoring plus the common fail-closed submission validator.",
       "root_id": "fluidsbench_adapter"
@@ -5359,7 +5359,7 @@
     "normalized_json_exception_mode": "canonical_json_sha256_excluding_lifecycle_v1",
     "purpose": "Prevent the later evaluator-revision metadata commit from invalidating its own implementation freeze while retaining all HiLift scientific, split, metric, profile, and scoring-support content."
   },
-  "source_inventory_fingerprint": "07074fb0e64290693e256effbace39ceba990f62cf57ed31b8dd01d89312bac2",
+  "source_inventory_fingerprint": "615f1b8901fe663c6f386ceb2557863c1792c16ec535cc851ab4c59548bac516",
   "source_roots": {
     "fluidsbench_adapter": {
       "repository": "https://github.com/neilashton/fluidsbench-submission",

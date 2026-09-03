@@ -159,6 +159,18 @@ EXACT_SURFACE_PRESSURE_CONVENTION_ID = (
 SURFACE_SUPPORT_ID = "surface-native-points-v1"
 VOLUME_SUPPORT_ID = "volume-native-valid-points-v1"
 SCALAR_SUPPORT_ID = "aerodynamic-case-coefficients-v1"
+INFERENCE_INPUT_CASE_RECORD_IDS = {
+    "surface_input": "surface-native-input",
+    "volume_input": "volume-native-input",
+}
+INFERENCE_INPUT_SUPPORT_IDS = {
+    "surface_input": SURFACE_SUPPORT_ID,
+    "volume_input": VOLUME_SUPPORT_ID,
+}
+INFERENCE_OUTPUT_SUPPORT_IDS = {
+    "surface": SURFACE_SUPPORT_ID,
+    "volume": VOLUME_SUPPORT_ID,
+}
 NATIVE_SURFACE_SUPPORT_ID = "surface_native_points"
 NATIVE_VOLUME_SUPPORT_ID = "volume_native_valid_points"
 SURFACE_REGION_ORDER = (
@@ -1931,12 +1943,83 @@ def _convert_regional(
     return report
 
 
+def _prepare_inference_discretization(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise HiLiftPackageAssemblyError(
+            "config.spatial_discretization.inference must be an object"
+        )
+    inference = copy.deepcopy(value)
+    for input_name, default_record_id in INFERENCE_INPUT_CASE_RECORD_IDS.items():
+        representation = inference.get(input_name)
+        if not isinstance(representation, dict):
+            raise HiLiftPackageAssemblyError(
+                f"config.spatial_discretization.inference.{input_name} must be an object"
+            )
+        if representation.get("used") is not True:
+            continue
+        representation.setdefault("case_record_id", default_record_id)
+        case_record_id = representation.get("case_record_id")
+        if not isinstance(case_record_id, str) or not case_record_id:
+            raise HiLiftPackageAssemblyError(
+                "config.spatial_discretization.inference."
+                f"{input_name}.case_record_id must be a non-empty string when used"
+            )
+    return inference
+
+
+def _case_representation(
+    *,
+    record_id: str,
+    summary: Mapping[str, Any],
+    support_count: int,
+    label: str,
+) -> dict[str, Any]:
+    entities = [
+        entry.get("entity")
+        for entry in summary.get("entity_counts", [])
+        if isinstance(entry, dict)
+    ]
+    if entities != ["points"]:
+        raise HiLiftPackageAssemblyError(
+            f"{label} must declare exactly the points entity"
+        )
+    result: dict[str, Any] = {
+        "id": record_id,
+        "entity_counts": [{"entity": "points", "count": support_count}],
+    }
+    native = summary.get("native_comparison")
+    if isinstance(native, dict) and native.get("status") == "reported":
+        native_entities = [
+            entry.get("entity")
+            for entry in native.get("native_entity_counts", [])
+            if isinstance(entry, dict)
+        ]
+        fraction_entities = [
+            entry.get("entity")
+            for entry in native.get("fractions", [])
+            if isinstance(entry, dict)
+        ]
+        if native_entities != entities or fraction_entities != entities:
+            raise HiLiftPackageAssemblyError(
+                f"{label} native entity IDs must match entity_counts in declared order"
+            )
+        result["native_entity_counts"] = [
+            {"entity": "points", "count": support_count}
+        ]
+        result["native_fractions"] = [{"entity": "points", "fraction": 1.0}]
+    domain = summary.get("domain")
+    if isinstance(domain, dict):
+        result["domain"] = copy.deepcopy(domain)
+    return result
+
+
 def _case_discretization_records(
     *,
     submission_id: str,
     split_id: str,
     case_ids: Sequence[str],
     case_metrics: Mapping[str, Any],
+    inference_summary: Mapping[str, Any],
 ) -> bytes:
     by_case = {case["case_id"]: case for case in case_metrics["cases"]}
     lines: list[bytes] = []
@@ -1945,6 +2028,68 @@ def _case_discretization_records(
             support["support_id"]: support["support_count"]
             for support in by_case[case_id]["supports"]
         }
+        inputs = []
+        for input_name, support_id in INFERENCE_INPUT_SUPPORT_IDS.items():
+            representation = inference_summary.get(input_name)
+            if not isinstance(representation, dict):
+                raise HiLiftPackageAssemblyError(
+                    f"inference summary {input_name} must be an object"
+                )
+            if representation.get("used") is not True:
+                continue
+            inputs.append(
+                _case_representation(
+                    record_id=representation["case_record_id"],
+                    summary=representation,
+                    support_count=counts[support_id],
+                    label=f"inference.{input_name}",
+                )
+            )
+        direct_outputs = []
+        for output in inference_summary.get("direct_outputs", []):
+            if not isinstance(output, dict):
+                raise HiLiftPackageAssemblyError(
+                    "inference summary direct_outputs entries must be objects"
+                )
+            domain = output.get("domain")
+            support_id = INFERENCE_OUTPUT_SUPPORT_IDS.get(domain)
+            if support_id is None:
+                raise HiLiftPackageAssemblyError(
+                    f"inference direct output {output.get('id')!r} has unsupported "
+                    f"domain {domain!r}"
+                )
+            representation = output.get("representation")
+            if not isinstance(representation, dict):
+                raise HiLiftPackageAssemblyError(
+                    f"inference direct output {output.get('id')!r} representation must be an object"
+                )
+            direct_outputs.append(
+                _case_representation(
+                    record_id=output["id"],
+                    summary=representation,
+                    support_count=counts[support_id],
+                    label=f"inference.direct_outputs[{output.get('id')}]",
+                )
+            )
+        mappings = []
+        for mapping in inference_summary.get("mappings", []):
+            if not isinstance(mapping, dict):
+                raise HiLiftPackageAssemblyError(
+                    "inference summary mappings entries must be objects"
+                )
+            support_id = mapping["support_id"]
+            support_count = counts[support_id]
+            mappings.append(
+                {
+                    "support_id": support_id,
+                    "source_output_id": mapping["source_output_id"],
+                    "support_count": support_count,
+                    "scored_count": support_count,
+                    "unmapped_count": 0,
+                    "extrapolated_count": 0,
+                    "final_coverage_fraction": 1.0,
+                }
+            )
         document = {
             "$schema": "https://fluidsbench.org/schemas/v3/discretization-case.schema.json",
             "schema_version": "1.0",
@@ -1953,60 +2098,9 @@ def _case_discretization_records(
             "split_id": split_id,
             "case_id": case_id,
             "inference": {
-                "inputs": [],
-                "direct_outputs": [
-                    {
-                        "id": "surface-native-query-output",
-                        "entity_counts": [
-                            {"entity": "points", "count": counts[SURFACE_SUPPORT_ID]}
-                        ],
-                        "native_entity_counts": [
-                            {"entity": "points", "count": counts[SURFACE_SUPPORT_ID]}
-                        ],
-                        "native_fractions": [{"entity": "points", "fraction": 1.0}],
-                        "domain": {"kind": "full_dataset_domain"},
-                    },
-                    {
-                        "id": "volume-native-query-output",
-                        "entity_counts": [
-                            {"entity": "points", "count": counts[VOLUME_SUPPORT_ID]}
-                        ],
-                        "native_entity_counts": [
-                            {"entity": "points", "count": counts[VOLUME_SUPPORT_ID]}
-                        ],
-                        "native_fractions": [{"entity": "points", "fraction": 1.0}],
-                        "domain": {"kind": "full_dataset_domain"},
-                    },
-                ],
-                "mappings": [
-                    {
-                        "support_id": SURFACE_SUPPORT_ID,
-                        "source_output_id": "surface-native-query-output",
-                        "support_count": counts[SURFACE_SUPPORT_ID],
-                        "scored_count": counts[SURFACE_SUPPORT_ID],
-                        "unmapped_count": 0,
-                        "extrapolated_count": 0,
-                        "final_coverage_fraction": 1.0,
-                    },
-                    {
-                        "support_id": VOLUME_SUPPORT_ID,
-                        "source_output_id": "volume-native-query-output",
-                        "support_count": counts[VOLUME_SUPPORT_ID],
-                        "scored_count": counts[VOLUME_SUPPORT_ID],
-                        "unmapped_count": 0,
-                        "extrapolated_count": 0,
-                        "final_coverage_fraction": 1.0,
-                    },
-                    {
-                        "support_id": SCALAR_SUPPORT_ID,
-                        "source_output_id": "surface-native-query-output",
-                        "support_count": 1,
-                        "scored_count": 1,
-                        "unmapped_count": 0,
-                        "extrapolated_count": 0,
-                        "final_coverage_fraction": 1.0,
-                    },
-                ],
+                "inputs": inputs,
+                "direct_outputs": direct_outputs,
+                "mappings": mappings,
             },
         }
         _require_schema(
@@ -2286,11 +2380,15 @@ def assemble_package(
         )
         case_metrics_sha = write_json(staging / "metrics" / "cases.json", case_metrics)
 
+        inference_discretization = _prepare_inference_discretization(
+            spatial.get("inference")
+        )
         case_lines = _case_discretization_records(
             submission_id=participant["submission_id"],
             split_id=split_id,
             case_ids=case_ids,
             case_metrics=case_metrics,
+            inference_summary=inference_discretization,
         )
         cases_path = staging / "discretization" / "cases.jsonl"
         cases_path.parent.mkdir(parents=True, exist_ok=True)
@@ -2305,7 +2403,7 @@ def assemble_package(
             "scoring_support_release_id": candidate["release_id"],
             "scoring_support_manifest_sha256": candidate["manifest_sha256"],
             "training": copy.deepcopy(spatial.get("training")),
-            "inference": copy.deepcopy(spatial.get("inference")),
+            "inference": inference_discretization,
             "case_manifest": {
                 "format": "jsonl",
                 "file": "discretization/cases.jsonl",
