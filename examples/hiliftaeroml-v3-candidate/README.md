@@ -10,12 +10,12 @@ rather than illustrative release identities.
 `transolver-full360-candidate-config.json` records the real retained Table 5
 epoch-1000 Transolver replay.  Its `evaluation.command` is executable from the
 FluidsBench repository root once all referenced campaign products exist and
-targets the canonical `package-a` directory.  The evaluator
-`code_revision` intentionally remains forty zeroes while implementation commit
-A is prepared; the controlled metadata freeze fills that field with commit A
-in commit B.  Do not replace it with an arbitrary working-tree revision.  This
-freeze step does not open submissions, approve the candidate, or publish
-profile truth.
+targets the canonical `package-a` directory.  The evaluator `code_revision` is
+pinned to `1a03e3931dc30f3bf26fae3fe7150dc6a7e17aa6`, the immutable
+implementation commit recorded by the repository binding.  This freeze permits
+only controlled maintainer-local candidate dry runs; do not replace it with
+another working-tree revision.  It does not open submissions, approve the
+candidate, or publish profile truth.
 
 The package adapter consumes evaluator-native per-case products directly.  It
 recomputes Cp and velocity profile R2 from prediction-only chunks joined to an
@@ -49,11 +49,13 @@ python scripts/assemble_hiliftaeroml_schema_v3_candidate.py \
 The completed profile-ground-truth candidate is repository-bound for this
 maintainer-local dry run, but remains unpublished, unapproved, and inactive.
 Supplying its local release path does not open public profile intake.  The
-candidate remains blocked until the benchmark owner freezes the evaluator Git
-revision.  Force and overall scores also require exact complete truth-load
-coverage for every selected case.  An `unavailable_validated_exception` is
-reported as a blocker; imputation, zero-fill, case omission, and partial
-force/overall scores are forbidden.
+evaluator revision is frozen for this maintainer-local dry run.  Public
+activation remains blocked on benchmark-owner approval, public profile-truth
+publication, and the other activation-checklist gates.  Force and overall
+scores still require exact complete truth-load coverage for every selected
+case.  An `unavailable_validated_exception` is reported as a blocker;
+imputation, zero-fill, case omission, and partial force/overall scores are
+forbidden.
 
 Once those owner gates and every evaluator-native case product are complete,
 assemble a participant-owned directory:

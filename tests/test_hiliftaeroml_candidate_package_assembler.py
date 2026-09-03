@@ -175,7 +175,7 @@ def test_blocker_inspection_is_read_only_and_reports_owner_gates() -> None:
     assert result["status"] == "blocked"
     assert result["blocker_count"] == len(result["blockers"])
     assert "configuration_token" in gates
-    assert "frozen_evaluator_revision" in gates
+    assert "frozen_evaluator_revision" not in gates
     assert "profile_ground_truth_release" in gates
     assert "split" in gates
     assert result["note"] == "No package is written by blocker inspection."

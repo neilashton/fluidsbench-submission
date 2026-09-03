@@ -32,6 +32,9 @@ contract before the benchmark owner considers activation.
 - Candidate scoring-support manifest digest:
   `98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee`.
 - Regional report-only contract digest: `1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650`.
+- Closed candidate evaluator revision:
+  `1a03e3931dc30f3bf26fae3fe7150dc6a7e17aa6`, frozen for maintainer-local
+  candidate dry runs only with no activation effect.
 
 The scoring-support generator verifies all 1,355 unique evaluation cases
 against the complete internal 1,800-case surface and volume integrity
@@ -104,7 +107,7 @@ Revision-pinned public prediction fields are optional under schema v3. Omitting
 `prediction_artifacts` is not a candidate-dry-run blocker and does not relax any
 of the evidence above.
 
-## Activation gates after a successful internal dry run
+## Remaining activation gates after the evaluator freeze and successful internal dry run
 
 - Retain the unchanged public surface/volume archive-object inventory at its
   frozen revision and separately bind the force release
@@ -119,8 +122,13 @@ of the evidence above.
 - Exercise and independently audit the same-stream nondimensional relative and
   dimensional absolute field reductions, vector semantics, loads, and profile
   aggregation.
-- Publish and owner-approve one immutable evaluator revision and bind the
-  package evidence to that exact revision.
+- Complete and independently validate the Full360 assembled package and a
+  byte-identical deterministic ZIP rebuild. The prefreeze native aggregate
+  closes exact-force implementation only; it does not close the overall-score
+  and package-replay gate.
+- Obtain separate benchmark-owner approval of evaluator revision
+  `1a03e3931dc30f3bf26fae3fe7150dc6a7e17aa6` before any public activation or
+  accepted submission.
 - Run `scripts/validate_submission.py --candidate-dry-run` on the complete
   package with no errors, then obtain a separate benchmark-owner approval before
   changing any candidate status or opening submissions.

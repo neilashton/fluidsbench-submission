@@ -2595,7 +2595,7 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Closed owner-review candidate: immutable public source-content pins, owner scientific approval, and an immutable evaluator revision are pending.",
+        "closed_reason": "Closed owner-review candidate: immutable public source-content pins, public profile-truth publication, and owner scientific approval remain pending. The immutable evaluator revision is frozen only for closed candidate dry runs and has no activation effect.",
         "candidate_manifest": {
           "status": "candidate",
           "release_id": "hiliftaeroml-native-all-splits-support-v1-candidate",
@@ -2604,11 +2604,11 @@
           "manifest_sha256": "98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee"
         },
         "dataset_evaluator_binding": {
-          "status": "pending_frozen_release",
+          "status": "frozen",
           "repository_url": "https://github.com/neilashton/fluidsbench-submission",
           "evaluator_reference_version": "hiliftaeroml-evaluator-v0.1-candidate",
-          "evaluator_code_revision": null,
-          "activation_rule": "Publish and owner-approve one immutable evaluator Git revision; participant evidence must bind that exact revision."
+          "evaluator_code_revision": "1a03e3931dc30f3bf26fae3fe7150dc6a7e17aa6",
+          "activation_rule": "This frozen revision may be used only for closed maintainer-local candidate dry runs; it does not publish profile truth, record owner approval, open submissions, or activate a public or private leaderboard."
         },
         "coverage_contract": {
           "dimensionality": "3D surface and 3D flow domain",
@@ -2684,7 +2684,7 @@
           "approve_all_exact_split_bindings_and_candidate_scoring_support_release",
           "exercise_and_audit_same_stream_nondimensional_relative_and_dimensional_absolute_field_aggregation",
           "freeze_lossless_cp_connected_graph_and_five_station_velocity_profile_serialization_and_public_truth_release",
-          "freeze_and_approve_the_immutable_dataset_evaluator_git_revision",
+          "owner_approve_the_frozen_dataset_evaluator_git_revision_without_public_activation",
           "approve_the_zero_weight_regional_contract_and_complete_split_aggregator"
         ]
       },

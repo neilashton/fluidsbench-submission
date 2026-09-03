@@ -30,9 +30,17 @@ RELEASE = (
     / "hiliftaeroml-native-all-splits-support-v1-candidate"
     / "manifest.json"
 )
+CANDIDATE_EVALUATOR_BINDING = DATASET / "candidate-evaluator-release-binding.json"
+CONCRETE_CONFIG = (
+    ROOT
+    / "examples"
+    / "hiliftaeroml-v3-candidate"
+    / "transolver-full360-candidate-config.json"
+)
 CASE_SET_ID = "caseset-ac791749e527"
 CASE_SET_SHA256 = "ac791749e5279ecf6746fcce20e3ec32408fd33b22127d5270de968be7842acf"
 REGION_SHA256 = "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650"
+EVALUATOR_REVISION = "1a03e3931dc30f3bf26fae3fe7150dc6a7e17aa6"
 
 
 def load(path: Path) -> dict:
@@ -116,6 +124,56 @@ def test_candidate_release_is_closed_complete_and_semantically_valid() -> None:
             "volume-native-valid-points-v1",
             "aerodynamic-case-coefficients-v1",
         }
+
+
+def test_frozen_evaluator_revision_is_consistent_and_nonactivating() -> None:
+    specification = load(SPEC)
+    manifest = load(LEADERBOARD_MANIFEST)
+    binding = load(CANDIDATE_EVALUATOR_BINDING)
+    config = load(CONCRETE_CONFIG)
+    dataset = next(
+        item for item in manifest["datasets"] if item["slug"] == "hiliftaeroml"
+    )
+    support = specification["scoring_support"]
+    evaluator = support["dataset_evaluator_binding"]
+
+    assert dataset["scoring_support"] == support
+    assert dataset["submission_count"] == 8
+    assert dataset["revision_count"] == 8
+    assert dataset["updated_at"] == "2026-07-08"
+    assert evaluator["status"] == "frozen"
+    assert evaluator["evaluator_reference_version"] == specification[
+        "evaluation_reference_version"
+    ]
+    assert evaluator["evaluator_code_revision"] == EVALUATOR_REVISION
+    assert config["release_bindings"]["evaluator"] == {
+        "reference_version": specification["evaluation_reference_version"],
+        "code_revision": EVALUATOR_REVISION,
+    }
+    assert binding["repositories"]["fluidsbench_adapter"][
+        "immutable_evaluator_code_revision"
+    ] == EVALUATOR_REVISION
+    assert binding["activation_gates"]["immutable_evaluator_revision_bound"] is True
+    assert binding["activation_gates"][
+        "full_360_force_and_overall_replay_complete"
+    ] is False
+    assert binding["activation_gates"]["owner_scientific_approval"] is False
+    assert binding["activation_gates"]["public_profile_truth_published"] is False
+    assert binding["activation_gates"]["submissions_open"] is False
+    assert specification["status"] == "owner_review_required"
+    assert support["status"] == "owner_review_required"
+    assert support["submissions_open"] is False
+    assert specification["profile_definition"]["profile_ground_truth"] == {
+        "status": "not_published",
+        "release_id": None,
+        "manifest_sha256": None,
+    }
+    decisions = support["owner_decisions_required"]
+    assert (
+        "owner_approve_the_frozen_dataset_evaluator_git_revision_without_"
+        "public_activation"
+    ) in decisions
+    assert "freeze_and_approve_the_immutable_dataset_evaluator_git_revision" not in decisions
 
 
 def test_primary_l2_policy_and_activation_gate_are_explicit() -> None:
