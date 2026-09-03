@@ -57,8 +57,8 @@ case.  An `unavailable_validated_exception` is reported as a blocker;
 imputation, zero-fill, case omission, and partial force/overall scores are
 forbidden.
 
-Once those owner gates and every evaluator-native case product are complete,
-assemble a participant-owned directory:
+Once the required local candidate inputs and every evaluator-native case
+product are complete, assemble a participant-owned directory:
 
 ```bash
 python scripts/assemble_hiliftaeroml_schema_v3_candidate.py \
@@ -103,6 +103,20 @@ sha256sum \
 The two SHA-256 values must match. Archive members are sorted and receive
 fixed timestamps, permissions, and compression settings; symbolic links and
 non-regular source entries are rejected.
+
+The commissioned Full360 Transolver replay completed this procedure over all
+360 ordered cases. Both independently assembled 763-file packages passed the
+candidate validator and had logical-tree SHA-256
+`9c02d241eaf2ea6deecd4181816ed690d664b10f6eea0c2db4e5880aa2b1a0ab`.
+Both 2,264,458,600-byte, 763-member ZIP builds had SHA-256
+`a8dfd6ffbe6d103bc1a3123f6e6f756bacf960f92acc7079237b443bbbb62504`.
+The resulting headline values were 69.15276784043088 overall,
+48.167429082451235 for fields, 99.52105782630258 for forces,
+80.75515537051848 for diagnostics, 0.9636931485730299 for Cp-cut R2, and
+0.7034571571266213 for velocity-profile R2. This is reproducibility evidence
+for a closed candidate only: it did not approve or activate the evaluator,
+publish hidden truth, open submissions, upload or publish the package, or
+create a public or private leaderboard entry.
 
 The output uses the same FluidsBench schema-v3 submission, evidence,
 case-metrics, scoring-support, and discretization envelopes as DrivAerML.  Its

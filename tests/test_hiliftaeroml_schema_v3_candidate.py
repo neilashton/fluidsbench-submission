@@ -153,10 +153,14 @@ def test_frozen_evaluator_revision_is_consistent_and_nonactivating() -> None:
     assert binding["repositories"]["fluidsbench_adapter"][
         "immutable_evaluator_code_revision"
     ] == EVALUATOR_REVISION
+    assert binding["status"] == (
+        "candidate_full360_replay_complete_owner_approval_pending"
+    )
+    assert binding["activation_effect"] == "none"
     assert binding["activation_gates"]["immutable_evaluator_revision_bound"] is True
     assert binding["activation_gates"][
         "full_360_force_and_overall_replay_complete"
-    ] is False
+    ] is True
     assert binding["activation_gates"]["owner_scientific_approval"] is False
     assert binding["activation_gates"]["public_profile_truth_published"] is False
     assert binding["activation_gates"]["submissions_open"] is False

@@ -55,7 +55,7 @@ def test_candidate_binding_is_nonactivating_and_fail_closed() -> None:
     )
     assert binding["schema_version"] == 1
     assert binding["status"] == (
-        "candidate_evaluator_revision_frozen_full360_replay_pending"
+        "candidate_full360_replay_complete_owner_approval_pending"
     )
     assert binding["activation_effect"] == "none"
     assert binding["dataset_id"] == "hiliftaeroml"
@@ -89,7 +89,7 @@ def test_candidate_binding_is_nonactivating_and_fail_closed() -> None:
     assert gates["force_truth_policy_selected"] is True
     assert gates["force_coefficient_normalization_selected"] is True
     assert gates["force_truth_policy_implemented_in_native_evaluator"] is True
-    assert gates["full_360_force_and_overall_replay_complete"] is False
+    assert gates["full_360_force_and_overall_replay_complete"] is True
     assert gates["evaluator_implementation_manifest_complete"] is True
     assert gates["immutable_evaluator_revision_bound"] is True
     assert gates["owner_scientific_approval"] is False
@@ -207,7 +207,8 @@ def test_force_release_is_bound_separately_from_unchanged_vtu_archives() -> None
 
 
 def test_external_audits_are_bound_but_not_misrepresented_as_final_freeze() -> None:
-    external = load_binding()["external_audit_bindings"]
+    binding = load_binding()
+    external = binding["external_audit_bindings"]
     moment = external["exact_moment_all_1800"]
     assert moment["status"] == "complete_validation_passed"
     assert moment["case_count"] == 1800
@@ -249,3 +250,106 @@ def test_external_audits_are_bound_but_not_misrepresented_as_final_freeze() -> N
     assert prefreeze["overall_score_computed"] is False
     assert prefreeze["acceptable_as_force_policy_implementation_evidence"] is True
     assert prefreeze["acceptable_as_final_package_completion_evidence"] is False
+
+    replay = external["transolver_full_360_schema_v3_candidate_replay"]
+    assert replay["status"] == "complete_closed_candidate_reproducible"
+    assert replay["submission_id"] == (
+        "hiliftaeroml-transolver-full360-candidate-v1"
+    )
+    assert replay["dataset_version"] == "hiliftaeroml-native-v1-candidate"
+    assert replay["split_id"] == "full"
+    assert replay["case_count"] == 360
+    assert replay["case_set_id"] == "caseset-ac791749e527"
+    assert replay["case_set_sha256"] == (
+        "ac791749e5279ecf6746fcce20e3ec32408fd33b22127d5270de968be7842acf"
+    )
+    assert replay["exact_surface_summary_content_fingerprint"] == (
+        "85ac770b7330ad229682cb46291a5be4a6ae7f6141af737ed4fb4e9fcd20fd80"
+    )
+    assert replay["evaluator_reference_version"] == binding["reference_version"]
+    assert replay["evaluator_code_revision"] == EVALUATOR_REVISION
+    assert replay["package_config_sha256"] == (
+        "b4b1d2085d90d5c8fac309b96cb4b041f949a0a1a0ef0f68c698784dc581fe86"
+    )
+    assert replay["submission_specification_sha256"] == (
+        "59c6ce89d09c562486ebf5b344706638c648fe8655d5334a53e6b3af30133423"
+    )
+    assert replay["completion_receipt_sha256"] == (
+        "d6f65d6ed83b8d480a89b9bb4044c39e46f46987c4dd283f62e20a4d74aa6eb1"
+    )
+    assert replay["completion_receipt_size_bytes"] == 13262
+    assert replay["surface_native_point_count"] == 50_766_193_080
+    assert replay["surface_scored_point_count"] == 50_766_193_080
+    assert replay["volume_native_valid_point_count"] == 83_728_136_475
+    assert replay["volume_scored_point_count"] == 83_728_136_475
+    assert replay["incomplete_support_record_count"] == 0
+
+    assert replay["aggregate_a_logical_tree_sha256"] == replay[
+        "aggregate_b_logical_tree_sha256"
+    ] == "e44f5fb4cfa68d9dbbd1704c804ed52b220948a84b7f510dcc25208285f8e38e"
+    assert replay["receipts_a_logical_tree_sha256"] == replay[
+        "receipts_b_logical_tree_sha256"
+    ] == "17c549ec4a97fd78c7b3f884b42be84a6c57c998ae5acbad7902151c800ee689"
+    assert replay["package_a_logical_tree_sha256"] == replay[
+        "package_b_logical_tree_sha256"
+    ] == "9c02d241eaf2ea6deecd4181816ed690d664b10f6eea0c2db4e5880aa2b1a0ab"
+    assert replay["package_file_count_each"] == 763
+    assert replay["package_directory_count_each"] == 364
+    assert replay["package_size_bytes_each"] == 2_345_982_957
+    assert replay["submission_json_sha256"] == (
+        "11b678133ca086639ba444395fff2835559eb259d92974d60aa0b0039c0aef4c"
+    )
+    assert replay["evaluation_evidence_sha256"] == (
+        "2135ca5a18ad93b1dfcb980f4bf4d315bca6231595561240d867779039f2bb36"
+    )
+    assert replay["case_metrics_sha256"] == (
+        "61a97397fe845d1656acdaa2034829084d101134770402de35048e342d1a12dc"
+    )
+    assert replay["discretization_sha256"] == (
+        "073e3bb91091738fa34c435681fe9e83a7492087b938a3924e6b8a89b1c7debc"
+    )
+    assert replay["discretization_case_records_sha256"] == (
+        "3af8ab1321c5f072b3f5bfc10ce837a1a80c4b79d75be5f94cc461cfcbff5abd"
+    )
+    assert replay["profile_index_sha256"] == (
+        "bd842829a02b63d6de7fa06f104dac5c80245b77e877e7f09b44e318aa21dfba"
+    )
+    assert replay["profile_ground_truth_manifest_sha256"] == (
+        "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477"
+    )
+    assert replay["scoring_support_manifest_sha256"] == (
+        "98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee"
+    )
+    assert replay["regional_diagnostics_sha256"] == (
+        "1bdde868bde838d9a14fa6267e4b11ae886e9353d2d086c3e05c017756a9e241"
+    )
+    assert replay["zip_a_sha256"] == replay["zip_b_sha256"] == (
+        "a8dfd6ffbe6d103bc1a3123f6e6f756bacf960f92acc7079237b443bbbb62504"
+    )
+    assert replay["zip_size_bytes_each"] == 2_264_458_600
+    assert replay["zip_member_count_each"] == 763
+    assert replay["candidate_validation_pass_count"] == 2
+    assert replay["computed_scores"] == {
+        "overall_score": 69.15276784043088,
+        "field_score": 48.167429082451235,
+        "force_score": 99.52105782630258,
+        "diagnostic_score": 80.75515537051848,
+        "cp_cut_r2": 0.9636931485730299,
+        "velocity_profile_r2": 0.7034571571266213,
+    }
+    assert all(replay["checks"].values())
+    assert replay["lifecycle"] == {
+        "owner_scientific_approval": False,
+        "candidate_activated": False,
+        "public_profile_truth_published": False,
+        "submissions_opened": False,
+        "official_submission": False,
+        "uploaded": False,
+        "published": False,
+        "public_leaderboard_entry_created": False,
+        "private_leaderboard_created": False,
+    }
+    assert replay["acceptable_as_final_package_completion_evidence"] is True
+    assert replay["acceptable_as_owner_approval_or_activation_evidence"] is False
+    serialized = json.dumps(replay, sort_keys=True)
+    assert not any(prefix in serialized for prefix in ("/lustre/", "/home/", "/root/"))

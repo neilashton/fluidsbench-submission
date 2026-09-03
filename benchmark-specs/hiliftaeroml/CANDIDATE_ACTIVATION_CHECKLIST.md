@@ -107,6 +107,27 @@ Revision-pinned public prediction fields are optional under schema v3. Omitting
 `prediction_artifacts` is not a candidate-dry-run blocker and does not relax any
 of the evidence above.
 
+## Completed Full360 closed candidate replay
+
+The commissioned Transolver Full replay completed for all 360 ordered cases.
+Two independent assemblies produced the same 763-file logical package tree,
+`9c02d241eaf2ea6deecd4181816ed690d664b10f6eea0c2db4e5880aa2b1a0ab`,
+and both packages passed `--candidate-dry-run` validation. Two deterministic
+763-member ZIP builds were byte-identical at 2,264,458,600 bytes with SHA-256
+`a8dfd6ffbe6d103bc1a3123f6e6f756bacf960f92acc7079237b443bbbb62504`.
+The portable completion-receipt identity is
+`d6f65d6ed83b8d480a89b9bb4044c39e46f46987c4dd283f62e20a4d74aa6eb1`.
+
+The replay scored 69.15276784043088 overall, 48.167429082451235 for fields,
+99.52105782630258 for forces, and 80.75515537051848 for diagnostics. Its Cp-cut
+and velocity-profile R2 values were 0.9636931485730299 and
+0.7034571571266213. The case evidence covers 50,766,193,080 surface points and
+83,728,136,475 retained valid volume points with no incomplete support record.
+
+This closes only the technical Full360 force-and-overall replay gate. It does
+not approve or activate the evaluator, publish hidden truth, open submissions,
+upload or publish the package, or create a public or private leaderboard entry.
+
 ## Remaining activation gates after the evaluator freeze and successful internal dry run
 
 - Retain the unchanged public surface/volume archive-object inventory at its
@@ -122,13 +143,6 @@ of the evidence above.
 - Exercise and independently audit the same-stream nondimensional relative and
   dimensional absolute field reductions, vector semantics, loads, and profile
   aggregation.
-- Complete and independently validate the Full360 assembled package and a
-  byte-identical deterministic ZIP rebuild. The prefreeze native aggregate
-  closes exact-force implementation only; it does not close the overall-score
-  and package-replay gate.
 - Obtain separate benchmark-owner approval of evaluator revision
   `68899f780d96b70f2badb5658971c87af0b17172` before any public activation or
   accepted submission.
-- Run `scripts/validate_submission.py --candidate-dry-run` on the complete
-  package with no errors, then obtain a separate benchmark-owner approval before
-  changing any candidate status or opening submissions.
