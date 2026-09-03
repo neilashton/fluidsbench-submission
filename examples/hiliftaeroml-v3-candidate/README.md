@@ -11,7 +11,7 @@ rather than illustrative release identities.
 epoch-1000 Transolver replay.  Its `evaluation.command` is executable from the
 FluidsBench repository root once all referenced campaign products exist and
 targets the canonical `package-a` directory.  The evaluator `code_revision` is
-pinned to `1a03e3931dc30f3bf26fae3fe7150dc6a7e17aa6`, the immutable
+pinned to `40bc0c60d21a1961be6f6cd891529dd99f84c2e7`, the immutable
 implementation commit recorded by the repository binding.  This freeze permits
 only controlled maintainer-local candidate dry runs; do not replace it with
 another working-tree revision.  It does not open submissions, approve the
