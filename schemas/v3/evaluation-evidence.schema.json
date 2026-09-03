@@ -41,6 +41,9 @@
     "dataset_evaluator_binding": {
       "$ref": "#/$defs/dataset_evaluator_binding"
     },
+    "compact_profile_implementation_binding": {
+      "$ref": "#/$defs/compact_profile_implementation_binding"
+    },
     "command": { "type": "string", "minLength": 1, "maxLength": 2000 },
     "generated_at": { "type": "string", "format": "date-time" },
     "status": { "const": "submitted_evaluation" },
@@ -79,6 +82,26 @@
         "code_revision": {
           "type": "string",
           "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+        }
+      }
+    },
+    "compact_profile_implementation_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "activation_effect",
+        "code_revision",
+        "implementation_manifest_sha256",
+        "base_dataset_evaluator_scope"
+      ],
+      "properties": {
+        "status": { "const": "unbound_worktree_candidate" },
+        "activation_effect": { "const": "none" },
+        "code_revision": { "type": "null" },
+        "implementation_manifest_sha256": { "type": "null" },
+        "base_dataset_evaluator_scope": {
+          "const": "native_v1_base_field_force_and_noncompact_scoring_only"
         }
       }
     }

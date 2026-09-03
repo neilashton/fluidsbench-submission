@@ -142,6 +142,35 @@ release used only for an authorized local dry run. See
 [`native-profile-format-v1.json`](native-profile-format-v1.json) and
 [`NATIVE_PROFILE_TRUTH_EXPORT.md`](NATIVE_PROFILE_TRUTH_EXPORT.md).
 
+### Additive compact profile-v2 candidate
+
+An additive, inactive v2 candidate removes geometry and topology arrays from
+the participant profile artifacts. The evaluator owns that immutable support,
+joins it outside the submission, and accepts exactly two prediction-value
+arrays per case: quantized Cp deltas and scalar Float32 velocity-profile
+values. No truth, reference, geometry, topology, mask, weight, or alignment
+array is included in the participant artifact.
+
+The frozen Full360 study selected at most 128 samples per physical connected
+Cp graph, placed uniformly in physical graph arc length. Velocity retains the
+five v1 stations and submits all and only evaluator-selected valid rows as
+scalar `float32` speed-over-freestream values. This compact path changes only
+Cp-cut and velocity-profile plotting/scoring payloads. Complete native-surface
+Cp scoring, wall-shear scoring, force integration, and pitching-moment
+integration continue to use the unchanged full native surface prediction.
+
+The compact assembler enforces a hard 15,000,000-byte limit on the complete
+assembled package. This is an implementation gate in addition to the
+prediction-only and release-binding checks. It is not evidence that the
+candidate is published or active. The format and retained scientific evidence
+are [`native-profile-format-v2.json`](native-profile-format-v2.json),
+[`compact-cp-representation-decision-v1.json`](compact-cp-representation-decision-v1.json),
+and
+[`compact-cp-representation-audit-v1.md`](compact-cp-representation-audit-v1.md).
+The completed two-build Full360 size, identity, metric, and validation receipt
+is
+[`compact-profile-full360-validation-v1.json`](compact-profile-full360-validation-v1.json).
+
 ## Regional reporting
 
 [`regional-diagnostics-v1.json`](regional-diagnostics-v1.json) defines four
@@ -189,3 +218,7 @@ The machine-readable authorities are:
   report-only regions; and
 - [`candidate-evaluator-release-binding.json`](candidate-evaluator-release-binding.json)
   for the fail-closed release hand-off.
+
+The additive [`native-profile-format-v2.json`](native-profile-format-v2.json)
+is a candidate contract only. Its evaluator-owned support is not public, and
+it does not supersede the v1 authority or activate compact-profile intake.

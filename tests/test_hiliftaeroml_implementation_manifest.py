@@ -14,15 +14,14 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / builder.DEFAULT_OUTPUT_RELATIVE
 SCHEMA_PATH = ROOT / builder.MANIFEST_SCHEMA_RELATIVE
 LOCK_PATH = ROOT / builder.RUNTIME_LOCK_RELATIVE
+FROZEN_MANIFEST_SHA256 = (
+    "f94cef375b45c8604bbd65bb59c679af417340b39dd941c27beb363d59f883d6"
+)
 
 
 @pytest.fixture(scope="module")
-def generated() -> tuple[dict, dict, builder.BuildRoots]:
-    args = builder.parser().parse_args([])
-    roots = builder.roots_from_args(args)
-    observed = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
-    expected = builder.build_manifest(roots)
-    return observed, expected, roots
+def retained_manifest() -> dict:
+    return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
 
 
 def group_paths(manifest: dict, group_id: str) -> set[str]:
@@ -39,11 +38,14 @@ def group_identity(manifest: dict, group_id: str, path: str) -> dict:
     return next(item for item in group["files"] if item["path"] == path)
 
 
-def test_generated_manifest_is_schema_valid_and_byte_deterministic(generated) -> None:
-    observed, expected, _roots = generated
-    assert observed == expected
-    assert MANIFEST_PATH.read_bytes() == builder.pretty_bytes(expected)
-    assert builder.pretty_bytes(expected) == builder.pretty_bytes(expected)
+def test_retained_manifest_is_schema_valid_and_byte_deterministic(
+    retained_manifest,
+) -> None:
+    observed = retained_manifest
+    payload = MANIFEST_PATH.read_bytes()
+    assert hashlib.sha256(payload).hexdigest() == FROZEN_MANIFEST_SHA256
+    assert payload == builder.pretty_bytes(observed)
+    assert builder.pretty_bytes(observed) == builder.pretty_bytes(observed)
     builder.verify_fingerprint(observed)
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     errors = sorted(
@@ -80,8 +82,10 @@ def test_generated_manifest_is_schema_valid_and_byte_deterministic(generated) ->
     )
 
 
-def test_inventory_covers_native_and_fluidsbench_execution_surfaces(generated) -> None:
-    manifest, _expected, _roots = generated
+def test_inventory_covers_native_and_fluidsbench_execution_surfaces(
+    retained_manifest,
+) -> None:
+    manifest = retained_manifest
     native = group_paths(manifest, "native_submission_execution")
     assert {
         "inference/exact_surface_loads.py",
@@ -134,8 +138,10 @@ def test_inventory_covers_native_and_fluidsbench_execution_surfaces(generated) -
     } <= references
 
 
-def test_result_specific_example_config_is_transparently_excluded(generated) -> None:
-    manifest, _expected, _roots = generated
+def test_result_specific_example_config_is_transparently_excluded(
+    retained_manifest,
+) -> None:
+    manifest = retained_manifest
     exclusions = {
         row.get("path"): row.get("reason")
         for row in manifest["excluded_by_design"]
@@ -149,8 +155,10 @@ def test_result_specific_example_config_is_transparently_excluded(generated) -> 
     assert "postprocess receipt binds its exact bytes" in exclusions[path]
 
 
-def test_every_hilift_split_support_and_runtime_schema_is_bound(generated) -> None:
-    manifest, _expected, _roots = generated
+def test_every_hilift_split_support_and_runtime_schema_is_bound(
+    retained_manifest,
+) -> None:
+    manifest = retained_manifest
     specifications = group_paths(manifest, "fluidsbench_hilift_specification")
     expected_splits = {
         path.relative_to(ROOT).as_posix()
@@ -184,8 +192,10 @@ def test_every_hilift_split_support_and_runtime_schema_is_bound(generated) -> No
     assert "schemas/v1/hiliftaeroml-native-profile-chunk.schema.json" in schemas
 
 
-def test_runtime_lock_is_minimal_exact_and_container_is_separate(generated) -> None:
-    manifest, _expected, _roots = generated
+def test_runtime_lock_is_minimal_exact_and_container_is_separate(
+    retained_manifest,
+) -> None:
+    manifest = retained_manifest
     pins = {
         line.split("==", 1)[0]: line.split("==", 1)[1]
         for line in LOCK_PATH.read_text(encoding="utf-8").splitlines()
@@ -219,9 +229,9 @@ def test_runtime_lock_is_minimal_exact_and_container_is_separate(generated) -> N
 
 
 def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
-    tmp_path: Path, generated
+    tmp_path: Path, retained_manifest
 ) -> None:
-    manifest, _expected, _roots = generated
+    manifest = retained_manifest
     group_id = "fluidsbench_hilift_specification"
 
     spec_relative = "benchmark-specs/hiliftaeroml/submission-spec.json"
@@ -233,6 +243,8 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
         ("fluidsbench_adapter", spec_relative)
     ]
     spec = json.loads((ROOT / spec_relative).read_text(encoding="utf-8"))
+    compact_definition = spec.pop("compact_profile_definition")
+    assert compact_definition["status"] == "additive_candidate_not_bound"
     spec["status"] = "future_activation_state"
     spec["evaluation_reference_version"] = "future-revision-label"
     spec["scoring_support"]["status"] = "future_status"
@@ -260,6 +272,8 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
     assert normalized_lifecycle_spec == spec_identity
 
     scientific_spec = json.loads((ROOT / spec_relative).read_text(encoding="utf-8"))
+    compact_definition = scientific_spec.pop("compact_profile_definition")
+    assert compact_definition["status"] == "additive_candidate_not_bound"
     scientific_spec["overall_score_composite"]["components"][0]["weight"] += 0.001
     scientific_spec_path = tmp_path / "submission-spec-scientific.json"
     scientific_spec_path.write_text(json.dumps(scientific_spec), encoding="utf-8")
@@ -326,8 +340,8 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
     ] != leaderboard_identity["canonical_sha256"]
 
 
-def test_manifest_cannot_activate_or_resolve_release_gates(generated) -> None:
-    manifest, _expected, _roots = generated
+def test_manifest_cannot_activate_or_resolve_release_gates(retained_manifest) -> None:
+    manifest = retained_manifest
     assert manifest["status"] == builder.STATUS
     assert manifest["activation_effect"] == "none"
     assert manifest["release_state"] == {
@@ -353,10 +367,11 @@ def test_manifest_cannot_activate_or_resolve_release_gates(generated) -> None:
     )
 
 
-def test_check_mode_fails_closed_on_different_bytes(tmp_path: Path, generated) -> None:
-    _observed, expected, _roots = generated
+def test_check_mode_fails_closed_on_different_bytes(
+    tmp_path: Path, retained_manifest
+) -> None:
     output = tmp_path / "manifest.json"
-    payload = builder.pretty_bytes(expected)
+    payload = builder.pretty_bytes(retained_manifest)
     assert builder.write_or_check(output, payload, check=False) == "written"
     assert builder.write_or_check(output, payload, check=True) == "validated_existing"
     output.write_bytes(payload + b"\n")

@@ -122,6 +122,30 @@
     },
     "activation_rule": "Publish and owner-approve one complete profile ground-truth release bound to this exact contract SHA-256 before accepting native profile chunks."
   },
+  "compact_profile_definition": {
+    "status": "additive_candidate_not_bound",
+    "contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
+    "file": "native-profile-format-v2.json",
+    "format": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate",
+    "sha256": "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c",
+    "representation_decision": {
+      "status": "full360_sensitivity_complete_128_selected",
+      "file": "compact-cp-representation-decision-v1.json",
+      "sha256": "f0290ad8c2b390dc09cf8e43797d4d838fba616a0695ba53ebf0e9b72fd64bd7"
+    },
+    "evaluator_support": {
+      "status": "not_published",
+      "release_id": null,
+      "manifest_sha256": null
+    },
+    "candidate_dry_run_evaluator_support": {
+      "status": "complete_candidate_not_published",
+      "usage": "maintainer_local_candidate_dry_run_only",
+      "release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
+      "manifest_sha256": "81150cc075d5b64caf0c63b9601a23bbecbf38a8f60bfd69814981e408dd712c"
+    },
+    "activation_rule": "Owner approval, publication of immutable evaluator support and profile truth bound to this exact contract SHA-256, and an explicit status change are required before compact-v2 submissions open."
+  },
   "evaluation_reference_version": "hiliftaeroml-evaluator-v0.1-candidate",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {

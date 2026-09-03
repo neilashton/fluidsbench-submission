@@ -48,6 +48,16 @@ from reference.hiliftaeroml.native_profile_evaluator import (
     open_candidate_truth_release,
     score_native_profile_directory,
 )
+from reference.hiliftaeroml.compact_profile_evaluator import (
+    COMPACT_PROFILE_CONTRACT_ID,
+    COMPACT_PROFILE_CONTRACT_PATH,
+    COMPACT_PROFILE_CONTRACT_SHA256,
+    COMPACT_PROFILE_FORMAT,
+    CompactProfileEvaluationError,
+    build_compact_profile_directory,
+    open_compact_support_release,
+    score_compact_profile_directory,
+)
 from reference.hiliftaeroml.regional_aggregate import (
     AGGREGATE_REGIONAL_REPORT_SCHEMA,
     REGIONAL_DEFINITION_ID,
@@ -70,6 +80,16 @@ SCHEMA_ROOT = ROOT / "schemas"
 CONFIG_SCHEMA = "hiliftaeroml-fluidsbench-schema-v3-package-config-v1"
 SUBMISSION_FORMAT = "hiliftaeroml_native_candidate_v3"
 TOKEN_PREFIXES = ("__REPLACE_", "__UNRESOLVED_HILIFTAEROML_")
+COMPACT_PACKAGE_MAX_BYTES = 15_000_000
+COMPACT_PROFILE_IMPLEMENTATION_BINDING = {
+    "status": "unbound_worktree_candidate",
+    "activation_effect": "none",
+    "code_revision": None,
+    "implementation_manifest_sha256": None,
+    "base_dataset_evaluator_scope": (
+        "native_v1_base_field_force_and_noncompact_scoring_only"
+    ),
+}
 # Release-ready native artifacts are bound to an exact ordered case set, not a
 # particular split label or a 360-case campaign.  The legacy identifiers remain
 # readable only so retained Full-360 evidence can be diagnosed during migration;
@@ -686,6 +706,68 @@ def _release_bindings(
                 f"{key} differs from the local candidate repository binding"
             )
     return dict(candidate), dict(evaluator), dict(owner_candidate_truth)
+
+
+def _compact_profile_declaration(
+    specification: Mapping[str, Any], specification_path: Path
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Validate the additive compact contract without changing v1 activation."""
+
+    definition = specification.get("compact_profile_definition")
+    if not isinstance(definition, dict):
+        raise HiLiftPackageAssemblyError(
+            "HiLiftAeroML compact profile definition is absent"
+        )
+    expected_contract = {
+        "contract_id": COMPACT_PROFILE_CONTRACT_ID,
+        "file": COMPACT_PROFILE_CONTRACT_PATH.name,
+        "format": COMPACT_PROFILE_FORMAT,
+        "sha256": COMPACT_PROFILE_CONTRACT_SHA256,
+    }
+    if definition.get("status") != "additive_candidate_not_bound":
+        raise HiLiftPackageAssemblyError(
+            "compact profile definition must remain an unbound additive candidate"
+        )
+    for key, expected in expected_contract.items():
+        if definition.get(key) != expected:
+            raise HiLiftPackageAssemblyError(
+                f"compact profile definition {key} differs from {expected!r}"
+            )
+    contract_path = _safe_child(
+        specification_path.parent,
+        definition.get("file"),
+        "compact profile contract file",
+    )
+    if contract_path != COMPACT_PROFILE_CONTRACT_PATH.resolve():
+        raise HiLiftPackageAssemblyError(
+            "compact profile contract resolves outside its retained repository path"
+        )
+    if sha256_file(contract_path) != COMPACT_PROFILE_CONTRACT_SHA256:
+        raise HiLiftPackageAssemblyError("compact profile contract SHA-256 changed")
+    if definition.get("evaluator_support") != {
+        "status": "not_published",
+        "release_id": None,
+        "manifest_sha256": None,
+    }:
+        raise HiLiftPackageAssemblyError(
+            "public compact evaluator-support activation boundary differs"
+        )
+    candidate = definition.get("candidate_dry_run_evaluator_support")
+    if (
+        not isinstance(candidate, dict)
+        or candidate.get("status") != "complete_candidate_not_published"
+        or candidate.get("usage") != "maintainer_local_candidate_dry_run_only"
+        or not isinstance(candidate.get("release_id"), str)
+        or not candidate["release_id"]
+    ):
+        raise HiLiftPackageAssemblyError(
+            "local candidate compact evaluator-support declaration is invalid"
+        )
+    _require_sha(
+        candidate.get("manifest_sha256"),
+        "candidate compact evaluator-support manifest digest",
+    )
+    return dict(definition), dict(candidate)
 
 
 def _verify_native_aggregate(
@@ -2173,7 +2255,11 @@ def _validate_config_envelope(config: Mapping[str, Any]) -> tuple[int, bool]:
         "spatial_discretization",
         "release_bindings",
     }
-    optional = {"profile_cases_per_chunk", "include_regional_diagnostics"}
+    optional = {
+        "profile_cases_per_chunk",
+        "include_regional_diagnostics",
+        "compact_evaluation",
+    }
     if not required.issubset(config) or not set(config).issubset(required | optional):
         raise HiLiftPackageAssemblyError(
             "package config keys differ; "
@@ -2187,6 +2273,14 @@ def _validate_config_envelope(config: Mapping[str, Any]) -> tuple[int, bool]:
     }:
         raise HiLiftPackageAssemblyError(
             "config.evaluation keys must be command and generated_at"
+        )
+    compact_evaluation = config.get("compact_evaluation")
+    if compact_evaluation is not None and (
+        not isinstance(compact_evaluation, dict)
+        or set(compact_evaluation) != {"command", "generated_at"}
+    ):
+        raise HiLiftPackageAssemblyError(
+            "config.compact_evaluation keys must be command and generated_at"
         )
     spatial = config.get("spatial_discretization")
     if not isinstance(spatial, dict) or not {"training", "inference"}.issubset(
@@ -2212,6 +2306,42 @@ def _validate_config_envelope(config: Mapping[str, Any]) -> tuple[int, bool]:
     return cases_per_chunk, include_regional
 
 
+def _selected_evaluation(
+    config: Mapping[str, Any], *, compact_profile_mode: bool
+) -> Mapping[str, Any]:
+    key = "compact_evaluation" if compact_profile_mode else "evaluation"
+    value = config.get(key)
+    if not isinstance(value, Mapping):
+        raise HiLiftPackageAssemblyError(f"config.{key} must be an object")
+    return value
+
+
+def _profile_evidence_notes(
+    *, evaluator_revision: str, compact_profile_mode: bool
+) -> str:
+    if compact_profile_mode:
+        return (
+            "The frozen dataset-evaluator revision "
+            f"{evaluator_revision} applies only to the native-v1 base field, "
+            "force, and noncompact scoring implementation. The additive "
+            "compact-v2 profile implementation is an unbound worktree "
+            "candidate with no code revision or implementation-manifest "
+            f"SHA-256; its profile topology contract is "
+            f"{COMPACT_PROFILE_CONTRACT_SHA256}. Cp/velocity profile R2 was "
+            "recomputed from prediction-only chunks against the explicitly "
+            "supplied inactive local candidate evaluator-support release; "
+            "this does not publish or activate profile intake."
+        )
+    return (
+        "Evaluator identity is repository-frozen at "
+        f"{evaluator_revision}; profile topology contract is "
+        f"{PROFILE_CONTRACT_SHA256}. Cp/velocity profile R2 was recomputed "
+        "from prediction-only chunks against the explicitly supplied "
+        "inactive local candidate truth release; this does not publish or "
+        "activate profile intake."
+    )
+
+
 def assemble_package(
     *,
     config_path: Path,
@@ -2219,14 +2349,23 @@ def assemble_package(
     native_aggregate_root: Path,
     native_outputs_root: Path | None,
     native_receipts_root: Path,
-    candidate_profile_truth_release_root: Path,
+    candidate_profile_truth_release_root: Path | None,
     output_path: Path,
     native_surface_outputs_root: Path | None = None,
     native_volume_outputs_root: Path | None = None,
+    candidate_compact_profile_support_release_root: Path | None = None,
 ) -> dict[str, Any]:
     config = load_json(config_path, label="package config")
     if config.get("schema") != CONFIG_SCHEMA:
         raise HiLiftPackageAssemblyError(f"config.schema must equal {CONFIG_SCHEMA!r}")
+    compact_profile_mode = (
+        candidate_compact_profile_support_release_root is not None
+    )
+    if compact_profile_mode == (candidate_profile_truth_release_root is not None):
+        raise HiLiftPackageAssemblyError(
+            "assembly requires exactly one local profile release: native-v1 truth "
+            "or compact-v2 evaluator support"
+        )
     profile_cases_per_chunk, include_regional_diagnostics = _validate_config_envelope(
         config
     )
@@ -2259,17 +2398,55 @@ def assemble_package(
     candidate, evaluator, profile_truth = _release_bindings(
         config, specification, specification_path
     )
-    try:
-        open_candidate_truth_release(
-            release_root=candidate_profile_truth_release_root,
-            candidate_declaration=profile_truth,
-            expected_case_ids=case_ids,
-            case_set_id=split["case_set_id"],
+    compact_support_declaration: dict[str, Any] | None = None
+    compact_support_release = None
+    if compact_profile_mode:
+        _, compact_support_declaration = _compact_profile_declaration(
+            specification, specification_path
         )
-    except NativeProfileEvaluationError as error:
-        raise HiLiftPackageAssemblyError(
-            f"local candidate profile-ground-truth release is invalid: {error}"
-        ) from error
+        assert candidate_compact_profile_support_release_root is not None
+        try:
+            compact_support_release = open_compact_support_release(
+                release_root=candidate_compact_profile_support_release_root,
+                expected_manifest_sha256=compact_support_declaration[
+                    "manifest_sha256"
+                ],
+                expected_case_ids=case_ids,
+                case_set_id=split["case_set_id"],
+            )
+        except CompactProfileEvaluationError as error:
+            raise HiLiftPackageAssemblyError(
+                f"local compact evaluator-support release is invalid: {error}"
+            ) from error
+        if (
+            compact_support_release.release_id
+            != compact_support_declaration["release_id"]
+            or compact_support_release.manifest_sha256
+            != compact_support_declaration["manifest_sha256"]
+            or compact_support_release.source_profile_truth_release_id
+            != profile_truth["release_id"]
+            or compact_support_release.source_profile_truth_manifest_sha256
+            != profile_truth["manifest_sha256"]
+        ):
+            raise HiLiftPackageAssemblyError(
+                "compact evaluator support differs from its contract or source-truth binding"
+            )
+    else:
+        assert candidate_profile_truth_release_root is not None
+        try:
+            open_candidate_truth_release(
+                release_root=candidate_profile_truth_release_root,
+                candidate_declaration=profile_truth,
+                expected_case_ids=case_ids,
+                case_set_id=split["case_set_id"],
+            )
+        except NativeProfileEvaluationError as error:
+            raise HiLiftPackageAssemblyError(
+                f"local candidate profile-ground-truth release is invalid: {error}"
+            ) from error
+    selected_profile_format = (
+        COMPACT_PROFILE_FORMAT if compact_profile_mode else PROFILE_FORMAT
+    )
     methodology_contract = load_json(
         specification_path.parent / "methodology-contract.json",
         label="HiLiftAeroML methodology contract",
@@ -2321,10 +2498,14 @@ def assemble_package(
     if list(support_release.cases) != case_ids:
         raise HiLiftPackageAssemblyError("scoring support case order differs from the split")
 
-    evaluation = config.get("evaluation")
+    evaluation = _selected_evaluation(
+        config, compact_profile_mode=compact_profile_mode
+    )
     spatial = config.get("spatial_discretization")
-    if not isinstance(evaluation, dict) or not isinstance(spatial, dict):
-        raise HiLiftPackageAssemblyError("config evaluation/spatial_discretization must be objects")
+    if not isinstance(spatial, dict):
+        raise HiLiftPackageAssemblyError(
+            "config spatial_discretization must be an object"
+        )
     command = evaluation.get("command")
     generated_at = evaluation.get("generated_at")
     if not isinstance(command, str) or not command or not isinstance(generated_at, str):
@@ -2333,36 +2514,82 @@ def assemble_package(
     staging = Path(
         tempfile.mkdtemp(prefix=f".{output_path.name}.staging-", dir=output_path.parent)
     )
+    package_size_bytes: int | None = None
     try:
-        try:
-            profile_index_sha, _native_profile_metrics = build_profile_directory(
-                submission_id=participant["submission_id"],
-                split_id=split_id,
-                case_set_id=split["case_set_id"],
-                case_ids=case_ids,
-                outputs_root=None,
-                surface_outputs_root=output_roots["surface"],
-                volume_outputs_root=output_roots["volume"],
-                profiles_root=staging / "profiles",
-                cases_per_chunk=profile_cases_per_chunk,
-                expected_case_artifact_sha256=profile_artifact_sha256,
-            )
-        except NativeProfileError as error:
-            raise HiLiftPackageAssemblyError(f"native profile serialization failed: {error}") from error
-        try:
-            profile_metrics = score_native_profile_directory(
-                profiles_root=staging / "profiles",
-                release_root=candidate_profile_truth_release_root,
-                candidate_declaration=profile_truth,
-                submission_id=participant["submission_id"],
-                split_id=split_id,
-                case_set_id=split["case_set_id"],
-                expected_case_ids=case_ids,
-            )
-        except NativeProfileEvaluationError as error:
-            raise HiLiftPackageAssemblyError(
-                "hidden-truth native profile scoring failed: " + str(error)
-            ) from error
+        if compact_profile_mode:
+            assert candidate_compact_profile_support_release_root is not None
+            assert compact_support_declaration is not None
+            try:
+                profile_index_sha, _compact_profile_metrics = (
+                    build_compact_profile_directory(
+                        submission_id=participant["submission_id"],
+                        split_id=split_id,
+                        case_set_id=split["case_set_id"],
+                        case_ids=case_ids,
+                        support_release_root=(
+                            candidate_compact_profile_support_release_root
+                        ),
+                        support_manifest_sha256=compact_support_declaration[
+                            "manifest_sha256"
+                        ],
+                        outputs_root=None,
+                        surface_outputs_root=output_roots["surface"],
+                        volume_outputs_root=output_roots["volume"],
+                        profiles_root=staging / "profiles",
+                        cases_per_chunk=profile_cases_per_chunk,
+                        expected_case_artifact_sha256=profile_artifact_sha256,
+                    )
+                )
+                profile_metrics = score_compact_profile_directory(
+                    profiles_root=staging / "profiles",
+                    support_release_root=(
+                        candidate_compact_profile_support_release_root
+                    ),
+                    support_manifest_sha256=compact_support_declaration[
+                        "manifest_sha256"
+                    ],
+                    submission_id=participant["submission_id"],
+                    split_id=split_id,
+                    case_set_id=split["case_set_id"],
+                    expected_case_ids=case_ids,
+                )
+            except CompactProfileEvaluationError as error:
+                raise HiLiftPackageAssemblyError(
+                    "compact profile serialization/scoring failed: " + str(error)
+                ) from error
+        else:
+            assert candidate_profile_truth_release_root is not None
+            try:
+                profile_index_sha, _native_profile_metrics = build_profile_directory(
+                    submission_id=participant["submission_id"],
+                    split_id=split_id,
+                    case_set_id=split["case_set_id"],
+                    case_ids=case_ids,
+                    outputs_root=None,
+                    surface_outputs_root=output_roots["surface"],
+                    volume_outputs_root=output_roots["volume"],
+                    profiles_root=staging / "profiles",
+                    cases_per_chunk=profile_cases_per_chunk,
+                    expected_case_artifact_sha256=profile_artifact_sha256,
+                )
+            except NativeProfileError as error:
+                raise HiLiftPackageAssemblyError(
+                    f"native profile serialization failed: {error}"
+                ) from error
+            try:
+                profile_metrics = score_native_profile_directory(
+                    profiles_root=staging / "profiles",
+                    release_root=candidate_profile_truth_release_root,
+                    candidate_declaration=profile_truth,
+                    submission_id=participant["submission_id"],
+                    split_id=split_id,
+                    case_set_id=split["case_set_id"],
+                    expected_case_ids=case_ids,
+                )
+            except NativeProfileEvaluationError as error:
+                raise HiLiftPackageAssemblyError(
+                    "hidden-truth native profile scoring failed: " + str(error)
+                ) from error
         case_metrics, metric_values = _case_metrics_and_values(
             submission_id=participant["submission_id"],
             split_id=split_id,
@@ -2442,6 +2669,12 @@ def assemble_package(
         reproducibility = participant.get("reproducibility")
         code = reproducibility.get("code") if isinstance(reproducibility, dict) else None
         participant_revision = code.get("commit") if isinstance(code, dict) else None
+        # Preserve native-v1 wording byte-for-byte while giving compact-v2 its
+        # evaluator-support terminology and contract identity.
+        evidence_notes = _profile_evidence_notes(
+            evaluator_revision=evaluator["code_revision"],
+            compact_profile_mode=compact_profile_mode,
+        )
         evidence = {
             "$schema": "https://fluidsbench.org/schemas/v3/evaluation-evidence.schema.json",
             "schema_version": "3.0",
@@ -2465,17 +2698,14 @@ def assemble_package(
             "scoring_support_manifest_sha256": candidate["manifest_sha256"],
             "discretization_sha256": discretization_sha,
             "case_metrics_sha256": case_metrics_sha,
-            "notes": (
-                "Evaluator identity is repository-frozen at "
-                f"{evaluator['code_revision']}; profile topology contract is "
-                f"{PROFILE_CONTRACT_SHA256}. Cp/velocity profile R2 was recomputed "
-                "from prediction-only chunks against the explicitly supplied "
-                "inactive local candidate truth release; this does not publish or "
-                "activate profile intake."
-            ),
+            "notes": evidence_notes,
         }
         if regional_sha is not None:
             evidence["regional_diagnostics_sha256"] = regional_sha
+        if compact_profile_mode:
+            evidence["compact_profile_implementation_binding"] = dict(
+                COMPACT_PROFILE_IMPLEMENTATION_BINDING
+            )
         if participant_revision is not None:
             evidence["code_revision"] = participant_revision
         _require_schema(evidence, "v3/evaluation-evidence.schema.json", "evaluation-evidence.json")
@@ -2517,7 +2747,7 @@ def assemble_package(
             },
             "metric_values": metric_values,
             "profile_data": {
-                "format": PROFILE_FORMAT,
+                "format": selected_profile_format,
                 "index_file": "profiles/index.json",
                 "case_count": len(case_ids),
                 "case_set_id": split["case_set_id"],
@@ -2525,12 +2755,38 @@ def assemble_package(
                 "profile_ground_truth_manifest_sha256": profile_truth["manifest_sha256"],
             },
         }
+        if compact_profile_mode:
+            assert compact_support_release is not None
+            submission["profile_data"].update(
+                {
+                    "evaluator_support_release_id": (
+                        compact_support_release.release_id
+                    ),
+                    "evaluator_support_manifest_sha256": (
+                        compact_support_release.manifest_sha256
+                    ),
+                    "compact_profile_implementation_binding": dict(
+                        COMPACT_PROFILE_IMPLEMENTATION_BINDING
+                    ),
+                }
+            )
         if regional_declaration is not None:
             submission["regional_diagnostics"] = regional_declaration
         if participant_revision is not None:
             submission["evaluation"]["code_revision"] = participant_revision
         _require_schema(submission, "v3/submission.schema.json", "submission.json")
         write_json(staging / "submission.json", submission)
+        if compact_profile_mode:
+            package_size_bytes = sum(
+                path.stat().st_size
+                for path in staging.rglob("*")
+                if path.is_file() and not path.is_symlink()
+            )
+            if package_size_bytes > COMPACT_PACKAGE_MAX_BYTES:
+                raise HiLiftPackageAssemblyError(
+                    "compact candidate package exceeds the 15,000,000-byte "
+                    f"portability gate ({package_size_bytes} bytes)"
+                )
         os.replace(staging, output_path)
     except Exception:
         shutil.rmtree(staging, ignore_errors=True)
@@ -2542,11 +2798,21 @@ def assemble_package(
         "split_id": split_id,
         "case_set_id": split["case_set_id"],
         "case_count": len(case_ids),
-        "profile_format": PROFILE_FORMAT,
+        "profile_format": selected_profile_format,
+        "package_size_bytes": package_size_bytes,
+        "compact_package_max_bytes": (
+            COMPACT_PACKAGE_MAX_BYTES if compact_profile_mode else None
+        ),
         "candidate_dry_run_command": (
             "python scripts/validate_submission.py --candidate-dry-run "
-            "--candidate-profile-truth-release "
-            f"{candidate_profile_truth_release_root} {output_path}"
+            + (
+                "--candidate-compact-profile-support-release "
+                f"{candidate_compact_profile_support_release_root} "
+                if compact_profile_mode
+                else "--candidate-profile-truth-release "
+                f"{candidate_profile_truth_release_root} "
+            )
+            + str(output_path)
         ),
     }
 
@@ -2559,10 +2825,24 @@ def inspect_blockers(
     native_outputs_root: Path | None,
     native_receipts_root: Path | None,
     candidate_profile_truth_release_root: Path | None = None,
+    candidate_compact_profile_support_release_root: Path | None = None,
     native_surface_outputs_root: Path | None = None,
     native_volume_outputs_root: Path | None = None,
 ) -> dict[str, Any]:
     blockers: list[dict[str, Any]] = []
+    if (
+        candidate_profile_truth_release_root is not None
+        and candidate_compact_profile_support_release_root is not None
+    ):
+        blockers.append(
+            {
+                "gate": "profile_release_selection",
+                "detail": (
+                    "native-v1 truth and compact-v2 evaluator-support paths are "
+                    "mutually exclusive"
+                ),
+            }
+        )
     config = load_json(config_path, label="package config")
     for token in unresolved_tokens(config):
         blockers.append({"gate": "configuration_token", **token})
@@ -2607,7 +2887,10 @@ def inspect_blockers(
             )
         else:
             candidate_profile_truth = candidate_value
-            if candidate_profile_truth_release_root is None:
+            if (
+                candidate_profile_truth_release_root is None
+                and candidate_compact_profile_support_release_root is None
+            ):
                 blockers.append(
                     {
                         "gate": "profile_ground_truth_release",
@@ -2641,6 +2924,39 @@ def inspect_blockers(
                     blockers.append(
                         {
                             "gate": "profile_ground_truth_release",
+                            "detail": str(error),
+                        }
+                    )
+            if candidate_compact_profile_support_release_root is not None:
+                try:
+                    _, compact_declaration = _compact_profile_declaration(
+                        specification, specification_path
+                    )
+                    release = open_compact_support_release(
+                        release_root=(
+                            candidate_compact_profile_support_release_root
+                        ),
+                        expected_manifest_sha256=compact_declaration[
+                            "manifest_sha256"
+                        ],
+                        expected_case_ids=case_ids,
+                        case_set_id=split["case_set_id"],
+                    )
+                    if (
+                        candidate_profile_truth is None
+                        or release.release_id != compact_declaration["release_id"]
+                        or release.source_profile_truth_release_id
+                        != candidate_profile_truth.get("release_id")
+                        or release.source_profile_truth_manifest_sha256
+                        != candidate_profile_truth.get("manifest_sha256")
+                    ):
+                        raise HiLiftPackageAssemblyError(
+                            "compact support source-truth binding differs"
+                        )
+                except (HiLiftPackageAssemblyError, CompactProfileEvaluationError) as error:
+                    blockers.append(
+                        {
+                            "gate": "compact_profile_support_release",
                             "detail": str(error),
                         }
                     )
@@ -2756,6 +3072,14 @@ def build_parser() -> argparse.ArgumentParser:
             "local inactive hidden-truth release root; candidate dry-run use only"
         ),
     )
+    parser.add_argument(
+        "--candidate-compact-profile-support-release",
+        type=Path,
+        help=(
+            "local inactive compact evaluator-support release root; candidate "
+            "dry-run use only and mutually exclusive with the native-v1 truth path"
+        ),
+    )
     parser.add_argument("--output", type=Path)
     parser.add_argument(
         "--list-blockers",
@@ -2780,6 +3104,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 candidate_profile_truth_release_root=(
                     args.candidate_profile_truth_release
                 ),
+                candidate_compact_profile_support_release_root=(
+                    args.candidate_compact_profile_support_release
+                ),
             )
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
@@ -2788,7 +3115,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             for name in (
                 "native_aggregate",
                 "native_receipts",
-                "candidate_profile_truth_release",
                 "output",
             )
             if getattr(args, name) is None
@@ -2797,6 +3123,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise HiLiftPackageAssemblyError(
                 "assembly requires arguments: "
                 + ", ".join(f"--{name.replace('_', '-')}" for name in missing)
+            )
+        supplied_profile_releases = sum(
+            value is not None
+            for value in (
+                args.candidate_profile_truth_release,
+                args.candidate_compact_profile_support_release,
+            )
+        )
+        if supplied_profile_releases != 1:
+            raise HiLiftPackageAssemblyError(
+                "assembly requires exactly one of --candidate-profile-truth-release "
+                "or --candidate-compact-profile-support-release"
             )
         _resolve_native_output_roots(
             outputs_root=args.native_outputs,
@@ -2813,6 +3151,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             native_receipts_root=args.native_receipts,
             candidate_profile_truth_release_root=(
                 args.candidate_profile_truth_release
+            ),
+            candidate_compact_profile_support_release_root=(
+                args.candidate_compact_profile_support_release
             ),
             output_path=args.output,
         )

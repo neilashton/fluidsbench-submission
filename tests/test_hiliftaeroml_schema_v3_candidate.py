@@ -180,6 +180,53 @@ def test_frozen_evaluator_revision_is_consistent_and_nonactivating() -> None:
     assert "freeze_and_approve_the_immutable_dataset_evaluator_git_revision" not in decisions
 
 
+def test_compact_command_and_evidence_are_additive_to_native_v1() -> None:
+    config = load(CONCRETE_CONFIG)
+    assembler._validate_config_envelope(config)
+    native = assembler._selected_evaluation(
+        config, compact_profile_mode=False
+    )
+    compact = assembler._selected_evaluation(
+        config, compact_profile_mode=True
+    )
+    assert "--candidate-profile-truth-release" in native["command"]
+    assert "--candidate-compact-profile-support-release" not in native["command"]
+    assert "--candidate-compact-profile-support-release" in compact["command"]
+    assert "--candidate-profile-truth-release" not in compact["command"]
+    assert native != compact
+
+    revision = config["release_bindings"]["evaluator"]["code_revision"]
+    native_notes = assembler._profile_evidence_notes(
+        evaluator_revision=revision, compact_profile_mode=False
+    )
+    assert native_notes == (
+        "Evaluator identity is repository-frozen at "
+        f"{revision}; profile topology contract is "
+        f"{assembler.PROFILE_CONTRACT_SHA256}. Cp/velocity profile R2 was "
+        "recomputed from prediction-only chunks against the explicitly supplied "
+        "inactive local candidate truth release; this does not publish or "
+        "activate profile intake."
+    )
+    compact_notes = assembler._profile_evidence_notes(
+        evaluator_revision=revision, compact_profile_mode=True
+    )
+    assert assembler.COMPACT_PROFILE_CONTRACT_SHA256 in compact_notes
+    assert "unbound worktree candidate" in compact_notes
+    assert "no code revision or implementation-manifest SHA-256" in compact_notes
+    assert (
+        assembler.COMPACT_PROFILE_IMPLEMENTATION_BINDING
+        == {
+            "status": "unbound_worktree_candidate",
+            "activation_effect": "none",
+            "code_revision": None,
+            "implementation_manifest_sha256": None,
+            "base_dataset_evaluator_scope": (
+                "native_v1_base_field_force_and_noncompact_scoring_only"
+            ),
+        }
+    )
+
+
 def test_primary_l2_policy_and_activation_gate_are_explicit() -> None:
     specification = load(SPEC)
     manifest = load(RELEASE)

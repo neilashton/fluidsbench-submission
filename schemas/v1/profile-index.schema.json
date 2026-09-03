@@ -12,11 +12,14 @@
         "fluidsbench-profile-chunks-v1",
         "fluidsbench-drivaerml-physical-profile-chunks-v1",
         "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate",
-        "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate"
+        "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate",
+        "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
       ]
     },
     "contract_id": {"type": "string", "minLength": 1},
     "contract_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "evaluator_support_release_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,159}$"},
+    "evaluator_support_manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "submission_id": {"type": "string", "minLength": 1},
     "dataset_id": {"type": "string", "minLength": 1},
     "split_id": {"type": "string", "minLength": 1},
@@ -45,7 +48,8 @@
           "format": {
             "enum": [
               "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate",
-              "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate"
+              "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate",
+              "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
             ]
           }
         },
@@ -59,6 +63,30 @@
           "anyOf": [
             {"required": ["contract_id"]},
             {"required": ["contract_sha256"]}
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "format": {
+            "const": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
+          }
+        },
+        "required": ["format"]
+      },
+      "then": {
+        "required": [
+          "evaluator_support_release_id",
+          "evaluator_support_manifest_sha256"
+        ]
+      },
+      "else": {
+        "not": {
+          "anyOf": [
+            {"required": ["evaluator_support_release_id"]},
+            {"required": ["evaluator_support_manifest_sha256"]}
           ]
         }
       }

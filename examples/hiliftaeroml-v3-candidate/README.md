@@ -24,6 +24,10 @@ identities, fill missing cases, or synthesize unavailable loads.  It accepts
 every official HiLiftAeroML split in `submission-spec.json`; the 14 public
 split labels map to the exact eight retained case sets.
 
+The commands and Full360 reproducibility evidence below retain the native
+profile-v1 workflow. An additive compact profile-v2 path is documented
+separately later in this file; it does not alter or supersede that evidence.
+
 Copy `package-config.template.json` outside the repository and replace the
 participant fields with the submitted method's actual record.  The structured
 methodology must describe the architecture and exact parameter count, all four
@@ -117,6 +121,86 @@ The resulting headline values were 69.15276784043088 overall,
 for a closed candidate only: it did not approve or activate the evaluator,
 publish hidden truth, open submissions, upload or publish the package, or
 create a public or private leaderboard entry.
+
+## Additive compact profile-v2 Full360 exercise
+
+The compact path is an inactive, unpublished maintainer-local candidate for
+profile plots and profile R2 payloads only. Full native-surface Cp scoring,
+wall-shear scoring, exact force integration, and exact pitching-moment
+integration are unchanged and still consume the complete native surface
+prediction. The compact representation does not make the native field outputs
+optional.
+
+Compact packages state this provenance boundary explicitly: the retained
+dataset-evaluator revision applies only to the native-v1 base field, force, and
+noncompact scoring path, while the compact-v2 implementation remains an
+unbound worktree candidate with no code revision or implementation-manifest
+digest. A future freeze must replace those null bindings explicitly.
+
+Evaluator-owned support remains outside the participant package. It owns the
+physical cut geometry and connected-graph topology, a frozen maximum of 128 Cp
+samples per physical graph placed uniformly in physical arc length, and the
+velocity coordinates, validity mask, weights, and ordering. A participant case
+artifact contains exactly prediction values: `cp_q_delta` and scalar `float32`
+`velocity_speed_over_u_inf`. See the candidate
+[`native-profile-format-v2.json`](../../benchmark-specs/hiliftaeroml/native-profile-format-v2.json),
+the
+[`compact-cp-representation-decision-v1.json`](../../benchmark-specs/hiliftaeroml/compact-cp-representation-decision-v1.json),
+and the
+[`compact-cp-representation-audit-v1.md`](../../benchmark-specs/hiliftaeroml/compact-cp-representation-audit-v1.md).
+
+With authorized Full360 native outputs and native-profile truth, materialize
+one local evaluator-support release:
+
+```bash
+python scripts/materialize_hiliftaeroml_compact_profile_support.py \
+  --submission-spec benchmark-specs/hiliftaeroml/submission-spec.json \
+  --split benchmark-specs/hiliftaeroml/splits/full.json \
+  --surface-outputs-root /path/to/native/surface/per-case/outputs \
+  --volume-outputs-root /path/to/native/volume/per-case/outputs \
+  --source-truth-release /path/to/hiliftaeroml-native-profile-truth-v1-candidate \
+  --output-root /path/to/hiliftaeroml-compact-profile-support-v2-candidate
+```
+
+That output is evaluator-owned and must not be copied into the submission.
+Pass it to the assembler and validator instead of the native-v1 truth flag:
+
+For this path, add a top-level `compact_evaluation` object containing the
+exact compact assembler `command` and RFC3339 `generated_at` time. The
+assembler uses that record only in compact mode and preserves the existing
+native-v1 `evaluation` record. The checked-in Full360 configuration shows both.
+
+```bash
+python scripts/assemble_hiliftaeroml_schema_v3_candidate.py \
+  --config /path/to/package-config.json \
+  --native-aggregate /path/to/native/aggregate \
+  --native-surface-outputs /path/to/native/surface/per-case/outputs \
+  --native-volume-outputs /path/to/native/volume/per-case/outputs \
+  --native-receipts /path/to/native/per-case/receipts \
+  --candidate-compact-profile-support-release /path/to/hiliftaeroml-compact-profile-support-v2-candidate \
+  --output /path/to/hiliftaeroml-my-model-compact-v2
+
+python scripts/validate_submission.py \
+  --candidate-dry-run \
+  --candidate-compact-profile-support-release /path/to/hiliftaeroml-compact-profile-support-v2-candidate \
+  /path/to/hiliftaeroml-my-model-compact-v2
+```
+
+The compact assembler has a hard 15,000,000-byte limit on the sum of regular
+files in the assembled package. Passing that limit, deterministic archive
+checks, and local validation is not publication, activation, owner approval,
+or evidence for any case set beyond this Full360 exercise. The native-v1
+workflow and its retained package hashes above remain unchanged.
+
+The retained Full360 compact exercise completed two independent 360-case
+assemblies. Both 14,420,587-byte package trees passed candidate dry-run
+validation over 5,400 profile series and compared equal recursively. Their
+independent 403-member ZIPs are each 11,514,743 bytes and byte-identical, with
+SHA-256
+`7a0c0842c34ecef9b67ed2e1d06fb979a10316f151e695c8038fbd96090bc066`.
+That is a 99.4915% size reduction from the retained native-v1 ZIP. The exact
+inactive-candidate receipt is
+[`compact-profile-full360-validation-v1.json`](../../benchmark-specs/hiliftaeroml/compact-profile-full360-validation-v1.json).
 
 The output uses the same FluidsBench schema-v3 submission, evidence,
 case-metrics, scoring-support, and discretization envelopes as DrivAerML.  Its

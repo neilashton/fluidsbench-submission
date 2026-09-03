@@ -1,0 +1,94 @@
+{
+  "schema": "hiliftaeroml-compact-profile-full360-validation-v1",
+  "recorded_on": "2026-09-03",
+  "status": "complete_candidate_not_published",
+  "usage": "maintainer_local_candidate_dry_run_only",
+  "activation": {
+    "owner_approval_complete": false,
+    "published": false,
+    "submissions_opened": false,
+    "validation_changes_activation": false
+  },
+  "implementation_provenance": {
+    "status": "unbound_worktree_candidate",
+    "activation_effect": "none",
+    "code_revision": null,
+    "implementation_manifest_sha256": null,
+    "base_dataset_evaluator_revision": "68899f780d96b70f2badb5658971c87af0b17172",
+    "base_dataset_evaluator_scope": "native_v1_base_field_force_and_noncompact_scoring_only"
+  },
+  "scope": {
+    "split_id": "full",
+    "case_set_id": "caseset-ac791749e527",
+    "case_count": 360,
+    "profile_series_count": 5400,
+    "full_surface_scoring_changed": false,
+    "force_or_moment_scoring_changed": false
+  },
+  "representation": {
+    "maximum_cp_points_per_physical_graph": 128,
+    "cp_placement": "uniform_native_physical_arc_length_per_retained_branch",
+    "cp_prediction_array": "cp_q_delta",
+    "velocity_prediction_array": "velocity_speed_over_u_inf",
+    "participant_npz_array_count": 2,
+    "participant_artifacts_contain_evaluator_support": false,
+    "participant_artifacts_contain_truth": false
+  },
+  "bindings": {
+    "profile_contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
+    "profile_contract_sha256": "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c",
+    "evaluator_support_release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
+    "evaluator_support_manifest_sha256": "81150cc075d5b64caf0c63b9601a23bbecbf38a8f60bfd69814981e408dd712c",
+    "source_profile_truth_release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
+    "source_profile_truth_manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477"
+  },
+  "assembly": {
+    "package_a": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/package-a",
+    "package_b": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/package-b",
+    "regular_file_bytes_each": 14420587,
+    "regular_file_byte_limit": 15000000,
+    "regular_file_headroom_bytes": 579413,
+    "recursive_file_comparison_equal": true,
+    "profile_index_sha256": "8736c1c4a71a0fa2d770abd3ab14bef49e04f1419609644c1f52af10dc9859b2",
+    "submission_json_sha256": "fcccbf5a36e473858e7360c623bad95fa01031bab02d55a734dabe17b9f5ca38",
+    "evaluation_evidence_sha256": "ce395b38ed380a5323244fd2c64f0ebbc666a7796f06bdc4e5bb45769e6ffd94"
+  },
+  "deterministic_archives": {
+    "archive_a": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/hiliftaeroml-transolver-full360-compact-candidate-v2.build-a.zip",
+    "archive_b": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/hiliftaeroml-transolver-full360-compact-candidate-v2.build-b.zip",
+    "byte_identical": true,
+    "size_bytes_each": 11514743,
+    "member_count_each": 403,
+    "sha256_each": "7a0c0842c34ecef9b67ed2e1d06fb979a10316f151e695c8038fbd96090bc066",
+    "maximum_archive_bytes": 15000000,
+    "archive_headroom_bytes": 3485257
+  },
+  "candidate_validation": {
+    "package_a": {
+      "valid": true,
+      "case_count": 360,
+      "profile_series_count": 5400
+    },
+    "package_b": {
+      "valid": true,
+      "case_count": 360,
+      "profile_series_count": 5400
+    }
+  },
+  "metric_values": {
+    "overall_score": 69.14965881236131,
+    "field_score": 48.167429082451235,
+    "force_score": 99.52105782630258,
+    "diagnostic_score": 80.74271925824019,
+    "cp_cut_r2": 0.9633822454116702,
+    "velocity_profile_r2": 0.7034571573628897
+  },
+  "native_v1_archive_comparison": {
+    "size_bytes": 2264458600,
+    "sha256": "a8dfd6ffbe6d103bc1a3123f6e6f756bacf960f92acc7079237b443bbbb62504",
+    "compact_to_native_size_ratio": 0.005084987201797375,
+    "native_to_compact_reduction_factor": 196.65732878276137,
+    "size_reduction_percent": 99.49150127982026,
+    "saved_bytes": 2252943857
+  }
+}

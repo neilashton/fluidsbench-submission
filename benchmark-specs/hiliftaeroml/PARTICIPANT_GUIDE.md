@@ -180,6 +180,34 @@ or reference arrays. Hidden truth is joined only by the candidate validator
 from the separately supplied, benchmark-owned local release. The evaluator
 must emit every selected case and all ten Cp plus five velocity station aliases.
 
+### Inactive compact profile-v2 alternative
+
+The additive compact candidate is a maintainer-local alternative for the
+profile payload only. Its evaluator-owned release holds cut geometry,
+connected-graph topology, branch boundaries, sample placement, velocity
+validity masks, weights, alignment, and hidden truth outside the submission.
+Each participant case artifact contains exactly the two prediction arrays
+defined by
+[`native-profile-format-v2.json`](native-profile-format-v2.json):
+`cp_q_delta` and `velocity_speed_over_u_inf`. It contains no evaluator support
+or truth arrays.
+
+The selected Cp support uses at most 128 points per physical connected graph,
+placed uniformly in native physical arc length. Cp values are fixed-int16
+quantized and delta encoded at evaluator-owned retained-branch boundaries.
+Velocity values are scalar `float32` speed-over-freestream predictions for all
+and only the evaluator-owned valid rows at the same five stations. The
+selection evidence is recorded in
+[`compact-cp-representation-decision-v1.json`](compact-cp-representation-decision-v1.json)
+and
+[`compact-cp-representation-audit-v1.md`](compact-cp-representation-audit-v1.md).
+
+This alternative does not compact or replace the canonical native surface
+prediction. Full native Cp and wall-shear field metrics, forces, and pitching
+moment remain unchanged. The v2 candidate is unbound for public use,
+unpublished, and inactive; access to a local support directory changes none of
+those lifecycle facts.
+
 ## 6. Include regional reports only when complete
 
 Regional diagnostics answer where a method is performing well or poorly using
@@ -332,6 +360,53 @@ grant official acceptance, benchmark-owner approval, contributor-stage
 eligibility, or leaderboard visibility. Do not use `--contributor-stage` for
 this closed workflow.
 
+### Optional local Full360 compact-v2 exercise
+
+The retained compact study covers the Full360 case set only. A maintainer with
+the authorized native-profile truth and complete Full360 native outputs can
+materialize an evaluator-owned support release locally:
+
+```bash
+python scripts/materialize_hiliftaeroml_compact_profile_support.py \
+  --submission-spec benchmark-specs/hiliftaeroml/submission-spec.json \
+  --split benchmark-specs/hiliftaeroml/splits/full.json \
+  --surface-outputs-root /path/to/native/surface/per-case/outputs \
+  --volume-outputs-root /path/to/native/volume/per-case/outputs \
+  --source-truth-release /authorized/local/hiliftaeroml-native-profile-truth-v1-candidate \
+  --output-root /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate
+```
+
+The output is benchmark/evaluator-owned local support and must remain outside
+the participant package. Use it in place of, not alongside,
+`--candidate-profile-truth-release` when inspecting blockers or assembling:
+
+Compact assembly also requires a top-level `compact_evaluation` object in the
+package configuration with the exact compact assembler `command` and its
+RFC3339 `generated_at` time. Keep the native-v1 `evaluation` object unchanged;
+the assembler selects between the two records strictly by profile mode.
+
+```bash
+python scripts/assemble_hiliftaeroml_schema_v3_candidate.py \
+  --config /path/to/package-config.json \
+  --native-aggregate /path/to/native/case-set-aggregate \
+  --native-surface-outputs /path/to/native/surface/per-case/outputs \
+  --native-volume-outputs /path/to/native/volume/per-case/outputs \
+  --native-receipts /path/to/native/case-receipts \
+  --candidate-compact-profile-support-release /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate \
+  --output /path/to/local/hiliftaeroml-my-method-compact-v2
+
+python scripts/validate_submission.py \
+  --candidate-dry-run \
+  --candidate-compact-profile-support-release /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate \
+  /path/to/local/hiliftaeroml-my-method-compact-v2
+```
+
+The assembler rejects the compact candidate if the sum of regular files in
+the completed package exceeds 15,000,000 bytes. Passing that hard portability
+gate and the validator remains only local candidate evidence; it does not
+publish support, qualify other case sets, approve the evaluator, or open
+submissions. The native profile-v1 commands above remain the retained workflow.
+
 ## 10. Package boundary while submissions are closed
 
 The schema-v3 directory contains the normal participant envelope:
@@ -347,6 +422,11 @@ Do not add hidden truth, native truth fields, benchmark-owned approval files,
 or fabricated release metadata. Do not edit specifications, schemas, evaluator
 code, scoring support, workflows, or an existing result inside a participant
 package.
+
+For compact-v2 packages, each per-case NPZ has exactly `cp_q_delta` and
+`velocity_speed_over_u_inf`; evaluator-owned support remains in the separately
+bound local release. Full native surface/volume evaluation products and their
+receipt chain remain required outside the portable package assembly inputs.
 
 While `submissions_open` is `false`, retain the package locally or share it
 directly with the benchmark owner for coordinated implementation review. Do
