@@ -41,6 +41,26 @@ from reference.drivaerml.regional_aggregate import (
     RegionalAggregateError,
     validate_aggregate_regional_diagnostics,
 )
+from reference.hiliftaeroml.regional_aggregate import (
+    AGGREGATE_REGIONAL_REPORT_SCHEMA as HILIFT_AGGREGATE_REGIONAL_REPORT_SCHEMA,
+    REGIONAL_DEFINITION_ID as HILIFT_REGIONAL_DEFINITION_ID,
+    REGIONAL_DIAGNOSTICS_CONTRACT_SHA256 as HILIFT_REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
+    HiLiftRegionalAggregateError,
+    validate_aggregate_regional_diagnostics as validate_hilift_aggregate_regional_diagnostics,
+)
+from reference.hiliftaeroml.native_profiles import (
+    CP_PUBLISHED_ARRAYS as HILIFT_CP_PROFILE_ARRAYS,
+    NativeProfileError as HiLiftNativeProfileError,
+    PROFILE_CONTRACT_ID as HILIFT_PROFILE_CONTRACT_ID,
+    PROFILE_CONTRACT_SHA256 as HILIFT_PROFILE_CONTRACT_SHA256,
+    PROFILE_FORMAT as HILIFT_PROFILE_FORMAT,
+    VELOCITY_PUBLISHED_ARRAYS as HILIFT_VELOCITY_PROFILE_ARRAYS,
+    validate_prediction_npz as validate_hilift_prediction_npz,
+)
+from reference.hiliftaeroml.native_profile_evaluator import (
+    NativeProfileEvaluationError as HiLiftNativeProfileEvaluationError,
+    score_native_profile_directory as score_hilift_native_profile_directory,
+)
 from reference.methodology import methodology_errors
 
 try:
@@ -115,6 +135,25 @@ DRIVAERML_RELATIVE_PROFILE_CHUNK_SCHEMA_SHA256 = (
 DRIVAERML_OFFICIAL_CASE_COUNT = 484
 LOWER_SHA256 = re.compile(r"^[a-f0-9]{64}$")
 LOWER_GIT_SHA1 = re.compile(r"^[a-f0-9]{40}$")
+
+HILIFT_FORCE_SUPPORT_ID = "aerodynamic-case-coefficients-v1"
+HILIFT_FORCE_COEFFICIENT_FIELDS = (
+    "predicted_c_drag",
+    "truth_c_drag",
+    "predicted_c_lift",
+    "truth_c_lift",
+    "predicted_c_pitch",
+    "truth_c_pitch",
+)
+HILIFT_FORCE_MAE_INPUTS = {
+    "c_drag_mae": ("truth_c_drag", "predicted_c_drag"),
+    "c_lift_mae": ("truth_c_lift", "predicted_c_lift"),
+    "c_pitch_mae": ("truth_c_pitch", "predicted_c_pitch"),
+}
+HILIFT_FORCE_R2_INPUTS = {
+    "cd_r2": ("truth_c_drag", "predicted_c_drag"),
+    "cl_r2": ("truth_c_lift", "predicted_c_lift"),
+}
 
 
 class SubmissionJSONError(ValueError):
@@ -3349,6 +3388,178 @@ def validate_v3_scoring_support(
     return support_manifest, case_index
 
 
+def _hilift_force_r2(
+    truth: list[float], prediction: list[float]
+) -> float | None:
+    """Replay the dataset-declared equal-case R2 reduction."""
+
+    if len(truth) != len(prediction) or len(truth) < 2:
+        return None
+    truth_mean = math.fsum(truth) / len(truth)
+    denominator = math.fsum((value - truth_mean) ** 2 for value in truth)
+    if denominator <= 0.0:
+        return None
+    numerator = math.fsum(
+        (predicted - target) ** 2
+        for target, predicted in zip(truth, prediction, strict=True)
+    )
+    return 1.0 - numerator / denominator
+
+
+def _validate_hiliftaeroml_force_metric_bindings(
+    add: Any,
+    *,
+    submission: dict[str, Any],
+    case_metrics: dict[str, Any],
+) -> None:
+    """Replay every HiLift force metric from per-case coefficient evidence."""
+
+    cases = case_metrics.get("cases")
+    if not isinstance(cases, list) or not cases:
+        add("HiLiftAeroML force recomputation requires a non-empty cases array")
+        return
+    submitted_aggregates = submission.get("metric_values")
+    if not isinstance(submitted_aggregates, dict):
+        add("HiLiftAeroML force recomputation requires submission metric_values")
+        return
+
+    coefficient_inputs: dict[str, list[float]] = {
+        field: [] for field in HILIFT_FORCE_COEFFICIENT_FIELDS
+    }
+    per_case_errors: dict[str, list[float]] = {
+        metric_id: [] for metric_id in HILIFT_FORCE_MAE_INPUTS
+    }
+    complete_coefficient_cases = 0
+    expected_coefficient_fields = set(HILIFT_FORCE_COEFFICIENT_FIELDS)
+    for case in cases:
+        if not isinstance(case, dict):
+            continue
+        case_id = case.get("case_id")
+        coefficients = case.get("force_coefficients")
+        if not isinstance(coefficients, dict):
+            add(f"case-metrics {case_id} has no force_coefficients evidence")
+            continue
+        observed_fields = set(coefficients)
+        if observed_fields != expected_coefficient_fields:
+            add(
+                f"case-metrics {case_id} force_coefficients must contain exactly "
+                f"{sorted(expected_coefficient_fields)}; "
+                f"missing={sorted(expected_coefficient_fields-observed_fields)}, "
+                f"unexpected={sorted(observed_fields-expected_coefficient_fields)}"
+            )
+            continue
+        invalid_fields = [
+            field
+            for field in HILIFT_FORCE_COEFFICIENT_FIELDS
+            if not is_number(coefficients.get(field))
+        ]
+        if invalid_fields:
+            add(
+                f"case-metrics {case_id} force_coefficients must be finite numbers; "
+                f"invalid={invalid_fields}"
+            )
+            continue
+
+        numeric_coefficients = {
+            field: float(coefficients[field])
+            for field in HILIFT_FORCE_COEFFICIENT_FIELDS
+        }
+        complete_coefficient_cases += 1
+        for field, value in numeric_coefficients.items():
+            coefficient_inputs[field].append(value)
+
+        expected_errors = {
+            metric_id: abs(
+                numeric_coefficients[prediction_field]
+                - numeric_coefficients[truth_field]
+            )
+            for metric_id, (truth_field, prediction_field) in (
+                HILIFT_FORCE_MAE_INPUTS.items()
+            )
+        }
+        nonspatial = case.get("nonspatial_metric_values")
+        if not isinstance(nonspatial, dict):
+            add(f"case-metrics {case_id} has no nonspatial_metric_values")
+            nonspatial = {}
+
+        force_supports = [
+            support
+            for support in case.get("supports", [])
+            if isinstance(support, dict)
+            and support.get("support_id") == HILIFT_FORCE_SUPPORT_ID
+        ]
+        if len(force_supports) != 1:
+            add(
+                f"case-metrics {case_id} requires exactly one "
+                f"{HILIFT_FORCE_SUPPORT_ID!r} support for force recomputation"
+            )
+            support_metric_values: dict[str, Any] = {}
+        else:
+            candidate_values = force_supports[0].get("metric_values")
+            if not isinstance(candidate_values, dict):
+                add(
+                    f"case-metrics {case_id}/{HILIFT_FORCE_SUPPORT_ID} has no "
+                    "metric_values"
+                )
+                support_metric_values = {}
+            else:
+                support_metric_values = candidate_values
+
+        for metric_id, expected in expected_errors.items():
+            per_case_errors[metric_id].append(expected)
+            truth_field, prediction_field = HILIFT_FORCE_MAE_INPUTS[metric_id]
+            for container_name, container in (
+                ("nonspatial_metric_values", nonspatial),
+                (
+                    f"supports[{HILIFT_FORCE_SUPPORT_ID}].metric_values",
+                    support_metric_values,
+                ),
+            ):
+                submitted = container.get(metric_id)
+                if not is_number(submitted) or not math.isclose(
+                    float(submitted), expected, rel_tol=1e-12, abs_tol=1e-12
+                ):
+                    add(
+                        f"case-metrics {case_id} {container_name}.{metric_id} must "
+                        f"equal abs(force_coefficients.{prediction_field} - "
+                        f"force_coefficients.{truth_field})"
+                    )
+
+    if complete_coefficient_cases != len(cases):
+        add(
+            "HiLiftAeroML force recomputation requires complete finite coefficient "
+            "evidence for every test case"
+        )
+        return
+
+    expected_aggregates = {
+        metric_id: math.fsum(values) / len(values)
+        for metric_id, values in per_case_errors.items()
+    }
+    for metric_id, (truth_field, prediction_field) in HILIFT_FORCE_R2_INPUTS.items():
+        recomputed = _hilift_force_r2(
+            coefficient_inputs[truth_field],
+            coefficient_inputs[prediction_field],
+        )
+        if recomputed is None:
+            add(
+                f"metric_values.{metric_id} cannot be recomputed because the "
+                "complete truth coefficient array has zero variance or fewer than two cases"
+            )
+        else:
+            expected_aggregates[metric_id] = recomputed
+
+    for metric_id, expected in expected_aggregates.items():
+        submitted = submitted_aggregates.get(metric_id)
+        if not is_number(submitted) or not math.isclose(
+            float(submitted), expected, rel_tol=1e-12, abs_tol=1e-12
+        ):
+            add(
+                f"metric_values.{metric_id} must equal the independent HiLiftAeroML "
+                "force-coefficient recomputation"
+            )
+
+
 def validate_v3_case_metrics(
     add: Any,
     directory: Path,
@@ -3661,13 +3872,23 @@ def validate_v3_case_metrics(
         if len(values) != len(split_case_ids):
             add(f"{declaration['file']} metric {metric_id!r} must have one value per test case")
             continue
-        if (
-            bound_metric_bindings.get(metric_id, {}).get("aggregation")
-            != "per_geometry_then_macro_average"
-        ):
+        binding = bound_metric_bindings.get(metric_id, {})
+        aggregation = binding.get("aggregation")
+        reduction = binding.get("reduction")
+        if aggregation == "per_geometry_then_macro_average":
+            expected_value = math.fsum(values) / len(values)
+            reduction_label = "macro-average"
+        elif aggregation == "all_test_cases" and reduction == "mae":
+            expected_value = math.fsum(values) / len(values)
+            reduction_label = "equal-case MAE reduction"
+        elif aggregation == "all_test_cases" and reduction == "rmse":
+            expected_value = math.sqrt(
+                math.fsum(value * value for value in values) / len(values)
+            )
+            reduction_label = "equal-case RMSE reduction"
+        else:
             continue
         submitted_value = submission.get("metric_values", {}).get(metric_id)
-        expected_value = sum(values) / len(values)
         if is_number(submitted_value) and not math.isclose(
             submitted_value,
             expected_value,
@@ -3675,9 +3896,15 @@ def validate_v3_case_metrics(
             abs_tol=1e-6,
         ):
             add(
-                f"metric_values.{metric_id} must equal the macro-average of its submitted "
-                "per-case values"
+                f"metric_values.{metric_id} must equal the {reduction_label} of its "
+                "submitted per-case values"
             )
+    if submission.get("dataset_id") == "hiliftaeroml":
+        _validate_hiliftaeroml_force_metric_bindings(
+            add,
+            submission=submission,
+            case_metrics=case_metrics,
+        )
     if submission.get("dataset_id") == "drivaerml" and not surface_only:
         try:
             validate_schema_v3_candidate_nonspatial_metrics(case_metrics)
@@ -4676,8 +4903,74 @@ def validate_drivaerml_maintainer_receipt_hash(
         )
 
 
+def _validate_hiliftaeroml_dataset_evaluator_binding(
+    add: Any,
+    *,
+    submission: dict[str, Any],
+    evidence: dict[str, Any],
+    dataset_spec: dict[str, Any] | None,
+) -> None:
+    """Bind HiLift evidence to dataset-owned evaluator code, not participant code."""
+
+    declared = evidence.get("dataset_evaluator_binding")
+    if not isinstance(declared, dict):
+        add(
+            "evaluation-evidence.json HiLiftAeroML requires a structured "
+            "dataset_evaluator_binding"
+        )
+        return
+    expected_fields = {"status", "reference_version", "code_revision"}
+    if set(declared) != expected_fields:
+        add(
+            "evaluation-evidence.json dataset_evaluator_binding must contain exactly "
+            f"{sorted(expected_fields)}"
+        )
+
+    support = (
+        dataset_spec.get("scoring_support")
+        if isinstance(dataset_spec, dict)
+        else None
+    )
+    owner_binding = (
+        support.get("dataset_evaluator_binding")
+        if isinstance(support, dict)
+        else None
+    )
+    if not isinstance(owner_binding, dict):
+        add("HiLiftAeroML specification has no dataset_evaluator_binding")
+        return
+    if owner_binding.get("status") != "frozen":
+        add(
+            "HiLiftAeroML specification dataset_evaluator_binding must be frozen "
+            "before candidate package validation"
+        )
+        return
+    expected = {
+        "status": "frozen",
+        "reference_version": owner_binding.get("evaluator_reference_version"),
+        "code_revision": owner_binding.get("evaluator_code_revision"),
+    }
+    for key, value in expected.items():
+        if declared.get(key) != value:
+            add(
+                "evaluation-evidence.json dataset_evaluator_binding."
+                f"{key} must equal the frozen HiLiftAeroML specification value "
+                f"{value!r}"
+            )
+    if declared.get("reference_version") != submission.get("evaluation", {}).get(
+        "reference_version"
+    ):
+        add(
+            "evaluation-evidence.json dataset_evaluator_binding.reference_version "
+            "must equal submission evaluation.reference_version"
+        )
+
+
 def validate_evaluation_evidence(
-    add: Any, directory: Path, submission: dict[str, Any]
+    add: Any,
+    directory: Path,
+    submission: dict[str, Any],
+    dataset_spec: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     evaluation = submission["evaluation"]
     filename = evaluation["evidence_file"]
@@ -4769,6 +5062,13 @@ def validate_evaluation_evidence(
         for key, expected in v3_bindings.items():
             if evidence.get(key) != expected:
                 add(f"evaluation-evidence.json {key} must equal {expected!r}")
+        if submission.get("dataset_id") == "hiliftaeroml":
+            _validate_hiliftaeroml_dataset_evaluator_binding(
+                add,
+                submission=submission,
+                evidence=evidence,
+                dataset_spec=dataset_spec,
+            )
     if evidence.get("metric_values") != submission.get("metric_values"):
         add("evaluation-evidence.json metric_values must exactly match submission.json")
 
@@ -4786,29 +5086,33 @@ def validate_regional_diagnostics(
     split_case_ids: list[str],
     evidence: dict[str, Any] | None,
 ) -> None:
-    """Validate the optional cross-project DrivAerML zero-weight report."""
+    """Validate a dataset-owned zero-weight regional report."""
 
     contract = dataset_spec.get("regional_diagnostics")
     required = (
-        submission.get("dataset_id") == "drivaerml"
-        and isinstance(contract, dict)
+        isinstance(contract, dict)
         and contract.get("required_for_new_submissions") is True
     )
     declaration = submission.get("regional_diagnostics")
     if not isinstance(declaration, dict):
         if required:
             add(
-                "DrivAerML schema-v3 submissions require "
+                f"{submission.get('dataset_id')} schema-v3 submissions require "
                 "regional_diagnostics metadata"
             )
         return
+    if not isinstance(contract, dict):
+        add("regional_diagnostics is not enabled by the benchmark specification")
+        return
     expected_contract = {
-        "format": AGGREGATE_REGIONAL_REPORT_SCHEMA,
-        "contract_sha256": REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
+        "format": contract.get("format"),
+        "contract_sha256": contract.get("contract_sha256"),
         "role": "report_only",
         "weight": 0.0,
         "official_score_changed": False,
     }
+    if isinstance(contract.get("definition_id"), str):
+        expected_contract["definition_id"] = contract["definition_id"]
     for key, expected in expected_contract.items():
         if declaration.get(key) != expected:
             add(f"regional_diagnostics.{key} must equal {expected!r}")
@@ -4832,11 +5136,40 @@ def validate_regional_diagnostics(
         )
     try:
         report = load_json(report_path)
-        validate_aggregate_regional_diagnostics(
-            report,
-            expected_case_ids=split_case_ids,
-        )
-    except (OSError, json.JSONDecodeError, RegionalAggregateError) as error:
+        regional_format = contract.get("format")
+        if regional_format == AGGREGATE_REGIONAL_REPORT_SCHEMA:
+            if contract.get("contract_sha256") != REGIONAL_DIAGNOSTICS_CONTRACT_SHA256:
+                raise RegionalAggregateError(
+                    "DrivAerML regional contract SHA-256 differs"
+                )
+            validate_aggregate_regional_diagnostics(
+                report,
+                expected_case_ids=split_case_ids,
+            )
+        elif regional_format == HILIFT_AGGREGATE_REGIONAL_REPORT_SCHEMA:
+            if (
+                contract.get("contract_sha256")
+                != HILIFT_REGIONAL_DIAGNOSTICS_CONTRACT_SHA256
+                or contract.get("definition_id") != HILIFT_REGIONAL_DEFINITION_ID
+            ):
+                raise HiLiftRegionalAggregateError(
+                    "HiLiftAeroML regional contract identity differs"
+                )
+            validate_hilift_aggregate_regional_diagnostics(
+                report,
+                expected_case_ids=split_case_ids,
+                expected_split_id=submission.get("split_id"),
+            )
+        else:
+            raise HiLiftRegionalAggregateError(
+                f"unsupported dataset regional format {regional_format!r}"
+            )
+    except (
+        OSError,
+        json.JSONDecodeError,
+        RegionalAggregateError,
+        HiLiftRegionalAggregateError,
+    ) as error:
         add(f"regional-diagnostics.json is invalid: {error}")
 
 
@@ -4982,12 +5315,36 @@ def validate_open_reproducibility(
     if dataset_spec.get("status") != "official" and not candidate_dry_run:
         add("submitted_evaluation evidence requires an official dataset specification")
 
-    ground_truth = manifest.get("data_release", {}).get("profile_ground_truth", {})
+    ground_truth_source = "the leaderboard manifest"
+    if candidate_dry_run and submission.get("dataset_id") == "hiliftaeroml":
+        profile_definition = dataset_spec.get("profile_definition")
+        ground_truth = (
+            profile_definition.get("candidate_dry_run_profile_ground_truth", {})
+            if isinstance(profile_definition, dict)
+            else {}
+        )
+        ground_truth_source = "the HiLiftAeroML candidate dry-run declaration"
+        if not isinstance(ground_truth, dict):
+            ground_truth = {}
+            add(
+                "HiLiftAeroML candidate dry-run profile truth has no benchmark "
+                "declaration"
+            )
+    else:
+        ground_truth = manifest.get("data_release", {}).get(
+            "profile_ground_truth", {}
+        )
     submitted_profile_ground_truth = submission.get("profile_data", {})
     if submitted_profile_ground_truth.get("profile_ground_truth_release_id") != ground_truth.get("release_id"):
-        add("profile_data.profile_ground_truth_release_id must match the leaderboard manifest")
+        add(
+            "profile_data.profile_ground_truth_release_id must match "
+            f"{ground_truth_source}"
+        )
     if submitted_profile_ground_truth.get("profile_ground_truth_manifest_sha256") != ground_truth.get("manifest_sha256"):
-        add("profile_data.profile_ground_truth_manifest_sha256 must match the leaderboard manifest")
+        add(
+            "profile_data.profile_ground_truth_manifest_sha256 must match "
+            f"{ground_truth_source}"
+        )
 
     split_path = ROOT / "benchmark-specs" / submission["dataset_id"] / split_spec_entry["index_file"]
     if split_path.is_file():
@@ -5097,6 +5454,83 @@ def validate_open_reproducibility(
             )
 
 
+def _validate_hilift_native_profile_score_bindings(
+    add: Any,
+    *,
+    submission: dict[str, Any],
+    case_metrics: dict[str, Any] | None,
+    recomputed_scores: dict[str, dict[str, float]],
+) -> None:
+    """Bind submitted HiLift profile scores to hidden-truth recomputation."""
+
+    metric_ids = ("cp_cut_r2", "velocity_profile_r2")
+    if case_metrics is None:
+        add(
+            "HiLiftAeroML hidden profile-truth recomputation requires valid "
+            "case-metrics evidence"
+        )
+        return
+    cases = case_metrics.get("cases")
+    if not isinstance(cases, list):
+        add("HiLiftAeroML case-metrics evidence has no cases array")
+        return
+    case_records = {
+        case.get("case_id"): case
+        for case in cases
+        if isinstance(case, dict) and isinstance(case.get("case_id"), str)
+    }
+    aggregate_inputs = {metric_id: [] for metric_id in metric_ids}
+    for case_id, scores in recomputed_scores.items():
+        record = case_records.get(case_id)
+        if not isinstance(record, dict):
+            add(f"hidden profile-truth recomputation has no case-metrics record for {case_id}")
+            continue
+        submitted_scores = record.get("nonspatial_metric_values")
+        if not isinstance(submitted_scores, dict):
+            add(f"case-metrics {case_id} has no nonspatial_metric_values")
+            continue
+        for metric_id in metric_ids:
+            recomputed = scores.get(metric_id)
+            submitted = submitted_scores.get(metric_id)
+            if not is_number(recomputed):
+                add(
+                    f"hidden profile-truth recomputation did not produce a finite "
+                    f"{metric_id} for {case_id}"
+                )
+                continue
+            aggregate_inputs[metric_id].append(float(recomputed))
+            if not is_number(submitted) or not math.isclose(
+                float(submitted),
+                float(recomputed),
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            ):
+                add(
+                    f"case-metrics {case_id} nonspatial_metric_values.{metric_id} "
+                    "must equal the benchmark hidden-truth recomputation"
+                )
+
+    submitted_aggregates = submission.get("metric_values")
+    if not isinstance(submitted_aggregates, dict):
+        add("submission metric_values are absent for hidden profile-truth recomputation")
+        return
+    for metric_id, values in aggregate_inputs.items():
+        if len(values) != len(recomputed_scores) or not values:
+            continue
+        expected = math.fsum(values) / len(values)
+        submitted = submitted_aggregates.get(metric_id)
+        if not is_number(submitted) or not math.isclose(
+            float(submitted),
+            expected,
+            rel_tol=1e-12,
+            abs_tol=1e-12,
+        ):
+            add(
+                f"metric_values.{metric_id} must equal the macro-average of the "
+                "benchmark hidden-truth per-case recomputation"
+            )
+
+
 def validate_profiles(
     add: Any,
     directory: Path,
@@ -5105,11 +5539,14 @@ def validate_profiles(
     split_spec_entry: dict[str, Any],
     *,
     candidate_dry_run: bool = False,
+    candidate_profile_truth_release: Path | None = None,
+    case_metrics: dict[str, Any] | None = None,
 ) -> dict[str, int]:
     profile_format = submission["profile_data"].get(
         "format", "fluidsbench-profile-chunks-v1"
     )
     relative_profile = profile_format == RELATIVE_PROFILE_FORMAT
+    hilift_native_profile = profile_format == HILIFT_PROFILE_FORMAT
     physical_coordinate_profile = (
         profile_format == "fluidsbench-drivaerml-physical-profile-chunks-v1"
     )
@@ -5117,6 +5554,7 @@ def validate_profiles(
         "fluidsbench-profile-chunks-v1",
         "fluidsbench-drivaerml-physical-profile-chunks-v1",
         RELATIVE_PROFILE_FORMAT,
+        HILIFT_PROFILE_FORMAT,
     }:
         add(f"unsupported profile_data.format {profile_format!r}")
         return {"cases": 0, "series": 0}
@@ -5168,6 +5606,67 @@ def validate_profiles(
                     "DrivAerML relative profile format is closed until all benchmark "
                     "activation gates are complete"
                 )
+    if hilift_native_profile and submission.get("dataset_id") != "hiliftaeroml":
+        add("the HiLiftAeroML native profile format is available only for HiLiftAeroML")
+    if candidate_profile_truth_release is not None and not candidate_dry_run:
+        add(
+            "candidate_profile_truth_release is permitted only with "
+            "candidate dry-run validation"
+        )
+    if candidate_dry_run and submission.get("dataset_id") == "hiliftaeroml":
+        if not hilift_native_profile:
+            add(
+                "HiLiftAeroML candidate dry-run requires the native prediction-only "
+                "profile format"
+            )
+        if candidate_profile_truth_release is None:
+            add(
+                "HiLiftAeroML candidate dry-run native profiles require an "
+                "explicit local candidate profile-truth release"
+            )
+    profile_definition = dataset_spec.get("profile_definition")
+    candidate_profile_truth: dict[str, Any] | None = None
+    if hilift_native_profile and submission.get("dataset_id") == "hiliftaeroml":
+        if not isinstance(profile_definition, dict):
+            add("HiLiftAeroML native profiles have no benchmark profile definition")
+        elif candidate_dry_run:
+            declared_candidate = profile_definition.get(
+                "candidate_dry_run_profile_ground_truth"
+            )
+            if not isinstance(declared_candidate, dict):
+                add(
+                    "HiLiftAeroML candidate dry-run profile truth has no benchmark "
+                    "declaration"
+                )
+            else:
+                candidate_profile_truth = declared_candidate
+                submitted_truth = submission.get("profile_data", {})
+                if (
+                    submitted_truth.get("profile_ground_truth_release_id")
+                    != declared_candidate.get("release_id")
+                ):
+                    add(
+                        "profile_data.profile_ground_truth_release_id must match the "
+                        "HiLiftAeroML candidate dry-run declaration"
+                    )
+                if (
+                    submitted_truth.get("profile_ground_truth_manifest_sha256")
+                    != declared_candidate.get("manifest_sha256")
+                ):
+                    add(
+                        "profile_data.profile_ground_truth_manifest_sha256 must match "
+                        "the HiLiftAeroML candidate dry-run declaration"
+                    )
+        else:
+            public_truth = profile_definition.get("profile_ground_truth")
+            if (
+                not isinstance(public_truth, dict)
+                or public_truth.get("status") != "published"
+            ):
+                add(
+                    "HiLiftAeroML native profile intake is closed until profile "
+                    "ground truth is published"
+                )
     index_path = directory / submission["profile_data"]["index_file"]
     if not index_path.is_file():
         add(f"missing profile index: {index_path.relative_to(ROOT)}")
@@ -5200,6 +5699,13 @@ def validate_profiles(
     elif physical_coordinate_profile:
         if index.get("format") != "fluidsbench-drivaerml-physical-profile-chunks-v1":
             add("profiles/index.json format must match profile_data.format")
+    elif hilift_native_profile:
+        if index.get("format") != HILIFT_PROFILE_FORMAT:
+            add("profiles/index.json format must match profile_data.format")
+        if index.get("contract_id") != HILIFT_PROFILE_CONTRACT_ID:
+            add("profiles/index.json contract_id is not the retained HiLift native-profile contract")
+        if index.get("contract_sha256") != HILIFT_PROFILE_CONTRACT_SHA256:
+            add("profiles/index.json contract_sha256 does not match the HiLift native-profile contract")
     elif index.get("format") not in {None, "fluidsbench-profile-chunks-v1"}:
         add("profiles/index.json format must match profile_data.format")
 
@@ -5238,6 +5744,7 @@ def validate_profiles(
     loaded_case_ids: list[str] = []
     series_count = 0
     referenced_files: set[str] = set()
+    referenced_profile_artifacts: set[str] = set()
     for chunk_entry in index.get("chunks", []):
         filename = chunk_entry.get("file", "")
         if not filename or Path(filename).name != filename:
@@ -5262,7 +5769,11 @@ def validate_profiles(
         chunk_schema = (
             "drivaerml-relative-profile-chunk.schema.json"
             if relative_profile
-            else "profile-chunk.schema.json"
+            else (
+                "hiliftaeroml-native-profile-chunk.schema.json"
+                if hilift_native_profile
+                else "profile-chunk.schema.json"
+            )
         )
         for error in schema_errors(chunk, chunk_schema):
             add(f"profiles/{filename} {error}")
@@ -5281,6 +5792,82 @@ def validate_profiles(
         if chunk_case_ids != chunk_entry.get("case_ids"):
             add(f"{filename} case order does not match profiles/index.json")
         loaded_case_ids.extend(chunk_case_ids)
+
+        if hilift_native_profile:
+            chunk_identity = {
+                "format": HILIFT_PROFILE_FORMAT,
+                "contract_id": HILIFT_PROFILE_CONTRACT_ID,
+                "contract_sha256": HILIFT_PROFILE_CONTRACT_SHA256,
+                "submission_id": submission["submission_id"],
+                "dataset_id": "hiliftaeroml",
+                "split_id": submission["split_id"],
+                "case_set_id": submission["case_set_id"],
+            }
+            for key, expected in chunk_identity.items():
+                if chunk.get(key) != expected:
+                    add(f"profiles/{filename} {key} must equal {expected!r}")
+            for case in chunk.get("cases", []):
+                if not isinstance(case, dict):
+                    continue
+                case_id = case.get("case_id")
+                for domain_key, expected_name, expected_arrays in (
+                    (
+                        "surface_cp",
+                        "surface-cp-predictions.npz",
+                        HILIFT_CP_PROFILE_ARRAYS,
+                    ),
+                    (
+                        "volume_velocity",
+                        "volume-velocity-predictions.npz",
+                        HILIFT_VELOCITY_PROFILE_ARRAYS,
+                    ),
+                ):
+                    domain = case.get(domain_key)
+                    artifact = domain.get("artifact") if isinstance(domain, dict) else None
+                    if not isinstance(artifact, dict):
+                        add(f"profiles/{filename} {case_id}/{domain_key} artifact is absent")
+                        continue
+                    relative_artifact = artifact.get("file")
+                    expected_relative = f"artifacts/{case_id}/{expected_name}"
+                    if relative_artifact != expected_relative:
+                        add(
+                            f"profiles/{filename} {case_id}/{domain_key} artifact.file "
+                            f"must equal {expected_relative!r}"
+                        )
+                        continue
+                    if relative_artifact in referenced_profile_artifacts:
+                        add(f"profile artifact {relative_artifact!r} is referenced more than once")
+                        continue
+                    referenced_profile_artifacts.add(relative_artifact)
+                    artifact_path = index_path.parent / relative_artifact
+                    try:
+                        resolved_artifact = artifact_path.resolve()
+                        resolved_artifact.relative_to(index_path.parent.resolve())
+                    except (OSError, ValueError):
+                        add(f"profile artifact escapes profiles/: {relative_artifact!r}")
+                        continue
+                    if not artifact_path.is_file() or artifact_path.is_symlink():
+                        add(f"missing regular profile artifact: {relative_artifact}")
+                        continue
+                    if artifact_path.stat().st_size != artifact.get("byte_size"):
+                        add(f"profile artifact {relative_artifact} byte_size differs")
+                    if artifact.get("source_native_npz_sha256") != domain.get(
+                        "source_npz_sha256"
+                    ):
+                        add(
+                            f"profile artifact {relative_artifact} source native SHA-256 differs"
+                        )
+                    try:
+                        validate_hilift_prediction_npz(
+                            artifact_path,
+                            expected_arrays=expected_arrays,
+                            expected_sha256=artifact.get("sha256"),
+                            metadata=domain,
+                        )
+                    except HiLiftNativeProfileError as error:
+                        add(f"profile artifact {relative_artifact} is invalid: {error}")
+            series_count += 15 * len(chunk_case_ids)
+            continue
 
         if relative_profile:
             if normalized_relative_chunk is not None:
@@ -5424,6 +6011,42 @@ def validate_profiles(
     actual_chunk_files = {path.name for path in index_path.parent.glob("chunk-*.json")}
     if actual_chunk_files != referenced_files:
         add(f"profile directory contains unindexed chunks: {sorted(actual_chunk_files - referenced_files)}")
+    if hilift_native_profile:
+        actual_profile_artifacts = {
+            path.relative_to(index_path.parent).as_posix()
+            for path in (index_path.parent / "artifacts").glob("**/*.npz")
+            if path.is_file()
+        }
+        if actual_profile_artifacts != referenced_profile_artifacts:
+            add(
+                "profile directory artifact inventory differs; "
+                f"missing={sorted(referenced_profile_artifacts - actual_profile_artifacts)[:5]}, "
+                f"unindexed={sorted(actual_profile_artifacts - referenced_profile_artifacts)[:5]}"
+            )
+        if (
+            candidate_dry_run
+            and candidate_profile_truth_release is not None
+            and candidate_profile_truth is not None
+        ):
+            try:
+                recomputed_scores = score_hilift_native_profile_directory(
+                    profiles_root=index_path.parent,
+                    release_root=candidate_profile_truth_release,
+                    candidate_declaration=candidate_profile_truth,
+                    submission_id=submission["submission_id"],
+                    split_id=submission["split_id"],
+                    case_set_id=submission["case_set_id"],
+                    expected_case_ids=expected_case_ids,
+                )
+            except HiLiftNativeProfileEvaluationError as error:
+                add(f"HiLiftAeroML hidden profile-truth scoring failed: {error}")
+            else:
+                _validate_hilift_native_profile_score_bindings(
+                    add,
+                    submission=submission,
+                    case_metrics=case_metrics,
+                    recomputed_scores=recomputed_scores,
+                )
     return {"cases": len(loaded_case_ids), "series": series_count}
 
 
@@ -5433,6 +6056,7 @@ def validate_submission_file(
     *,
     contributor_stage: bool = False,
     candidate_dry_run: bool = False,
+    candidate_profile_truth_release: Path | None = None,
 ) -> tuple[list[str], dict[str, int]]:
     errors: list[str] = []
     stats = {"cases": 0, "series": 0}
@@ -5444,11 +6068,25 @@ def validate_submission_file(
     if contributor_stage and candidate_dry_run:
         add("--contributor-stage and --candidate-dry-run are mutually exclusive")
         return errors, stats
+    if candidate_profile_truth_release is not None and not candidate_dry_run:
+        add(
+            "--candidate-profile-truth-release requires --candidate-dry-run"
+        )
+        return errors, stats
 
     try:
         submission = load_submission_json(path)
     except (OSError, json.JSONDecodeError, SubmissionJSONError) as error:
         add(f"cannot read submission JSON: {error}")
+        return errors, stats
+    if (
+        candidate_profile_truth_release is not None
+        and submission.get("dataset_id") != "hiliftaeroml"
+    ):
+        add(
+            "--candidate-profile-truth-release is available only for "
+            "HiLiftAeroML candidate validation"
+        )
         return errors, stats
     submission_schema_version = submission.get("schema_version")
     if candidate_dry_run and submission_schema_version != "3.0":
@@ -5550,6 +6188,7 @@ def validate_submission_file(
         ):
             add(f"methodology validation failed: {error}")
     split_case_ids: list[str] = []
+    case_metrics: dict[str, Any] | None = None
     has_regional_diagnostics = isinstance(submission.get("regional_diagnostics"), dict)
     if submission_schema_version == "3.0" or has_regional_diagnostics:
         split_path = ROOT / "benchmark-specs" / submission["dataset_id"] / spec_split["index_file"]
@@ -5599,7 +6238,12 @@ def validate_submission_file(
                 case_metrics=case_metrics,
                 dataset_spec=dataset_spec,
             )
-    evidence = validate_evaluation_evidence(add, path.parent, submission)
+    evidence = validate_evaluation_evidence(
+        add,
+        path.parent,
+        submission,
+        dataset_spec,
+    )
     if submission_schema_version == "3.0" or has_regional_diagnostics:
         validate_regional_diagnostics(
             add,
@@ -5627,6 +6271,8 @@ def validate_submission_file(
         dataset_spec,
         spec_split,
         candidate_dry_run=candidate_dry_run,
+        candidate_profile_truth_release=candidate_profile_truth_release,
+        case_metrics=case_metrics,
     )
     return errors, stats
 
@@ -5636,11 +6282,16 @@ def validate_many(
     *,
     contributor_stage: bool = False,
     candidate_dry_run: bool = False,
+    candidate_profile_truth_release: Path | None = None,
     manifest: dict[str, Any] | None = None,
 ) -> tuple[list[str], dict[str, int]]:
     if contributor_stage and candidate_dry_run:
         return [
             "--contributor-stage and --candidate-dry-run are mutually exclusive"
+        ], {"submissions": 0, "cases": 0, "series": 0}
+    if candidate_profile_truth_release is not None and not candidate_dry_run:
+        return [
+            "--candidate-profile-truth-release requires --candidate-dry-run"
         ], {"submissions": 0, "cases": 0, "series": 0}
     files = submission_files(paths)
     if not files:
@@ -5655,6 +6306,7 @@ def validate_many(
             manifest,
             contributor_stage=contributor_stage,
             candidate_dry_run=candidate_dry_run,
+            candidate_profile_truth_release=candidate_profile_truth_release,
         )
         errors.extend(current_errors)
         totals["cases"] += stats["cases"]
@@ -5712,11 +6364,20 @@ def main(argv: list[str] | None = None) -> int:
             "remote artifacts"
         ),
     )
+    parser.add_argument(
+        "--candidate-profile-truth-release",
+        type=Path,
+        help=(
+            "local inactive HiLiftAeroML profile-truth release; valid only for "
+            "--candidate-dry-run and never activates public intake"
+        ),
+    )
     args = parser.parse_args(argv)
     errors, totals = validate_many(
         args.paths or None,
         contributor_stage=args.contributor_stage,
         candidate_dry_run=args.candidate_dry_run,
+        candidate_profile_truth_release=args.candidate_profile_truth_release,
     )
     if errors:
         for error in errors:

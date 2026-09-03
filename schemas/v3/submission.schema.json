@@ -1221,7 +1221,10 @@
       ],
       "properties": {
         "format": {
-          "const": "drivaerml-regional-aggregate-v2"
+          "enum": [
+            "drivaerml-regional-aggregate-v2",
+            "hiliftaeroml-regional-diagnostics-aggregate-v1"
+          ]
         },
         "file": {
           "const": "regional-diagnostics.json"
@@ -1230,7 +1233,10 @@
           "$ref": "#/$defs/sha256"
         },
         "contract_sha256": {
-          "const": "2bfd372817989112642056e4c76cfb418dbdcee445c57ee20ca37ee9ca158583"
+          "$ref": "#/$defs/sha256"
+        },
+        "definition_id": {
+          "$ref": "#/$defs/safe_id"
         },
         "case_count": {
           "type": "integer",
@@ -1255,7 +1261,8 @@
         "format": {
           "enum": [
             "fluidsbench-profile-chunks-v1",
-            "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
+            "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate",
+            "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate"
           ]
         },
         "index_file": {

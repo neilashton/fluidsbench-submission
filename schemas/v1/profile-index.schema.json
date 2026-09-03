@@ -11,7 +11,8 @@
       "enum": [
         "fluidsbench-profile-chunks-v1",
         "fluidsbench-drivaerml-physical-profile-chunks-v1",
-        "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
+        "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate",
+        "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate"
       ]
     },
     "contract_id": {"type": "string", "minLength": 1},
@@ -42,7 +43,10 @@
       "if": {
         "properties": {
           "format": {
-            "const": "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate"
+            "enum": [
+              "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate",
+              "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate"
+            ]
           }
         },
         "required": ["format"]

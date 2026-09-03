@@ -1,0 +1,184 @@
+{
+  "schema": "hiliftaeroml-fluidsbench-candidate-evaluator-release-binding-v1",
+  "schema_version": 1,
+  "status": "prepared_evidence_bound_revision_unresolved",
+  "activation_effect": "none",
+  "dataset_id": "hiliftaeroml",
+  "reference_version": "hiliftaeroml-evaluator-v0.1-candidate",
+  "unresolved_token_prefix": "__UNRESOLVED_HILIFTAEROML_",
+  "repositories": {
+    "fluidsbench_adapter": {
+      "repository": "https://github.com/neilashton/fluidsbench-submission",
+      "observed_base_revision": "f18f3aabf5ed34e4d0502f584c4df826250e9bd2",
+      "observed_base_revision_contains_candidate_implementation": false,
+      "candidate_implementation_state": "working_tree_not_commit_bound",
+      "immutable_evaluator_code_revision": "__UNRESOLVED_HILIFTAEROML_EVALUATOR_CODE_REVISION__"
+    },
+    "native_evaluator": {
+      "repository": "https://github.com/NVIDIA/physicsnemo",
+      "observed_base_revision": "651c62656dd4f0ce5de9cd5afd0dbc389ae105bc",
+      "observed_base_revision_contains_candidate_implementation": false,
+      "candidate_implementation_state": "untracked_native_evaluator_sources_not_commit_bound",
+      "immutable_native_evaluator_code_revision": "__UNRESOLVED_HILIFTAEROML_NATIVE_EVALUATOR_CODE_REVISION__"
+    }
+  },
+  "dataset_force_release_binding": {
+    "status": "published_and_remote_sha256_verified",
+    "repository": "https://huggingface.co/datasets/nvidia/HiLiftAeroML",
+    "repository_type": "dataset",
+    "release_revision": "bbec30bcfc6103309c1375c5228b3ad0a586bfaf",
+    "release_tag": "force-mom-overrides-v1.1",
+    "pre_update_revision": "dd186e13724f39fc94186308519748cca32399eb",
+    "pre_update_tag": "force-mom-monitor-v1",
+    "archive_source_inventory_revision": "1c266d3869bc2968ff97d2107c9c3919be03ed32",
+    "archive_source_objects_changed": false,
+    "manifest": {
+      "file": "force_mom_surface_overrides_v1.json",
+      "sha256": "ccdb8e4f9f26176fd5eef8c87efbef5f1a9a211335d37694dcd8c1278a414f2f"
+    },
+    "aggregate": {
+      "file": "force_mom_all.csv",
+      "sha256": "e43e0e08f1475100fbe7f0338b1ed6b541aac8fdf376a6f3e7cea95c518955ed",
+      "changed_rows": 6,
+      "unchanged_rows": 1794
+    },
+    "per_case_csv_sha256": {
+      "geo_LHC012_AoA_16": "fdbb03dea16d3ddefc6e53acc8bd3a7af55a62304d61b7565283097b1654c629",
+      "geo_LHC018_AoA_16": "720d1b63d06fea76f193a631ed17452f3203b29bf8532aea923aecb253fe1279",
+      "geo_LHC028_AoA_18": "7e701fb0498d618ddc914e81aa18b072c45fc36f7df9a43edf852b97a76b5739",
+      "geo_LHC028_AoA_22": "27a211e329b0bb0ea1a22e2fa9cfd3a8519f81d6aaead2b3896e18e679db70e6",
+      "geo_LHC129_AoA_4": "c38169d62dbd33758d3b723f94f43825f21395f21e891f0457edf399b3c623ed",
+      "geo_LHC172_AoA_22": "71df28fb7d9e488c76cf84106391d6c917a91562eff7eb248b78c4f9b8b27995"
+    }
+  },
+  "retained_evidence_bindings": [
+    {
+      "id": "methodology_contract",
+      "file": "methodology-contract.json",
+      "sha256": "835f55a8f5c296f8635cbfdb9f09315fdcec16832ec14c4cd96e5eed08e96d9c"
+    },
+    {
+      "id": "candidate_scoring_support",
+      "file": "scoring-support/hiliftaeroml-native-all-splits-support-v1-candidate/manifest.json",
+      "sha256": "98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee"
+    },
+    {
+      "id": "native_profile_contract",
+      "file": "native-profile-format-v1.json",
+      "sha256": "39a1e79edf951b3e4f5d1b5fa456cbd1fad524e93dac1bdca58534e01647ae25"
+    },
+    {
+      "id": "inactive_candidate_profile_truth",
+      "file": "candidate-profile-truth-binding.json",
+      "sha256": "11deb05bb29d98149c72712aef571b9be4de543cd69d5d6a1ef68b5bd53f7b93"
+    },
+    {
+      "id": "regional_report_only_contract",
+      "file": "regional-diagnostics-v1.json",
+      "sha256": "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650"
+    },
+    {
+      "id": "public_archive_member_identity",
+      "file": "public-source-identity/hiliftaeroml-public-source-identity-v1.json",
+      "sha256": "44f62b90d58ab8e070c3df2a37c98435c576519222b1853a511e79b2124dc881"
+    },
+    {
+      "id": "public_huggingface_archive_metadata",
+      "file": "public-source-identity/hf-archive-metadata-rev-1c266d3869bc2968ff97d2107c9c3919be03ed32.json",
+      "sha256": "fb2d3881ac7b2ddea08f12fe4f202c5ce483436ece3065ee56c46f02777b0a05"
+    }
+  ],
+  "external_audit_bindings": {
+    "exact_moment_all_1800": {
+      "status": "complete_validation_passed",
+      "case_count": 1800,
+      "fluidsbench_union_case_count": 1355,
+      "aggregate_sha256": "f81698dca9cd90d093545635c97c5e528ab80dd3c9fc10937da25c9b1f919b9c",
+      "aggregate_size_bytes": 114163,
+      "validation_sha256": "1cb487329d6be81d5648199916176f246dd479a1f72713f352fa2f7c37009f7f",
+      "validation_size_bytes": 1037,
+      "source_reintegration_performed_by_validation": false,
+      "published_coefficients_modified": false,
+      "source_fields_modified": false
+    },
+    "transolver_full_360_legacy_native_aggregate": {
+      "status": "complete_fields_and_profiles_incomplete_force_policy_replay",
+      "case_count": 360,
+      "artifact_manifest_sha256": "027ecbff5de55ca5d4f0e12c4afc19a611bb66fc94e4e07ec73d3d1b1aeafbf9",
+      "auxiliary_summary_sha256": "8d4186a56e3f10efdf3284788214204d411ad5e2550178edde45c7ed38317d14",
+      "case_metrics_sha256": "f2b57cfc34de013e8ddf80d8c743e21e7067d49c080f62ae454bb3866aa9f982",
+      "regional_diagnostics_sha256": "40004f2ba74d17c8ce31add783ea6e1590ada5de292f48a2e50aa93f4c78a31e",
+      "submission_results_sha256": "a2036211719c504e1f34e1ffe99a7cf832827bc038aa3f7b5cd5e1828d108bd8",
+      "force_score_computed": false,
+      "overall_score_computed": false,
+      "acceptable_as_final_freeze_evidence": false
+    }
+  },
+  "force_truth_policy": {
+    "status": "truth_source_and_normalization_resolved_implementation_pending",
+    "scored_truth_source": "canonical_reintegration_of_native_surface_truth_fields_for_every_case",
+    "coefficient_normalization": "case_qRef_from_ref_values_csv",
+    "normalization_implementation": "convert checkpoint-space Cp and Cf from the training q_inf basis back to physical traction, then divide integrated force and moment by case qRef, areaRef, and chordRef as applicable",
+    "normalization_audit_note": "the current native scorer uses the training qinf basis while the exact-moment audit uses case qRef; their relative difference is approximately 0.007580 percent and must not be silently mixed",
+    "pressure_force_quadrature": "ordered_fan_exact_degree_1_linear_traction",
+    "viscous_force_quadrature": "ordered_fan_exact_degree_1_linear_traction",
+    "pitching_moment_quadrature": "hiliftaeroml-ordered-fan-exact-linear-traction-moment-v1",
+    "current_native_pitching_moment_status": "vertex_lumped_diagnostic_not_acceptable_as_claimed_exact_scored_cm",
+    "exact_minus_vertex_lumped_max_abs_cm": 1.84345e-7,
+    "published_force_moment_csv_role": "released_reference_and_provenance_diagnostic; six documented mean-coefficient rows are canonical surface-integrated overrides",
+    "monitor_comparison_protocol": "hilift-native-truth-vs-monitor-ci95-v1",
+    "perfect_surface_prediction_must_receive_perfect_load_metrics": true,
+    "historical_public_monitor_mismatch_case_ids": [
+      "geo_LHC012_AoA_16",
+      "geo_LHC018_AoA_16",
+      "geo_LHC028_AoA_18",
+      "geo_LHC028_AoA_22",
+      "geo_LHC172_AoA_22"
+    ],
+    "historical_outside_current_union_monitor_mismatch_case_ids": [
+      "geo_LHC129_AoA_4"
+    ],
+    "case_exclusion_or_downweighting_permitted": false,
+    "per_case_tolerance_inflation_permitted": false,
+    "surface_reintegration_value_substitution_policy": "exactly_the_six_manifested_cases_are_approved_and_published_at_force-mom-overrides-v1.1; all_other_rows_unchanged",
+    "surface_reintegration_value_substitution_case_count": 6,
+    "physical_monitor_field_mismatch_cause": "released averaged surface fields and original solver-monitor means differ for the six manifested cases; release documentation preserves that distinction",
+    "implementation_evidence_sha256": "__UNRESOLVED_HILIFTAEROML_FORCE_POLICY_IMPLEMENTATION_EVIDENCE_SHA256__"
+  },
+  "implementation_scope_to_freeze": {
+    "native_execution": [
+      "surface_and_volume_native_field_reductions",
+      "surface_load_force_and_exact_moment_reintegration",
+      "cp_and_velocity_profile_prediction_generation",
+      "complete_case_aggregation"
+    ],
+    "fluidsbench_adapter": [
+      "schema_v3_package_assembly",
+      "candidate_hidden_profile_truth_scoring",
+      "submission_validation",
+      "composite_score_reduction"
+    ],
+    "runtime_dependency_lock_sha256": "__UNRESOLVED_HILIFTAEROML_EVALUATOR_RUNTIME_LOCK_SHA256__",
+    "implementation_manifest_sha256": "__UNRESOLVED_HILIFTAEROML_EVALUATOR_IMPLEMENTATION_MANIFEST_SHA256__"
+  },
+  "activation_gates": {
+    "candidate_scoring_support_hash_bound": true,
+    "public_archive_member_identity_hash_bound": true,
+    "candidate_profile_truth_hash_bound": true,
+    "exact_moment_audit_hash_bound": true,
+    "force_truth_policy_selected": true,
+    "force_coefficient_normalization_selected": true,
+    "force_truth_policy_implemented_in_native_evaluator": false,
+    "full_360_force_and_overall_replay_complete": false,
+    "evaluator_implementation_manifest_complete": false,
+    "immutable_evaluator_revision_bound": false,
+    "owner_scientific_approval": false,
+    "public_profile_truth_published": false,
+    "submissions_open": false
+  },
+  "owner_approval": {
+    "status": "pending",
+    "record_sha256": "__UNRESOLVED_HILIFTAEROML_OWNER_APPROVAL_RECORD_SHA256__"
+  },
+  "notes": "This is a fail-closed release hand-off, not a frozen evaluator declaration. It binds the verified HiLiftAeroML force release and the completed scientific evidence while preserving the remaining technical freeze steps: implement exact degree-two prediction-side pitching moment with case-qRef normalization, replay the complete selected split, and commit every native and FluidsBench evaluator source under immutable revisions with a complete implementation manifest. It does not publish hidden truth, activate scoring, open submissions, or approve a leaderboard result."
+}

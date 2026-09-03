@@ -1,0 +1,191 @@
+# HiLiftAeroML closed-candidate submission contract
+
+HiLiftAeroML has a participant-shaped FluidsBench schema-v3 contract, but it is
+not open for submissions. The machine-readable
+[`submission-spec.json`](submission-spec.json) currently has
+`submissions_open: false`. A candidate package may be used for local or
+benchmark-owner-coordinated dry runs only; it is not accepted, rankable,
+citable as a leaderboard result, or evidence of benchmark approval.
+
+No private leaderboard is created or operated by this candidate workflow.
+`--candidate-dry-run` validates files locally and does not publish a row to a
+public or private leaderboard.
+
+The candidate brings the thoroughly tested DrivAerML packaging pattern to
+HiLiftAeroML while retaining HiLiftAeroML's native scientific definitions:
+
+- complete native-point surface and volume coverage with bounded-memory
+  chunking;
+- area-weighted surface and equal-valid-node volume reductions;
+- exact surface-force and pitching-moment integration;
+- native pressure cuts and velocity profiles; and
+- optional, zero-weight surface and volume regional reports.
+
+The detailed workflow is in [`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md).
+The activation work that remains is tracked separately in
+[`CANDIDATE_ACTIVATION_CHECKLIST.md`](CANDIDATE_ACTIVATION_CHECKLIST.md).
+
+## Official evaluation labels and case sets
+
+Each package declares exactly one `split_id`. The 14 accepted labels map to
+eight exact ordered evaluation case sets:
+
+| `split_id` | Display label | Evaluation cases | Case-set ID |
+| --- | --- | ---: | --- |
+| `full` | Full | 360 | `caseset-ac791749e527` |
+| `medium` | Medium | 360 | `caseset-ac791749e527` |
+| `scarce` | Scarce | 360 | `caseset-ac791749e527` |
+| `super_scarce` | Super scarce | 360 | `caseset-ac791749e527` |
+| `geometry` | Geometry | 360 | `caseset-53990ea68fa6` |
+| `geometry_medium` | Geometry medium | 360 | `caseset-53990ea68fa6` |
+| `geometry_scarce` | Geometry scarce | 360 | `caseset-53990ea68fa6` |
+| `geometry_super_scarce` | Geometry super scarce | 360 | `caseset-53990ea68fa6` |
+| `single_aoa_4` | AoA 4 | 36 | `caseset-7a743a20b3bd` |
+| `single_aoa_12` | AoA 12 | 36 | `caseset-02fc12ff3494` |
+| `single_aoa_22` | AoA 22 | 36 | `caseset-85ecccd9ccda` |
+| `aoa` | AoA extrapolation | 900 | `caseset-29693354ed8a` |
+| `deflection` | Deflection | 360 | `caseset-c0ecb14de138` |
+| `stall` | Stall | 723 | `caseset-804491c8956e` |
+
+The union contains 1,355 unique physical cases. Labels that share a case set
+still represent distinct declared training regimes; they are not interchangeable
+names. The files in [`splits/`](splits/) bind the ordered evaluation cases.
+Participants must use the matching dataset-owner training definition and
+describe it in the methodology record. Public evaluation fields are
+evaluation-only and must not influence fitting, normalization statistics,
+checkpoint selection, or manual model selection.
+
+## Native fields and reductions
+
+The closed candidate requires all four logical predictions for every case in
+the selected evaluation set:
+
+| Support | Required prediction | Primary spatial weight |
+| --- | --- | --- |
+| all native boundary `PointData` points | scalar surface pressure | published native nodal dual area |
+| all native boundary `PointData` points | three-component wall shear | published native nodal dual area |
+| retained native volume `PointData` points | scalar volume pressure | one per valid point |
+| retained native volume `PointData` points | three-component velocity | one per valid point |
+
+The volume validity rule is the raw Float32 `avg(P) != 0.0` test before
+normalization. There is no dual-volume or cell-volume-weighted secondary
+metric. Surface equal-native-node relative L2 is retained as a mandatory
+secondary diagnostic for both surface fields.
+
+For one case, relative L2 is
+
+`100 * sqrt(sum_i(w_i * ||prediction_i - truth_i||^2) / sum_i(w_i * ||truth_i||^2))`.
+
+For vector fields one point weight multiplies the complete squared
+three-component magnitude. A chunk contributes additive sufficient statistics;
+division and the square root happen only after the complete case closes. The
+benchmark value is then the equal arithmetic mean of the complete-case values
+in the selected split. It is not a pooled all-point ratio and never an average
+of chunk-local metrics.
+
+Relative metrics use `(P-p_inf)/q_inf`, `tau_wall/q_inf`, and `U/|U_inf|`.
+The companion MAE and RMSE diagnostics are converted back to their dimensional
+bases per case before equal-case macro aggregation.
+
+## Loads and composite score
+
+The evaluator derives loads from the same complete native surface prediction;
+participants do not provide an independently fitted force value. Pressure and
+viscous force use exact degree-one integration on each native polygon's ordered
+fan. Input `Cp` and `Cf` are on the training-`q_inf` basis, and the evaluator
+multiplies each integrated numerator by `q_inf/qRef` exactly once before
+normalizing by the case `areaRef`.
+
+Pitching moment is the exact degree-two integral of
+`(r-forcesCoR) cross traction` on the same ordered fan and is normalized by
+`qRef * areaRef * chordRef`. `Cd` and `Cl` are ranked through equal-case R2.
+`c_drag_mae`, `c_lift_mae`, and exact `c_pitch_mae` are required diagnostics;
+pitching moment has no duplicate composite weight. The released force/moment
+tables are reference and provenance records. Scored truth is canonical native
+surface reintegration, so participants must not substitute table values for
+their prediction-side integration.
+
+The bounded candidate composite is:
+
+| Component | Transform | Weight |
+| --- | --- | ---: |
+| surface pressure relative L2 | `clip(100 * (1 - error/15), 0, 100)` | 0.15 |
+| surface wall-shear relative L2 | `clip(100 * (1 - error/20), 0, 100)` | 0.10 |
+| volume velocity relative L2 | `clip(100 * (1 - error/12), 0, 100)` | 0.15 |
+| volume pressure relative L2 | `clip(100 * (1 - error/15), 0, 100)` | 0.10 |
+| `Cd` R2 | `100 * clip(R2, 0, 1)` | 0.15 |
+| `Cl` R2 | `100 * clip(R2, 0, 1)` | 0.10 |
+| velocity-profile R2 | `100 * clip(R2, 0, 1)` | 0.15 |
+| Cp-cut R2 | `100 * clip(R2, 0, 1)` | 0.10 |
+
+This preserves 50% field, 25% force, and 25% profile weight. The specification,
+not this prose summary, is the numerical source of truth.
+
+## Profile diagnostics
+
+Every complete case has ten pressure-cut rows, `A` through `J`. Cp scoring
+retains every disconnected physical cut graph, centers truth independently
+within each graph, pools graph weighted SSE and SST within the case, and then
+macro-averages complete-case R2 equally. Physical connected-cut arc length is
+the weight; disconnected graphs must never be joined by a new scoring edge.
+
+Volume velocity uses exactly five stations: `B.2`, `B.3`, `C.1`, `C.2`, and
+`C.3`. Each station retains 801 requested rows, its authoritative validity
+mask, physical polyline arc-length weights, and explicit gaps. Truth is centered
+within each station; station SSE and SST are pooled within the case before the
+equal-case macro average. Invalid runs remain serialized with zero weight and
+must not be interpolated or bridged.
+
+The package profile chunks contain predictions and alignment support, not
+ground truth. Candidate truth is a separate unpublished benchmark-owned
+release used only for an authorized local dry run. See
+[`native-profile-format-v1.json`](native-profile-format-v1.json) and
+[`NATIVE_PROFILE_TRUTH_EXPORT.md`](NATIVE_PROFILE_TRUTH_EXPORT.md).
+
+## Regional reporting
+
+[`regional-diagnostics-v1.json`](regional-diagnostics-v1.json) defines four
+surface regions and four volume regions. They reuse the native predictions and
+the primary field weights; no second inference is required. They report where
+error is concentrated, but their weight is `0.0`, they do not change any
+official metric, and they do not change the overall score.
+
+The named regions are geometric proxies, not CAD-part or flow-topology labels.
+Surface reports cover the nacelle-installation envelope, inboard high-lift
+envelope, outboard high-lift envelope, and the remaining surface. Volume
+reports cover the near-airframe signed-distance band, an aft wake envelope,
+the near-aircraft flow envelope, and the remaining far field.
+
+Regional output is optional while `required_for_new_submissions` remains
+`false`. If supplied, it must cover the complete selected case set and
+reconstruct the corresponding global sufficient statistics; a partial or
+fabricated report is not accepted.
+
+## Closed schema-v3 workflow
+
+Use the configuration template and instructions in
+[`../../examples/hiliftaeroml-v3-candidate/`](../../examples/hiliftaeroml-v3-candidate/)
+and [`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md). The assembler consumes the
+native evaluator's complete case-set aggregate, separate surface and volume
+output roots if necessary, case receipts, and the authorized local candidate
+profile-truth release. It writes a normal FluidsBench schema-v3 package and
+refuses missing cases, placeholder values, stale hashes, unresolved release
+bindings, or an existing output directory.
+
+Validate a resulting directory with `scripts/validate_submission.py` in
+`--candidate-dry-run` mode. A pass means only that the directory implements the
+closed candidate contract. It does not open submissions, grant owner approval,
+or create a leaderboard entry.
+
+The machine-readable authorities are:
+
+- [`submission-spec.json`](submission-spec.json) for metrics, weights, split
+  aliases, and lifecycle status;
+- [`methodology-contract.json`](methodology-contract.json) for required model
+  outputs;
+- [`native-profile-format-v1.json`](native-profile-format-v1.json) for
+  prediction-only profile serialization;
+- [`regional-diagnostics-v1.json`](regional-diagnostics-v1.json) for optional
+  report-only regions; and
+- [`candidate-evaluator-release-binding.json`](candidate-evaluator-release-binding.json)
+  for the fail-closed release hand-off.

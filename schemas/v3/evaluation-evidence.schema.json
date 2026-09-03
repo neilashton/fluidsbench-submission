@@ -38,6 +38,9 @@
     "prediction_scope": { "enum": ["surface_and_volume", "surface_only"] },
     "reference_version": { "type": "string", "minLength": 1, "maxLength": 160 },
     "code_revision": { "type": "string", "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$" },
+    "dataset_evaluator_binding": {
+      "$ref": "#/$defs/dataset_evaluator_binding"
+    },
     "command": { "type": "string", "minLength": 1, "maxLength": 2000 },
     "generated_at": { "type": "string", "format": "date-time" },
     "status": { "const": "submitted_evaluation" },
@@ -61,6 +64,23 @@
     "safe_id": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9._-]{0,159}$"
+    },
+    "dataset_evaluator_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reference_version", "code_revision"],
+      "properties": {
+        "status": { "const": "frozen" },
+        "reference_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "code_revision": {
+          "type": "string",
+          "pattern": "^(?:[a-f0-9]{40}|[a-f0-9]{64})$"
+        }
+      }
     }
   }
 }
