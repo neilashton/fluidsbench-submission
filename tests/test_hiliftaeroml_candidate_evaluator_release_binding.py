@@ -13,7 +13,7 @@ IMPLEMENTATION_MANIFEST_PATH = (
 )
 RUNTIME_LOCK_PATH = ROOT / "requirements-hiliftaeroml-evaluator.lock.txt"
 TOKEN_PREFIX = "__UNRESOLVED_HILIFTAEROML_"
-EVALUATOR_REVISION = "40bc0c60d21a1961be6f6cd891529dd99f84c2e7"
+EVALUATOR_REVISION = "68899f780d96b70f2badb5658971c87af0b17172"
 
 
 def sha256_file(path: Path) -> str:
@@ -107,7 +107,7 @@ def test_implementation_manifest_and_runtime_lock_are_exactly_bound() -> None:
     scope = load_binding()["implementation_scope_to_freeze"]
     assert scope["implementation_manifest_sha256"] == sha256_file(
         IMPLEMENTATION_MANIFEST_PATH
-    ) == "ad3c83b096024e12367b9d0f6b978b8510cfdf21bb94e546d64168005c78d3c4"
+    ) == "f94cef375b45c8604bbd65bb59c679af417340b39dd941c27beb363d59f883d6"
     assert scope["runtime_dependency_lock_sha256"] == sha256_file(
         RUNTIME_LOCK_PATH
     ) == "155f81a0d0ea1d88eb4b12e14e135eca07532fcdfde297bcb7fbc56c9469807b"
@@ -115,10 +115,10 @@ def test_implementation_manifest_and_runtime_lock_are_exactly_bound() -> None:
     manifest = json.loads(IMPLEMENTATION_MANIFEST_PATH.read_text(encoding="utf-8"))
     assert manifest["source_file_count"] == 860
     assert manifest["content_fingerprint"] == (
-        "18d2f621a0a864302ebfb82bfea4f3b9105e337108de75349a81571b28317b03"
+        "55d201297d3a71517a65b9021e2b458d99a0d642304c6b8d5c73933bb2e0e924"
     )
     assert manifest["source_inventory_fingerprint"] == (
-        "07074fb0e64290693e256effbace39ceba990f62cf57ed31b8dd01d89312bac2"
+        "615f1b8901fe663c6f386ceb2557863c1792c16ec535cc851ab4c59548bac516"
     )
     native_runtime = manifest["runtime_boundaries"]["native_gpu_container"]
     assert native_runtime["image_digest"] is None

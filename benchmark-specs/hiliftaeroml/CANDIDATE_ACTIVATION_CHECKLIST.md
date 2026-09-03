@@ -33,7 +33,7 @@ contract before the benchmark owner considers activation.
   `98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee`.
 - Regional report-only contract digest: `1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650`.
 - Closed candidate evaluator revision:
-  `40bc0c60d21a1961be6f6cd891529dd99f84c2e7`, frozen for maintainer-local
+  `68899f780d96b70f2badb5658971c87af0b17172`, frozen for maintainer-local
   candidate dry runs only with no activation effect.
 
 The scoring-support generator verifies all 1,355 unique evaluation cases
@@ -127,7 +127,7 @@ of the evidence above.
   closes exact-force implementation only; it does not close the overall-score
   and package-replay gate.
 - Obtain separate benchmark-owner approval of evaluator revision
-  `40bc0c60d21a1961be6f6cd891529dd99f84c2e7` before any public activation or
+  `68899f780d96b70f2badb5658971c87af0b17172` before any public activation or
   accepted submission.
 - Run `scripts/validate_submission.py --candidate-dry-run` on the complete
   package with no errors, then obtain a separate benchmark-owner approval before
