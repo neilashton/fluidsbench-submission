@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-08-31T12:44:17Z",
+  "generated_at": "2026-09-04T05:42:34Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-08-31-80674967510e",
+    "id": "prototype-dev-2026-09-02-65f278d37c88",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-08-31T12:44:17Z",
+    "generated_at": "2026-09-04T05:42:34Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "80674967510e1159a031e6d67d6bc98135e5ce8a8f39a6e8ac69e4fd5728bc3d",
+    "feed_sha256": "65f278d37c88fb5937fa89c4d7116b8cfb563d9ef9cdcd27e76d24b73b177278",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,16 +51,16 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "66c5ba45305aa0ba4977d1b990c52434bc017671aedf3ffb1ef617f79e3d2026",
-      "record_count": 63,
+      "index_sha256": "eb3a4037462f69af8e76b16bb699805305ae950653ee30a02f747e73fa2e7175",
+      "record_count": 56,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "ccf0f649c290bb9a09df414b8ceef6af96294e9f23d23ffe8dac06bd329aaa93",
-      "record_count": 63,
-      "series_count": 63
+      "sha256": "b6fd4744bcd1a7bc1806dc85a1c756489196a97ede56bdd871f650cc23deb92b",
+      "record_count": 56,
+      "series_count": 56
     }
   },
   "all_file": "leaderboard/all.json",
@@ -2128,8 +2128,8 @@
       "name": "HiLiftAeroML",
       "slug": "hiliftaeroml",
       "file": "leaderboard/datasets/hiliftaeroml.json",
-      "submission_count": 8,
-      "updated_at": "2026-07-08",
+      "submission_count": 1,
+      "updated_at": "2026-09-02",
       "metrics": {
         "dimensional_fields": [
           "surface_pressure",
@@ -2271,7 +2271,7 @@
           "description": "Flow-regime extrapolation from pre-stall training cases to post-stall test cases."
         }
       ],
-      "submission_format": "legacy_external_aero",
+      "submission_format": "hiliftaeroml_native_candidate_v3",
       "metric_ids": [
         "overall_score",
         "field_score",
@@ -2282,9 +2282,7 @@
         "surface_wall_shear_rel_l2",
         "surface_wall_shear_equal_entity_rel_l2",
         "volume_velocity_rel_l2",
-        "volume_velocity_physical_rel_l2",
         "volume_pressure_rel_l2",
-        "volume_pressure_physical_rel_l2",
         "surface_pressure_rel_l1",
         "surface_wall_shear_rel_l1",
         "volume_velocity_rel_l1",
@@ -2531,83 +2529,6 @@
           ],
           "stations": [
             {
-              "id": "hlpw5_a_1",
-              "label": "HLPW-5 A.1",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1034.95,
-              "y_in": 137.9135,
-              "surface_z_in": 191.75,
-              "description": "HLPW-5 velocity-profile station A.1 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_a_2",
-              "label": "HLPW-5 A.2",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1071.2212,
-              "y_in": 160.9808,
-              "surface_z_in": 195.4808,
-              "description": "HLPW-5 velocity-profile station A.2 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_a_3",
-              "label": "HLPW-5 A.3",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1365.5096,
-              "y_in": 227.1058,
-              "surface_z_in": 183.1173,
-              "description": "HLPW-5 velocity-profile station A.3 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_a_4",
-              "label": "HLPW-5 A.4",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1385.4231,
-              "y_in": 128.3423,
-              "surface_z_in": 156.9615,
-              "description": "HLPW-5 velocity-profile station A.4 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_a_5",
-              "label": "HLPW-5 A.5",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1421.5757,
-              "y_in": 129.1298,
-              "surface_z_in": 148.0621,
-              "description": "HLPW-5 velocity-profile station A.5 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_a_6",
-              "label": "HLPW-5 A.6",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1444.4584,
-              "y_in": 225.9062,
-              "surface_z_in": 167.196,
-              "description": "HLPW-5 velocity-profile station A.6 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_b_1",
-              "label": "HLPW-5 B.1",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1163.5769,
-              "y_in": 379.9615,
-              "surface_z_in": 190.8654,
-              "description": "HLPW-5 velocity-profile station B.1 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
               "id": "hlpw5_b_2",
               "label": "HLPW-5 B.2",
               "x_label": "z - z_surface (in)",
@@ -2626,17 +2547,6 @@
               "y_in": 360.8769,
               "surface_z_in": 205.5577,
               "description": "HLPW-5 velocity-profile station B.3 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_b_4",
-              "label": "HLPW-5 B.4",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1493.6878,
-              "y_in": 361.0165,
-              "surface_z_in": 173.5348,
-              "description": "HLPW-5 velocity-profile station B.4 at the published full-scale x/y location.",
               "basis": "published_validation_trace",
               "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
             },
@@ -2672,39 +2582,6 @@
               "description": "HLPW-5 velocity-profile station C.3 at the published full-scale x/y location.",
               "basis": "published_validation_trace",
               "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_d_1",
-              "label": "HLPW-5 D.1",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1799.3942,
-              "y_in": 1152.4692,
-              "surface_z_in": 268.0192,
-              "description": "HLPW-5 velocity-profile station D.1 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_d_2",
-              "label": "HLPW-5 D.2",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1821.0673,
-              "y_in": 1152.2827,
-              "surface_z_in": 270.1462,
-              "description": "HLPW-5 velocity-profile station D.2 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
-            },
-            {
-              "id": "hlpw5_d_3",
-              "label": "HLPW-5 D.3",
-              "x_label": "z - z_surface (in)",
-              "x_in": 1842.7404,
-              "y_in": 1152.2058,
-              "surface_z_in": 271.0212,
-              "description": "HLPW-5 velocity-profile station D.3 at the published full-scale x/y location.",
-              "basis": "published_validation_trace",
-              "source_url": "https://aiaa-hlpw.org/HLPW/index-workshop5.html"
             }
           ],
           "required": true,
@@ -2718,7 +2595,21 @@
       "scoring_support": {
         "status": "owner_review_required",
         "submissions_open": false,
-        "closed_reason": "Submissions are currently closed.",
+        "closed_reason": "Closed owner-review candidate: immutable public source-content pins, public profile-truth publication, and owner scientific approval remain pending. The immutable evaluator revision is frozen only for closed candidate dry runs and has no activation effect.",
+        "candidate_manifest": {
+          "status": "candidate",
+          "release_id": "hiliftaeroml-native-all-splits-support-v1-candidate",
+          "manifest_file": "scoring-support/hiliftaeroml-native-all-splits-support-v1-candidate/manifest.json",
+          "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/hiliftaeroml/scoring-support/hiliftaeroml-native-all-splits-support-v1-candidate/manifest.json",
+          "manifest_sha256": "98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee"
+        },
+        "dataset_evaluator_binding": {
+          "status": "frozen",
+          "repository_url": "https://github.com/neilashton/fluidsbench-submission",
+          "evaluator_reference_version": "hiliftaeroml-evaluator-v0.1-candidate",
+          "evaluator_code_revision": "68899f780d96b70f2badb5658971c87af0b17172",
+          "activation_rule": "This frozen revision may be used only for closed maintainer-local candidate dry runs; it does not publish profile truth, record owner approval, open submissions, or activate a public or private leaderboard."
+        },
         "coverage_contract": {
           "dimensionality": "3D surface and 3D flow domain",
           "rule": "complete_original_public_release_entities",
@@ -2746,26 +2637,55 @@
             "format": "tar-gzipped VTK UnstructuredGrid",
             "domain": "three_dimensional_flow_domain",
             "association": "PointData",
-            "entities": "all_native_volume_points",
-            "physical_weight": "mass_lumped_dual_cell_volume",
-            "verification": "confirmed_in_public_release_documentation"
+            "entities": "retained_native_volume_points_with_raw_float32_avg(P)_not_equal_to_zero",
+            "verification": "confirmed_in_public_release_documentation",
+            "primary_weight": "one_per_retained_valid_native_point"
           }
         ],
         "relative_l2_policy": {
           "surface_or_curve_primary": "physical_measure_weighted",
           "surface_or_curve_secondary": "equal_native_entity",
-          "flow_domain_primary": "equal_native_entity",
-          "flow_domain_secondary": "physical_measure_weighted",
-          "point_or_vertex_physical_weights": "deterministic_mass_lumped_dual_measure_from_the_exact_public_mesh",
+          "flow_domain_primary": "equal_valid_native_entity",
+          "flow_domain_secondary": "not_part_of_closed_candidate",
+          "point_or_vertex_physical_weights": "surface_only_deterministic_mass_lumped_dual_area_from_the_exact_public_mesh",
           "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
           "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
         },
+        "field_metric_value_bases": {
+          "relative_l1_l2": {
+            "surface_pressure": "(P-p_inf)/q_inf",
+            "surface_wall_shear": "tau_wall/q_inf",
+            "volume_pressure": "(P-p_inf)/q_inf",
+            "volume_velocity": "U/|U_inf|",
+            "aggregation": "form each complete-case ratio from additive sufficient statistics, then macro-average all cases in the selected split equally"
+          },
+          "dimensional_mae_rmse": {
+            "surface_pressure": "inverse-scale each case by q_inf into Pa",
+            "surface_wall_shear": "inverse-scale each case by q_inf into Pa",
+            "volume_pressure": "inverse-scale each case by q_inf into Pa",
+            "volume_velocity": "inverse-scale each case by |U_inf| into m/s",
+            "aggregation": "derive each dimensional complete-case value before macro-averaging all cases in the selected split equally"
+          },
+          "vector_reduction": {
+            "relative_l1": "component-flattened absolute numerator and denominator",
+            "relative_l2": "one nodal weight multiplies the squared three-component vector error and truth magnitude",
+            "mae_rmse": "current native-evaluator per-component convention over 3*N weighted scalar components"
+          }
+        },
+        "candidate_migration_notes": [
+          "The closed schema-v3 candidate removes the legacy diagnostic volume_velocity_physical_rel_l2 and volume_pressure_physical_rel_l2 requirements. The native Table-5 evaluator has never published or consumed volume dual-volume support; its frozen primary contract is equal valid native nodes. This candidate migration is not an activated public scoring change because submissions remain closed and unapproved.",
+          "Relative field metrics are bound to the frozen Table-5 nondimensional targets, while the existing paper-compatible MAE/RMSE metrics remain dimensional. A candidate aggregate must emit and audit both bases from the same per-case inference stream.",
+          "The closed candidate replaces the stale prototype 16-station velocity panel with the five frozen Table-5 stations B.2, B.3, C.1, C.2, and C.3. Velocity profiles use physical polyline arc length and within-station centering; Cp retains exact rows A-J with physical connected-cut arc length and independently centered connected graphs. This is not an activated public profile-contract change while submissions remain closed."
+        ],
         "owner_decisions_required": [
-          "pin_exact_public_release_files_revisions_and_hashes",
-          "confirm_array_names_entity_associations_masks_and_order",
-          "publish_authoritative_physical_weights_and_stable_entity_ids",
-          "approve_public_ground_truth_case_set_and_split_bindings",
-          "approve_loader_evaluator_and_immutable_scoring_support_manifest"
+          "pin_exact_public_release_archive_and_extracted_member_content_sha256_for_all_1355_unique_evaluation_cases",
+          "confirm_public_source_array_names_associations_retained_volume_mask_and_raw_point_order",
+          "publish_and_approve_authoritative_surface_dual_area_support",
+          "approve_all_exact_split_bindings_and_candidate_scoring_support_release",
+          "exercise_and_audit_same_stream_nondimensional_relative_and_dimensional_absolute_field_aggregation",
+          "freeze_lossless_cp_connected_graph_and_five_station_velocity_profile_serialization_and_public_truth_release",
+          "owner_approve_the_frozen_dataset_evaluator_git_revision_without_public_activation",
+          "approve_the_zero_weight_regional_contract_and_complete_split_aggregator"
         ]
       },
       "overall_score_composite": {
@@ -2848,7 +2768,28 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 8
+      "revision_count": 1,
+      "profile_definition": {
+        "status": "candidate_owner_review_required",
+        "contract_id": "hiliftaeroml-native-profile-predictions-v1-candidate",
+        "file": "native-profile-format-v1.json",
+        "format": "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate",
+        "sha256": "39a1e79edf951b3e4f5d1b5fa456cbd1fad524e93dac1bdca58534e01647ae25",
+        "profile_ground_truth": {
+          "status": "not_published",
+          "release_id": null,
+          "manifest_sha256": null
+        },
+        "candidate_dry_run_profile_ground_truth": {
+          "status": "complete_candidate_not_published",
+          "usage": "maintainer_local_candidate_dry_run_only",
+          "release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
+          "manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477",
+          "binding_file": "candidate-profile-truth-binding.json",
+          "binding_sha256": "11deb05bb29d98149c72712aef571b9be4de543cd69d5d6a1ef68b5bd53f7b93"
+        },
+        "activation_rule": "Publish and owner-approve one complete profile ground-truth release bound to this exact contract SHA-256 before accepting native profile chunks."
+      }
     },
     {
       "name": "WindsorML",

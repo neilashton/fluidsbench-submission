@@ -1,0 +1,388 @@
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+import numpy as np
+
+import scripts.materialize_hiliftaeroml_compact_profile_support as materializer
+from reference.hiliftaeroml.compact_profile_evaluator import (
+    COMPACT_PROFILE_CONTRACT_ID,
+    COMPACT_PROFILE_CONTRACT_SHA256,
+    COMPACT_SUPPORT_RELEASE_ID,
+    COMPACT_SUPPORT_RELEASE_STATUS,
+    COMPACT_SUPPORT_RELEASE_USAGE,
+    SOURCE_ARTIFACT_SHA256_KEYS,
+    open_compact_support_release,
+)
+from reference.hiliftaeroml.compact_profiles import (
+    COMPACT_PROFILE_FORMAT,
+    CP_POINTS_PER_GRAPH,
+    load_compact_support_npz,
+)
+from reference.hiliftaeroml.native_profile_evaluator import CandidateTruthRelease
+from reference.hiliftaeroml.native_profile_truth import (
+    CaseUniverse,
+    assemble_release,
+    build_case_truth,
+    build_source_index,
+    load_source_index,
+)
+from reference.hiliftaeroml.native_profiles import (
+    CP_SOURCE_ARRAYS,
+    PROFILE_CONTRACT_ID,
+    PROFILE_CONTRACT_SHA256,
+    canonical_json_bytes,
+)
+from tests.test_hiliftaeroml_native_profiles import (
+    CASE_ID,
+    make_case,
+    write_ordered_npz,
+)
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CASE_SET_ID = "caseset-test"
+
+
+def _digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _write_json(path: Path, value: object) -> str:
+    payload = canonical_json_bytes(value)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(payload)
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _tree_hashes(root: Path) -> dict[str, str]:
+    return {
+        path.relative_to(root).as_posix(): _digest(path)
+        for path in sorted(root.rglob("*"))
+        if path.is_file()
+    }
+
+
+def _truth_release(outputs: Path, root: Path) -> tuple[CandidateTruthRelease, str]:
+    case_ids = (CASE_ID,)
+    universe = CaseUniverse(
+        case_ids=case_ids,
+        case_sets=((CASE_SET_ID, case_ids, "9" * 64),),
+        support_manifest_sha256="8" * 64,
+        case_universe_sha256=hashlib.sha256(
+            f"{CASE_ID}\n".encode("utf-8")
+        ).hexdigest(),
+    )
+    source_path = root / "source-index.json"
+    build_source_index(
+        universe=universe,
+        outputs_roots=[outputs],
+        output_path=source_path,
+    )
+    source, source_sha = load_source_index(
+        source_path, universe=universe, require_complete=True
+    )
+    release_root = root / "release"
+    build_case_truth(case_id=CASE_ID, source=source, output_root=release_root)
+    manifest = assemble_release(
+        universe=universe,
+        source_index_sha256=source_sha,
+        output_root=release_root,
+        cases_per_chunk=1,
+    )
+    index = json.loads((release_root / "index.json").read_text(encoding="utf-8"))
+    manifest_sha = _digest(release_root / "manifest.json")
+    return (
+        CandidateTruthRelease(
+            campaign_root=root,
+            release_root=release_root.resolve(),
+            binding={},
+            manifest=manifest,
+            index=index,
+            case_set_id=CASE_SET_ID,
+            case_ids=case_ids,
+        ),
+        manifest_sha,
+    )
+
+
+def _poison_raw_truth_copy(outputs: Path) -> None:
+    surface = outputs / CASE_ID / "surface_submission_stream"
+    npz_path = surface / "cp_cut_values.npz"
+    with np.load(npz_path, allow_pickle=False) as archive:
+        arrays = {name: np.array(archive[name], copy=True) for name in archive.files}
+    arrays["truth_cp"] += 100.0
+    write_ordered_npz(npz_path, arrays, CP_SOURCE_ARRAYS)
+    metrics_path = surface / "cp_profile_metrics.json"
+    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    metrics["cut_values"]["sha256"] = _digest(npz_path)
+    metrics["cut_values"]["size_bytes"] = npz_path.stat().st_size
+    _write_json(metrics_path, metrics)
+
+
+def _benchmark_specification(root: Path, truth_manifest_sha: str) -> tuple[Path, Path]:
+    root.mkdir(parents=True, exist_ok=True)
+    contract_source = (
+        ROOT / "benchmark-specs/hiliftaeroml/native-profile-format-v2.json"
+    )
+    contract_path = root / "native-profile-format-v2.json"
+    contract_path.write_bytes(contract_source.read_bytes())
+    assert _digest(contract_path) == COMPACT_PROFILE_CONTRACT_SHA256
+
+    split = {
+        "schema_version": "1.0",
+        "dataset_id": "hiliftaeroml",
+        "split_id": "full",
+        "case_set_id": CASE_SET_ID,
+        "split_label": "Full fixture",
+        "case_id_status": "official",
+        "case_count": 1,
+        "case_set_sha256": hashlib.sha256(
+            f"{CASE_ID}\n".encode("utf-8")
+        ).hexdigest(),
+        "case_set_sha256_rule": materializer.CASE_SET_SHA256_RULE,
+        "case_ids": [CASE_ID],
+    }
+    split_path = root / "splits/full.json"
+    split_sha = _write_json(split_path, split)
+    binding_path = root / "candidate-profile-truth-binding.json"
+    binding_sha = _write_json(binding_path, {})
+    spec = {
+        "dataset_id": "hiliftaeroml",
+        "profile_definition": {
+            "contract_id": PROFILE_CONTRACT_ID,
+            "sha256": PROFILE_CONTRACT_SHA256,
+            "candidate_dry_run_profile_ground_truth": {
+                "status": "complete_candidate_not_published",
+                "usage": "maintainer_local_candidate_dry_run_only",
+                "release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
+                "manifest_sha256": truth_manifest_sha,
+                "binding_file": binding_path.name,
+                "binding_sha256": binding_sha,
+            },
+        },
+        "compact_profile_definition": {
+            "contract_id": COMPACT_PROFILE_CONTRACT_ID,
+            "file": contract_path.name,
+            "format": COMPACT_PROFILE_FORMAT,
+            "sha256": COMPACT_PROFILE_CONTRACT_SHA256,
+            "candidate_dry_run_evaluator_support": {
+                "status": COMPACT_SUPPORT_RELEASE_STATUS,
+                "usage": COMPACT_SUPPORT_RELEASE_USAGE,
+                "release_id": COMPACT_SUPPORT_RELEASE_ID,
+                "manifest_sha256": None,
+            },
+        },
+        "splits": [
+            {
+                "id": "full",
+                "label": "Full fixture",
+                "index_file": "splits/full.json",
+                "case_count": 1,
+                "case_set_id": CASE_SET_ID,
+                "case_id_status": "official",
+                "sha256": split_sha,
+            }
+        ],
+    }
+    spec_path = root / "submission-spec.json"
+    _write_json(spec_path, spec)
+    return spec_path, split_path
+
+
+def _arguments(
+    spec: Path, split: Path, outputs: Path, truth: Path, output: Path
+) -> list[str]:
+    return [
+        "--submission-spec",
+        str(spec),
+        "--split",
+        str(split),
+        "--surface-outputs-root",
+        str(outputs),
+        "--volume-outputs-root",
+        str(outputs),
+        "--source-truth-release",
+        str(truth),
+        "--output-root",
+        str(output),
+    ]
+
+
+def test_materializer_is_truth_safe_exclusive_and_ab_deterministic(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    outputs = tmp_path / "outputs"
+    make_case(outputs)
+    truth_handle, truth_manifest_sha = _truth_release(
+        outputs, tmp_path / "truth-campaign"
+    )
+    # A validated native output may carry a truth copy for historical reasons,
+    # but the compact materializer must never select it as authority.
+    _poison_raw_truth_copy(outputs)
+    spec, split = _benchmark_specification(
+        tmp_path / "benchmark-specs/hiliftaeroml", truth_manifest_sha
+    )
+
+    def fake_open_candidate_truth_release(**kwargs):
+        assert kwargs["expected_case_ids"] == (CASE_ID,)
+        assert kwargs["case_set_id"] == CASE_SET_ID
+        assert kwargs["release_root"] == truth_handle.release_root
+        return truth_handle
+
+    monkeypatch.setattr(
+        materializer,
+        "open_candidate_truth_release",
+        fake_open_candidate_truth_release,
+    )
+
+    releases = [tmp_path / "support-a", tmp_path / "support-b"]
+    receipts = []
+    for release in releases:
+        assert (
+            materializer.main(
+                _arguments(
+                    spec,
+                    split,
+                    outputs,
+                    truth_handle.release_root,
+                    release,
+                )
+            )
+            == 0
+        )
+        captured = capsys.readouterr()
+        assert captured.err == f"compact-support 1/1 {CASE_ID}\n"
+        receipts.append(json.loads(captured.out))
+
+    assert _tree_hashes(releases[0]) == _tree_hashes(releases[1])
+    assert (
+        receipts[0]["evaluator_support_manifest_sha256"]
+        == receipts[1]["evaluator_support_manifest_sha256"]
+    )
+    assert receipts[0]["points_per_physical_graph"] == CP_POINTS_PER_GRAPH == 128
+    assert receipts[0]["activation"] == {
+        "owner_approval_complete": False,
+        "published": False,
+        "submissions_opened": False,
+        "materialization_changes_activation": False,
+    }
+
+    manifest_sha = receipts[0]["evaluator_support_manifest_sha256"]
+    opened = open_compact_support_release(
+        release_root=releases[0],
+        expected_manifest_sha256=manifest_sha,
+        expected_case_ids=[CASE_ID],
+        case_set_id=CASE_SET_ID,
+    )
+    assert opened.source_profile_truth_release_id == (
+        "hiliftaeroml-native-profile-truth-v1-candidate"
+    )
+    assert opened.source_profile_truth_manifest_sha256 == truth_manifest_sha
+    record = opened.case_records[CASE_ID]
+    assert tuple(record["source_artifact_sha256"]) == SOURCE_ARTIFACT_SHA256_KEYS
+    identity_digests = (
+        record["surface_cp"]["support_identity_sha256"],
+        record["surface_cp"]["prediction_order_sha256"],
+        record["volume_velocity"]["support_identity_sha256"],
+        record["volume_velocity"]["prediction_order_sha256"],
+    )
+    assert all(
+        len(value) == 64 and set(value) <= set("0123456789abcdef")
+        for value in identity_digests
+    )
+    support_path = releases[0] / record["support"]["file"]
+    support, support_sha = load_compact_support_npz(support_path)
+    assert support_sha == record["support"]["sha256"]
+    assert support_path.stat().st_size == record["support"]["byte_size"]
+    # The raw source truth copy was shifted by +100 after the hidden release
+    # was built; the compact truth still comes from the hidden release.
+    assert support["cp_truth"].tolist() == [0.0, 0.25, 0.5]
+
+    # The first pass produces the digest that maintainers pin into the spec.
+    # Rebuilding against that pin is byte-identical; a different pin leaves no
+    # output release behind.
+    spec_body = json.loads(spec.read_text(encoding="utf-8"))
+    support_declaration = spec_body["compact_profile_definition"][
+        "candidate_dry_run_evaluator_support"
+    ]
+    support_declaration["manifest_sha256"] = manifest_sha
+    _write_json(spec, spec_body)
+    pinned = tmp_path / "support-pinned"
+    assert (
+        materializer.main(
+            _arguments(
+                spec,
+                split,
+                outputs,
+                truth_handle.release_root,
+                pinned,
+            )
+        )
+        == 0
+    )
+    capsys.readouterr()
+    assert _tree_hashes(pinned) == _tree_hashes(releases[0])
+    support_declaration["manifest_sha256"] = "0" * 64
+    _write_json(spec, spec_body)
+    wrong_pin = tmp_path / "support-wrong-pin"
+    assert (
+        materializer.main(
+            _arguments(
+                spec,
+                split,
+                outputs,
+                truth_handle.release_root,
+                wrong_pin,
+            )
+        )
+        == 2
+    )
+    assert not wrong_pin.exists()
+    capsys.readouterr()
+    support_declaration["manifest_sha256"] = manifest_sha
+    _write_json(spec, spec_body)
+
+    before = _tree_hashes(releases[0])
+    assert (
+        materializer.main(
+            _arguments(
+                spec,
+                split,
+                outputs,
+                truth_handle.release_root,
+                releases[0],
+            )
+        )
+        == 2
+    )
+    assert _tree_hashes(releases[0]) == before
+    capsys.readouterr()
+
+    # A source failure after the writer creates its root removes all partial
+    # bytes, so no incomplete release can retain a manifest-looking boundary.
+    metrics_path = (
+        outputs
+        / CASE_ID
+        / "surface_submission_stream"
+        / "cp_profile_metrics.json"
+    )
+    metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+    metrics["status"] = "incomplete"
+    _write_json(metrics_path, metrics)
+    failed = tmp_path / "support-failed"
+    assert (
+        materializer.main(
+            _arguments(
+                spec,
+                split,
+                outputs,
+                truth_handle.release_root,
+                failed,
+            )
+        )
+        == 2
+    )
+    assert not failed.exists()

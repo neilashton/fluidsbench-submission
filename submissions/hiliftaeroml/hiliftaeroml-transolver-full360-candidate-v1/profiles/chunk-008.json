@@ -1,0 +1,453 @@
+{
+  "schema": "hiliftaeroml-compact-profile-chunk-v2-candidate",
+  "schema_version": "2.0",
+  "format": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate",
+  "contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
+  "contract_sha256": "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c",
+  "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
+  "dataset_id": "hiliftaeroml",
+  "split_id": "full",
+  "case_set_id": "caseset-ac791749e527",
+  "cases": [
+    {
+      "case_id": "geo_LHC159_AoA_8",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC159_AoA_8/compact-profile-predictions.npz",
+        "sha256": "6ef84f86c3e29309491e64eecbb7355d7c9605da439b278dcbda3e0eaa37fac3",
+        "byte_size": 29918,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "f4460915796b16be172e1a50cb3f39854d334672da5d1b5734707dbc889563be",
+        "prediction_order_sha256": "84e589c6f1f57da9a1fa1a7b49c07f785357a4baf12d55ec3e3fbda068a35649",
+        "physical_graph_count": 177,
+        "retained_branch_count": 886,
+        "retained_point_count": 21048,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC162_AoA_18",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC162_AoA_18/compact-profile-predictions.npz",
+        "sha256": "d1d399eec9b4e657d0fb36d685c8c9be7a0aae9d6940b9c03e2e31cea6f96257",
+        "byte_size": 34559,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "c6802e3d29e8891d0e68637f4af9f7a03fc9f825326a73debe0fcbf0943481c0",
+        "prediction_order_sha256": "a3e5356063a48cb6c8c2cf015060d1862b3d2b6483aa2d289613309967bbf2b5",
+        "physical_graph_count": 196,
+        "retained_branch_count": 813,
+        "retained_point_count": 21857,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC164_AoA_16",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC164_AoA_16/compact-profile-predictions.npz",
+        "sha256": "e8e03746928a59d6d4bd9da1032fcec148ae8f23ea134881ee23c22e60cd92d5",
+        "byte_size": 32608,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "f9bb19c300d6092a9910ac0065fd24d232b380eadeaef3b4098f5d6c703b201c",
+        "prediction_order_sha256": "2dcb60292e1434ec8185d885137f0ad5d3c967f7303915b7b3421d89c4d144ca",
+        "physical_graph_count": 175,
+        "retained_branch_count": 933,
+        "retained_point_count": 21075,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC166_AoA_14",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC166_AoA_14/compact-profile-predictions.npz",
+        "sha256": "17a720bf13fef5127a82390ad87386079dc736a446ccab4a5b2ddba778a78d30",
+        "byte_size": 31403,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "032490e788aabe33fcbee4b680358c1bb5e1590ce1ac2b4f8e21f5f5d263229e",
+        "prediction_order_sha256": "588bbc906c08e6daae806bc51eebd5b5c33bcc159be70bbad2d25e5f17842f1d",
+        "physical_graph_count": 197,
+        "retained_branch_count": 819,
+        "retained_point_count": 22005,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC168_AoA_8",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC168_AoA_8/compact-profile-predictions.npz",
+        "sha256": "21ede45c180ac48dd837f5b01ca5e3da2bc53b453a698dbaaee4ab9202c34125",
+        "byte_size": 29711,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "6e1929f6f55c4ace1ef55eb1011283b747167df9f23f1ecc76bf13b7816a462c",
+        "prediction_order_sha256": "17e537668d440b11c9e083bcd6d021ed4f60cb9cf7a47c560b696665fa6b507e",
+        "physical_graph_count": 172,
+        "retained_branch_count": 877,
+        "retained_point_count": 20499,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC171_AoA_4",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC171_AoA_4/compact-profile-predictions.npz",
+        "sha256": "2d4925616078cbf8a2b8d69709850db91650c25854605d75a966579ee240411b",
+        "byte_size": 28645,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "0f42b1c7111f23440b7d1b8780e1969b86bf60825cd097a6cf59d6823d50fc1c",
+        "prediction_order_sha256": "cc0ebf0c82a7530bb70f613af20814c06aa5b51a5a1e925029aa27d7035f45a3",
+        "physical_graph_count": 201,
+        "retained_branch_count": 818,
+        "retained_point_count": 22711,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC172_AoA_20",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC172_AoA_20/compact-profile-predictions.npz",
+        "sha256": "3182f1e54db27dc8be02d3263c1b7ed695236fe2338bfb5b6c074af1c4426308",
+        "byte_size": 31023,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "f4df691692b9540b121227c29be28cfe78e8041180eadd9c0d62809c0b5656c6",
+        "prediction_order_sha256": "5214b9317850eba246ce7a727a0f8cb56ccb88717fd67c1738a6b6fc682eec11",
+        "physical_graph_count": 204,
+        "retained_branch_count": 879,
+        "retained_point_count": 23175,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC173_AoA_6",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC173_AoA_6/compact-profile-predictions.npz",
+        "sha256": "dd8e36646bc18495e2ca670b219a72fa635df4386000050cd1b1d4e5aca84b4c",
+        "byte_size": 28625,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "4a025e710452a65dd2911ebce0ba36504157df8e46cbf80eac698d484ca1df27",
+        "prediction_order_sha256": "02f99b473d31f9a51d3168a5d647fe7a2ad4f21b926c741cd5fa0ae176f45b22",
+        "physical_graph_count": 188,
+        "retained_branch_count": 812,
+        "retained_point_count": 21781,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC177_AoA_18",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC177_AoA_18/compact-profile-predictions.npz",
+        "sha256": "e1e527299118f0b956c7c2dcef7201a51227c32cdfc7a1f20a8bbdc5ee716bc0",
+        "byte_size": 31878,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "57a49c5b898925c84f0dc65b0addad2d2d8a9bef1d040c58e2157ccf51b1d53e",
+        "prediction_order_sha256": "387ff6579ee396f34e0c0e32be205a8ccd862f567487e8d75eb203b409b6d341",
+        "physical_graph_count": 204,
+        "retained_branch_count": 835,
+        "retained_point_count": 23089,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    },
+    {
+      "case_id": "geo_LHC179_AoA_14",
+      "artifact": {
+        "format": "numpy-npz-v1",
+        "file": "artifacts/geo_LHC179_AoA_14/compact-profile-predictions.npz",
+        "sha256": "eafdf0b5235f7dbd04035c261340e2e3cd0a10accaff1c878a4b3f1d2dbdc049",
+        "byte_size": 31309,
+        "array_order": [
+          "cp_q_delta",
+          "velocity_speed_over_u_inf"
+        ],
+        "ownership": "participant",
+        "content": "predictions_only"
+      },
+      "surface_cp": {
+        "support_identity_sha256": "66c3d994a547eb9e54e4102859ca9f5ac0fee2a42d3e3ea600e5c7876f9e218c",
+        "prediction_order_sha256": "d2f841087e42223a1383ca89248de09442092842c16123dd2a5f36c7383aa98b",
+        "physical_graph_count": 179,
+        "retained_branch_count": 826,
+        "retained_point_count": 21443,
+        "maximum_points_per_physical_graph": 128,
+        "quantization_scale": 1024,
+        "quantization_dtype": "int16",
+        "delta_dtype": "int16",
+        "prediction_array": "cp_q_delta"
+      },
+      "volume_velocity": {
+        "support_identity_sha256": "3b79ad5e81221f6651508db983e9203f932ba10d03db19c34d99257e54c02c82",
+        "prediction_order_sha256": "0d3add5158c18c2beaa973ada59bf9f2a33df29b651a1fffd5b488c6bb22a2b9",
+        "station_order": [
+          "B.2",
+          "B.3",
+          "C.1",
+          "C.2",
+          "C.3"
+        ],
+        "station_count": 5,
+        "row_count": 4005,
+        "valid_row_count": 3991,
+        "invalid_row_count": 14,
+        "prediction_dtype": "float32",
+        "prediction_array": "velocity_speed_over_u_inf"
+      }
+    }
+  ]
+}

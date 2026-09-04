@@ -17,6 +17,16 @@ dataset-specific required fields; the filled
 [`methodology.example.json`](drivaerml-v3-candidate/methodology.example.json)
 shows the record's shape but contains illustrative values only.
 
+For the closed HiLiftAeroML candidate, use
+[`hiliftaeroml-v3-candidate/`](hiliftaeroml-v3-candidate/). Its direct native
+adapter supports all official split labels, preserves disconnected Cp graphs
+and the exact five-station velocity support, and reports zero-weight surface
+and volume regions. It refuses to build force or overall results when any
+case lacks exact complete truth-load coverage. The completed hidden-profile
+truth candidate is bound for an explicit maintainer-local dry run, while the
+public truth binding remains unpublished and inactive; the template still
+retains an unresolved evaluator-revision token until that revision is frozen.
+
 A real dataset specification pins its original public field-bearing files and requires one mapped prediction for every official
 entity in every case. It also identifies whether fields are point-, node-, face-, or cell-associated and supplies the authoritative
 area, length, volume, or cell-area weights. The guidance distinguishes three-dimensional surfaces and flow domains, two-dimensional

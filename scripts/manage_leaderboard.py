@@ -21,6 +21,7 @@ if __package__:
         load_json,
         manifest_with_benchmark_contract,
         normalized_result_revision,
+        registered_hiliftaeroml_preview,
         schema_errors,
         sha256_file,
         submission_files,
@@ -32,6 +33,7 @@ else:
         load_json,
         manifest_with_benchmark_contract,
         normalized_result_revision,
+        registered_hiliftaeroml_preview,
         schema_errors,
         sha256_file,
         submission_files,
@@ -292,10 +294,22 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
     allowed_approval_status = "prototype" if release_status == "prototype_dummy_data" else "approved"
     for path in submission_files():
         submission = load_json(path)
-        if submission.get("approval", {}).get("status") != allowed_approval_status:
+        registered_preview = registered_hiliftaeroml_preview(
+            path,
+            submission,
+            manifest,
+            root=ROOT,
+        )
+        if (
+            registered_preview is None
+            and submission.get("approval", {}).get("status")
+            != allowed_approval_status
+        ):
             continue
         row = deepcopy(submission)
         row.pop("$schema", None)
+        if registered_preview is not None:
+            row["record_type"] = registered_preview["record_type"]
         row["parameter_count"] = row.get("parameter_count_millions")
         row["profile_data"]["index_file"] = str(
             (path.parent / row["profile_data"]["index_file"]).relative_to(ROOT)
@@ -485,15 +499,23 @@ def published_metric_value(value: int | float, decimal_places: int) -> tuple[Dec
 def claim_eligibility(release_status: str, row: dict[str, Any]) -> dict[str, Any]:
     if release_status == "prototype_dummy_data":
         if row.get("record_type") == "pre_release_reference":
+            if row.get("dataset_id") == "hiliftaeroml":
+                reason = (
+                    "Genuine HiLiftAeroML pre-release reference data retained to "
+                    "exercise the evaluator and leaderboard before submissions "
+                    "open; it is not an official benchmark result or ranking claim."
+                )
+            else:
+                reason = (
+                    "Genuine pre-release reference data retained to validate the "
+                    "DrivAerML workflow before submissions open; it is not an "
+                    "official benchmark result or ranking claim."
+                )
             return {
                 "academic_citation": False,
                 "promotion": False,
                 "reason_code": "pre_release_reference",
-                "reason": (
-                    "Genuine pre-release reference data retained to validate the "
-                    "DrivAerML workflow before submissions open; it is not an "
-                    "official benchmark result or ranking claim."
-                ),
+                "reason": reason,
             }
         return {
             "academic_citation": False,
@@ -1250,6 +1272,33 @@ def approve_submission(
         return [f"cannot read submission: {error}"]
     if submission.get("schema_version") != "3.0":
         return ["new approvals require submission schema_version=3.0"]
+    if submission.get("dataset_id") == "hiliftaeroml":
+        specification = load_json(
+            ROOT / "benchmark-specs" / "hiliftaeroml" / "submission-spec.json"
+        )
+        scoring_support = specification.get("scoring_support", {})
+        profile_definition = specification.get("profile_definition", {})
+        compact_definition = specification.get("compact_profile_definition", {})
+        compact_profile = (
+            submission.get("profile_data", {}).get("format")
+            == "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
+        )
+        if (
+            specification.get("status") != "official"
+            or scoring_support.get("status") != "official"
+            or scoring_support.get("submissions_open") is not True
+            or profile_definition.get("profile_ground_truth", {}).get("status")
+            != "published"
+            or (
+                compact_profile
+                and compact_definition.get("evaluator_support", {}).get("status")
+                != "published"
+            )
+        ):
+            return [
+                "HiLiftAeroML approval is closed until scoring support, profile "
+                "truth, and any compact evaluator support are officially published"
+            ]
     existing_approval = submission.get("approval")
     if existing_approval is not None and not update_existing:
         return ["submission already has approval metadata; pass --update-existing to update its PR URL"]

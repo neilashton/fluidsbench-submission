@@ -157,7 +157,8 @@ those records with the fixed or minimum/median/maximum summary and verifies `fra
 Contributors leave `approval` absent and must not add `maintainer-validation.json` or
 `prediction-artifact-checks.json`. After submitted-data validation, maintainers add
 the separately hashed validation record and `approval.status=approved`. Prototype packages use `approval.status=prototype`; the feed
-builder publishes only prototype and maintainer-approved rows, so an unapproved source package cannot appear on the leaderboard.
+builder publishes only prototype and maintainer-approved rows. The sole exception is an exact maintainer-registered, hash-bound
+HiLiftAeroML `pre_release_reference`; it remains unapproved and explicitly ineligible for citation or promotion.
 
 Sharing full or example prediction fields is optional. When used, `prediction_artifacts` points to a revision-pinned public Hugging
 Face dataset manifest. A maintainer may add one `prediction-artifact-checks.json` index recording accessibility, format, or explicit
