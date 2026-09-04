@@ -5,13 +5,84 @@
   "usage": "browser_visualization_only_not_metric_recomputation",
   "activation_effect": "none",
   "dataset_id": "hiliftaeroml",
-  "split_id": "full",
-  "case_set_id": "caseset-ac791749e527",
-  "case_count": 360,
+  "case_count": 1355,
+  "case_set_count": 8,
+  "splits": [
+    {
+      "split_id": "full",
+      "case_set_id": "caseset-ac791749e527",
+      "case_count": 360
+    },
+    {
+      "split_id": "medium",
+      "case_set_id": "caseset-ac791749e527",
+      "case_count": 360
+    },
+    {
+      "split_id": "scarce",
+      "case_set_id": "caseset-ac791749e527",
+      "case_count": 360
+    },
+    {
+      "split_id": "super_scarce",
+      "case_set_id": "caseset-ac791749e527",
+      "case_count": 360
+    },
+    {
+      "split_id": "geometry",
+      "case_set_id": "caseset-53990ea68fa6",
+      "case_count": 360
+    },
+    {
+      "split_id": "geometry_medium",
+      "case_set_id": "caseset-53990ea68fa6",
+      "case_count": 360
+    },
+    {
+      "split_id": "geometry_scarce",
+      "case_set_id": "caseset-53990ea68fa6",
+      "case_count": 360
+    },
+    {
+      "split_id": "geometry_super_scarce",
+      "case_set_id": "caseset-53990ea68fa6",
+      "case_count": 360
+    },
+    {
+      "split_id": "single_aoa_4",
+      "case_set_id": "caseset-7a743a20b3bd",
+      "case_count": 36
+    },
+    {
+      "split_id": "single_aoa_12",
+      "case_set_id": "caseset-02fc12ff3494",
+      "case_count": 36
+    },
+    {
+      "split_id": "single_aoa_22",
+      "case_set_id": "caseset-85ecccd9ccda",
+      "case_count": 36
+    },
+    {
+      "split_id": "aoa",
+      "case_set_id": "caseset-29693354ed8a",
+      "case_count": 900
+    },
+    {
+      "split_id": "deflection",
+      "case_set_id": "caseset-c0ecb14de138",
+      "case_count": 360
+    },
+    {
+      "split_id": "stall",
+      "case_set_id": "caseset-804491c8956e",
+      "case_count": 723
+    }
+  ],
   "profile_contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
   "profile_contract_sha256": "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c",
   "truth_release": {
-    "release_id": "hiliftaeroml-compact-profile-truth-full360-v1",
+    "release_id": "hiliftaeroml-compact-profile-truth-all1355-v1",
     "format": "fluidsbench-hiliftaeroml-compact-profile-truth-v1",
     "source_kind": "native_cfd",
     "analytical_dummy": false,
@@ -21,9 +92,9 @@
     "source_ref": "dev",
     "site_manifest_release_id": "prototype-profile-ground-truth-2026-09-04",
     "site_manifest_url": "https://fluidsbench.org/assets/data/profile-ground-truth/manifest.json",
-    "site_manifest_sha256": "9e1a9c80d2935e5196601e8556de98f49805a562420b7b56d5304d5d648e59fb",
-    "index_url": "https://fluidsbench.org/assets/data/profile-ground-truth/datasets/hiliftaeroml/compact-full360-v1/index.json",
-    "index_sha256": "255e6eff307c2ba983db8d4d63b5958ce073cc558546a3b4f385988d5ee42a2c"
+    "site_manifest_sha256": "06dbd0149a4f37976d6b00cde0ab0ecc6c3023a363001315abe576bb4d9443f5",
+    "master_index_url": "https://fluidsbench.org/assets/data/profile-ground-truth/datasets/hiliftaeroml/compact-all1355-v1/index.json",
+    "master_index_sha256": "07ba8bec0ae1079659114cc054a9a3c61344727328ec6cd6741cf93ad789d5d4"
   },
   "scoring_truth": {
     "release_id": "hiliftaeroml-native-profile-truth-v1-candidate",

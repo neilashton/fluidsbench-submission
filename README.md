@@ -329,7 +329,8 @@ self-referential commit hash.
 
 HiLiftAeroML's registered Full360 preview uses the compact-v2 prediction
 contract. Its public Cp and velocity comparison truth lives in the website
-repository and is bound as plot-only metadata; the private lossless evaluator
+repository as a deduplicated 1,355-case release covering all eight official
+case sets. It is bound as plot-only metadata; the private lossless evaluator
 truth remains the scoring authority and is not copied into this repository.
 
 Official `asset_base_url` and `release_view_url` values are clean HTTPS directory bases: their final path segment is exactly the
