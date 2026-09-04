@@ -871,44 +871,71 @@ def _load_case_record(
     ):
         raise NativeProfileTruthError(f"{case_id} truth record identity differs")
     if validate_artifact:
-        artifact_path, artifact_sha = _load_descriptor(
-            {
-                key: record["truth_artifact"][key]
-                for key in ("file", "sha256", "byte_size")
-            },
-            label=f"{case_id} truth artifact",
-            root=output_root,
-        )
-        try:
-            with np.load(artifact_path, allow_pickle=False) as archive:
-                if archive.files != list(TRUTH_ARRAYS):
-                    raise NativeProfileTruthError(
-                        f"{case_id} truth artifact array inventory/order differs"
-                    )
-                truth_cp = np.array(archive["truth_cp"], copy=True)
-                velocity = np.array(archive["reference_velocity_nd"], copy=True)
-        except (OSError, ValueError, zipfile.BadZipFile) as error:
-            raise NativeProfileTruthError(
-                f"cannot read {case_id} truth artifact: {error}"
-            ) from error
-        if artifact_sha != record["truth_artifact"]["sha256"]:
-            raise NativeProfileTruthError(f"{case_id} truth artifact digest differs")
-        if (
-            list(truth_cp.shape) != record["surface_cp"].get("truth_shape")
-            or truth_cp.dtype.str != record["surface_cp"].get("truth_dtype")
-            or array_identity(
-                truth_cp, namespace="fluidsbench-hiliftaeroml-cp-truth-v1"
-            )
-            != record["surface_cp"].get("truth_identity_sha256")
-            or list(velocity.shape) != record["volume_velocity"].get("truth_shape")
-            or velocity.dtype.str != record["volume_velocity"].get("truth_dtype")
-            or array_identity(
-                velocity, namespace="fluidsbench-hiliftaeroml-velocity-truth-v1"
-            )
-            != record["volume_velocity"].get("truth_identity_sha256")
-        ):
-            raise NativeProfileTruthError(f"{case_id} truth array identity differs")
+        _load_case_truth_artifact(output_root, case_id, record)
     return record, digest
+
+
+def _load_case_truth_artifact(
+    output_root: Path,
+    case_id: str,
+    record: Mapping[str, Any],
+) -> tuple[dict[str, np.ndarray], str]:
+    artifact_path, artifact_sha = _load_descriptor(
+        {
+            key: record["truth_artifact"][key]
+            for key in ("file", "sha256", "byte_size")
+        },
+        label=f"{case_id} truth artifact",
+        root=output_root,
+    )
+    try:
+        with np.load(artifact_path, allow_pickle=False) as archive:
+            if archive.files != list(TRUTH_ARRAYS):
+                raise NativeProfileTruthError(
+                    f"{case_id} truth artifact array inventory/order differs"
+                )
+            truth_cp = np.array(archive["truth_cp"], copy=True)
+            velocity = np.array(archive["reference_velocity_nd"], copy=True)
+    except (OSError, ValueError, zipfile.BadZipFile) as error:
+        raise NativeProfileTruthError(
+            f"cannot read {case_id} truth artifact: {error}"
+        ) from error
+    if artifact_sha != record["truth_artifact"]["sha256"]:
+        raise NativeProfileTruthError(f"{case_id} truth artifact digest differs")
+    if (
+        list(truth_cp.shape) != record["surface_cp"].get("truth_shape")
+        or truth_cp.dtype.str != record["surface_cp"].get("truth_dtype")
+        or array_identity(
+            truth_cp, namespace="fluidsbench-hiliftaeroml-cp-truth-v1"
+        )
+        != record["surface_cp"].get("truth_identity_sha256")
+        or list(velocity.shape) != record["volume_velocity"].get("truth_shape")
+        or velocity.dtype.str != record["volume_velocity"].get("truth_dtype")
+        or array_identity(
+            velocity, namespace="fluidsbench-hiliftaeroml-velocity-truth-v1"
+        )
+        != record["volume_velocity"].get("truth_identity_sha256")
+    ):
+        raise NativeProfileTruthError(f"{case_id} truth array identity differs")
+    return {
+        "truth_cp": truth_cp,
+        "reference_velocity_nd": velocity,
+    }, artifact_sha
+
+
+def load_case_truth_arrays(
+    output_root: Path,
+    case_id: str,
+) -> tuple[dict[str, Any], str, dict[str, np.ndarray], str]:
+    """Load one identity-checked truth record and its two canonical arrays."""
+
+    record, record_sha = _load_case_record(
+        output_root, case_id, validate_artifact=False
+    )
+    arrays, artifact_sha = _load_case_truth_artifact(
+        output_root, case_id, record
+    )
+    return record, record_sha, arrays, artifact_sha
 
 
 def assemble_release(
@@ -1400,6 +1427,7 @@ __all__ = [
     "build_case_truth_from_arrays",
     "build_source_index",
     "load_case_universe",
+    "load_case_truth_arrays",
     "load_source_index",
     "preflight",
     "validate_release",

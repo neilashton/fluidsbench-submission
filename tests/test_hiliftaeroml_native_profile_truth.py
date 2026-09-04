@@ -7,6 +7,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from reference.hiliftaeroml import (
+    native_profile_truth_materializer as truth_materializer,
+)
 from reference.hiliftaeroml.native_profile_truth import (
     TRUTH_ARRAYS,
     CaseUniverse,
@@ -15,6 +18,7 @@ from reference.hiliftaeroml.native_profile_truth import (
     assemble_release,
     build_case_truth,
     build_source_index,
+    load_case_truth_arrays,
     load_case_universe,
     load_source_index,
     preflight,
@@ -26,6 +30,7 @@ from reference.hiliftaeroml.native_profile_truth_materializer import (
     _reconstruct_cp,
     _reconstruct_velocity,
     _SparseVTUReader,
+    load_compact_profile_support_inputs,
 )
 from reference.hiliftaeroml.native_profiles import canonical_json_bytes
 from tests.test_hiliftaeroml_native_profiles import CASE_ID, make_case
@@ -172,6 +177,20 @@ def test_truth_release_is_lossless_deduplicated_and_deterministic(
         assert "predicted_velocity_nd" not in archive.files
         assert np.all(np.isfinite(archive["truth_cp"]))
         assert archive["reference_velocity_nd"].shape == (4005, 3)
+        expected_truth_cp = np.array(archive["truth_cp"], copy=True)
+        expected_velocity = np.array(archive["reference_velocity_nd"], copy=True)
+    loaded_record, loaded_record_sha, loaded_arrays, loaded_artifact_sha = (
+        load_case_truth_arrays(releases[0], CASE_ID)
+    )
+    assert loaded_record["case_id"] == CASE_ID
+    assert loaded_record_sha == digest(
+        releases[0] / "case-records" / f"{CASE_ID}.json"
+    )
+    assert loaded_artifact_sha == digest(artifact)
+    assert np.array_equal(loaded_arrays["truth_cp"], expected_truth_cp)
+    assert np.array_equal(
+        loaded_arrays["reference_velocity_nd"], expected_velocity, equal_nan=True
+    )
     record = json.loads(
         (releases[0] / "case-records" / f"{CASE_ID}.json").read_text(encoding="utf-8")
     )
@@ -481,6 +500,83 @@ def test_truth_materializer_sparse_vtu_reader_reads_only_selected_field_rows(
     assert reader.number_of_points == 5
     assert spec.shape == (5,)
     assert np.array_equal(selected, pressure[[0, 2, 4]])
+
+
+def test_compact_support_inputs_are_prediction_free_and_authority_bound(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    cp_names = (
+        "cut_xyz_in",
+        "branch_vertex_offsets",
+        "branch_vertex_ids",
+        "branch_segment_offsets",
+        "segment_lengths_in",
+        "branch_row_code",
+        "branch_graph_component_code",
+        "branch_component_code",
+        "branch_plane_piece_code",
+        "branch_side_code",
+        "branch_topology_patch_code",
+    )
+    cp_stencil = {name: np.asarray([index]) for index, name in enumerate(cp_names)}
+    velocity_stencil = {
+        "requested_xyz_in": np.zeros((3, 3)),
+        "valid_mask": np.asarray([True, True, True]),
+        "station_names": np.asarray(["B.2"]),
+        "station_row_offsets": np.asarray([0, 3]),
+        "support_raw_point_ids": np.asarray([7], dtype=np.int64),
+    }
+    monkeypatch.setattr(
+        truth_materializer,
+        "_load_cp_stencil",
+        lambda entry, case_id: (cp_stencil, {}, "b" * 64),
+    )
+    monkeypatch.setattr(
+        truth_materializer,
+        "_load_velocity_stencil",
+        lambda entry, case_id: (velocity_stencil, {}, "c" * 64),
+    )
+    monkeypatch.setattr(
+        truth_materializer,
+        "_load_validity",
+        lambda entry, case_id, support: (
+            np.asarray([0], dtype=np.int64),
+            {},
+            "d" * 64,
+        ),
+    )
+    monkeypatch.setattr(
+        truth_materializer,
+        "_line_weights",
+        lambda stencil: np.asarray([0.5, 1.0, 0.5]),
+    )
+    authority = {
+        "cases": {
+            CASE_ID: {
+                "authority_case_identity_sha256": "a" * 64,
+            }
+        }
+    }
+    cp, velocity, evidence = load_compact_profile_support_inputs(
+        case_id=CASE_ID,
+        authority=authority,
+    )
+    assert tuple(cp) == cp_names
+    assert "prediction_cp" not in cp
+    assert tuple(velocity) == (
+        "requested_xyz_in",
+        "valid_mask",
+        "station_names",
+        "station_row_offsets",
+        "line_length_weights_in",
+    )
+    assert "predicted_velocity_nd" not in velocity
+    assert evidence == {
+        "authority_case_identity_sha256": "a" * 64,
+        "cp_stencil_identity_sha256": "b" * 64,
+        "velocity_stencil_identity_sha256": "c" * 64,
+        "validity_identity_sha256": "d" * 64,
+    }
 
 
 def test_truth_materializer_sparse_profile_formulas_are_lossless() -> None:
