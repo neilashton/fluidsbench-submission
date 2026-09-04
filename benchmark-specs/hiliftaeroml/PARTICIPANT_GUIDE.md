@@ -204,8 +204,9 @@ and
 
 This alternative does not compact or replace the canonical native surface
 prediction. Full native Cp and wall-shear field metrics, forces, and pitching
-moment remain unchanged. A float32, plot-only projection of Full360 truth is
-publicly bound for dashboard comparison by
+moment remain unchanged. A float32, plot-only projection of truth for all
+1,355 unique cases across the eight official case sets is publicly bound for
+dashboard comparison by
 [`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json),
 but it omits scoring weights and is not an evaluator release. The v2 candidate
 therefore remains unbound for submission intake and inactive; access to either
@@ -366,9 +367,10 @@ this closed workflow.
 
 ### Optional local Full360 compact-v2 exercise
 
-The retained compact study covers the Full360 case set only. A maintainer with
-the authorized native-profile truth and complete Full360 native outputs can
-materialize an evaluator-owned support release locally:
+The retained real-surrogate compact package covers the Full360 case set only;
+the public plot-only truth separately covers every official case set. A
+maintainer with the authorized native-profile truth and complete Full360 native
+outputs can materialize an evaluator-owned scoring support release locally:
 
 ```bash
 python scripts/materialize_hiliftaeroml_compact_profile_support.py \

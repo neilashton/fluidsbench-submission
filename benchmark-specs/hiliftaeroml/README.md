@@ -149,10 +149,12 @@ release used only for an authorized local dry run. See
 [`NATIVE_PROFILE_TRUTH_EXPORT.md`](NATIVE_PROFILE_TRUTH_EXPORT.md).
 
 The website repository now publishes a separate, checksum-bound float32
-projection of the Full360 Cp and velocity truth for browser visualization.
-That derivative contains neither scoring weights nor the evaluator's lossless
-truth and cannot be used for metric recomputation. Its exact cross-repository
-binding is
+projection of the Cp and velocity truth for all 1,355 unique cases in all
+eight official case sets. Case artifacts are deduplicated across overlapping
+splits, while each case-set index preserves its exact official order. That
+derivative contains neither scoring weights nor the evaluator's lossless truth
+and cannot be used for metric recomputation. Its exact cross-repository binding
+is
 [`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json).
 
 ### Additive compact profile-v2 candidate
@@ -165,7 +167,11 @@ values. No truth, reference, geometry, topology, mask, weight, or alignment
 array is included in the participant artifact.
 
 The frozen Full360 study selected at most 128 samples per physical connected
-Cp graph, placed uniformly in physical graph arc length. Velocity retains the
+Cp graph, placed uniformly in physical graph arc length. The all-split support
+replay additionally confirms that a closed native contour is unwrapped by
+repeating its first vertex, thereby retaining its existing closing segment
+without creating a new edge; this does not change any Full360 support bytes.
+Velocity retains the
 five v1 stations and submits all and only evaluator-selected valid rows as
 scalar `float32` speed-over-freestream values. This compact path changes only
 Cp-cut and velocity-profile plotting/scoring payloads. Complete native-surface

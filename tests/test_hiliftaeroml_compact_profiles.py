@@ -72,6 +72,7 @@ def _native_inputs() -> tuple[
     )
     cp_native = {
         "cut_xyz_in": xyz,
+        "branch_closed": np.zeros(4, dtype=np.bool_),
         "branch_vertex_offsets": np.asarray([0, 3, 5, 7, 10], dtype=np.int64),
         "branch_vertex_ids": np.arange(10, dtype=np.int64),
         "branch_segment_offsets": np.asarray([0, 2, 3, 4, 6], dtype=np.int64),
@@ -179,6 +180,45 @@ def test_branch_allocation_prunes_only_tiny_branch_and_is_deterministic() -> Non
     )
     assert keep.tolist() == list(range(maximum_branches))
     assert allocation.tolist() == [2] * maximum_branches
+
+
+def test_closed_native_branch_is_unwrapped_without_adding_a_scoring_edge() -> None:
+    cp_native, truth_cp, velocity_native, truth_velocity = _native_inputs()
+    cp_native["branch_closed"][3] = True
+    cp_native["branch_segment_offsets"] = np.asarray(
+        [0, 2, 3, 4, 7], dtype=np.int64
+    )
+    cp_native["segment_lengths_in"] = np.asarray(
+        [3.0, 3.0, 4.0, 0.0005, 2.0, 2.0, 4.0], dtype=np.float64
+    )
+
+    support = build_compact_support(
+        cp_native=cp_native,
+        truth_cp=truth_cp,
+        velocity_native=velocity_native,
+        truth_velocity_nd=truth_velocity,
+    )
+    source_slot = support["cp_source_branch_index"].tolist().index(3)
+    start = int(support["cp_branch_point_offsets"][source_slot])
+    stop = int(support["cp_branch_point_offsets"][source_slot + 1])
+    assert stop - start == 4
+    np.testing.assert_array_equal(
+        support["cp_xyz_in"][start], support["cp_xyz_in"][stop - 1]
+    )
+    assert support["cp_arc_length_in"][stop - 1] == 8.0
+    assert support["cp_truth"][start] == support["cp_truth"][stop - 1]
+
+    artifact = encode_native_predictions(
+        support=support,
+        cp_native=cp_native,
+        velocity_native=velocity_native,
+    )
+    decoded_cp, _ = decode_compact_predictions(
+        artifact,
+        support=support,
+        metadata=compact_case_metadata(support),
+    )
+    assert decoded_cp[start] == decoded_cp[stop - 1]
 
 
 def test_support_and_prediction_roundtrip_are_deterministic_and_prediction_only(

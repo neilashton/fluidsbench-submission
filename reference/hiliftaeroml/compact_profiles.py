@@ -74,6 +74,7 @@ PREDICTION_ARRAYS = (
 
 _CP_NATIVE_SUPPORT_ARRAYS = (
     "cut_xyz_in",
+    "branch_closed",
     "branch_vertex_offsets",
     "branch_vertex_ids",
     "branch_segment_offsets",
@@ -234,6 +235,9 @@ def _validate_cp_native_support(
     segment_lengths = _require_array(
         arrays, "segment_lengths_in", dtype=np.float64, shape=(None,)
     )
+    closed = _require_array(
+        arrays, "branch_closed", dtype=np.bool_, shape=(branch_count,)
+    )
     row_codes = _require_array(
         arrays, "branch_row_code", dtype=np.uint8, shape=(branch_count,)
     )
@@ -283,9 +287,17 @@ def _validate_cp_native_support(
         vertex_end = int(vertex_offsets[branch_index + 1])
         segment_start = int(segment_offsets[branch_index])
         segment_end = int(segment_offsets[branch_index + 1])
-        if vertex_end - vertex_start != segment_end - segment_start + 1:
-            _fail("every native Cp branch must have one more vertex than segment")
+        vertex_count = vertex_end - vertex_start
+        segment_count = segment_end - segment_start
+        expected_segment_count = vertex_count if closed[branch_index] else vertex_count - 1
+        if vertex_count < 2 or segment_count != expected_segment_count:
+            _fail(
+                "every native Cp branch must have one segment per vertex when "
+                "closed, or one fewer segment than vertices when open"
+            )
         branch_xyz = xyz[vertex_ids[vertex_start:vertex_end]]
+        if closed[branch_index]:
+            branch_xyz = np.concatenate((branch_xyz, branch_xyz[:1]), axis=0)
         geometric_lengths = np.linalg.norm(np.diff(branch_xyz, axis=0), axis=1)
         declared_lengths = segment_lengths[segment_start:segment_end]
         if not np.allclose(
@@ -299,6 +311,7 @@ def _validate_cp_native_support(
         vertex_ids,
         segment_offsets,
         segment_lengths,
+        closed,
         row_codes,
         graph_codes,
         component_codes,
@@ -345,6 +358,7 @@ def build_compact_support(
         vertex_ids,
         segment_offsets,
         segment_lengths,
+        closed,
         row_codes,
         graph_codes,
         component_codes,
@@ -392,7 +406,11 @@ def build_compact_support(
         )
         native_point_counts = np.asarray(
             [
-                int(vertex_offsets[index + 1] - vertex_offsets[index])
+                int(
+                    vertex_offsets[index + 1]
+                    - vertex_offsets[index]
+                    + int(closed[index])
+                )
                 for index in branch_indices
             ],
             dtype=np.int64,
@@ -414,6 +432,10 @@ def build_compact_support(
             end = int(vertex_offsets[source_index + 1])
             ids = vertex_ids[start:end]
             branch_xyz = xyz[ids]
+            branch_truth = truth[ids]
+            if closed[source_index]:
+                branch_xyz = np.concatenate((branch_xyz, branch_xyz[:1]), axis=0)
+                branch_truth = np.concatenate((branch_truth, branch_truth[:1]))
             distance = np.linalg.norm(np.diff(branch_xyz, axis=0), axis=1)
             native_arc = np.concatenate(
                 (np.asarray([0.0], dtype=np.float64), np.cumsum(distance))
@@ -434,7 +456,7 @@ def build_compact_support(
                     for axis in range(3)
                 ]
             )
-            sample_truth = np.interp(sample_arc, native_arc, truth[ids])
+            sample_truth = np.interp(sample_arc, native_arc, branch_truth)
             compact_xyz.append(sample_xyz)
             compact_arc.append(sample_arc)
             compact_truth.append(sample_truth)
@@ -705,6 +727,7 @@ def sample_native_cp_prediction(
         vertex_ids,
         _segment_offsets,
         _segment_lengths,
+        closed,
         _rows,
         _graphs,
         _components,
@@ -734,6 +757,12 @@ def sample_native_cp_prediction(
         native_end = int(vertex_offsets[source_index + 1])
         ids = vertex_ids[native_start:native_end]
         branch_xyz = xyz[ids]
+        branch_prediction = prediction[ids]
+        if closed[source_index]:
+            branch_xyz = np.concatenate((branch_xyz, branch_xyz[:1]), axis=0)
+            branch_prediction = np.concatenate(
+                (branch_prediction, branch_prediction[:1])
+            )
         distance = np.linalg.norm(np.diff(branch_xyz, axis=0), axis=1)
         native_arc = np.concatenate(
             (np.asarray([0.0], dtype=np.float64), np.cumsum(distance))
@@ -755,7 +784,7 @@ def sample_native_cp_prediction(
             expected_xyz, support_xyz[start:end], rtol=1.0e-13, atol=1.0e-13
         ):
             _fail("compact support and native Cp plotting coordinates differ")
-        sampled.append(np.interp(target_arc, native_arc, prediction[ids]))
+        sampled.append(np.interp(target_arc, native_arc, branch_prediction))
     return np.concatenate(sampled).astype(np.float64, copy=False)
 
 

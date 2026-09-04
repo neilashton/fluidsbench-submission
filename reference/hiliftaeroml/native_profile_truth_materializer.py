@@ -1209,6 +1209,72 @@ def _line_weights(stencil: Mapping[str, np.ndarray]) -> np.ndarray:
     return result
 
 
+def load_compact_profile_support_inputs(
+    *,
+    case_id: str,
+    authority: Mapping[str, Any],
+) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], dict[str, str]]:
+    """Load prediction-free native support needed by compact profile-v2.
+
+    The compact sampling rule needs geometry/topology from the frozen Cp
+    stencil and coordinates, gaps, and line weights from the frozen velocity
+    stencil.  This helper deliberately does not read a model-output directory
+    or either full truth field.  The caller joins truth values from the
+    separately validated native-profile truth release.
+
+    At most one case's stencil payloads are resident at a time.  That makes
+    this entry point suitable for streaming the complete 1,355-case public
+    plotting projection without recreating the 1.755 GB lossless archive in
+    memory.
+    """
+
+    if SAFE_CASE_ID.fullmatch(case_id) is None:
+        raise NativeProfileTruthError(f"invalid case ID {case_id!r}")
+    entry = _entry(authority, case_id)
+    cp_stencil, _cp_record, cp_identity = _load_cp_stencil(entry, case_id)
+    velocity_stencil, _velocity_record, velocity_identity = (
+        _load_velocity_stencil(entry, case_id)
+    )
+    _support_compact, _validity, validity_identity = _load_validity(
+        entry, case_id, velocity_stencil["support_raw_point_ids"]
+    )
+
+    cp_arrays = {
+        name: cp_stencil[name]
+        for name in (
+            "cut_xyz_in",
+            "branch_closed",
+            "branch_vertex_offsets",
+            "branch_vertex_ids",
+            "branch_segment_offsets",
+            "segment_lengths_in",
+            "branch_row_code",
+            "branch_graph_component_code",
+            "branch_component_code",
+            "branch_plane_piece_code",
+            "branch_side_code",
+            "branch_topology_patch_code",
+        )
+    }
+    velocity_arrays = {
+        "requested_xyz_in": velocity_stencil["requested_xyz_in"],
+        "valid_mask": velocity_stencil["valid_mask"],
+        "station_names": velocity_stencil["station_names"],
+        "station_row_offsets": velocity_stencil["station_row_offsets"],
+        "line_length_weights_in": _line_weights(velocity_stencil),
+    }
+    evidence = {
+        "authority_case_identity_sha256": _sha(
+            entry.get("authority_case_identity_sha256"),
+            f"{case_id} authority identity",
+        ),
+        "cp_stencil_identity_sha256": cp_identity,
+        "velocity_stencil_identity_sha256": velocity_identity,
+        "validity_identity_sha256": validity_identity,
+    }
+    return cp_arrays, velocity_arrays, evidence
+
+
 def _oracle_exact(
     *, case_id: str, oracle_case_root: Path, truth_cp: np.ndarray, velocity: np.ndarray
 ) -> dict[str, Any]:
@@ -1514,6 +1580,7 @@ __all__ = [
     "build_prerequisite_authority_index",
     "build_support_map",
     "load_prerequisite_authority_index",
+    "load_compact_profile_support_inputs",
     "materialize_case_truth",
     "prerequisite_preflight",
 ]
