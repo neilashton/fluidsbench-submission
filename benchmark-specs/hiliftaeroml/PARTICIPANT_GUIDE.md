@@ -204,9 +204,13 @@ and
 
 This alternative does not compact or replace the canonical native surface
 prediction. Full native Cp and wall-shear field metrics, forces, and pitching
-moment remain unchanged. The v2 candidate is unbound for public use,
-unpublished, and inactive; access to a local support directory changes none of
-those lifecycle facts.
+moment remain unchanged. A float32, plot-only projection of Full360 truth is
+publicly bound for dashboard comparison by
+[`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json),
+but it omits scoring weights and is not an evaluator release. The v2 candidate
+therefore remains unbound for submission intake and inactive; access to either
+the public plot bundle or a local support directory changes none of those
+lifecycle facts.
 
 ## 6. Include regional reports only when complete
 

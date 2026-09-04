@@ -148,6 +148,13 @@ release used only for an authorized local dry run. See
 [`native-profile-format-v1.json`](native-profile-format-v1.json) and
 [`NATIVE_PROFILE_TRUTH_EXPORT.md`](NATIVE_PROFILE_TRUTH_EXPORT.md).
 
+The website repository now publishes a separate, checksum-bound float32
+projection of the Full360 Cp and velocity truth for browser visualization.
+That derivative contains neither scoring weights nor the evaluator's lossless
+truth and cannot be used for metric recomputation. Its exact cross-repository
+binding is
+[`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json).
+
 ### Additive compact profile-v2 candidate
 
 An additive, inactive v2 candidate removes geometry and topology arrays from
@@ -226,11 +233,14 @@ The machine-readable authorities are:
   outputs;
 - [`native-profile-format-v1.json`](native-profile-format-v1.json) for
   prediction-only profile serialization;
+- [`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json)
+  for the non-scoring Full360 browser-plot truth;
 - [`regional-diagnostics-v1.json`](regional-diagnostics-v1.json) for optional
   report-only regions; and
 - [`candidate-evaluator-release-binding.json`](candidate-evaluator-release-binding.json)
   for the fail-closed release hand-off.
 
 The additive [`native-profile-format-v2.json`](native-profile-format-v2.json)
-is a candidate contract only. Its evaluator-owned support is not public, and
-it does not supersede the v1 authority or activate compact-profile intake.
+is a candidate contract only. Its evaluator-owned scoring support is not
+public; publishing the plot-only derivative does not supersede the v1
+authority or activate compact-profile intake.
