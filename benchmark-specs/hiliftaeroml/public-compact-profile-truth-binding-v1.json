@@ -1,0 +1,34 @@
+{
+  "schema": "hiliftaeroml-public-compact-profile-truth-binding-v1",
+  "schema_version": "1.0",
+  "status": "public_plot_only_candidate",
+  "usage": "browser_visualization_only_not_metric_recomputation",
+  "activation_effect": "none",
+  "dataset_id": "hiliftaeroml",
+  "split_id": "full",
+  "case_set_id": "caseset-ac791749e527",
+  "case_count": 360,
+  "profile_contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
+  "profile_contract_sha256": "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c",
+  "truth_release": {
+    "release_id": "hiliftaeroml-compact-profile-truth-full360-v1",
+    "format": "fluidsbench-hiliftaeroml-compact-profile-truth-v1",
+    "source_kind": "native_cfd",
+    "analytical_dummy": false,
+    "plot_only": true,
+    "contains_scoring_weights": false,
+    "repository": "https://github.com/neilashton/fluidsbench",
+    "source_ref": "dev",
+    "site_manifest_release_id": "prototype-profile-ground-truth-2026-09-04",
+    "site_manifest_url": "https://fluidsbench.org/assets/data/profile-ground-truth/manifest.json",
+    "site_manifest_sha256": "9e1a9c80d2935e5196601e8556de98f49805a562420b7b56d5304d5d648e59fb",
+    "index_url": "https://fluidsbench.org/assets/data/profile-ground-truth/datasets/hiliftaeroml/compact-full360-v1/index.json",
+    "index_sha256": "255e6eff307c2ba983db8d4d63b5958ce073cc558546a3b4f385988d5ee42a2c"
+  },
+  "scoring_truth": {
+    "release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
+    "manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477",
+    "published": false,
+    "relationship": "the public plot release is a float32 visualization projection and does not replace this evaluator-owned scoring truth"
+  }
+}
