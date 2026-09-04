@@ -299,6 +299,11 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
     hilift = next(
         item for item in leaderboard["datasets"] if item["slug"] == "hiliftaeroml"
     )
+    expected_profile_definition = json.loads(
+        (ROOT / spec_relative).read_text(encoding="utf-8")
+    )["profile_definition"]
+    derived_profile_definition = hilift.pop("profile_definition")
+    assert derived_profile_definition == expected_profile_definition
     hilift["submission_count"] += 1
     hilift["updated_at"] = "2099-12-31"
     hilift["revision_count"] += 1
@@ -327,6 +332,8 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
         for item in scientific_leaderboard["datasets"]
         if item["slug"] == "hiliftaeroml"
     )
+    derived_profile_definition = scientific_hilift.pop("profile_definition")
+    assert derived_profile_definition == expected_profile_definition
     scientific_hilift["overall_score_composite"]["components"][0]["weight"] += 0.001
     scientific_leaderboard_path = tmp_path / "leaderboard-scientific.json"
     scientific_leaderboard_path.write_text(

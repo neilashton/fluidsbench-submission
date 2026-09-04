@@ -9,6 +9,24 @@
     "submissions_opened": false,
     "validation_changes_activation": false
   },
+  "registered_preview": {
+    "status": "registered_pre_release_reference",
+    "record_type": "pre_release_reference",
+    "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
+    "submission_path": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/submission.json",
+    "submission_json_sha256": "fcccbf5a36e473858e7360c623bad95fa01031bab02d55a734dabe17b9f5ca38",
+    "deterministic_archive": {
+      "sha256": "7a0c0842c34ecef9b67ed2e1d06fb979a10316f151e695c8038fbd96090bc066",
+      "size_bytes": 11514743,
+      "member_count": 403
+    },
+    "ordinary_validation_scope": "structure_hashes_inventory_and_deterministic_archive_only",
+    "truth_dependent_metric_recomputation": "maintainer_local_candidate_dry_run_only",
+    "claim_eligibility": {
+      "academic_citation": false,
+      "promotion": false
+    }
+  },
   "implementation_provenance": {
     "status": "unbound_worktree_candidate",
     "activation_effect": "none",

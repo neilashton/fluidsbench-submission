@@ -4,12 +4,18 @@ HiLiftAeroML has a participant-shaped FluidsBench schema-v3 contract, but it is
 not open for submissions. The machine-readable
 [`submission-spec.json`](submission-spec.json) currently has
 `submissions_open: false`. A candidate package may be used for local or
-benchmark-owner-coordinated dry runs only; it is not accepted, rankable,
-citable as a leaderboard result, or evidence of benchmark approval.
+benchmark-owner-coordinated dry runs only; it is not accepted, citable as an
+official result, or evidence of benchmark approval. One exact real-inference
+Full360 package is additionally registered by path and hashes as a public
+`pre_release_reference` so the evaluator, plots, and leaderboard integration
+can be exercised before intake opens. Its citation and promotion eligibility
+are both false.
 
 No private leaderboard is created or operated by this candidate workflow.
-`--candidate-dry-run` validates files locally and does not publish a row to a
-public or private leaderboard.
+`--candidate-dry-run` validates files locally and does not register arbitrary
+candidates. The sole preview registration is maintained in
+[`compact-profile-full360-validation-v1.json`](compact-profile-full360-validation-v1.json)
+and is bound to the deterministic compact archive identity.
 
 The candidate brings the thoroughly tested DrivAerML packaging pattern to
 HiLiftAeroML while retaining HiLiftAeroML's native scientific definitions:
@@ -170,6 +176,11 @@ and
 The completed two-build Full360 size, identity, metric, and validation receipt
 is
 [`compact-profile-full360-validation-v1.json`](compact-profile-full360-validation-v1.json).
+The retained evaluator implementation manifest predates this additive compact
+preview and does not attest it. Compact implementation provenance therefore
+remains explicitly `unbound_worktree_candidate` until a complete compact-source
+inventory and immutable evaluator revision are frozen; preview registration
+does not activate or implicitly revise that older attestation.
 
 ## Regional reporting
 
@@ -204,7 +215,8 @@ bindings, or an existing output directory.
 Validate a resulting directory with `scripts/validate_submission.py` in
 `--candidate-dry-run` mode. A pass means only that the directory implements the
 closed candidate contract. It does not open submissions, grant owner approval,
-or create a leaderboard entry.
+or create a leaderboard entry. Only the separately registered, hash-bound
+Full360 preview is visible as a non-citable pre-release reference.
 
 The machine-readable authorities are:
 

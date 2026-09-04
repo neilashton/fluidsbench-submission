@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-08-31T12:44:17Z",
+  "generated_at": "2026-09-04T05:42:34Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-08-31-80674967510e",
+    "id": "prototype-dev-2026-09-02-65f278d37c88",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-08-31T12:44:17Z",
+    "generated_at": "2026-09-04T05:42:34Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "80674967510e1159a031e6d67d6bc98135e5ce8a8f39a6e8ac69e4fd5728bc3d",
+    "feed_sha256": "65f278d37c88fb5937fa89c4d7116b8cfb563d9ef9cdcd27e76d24b73b177278",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,16 +51,16 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "66c5ba45305aa0ba4977d1b990c52434bc017671aedf3ffb1ef617f79e3d2026",
-      "record_count": 63,
+      "index_sha256": "eb3a4037462f69af8e76b16bb699805305ae950653ee30a02f747e73fa2e7175",
+      "record_count": 56,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "ccf0f649c290bb9a09df414b8ceef6af96294e9f23d23ffe8dac06bd329aaa93",
-      "record_count": 63,
-      "series_count": 63
+      "sha256": "b6fd4744bcd1a7bc1806dc85a1c756489196a97ede56bdd871f650cc23deb92b",
+      "record_count": 56,
+      "series_count": 56
     }
   },
   "all_file": "leaderboard/all.json",
@@ -2128,8 +2128,8 @@
       "name": "HiLiftAeroML",
       "slug": "hiliftaeroml",
       "file": "leaderboard/datasets/hiliftaeroml.json",
-      "submission_count": 8,
-      "updated_at": "2026-07-08",
+      "submission_count": 1,
+      "updated_at": "2026-09-02",
       "metrics": {
         "dimensional_fields": [
           "surface_pressure",
@@ -2768,7 +2768,28 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 8
+      "revision_count": 1,
+      "profile_definition": {
+        "status": "candidate_owner_review_required",
+        "contract_id": "hiliftaeroml-native-profile-predictions-v1-candidate",
+        "file": "native-profile-format-v1.json",
+        "format": "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate",
+        "sha256": "39a1e79edf951b3e4f5d1b5fa456cbd1fad524e93dac1bdca58534e01647ae25",
+        "profile_ground_truth": {
+          "status": "not_published",
+          "release_id": null,
+          "manifest_sha256": null
+        },
+        "candidate_dry_run_profile_ground_truth": {
+          "status": "complete_candidate_not_published",
+          "usage": "maintainer_local_candidate_dry_run_only",
+          "release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
+          "manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477",
+          "binding_file": "candidate-profile-truth-binding.json",
+          "binding_sha256": "11deb05bb29d98149c72712aef571b9be4de543cd69d5d6a1ef68b5bd53f7b93"
+        },
+        "activation_rule": "Publish and owner-approve one complete profile ground-truth release bound to this exact contract SHA-256 before accepting native profile chunks."
+      }
     },
     {
       "name": "WindsorML",

@@ -10,6 +10,7 @@ import math
 import re
 import subprocess
 import sys
+import tempfile
 from copy import deepcopy
 from datetime import date, datetime
 from pathlib import Path
@@ -91,6 +92,40 @@ HILIFT_COMPACT_PROFILE_IMPLEMENTATION_BINDING = {
     "base_dataset_evaluator_scope": (
         "native_v1_base_field_force_and_noncompact_scoring_only"
     ),
+}
+HILIFT_REGISTERED_PREVIEW_RECORD_PATH = (
+    Path("benchmark-specs")
+    / "hiliftaeroml"
+    / "compact-profile-full360-validation-v1.json"
+)
+HILIFT_REGISTERED_PREVIEW = {
+    "status": "registered_pre_release_reference",
+    "record_type": "pre_release_reference",
+    "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
+    "submission_path": (
+        "submissions/hiliftaeroml/"
+        "hiliftaeroml-transolver-full360-candidate-v1/submission.json"
+    ),
+    "submission_json_sha256": (
+        "fcccbf5a36e473858e7360c623bad95fa01031bab02d55a734dabe17b9f5ca38"
+    ),
+    "deterministic_archive": {
+        "sha256": (
+            "7a0c0842c34ecef9b67ed2e1d06fb979a10316f151e695c8038fbd96090bc066"
+        ),
+        "size_bytes": 11_514_743,
+        "member_count": 403,
+    },
+    "ordinary_validation_scope": (
+        "structure_hashes_inventory_and_deterministic_archive_only"
+    ),
+    "truth_dependent_metric_recomputation": (
+        "maintainer_local_candidate_dry_run_only"
+    ),
+    "claim_eligibility": {
+        "academic_citation": False,
+        "promotion": False,
+    },
 }
 LEGACY_V1_SUBMISSION_ID = re.compile(r"^(?P<series>[a-z0-9][a-z0-9-]{2,69})-v1$")
 
@@ -430,6 +465,198 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def is_registered_hiliftaeroml_preview_path(
+    path: Path,
+    *,
+    root: Path | None = None,
+) -> bool:
+    """Return whether *path* is the single maintainer-configured preview path."""
+
+    effective_root = (root or ROOT).resolve()
+    try:
+        relative_path = path.resolve().relative_to(effective_root).as_posix()
+    except (OSError, ValueError):
+        return False
+    return relative_path == HILIFT_REGISTERED_PREVIEW["submission_path"]
+
+
+def registered_hiliftaeroml_preview(
+    path: Path,
+    submission: dict[str, Any],
+    manifest: dict[str, Any],
+    *,
+    root: Path | None = None,
+) -> dict[str, Any] | None:
+    """Return the maintainer binding for the one checked-in HiLift preview.
+
+    This is deliberately not a general candidate acceptance path.  The source
+    path, submission metadata, historical validation receipt, and archive
+    identity are pinned in code so another closed candidate cannot enter the
+    public feed merely by declaring itself a preview.
+    """
+
+    effective_root = (root or ROOT).resolve()
+    if not is_registered_hiliftaeroml_preview_path(path, root=effective_root):
+        return None
+    if manifest.get("data_release", {}).get("status") != "prototype_dummy_data":
+        return None
+    if (
+        submission.get("submission_id")
+        != HILIFT_REGISTERED_PREVIEW["submission_id"]
+        or submission.get("dataset_id") != "hiliftaeroml"
+        or submission.get("dataset") != "HiLiftAeroML"
+        or submission.get("split_id") != "full"
+        or submission.get("case_set_id") != "caseset-ac791749e527"
+        or submission.get("schema_version") != "3.0"
+        or submission.get("approval") is not None
+        or submission.get("profile_data", {}).get("format")
+        != HILIFT_COMPACT_PROFILE_FORMAT
+    ):
+        return None
+    try:
+        if sha256_file(path) != HILIFT_REGISTERED_PREVIEW["submission_json_sha256"]:
+            return None
+        receipt = load_json(effective_root / HILIFT_REGISTERED_PREVIEW_RECORD_PATH)
+        dataset_spec = load_json(
+            effective_root
+            / "benchmark-specs"
+            / "hiliftaeroml"
+            / "submission-spec.json"
+        )
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(receipt, dict) or not isinstance(dataset_spec, dict):
+        return None
+    if (
+        receipt.get("schema")
+        != "hiliftaeroml-compact-profile-full360-validation-v1"
+        or receipt.get("status") != "complete_candidate_not_published"
+        or receipt.get("usage") != "maintainer_local_candidate_dry_run_only"
+        or receipt.get("activation")
+        != {
+            "owner_approval_complete": False,
+            "published": False,
+            "submissions_opened": False,
+            "validation_changes_activation": False,
+        }
+        or receipt.get("registered_preview") != HILIFT_REGISTERED_PREVIEW
+    ):
+        return None
+    scoring_support = dataset_spec.get("scoring_support", {})
+    profile_definition = dataset_spec.get("profile_definition", {})
+    compact_definition = dataset_spec.get("compact_profile_definition", {})
+    if (
+        dataset_spec.get("status") != "owner_review_required"
+        or scoring_support.get("status") != "owner_review_required"
+        or scoring_support.get("submissions_open") is not False
+        or profile_definition.get("profile_ground_truth")
+        != {
+            "status": "not_published",
+            "release_id": None,
+            "manifest_sha256": None,
+        }
+        or compact_definition.get("status") != "additive_candidate_not_bound"
+        or compact_definition.get("evaluator_support")
+        != {
+            "status": "not_published",
+            "release_id": None,
+            "manifest_sha256": None,
+        }
+    ):
+        return None
+    assembly = receipt.get("assembly", {})
+    archives = receipt.get("deterministic_archives", {})
+    scope = receipt.get("scope", {})
+    representation = receipt.get("representation", {})
+    validation = receipt.get("candidate_validation", {})
+    metric_values = receipt.get("metric_values", {})
+    evaluation = submission.get("evaluation", {})
+    profile_data = submission.get("profile_data", {})
+    evidence_path = path.parent / str(evaluation.get("evidence_file", ""))
+    profile_index_path = path.parent / str(profile_data.get("index_file", ""))
+    try:
+        evidence = load_json(evidence_path)
+        evidence_sha256 = sha256_file(evidence_path)
+        profile_index_sha256 = sha256_file(profile_index_path)
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(evidence, dict) or not isinstance(metric_values, dict):
+        return None
+    if (
+        assembly.get("submission_json_sha256")
+        != HILIFT_REGISTERED_PREVIEW["submission_json_sha256"]
+        or assembly.get("regular_file_bytes_each") != 14_420_587
+        or evidence.get("status") != "submitted_evaluation"
+        or evidence_sha256 != assembly.get("evaluation_evidence_sha256")
+        or evidence_sha256 != evaluation.get("evidence_sha256")
+        or profile_index_sha256 != assembly.get("profile_index_sha256")
+        or scope.get("split_id") != "full"
+        or scope.get("case_set_id") != "caseset-ac791749e527"
+        or scope.get("case_count") != 360
+        or scope.get("profile_series_count") != 5_400
+        or representation.get("participant_artifacts_contain_evaluator_support")
+        is not False
+        or representation.get("participant_artifacts_contain_truth") is not False
+        or metric_values
+        != {
+            metric_id: submission.get("metric_values", {}).get(metric_id)
+            for metric_id in metric_values
+        }
+        or profile_data.get("evaluator_support_release_id")
+        != receipt.get("bindings", {}).get("evaluator_support_release_id")
+        or profile_data.get("evaluator_support_manifest_sha256")
+        != receipt.get("bindings", {}).get("evaluator_support_manifest_sha256")
+        or profile_data.get("profile_ground_truth_release_id")
+        != receipt.get("bindings", {}).get("source_profile_truth_release_id")
+        or profile_data.get("profile_ground_truth_manifest_sha256")
+        != receipt.get("bindings", {}).get("source_profile_truth_manifest_sha256")
+        or archives.get("sha256_each")
+        != HILIFT_REGISTERED_PREVIEW["deterministic_archive"]["sha256"]
+        or archives.get("size_bytes_each")
+        != HILIFT_REGISTERED_PREVIEW["deterministic_archive"]["size_bytes"]
+        or archives.get("member_count_each")
+        != HILIFT_REGISTERED_PREVIEW["deterministic_archive"]["member_count"]
+        or archives.get("byte_identical") is not True
+        or any(
+            validation.get(package, {}).get("valid") is not True
+            for package in ("package_a", "package_b")
+        )
+    ):
+        return None
+    return deepcopy(HILIFT_REGISTERED_PREVIEW)
+
+
+def validate_registered_hiliftaeroml_preview_archive(
+    add: Any,
+    directory: Path,
+    binding: dict[str, Any],
+) -> None:
+    """Bind every checked-in preview member to the reviewed deterministic ZIP."""
+
+    from scripts.build_hiliftaeroml_submission_zip import (
+        DeterministicZipError,
+        build_deterministic_submission_zip,
+    )
+
+    expected = binding["deterministic_archive"]
+    try:
+        with tempfile.TemporaryDirectory(
+            prefix="fluidsbench-hilift-preview-"
+        ) as temporary:
+            archive_path = Path(temporary) / "submission.zip"
+            receipt = build_deterministic_submission_zip(directory, archive_path)
+            archive_size = archive_path.stat().st_size
+    except (DeterministicZipError, OSError) as error:
+        add(f"registered HiLiftAeroML preview archive build failed: {error}")
+        return
+    if receipt.get("archive_sha256") != expected["sha256"]:
+        add("registered HiLiftAeroML preview deterministic archive SHA-256 differs")
+    if receipt.get("member_count") != expected["member_count"]:
+        add("registered HiLiftAeroML preview deterministic archive member count differs")
+    if archive_size != expected["size_bytes"]:
+        add("registered HiLiftAeroML preview deterministic archive byte size differs")
 
 
 def canonical_json_sha256(value: Any) -> str:
@@ -5595,10 +5822,12 @@ def validate_profiles(
     split_spec_entry: dict[str, Any],
     *,
     candidate_dry_run: bool = False,
+    registered_preview: bool = False,
     candidate_profile_truth_release: Path | None = None,
     candidate_compact_profile_support_release: Path | None = None,
     case_metrics: dict[str, Any] | None = None,
 ) -> dict[str, int]:
+    candidate_contract_validation = candidate_dry_run or registered_preview
     profile_format = submission["profile_data"].get(
         "format", "fluidsbench-profile-chunks-v1"
     )
@@ -5683,13 +5912,20 @@ def validate_profiles(
             "candidate_compact_profile_support_release is permitted only with "
             "candidate dry-run validation"
         )
-    if candidate_dry_run and submission.get("dataset_id") == "hiliftaeroml":
+    if (
+        candidate_contract_validation
+        and submission.get("dataset_id") == "hiliftaeroml"
+    ):
         if not (hilift_native_profile or hilift_compact_profile):
             add(
                 "HiLiftAeroML candidate dry-run requires a retained prediction-only "
                 "profile format"
             )
-        if hilift_native_profile and candidate_profile_truth_release is None:
+        if (
+            hilift_native_profile
+            and candidate_profile_truth_release is None
+            and not registered_preview
+        ):
             add(
                 "HiLiftAeroML candidate dry-run native profiles require an "
                 "explicit local candidate profile-truth release"
@@ -5699,7 +5935,11 @@ def validate_profiles(
                 "HiLiftAeroML native-v1 profiles do not accept the compact "
                 "evaluator-support release argument"
             )
-        if hilift_compact_profile and candidate_compact_profile_support_release is None:
+        if (
+            hilift_compact_profile
+            and candidate_compact_profile_support_release is None
+            and not registered_preview
+        ):
             add(
                 "HiLiftAeroML candidate dry-run compact profiles require an "
                 "explicit local candidate compact evaluator-support release"
@@ -5715,7 +5955,7 @@ def validate_profiles(
     if hilift_native_profile and submission.get("dataset_id") == "hiliftaeroml":
         if not isinstance(profile_definition, dict):
             add("HiLiftAeroML native profiles have no benchmark profile definition")
-        elif candidate_dry_run:
+        elif candidate_contract_validation:
             declared_candidate = profile_definition.get(
                 "candidate_dry_run_profile_ground_truth"
             )
@@ -5776,7 +6016,7 @@ def validate_profiles(
                 "manifest_sha256": None,
             }:
                 add("HiLiftAeroML public compact evaluator-support boundary differs")
-            if candidate_dry_run:
+            if candidate_contract_validation:
                 declared_support = compact_definition.get(
                     "candidate_dry_run_evaluator_support"
                 )
@@ -6404,6 +6644,34 @@ def validate_submission_file(
 
     if manifest is None:
         manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
+    configured_preview_path = is_registered_hiliftaeroml_preview_path(path)
+    preview_binding = registered_hiliftaeroml_preview(path, submission, manifest)
+    if configured_preview_path and preview_binding is None:
+        add(
+            "registered HiLiftAeroML preview does not match its maintainer "
+            "lifecycle, submission, evidence, profile-index, or archive binding"
+        )
+    if contributor_stage and preview_binding is not None:
+        add(
+            "the maintainer-registered HiLiftAeroML preview is unavailable in "
+            "contributor-stage validation"
+        )
+    registered_preview = (
+        preview_binding is not None
+        and not contributor_stage
+        and not candidate_dry_run
+    )
+    candidate_contract_validation = candidate_dry_run or registered_preview
+    if registered_preview:
+        if "approval" in submission:
+            add("registered HiLiftAeroML previews must not contain approval metadata")
+        for filename in (
+            "maintainer-validation.json",
+            "prediction-artifact-checks.json",
+            "maintainer-replay.json",
+        ):
+            if (path.parent / filename).exists():
+                add(f"registered HiLiftAeroML previews must not contain {filename}")
     dataset = next((item for item in manifest["datasets"] if item["slug"] == submission["dataset_id"]), None)
     if dataset is None:
         add(f"unknown dataset_id {submission['dataset_id']!r}")
@@ -6437,7 +6705,7 @@ def validate_submission_file(
                 methodology_contract = loaded_methodology_contract
             else:
                 add("dataset methodology contract must be a JSON object")
-    if candidate_dry_run and dataset_spec.get("status") not in {
+    if candidate_contract_validation and dataset_spec.get("status") not in {
         "candidate",
         "candidate_scoring_contract",
         "owner_review_required",
@@ -6503,7 +6771,7 @@ def validate_submission_file(
                 submission,
                 dataset_spec,
                 spec_split,
-                candidate_dry_run=candidate_dry_run,
+                candidate_dry_run=candidate_contract_validation,
             )
             case_metrics = validate_v3_case_metrics(
                 add,
@@ -6527,7 +6795,7 @@ def validate_submission_file(
                 submission,
                 split_case_ids,
                 contributor_stage=contributor_stage,
-                candidate_dry_run=candidate_dry_run,
+                candidate_dry_run=candidate_contract_validation,
                 case_metrics=case_metrics,
                 dataset_spec=dataset_spec,
             )
@@ -6555,7 +6823,7 @@ def validate_submission_file(
         dataset_spec,
         spec_split,
         contributor_stage=contributor_stage,
-        candidate_dry_run=candidate_dry_run,
+        candidate_dry_run=candidate_contract_validation,
     )
     stats = validate_profiles(
         add,
@@ -6563,13 +6831,20 @@ def validate_submission_file(
         submission,
         dataset_spec,
         spec_split,
-        candidate_dry_run=candidate_dry_run,
+        candidate_dry_run=candidate_contract_validation,
+        registered_preview=registered_preview,
         candidate_profile_truth_release=candidate_profile_truth_release,
         candidate_compact_profile_support_release=(
             candidate_compact_profile_support_release
         ),
         case_metrics=case_metrics,
     )
+    if preview_binding is not None and not contributor_stage:
+        validate_registered_hiliftaeroml_preview_archive(
+            add,
+            path.parent,
+            preview_binding,
+        )
     return errors, stats
 
 

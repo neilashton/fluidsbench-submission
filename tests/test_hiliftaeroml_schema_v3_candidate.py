@@ -138,9 +138,9 @@ def test_frozen_evaluator_revision_is_consistent_and_nonactivating() -> None:
     evaluator = support["dataset_evaluator_binding"]
 
     assert dataset["scoring_support"] == support
-    assert dataset["submission_count"] == 8
-    assert dataset["revision_count"] == 8
-    assert dataset["updated_at"] == "2026-07-08"
+    assert dataset["submission_count"] == 1
+    assert dataset["revision_count"] == 1
+    assert dataset["updated_at"] == "2026-09-02"
     assert evaluator["status"] == "frozen"
     assert evaluator["evaluator_reference_version"] == specification[
         "evaluation_reference_version"
