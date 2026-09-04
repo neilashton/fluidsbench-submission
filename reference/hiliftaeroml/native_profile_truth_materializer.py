@@ -1243,6 +1243,7 @@ def load_compact_profile_support_inputs(
         name: cp_stencil[name]
         for name in (
             "cut_xyz_in",
+            "branch_closed",
             "branch_vertex_offsets",
             "branch_vertex_ids",
             "branch_segment_offsets",

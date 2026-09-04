@@ -507,6 +507,7 @@ def test_compact_support_inputs_are_prediction_free_and_authority_bound(
 ) -> None:
     cp_names = (
         "cut_xyz_in",
+        "branch_closed",
         "branch_vertex_offsets",
         "branch_vertex_ids",
         "branch_segment_offsets",
