@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-02-65f278d37c88/hiliftaeroml/full/hiliftaeroml-transolver-full360-candidate-v1",
+  "claim_id": "prototype-dev-2026-09-02-78b3419d6294/hiliftaeroml/full/hiliftaeroml-transolver-full360-candidate-v1",
   "release": {
-    "id": "prototype-dev-2026-09-02-65f278d37c88",
+    "id": "prototype-dev-2026-09-02-78b3419d6294",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-04T05:42:34Z",
+    "published_at": "2026-09-04T21:19:08Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -54,16 +54,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "65f278d37c88fb5937fa89c4d7116b8cfb563d9ef9cdcd27e76d24b73b177278",
+      "feed_sha256": "78b3419d6294e4fd3191e0dae43d001c30e86e55d1a5acdf247f52e360c44217",
       "row_index": 28
     },
     "source_submission": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/submission.json",
-      "sha256": "fcccbf5a36e473858e7360c623bad95fa01031bab02d55a734dabe17b9f5ca38"
+      "sha256": "d82393bb17dab877ab72f06072241df26f1b6abe50537f023fe767dfe6beccf9"
     },
     "evaluation_evidence": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/evaluation-evidence.json",
-      "sha256": "ce395b38ed380a5323244fd2c64f0ebbc666a7796f06bdc4e5bb45769e6ffd94"
+      "sha256": "51ac886029cc95ba89bd4d403faa5eb6796baac4b2d70db20dfd2f2cbd2e3c99"
     },
     "profile_index": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/profiles/index.json",
@@ -83,7 +83,7 @@
     },
     "regional_diagnostics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/regional-diagnostics.json",
-      "sha256": "1bdde868bde838d9a14fa6267e4b11ae886e9353d2d086c3e05c017756a9e241"
+      "sha256": "1b6a84550ffa46ba45bddd5ef87f3856c02649d839b9cc4273a109ae801ccc6e"
     },
     "scoring_support": {
       "release_id": "hiliftaeroml-native-all-splits-support-v1-candidate",

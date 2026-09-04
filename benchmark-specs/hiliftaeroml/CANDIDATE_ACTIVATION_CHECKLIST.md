@@ -31,7 +31,7 @@ contract before the benchmark owner considers activation.
   `hiliftaeroml-native-all-splits-support-v1-candidate`.
 - Candidate scoring-support manifest digest:
   `98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee`.
-- Regional report-only contract digest: `1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650`.
+- Regional report-only contract digest: `8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4`.
 - Closed candidate evaluator revision:
   `68899f780d96b70f2badb5658971c87af0b17172`, frozen for maintainer-local
   candidate dry runs only with no activation effect.
@@ -100,7 +100,7 @@ checkpoint over every ordered case in the selected split.
    checkpoint identities, code revision, evaluator revision, and split/support
    identities.
 6. Optionally, `regional-diagnostics.json` in
-   `hiliftaeroml-regional-diagnostics-aggregate-v1`. It must be omitted rather
+   `hiliftaeroml-regional-diagnostics-aggregate-v2`. It must be omitted rather
    than fabricated if the complete-split aggregate is not available.
 
 Revision-pinned public prediction fields are optional under schema v3. Omitting

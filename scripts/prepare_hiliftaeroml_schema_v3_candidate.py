@@ -43,9 +43,9 @@ RELEASE_DIR = DATASET_DIR / "scoring-support" / RELEASE_ID
 DATASET_VERSION = "hiliftaeroml-native-v1-candidate"
 EVALUATOR_VERSION = "hiliftaeroml-evaluator-v0.1-candidate"
 REGIONAL_CONTRACT_SHA256 = (
-    "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650"
+    "8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4"
 )
-REGIONAL_CONTRACT_PATH = DATASET_DIR / "regional-diagnostics-v1.json"
+REGIONAL_CONTRACT_PATH = DATASET_DIR / "regional-diagnostics-v2.json"
 LEADERBOARD_MANIFEST_PATH = ROOT / "leaderboard" / "manifest.json"
 MANIFEST_URL = (
     "https://github.com/neilashton/fluidsbench-submission/blob/dev/"

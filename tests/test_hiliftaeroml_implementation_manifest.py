@@ -17,6 +17,13 @@ LOCK_PATH = ROOT / builder.RUNTIME_LOCK_RELATIVE
 FROZEN_MANIFEST_SHA256 = (
     "f94cef375b45c8604bbd65bb59c679af417340b39dd941c27beb363d59f883d6"
 )
+FROZEN_REGIONAL_DECLARATION = {
+    "format": "hiliftaeroml-regional-diagnostics-aggregate-v1",
+    "contract_file": "regional-diagnostics-v1.json",
+    "contract_sha256": (
+        "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650"
+    ),
+}
 
 
 @pytest.fixture(scope="module")
@@ -36,6 +43,16 @@ def group_identity(manifest: dict, group_id: str, path: str) -> dict:
         group for group in manifest["source_groups"] if group["group_id"] == group_id
     )
     return next(item for item in group["files"] if item["path"] == path)
+
+
+def remove_postfreeze_additive_extensions(specification: dict) -> None:
+    compact_definition = specification.pop("compact_profile_definition")
+    assert compact_definition["status"] == "additive_candidate_not_bound"
+    regional = specification["regional_diagnostics"]
+    assert regional["role"] == "report_only"
+    assert regional["weight"] == 0.0
+    for key, value in FROZEN_REGIONAL_DECLARATION.items():
+        regional[key] = value
 
 
 def test_retained_manifest_is_schema_valid_and_byte_deterministic(
@@ -243,8 +260,7 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
         ("fluidsbench_adapter", spec_relative)
     ]
     spec = json.loads((ROOT / spec_relative).read_text(encoding="utf-8"))
-    compact_definition = spec.pop("compact_profile_definition")
-    assert compact_definition["status"] == "additive_candidate_not_bound"
+    remove_postfreeze_additive_extensions(spec)
     spec["status"] = "future_activation_state"
     spec["evaluation_reference_version"] = "future-revision-label"
     spec["scoring_support"]["status"] = "future_status"
@@ -272,8 +288,7 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
     assert normalized_lifecycle_spec == spec_identity
 
     scientific_spec = json.loads((ROOT / spec_relative).read_text(encoding="utf-8"))
-    compact_definition = scientific_spec.pop("compact_profile_definition")
-    assert compact_definition["status"] == "additive_candidate_not_bound"
+    remove_postfreeze_additive_extensions(scientific_spec)
     scientific_spec["overall_score_composite"]["components"][0]["weight"] += 0.001
     scientific_spec_path = tmp_path / "submission-spec-scientific.json"
     scientific_spec_path.write_text(json.dumps(scientific_spec), encoding="utf-8")

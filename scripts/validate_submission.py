@@ -107,13 +107,13 @@ HILIFT_REGISTERED_PREVIEW = {
         "hiliftaeroml-transolver-full360-candidate-v1/submission.json"
     ),
     "submission_json_sha256": (
-        "fcccbf5a36e473858e7360c623bad95fa01031bab02d55a734dabe17b9f5ca38"
+        "d82393bb17dab877ab72f06072241df26f1b6abe50537f023fe767dfe6beccf9"
     ),
     "deterministic_archive": {
         "sha256": (
-            "7a0c0842c34ecef9b67ed2e1d06fb979a10316f151e695c8038fbd96090bc066"
+            "8b73e43273e57154ec4180e7393eaa4e5107dd912adde7f60f9348cec7b1ef32"
         ),
-        "size_bytes": 11_514_743,
+        "size_bytes": 11_526_141,
         "member_count": 403,
     },
     "ordinary_validation_scope": (
@@ -587,7 +587,7 @@ def registered_hiliftaeroml_preview(
     if (
         assembly.get("submission_json_sha256")
         != HILIFT_REGISTERED_PREVIEW["submission_json_sha256"]
-        or assembly.get("regular_file_bytes_each") != 14_420_587
+        or assembly.get("regular_file_bytes_each") != 14_505_024
         or evidence.get("status") != "submitted_evaluation"
         or evidence_sha256 != assembly.get("evaluation_evidence_sha256")
         or evidence_sha256 != evaluation.get("evidence_sha256")

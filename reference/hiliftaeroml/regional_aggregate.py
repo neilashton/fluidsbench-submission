@@ -14,11 +14,11 @@ from collections.abc import Mapping, Sequence
 
 
 REGIONAL_DIAGNOSTICS_CONTRACT_SHA256 = (
-    "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650"
+    "8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4"
 )
 REGIONAL_DEFINITION_ID = "hiliftaeroml-native-geometric-regions-v1"
 AGGREGATE_REGIONAL_REPORT_SCHEMA = (
-    "hiliftaeroml-regional-diagnostics-aggregate-v1"
+    "hiliftaeroml-regional-diagnostics-aggregate-v2"
 )
 SURFACE_SUPPORT_ID = "surface_native_points"
 VOLUME_SUPPORT_ID = "volume_native_valid_points"
@@ -73,9 +73,26 @@ _REGION_KEYS = {
     "entity_fraction",
     "weight_fraction",
     "squared_error_fraction",
+    "whole_support_normalized_rmse_percent",
     "relative_l2_percent",
+    "r2",
+    "r2_status",
     "mae",
     "rmse",
+    "case_macro",
+    "case_distribution",
+}
+_CASE_MACRO_METRICS = {
+    "whole_support_normalized_rmse_percent",
+    "relative_l2_percent",
+    "r2",
+    "mae",
+    "rmse",
+}
+_CASE_DISTRIBUTION_METRICS = {
+    "whole_support_normalized_rmse_percent",
+    "relative_l2_percent",
+    "r2",
 }
 
 
@@ -120,6 +137,102 @@ def _fraction(value: object, label: str) -> float | None:
     return result
 
 
+def _defined_case_count(value: object, label: str, *, case_count: int) -> int:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, int)
+        or not 0 <= value <= case_count
+    ):
+        raise HiLiftRegionalAggregateError(
+            f"{label} must be an integer in [0, {case_count}]"
+        )
+    return value
+
+
+def _case_macro(
+    value: object,
+    label: str,
+    *,
+    case_count: int,
+) -> None:
+    if not isinstance(value, Mapping) or set(value) != _CASE_MACRO_METRICS:
+        raise HiLiftRegionalAggregateError(f"{label} metric inventory differs")
+    for metric_id, raw in value.items():
+        metric_label = f"{label}.{metric_id}"
+        if not isinstance(raw, Mapping) or set(raw) != {
+            "value",
+            "defined_case_count",
+        }:
+            raise HiLiftRegionalAggregateError(f"{metric_label} keys differ")
+        count = _defined_case_count(
+            raw["defined_case_count"],
+            f"{metric_label}.defined_case_count",
+            case_count=case_count,
+        )
+        observed = _finite_or_none(raw["value"], f"{metric_label}.value")
+        if (count == 0) != (observed is None):
+            raise HiLiftRegionalAggregateError(
+                f"{metric_label} value/count nullability differs"
+            )
+        if (
+            observed is not None
+            and metric_id != "r2"
+            and observed < 0.0
+        ):
+            raise HiLiftRegionalAggregateError(
+                f"{metric_label}.value must be non-negative"
+            )
+
+
+def _case_distribution(
+    value: object,
+    label: str,
+    *,
+    case_count: int,
+) -> None:
+    if not isinstance(value, Mapping) or set(value) != _CASE_DISTRIBUTION_METRICS:
+        raise HiLiftRegionalAggregateError(f"{label} metric inventory differs")
+    for metric_id, raw in value.items():
+        metric_label = f"{label}.{metric_id}"
+        required = {
+            "defined_case_count",
+            "minimum",
+            "median",
+            "p90",
+            "maximum",
+        }
+        if not isinstance(raw, Mapping) or set(raw) != required:
+            raise HiLiftRegionalAggregateError(f"{metric_label} keys differ")
+        count = _defined_case_count(
+            raw["defined_case_count"],
+            f"{metric_label}.defined_case_count",
+            case_count=case_count,
+        )
+        summary = [
+            _finite_or_none(raw[key], f"{metric_label}.{key}")
+            for key in ("minimum", "median", "p90", "maximum")
+        ]
+        if count == 0:
+            if any(item is not None for item in summary):
+                raise HiLiftRegionalAggregateError(
+                    f"{metric_label} empty distribution must be null"
+                )
+            continue
+        if any(item is None for item in summary):
+            raise HiLiftRegionalAggregateError(
+                f"{metric_label} populated distribution must be finite"
+            )
+        numeric = [float(item) for item in summary if item is not None]
+        if metric_id != "r2" and any(item < 0.0 for item in numeric):
+            raise HiLiftRegionalAggregateError(
+                f"{metric_label} values must be non-negative"
+            )
+        if numeric != sorted(numeric):
+            raise HiLiftRegionalAggregateError(
+                f"{metric_label} quantiles are not ordered"
+            )
+
+
 def _support(
     value: object,
     *,
@@ -128,6 +241,7 @@ def _support(
     expected_regions: tuple[str, ...],
     allowed_fields: frozenset[str],
     required_primary_fields: frozenset[str],
+    case_count: int,
 ) -> int:
     if not isinstance(value, Mapping) or set(value) != {
         "support_id",
@@ -172,6 +286,7 @@ def _support(
             "weight_fraction": [],
             "squared_error_fraction": [],
         }
+        whole_support_normalized: list[float] = []
         for row in regions:
             if not isinstance(row, Mapping) or set(row) != _REGION_KEYS:
                 raise HiLiftRegionalAggregateError(
@@ -181,7 +296,12 @@ def _support(
                 observed = _fraction(row[name], f"{field_label}.{row['region_id']}.{name}")
                 if observed is not None:
                     fractions[name].append(observed)
-            for name in ("relative_l2_percent", "mae", "rmse"):
+            for name in (
+                "whole_support_normalized_rmse_percent",
+                "relative_l2_percent",
+                "mae",
+                "rmse",
+            ):
                 observed = _finite_or_none(
                     row[name], f"{field_label}.{row['region_id']}.{name}"
                 )
@@ -189,6 +309,33 @@ def _support(
                     raise HiLiftRegionalAggregateError(
                         f"{field_label}.{row['region_id']}.{name} must be non-negative"
                     )
+                if (
+                    name == "whole_support_normalized_rmse_percent"
+                    and observed is not None
+                ):
+                    whole_support_normalized.append(observed)
+            r2 = _finite_or_none(
+                row["r2"], f"{field_label}.{row['region_id']}.r2"
+            )
+            r2_status = row["r2_status"]
+            if r2_status not in {"ok", "empty", "zero_target_variance"}:
+                raise HiLiftRegionalAggregateError(
+                    f"{field_label}.{row['region_id']}.r2_status differs"
+                )
+            if (r2 is None) != (r2_status != "ok"):
+                raise HiLiftRegionalAggregateError(
+                    f"{field_label}.{row['region_id']} r2 value/status differs"
+                )
+            _case_macro(
+                row["case_macro"],
+                f"{field_label}.{row['region_id']}.case_macro",
+                case_count=case_count,
+            )
+            _case_distribution(
+                row["case_distribution"],
+                f"{field_label}.{row['region_id']}.case_distribution",
+                case_count=case_count,
+            )
             checked_regions += 1
         for fraction_id, values in fractions.items():
             if len(values) == len(expected_regions) and not math.isclose(
@@ -196,6 +343,35 @@ def _support(
             ):
                 raise HiLiftRegionalAggregateError(
                     f"{field_label}.{fraction_id} does not sum to one"
+                )
+        global_relative_l2 = _finite_or_none(
+            field["global"].get("relative_l2_percent"),
+            f"{field_label}.global.relative_l2_percent",
+        )
+        if (
+            global_relative_l2 is not None
+            and len(fractions["weight_fraction"]) == len(expected_regions)
+            and len(whole_support_normalized) == len(expected_regions)
+        ):
+            reconstructed_relative_l2 = math.sqrt(
+                math.fsum(
+                    fraction * value * value
+                    for fraction, value in zip(
+                        fractions["weight_fraction"],
+                        whole_support_normalized,
+                        strict=True,
+                    )
+                )
+            )
+            if not math.isclose(
+                reconstructed_relative_l2,
+                global_relative_l2,
+                rel_tol=5.0e-12,
+                abs_tol=1.0e-12,
+            ):
+                raise HiLiftRegionalAggregateError(
+                    f"{field_label} whole-support-normalized regional RMSE "
+                    "does not reconstruct global relative L2"
                 )
     return checked_regions
 
@@ -222,7 +398,7 @@ def validate_aggregate_regional_diagnostics(
         or report.get("prediction_scope") != "surface_and_volume"
     ):
         raise HiLiftRegionalAggregateError("regional report identity differs")
-    if "schema_version" in report and report.get("schema_version") != 1:
+    if "schema_version" in report and report.get("schema_version") != 2:
         raise HiLiftRegionalAggregateError("regional report schema_version differs")
     if "status" in report and report.get("status") != "complete_report_only":
         raise HiLiftRegionalAggregateError("regional report status differs")
@@ -253,6 +429,7 @@ def validate_aggregate_regional_diagnostics(
         expected_regions=SURFACE_REGION_IDS,
         allowed_fields=SURFACE_FIELDS,
         required_primary_fields=frozenset({"pressure", "tau_wall"}),
+        case_count=len(expected_case_ids),
     )
     checked_regions += _support(
         report["volume"],
@@ -261,6 +438,7 @@ def validate_aggregate_regional_diagnostics(
         expected_regions=VOLUME_REGION_IDS,
         allowed_fields=VOLUME_FIELDS,
         required_primary_fields=frozenset({"pressure", "velocity"}),
+        case_count=len(expected_case_ids),
     )
     reconstruction = report["reconstruction"]
     expected_reconstruction_keys = {

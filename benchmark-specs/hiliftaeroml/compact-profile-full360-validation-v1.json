@@ -1,6 +1,6 @@
 {
   "schema": "hiliftaeroml-compact-profile-full360-validation-v1",
-  "recorded_on": "2026-09-03",
+  "recorded_on": "2026-09-04",
   "status": "complete_candidate_not_published",
   "usage": "maintainer_local_candidate_dry_run_only",
   "activation": {
@@ -14,10 +14,10 @@
     "record_type": "pre_release_reference",
     "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
     "submission_path": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/submission.json",
-    "submission_json_sha256": "fcccbf5a36e473858e7360c623bad95fa01031bab02d55a734dabe17b9f5ca38",
+    "submission_json_sha256": "d82393bb17dab877ab72f06072241df26f1b6abe50537f023fe767dfe6beccf9",
     "deterministic_archive": {
-      "sha256": "7a0c0842c34ecef9b67ed2e1d06fb979a10316f151e695c8038fbd96090bc066",
-      "size_bytes": 11514743,
+      "sha256": "8b73e43273e57154ec4180e7393eaa4e5107dd912adde7f60f9348cec7b1ef32",
+      "size_bytes": 11526141,
       "member_count": 403
     },
     "ordinary_validation_scope": "structure_hashes_inventory_and_deterministic_archive_only",
@@ -33,7 +33,8 @@
     "code_revision": null,
     "implementation_manifest_sha256": null,
     "base_dataset_evaluator_revision": "68899f780d96b70f2badb5658971c87af0b17172",
-    "base_dataset_evaluator_scope": "native_v1_base_field_force_and_noncompact_scoring_only"
+    "base_dataset_evaluator_scope": "native_v1_base_field_force_and_noncompact_scoring_only",
+    "regional_diagnostics_v2_scope": "unbound_report_only_adapter"
   },
   "scope": {
     "split_id": "full",
@@ -58,40 +59,65 @@
     "evaluator_support_release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
     "evaluator_support_manifest_sha256": "81150cc075d5b64caf0c63b9601a23bbecbf38a8f60bfd69814981e408dd712c",
     "source_profile_truth_release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
-    "source_profile_truth_manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477"
+    "source_profile_truth_manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477",
+    "regional_diagnostics_contract_file": "regional-diagnostics-v2.json",
+    "regional_diagnostics_definition_id": "hiliftaeroml-native-geometric-regions-v1",
+    "regional_diagnostics_contract_sha256": "8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4",
+    "regional_diagnostics_report_schema": "hiliftaeroml-regional-diagnostics-aggregate-v2",
+    "regional_diagnostics_report_sha256": "1b6a84550ffa46ba45bddd5ef87f3856c02649d839b9cc4273a109ae801ccc6e"
   },
   "assembly": {
-    "package_a": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/package-a",
-    "package_b": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/package-b",
-    "regular_file_bytes_each": 14420587,
+    "package_a": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260904/package-a",
+    "package_b": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260904/package-b",
+    "regular_file_bytes_each": 14505024,
     "regular_file_byte_limit": 15000000,
-    "regular_file_headroom_bytes": 579413,
+    "regular_file_headroom_bytes": 494976,
     "recursive_file_comparison_equal": true,
     "profile_index_sha256": "8736c1c4a71a0fa2d770abd3ab14bef49e04f1419609644c1f52af10dc9859b2",
-    "submission_json_sha256": "fcccbf5a36e473858e7360c623bad95fa01031bab02d55a734dabe17b9f5ca38",
-    "evaluation_evidence_sha256": "ce395b38ed380a5323244fd2c64f0ebbc666a7796f06bdc4e5bb45769e6ffd94"
+    "submission_json_sha256": "d82393bb17dab877ab72f06072241df26f1b6abe50537f023fe767dfe6beccf9",
+    "evaluation_evidence_sha256": "51ac886029cc95ba89bd4d403faa5eb6796baac4b2d70db20dfd2f2cbd2e3c99"
   },
   "deterministic_archives": {
-    "archive_a": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/hiliftaeroml-transolver-full360-compact-candidate-v2.build-a.zip",
-    "archive_b": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/hiliftaeroml-transolver-full360-compact-candidate-v2.build-b.zip",
+    "archive_a": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260904/hiliftaeroml-transolver-full360-compact-regional-v2.build-a.zip",
+    "archive_b": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260904/hiliftaeroml-transolver-full360-compact-regional-v2.build-b.zip",
     "byte_identical": true,
-    "size_bytes_each": 11514743,
+    "size_bytes_each": 11526141,
     "member_count_each": 403,
-    "sha256_each": "7a0c0842c34ecef9b67ed2e1d06fb979a10316f151e695c8038fbd96090bc066",
+    "sha256_each": "8b73e43273e57154ec4180e7393eaa4e5107dd912adde7f60f9348cec7b1ef32",
     "maximum_archive_bytes": 15000000,
-    "archive_headroom_bytes": 3485257
+    "archive_headroom_bytes": 3473859
   },
   "candidate_validation": {
+    "checked_in_preview": {
+      "valid": true,
+      "case_count": 360,
+      "profile_series_count": 5400,
+      "mode": "candidate_dry_run_with_evaluator_owned_compact_support"
+    },
     "package_a": {
       "valid": true,
       "case_count": 360,
-      "profile_series_count": 5400
+      "profile_series_count": 5400,
+      "validation_basis": "byte_identical_to_checked_in_preview"
     },
     "package_b": {
       "valid": true,
       "case_count": 360,
-      "profile_series_count": 5400
+      "profile_series_count": 5400,
+      "validation_basis": "byte_identical_to_checked_in_preview"
     }
+  },
+  "regional_diagnostics_update": {
+    "status": "derived_from_retained_per_case_sufficient_statistics",
+    "second_surrogate_inference_required": false,
+    "official_metric_inputs_changed": false,
+    "official_score_changed": false,
+    "dashboard_primary_volume_metric": "case_macro.whole_support_normalized_rmse_percent.value",
+    "retained_diagnostics": [
+      "pooled_whole_support_normalized_rmse_percent",
+      "local_relative_l2_percent",
+      "r2"
+    ]
   },
   "metric_values": {
     "overall_score": 69.14965881236131,

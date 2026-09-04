@@ -1,9 +1,9 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/revision-history.schema.json",
   "schema_version": "1.0",
-  "release_id": "prototype-dev-2026-09-02-65f278d37c88",
+  "release_id": "prototype-dev-2026-09-02-78b3419d6294",
   "release_status": "prototype_dummy_data",
-  "generated_at": "2026-09-04T05:42:34Z",
+  "generated_at": "2026-09-04T21:19:08Z",
   "record_count": 56,
   "series_count": 56,
   "records": [
@@ -5118,7 +5118,7 @@
         "reference_version": "hiliftaeroml-evaluator-v0.1-candidate",
         "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config examples/hiliftaeroml-v3-candidate/transolver-full360-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_candidate_20260902/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/full360_exact_v1 --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/full360 --native-receipts ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_candidate_20260902/receipts-a --candidate-compact-profile-support-release ../eval_runs/hilift_compact_profile_support_v2_candidate_20260903/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/package-a",
         "evidence_file": "evaluation-evidence.json",
-        "evidence_sha256": "ce395b38ed380a5323244fd2c64f0ebbc666a7796f06bdc4e5bb45769e6ffd94"
+        "evidence_sha256": "51ac886029cc95ba89bd4d403faa5eb6796baac4b2d70db20dfd2f2cbd2e3c99"
       },
       "scoring_support": {
         "status": "candidate",
@@ -5556,10 +5556,10 @@
         "index_sha256": "8736c1c4a71a0fa2d770abd3ab14bef49e04f1419609644c1f52af10dc9859b2"
       },
       "regional_diagnostics": {
-        "format": "hiliftaeroml-regional-diagnostics-aggregate-v1",
+        "format": "hiliftaeroml-regional-diagnostics-aggregate-v2",
         "file": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/regional-diagnostics.json",
-        "sha256": "1bdde868bde838d9a14fa6267e4b11ae886e9353d2d086c3e05c017756a9e241",
-        "contract_sha256": "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650",
+        "sha256": "1b6a84550ffa46ba45bddd5ef87f3856c02649d839b9cc4273a109ae801ccc6e",
+        "contract_sha256": "8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4",
         "definition_id": "hiliftaeroml-native-geometric-regions-v1",
         "case_count": 360,
         "role": "report_only",

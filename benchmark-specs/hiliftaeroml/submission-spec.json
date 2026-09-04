@@ -702,10 +702,10 @@
   "regional_diagnostics": {
     "status": "candidate_report_only",
     "required_for_new_submissions": false,
-    "format": "hiliftaeroml-regional-diagnostics-aggregate-v1",
+    "format": "hiliftaeroml-regional-diagnostics-aggregate-v2",
     "definition_id": "hiliftaeroml-native-geometric-regions-v1",
-    "contract_file": "regional-diagnostics-v1.json",
-    "contract_sha256": "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650",
+    "contract_file": "regional-diagnostics-v2.json",
+    "contract_sha256": "8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4",
     "role": "report_only",
     "weight": 0.0,
     "affects_official_metrics": false,
