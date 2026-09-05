@@ -37,7 +37,7 @@ class HiLiftRegisteredPreviewTests(unittest.TestCase):
 
         with patch.object(
             validator,
-            "score_hilift_compact_profile_directory",
+            "score_hilift_profile_directory",
             side_effect=AssertionError(
                 "ordinary preview validation loaded hidden truth"
             ),

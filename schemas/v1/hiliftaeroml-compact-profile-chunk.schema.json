@@ -18,16 +18,16 @@
   ],
   "properties": {
     "schema": {
-      "const": "hiliftaeroml-compact-profile-chunk-v2-candidate"
+      "const": "hiliftaeroml-compact-profile-chunk-v2"
     },
     "schema_version": {
       "const": "2.0"
     },
     "format": {
-      "const": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
+      "const": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2"
     },
     "contract_id": {
-      "const": "hiliftaeroml-compact-profile-predictions-v2-candidate"
+      "const": "hiliftaeroml-compact-profile-predictions-v2"
     },
     "contract_sha256": {
       "$ref": "#/$defs/sha256"

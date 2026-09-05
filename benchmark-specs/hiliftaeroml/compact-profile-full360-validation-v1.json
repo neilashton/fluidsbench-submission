@@ -14,10 +14,10 @@
     "record_type": "pre_release_reference",
     "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
     "submission_path": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/submission.json",
-    "submission_json_sha256": "d82393bb17dab877ab72f06072241df26f1b6abe50537f023fe767dfe6beccf9",
+    "submission_json_sha256": "4cd5848418341345ea023719e52e0a65b1d85bc7bd823adc0ad6594d7c129c3e",
     "deterministic_archive": {
-      "sha256": "8b73e43273e57154ec4180e7393eaa4e5107dd912adde7f60f9348cec7b1ef32",
-      "size_bytes": 11526141,
+      "sha256": "f1cd3122b9d8cb7070443685a3b24b94be273466e00ea949b2abf75dbc74c626",
+      "size_bytes": 11526032,
       "member_count": 403
     },
     "ordinary_validation_scope": "structure_hashes_inventory_and_deterministic_archive_only",
@@ -28,12 +28,12 @@
     }
   },
   "implementation_provenance": {
-    "status": "unbound_worktree_candidate",
+    "status": "official_contract_unbound_implementation",
     "activation_effect": "none",
     "code_revision": null,
     "implementation_manifest_sha256": null,
     "base_dataset_evaluator_revision": "68899f780d96b70f2badb5658971c87af0b17172",
-    "base_dataset_evaluator_scope": "native_v1_base_field_force_and_noncompact_scoring_only",
+    "base_dataset_evaluator_scope": "base_field_force_and_nonprofile_scoring_only",
     "regional_diagnostics_v2_scope": "unbound_report_only_adapter"
   },
   "scope": {
@@ -45,6 +45,7 @@
     "force_or_moment_scoring_changed": false
   },
   "representation": {
+    "status": "official",
     "maximum_cp_points_per_physical_graph": 128,
     "cp_placement": "uniform_native_physical_arc_length_per_retained_branch",
     "cp_prediction_array": "cp_q_delta",
@@ -54,8 +55,8 @@
     "participant_artifacts_contain_truth": false
   },
   "bindings": {
-    "profile_contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
-    "profile_contract_sha256": "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c",
+    "profile_contract_id": "hiliftaeroml-compact-profile-predictions-v2",
+    "profile_contract_sha256": "44651f4da2add287e51807f02f329f5aa226dd1fb2ae21d99e129ba2fc9000b5",
     "evaluator_support_release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
     "evaluator_support_manifest_sha256": "81150cc075d5b64caf0c63b9601a23bbecbf38a8f60bfd69814981e408dd712c",
     "source_profile_truth_release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
@@ -69,23 +70,23 @@
   "assembly": {
     "package_a": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260904/package-a",
     "package_b": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260904/package-b",
-    "regular_file_bytes_each": 14505024,
+    "regular_file_bytes_each": 14503794,
     "regular_file_byte_limit": 15000000,
-    "regular_file_headroom_bytes": 494976,
+    "regular_file_headroom_bytes": 496206,
     "recursive_file_comparison_equal": true,
-    "profile_index_sha256": "8736c1c4a71a0fa2d770abd3ab14bef49e04f1419609644c1f52af10dc9859b2",
-    "submission_json_sha256": "d82393bb17dab877ab72f06072241df26f1b6abe50537f023fe767dfe6beccf9",
-    "evaluation_evidence_sha256": "51ac886029cc95ba89bd4d403faa5eb6796baac4b2d70db20dfd2f2cbd2e3c99"
+    "profile_index_sha256": "e061b39b379201d16433f7641c637e29004d5f02cb5f935a6a6541339980b06d",
+    "submission_json_sha256": "4cd5848418341345ea023719e52e0a65b1d85bc7bd823adc0ad6594d7c129c3e",
+    "evaluation_evidence_sha256": "709554f332e30cb13b9d06d0b5edd143fce3b87149e94be50346d06cc3713e4d"
   },
   "deterministic_archives": {
     "archive_a": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260904/hiliftaeroml-transolver-full360-compact-regional-v2.build-a.zip",
     "archive_b": "../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260904/hiliftaeroml-transolver-full360-compact-regional-v2.build-b.zip",
     "byte_identical": true,
-    "size_bytes_each": 11526141,
+    "size_bytes_each": 11526032,
     "member_count_each": 403,
-    "sha256_each": "8b73e43273e57154ec4180e7393eaa4e5107dd912adde7f60f9348cec7b1ef32",
+    "sha256_each": "f1cd3122b9d8cb7070443685a3b24b94be273466e00ea949b2abf75dbc74c626",
     "maximum_archive_bytes": 15000000,
-    "archive_headroom_bytes": 3473859
+    "archive_headroom_bytes": 3473968
   },
   "candidate_validation": {
     "checked_in_preview": {

@@ -5,8 +5,9 @@ Coordinates, topology, validity masks, weights, and reference values remain in
 an explicitly supplied evaluator-owned support release.  This module validates
 both sides of that boundary before it serializes or scores any prediction.
 
-The release format is deliberately a local, inactive candidate.  Supplying a
-release path and its manifest digest does not publish or activate the format.
+The participant representation is official.  Evaluator-support releases remain
+separate lifecycle artifacts: supplying a local support path and its manifest
+digest does not publish support or open benchmark intake.
 """
 
 from __future__ import annotations
@@ -62,13 +63,13 @@ COMPACT_PROFILE_CONTRACT_PATH = (
     ROOT / "benchmark-specs" / "hiliftaeroml" / "native-profile-format-v2.json"
 )
 COMPACT_PROFILE_CONTRACT_ID = (
-    "hiliftaeroml-compact-profile-predictions-v2-candidate"
+    "hiliftaeroml-compact-profile-predictions-v2"
 )
 COMPACT_PROFILE_CONTRACT_SHA256 = (
-    "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c"
+    "44651f4da2add287e51807f02f329f5aa226dd1fb2ae21d99e129ba2fc9000b5"
 )
 COMPACT_PROFILE_CHUNK_SCHEMA = (
-    "hiliftaeroml-compact-profile-chunk-v2-candidate"
+    "hiliftaeroml-compact-profile-chunk-v2"
 )
 COMPACT_PROFILE_SCHEMA_VERSION = "2.0"
 COMPACT_PROFILE_INDEX_SCHEMA_VERSION = "1.0"

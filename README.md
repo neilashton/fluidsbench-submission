@@ -327,11 +327,12 @@ releases use `archive_url: null`; an official release must provide an immutable 
 release-view URLs containing the release ID. The separate full `source_commit` records repository provenance without creating a
 self-referential commit hash.
 
-HiLiftAeroML's registered Full360 preview uses the compact-v2 prediction
-contract. Its public Cp and velocity comparison truth lives in the website
-repository as a deduplicated 1,355-case release covering all eight official
-case sets. It is bound as plot-only metadata; the private lossless evaluator
-truth remains the scoring authority and is not copied into this repository.
+HiLiftAeroML's registered Full360 preview uses the sole official compact-v2
+profile-prediction contract; prior HiLift profile formats are not accepted.
+Its public Cp and velocity comparison truth lives in the website repository as
+a deduplicated 1,355-case release covering all eight official case sets. It is
+bound as plot-only metadata; evaluator-owned compact support and private truth
+remain the scoring authority and are not copied into participant packages.
 
 Official `asset_base_url` and `release_view_url` values are clean HTTPS directory bases: their final path segment is exactly the
 safe lowercase release ID, they end in `/`, and they contain no query or fragment. Official builds preserve the manifest's explicit

@@ -1,8 +1,7 @@
 """Compact, prediction-only HiLiftAeroML diagnostic profile primitives.
 
-This module is deliberately independent of the native profile-v1 package
-contract.  Version 1 remains the lossless audit representation.  The compact
-version keeps plotting coordinates, topology, quadrature weights, validity
+This module defines the sole participant-facing HiLiftAeroML profile
+representation.  It keeps plotting coordinates, topology, quadrature weights, validity
 gaps, and reference values in an evaluator-owned support artifact.  A
 participant artifact contains exactly two prediction arrays; the surrounding
 case metadata binds their support and prediction order with four SHA-256
@@ -38,7 +37,7 @@ import numpy as np
 
 
 COMPACT_PROFILE_FORMAT = (
-    "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
+    "fluidsbench-hiliftaeroml-compact-profile-chunks-v2"
 )
 CP_POINTS_PER_GRAPH = 128
 CP_FIXED_POINT_SCALE = 1024

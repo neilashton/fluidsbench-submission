@@ -20,7 +20,7 @@ from scripts.validate_scoring_supports import validate_candidate_manifest_releas
 ROOT = Path(__file__).resolve().parents[1]
 DATASET = ROOT / "benchmark-specs" / "hiliftaeroml"
 SPEC = DATASET / "submission-spec.json"
-PROFILE_FORMAT = DATASET / "native-profile-format-v1.json"
+PROFILE_FORMAT = DATASET / "native-profile-format-v2.json"
 LEADERBOARD_MANIFEST = ROOT / "leaderboard" / "manifest.json"
 SUBMISSION_SCHEMA = ROOT / "schemas" / "v3" / "submission.schema.json"
 FULL_SPLIT = DATASET / "splits" / "full.json"
@@ -180,48 +180,29 @@ def test_frozen_evaluator_revision_is_consistent_and_nonactivating() -> None:
     assert "freeze_and_approve_the_immutable_dataset_evaluator_git_revision" not in decisions
 
 
-def test_compact_command_and_evidence_are_additive_to_native_v1() -> None:
+def test_official_compact_v2_is_the_only_profile_command_and_evidence_path() -> None:
     config = load(CONCRETE_CONFIG)
     assembler._validate_config_envelope(config)
-    native = assembler._selected_evaluation(
-        config, compact_profile_mode=False
-    )
-    compact = assembler._selected_evaluation(
-        config, compact_profile_mode=True
-    )
-    assert "--candidate-profile-truth-release" in native["command"]
-    assert "--candidate-compact-profile-support-release" not in native["command"]
-    assert "--candidate-compact-profile-support-release" in compact["command"]
-    assert "--candidate-profile-truth-release" not in compact["command"]
-    assert native != compact
+    evaluation = assembler._selected_evaluation(config)
+    assert "--profile-support-release" in evaluation["command"]
+    assert "--candidate-profile-truth-release" not in evaluation["command"]
+    assert "--candidate-compact-profile-support-release" not in evaluation["command"]
+    assert "compact_evaluation" not in config
 
     revision = config["release_bindings"]["evaluator"]["code_revision"]
-    native_notes = assembler._profile_evidence_notes(
-        evaluator_revision=revision, compact_profile_mode=False
-    )
-    assert native_notes == (
-        "Evaluator identity is repository-frozen at "
-        f"{revision}; profile topology contract is "
-        f"{assembler.PROFILE_CONTRACT_SHA256}. Cp/velocity profile R2 was "
-        "recomputed from prediction-only chunks against the explicitly supplied "
-        "inactive local candidate truth release; this does not publish or "
-        "activate profile intake."
-    )
-    compact_notes = assembler._profile_evidence_notes(
-        evaluator_revision=revision, compact_profile_mode=True
-    )
-    assert assembler.COMPACT_PROFILE_CONTRACT_SHA256 in compact_notes
-    assert "unbound worktree candidate" in compact_notes
-    assert "no code revision or implementation-manifest SHA-256" in compact_notes
+    notes = assembler._profile_evidence_notes(evaluator_revision=revision)
+    assert assembler.COMPACT_PROFILE_CONTRACT_SHA256 in notes
+    assert "sole official participant profile representation" in notes
+    assert "has not yet been bound into the frozen evaluator manifest" in notes
     assert (
         assembler.COMPACT_PROFILE_IMPLEMENTATION_BINDING
         == {
-            "status": "unbound_worktree_candidate",
+            "status": "official_contract_unbound_implementation",
             "activation_effect": "none",
             "code_revision": None,
             "implementation_manifest_sha256": None,
             "base_dataset_evaluator_scope": (
-                "native_v1_base_field_force_and_noncompact_scoring_only"
+                "base_field_force_and_nonprofile_scoring_only"
             ),
         }
     )

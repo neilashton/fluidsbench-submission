@@ -313,9 +313,9 @@
     "split_sha256": "2c8192e1c2d03f92c4701e4257d18cf8a2c70489cdfcc26206344c6cb01666c0",
     "evaluation": {
       "reference_version": "hiliftaeroml-evaluator-v0.1-candidate",
-      "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config examples/hiliftaeroml-v3-candidate/transolver-full360-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_candidate_20260902/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/full360_exact_v1 --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/full360 --native-receipts ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_candidate_20260902/receipts-a --candidate-compact-profile-support-release ../eval_runs/hilift_compact_profile_support_v2_candidate_20260903/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/package-a",
+      "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config examples/hiliftaeroml-v3-candidate/transolver-full360-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_candidate_20260902/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/full360_exact_v1 --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/full360 --native-receipts ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_candidate_20260902/receipts-a --profile-support-release ../eval_runs/hilift_compact_profile_support_v2_candidate_20260903/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/full360_schema_v3_compact_candidate_20260903/package-a",
       "evidence_file": "evaluation-evidence.json",
-      "evidence_sha256": "51ac886029cc95ba89bd4d403faa5eb6796baac4b2d70db20dfd2f2cbd2e3c99"
+      "evidence_sha256": "709554f332e30cb13b9d06d0b5edd143fce3b87149e94be50346d06cc3713e4d"
     },
     "scoring_support": {
       "status": "candidate",
@@ -735,7 +735,7 @@
       "c_pitch_mae": 0.01400039835182241
     },
     "profile_data": {
-      "format": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate",
+      "format": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2",
       "index_file": "submissions/hiliftaeroml/hiliftaeroml-transolver-full360-candidate-v1/profiles/index.json",
       "case_count": 360,
       "case_set_id": "caseset-ac791749e527",
@@ -744,13 +744,13 @@
       "evaluator_support_release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
       "evaluator_support_manifest_sha256": "81150cc075d5b64caf0c63b9601a23bbecbf38a8f60bfd69814981e408dd712c",
       "compact_profile_implementation_binding": {
-        "status": "unbound_worktree_candidate",
+        "status": "official_contract_unbound_implementation",
         "activation_effect": "none",
         "code_revision": null,
         "implementation_manifest_sha256": null,
-        "base_dataset_evaluator_scope": "native_v1_base_field_force_and_noncompact_scoring_only"
+        "base_dataset_evaluator_scope": "base_field_force_and_nonprofile_scoring_only"
       },
-      "index_sha256": "8736c1c4a71a0fa2d770abd3ab14bef49e04f1419609644c1f52af10dc9859b2"
+      "index_sha256": "e061b39b379201d16433f7641c637e29004d5f02cb5f935a6a6541339980b06d"
     },
     "regional_diagnostics": {
       "format": "hiliftaeroml-regional-diagnostics-aggregate-v2",
