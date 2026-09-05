@@ -39,7 +39,7 @@ CONCRETE_CONFIG = (
 )
 CASE_SET_ID = "caseset-ac791749e527"
 CASE_SET_SHA256 = "ac791749e5279ecf6746fcce20e3ec32408fd33b22127d5270de968be7842acf"
-REGION_SHA256 = "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650"
+REGION_SHA256 = "8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4"
 EVALUATOR_REVISION = "68899f780d96b70f2badb5658971c87af0b17172"
 
 
@@ -404,7 +404,7 @@ def test_regional_contract_is_exactly_bound_and_zero_weight() -> None:
     declaration = specification["regional_diagnostics"]
     contract = DATASET / declaration["contract_file"]
     assert digest(contract) == declaration["contract_sha256"] == REGION_SHA256
-    assert declaration["format"] == "hiliftaeroml-regional-diagnostics-aggregate-v1"
+    assert declaration["format"] == "hiliftaeroml-regional-diagnostics-aggregate-v2"
     assert declaration["definition_id"] == "hiliftaeroml-native-geometric-regions-v1"
     assert declaration["role"] == "report_only"
     assert declaration["weight"] == 0.0
@@ -414,6 +414,30 @@ def test_regional_contract_is_exactly_bound_and_zero_weight() -> None:
 
 
 def regional_field(region_ids: tuple[str, ...]) -> dict:
+    case_macro = {
+        metric_id: {"value": value, "defined_case_count": 2}
+        for metric_id, value in {
+            "whole_support_normalized_rmse_percent": 1.5,
+            "relative_l2_percent": 2.0,
+            "r2": 0.8,
+            "mae": 0.1,
+            "rmse": 0.2,
+        }.items()
+    }
+    case_distribution = {
+        metric_id: {
+            "defined_case_count": 2,
+            "minimum": minimum,
+            "median": median,
+            "p90": maximum,
+            "maximum": maximum,
+        }
+        for metric_id, (minimum, median, maximum) in {
+            "whole_support_normalized_rmse_percent": (1.0, 1.5, 2.0),
+            "relative_l2_percent": (1.0, 2.0, 3.0),
+            "r2": (0.6, 0.8, 0.9),
+        }.items()
+    }
     return {
         "global": {"relative_l2_percent": 2.0},
         "regions": [
@@ -422,9 +446,14 @@ def regional_field(region_ids: tuple[str, ...]) -> dict:
                 "entity_fraction": 0.25,
                 "weight_fraction": 0.25,
                 "squared_error_fraction": 0.25,
+                "whole_support_normalized_rmse_percent": 2.0,
                 "relative_l2_percent": 2.0,
+                "r2": 0.8,
+                "r2_status": "ok",
                 "mae": 0.1,
                 "rmse": 0.2,
+                "case_macro": case_macro,
+                "case_distribution": case_distribution,
             }
             for region_id in region_ids
         ],
@@ -448,8 +477,8 @@ def regional_report(case_ids: list[str]) -> dict:
         "farfield_and_remaining",
     )
     return {
-        "schema": "hiliftaeroml-regional-diagnostics-aggregate-v1",
-        "schema_version": 1,
+        "schema": "hiliftaeroml-regional-diagnostics-aggregate-v2",
+        "schema_version": 2,
         "status": "complete_report_only",
         "definition_id": "hiliftaeroml-native-geometric-regions-v1",
         "contract_sha256": REGION_SHA256,
@@ -508,3 +537,44 @@ def test_hilift_regional_aggregate_validator_is_dataset_specific_and_fail_closed
             expected_case_ids=case_ids,
             expected_split_id="full",
         )
+    broken = copy.deepcopy(report)
+    broken["volume"]["fields"]["pressure"]["regions"][0][
+        "whole_support_normalized_rmse_percent"
+    ] = 3.0
+    with pytest.raises(
+        HiLiftRegionalAggregateError,
+        match="does not reconstruct global relative L2",
+    ):
+        validate_aggregate_regional_diagnostics(
+            broken,
+            expected_case_ids=case_ids,
+            expected_split_id="full",
+        )
+
+
+def test_whole_support_regional_normalization_uses_global_truth_rms() -> None:
+    value = assembler._whole_support_normalized_rmse_percent(
+        {"weight_sum": 4.0, "sum_squared_error": 4.0},
+        {"weight_sum": 25.0, "sum_squared_truth": 100.0},
+        label="test pressure region",
+    )
+    assert value == pytest.approx(50.0)
+    assert assembler._whole_support_normalized_rmse_percent(
+        {"weight_sum": 0.0, "sum_squared_error": 0.0},
+        {"weight_sum": 25.0, "sum_squared_truth": 100.0},
+        label="empty region",
+    ) is None
+
+
+def test_regional_case_summaries_retain_defined_counts_and_negative_r2() -> None:
+    assert assembler._regional_case_macro([1.0, None, 3.0]) == {
+        "value": 2.0,
+        "defined_case_count": 2,
+    }
+    assert assembler._regional_case_distribution([-2.0, None, 0.5]) == {
+        "defined_case_count": 2,
+        "minimum": -2.0,
+        "median": -0.75,
+        "p90": 0.5,
+        "maximum": 0.5,
+    }

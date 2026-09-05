@@ -113,6 +113,9 @@ LEGACY_NATIVE_RECEIPT_SCHEMA = "hiliftaeroml-transolver-full360-case-receipt-v2"
 LEGACY_FULL360_CASE_SET_ID = "caseset-ac791749e527"
 NATIVE_REGIONAL_SCHEMA = "hiliftaeroml-regional-diagnostics-aggregate-v1"
 NATIVE_REGIONAL_CASE_SCHEMA = "hiliftaeroml-regional-diagnostics-case-support-v1"
+NATIVE_REGIONAL_CONTRACT_SHA256 = (
+    "1579b0262f3368fe3748eb53025aa5e46c0a32c8ff1616c9becdbb5dedd85650"
+)
 NATIVE_SUPPORT_SCHEMA = "hiliftaeroml-native-support-score-v1"
 NATIVE_AGGREGATE_CONTRACTS = {
     NATIVE_ARTIFACT_SCHEMA: {
@@ -1835,6 +1838,66 @@ def _summary(values: Sequence[float]) -> dict[str, float]:
     }
 
 
+def _regional_case_macro(values: Sequence[float | None]) -> dict[str, Any]:
+    defined = [float(value) for value in values if value is not None]
+    return {
+        "value": math.fsum(defined) / len(defined) if defined else None,
+        "defined_case_count": len(defined),
+    }
+
+
+def _regional_case_distribution(values: Sequence[float | None]) -> dict[str, Any]:
+    defined = [float(value) for value in values if value is not None]
+    return {
+        "defined_case_count": len(defined),
+        **(
+            _summary(defined)
+            if defined
+            else {"minimum": None, "median": None, "p90": None, "maximum": None}
+        ),
+    }
+
+
+def _optional_regional_metric(
+    document: Mapping[str, Any], metric_id: str, label: str
+) -> float | None:
+    value = document.get("metrics", {}).get(metric_id)
+    return None if value is None else _finite(value, label)
+
+
+def _whole_support_normalized_rmse_percent(
+    regional_sums: Mapping[str, Any],
+    global_sums: Mapping[str, Any],
+    *,
+    label: str,
+) -> float | None:
+    regional_weight = _finite(
+        regional_sums.get("weight_sum"), f"{label} regional weight_sum"
+    )
+    regional_squared_error = _finite(
+        regional_sums.get("sum_squared_error"),
+        f"{label} regional sum_squared_error",
+    )
+    global_weight = _finite(
+        global_sums.get("weight_sum"), f"{label} whole-support weight_sum"
+    )
+    global_squared_truth = _finite(
+        global_sums.get("sum_squared_truth"),
+        f"{label} whole-support sum_squared_truth",
+    )
+    if regional_weight <= 0.0:
+        return None
+    if global_weight <= 0.0 or global_squared_truth <= 0.0:
+        return None
+    if regional_squared_error < 0.0:
+        raise HiLiftPackageAssemblyError(
+            f"{label} regional sum_squared_error is negative"
+        )
+    regional_rmse = math.sqrt(regional_squared_error / regional_weight)
+    whole_support_truth_rms = math.sqrt(global_squared_truth / global_weight)
+    return 100.0 * regional_rmse / whole_support_truth_rms
+
+
 def _convert_regional(
     *,
     native: Mapping[str, Any],
@@ -1849,7 +1912,7 @@ def _convert_regional(
         or native.get("status") != "complete_report_only"
         or native.get("scoring_weight") != 0.0
         or native.get("case_count") != len(case_ids)
-        or native.get("contract_sha256") != REGIONAL_DIAGNOSTICS_CONTRACT_SHA256
+        or native.get("contract_sha256") != NATIVE_REGIONAL_CONTRACT_SHA256
     ):
         raise HiLiftPackageAssemblyError("native regional aggregate identity differs")
     domains: dict[str, Any] = {}
@@ -1895,7 +1958,7 @@ def _convert_regional(
                 or report.get("support_id") != support_id
                 or report.get("definition_id") != REGIONAL_DEFINITION_ID
                 or report.get("contract_sha256")
-                != REGIONAL_DIAGNOSTICS_CONTRACT_SHA256
+                != NATIVE_REGIONAL_CONTRACT_SHA256
                 or report.get("scoring_weight") != 0.0
                 or report.get("region_order") != list(expected_regions)
                 or report.get("coverage", {}).get("complete") is not True
@@ -1943,15 +2006,107 @@ def _convert_regional(
             for position, region_id in enumerate(expected_regions):
                 raw_region = aggregate_field["regions"][position]
                 pooled = raw_region["pooled_metrics"]
+                case_region_documents = [
+                    report["fields"][field_id]["regions"][position]
+                    for report in case_reports
+                ]
+                case_global_documents = [
+                    report["fields"][field_id]["global"]
+                    for report in case_reports
+                ]
+                stable_case_values = [
+                    _whole_support_normalized_rmse_percent(
+                        case_region["sufficient_statistics"],
+                        case_global["sufficient_statistics"],
+                        label=(
+                            f"regional {case_id}/{domain}/{field_id}/{region_id}"
+                        ),
+                    )
+                    for case_id, case_region, case_global in zip(
+                        case_ids,
+                        case_region_documents,
+                        case_global_documents,
+                        strict=True,
+                    )
+                ]
+                local_l2_case_values = [
+                    _optional_regional_metric(
+                        case_region,
+                        "relative_l2_percent",
+                        f"regional {case_id}/{domain}/{field_id}/{region_id} relative L2",
+                    )
+                    for case_id, case_region in zip(
+                        case_ids, case_region_documents, strict=True
+                    )
+                ]
+                r2_case_values = [
+                    _optional_regional_metric(
+                        case_region,
+                        "r2",
+                        f"regional {case_id}/{domain}/{field_id}/{region_id} R2",
+                    )
+                    for case_id, case_region in zip(
+                        case_ids, case_region_documents, strict=True
+                    )
+                ]
+                mae_case_values = [
+                    _optional_regional_metric(
+                        case_region,
+                        "mae",
+                        f"regional {case_id}/{domain}/{field_id}/{region_id} MAE",
+                    )
+                    for case_id, case_region in zip(
+                        case_ids, case_region_documents, strict=True
+                    )
+                ]
+                rmse_case_values = [
+                    _optional_regional_metric(
+                        case_region,
+                        "rmse",
+                        f"regional {case_id}/{domain}/{field_id}/{region_id} RMSE",
+                    )
+                    for case_id, case_region in zip(
+                        case_ids, case_region_documents, strict=True
+                    )
+                ]
                 regions.append(
                     {
                         "region_id": region_id,
                         "entity_fraction": raw_region.get("spatial_point_fraction"),
                         "weight_fraction": raw_region.get("weight_fraction"),
                         "squared_error_fraction": raw_region.get("squared_error_fraction"),
+                        "whole_support_normalized_rmse_percent": (
+                            _whole_support_normalized_rmse_percent(
+                                raw_region["sufficient_statistics"],
+                                aggregate_field["global"]["sufficient_statistics"],
+                                label=f"regional pooled {domain}/{field_id}/{region_id}",
+                            )
+                        ),
                         "relative_l2_percent": pooled.get("relative_l2_percent"),
+                        "r2": pooled.get("r2"),
+                        "r2_status": pooled.get("r2_status"),
                         "mae": pooled.get("mae"),
                         "rmse": pooled.get("rmse"),
+                        "case_macro": {
+                            "whole_support_normalized_rmse_percent": (
+                                _regional_case_macro(stable_case_values)
+                            ),
+                            "relative_l2_percent": _regional_case_macro(
+                                local_l2_case_values
+                            ),
+                            "r2": _regional_case_macro(r2_case_values),
+                            "mae": _regional_case_macro(mae_case_values),
+                            "rmse": _regional_case_macro(rmse_case_values),
+                        },
+                        "case_distribution": {
+                            "whole_support_normalized_rmse_percent": (
+                                _regional_case_distribution(stable_case_values)
+                            ),
+                            "relative_l2_percent": _regional_case_distribution(
+                                local_l2_case_values
+                            ),
+                            "r2": _regional_case_distribution(r2_case_values),
+                        },
                     }
                 )
             case_global = [
@@ -1989,7 +2144,7 @@ def _convert_regional(
         }
     report = {
         "schema": AGGREGATE_REGIONAL_REPORT_SCHEMA,
-        "schema_version": 1,
+        "schema_version": 2,
         "status": "complete_report_only",
         "definition_id": REGIONAL_DEFINITION_ID,
         "contract_sha256": REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,

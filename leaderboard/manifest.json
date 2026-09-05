@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-09-04T05:42:34Z",
+  "generated_at": "2026-09-04T21:19:08Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-09-02-65f278d37c88",
+    "id": "prototype-dev-2026-09-02-78b3419d6294",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-09-04T05:42:34Z",
+    "generated_at": "2026-09-04T21:19:08Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "65f278d37c88fb5937fa89c4d7116b8cfb563d9ef9cdcd27e76d24b73b177278",
+    "feed_sha256": "78b3419d6294e4fd3191e0dae43d001c30e86e55d1a5acdf247f52e360c44217",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,14 +51,14 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "eb3a4037462f69af8e76b16bb699805305ae950653ee30a02f747e73fa2e7175",
+      "index_sha256": "fe47c14988dccd023c4c836ed0dc222237f5f4b140cdeaf6b4480f14cbef7969",
       "record_count": 56,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "b6fd4744bcd1a7bc1806dc85a1c756489196a97ede56bdd871f650cc23deb92b",
+      "sha256": "06d4967c9afb00a5a8a206990f501e136e082f7070d85b747041313da0adb9ae",
       "record_count": 56,
       "series_count": 56
     }

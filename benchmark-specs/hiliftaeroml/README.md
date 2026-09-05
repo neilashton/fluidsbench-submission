@@ -190,14 +190,15 @@ The completed two-build Full360 size, identity, metric, and validation receipt
 is
 [`compact-profile-full360-validation-v1.json`](compact-profile-full360-validation-v1.json).
 The retained evaluator implementation manifest predates this additive compact
-preview and does not attest it. Compact implementation provenance therefore
-remains explicitly `unbound_worktree_candidate` until a complete compact-source
-inventory and immutable evaluator revision are frozen; preview registration
-does not activate or implicitly revise that older attestation.
+preview and the v2 regional dashboard contract, and does not attest either.
+Their implementation provenance therefore remains explicitly
+`unbound_worktree_candidate` until a complete additive-source inventory and
+immutable evaluator revision are frozen; preview registration does not
+activate or implicitly revise that older attestation.
 
 ## Regional reporting
 
-[`regional-diagnostics-v1.json`](regional-diagnostics-v1.json) defines four
+[`regional-diagnostics-v2.json`](regional-diagnostics-v2.json) defines four
 surface regions and four volume regions. They reuse the native predictions and
 the primary field weights; no second inference is required. They report where
 error is concentrated, but their weight is `0.0`, they do not change any
@@ -213,6 +214,13 @@ Regional output is optional while `required_for_new_submissions` remains
 `false`. If supplied, it must cover the complete selected case set and
 reconstruct the corresponding global sufficient statistics; a partial or
 fabricated report is not accepted.
+
+For volume-region comparisons, v2 adds an equal-case mean of each region's
+RMSE normalized by that case's whole-volume truth RMS. This is the primary
+dashboard view because it remains interpretable when local farfield pressure
+is close to zero. Local regional relative L2 and regional R2 remain visible as
+diagnostics. All regional values still have weight `0.0`; the official volume
+metrics, component scores, weights, and overall score are unchanged.
 
 ## Closed schema-v3 workflow
 
@@ -241,7 +249,7 @@ The machine-readable authorities are:
   prediction-only profile serialization;
 - [`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json)
   for the non-scoring Full360 browser-plot truth;
-- [`regional-diagnostics-v1.json`](regional-diagnostics-v1.json) for optional
+- [`regional-diagnostics-v2.json`](regional-diagnostics-v2.json) for optional
   report-only regions; and
 - [`candidate-evaluator-release-binding.json`](candidate-evaluator-release-binding.json)
   for the fail-closed release hand-off.

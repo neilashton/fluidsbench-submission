@@ -246,7 +246,9 @@ scores, overall score, acceptance status, or ranking.
 only when the evaluator produced the exact complete-selected-set aggregate. If
 that report is unavailable, set it to `false` and omit the report rather than
 fabricating or partially aggregating it. The authoritative definition is
-[`regional-diagnostics-v1.json`](regional-diagnostics-v1.json).
+[`regional-diagnostics-v2.json`](regional-diagnostics-v2.json). The v2 report
+uses equal-case whole-support-normalized RMSE as the primary volume-region
+comparison while retaining local relative L2 and R2 as zero-weight diagnostics.
 
 ## 7. Record method and discretization provenance
 
