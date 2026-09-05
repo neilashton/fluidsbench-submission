@@ -2,10 +2,10 @@
   "schema": "hiliftaeroml-compact-profile-format-contract-v2",
   "schema_version": 2,
   "dataset_id": "hiliftaeroml",
-  "contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
-  "format": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate",
-  "status": "additive_candidate_not_bound",
-  "activation_effect": "none",
+  "contract_id": "hiliftaeroml-compact-profile-predictions-v2",
+  "format": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2",
+  "status": "official",
+  "activation_effect": "official_profile_representation_only",
   "scope": {
     "included": [
       "surface_cp_cut_profile_diagnostic",
@@ -222,11 +222,11 @@
     "evaluator_support_arrays_forbidden": true,
     "profile_ground_truth_is_benchmark_owned": true
   },
-  "backward_compatibility": {
-    "native_profile_v1_is_unchanged": true,
-    "v1_and_v2_require_explicit_format_dispatch": true,
-    "silent_v1_to_v2_reinterpretation_forbidden": true,
-    "submission_specification_binding": "not_yet_bound"
+  "representation_lifecycle": {
+    "official_submission_representation": true,
+    "supersedes": "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate",
+    "prior_profile_formats_accepted": false,
+    "submission_specification_binding": "profile_definition"
   },
-  "activation_gate": "Owner approval, an immutable evaluator-support and profile-truth release bound to this exact contract SHA-256, and explicit submission-specification activation are required before v2 submissions open."
+  "intake_gate": "The compact-v2 representation is official. Submission intake remains closed until immutable evaluator support is published for every enabled case set and the independent benchmark scoring and owner-approval gates are complete."
 }

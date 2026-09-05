@@ -8,16 +8,16 @@ from jsonschema import Draft202012Validator
 
 
 ROOT = Path(__file__).resolve().parents[1]
-FORMAT = "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
-CONTRACT_ID = "hiliftaeroml-compact-profile-predictions-v2-candidate"
+FORMAT = "fluidsbench-hiliftaeroml-compact-profile-chunks-v2"
+CONTRACT_ID = "hiliftaeroml-compact-profile-predictions-v2"
 CASE_ID = "geo_LHC001_AoA_4"
 IMPLEMENTATION_BINDING = {
-    "status": "unbound_worktree_candidate",
+    "status": "official_contract_unbound_implementation",
     "activation_effect": "none",
     "code_revision": None,
     "implementation_manifest_sha256": None,
     "base_dataset_evaluator_scope": (
-        "native_v1_base_field_force_and_noncompact_scoring_only"
+        "base_field_force_and_nonprofile_scoring_only"
     ),
 }
 
@@ -28,7 +28,7 @@ def load(relative: str) -> dict:
 
 def valid_chunk() -> dict:
     return {
-        "schema": "hiliftaeroml-compact-profile-chunk-v2-candidate",
+        "schema": "hiliftaeroml-compact-profile-chunk-v2",
         "schema_version": "2.0",
         "format": FORMAT,
         "contract_id": CONTRACT_ID,
@@ -80,12 +80,17 @@ def valid_chunk() -> dict:
     }
 
 
-def test_compact_profile_contract_is_additive_and_excludes_full_surface_l2() -> None:
+def test_compact_profile_contract_is_official_exclusive_and_excludes_full_surface_l2() -> None:
     contract = load("benchmark-specs/hiliftaeroml/native-profile-format-v2.json")
     assert contract["format"] == FORMAT
     assert contract["contract_id"] == CONTRACT_ID
-    assert contract["status"] == "additive_candidate_not_bound"
-    assert contract["backward_compatibility"]["native_profile_v1_is_unchanged"]
+    assert contract["status"] == "official"
+    assert contract["representation_lifecycle"] == {
+        "official_submission_representation": True,
+        "supersedes": "fluidsbench-hiliftaeroml-native-profile-chunks-v1-candidate",
+        "prior_profile_formats_accepted": False,
+        "submission_specification_binding": "profile_definition",
+    }
     full_surface = contract["scope"]["full_surface_cp_dual_area_l2"]
     assert full_surface == {
         "metric_id": "surface_pressure_rel_l2",
