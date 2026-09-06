@@ -34,6 +34,7 @@ from reference.hiliftaeroml.compact_profiles import (
     PREDICTION_ARRAYS,
     SUPPORT_ARRAYS,
     VELOCITY_ROW_COUNT,
+    VELOCITY_STORAGE_ENCODING,
     VELOCITY_STATIONS,
     CompactProfileError,
     compact_case_metadata,
@@ -65,7 +66,7 @@ COMPACT_PROFILE_CONTRACT_ID = (
     "hiliftaeroml-compact-profile-predictions-v2-candidate"
 )
 COMPACT_PROFILE_CONTRACT_SHA256 = (
-    "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c"
+    "b1fd29b2cb6c1c84c694ddffc5d85f6cd68fd175b79c3695a443aa78bf962c2f"
 )
 COMPACT_PROFILE_CHUNK_SCHEMA = (
     "hiliftaeroml-compact-profile-chunk-v2-candidate"
@@ -137,6 +138,9 @@ _VELOCITY_METADATA_KEYS = {
     "invalid_row_count",
     "prediction_dtype",
     "prediction_array",
+    "storage_dtype",
+    "storage_encoding",
+    "stored_byte_count",
 }
 
 
@@ -430,7 +434,13 @@ def _preflight_npz(
                         _fail(f"{member_label} dtype, shape, or order differs")
     except CompactProfileEvaluationError:
         raise
-    except (OSError, ValueError, zipfile.BadZipFile, MemoryError) as error:
+    except (
+        OSError,
+        ValueError,
+        RuntimeError,
+        zipfile.BadZipFile,
+        MemoryError,
+    ) as error:
         raise CompactProfileEvaluationError(f"cannot preflight {label}: {error}") from error
 
 
@@ -521,10 +531,17 @@ def _support_array_contract(
     expected_velocity_strings = {
         "prediction_dtype": "float32",
         "prediction_array": "velocity_speed_over_u_inf",
+        "storage_dtype": "uint8",
+        "storage_encoding": VELOCITY_STORAGE_ENCODING,
     }
     for key, expected in expected_velocity_strings.items():
         if type(velocity.get(key)) is not str or velocity.get(key) != expected:
             _fail(f"{label}.volume_velocity.{key} differs")
+    _exact_int(
+        velocity.get("stored_byte_count"),
+        valid_count * np.dtype(np.float32).itemsize,
+        f"{label}.volume_velocity.stored_byte_count",
+    )
 
     branch_shape = (branch_count,)
     return {
@@ -1397,11 +1414,15 @@ def build_compact_profile_directory(
             selected = list(cases[start : start + cases_per_chunk])
             entries: list[dict[str, Any]] = []
             for case_id in selected:
-                support, release_hashes = _load_support_case(release, case_id)
-                if release_hashes != expected_hashes[case_id]:
-                    _fail(
-                        f"{case_id} compact support source hashes differ from retained receipt"
-                    )
+                support, _materialization_source_hashes = _load_support_case(
+                    release, case_id
+                )
+                # These release hashes preserve the exact native artifacts used
+                # to materialize evaluator-owned geometry and truth. They are
+                # provenance, not a prediction authorization: several
+                # surrogates can legitimately predict the same physical case.
+                # The current surrogate is independently authenticated below
+                # against its own receipts, then aligned to the support.
                 cp_metrics_path = _safe_child(
                     surface_root,
                     f"{case_id}/surface_submission_stream/cp_profile_metrics.json",
@@ -1773,8 +1794,11 @@ def score_compact_profile_directory(
                     (len(support["cp_truth"]),),
                 ),
                 "velocity_speed_over_u_inf": (
-                    np.dtype(np.float32),
-                    (int(np.count_nonzero(support["velocity_valid_mask"])),),
+                    np.dtype(np.uint8),
+                    (
+                        int(np.count_nonzero(support["velocity_valid_mask"]))
+                        * np.dtype(np.float32).itemsize,
+                    ),
                 ),
             }
             _preflight_npz(

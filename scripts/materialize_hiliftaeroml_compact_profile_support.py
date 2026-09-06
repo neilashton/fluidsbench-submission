@@ -286,9 +286,13 @@ class _StreamingCaseMaterializer:
         self,
         *,
         case_ids: Sequence[str],
-        surface_outputs_root: Path,
-        volume_outputs_root: Path,
-        truth_release: CandidateTruthRelease,
+        surface_outputs_root: Path | None = None,
+        volume_outputs_root: Path | None = None,
+        truth_release: CandidateTruthRelease | None = None,
+        case_sources: Mapping[
+            str, tuple[Path, Path, CandidateTruthRelease]
+        ]
+        | None = None,
     ) -> None:
         self.case_ids = tuple(case_ids)
         self._case_set = set(self.case_ids)
@@ -296,13 +300,62 @@ class _StreamingCaseMaterializer:
             case_id: position
             for position, case_id in enumerate(self.case_ids, start=1)
         }
-        self.surface_outputs_root = _regular_directory(
-            surface_outputs_root, "surface native-output root"
-        )
-        self.volume_outputs_root = _regular_directory(
-            volume_outputs_root, "volume native-output root"
-        )
-        self.truth_release = truth_release
+        if case_sources is None:
+            if (
+                surface_outputs_root is None
+                or volume_outputs_root is None
+                or truth_release is None
+            ):
+                _fail("single-route compact support inputs are incomplete")
+            surface = _regular_directory(
+                surface_outputs_root, "surface native-output root"
+            )
+            volume = _regular_directory(
+                volume_outputs_root, "volume native-output root"
+            )
+            self._case_sources = {
+                case_id: (surface, volume, truth_release)
+                for case_id in self.case_ids
+            }
+        else:
+            if any(
+                value is not None
+                for value in (
+                    surface_outputs_root,
+                    volume_outputs_root,
+                    truth_release,
+                )
+            ):
+                _fail("routed compact support cannot also use single-route inputs")
+            if set(case_sources) != self._case_set:
+                _fail("routed compact support case mapping differs")
+            regular_roots: dict[Path, Path] = {}
+
+            def regular(path: Path, label: str) -> Path:
+                resolved = path.resolve()
+                if resolved not in regular_roots:
+                    regular_roots[resolved] = _regular_directory(path, label)
+                return regular_roots[resolved]
+
+            self._case_sources = {}
+            for case_id in self.case_ids:
+                raw = case_sources[case_id]
+                if not isinstance(raw, tuple) or len(raw) != 3:
+                    _fail(f"{case_id} routed compact support source is invalid")
+                surface_root, volume_root, selected_truth = raw
+                if not isinstance(selected_truth, CandidateTruthRelease):
+                    _fail(f"{case_id} routed compact support truth handle is invalid")
+                self._case_sources[case_id] = (
+                    regular(
+                        surface_root,
+                        f"{case_id} surface native-output root",
+                    ),
+                    regular(
+                        volume_root,
+                        f"{case_id} volume native-output root",
+                    ),
+                    selected_truth,
+                )
         self._cached_case_id: str | None = None
         self._cached_support: dict[str, np.ndarray] | None = None
         self._cached_hashes: dict[str, str] | None = None
@@ -331,11 +384,14 @@ class _StreamingCaseMaterializer:
         self._cached_case_id = None
         self._cached_support = None
         self._cached_hashes = None
+        surface_outputs_root, volume_outputs_root, truth_release = (
+            self._case_sources[case_id]
+        )
         surface = self._stream(
-            self.surface_outputs_root, case_id, "surface_submission_stream"
+            surface_outputs_root, case_id, "surface_submission_stream"
         )
         volume = self._stream(
-            self.volume_outputs_root, case_id, "volume_submission_stream"
+            volume_outputs_root, case_id, "volume_submission_stream"
         )
         cp_arrays, cp_metadata = validate_cp_source(
             metrics_path=surface / "cp_profile_metrics.json",
@@ -347,9 +403,7 @@ class _StreamingCaseMaterializer:
             metrics_path=volume / "velocity_profile_metrics.json",
             npz_path=volume / "velocity_profiles.npz",
         )
-        record, truth_cp, truth_velocity = _truth_case(
-            self.truth_release, case_id
-        )
+        record, truth_cp, truth_velocity = _truth_case(truth_release, case_id)
         _validate_cp_alignment(case_id, cp_arrays, cp_metadata, record)
         _validate_velocity_alignment(
             case_id,
@@ -530,28 +584,324 @@ def materialize_compact_support_release(
     }
 
 
+def materialize_routed_compact_support_release(
+    *,
+    submission_spec_path: Path,
+    split_paths: Sequence[Path],
+    surface_outputs_roots: Sequence[Path],
+    volume_outputs_roots: Sequence[Path],
+    source_truth_release: Path,
+    output_root: Path,
+    allow_manifest_rebind_from: str | None = None,
+) -> dict[str, Any]:
+    """Build one support release covering several exact benchmark case sets.
+
+    The three route sequences are positional: each split uses the surface and
+    volume native-output roots at the same position.  If a case occurs in more
+    than one split, its first declared route is authoritative.  Case-set member
+    order remains exactly the official split order, while the deduplicated
+    release inventory is sorted for a stable master-case traversal.
+    """
+
+    route_count = len(split_paths)
+    if (
+        route_count == 0
+        or len(surface_outputs_roots) != route_count
+        or len(volume_outputs_roots) != route_count
+    ):
+        _fail("compact support split and native-output route counts differ")
+    if allow_manifest_rebind_from is not None:
+        allow_manifest_rebind_from = _require_sha(
+            allow_manifest_rebind_from,
+            "allowed prior compact-support manifest SHA-256",
+        )
+
+    loaded: list[
+        tuple[
+            Path,
+            Path,
+            Path,
+            str,
+            Mapping[str, Any],
+            str,
+            tuple[str, ...],
+            Mapping[str, Any],
+            Path,
+            Mapping[str, Any],
+        ]
+    ] = []
+    common_spec_sha: str | None = None
+    common_support_declaration: Mapping[str, Any] | None = None
+    common_binding_path: Path | None = None
+    common_truth_declaration: Mapping[str, Any] | None = None
+    seen_split_ids: set[str] = set()
+    for split_path, surface_root, volume_root in zip(
+        split_paths,
+        surface_outputs_roots,
+        volume_outputs_roots,
+        strict=True,
+    ):
+        (
+            _spec,
+            spec_sha,
+            split,
+            split_sha,
+            case_ids,
+            support_declaration,
+            binding_path,
+            truth_declaration,
+        ) = _load_benchmark_bindings(
+            submission_spec_path=submission_spec_path,
+            split_path=split_path,
+        )
+        split_id = split.get("split_id")
+        if not isinstance(split_id, str) or split_id in seen_split_ids:
+            _fail("routed compact support split IDs must be unique")
+        seen_split_ids.add(split_id)
+        if common_spec_sha is None:
+            common_spec_sha = spec_sha
+            common_support_declaration = support_declaration
+            common_binding_path = binding_path
+            common_truth_declaration = truth_declaration
+        elif (
+            spec_sha != common_spec_sha
+            or support_declaration != common_support_declaration
+            or binding_path != common_binding_path
+            or truth_declaration != common_truth_declaration
+        ):
+            _fail("routed compact support benchmark bindings differ")
+        loaded.append(
+            (
+                split_path,
+                surface_root,
+                volume_root,
+                split_sha,
+                split,
+                split_id,
+                case_ids,
+                support_declaration,
+                binding_path,
+                truth_declaration,
+            )
+        )
+
+    if (
+        common_spec_sha is None
+        or common_support_declaration is None
+        or common_binding_path is None
+        or common_truth_declaration is None
+    ):
+        _fail("routed compact support benchmark bindings are absent")
+    declared_manifest_sha = common_support_declaration.get("manifest_sha256")
+    if (
+        allow_manifest_rebind_from is not None
+        and declared_manifest_sha != allow_manifest_rebind_from
+    ):
+        _fail("allowed prior compact-support manifest differs from the live pin")
+
+    truth_handles: dict[str, CandidateTruthRelease] = {}
+    case_sets: dict[str, tuple[str, ...]] = {}
+    case_sources: dict[
+        str, tuple[Path, Path, CandidateTruthRelease]
+    ] = {}
+    route_receipts: list[dict[str, Any]] = []
+    source_truth_release_id: str | None = None
+    source_truth_manifest_sha = _require_sha(
+        common_truth_declaration.get("manifest_sha256"),
+        "source profile-truth manifest SHA-256",
+    )
+    for (
+        split_path,
+        surface_root,
+        volume_root,
+        split_sha,
+        split,
+        split_id,
+        case_ids,
+        _support_declaration,
+        binding_path,
+        truth_declaration,
+    ) in loaded:
+        case_set_id = split.get("case_set_id")
+        if not isinstance(case_set_id, str):
+            _fail(f"{split_id} routed compact support case-set ID is invalid")
+        previous_members = case_sets.get(case_set_id)
+        if previous_members is not None and previous_members != case_ids:
+            _fail("duplicate compact support case-set ID has different members")
+        case_sets.setdefault(case_set_id, case_ids)
+        truth_handle = truth_handles.get(case_set_id)
+        if truth_handle is None:
+            try:
+                truth_handle = open_candidate_truth_release(
+                    release_root=source_truth_release,
+                    candidate_declaration=truth_declaration,
+                    expected_case_ids=case_ids,
+                    case_set_id=case_set_id,
+                    binding_path=binding_path,
+                )
+            except NativeProfileEvaluationError as error:
+                raise CompactProfileEvaluationError(str(error)) from error
+            truth_handles[case_set_id] = truth_handle
+        opened_release_id = truth_handle.manifest.get("release_id")
+        if (
+            opened_release_id != truth_declaration.get("release_id")
+            or truth_handle.manifest.get("format") != TRUTH_FORMAT
+        ):
+            _fail("opened source profile-truth release identity differs")
+        if source_truth_release_id is None:
+            source_truth_release_id = opened_release_id
+        elif opened_release_id != source_truth_release_id:
+            _fail("routed compact support source truth releases differ")
+        selected_count = 0
+        for case_id in case_ids:
+            if case_id not in case_sources:
+                case_sources[case_id] = (
+                    surface_root,
+                    volume_root,
+                    truth_handle,
+                )
+                selected_count += 1
+        route_receipts.append(
+            {
+                "split_id": split_id,
+                "split_sha256": split_sha,
+                "split_path": str(split_path.resolve()),
+                "case_set_id": case_set_id,
+                "case_set_sha256": split["case_set_sha256"],
+                "case_count": len(case_ids),
+                "selected_source_case_count": selected_count,
+                "surface_outputs_root": str(surface_root.resolve()),
+                "volume_outputs_root": str(volume_root.resolve()),
+            }
+        )
+    if source_truth_release_id is None:
+        _fail("routed compact support source truth release is absent")
+
+    master_case_ids = tuple(sorted(case_sources))
+    source = _StreamingCaseMaterializer(
+        case_ids=master_case_ids,
+        case_sources=case_sources,
+    )
+    try:
+        manifest_sha = write_compact_support_release(
+            release_root=output_root,
+            case_ids=master_case_ids,
+            case_sets=case_sets,
+            supports=_SupportView(source),
+            source_artifact_sha256=_SourceHashView(source),
+            source_profile_truth_release_id=source_truth_release_id,
+            source_profile_truth_manifest_sha256=source_truth_manifest_sha,
+        )
+    except (CompactProfileError, NativeProfileError) as error:
+        raise CompactProfileEvaluationError(str(error)) from error
+    if (
+        declared_manifest_sha is not None
+        and manifest_sha != declared_manifest_sha
+        and allow_manifest_rebind_from is None
+    ):
+        if output_root.is_dir() and not output_root.is_symlink():
+            shutil.rmtree(output_root)
+        _fail("materialized support manifest differs from its submission-spec pin")
+
+    try:
+        for case_set_id, members in case_sets.items():
+            handle = open_compact_support_release(
+                release_root=output_root,
+                expected_manifest_sha256=manifest_sha,
+                expected_case_ids=members,
+                case_set_id=case_set_id,
+            )
+            if (
+                handle.source_profile_truth_release_id
+                != source_truth_release_id
+                or handle.source_profile_truth_manifest_sha256
+                != source_truth_manifest_sha
+            ):
+                _fail("materialized support source-truth binding differs")
+    except CompactProfileEvaluationError:
+        if output_root.is_dir() and not output_root.is_symlink():
+            shutil.rmtree(output_root)
+        raise
+    return {
+        "status": COMPACT_SUPPORT_RELEASE_STATUS,
+        "usage": COMPACT_SUPPORT_RELEASE_USAGE,
+        "dataset_id": "hiliftaeroml",
+        "evaluator_support_release_id": COMPACT_SUPPORT_RELEASE_ID,
+        "evaluator_support_manifest_sha256": manifest_sha,
+        "profile_contract_id": COMPACT_PROFILE_CONTRACT_ID,
+        "profile_contract_sha256": COMPACT_PROFILE_CONTRACT_SHA256,
+        "source_profile_truth_release_id": source_truth_release_id,
+        "source_profile_truth_manifest_sha256": source_truth_manifest_sha,
+        "submission_spec_sha256": common_spec_sha,
+        "split_count": len(route_receipts),
+        "case_set_count": len(case_sets),
+        "case_count": len(master_case_ids),
+        "points_per_physical_graph": CP_POINTS_PER_GRAPH,
+        "routes": route_receipts,
+        "output_root": str(output_root.resolve()),
+        "manifest_rebind": {
+            "allowed": allow_manifest_rebind_from is not None,
+            "prior_manifest_sha256": declared_manifest_sha,
+            "materialized_manifest_sha256": manifest_sha,
+        },
+        "activation": {
+            "owner_approval_complete": False,
+            "published": False,
+            "submissions_opened": False,
+            "materialization_changes_activation": False,
+        },
+    }
+
+
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
     result.add_argument("--submission-spec", required=True, type=Path)
-    result.add_argument("--split", required=True, type=Path)
-    result.add_argument("--surface-outputs-root", required=True, type=Path)
-    result.add_argument("--volume-outputs-root", required=True, type=Path)
+    result.add_argument("--split", required=True, action="append", type=Path)
+    result.add_argument(
+        "--surface-outputs-root", required=True, action="append", type=Path
+    )
+    result.add_argument(
+        "--volume-outputs-root", required=True, action="append", type=Path
+    )
     result.add_argument("--source-truth-release", required=True, type=Path)
     result.add_argument("--output-root", required=True, type=Path)
+    result.add_argument(
+        "--allow-manifest-rebind-from",
+        help=(
+            "explicitly permit a routed release to replace this currently "
+            "pinned compact-support manifest digest"
+        ),
+    )
     return result
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
-        receipt = materialize_compact_support_release(
-            submission_spec_path=args.submission_spec,
-            split_path=args.split,
-            surface_outputs_root=args.surface_outputs_root,
-            volume_outputs_root=args.volume_outputs_root,
-            source_truth_release=args.source_truth_release,
-            output_root=args.output_root,
-        )
+        if (
+            len(args.split) == 1
+            and len(args.surface_outputs_root) == 1
+            and len(args.volume_outputs_root) == 1
+            and args.allow_manifest_rebind_from is None
+        ):
+            receipt = materialize_compact_support_release(
+                submission_spec_path=args.submission_spec,
+                split_path=args.split[0],
+                surface_outputs_root=args.surface_outputs_root[0],
+                volume_outputs_root=args.volume_outputs_root[0],
+                source_truth_release=args.source_truth_release,
+                output_root=args.output_root,
+            )
+        else:
+            receipt = materialize_routed_compact_support_release(
+                submission_spec_path=args.submission_spec,
+                split_paths=args.split,
+                surface_outputs_roots=args.surface_outputs_root,
+                volume_outputs_roots=args.volume_outputs_root,
+                source_truth_release=args.source_truth_release,
+                output_root=args.output_root,
+                allow_manifest_rebind_from=args.allow_manifest_rebind_from,
+            )
     except (
         CompactProfileEvaluationError,
         CompactProfileError,

@@ -190,13 +190,19 @@ Each participant case artifact contains exactly the two prediction arrays
 defined by
 [`native-profile-format-v2.json`](native-profile-format-v2.json):
 `cp_q_delta` and `velocity_speed_over_u_inf`. It contains no evaluator support
-or truth arrays.
+or truth arrays. The NPZ uses deterministic level-9 ZIP Deflate. The velocity
+member losslessly unsigned-delta-codes and byte-shuffles the exact little-endian
+float32 bit patterns before compression; decoding restores every submitted bit
+and therefore does not change values or scores.
 
 The selected Cp support uses at most 128 points per physical connected graph,
 placed uniformly in native physical arc length. Cp values are fixed-int16
 quantized and delta encoded at evaluator-owned retained-branch boundaries.
 Velocity values are scalar `float32` speed-over-freestream predictions for all
-and only the evaluator-owned valid rows at the same five stations. The
+and only the evaluator-owned valid rows at the same five stations. They are
+stored as the `uint8` byte transform defined by the contract so browsers can
+decode the ordinary Deflate NPZ without evaluator support or a native LZMA
+runtime. The
 selection evidence is recorded in
 [`compact-cp-representation-decision-v1.json`](compact-cp-representation-decision-v1.json)
 and
@@ -432,9 +438,11 @@ code, scoring support, workflows, or an existing result inside a participant
 package.
 
 For compact-v2 packages, each per-case NPZ has exactly `cp_q_delta` and
-`velocity_speed_over_u_inf`; evaluator-owned support remains in the separately
-bound local release. Full native surface/volume evaluation products and their
-receipt chain remain required outside the portable package assembly inputs.
+`velocity_speed_over_u_inf`; the latter is the contract-defined lossless
+float32-bit transform stored as `uint8`. Evaluator-owned support remains in the
+separately bound local release. Full native surface/volume evaluation products
+and their receipt chain remain required outside the portable package assembly
+inputs.
 
 While `submissions_open` is `false`, retain the package locally or share it
 directly with the benchmark owner for coordinated implementation review. Do
