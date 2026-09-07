@@ -392,8 +392,35 @@ python scripts/materialize_hiliftaeroml_compact_profile_support.py \
 ```
 
 The `--split`, `--surface-outputs-root`, and `--volume-outputs-root` groups may
-be repeated in matching order. The retained seven-preview support release uses
-five distinct case sets and stores each overlapping physical case once.
+be repeated in matching order. Maintainers can instead reconstruct support for
+all eight official case sets without prediction outputs from the exact frozen
+authority already bound into the native-profile truth release:
+
+```bash
+python scripts/materialize_hiliftaeroml_compact_profile_support.py \
+  --submission-spec benchmark-specs/hiliftaeroml/submission-spec.json \
+  --split benchmark-specs/hiliftaeroml/splits/full.json \
+  --split benchmark-specs/hiliftaeroml/splits/geometry_scarce.json \
+  --split benchmark-specs/hiliftaeroml/splits/single_aoa_4.json \
+  --split benchmark-specs/hiliftaeroml/splits/single_aoa_12.json \
+  --split benchmark-specs/hiliftaeroml/splits/single_aoa_22.json \
+  --split benchmark-specs/hiliftaeroml/splits/aoa.json \
+  --split benchmark-specs/hiliftaeroml/splits/deflection.json \
+  --split benchmark-specs/hiliftaeroml/splits/stall.json \
+  --prerequisite-authority-index /authorized/local/hiliftaeroml-native-profile-truth-authority-v1.json \
+  --source-truth-release /authorized/local/hiliftaeroml-native-profile-truth-v1-candidate \
+  --output-root /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate
+```
+
+That path validates the authority against the truth-release binding, reads no
+surrogate prediction output, applies the same limit of 128 Cp points per
+physical graph, and stores every overlapping physical case once. Its receipt
+records how the authority record/payload hashes occupy the support format's
+four legacy source-hash provenance slots. The completed two-build all-case
+evidence is
+[`compact-profile-all-case-support-validation-v1.json`](compact-profile-all-case-support-validation-v1.json).
+That record is intentionally non-activating until the owner selects the final
+release binding.
 
 The output is benchmark/evaluator-owned local support and must remain outside
 the participant package. Use it in place of, not alongside,
@@ -420,11 +447,12 @@ python scripts/validate_submission.py \
   /path/to/local/hiliftaeroml-my-method-compact-v2
 ```
 
-The assembler rejects the compact candidate if the sum of regular files in
-the completed package exceeds 15,000,000 bytes. Passing that hard portability
-gate and the validator remains only local candidate evidence; it does not
-publish support, qualify other case sets, approve the evaluator, or open
-submissions. The native profile-v1 commands above remain the retained workflow.
+The assembler reports the completed package size but has no aggregate byte
+ceiling, because the official splits have materially different case counts.
+The bounded per-file/archive checks and the validator remain in force. Passing
+them remains only local candidate evidence; it does not publish support,
+approve the evaluator, or open submissions. The native profile-v1 commands
+above remain the retained workflow.
 
 ## 10. Package boundary while submissions are closed
 

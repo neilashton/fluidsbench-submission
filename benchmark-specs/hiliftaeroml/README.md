@@ -182,14 +182,20 @@ Cp-cut and velocity-profile plotting/scoring payloads. Complete native-surface
 Cp scoring, wall-shear scoring, force integration, and pitching-moment
 integration continue to use the unchanged full native surface prediction.
 
-The compact assembler enforces a hard 15,000,000-byte limit on the complete
-assembled package. This is an implementation gate in addition to the
-prediction-only and release-binding checks. It is not evidence that the
-candidate is published or active. The format and retained scientific evidence
-are [`native-profile-format-v2.json`](native-profile-format-v2.json),
+The compact assembler does not impose an aggregate package-size ceiling:
+package size scales with the official case count, while the strict per-file,
+array-shape, archive-member, prediction-only, and release-binding safety checks
+remain in force. Package size is reported in the assembly receipt. This does
+not make the candidate published or active. The format and retained scientific
+evidence are [`native-profile-format-v2.json`](native-profile-format-v2.json),
 [`compact-cp-representation-decision-v1.json`](compact-cp-representation-decision-v1.json),
 and
 [`compact-cp-representation-audit-v1.md`](compact-cp-representation-audit-v1.md).
+The prediction-free two-build materialization and compatibility evidence for
+all 1,355 cases is
+[`compact-profile-all-case-support-validation-v1.json`](compact-profile-all-case-support-validation-v1.json).
+It records a successor local candidate; it deliberately does not change the
+current candidate binding or activate submissions.
 The completed two-build size, identity, metric, and validation receipts are
 [`compact-profile-full360-validation-v1.json`](compact-profile-full360-validation-v1.json),
 [`compact-profile-aoa4-validation-v1.json`](compact-profile-aoa4-validation-v1.json),

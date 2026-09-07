@@ -80,7 +80,6 @@ SCHEMA_ROOT = ROOT / "schemas"
 CONFIG_SCHEMA = "hiliftaeroml-fluidsbench-schema-v3-package-config-v1"
 SUBMISSION_FORMAT = "hiliftaeroml_native_candidate_v3"
 TOKEN_PREFIXES = ("__REPLACE_", "__UNRESOLVED_HILIFTAEROML_")
-COMPACT_PACKAGE_MAX_BYTES = 15_000_000
 COMPACT_PROFILE_IMPLEMENTATION_BINDING = {
     "status": "unbound_worktree_candidate",
     "activation_effect": "none",
@@ -2937,11 +2936,6 @@ def assemble_package(
                 for path in staging.rglob("*")
                 if path.is_file() and not path.is_symlink()
             )
-            if package_size_bytes > COMPACT_PACKAGE_MAX_BYTES:
-                raise HiLiftPackageAssemblyError(
-                    "compact candidate package exceeds the 15,000,000-byte "
-                    f"portability gate ({package_size_bytes} bytes)"
-                )
         os.replace(staging, output_path)
     except Exception:
         shutil.rmtree(staging, ignore_errors=True)
@@ -2955,9 +2949,7 @@ def assemble_package(
         "case_count": len(case_ids),
         "profile_format": selected_profile_format,
         "package_size_bytes": package_size_bytes,
-        "compact_package_max_bytes": (
-            COMPACT_PACKAGE_MAX_BYTES if compact_profile_mode else None
-        ),
+        "compact_package_max_bytes": None,
         "candidate_dry_run_command": (
             "python scripts/validate_submission.py --candidate-dry-run "
             + (
