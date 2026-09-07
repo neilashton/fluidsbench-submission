@@ -373,12 +373,13 @@ grant official acceptance, benchmark-owner approval, contributor-stage
 eligibility, or leaderboard visibility. Do not use `--contributor-stage` for
 this closed workflow.
 
-### Optional local Full360 compact-v2 exercise
+### Optional local compact-v2 exercise
 
-The retained real-surrogate compact package covers the Full360 case set only;
-the public plot-only truth separately covers every official case set. A
-maintainer with the authorized native-profile truth and complete Full360 native
-outputs can materialize an evaluator-owned scoring support release locally:
+Seven retained real-surrogate compact packages cover Full, the three fixed-AoA
+splits, Super scarce, Geometry scarce, and Geometry super scarce. The public
+plot-only truth separately covers every official case set. A maintainer with
+the authorized native-profile truth and complete native outputs for the target
+case set can materialize an evaluator-owned scoring support release locally:
 
 ```bash
 python scripts/materialize_hiliftaeroml_compact_profile_support.py \
@@ -389,6 +390,10 @@ python scripts/materialize_hiliftaeroml_compact_profile_support.py \
   --source-truth-release /authorized/local/hiliftaeroml-native-profile-truth-v1-candidate \
   --output-root /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate
 ```
+
+The `--split`, `--surface-outputs-root`, and `--volume-outputs-root` groups may
+be repeated in matching order. The retained seven-preview support release uses
+five distinct case sets and stores each overlapping physical case once.
 
 The output is benchmark/evaluator-owned local support and must remain outside
 the participant package. Use it in place of, not alongside,

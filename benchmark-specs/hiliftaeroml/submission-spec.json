@@ -142,14 +142,14 @@
       "status": "complete_candidate_not_published",
       "usage": "maintainer_local_candidate_dry_run_only",
       "release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
-      "manifest_sha256": "6ff09c84c1d8f05cd79377c6fcd86f770512a9a2db5858cf5e0cd8eca14d6e91"
+      "manifest_sha256": "6797a7a9578b2f9c34c24d218637129f37d6bb5074f0059f2410455e9e59c6ff"
     },
     "public_plot_ground_truth": {
       "status": "public_plot_only_candidate",
       "usage": "browser_visualization_only_not_metric_recomputation",
       "activation_effect": "none",
       "binding_file": "public-compact-profile-truth-binding-v1.json",
-      "binding_sha256": "acc5d9ab9382879da8b775a6388bc6dc45b20ac911ab74b62146891714f6d0fa"
+      "binding_sha256": "69bc6e8c8503fbd86bdce1ec692e8967e8502d09582a3e06fc7c67cca203cedd"
     },
     "activation_rule": "Owner approval, publication of immutable evaluator support and profile truth bound to this exact contract SHA-256, and an explicit status change are required before compact-v2 submissions open."
   },

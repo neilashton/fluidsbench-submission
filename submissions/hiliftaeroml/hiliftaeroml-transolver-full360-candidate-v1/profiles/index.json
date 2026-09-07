@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "format": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate",
   "contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
-  "contract_sha256": "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c",
+  "contract_sha256": "b1fd29b2cb6c1c84c694ddffc5d85f6cd68fd175b79c3695a443aa78bf962c2f",
   "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
   "dataset_id": "hiliftaeroml",
   "split_id": "full",
@@ -10,7 +10,7 @@
   "case_count": 360,
   "case_id_status": "official",
   "evaluator_support_release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
-  "evaluator_support_manifest_sha256": "81150cc075d5b64caf0c63b9601a23bbecbf38a8f60bfd69814981e408dd712c",
+  "evaluator_support_manifest_sha256": "6797a7a9578b2f9c34c24d218637129f37d6bb5074f0059f2410455e9e59c6ff",
   "chunks": [
     {
       "file": "chunk-000.json",
@@ -26,7 +26,7 @@
         "geo_LHC016_AoA_4",
         "geo_LHC018_AoA_8"
       ],
-      "sha256": "e329f32c1bb99d4fda9396ab324f59c22d02ce8a31fa4445f7387ae81c33760d"
+      "sha256": "429a1f1b3227c99f76ae86d6d9a191b92008bdcbb8715de276ad8f664a9b9c3e"
     },
     {
       "file": "chunk-001.json",
@@ -42,7 +42,7 @@
         "geo_LHC035_AoA_6",
         "geo_LHC038_AoA_12"
       ],
-      "sha256": "9964b936a78174afb050db9206581b453021c8e6c879077226b957eeb7b34d83"
+      "sha256": "6bbb038a4d9b2960bf8c8de3086babdd4c8163a7271d38922966decac2a216db"
     },
     {
       "file": "chunk-002.json",
@@ -58,7 +58,7 @@
         "geo_LHC053_AoA_20",
         "geo_LHC054_AoA_18"
       ],
-      "sha256": "b5c3bbd51a1d98a478d5cdef03793618e7e942321d86c0135220fdf643e97c67"
+      "sha256": "21d43433d4e258e18203878e261f7a1adcab060a5e8acaa3b756606470177011"
     },
     {
       "file": "chunk-003.json",
@@ -74,7 +74,7 @@
         "geo_LHC072_AoA_18",
         "geo_LHC076_AoA_18"
       ],
-      "sha256": "31a0e626c1c671f97d6bf34a71dbaa6143c30f48484e66edaa55670021606872"
+      "sha256": "92835fcb53013a1dc7620d8249a378a877d984d7dd0335dd66231e82c02d3dee"
     },
     {
       "file": "chunk-004.json",
@@ -90,7 +90,7 @@
         "geo_LHC091_AoA_16",
         "geo_LHC094_AoA_4"
       ],
-      "sha256": "adc169489395d07ac439cbfeccb6fbf9a4ee3da2cc1fa34a3d2ee5da33c2340e"
+      "sha256": "fe553b29a02b0772939c7d2d16a3592d0eeb361c2c8871f67978e822b4240a95"
     },
     {
       "file": "chunk-005.json",
@@ -106,7 +106,7 @@
         "geo_LHC112_AoA_10",
         "geo_LHC114_AoA_16"
       ],
-      "sha256": "5f1c26c86f7ec7712977a389b2aa822d26902d198459bcdb87e19053f5aec38b"
+      "sha256": "53a4f26e584e5aaf0f1623d063469fcb70b003b2c8a2e9ca7b9f0f5b62f7c412"
     },
     {
       "file": "chunk-006.json",
@@ -122,7 +122,7 @@
         "geo_LHC135_AoA_14",
         "geo_LHC137_AoA_14"
       ],
-      "sha256": "b3f30d066de54027a2914b228644deb3b10c4ea6bc0170f33f8544e52f693403"
+      "sha256": "6658583b8c8320ffd5dea28033175c54d4f648f04e469ddbe5da5dd21cb44394"
     },
     {
       "file": "chunk-007.json",
@@ -138,7 +138,7 @@
         "geo_LHC154_AoA_20",
         "geo_LHC156_AoA_8"
       ],
-      "sha256": "83665fb658e4634591bab0df7352eaa5de5a16f8a2205186f037d35a5f24bcd9"
+      "sha256": "10fd687174a1d74aa61f7f4c890b277c37a874d8a1b5bca7eb8de0363306f7ab"
     },
     {
       "file": "chunk-008.json",
@@ -154,7 +154,7 @@
         "geo_LHC177_AoA_18",
         "geo_LHC179_AoA_14"
       ],
-      "sha256": "623a9fd58e1e0dfbf9e7e26df375f4ee567a9cbccc17ddee772bbaba580f63e3"
+      "sha256": "f501f66f513cac10a83a7cf5492008b0826d0986f903bcae7ce4b0cbd82ba899"
     },
     {
       "file": "chunk-009.json",
@@ -170,7 +170,7 @@
         "geo_LHC017_AoA_16",
         "geo_LHC020_AoA_20"
       ],
-      "sha256": "33b4714ad97c605f36c8cd53114a464961953aa808d5f2c24ecdf41b5021e3d9"
+      "sha256": "7f76dab7478db76819ee7897e595017ce47d91d69642e5eb0c99c6a528a401e7"
     },
     {
       "file": "chunk-010.json",
@@ -186,7 +186,7 @@
         "geo_LHC035_AoA_8",
         "geo_LHC038_AoA_18"
       ],
-      "sha256": "6db5231e7d580d041473df84a84a63725eca3089b96db2b394c68d60dd670fa5"
+      "sha256": "0739729b2c0d90a30e6386df72e7f80e85f15a1af6bca3389419a3d73fed4ecb"
     },
     {
       "file": "chunk-011.json",
@@ -202,7 +202,7 @@
         "geo_LHC053_AoA_4",
         "geo_LHC056_AoA_18"
       ],
-      "sha256": "de7cf4b8d8d58fabf36251dc6be74e2d16900392b258a55022c7566b95b8d1a2"
+      "sha256": "5fa6d9fd006976c1dadcd87dd6a3db3c0a48121977a635c7c7cdf8efc2ec6619"
     },
     {
       "file": "chunk-012.json",
@@ -218,7 +218,7 @@
         "geo_LHC072_AoA_20",
         "geo_LHC076_AoA_8"
       ],
-      "sha256": "23440ae65b65da82ab629d2bc33117f123cc2dcd891bfbc16828fda76143d9fe"
+      "sha256": "691ae108a174366077273a34ddd429f944eb7b557abcbd5d46fee818ade69e22"
     },
     {
       "file": "chunk-013.json",
@@ -234,7 +234,7 @@
         "geo_LHC091_AoA_4",
         "geo_LHC096_AoA_14"
       ],
-      "sha256": "30c63c5fdc2b93cc4c4a3f7eccf8dd01d295627b8d8c3706fd73251d694e3da7"
+      "sha256": "3c071994ef02212d37af35e077072b5e2caec63c4a35ebe24f53541d20ae5cf0"
     },
     {
       "file": "chunk-014.json",
@@ -250,7 +250,7 @@
         "geo_LHC112_AoA_22",
         "geo_LHC115_AoA_22"
       ],
-      "sha256": "11da721c63d6b6548810dc79fb62d7c8996d5463fcca693a4f5865c654450191"
+      "sha256": "882790ccc2df9cfd6abb012a18126021e703638edb4af33fb502c6a0c148cc70"
     },
     {
       "file": "chunk-015.json",
@@ -266,7 +266,7 @@
         "geo_LHC135_AoA_8",
         "geo_LHC137_AoA_20"
       ],
-      "sha256": "7c9cc9c30ae27763046c070b2dffdc98ee433d2009ec380176b6deb9a7ec955b"
+      "sha256": "0f50822d5f3eabde070115cc25a8515153c2a9761aab12e1dd166b76f85b41b8"
     },
     {
       "file": "chunk-016.json",
@@ -282,7 +282,7 @@
         "geo_LHC155_AoA_18",
         "geo_LHC157_AoA_20"
       ],
-      "sha256": "2be1625fe63170af48048931213c0062c85e66f4a508005f798790f59db6b6c7"
+      "sha256": "db60fcb38ef48d4d5f19f5234393012dd7fd8801bba108a0dc72e9cd7bc79339"
     },
     {
       "file": "chunk-017.json",
@@ -298,7 +298,7 @@
         "geo_LHC177_AoA_20",
         "geo_LHC179_AoA_4"
       ],
-      "sha256": "062f8b8e791dcfbb42cee00a15f2f99d14701d22429125bfd735c37d379ffa02"
+      "sha256": "1c66ecb05ee36bc4ecff6e9535161758674000543af35a5da92c820ad38a5e65"
     },
     {
       "file": "chunk-018.json",
@@ -314,7 +314,7 @@
         "geo_LHC017_AoA_22",
         "geo_LHC020_AoA_6"
       ],
-      "sha256": "f50ba69c003ebf912941563a6eee6360a8b9cbff7df27955c96116f229d61fb6"
+      "sha256": "0df194532f437d704dfabd3710c0505abf6600ae5360345b4eebca784dae05a6"
     },
     {
       "file": "chunk-019.json",
@@ -330,7 +330,7 @@
         "geo_LHC036_AoA_10",
         "geo_LHC038_AoA_4"
       ],
-      "sha256": "30470287bd97a78080097b92e59f96278124021baeea7fd83afa813776e50001"
+      "sha256": "2c01a040fcb6bbee99d56cb67b3a93c421f041d57b88208e7f5ddfae934c4ec2"
     },
     {
       "file": "chunk-020.json",
@@ -346,7 +346,7 @@
         "geo_LHC053_AoA_6",
         "geo_LHC056_AoA_20"
       ],
-      "sha256": "c12072d0b1efab50eab8a57153c6b20c0d449867028a9bff5603af5aa41e5039"
+      "sha256": "63f260f06393f32f3b0232f2076d6fe0052f089c7f812daf2648099ca5cc8c59"
     },
     {
       "file": "chunk-021.json",
@@ -362,7 +362,7 @@
         "geo_LHC072_AoA_4",
         "geo_LHC077_AoA_10"
       ],
-      "sha256": "6f3720f466c2019f624565de660dfb2ee1a13f03c777f3876d8e5289c8448fd4"
+      "sha256": "df653dd557000820d73556cac6e257168370a05fed3843da49321eb4540ad212"
     },
     {
       "file": "chunk-022.json",
@@ -378,7 +378,7 @@
         "geo_LHC092_AoA_12",
         "geo_LHC098_AoA_10"
       ],
-      "sha256": "695faaac27ac37aa44db1b2723f3968a8097e67601843285d02f5e5914d01dec"
+      "sha256": "c6ab108e9985b7c6b34d58e9a2c5607452cabc0b77b20ce730625b92badb265e"
     },
     {
       "file": "chunk-023.json",
@@ -394,7 +394,7 @@
         "geo_LHC112_AoA_6",
         "geo_LHC115_AoA_6"
       ],
-      "sha256": "79aeb56d8ea87a266beacf4bdbff8b84b511f86355e5c1d4d0d9ab1d8da5fd46"
+      "sha256": "b240e15def89b22501ab3749a85053eec449ac2fb0b158549baa2429f5b187d3"
     },
     {
       "file": "chunk-024.json",
@@ -410,7 +410,7 @@
         "geo_LHC136_AoA_10",
         "geo_LHC137_AoA_8"
       ],
-      "sha256": "36aec7f1a9ca6911327bffa546a8323a29eb876abb6e342675da0dcd37f76d6c"
+      "sha256": "c4fb74234250d74756029cf3ed6e55b756783ed11a59c38f233cc04a765bb367"
     },
     {
       "file": "chunk-025.json",
@@ -426,7 +426,7 @@
         "geo_LHC155_AoA_8",
         "geo_LHC157_AoA_22"
       ],
-      "sha256": "8f028b937dab88c86150dc7dda19a675cabc95b0d1fdc2d424379cf483009fd8"
+      "sha256": "cbe48431b8650b80e05a5c509696d51b92a4c05a300f1442635780295d23e203"
     },
     {
       "file": "chunk-026.json",
@@ -442,7 +442,7 @@
         "geo_LHC177_AoA_6",
         "geo_LHC179_AoA_6"
       ],
-      "sha256": "0e24ce20d9002b32e293bc0b25f4617c1f390374ca08c1efb0ed767b8dc7703e"
+      "sha256": "b8a2a9795f925ab247c3c4314385cb4b28fe34f2acd29fd99d4ee330dc1d354e"
     },
     {
       "file": "chunk-027.json",
@@ -458,7 +458,7 @@
         "geo_LHC017_AoA_4",
         "geo_LHC021_AoA_12"
       ],
-      "sha256": "ae1b4e11cba2149be48a646fccda649bdfb117c808585726bedf691190f1e0a1"
+      "sha256": "3949d24b689f70b39c0a4d33b8c797cfb6a90fd84a0a42ac04370d31f54b972c"
     },
     {
       "file": "chunk-028.json",
@@ -474,7 +474,7 @@
         "geo_LHC037_AoA_6",
         "geo_LHC039_AoA_10"
       ],
-      "sha256": "a3d7d29288484de5a5d187f69a79647a889f289d2b776b8ff821470695960937"
+      "sha256": "65afc2b0b64d871fb6dd6d8ae81c6fab86d4503b96efcd2db14d5f47236b6c57"
     },
     {
       "file": "chunk-029.json",
@@ -490,7 +490,7 @@
         "geo_LHC054_AoA_16",
         "geo_LHC056_AoA_8"
       ],
-      "sha256": "1b1dc170ca45b588d249605fdb620e4b62dfaaf662a83727cefe850914489fb5"
+      "sha256": "3232756ee74ef61864b1c7ec21d0925b3427300cbb44a470566c869cf3506bd7"
     },
     {
       "file": "chunk-030.json",
@@ -506,7 +506,7 @@
         "geo_LHC074_AoA_10",
         "geo_LHC077_AoA_18"
       ],
-      "sha256": "a803785cb059d82284c3ae2cea55b2e4fa9687af5cc5a0386e701fc50d7de435"
+      "sha256": "2688e52b38bafbc975d1cf1d6e46bd16c4629f740abcdbe631319c5f94a3837d"
     },
     {
       "file": "chunk-031.json",
@@ -522,7 +522,7 @@
         "geo_LHC092_AoA_14",
         "geo_LHC098_AoA_22"
       ],
-      "sha256": "56a183210797dbadef7f4aa57ecc6322c1004cc9b7f9abf884dbaca99f9b5aa2"
+      "sha256": "63a68e98da87e5a3b7bbbe1145641870d2d120809a8bd699e53c7e3e7b3a62b0"
     },
     {
       "file": "chunk-032.json",
@@ -538,7 +538,7 @@
         "geo_LHC114_AoA_14",
         "geo_LHC116_AoA_10"
       ],
-      "sha256": "68b4c3db1ada89eefacad6d323908fb96d6557788874548d41533139b78a5018"
+      "sha256": "28f1c21db3bf01344a2388f2fffeb90590fdd4a05a269bc3d9758535f439fc08"
     },
     {
       "file": "chunk-033.json",
@@ -554,7 +554,7 @@
         "geo_LHC136_AoA_4",
         "geo_LHC138_AoA_4"
       ],
-      "sha256": "ab1c9cbf4df17b38e5636f745dadb6c37c453df3cb87bd2832d8c7d514d45625"
+      "sha256": "c4dabe663ec19badd1c98c54c54577af072d2fd1a54a5245f5d63236dd418b43"
     },
     {
       "file": "chunk-034.json",
@@ -570,7 +570,7 @@
         "geo_LHC156_AoA_20",
         "geo_LHC158_AoA_12"
       ],
-      "sha256": "044b567fc9a059960be7706155abc638806afab340fb9281dfc2536a76fa9ca2"
+      "sha256": "974a4dc3069bf453fc130da01d35fffdad8556c3952dda727bb6a3ec294dd7a2"
     },
     {
       "file": "chunk-035.json",
@@ -586,7 +586,7 @@
         "geo_LHC178_AoA_20",
         "geo_LHC180_AoA_16"
       ],
-      "sha256": "820370358c01c6b22a64df865dc756ce078c8b5deba41f0f6ddc3c6c95a1b3ab"
+      "sha256": "57a874749e8444162cd07112db213ad4c81e3ae78f86afce22c0c7f0fd4bd064"
     }
   ]
 }

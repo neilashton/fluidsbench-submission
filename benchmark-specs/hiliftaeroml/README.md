@@ -259,7 +259,7 @@ The machine-readable authorities are:
 - [`native-profile-format-v1.json`](native-profile-format-v1.json) for
   prediction-only profile serialization;
 - [`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json)
-  for the non-scoring Full360 browser-plot truth;
+  for the non-scoring all-case browser-plot truth;
 - [`regional-diagnostics-v2.json`](regional-diagnostics-v2.json) for optional
   report-only regions; and
 - [`candidate-evaluator-release-binding.json`](candidate-evaluator-release-binding.json)
