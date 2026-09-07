@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Materialize one inactive evaluator-owned compact-profile support release.
 
-The native evaluator outputs are used only for their validated support and
-prediction ordering.  Ground truth is joined exclusively from the separately
-bound native-profile truth-v1 release.  Output creation is exclusive and the
-canonical manifest is written last by the reference evaluator release writer.
+Support can be reconstructed either from validated native evaluator outputs or
+directly, without predictions, from the frozen prerequisite authority used to
+build the native-profile truth release.  Ground truth is always joined
+exclusively from that separately bound truth-v1 release.  Output creation is
+exclusive and the canonical manifest is written last by the reference
+evaluator release writer.
 """
 
 from __future__ import annotations
@@ -50,8 +52,13 @@ from reference.hiliftaeroml.native_profile_evaluator import (  # noqa: E402
     open_candidate_truth_release,
 )
 from reference.hiliftaeroml.native_profile_truth import (  # noqa: E402
+    CaseUniverse,
     TRUTH_FORMAT,
     NativeProfileTruthError,
+)
+from reference.hiliftaeroml.native_profile_truth_materializer import (  # noqa: E402
+    load_compact_profile_support_inputs,
+    load_prerequisite_authority_index,
 )
 from reference.hiliftaeroml.native_profiles import (  # noqa: E402
     PROFILE_CONTRACT_ID,
@@ -67,6 +74,12 @@ from reference.hiliftaeroml.native_profiles import (  # noqa: E402
 
 
 CASE_SET_SHA256_RULE = "sha256(utf8(case_id + newline) in listed order)"
+AUTHORITY_SOURCE_HASH_SLOTS = {
+    "cp_profile_metrics": "cp_stencil_record",
+    "cp_cut_values": "cp_stencil_payload",
+    "velocity_profile_metrics": "velocity_stencil_record",
+    "velocity_profiles": "velocity_stencil_payload",
+}
 
 
 def _fail(message: str) -> None:
@@ -446,8 +459,205 @@ class _StreamingCaseMaterializer:
         return self._cached_hashes
 
 
+def _authority_truth_binding(
+    *,
+    case_id: str,
+    truth_record: Mapping[str, Any],
+    authority_evidence: Mapping[str, str],
+) -> None:
+    truth_authority = _require_mapping(
+        truth_record.get("truth_authority"), f"{case_id} truth authority"
+    )
+    surface_source = _require_mapping(
+        _require_mapping(
+            truth_record.get("surface_cp"), f"{case_id} truth surface Cp"
+        ).get("source"),
+        f"{case_id} truth surface Cp source",
+    )
+    velocity_source = _require_mapping(
+        _require_mapping(
+            truth_record.get("volume_velocity"),
+            f"{case_id} truth volume velocity",
+        ).get("source"),
+        f"{case_id} truth volume velocity source",
+    )
+    expected = {
+        "authority_case_identity_sha256": truth_authority.get(
+            "authority_identity_sha256"
+        ),
+        "cp_stencil_identity_sha256": surface_source.get(
+            "cp_stencil_identity_sha256"
+        ),
+        "velocity_stencil_identity_sha256": velocity_source.get(
+            "velocity_stencil_identity_sha256"
+        ),
+        "validity_identity_sha256": velocity_source.get(
+            "validity_identity_sha256"
+        ),
+    }
+    if expected != dict(authority_evidence):
+        _fail(f"{case_id} prerequisite authority and profile truth differ")
+
+
+def _authority_source_hashes(
+    *, case_id: str, authority: Mapping[str, Any]
+) -> dict[str, str]:
+    cases = _require_mapping(authority.get("cases"), "prerequisite authority cases")
+    entry = _require_mapping(cases.get(case_id), f"{case_id} prerequisite authority")
+    if entry.get("prediction_bearing_evaluator_outputs_used_as_source") is not False:
+        _fail(f"{case_id} prerequisite authority is prediction-bearing")
+    artifacts = _require_mapping(
+        entry.get("artifacts"), f"{case_id} prerequisite authority artifacts"
+    )
+    result: dict[str, str] = {}
+    for compatibility_slot, authority_name in AUTHORITY_SOURCE_HASH_SLOTS.items():
+        descriptor = _require_mapping(
+            artifacts.get(authority_name),
+            f"{case_id} prerequisite authority {authority_name}",
+        )
+        result[compatibility_slot] = _require_sha(
+            descriptor.get("sha256"),
+            f"{case_id} prerequisite authority {authority_name} SHA-256",
+        )
+    return result
+
+
+def _load_bound_prerequisite_authority(
+    *, authority_index_path: Path, truth_release: CandidateTruthRelease
+) -> tuple[dict[str, Any], str]:
+    layout = _require_mapping(
+        truth_release.binding.get("campaign_layout"),
+        "profile-truth campaign layout",
+    )
+    descriptor = _require_mapping(
+        layout.get("authority"), "profile-truth prerequisite authority descriptor"
+    )
+    relative = descriptor.get("file")
+    if (
+        not isinstance(relative, str)
+        or not relative
+        or Path(relative).is_absolute()
+        or ".." in Path(relative).parts
+        or "." in Path(relative).parts
+    ):
+        _fail("profile-truth prerequisite authority path is unsafe")
+    expected_path = (truth_release.campaign_root / relative).resolve()
+    supplied_path = authority_index_path.resolve()
+    if (
+        authority_index_path.is_symlink()
+        or not supplied_path.is_file()
+        or supplied_path != expected_path
+    ):
+        _fail("supplied prerequisite authority differs from the profile-truth binding")
+    expected_sha = _require_sha(
+        descriptor.get("sha256"), "profile-truth prerequisite authority SHA-256"
+    )
+    universe = CaseUniverse(
+        case_ids=tuple(truth_release.index.get("case_ids", ())),
+        case_sets=(),
+        support_manifest_sha256=_require_sha(
+            truth_release.index.get("support_manifest_sha256"),
+            "profile-truth scoring-support manifest SHA-256",
+        ),
+        case_universe_sha256=_require_sha(
+            truth_release.index.get("case_universe_sha256"),
+            "profile-truth case-universe SHA-256",
+        ),
+    )
+    try:
+        authority, observed_sha = load_prerequisite_authority_index(
+            supplied_path,
+            universe=universe,
+            require_complete=True,
+        )
+    except NativeProfileTruthError as error:
+        raise CompactProfileEvaluationError(str(error)) from error
+    if observed_sha != expected_sha:
+        _fail("prerequisite authority digest differs from the profile-truth binding")
+    return authority, observed_sha
+
+
+class _AuthorityCaseMaterializer:
+    """Build support prediction-free from the truth release's frozen authority."""
+
+    def __init__(
+        self,
+        *,
+        case_ids: Sequence[str],
+        truth_releases: Mapping[str, CandidateTruthRelease],
+        authority: Mapping[str, Any],
+    ) -> None:
+        self.case_ids = tuple(case_ids)
+        if set(truth_releases) != set(self.case_ids):
+            _fail("authority compact support truth mapping differs")
+        self._truth_releases = dict(truth_releases)
+        self._authority = authority
+        self._positions = {
+            case_id: position
+            for position, case_id in enumerate(self.case_ids, start=1)
+        }
+        self._cached_case_id: str | None = None
+        self._cached_support: dict[str, np.ndarray] | None = None
+        self._cached_hashes: dict[str, str] | None = None
+
+    def _build(self, case_id: str) -> None:
+        if case_id not in self._truth_releases:
+            raise KeyError(case_id)
+        if self._cached_case_id == case_id:
+            return
+        self._cached_case_id = None
+        self._cached_support = None
+        self._cached_hashes = None
+        try:
+            cp_native, velocity_native, authority_evidence = (
+                load_compact_profile_support_inputs(
+                    case_id=case_id,
+                    authority=self._authority,
+                )
+            )
+        except NativeProfileTruthError as error:
+            raise CompactProfileEvaluationError(str(error)) from error
+        record, truth_cp, truth_velocity = _truth_case(
+            self._truth_releases[case_id], case_id
+        )
+        _authority_truth_binding(
+            case_id=case_id,
+            truth_record=record,
+            authority_evidence=authority_evidence,
+        )
+        support = build_compact_support(
+            cp_native=cp_native,
+            truth_cp=truth_cp,
+            velocity_native=velocity_native,
+            truth_velocity_nd=truth_velocity,
+        )
+        self._cached_case_id = case_id
+        self._cached_support = support
+        self._cached_hashes = _authority_source_hashes(
+            case_id=case_id, authority=self._authority
+        )
+        print(
+            f"compact-support {self._positions[case_id]}/{len(self.case_ids)} "
+            f"{case_id}",
+            file=sys.stderr,
+            flush=True,
+        )
+
+    def support(self, case_id: str) -> Mapping[str, np.ndarray]:
+        self._build(case_id)
+        assert self._cached_support is not None
+        return self._cached_support
+
+    def source_hashes(self, case_id: str) -> Mapping[str, str]:
+        self._build(case_id)
+        assert self._cached_hashes is not None
+        return self._cached_hashes
+
+
 class _SupportView(Mapping[str, Mapping[str, np.ndarray]]):
-    def __init__(self, source: _StreamingCaseMaterializer) -> None:
+    def __init__(
+        self, source: _StreamingCaseMaterializer | _AuthorityCaseMaterializer
+    ) -> None:
         self.source = source
 
     def __getitem__(self, case_id: str) -> Mapping[str, np.ndarray]:
@@ -461,7 +671,9 @@ class _SupportView(Mapping[str, Mapping[str, np.ndarray]]):
 
 
 class _SourceHashView(Mapping[str, Mapping[str, str]]):
-    def __init__(self, source: _StreamingCaseMaterializer) -> None:
+    def __init__(
+        self, source: _StreamingCaseMaterializer | _AuthorityCaseMaterializer
+    ) -> None:
         self.source = source
 
     def __getitem__(self, case_id: str) -> Mapping[str, str]:
@@ -593,20 +805,27 @@ def materialize_routed_compact_support_release(
     source_truth_release: Path,
     output_root: Path,
     allow_manifest_rebind_from: str | None = None,
+    prerequisite_authority_index: Path | None = None,
 ) -> dict[str, Any]:
     """Build one support release covering several exact benchmark case sets.
 
-    The three route sequences are positional: each split uses the surface and
-    volume native-output roots at the same position.  If a case occurs in more
-    than one split, its first declared route is authoritative.  Case-set member
-    order remains exactly the official split order, while the deduplicated
-    release inventory is sorted for a stable master-case traversal.
+    In native-output mode the three route sequences are positional: each split
+    uses the surface and volume roots at the same position.  Authority mode has
+    no output roots and reconstructs support from the prediction-free source
+    bound into the truth release.  If a case occurs in more than one split, its
+    first declared truth handle is retained.  Case-set member order remains
+    exactly official, while the deduplicated release inventory is sorted for a
+    stable master-case traversal.
     """
 
     route_count = len(split_paths)
-    if (
-        route_count == 0
-        or len(surface_outputs_roots) != route_count
+    authority_mode = prerequisite_authority_index is not None
+    if route_count == 0:
+        _fail("compact support requires at least one split")
+    if authority_mode and (surface_outputs_roots or volume_outputs_roots):
+        _fail("prerequisite-authority mode cannot also use native-output roots")
+    if not authority_mode and (
+        len(surface_outputs_roots) != route_count
         or len(volume_outputs_roots) != route_count
     ):
         _fail("compact support split and native-output route counts differ")
@@ -619,8 +838,8 @@ def materialize_routed_compact_support_release(
     loaded: list[
         tuple[
             Path,
-            Path,
-            Path,
+            Path | None,
+            Path | None,
             str,
             Mapping[str, Any],
             str,
@@ -635,12 +854,11 @@ def materialize_routed_compact_support_release(
     common_binding_path: Path | None = None
     common_truth_declaration: Mapping[str, Any] | None = None
     seen_split_ids: set[str] = set()
-    for split_path, surface_root, volume_root in zip(
-        split_paths,
-        surface_outputs_roots,
-        volume_outputs_roots,
-        strict=True,
-    ):
+    for route_index, split_path in enumerate(split_paths):
+        surface_root = (
+            None if authority_mode else surface_outputs_roots[route_index]
+        )
+        volume_root = None if authority_mode else volume_outputs_roots[route_index]
         (
             _spec,
             spec_sha,
@@ -704,6 +922,7 @@ def materialize_routed_compact_support_release(
     case_sources: dict[
         str, tuple[Path, Path, CandidateTruthRelease]
     ] = {}
+    authority_truth_releases: dict[str, CandidateTruthRelease] = {}
     route_receipts: list[dict[str, Any]] = []
     source_truth_release_id: str | None = None
     source_truth_manifest_sha = _require_sha(
@@ -754,34 +973,72 @@ def materialize_routed_compact_support_release(
             _fail("routed compact support source truth releases differ")
         selected_count = 0
         for case_id in case_ids:
-            if case_id not in case_sources:
+            if authority_mode and case_id not in authority_truth_releases:
+                authority_truth_releases[case_id] = truth_handle
+                selected_count += 1
+            elif not authority_mode and case_id not in case_sources:
+                assert surface_root is not None and volume_root is not None
                 case_sources[case_id] = (
                     surface_root,
                     volume_root,
                     truth_handle,
                 )
                 selected_count += 1
-        route_receipts.append(
-            {
-                "split_id": split_id,
-                "split_sha256": split_sha,
-                "split_path": str(split_path.resolve()),
-                "case_set_id": case_set_id,
-                "case_set_sha256": split["case_set_sha256"],
-                "case_count": len(case_ids),
-                "selected_source_case_count": selected_count,
-                "surface_outputs_root": str(surface_root.resolve()),
-                "volume_outputs_root": str(volume_root.resolve()),
-            }
-        )
+        route_receipt = {
+            "split_id": split_id,
+            "split_sha256": split_sha,
+            "split_path": str(split_path.resolve()),
+            "case_set_id": case_set_id,
+            "case_set_sha256": split["case_set_sha256"],
+            "case_count": len(case_ids),
+            "selected_source_case_count": selected_count,
+        }
+        if authority_mode:
+            route_receipt["support_source"] = "frozen_prerequisite_authority"
+        else:
+            assert surface_root is not None and volume_root is not None
+            route_receipt.update(
+                {
+                    "support_source": "validated_native_evaluator_outputs",
+                    "surface_outputs_root": str(surface_root.resolve()),
+                    "volume_outputs_root": str(volume_root.resolve()),
+                }
+            )
+        route_receipts.append(route_receipt)
     if source_truth_release_id is None:
         _fail("routed compact support source truth release is absent")
 
-    master_case_ids = tuple(sorted(case_sources))
-    source = _StreamingCaseMaterializer(
-        case_ids=master_case_ids,
-        case_sources=case_sources,
-    )
+    selected_cases = authority_truth_releases if authority_mode else case_sources
+    master_case_ids = tuple(sorted(selected_cases))
+    authority_sha: str | None = None
+    if authority_mode:
+        assert prerequisite_authority_index is not None
+        if not truth_handles:
+            _fail("prerequisite-authority support has no truth handle")
+        first_truth_handle = next(iter(truth_handles.values()))
+        authority, authority_sha = _load_bound_prerequisite_authority(
+            authority_index_path=prerequisite_authority_index,
+            truth_release=first_truth_handle,
+        )
+        for truth_handle in truth_handles.values():
+            if (
+                truth_handle.campaign_root != first_truth_handle.campaign_root
+                or truth_handle.release_root != first_truth_handle.release_root
+                or truth_handle.index != first_truth_handle.index
+            ):
+                _fail("routed compact support profile-truth handles differ")
+        source: _StreamingCaseMaterializer | _AuthorityCaseMaterializer = (
+            _AuthorityCaseMaterializer(
+                case_ids=master_case_ids,
+                truth_releases=authority_truth_releases,
+                authority=authority,
+            )
+        )
+    else:
+        source = _StreamingCaseMaterializer(
+            case_ids=master_case_ids,
+            case_sources=case_sources,
+        )
     try:
         manifest_sha = write_compact_support_release(
             release_root=output_root,
@@ -804,20 +1061,29 @@ def materialize_routed_compact_support_release(
         _fail("materialized support manifest differs from its submission-spec pin")
 
     try:
-        for case_set_id, members in case_sets.items():
-            handle = open_compact_support_release(
-                release_root=output_root,
-                expected_manifest_sha256=manifest_sha,
-                expected_case_ids=members,
-                case_set_id=case_set_id,
-            )
-            if (
-                handle.source_profile_truth_release_id
-                != source_truth_release_id
-                or handle.source_profile_truth_manifest_sha256
-                != source_truth_manifest_sha
-            ):
-                _fail("materialized support source-truth binding differs")
+        first_case_set_id = next(iter(case_sets))
+        handle = open_compact_support_release(
+            release_root=output_root,
+            expected_manifest_sha256=manifest_sha,
+            expected_case_ids=case_sets[first_case_set_id],
+            case_set_id=first_case_set_id,
+        )
+        if (
+            handle.source_profile_truth_release_id != source_truth_release_id
+            or handle.source_profile_truth_manifest_sha256
+            != source_truth_manifest_sha
+        ):
+            _fail("materialized support source-truth binding differs")
+        indexed_case_sets = {
+            descriptor["case_set_id"]: tuple(descriptor["case_ids"])
+            for descriptor in handle.index["case_sets"]
+        }
+        expected_case_sets = {
+            case_set_id: tuple(members)
+            for case_set_id, members in case_sets.items()
+        }
+        if indexed_case_sets != expected_case_sets:
+            _fail("materialized support case-set bindings differ")
     except CompactProfileEvaluationError:
         if output_root.is_dir() and not output_root.is_symlink():
             shutil.rmtree(output_root)
@@ -837,6 +1103,22 @@ def materialize_routed_compact_support_release(
         "case_set_count": len(case_sets),
         "case_count": len(master_case_ids),
         "points_per_physical_graph": CP_POINTS_PER_GRAPH,
+        "support_source": (
+            {
+                "kind": "frozen_prerequisite_authority",
+                "prediction_bearing_evaluator_outputs_used_as_source": False,
+                "authority_index": str(prerequisite_authority_index.resolve()),
+                "authority_index_sha256": authority_sha,
+                "legacy_source_hash_slot_mapping": dict(
+                    AUTHORITY_SOURCE_HASH_SLOTS
+                ),
+            }
+            if authority_mode and prerequisite_authority_index is not None
+            else {
+                "kind": "validated_native_evaluator_outputs",
+                "prediction_bearing_evaluator_outputs_used_as_source": True,
+            }
+        ),
         "routes": route_receipts,
         "output_root": str(output_root.resolve()),
         "manifest_rebind": {
@@ -858,10 +1140,18 @@ def parser() -> argparse.ArgumentParser:
     result.add_argument("--submission-spec", required=True, type=Path)
     result.add_argument("--split", required=True, action="append", type=Path)
     result.add_argument(
-        "--surface-outputs-root", required=True, action="append", type=Path
+        "--surface-outputs-root", action="append", type=Path, default=[]
     )
     result.add_argument(
-        "--volume-outputs-root", required=True, action="append", type=Path
+        "--volume-outputs-root", action="append", type=Path, default=[]
+    )
+    result.add_argument(
+        "--prerequisite-authority-index",
+        type=Path,
+        help=(
+            "prediction-free prerequisite authority bound into the native-profile "
+            "truth release; mutually exclusive with native-output roots"
+        ),
     )
     result.add_argument("--source-truth-release", required=True, type=Path)
     result.add_argument("--output-root", required=True, type=Path)
@@ -879,7 +1169,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
         if (
-            len(args.split) == 1
+            args.prerequisite_authority_index is None
+            and len(args.split) == 1
             and len(args.surface_outputs_root) == 1
             and len(args.volume_outputs_root) == 1
             and args.allow_manifest_rebind_from is None
@@ -901,6 +1192,7 @@ def main(argv: list[str] | None = None) -> int:
                 source_truth_release=args.source_truth_release,
                 output_root=args.output_root,
                 allow_manifest_rebind_from=args.allow_manifest_rebind_from,
+                prerequisite_authority_index=args.prerequisite_authority_index,
             )
     except (
         CompactProfileEvaluationError,

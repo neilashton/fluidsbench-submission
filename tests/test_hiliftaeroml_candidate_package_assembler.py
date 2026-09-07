@@ -20,6 +20,9 @@ RESOLVED_CONFIG = (
     / "hiliftaeroml-v3-candidate"
     / "transolver-full360-candidate-config.json"
 )
+ALL_CASE_SUPPORT_VALIDATION = (
+    DATASET / "compact-profile-all-case-support-validation-v1.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -148,6 +151,57 @@ def test_all_official_split_labels_resolve_to_the_exact_eight_case_sets() -> Non
         previous = observed_case_sets.setdefault(declared["case_set_id"], case_ids)
         assert previous == case_ids
     assert len(observed_case_sets) == 8
+
+
+def test_all_case_compact_support_record_covers_every_official_split() -> None:
+    specification = load(SPECIFICATION)
+    validation = load(ALL_CASE_SUPPORT_VALIDATION)
+    recorded = {
+        binding["split_id"]: binding
+        for binding in validation["coverage"]["split_bindings"]
+    }
+    assert len(recorded) == validation["coverage"]["advertised_split_label_count"]
+    assert len(recorded) == len(specification["splits"]) == 14
+    for declared in specification["splits"]:
+        split = load(DATASET / declared["index_file"])
+        assert recorded[declared["id"]] == {
+            "split_id": declared["id"],
+            "case_set_id": split["case_set_id"],
+            "case_count": split["case_count"],
+            "case_set_sha256": split["case_set_sha256"],
+        }
+    assert validation["coverage"]["distinct_case_set_count"] == 8
+    assert validation["coverage"]["unique_case_count"] == 1355
+    assert validation["representation"][
+        "maximum_cp_points_per_physical_graph"
+    ] == 128
+    assert validation["compatibility"][
+        "overlapping_case_support_records_exact"
+    ] == validation["coverage"]["previous_unique_case_count"] == 652
+    assert validation["source"][
+        "prediction_bearing_evaluator_outputs_used_as_source"
+    ] is False
+    assert validation["package_size_policy"][
+        "aggregate_package_byte_ceiling"
+    ] is None
+    candidate_support = specification["compact_profile_definition"][
+        "candidate_dry_run_evaluator_support"
+    ]
+    assert validation["candidate_binding"][
+        "submission_spec_manifest_sha256"
+    ] == candidate_support["manifest_sha256"]
+    assert validation["candidate_binding"]["successor_manifest_sha256"] == (
+        validation["evaluator_support"]["manifest_sha256"]
+    )
+    assert validation["candidate_binding"][
+        "successor_manifest_sha256"
+    ] != candidate_support["manifest_sha256"]
+    assert validation["activation"] == {
+        "owner_approval_complete": False,
+        "published": False,
+        "submissions_opened": False,
+        "validation_changes_activation": False,
+    }
 
 
 def test_release_native_contract_is_case_set_generic_and_surface_v7() -> None:
