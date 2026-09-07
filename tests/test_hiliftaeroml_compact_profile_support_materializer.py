@@ -386,3 +386,125 @@ def test_materializer_is_truth_safe_exclusive_and_ab_deterministic(
         == 2
     )
     assert not failed.exists()
+
+
+def test_routed_materializer_deduplicates_cases_and_preserves_case_sets(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    outputs = tmp_path / "outputs"
+    make_case(outputs)
+    truth_handle, truth_manifest_sha = _truth_release(
+        outputs, tmp_path / "truth-campaign"
+    )
+    spec, first_split = _benchmark_specification(
+        tmp_path / "benchmark-specs/hiliftaeroml", truth_manifest_sha
+    )
+    spec_body = json.loads(spec.read_text(encoding="utf-8"))
+    prior_manifest_sha = "7" * 64
+    spec_body["compact_profile_definition"][
+        "candidate_dry_run_evaluator_support"
+    ]["manifest_sha256"] = prior_manifest_sha
+    mirror_case_set_id = "caseset-test-mirror"
+    mirror = {
+        "schema_version": "1.0",
+        "dataset_id": "hiliftaeroml",
+        "split_id": "mirror",
+        "case_set_id": mirror_case_set_id,
+        "split_label": "Mirror fixture",
+        "case_id_status": "official",
+        "case_count": 1,
+        "case_set_sha256": hashlib.sha256(
+            f"{CASE_ID}\n".encode("utf-8")
+        ).hexdigest(),
+        "case_set_sha256_rule": materializer.CASE_SET_SHA256_RULE,
+        "case_ids": [CASE_ID],
+    }
+    mirror_path = first_split.parent / "mirror.json"
+    mirror_sha = _write_json(mirror_path, mirror)
+    spec_body["splits"].append(
+        {
+            "id": "mirror",
+            "label": "Mirror fixture",
+            "index_file": "splits/mirror.json",
+            "case_count": 1,
+            "case_set_id": mirror_case_set_id,
+            "case_id_status": "official",
+            "sha256": mirror_sha,
+        }
+    )
+    _write_json(spec, spec_body)
+
+    def fake_open_candidate_truth_release(**kwargs):
+        case_set_id = kwargs["case_set_id"]
+        assert case_set_id in {CASE_SET_ID, mirror_case_set_id}
+        assert kwargs["expected_case_ids"] == (CASE_ID,)
+        return CandidateTruthRelease(
+            campaign_root=truth_handle.campaign_root,
+            release_root=truth_handle.release_root,
+            binding=truth_handle.binding,
+            manifest=truth_handle.manifest,
+            index=truth_handle.index,
+            case_set_id=case_set_id,
+            case_ids=(CASE_ID,),
+        )
+
+    monkeypatch.setattr(
+        materializer,
+        "open_candidate_truth_release",
+        fake_open_candidate_truth_release,
+    )
+    release = tmp_path / "routed-support"
+    assert (
+        materializer.main(
+            [
+                "--submission-spec",
+                str(spec),
+                "--split",
+                str(first_split),
+                "--surface-outputs-root",
+                str(outputs),
+                "--volume-outputs-root",
+                str(outputs),
+                "--split",
+                str(mirror_path),
+                "--surface-outputs-root",
+                str(outputs),
+                "--volume-outputs-root",
+                str(outputs),
+                "--source-truth-release",
+                str(truth_handle.release_root),
+                "--output-root",
+                str(release),
+                "--allow-manifest-rebind-from",
+                prior_manifest_sha,
+            ]
+        )
+        == 0
+    )
+    captured = capsys.readouterr()
+    assert captured.err == f"compact-support 1/1 {CASE_ID}\n"
+    receipt = json.loads(captured.out)
+    assert receipt["split_count"] == 2
+    assert receipt["case_set_count"] == 2
+    assert receipt["case_count"] == 1
+    assert [item["selected_source_case_count"] for item in receipt["routes"]] == [
+        1,
+        0,
+    ]
+    assert receipt["manifest_rebind"] == {
+        "allowed": True,
+        "prior_manifest_sha256": prior_manifest_sha,
+        "materialized_manifest_sha256": receipt[
+            "evaluator_support_manifest_sha256"
+        ],
+    }
+    for case_set_id in (CASE_SET_ID, mirror_case_set_id):
+        opened = open_compact_support_release(
+            release_root=release,
+            expected_manifest_sha256=receipt[
+                "evaluator_support_manifest_sha256"
+            ],
+            expected_case_ids=[CASE_ID],
+            case_set_id=case_set_id,
+        )
+        assert opened.case_ids == (CASE_ID,)

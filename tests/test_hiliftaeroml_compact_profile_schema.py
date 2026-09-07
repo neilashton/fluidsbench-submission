@@ -74,6 +74,12 @@ def valid_chunk() -> dict:
                     "invalid_row_count": 105,
                     "prediction_dtype": "float32",
                     "prediction_array": "velocity_speed_over_u_inf",
+                    "storage_dtype": "uint8",
+                    "storage_encoding": (
+                        "little_endian_float32_bits_unsigned_delta_modulo_"
+                        "2pow32_byte_shuffle_v1"
+                    ),
+                    "stored_byte_count": 15600,
                 },
             }
         ],
@@ -95,6 +101,7 @@ def test_compact_profile_contract_is_additive_and_excludes_full_surface_l2() -> 
         "profile_payload_used": False,
     }
     assert contract["evaluator_owned_support"]["included_in_participant_artifact"] is False
+    assert contract["container"]["compression"] == "zip_deflate_method_8_level_9"
     identities = contract["evaluator_owned_support"]["identity_encoding"]
     assert identities["truth_arrays_included"] is False
     assert identities["volume_velocity_prediction_order_array_order"] == [
@@ -108,12 +115,25 @@ def test_compact_profile_contract_is_additive_and_excludes_full_surface_l2() -> 
     assert contract["surface_cp"]["quantization"]["formula"] == (
         "q=int16(round(Cp*1024))"
     )
-    assert contract["volume_velocity"]["prediction_array"]["dtype"] == "float32"
+    velocity = contract["volume_velocity"]["prediction_array"]
+    assert velocity["logical_dtype"] == "float32"
+    assert velocity["storage"] == {
+        **velocity["storage"],
+        "dtype": "uint8",
+        "shape": ["4*velocity_valid_row_count"],
+        "encoding": (
+            "little_endian_float32_bits_unsigned_delta_modulo_2pow32_"
+            "byte_shuffle_v1"
+        ),
+        "lossless": True,
+        "browser_native_container_decompression": True,
+    }
     counts = contract["case_metadata"]["count_semantics"]
     assert counts["row_count"].startswith("4005 canonical source rows")
     assert counts["valid_row_count"].endswith(
-        "length(velocity_speed_over_u_inf)"
+        "decoded logical length of velocity_speed_over_u_inf"
     )
+    assert counts["stored_byte_count"].startswith("4*valid_row_count")
 
 
 def test_compact_profile_chunk_and_generic_index_are_schema_valid() -> None:

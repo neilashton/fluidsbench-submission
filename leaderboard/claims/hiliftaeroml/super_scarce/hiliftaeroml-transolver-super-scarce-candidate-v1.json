@@ -1,0 +1,101 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/super_scarce/hiliftaeroml-transolver-super-scarce-candidate-v1",
+  "release": {
+    "id": "prototype-dev-2026-09-06-ef0e544bf188",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-09-07T01:07:29Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "hiliftaeroml-transolver-super-scarce-candidate-v1",
+    "result_revision": {
+      "series_id": "hiliftaeroml-transolver-super-scarce-candidate",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": "Initial maintainer-local schema-v3 replay of the retained Super scarce epoch-1000 Transolver result.",
+      "is_latest": true,
+      "latest_submission_id": "hiliftaeroml-transolver-super-scarce-candidate-v1",
+      "version_count": 1
+    },
+    "model": "Transolver surface and volume, Super scarce, epoch 1000",
+    "dataset": "HiLiftAeroML",
+    "dataset_id": "hiliftaeroml",
+    "split": "Super scarce",
+    "split_id": "super_scarce",
+    "submission_schema_version": "3.0",
+    "prediction_scope": "surface_and_volume"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 22.518992291166747,
+    "ranked_value": 22.5,
+    "display_value": "22.5",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 1,
+    "ranked_result_count": 1,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "pre_release_reference",
+    "reason": "Genuine HiLiftAeroML pre-release reference data retained to exercise the evaluator and leaderboard before submissions open; it is not an official benchmark result or ranking claim."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "ef0e544bf188072e4fee197232b86d6327a57df4b886bd9e9b8badf1186fd595",
+      "row_index": 34
+    },
+    "source_submission": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-super-scarce-candidate-v1/submission.json",
+      "sha256": "a6ff4b9377c31caca90389da9cac48c54e0ed9afad298bffd3fe210fa30d8afd"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-super-scarce-candidate-v1/evaluation-evidence.json",
+      "sha256": "d34392f3716749b2e3e0a651bbb634d6ef44bc1dcfa979c2374a6d9f3df13a40"
+    },
+    "profile_index": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-super-scarce-candidate-v1/profiles/index.json",
+      "sha256": "8a08705e2604d210c3c53af1ed2dc4f7ed7618b6da4a7cd375804a6c7322612d"
+    },
+    "spatial_discretization": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-super-scarce-candidate-v1/discretization.json",
+      "sha256": "8cbcfbf5f901d90669d3be03a96eae7ebaa1ecdfdda3c462267993ae7d07b4cd"
+    },
+    "discretization_cases": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-super-scarce-candidate-v1/discretization/cases.jsonl",
+      "sha256": "59fb67453f00f08b7878a18fa353d52c90f428e104bf47521a8a96d919281ba4"
+    },
+    "case_metrics": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-super-scarce-candidate-v1/metrics/cases.json",
+      "sha256": "72dc4c9e68d0a9e55108c379bb5cd1a9c045e4add7fde71142fff1a7023ef735"
+    },
+    "regional_diagnostics": {
+      "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-super-scarce-candidate-v1/regional-diagnostics.json",
+      "sha256": "c8356f52be1f7a85c871dba4072838f5cf5c0aa4d82f24af1abb1778cbfcd43e"
+    },
+    "scoring_support": {
+      "release_id": "hiliftaeroml-native-all-splits-support-v1-candidate",
+      "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/hiliftaeroml/scoring-support/hiliftaeroml-native-all-splits-support-v1-candidate/manifest.json",
+      "manifest_sha256": "98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee",
+      "path": "benchmark-specs/hiliftaeroml/scoring-support/hiliftaeroml-native-all-splits-support-v1-candidate/manifest.json"
+    }
+  },
+  "prediction_artifacts": {
+    "sharing": "not_declared",
+    "declared_artifact_count": 0,
+    "maintainer_check_status": "not_recorded",
+    "checked_artifact_count": 0
+  }
+}

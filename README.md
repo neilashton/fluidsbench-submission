@@ -157,8 +157,8 @@ those records with the fixed or minimum/median/maximum summary and verifies `fra
 Contributors leave `approval` absent and must not add `maintainer-validation.json` or
 `prediction-artifact-checks.json`. After submitted-data validation, maintainers add
 the separately hashed validation record and `approval.status=approved`. Prototype packages use `approval.status=prototype`; the feed
-builder publishes only prototype and maintainer-approved rows. The sole exception is an exact maintainer-registered, hash-bound
-HiLiftAeroML `pre_release_reference`; it remains unapproved and explicitly ineligible for citation or promotion.
+builder publishes only prototype and maintainer-approved rows. The sole exception class is an exact maintainer-registered,
+hash-bound HiLiftAeroML `pre_release_reference`; each remains unapproved and explicitly ineligible for citation or promotion.
 
 Sharing full or example prediction fields is optional. When used, `prediction_artifacts` points to a revision-pinned public Hugging
 Face dataset manifest. A maintainer may add one `prediction-artifact-checks.json` index recording accessibility, format, or explicit
@@ -327,11 +327,12 @@ releases use `archive_url: null`; an official release must provide an immutable 
 release-view URLs containing the release ID. The separate full `source_commit` records repository provenance without creating a
 self-referential commit hash.
 
-HiLiftAeroML's registered Full360 preview uses the compact-v2 prediction
-contract. Its public Cp and velocity comparison truth lives in the website
-repository as a deduplicated 1,355-case release covering all eight official
-case sets. It is bound as plot-only metadata; the private lossless evaluator
-truth remains the scoring authority and is not copied into this repository.
+HiLiftAeroML's seven registered Transolver previews use the compact-v2
+prediction contract. Their public Cp and velocity comparison truth lives in
+the website repository as a deduplicated 1,355-case release covering all eight
+official case sets. It is bound as plot-only metadata; the private lossless
+evaluator truth remains the scoring authority and is not copied into this
+repository.
 
 Official `asset_base_url` and `release_view_url` values are clean HTTPS directory bases: their final path segment is exactly the
 safe lowercase release ID, they end in `/`, and they contain no query or fragment. Official builds preserve the manifest's explicit

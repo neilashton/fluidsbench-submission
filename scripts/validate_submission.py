@@ -93,40 +93,175 @@ HILIFT_COMPACT_PROFILE_IMPLEMENTATION_BINDING = {
         "native_v1_base_field_force_and_noncompact_scoring_only"
     ),
 }
-HILIFT_REGISTERED_PREVIEW_RECORD_PATH = (
-    Path("benchmark-specs")
-    / "hiliftaeroml"
-    / "compact-profile-full360-validation-v1.json"
-)
-HILIFT_REGISTERED_PREVIEW = {
-    "status": "registered_pre_release_reference",
-    "record_type": "pre_release_reference",
-    "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
-    "submission_path": (
-        "submissions/hiliftaeroml/"
-        "hiliftaeroml-transolver-full360-candidate-v1/submission.json"
-    ),
-    "submission_json_sha256": (
-        "d82393bb17dab877ab72f06072241df26f1b6abe50537f023fe767dfe6beccf9"
-    ),
-    "deterministic_archive": {
-        "sha256": (
-            "8b73e43273e57154ec4180e7393eaa4e5107dd912adde7f60f9348cec7b1ef32"
+
+
+def _hilift_preview_configuration(
+    *,
+    slug: str,
+    split_id: str,
+    case_set_id: str,
+    case_count: int,
+    submission_json_sha256: str,
+    archive_sha256: str,
+    archive_size_bytes: int,
+    archive_member_count: int,
+    regular_file_bytes: int,
+) -> dict[str, Any]:
+    """Build one explicit, code-pinned HiLift pre-release registration."""
+
+    submission_id = f"hiliftaeroml-transolver-{slug}-candidate-v1"
+    validation_name = f"compact-profile-{slug}-validation-v1"
+    binding = {
+        "status": "registered_pre_release_reference",
+        "record_type": "pre_release_reference",
+        "submission_id": submission_id,
+        "submission_path": (
+            f"submissions/hiliftaeroml/{submission_id}/submission.json"
         ),
-        "size_bytes": 11_526_141,
-        "member_count": 403,
-    },
-    "ordinary_validation_scope": (
-        "structure_hashes_inventory_and_deterministic_archive_only"
+        "submission_json_sha256": submission_json_sha256,
+        "deterministic_archive": {
+            "sha256": archive_sha256,
+            "size_bytes": archive_size_bytes,
+            "member_count": archive_member_count,
+        },
+        "ordinary_validation_scope": (
+            "structure_hashes_inventory_and_deterministic_archive_only"
+        ),
+        "truth_dependent_metric_recomputation": (
+            "maintainer_local_candidate_dry_run_only"
+        ),
+        "claim_eligibility": {
+            "academic_citation": False,
+            "promotion": False,
+        },
+    }
+    return {
+        "binding": binding,
+        "validation_record_path": (
+            Path("benchmark-specs")
+            / "hiliftaeroml"
+            / f"{validation_name}.json"
+        ),
+        "validation_record_schema": f"hiliftaeroml-{validation_name}",
+        "split_id": split_id,
+        "case_set_id": case_set_id,
+        "case_count": case_count,
+        "profile_series_count": case_count * 15,
+        "regular_file_bytes_each": regular_file_bytes,
+    }
+
+
+HILIFT_REGISTERED_PREVIEW_CONFIGS = (
+    _hilift_preview_configuration(
+        slug="full360",
+        split_id="full",
+        case_set_id="caseset-ac791749e527",
+        case_count=360,
+        submission_json_sha256=(
+            "e99e890ded93bf581d4dfbce165b7f94852ce89683d5fad2a41102d7220e1b54"
+        ),
+        archive_sha256=(
+            "3f7095423154d3395e3d6a3efff1d7daca06a56a8b41236ac760bd389b3d2c94"
+        ),
+        archive_size_bytes=8_724_046,
+        archive_member_count=403,
+        regular_file_bytes=11_758_621,
     ),
-    "truth_dependent_metric_recomputation": (
-        "maintainer_local_candidate_dry_run_only"
+    _hilift_preview_configuration(
+        slug="aoa4",
+        split_id="single_aoa_4",
+        case_set_id="caseset-7a743a20b3bd",
+        case_count=36,
+        submission_json_sha256=(
+            "cf81d53ad3de44589f1b622fac68bcc0bbea685ff14ae9d74f859631809fc0cd"
+        ),
+        archive_sha256=(
+            "6de3a8b4c1b0cafb8d4205e03625dee283362d5f0598b9f2193fffd4c48f8aa2"
+        ),
+        archive_size_bytes=841_953,
+        archive_member_count=47,
+        regular_file_bytes=1_257_729,
     ),
-    "claim_eligibility": {
-        "academic_citation": False,
-        "promotion": False,
-    },
-}
+    _hilift_preview_configuration(
+        slug="aoa12",
+        split_id="single_aoa_12",
+        case_set_id="caseset-02fc12ff3494",
+        case_count=36,
+        submission_json_sha256=(
+            "0d52ac999e84eb9f1393411018fda99724b73021b490eba7b385cbe4698966ac"
+        ),
+        archive_sha256=(
+            "236a11d222ad1222490177c5f6edeeff81a35fc3ea96d41e86c92748b8113fb9"
+        ),
+        archive_size_bytes=955_744,
+        archive_member_count=47,
+        regular_file_bytes=1_372_152,
+    ),
+    _hilift_preview_configuration(
+        slug="aoa22",
+        split_id="single_aoa_22",
+        case_set_id="caseset-85ecccd9ccda",
+        case_count=36,
+        submission_json_sha256=(
+            "c89702f260dd9a300793ce769978f766b334b2fc161039c86542011d7450f119"
+        ),
+        archive_sha256=(
+            "53f9fb3360ebd3cc74482899c4bf66218cd72d7308bd11677d51ad2837c26018"
+        ),
+        archive_size_bytes=960_065,
+        archive_member_count=47,
+        regular_file_bytes=1_375_794,
+    ),
+    _hilift_preview_configuration(
+        slug="super-scarce",
+        split_id="super_scarce",
+        case_set_id="caseset-ac791749e527",
+        case_count=360,
+        submission_json_sha256=(
+            "a6ff4b9377c31caca90389da9cac48c54e0ed9afad298bffd3fe210fa30d8afd"
+        ),
+        archive_sha256=(
+            "1aa6b071e93b7e7fafd872ff36ac8632a7fa85ba2e6c620774addc7cd2d415f5"
+        ),
+        archive_size_bytes=10_532_403,
+        archive_member_count=403,
+        regular_file_bytes=13_568_912,
+    ),
+    _hilift_preview_configuration(
+        slug="geometry-scarce",
+        split_id="geometry_scarce",
+        case_set_id="caseset-53990ea68fa6",
+        case_count=360,
+        submission_json_sha256=(
+            "db36b45ac5ea293f58d6e7996c9864ae49640caa182f1532c8a0962fb7e9774f"
+        ),
+        archive_sha256=(
+            "1f05d48acca25da8b56a30048585b2ae6405981feb296bf018c6f3efaec6cd2b"
+        ),
+        archive_size_bytes=9_322_118,
+        archive_member_count=403,
+        regular_file_bytes=12_364_867,
+    ),
+    _hilift_preview_configuration(
+        slug="geometry-super-scarce",
+        split_id="geometry_super_scarce",
+        case_set_id="caseset-53990ea68fa6",
+        case_count=360,
+        submission_json_sha256=(
+            "818a132d8bfe475e25d4633e48a0f2df8bc7a2377f8526d42db4828130bea104"
+        ),
+        archive_sha256=(
+            "3d3313fe13f6e08a958556dc4f3763c6305ab9e16e91e52f0002e6a20fe4518f"
+        ),
+        archive_size_bytes=10_205_034,
+        archive_member_count=403,
+        regular_file_bytes=13_250_557,
+    ),
+)
+HILIFT_REGISTERED_PREVIEW = HILIFT_REGISTERED_PREVIEW_CONFIGS[0]["binding"]
+HILIFT_REGISTERED_PREVIEW_RECORD_PATH = HILIFT_REGISTERED_PREVIEW_CONFIGS[0][
+    "validation_record_path"
+]
 LEGACY_V1_SUBMISSION_ID = re.compile(r"^(?P<series>[a-z0-9][a-z0-9-]{2,69})-v1$")
 
 DRIVAERML_RELATIVE_ACTIVATION_RECORD_SCHEMA = (
@@ -472,14 +607,31 @@ def is_registered_hiliftaeroml_preview_path(
     *,
     root: Path | None = None,
 ) -> bool:
-    """Return whether *path* is the single maintainer-configured preview path."""
+    """Return whether *path* is a maintainer-configured preview path."""
+
+    return _registered_hiliftaeroml_preview_config(path, root=root) is not None
+
+
+def _registered_hiliftaeroml_preview_config(
+    path: Path,
+    *,
+    root: Path | None = None,
+) -> dict[str, Any] | None:
+    """Resolve one code-pinned preview configuration by repository path."""
 
     effective_root = (root or ROOT).resolve()
     try:
         relative_path = path.resolve().relative_to(effective_root).as_posix()
     except (OSError, ValueError):
-        return False
-    return relative_path == HILIFT_REGISTERED_PREVIEW["submission_path"]
+        return None
+    return next(
+        (
+            configuration
+            for configuration in HILIFT_REGISTERED_PREVIEW_CONFIGS
+            if relative_path == configuration["binding"]["submission_path"]
+        ),
+        None,
+    )
 
 
 def registered_hiliftaeroml_preview(
@@ -489,26 +641,31 @@ def registered_hiliftaeroml_preview(
     *,
     root: Path | None = None,
 ) -> dict[str, Any] | None:
-    """Return the maintainer binding for the one checked-in HiLift preview.
+    """Return the maintainer binding for a checked-in HiLift preview.
 
     This is deliberately not a general candidate acceptance path.  The source
     path, submission metadata, historical validation receipt, and archive
-    identity are pinned in code so another closed candidate cannot enter the
-    public feed merely by declaring itself a preview.
+    identity of every permitted entry are pinned in code so another closed
+    candidate cannot enter the public feed merely by declaring itself a
+    preview.
     """
 
     effective_root = (root or ROOT).resolve()
-    if not is_registered_hiliftaeroml_preview_path(path, root=effective_root):
+    configuration = _registered_hiliftaeroml_preview_config(
+        path, root=effective_root
+    )
+    if configuration is None:
         return None
+    binding = configuration["binding"]
     if manifest.get("data_release", {}).get("status") != "prototype_dummy_data":
         return None
     if (
         submission.get("submission_id")
-        != HILIFT_REGISTERED_PREVIEW["submission_id"]
+        != binding["submission_id"]
         or submission.get("dataset_id") != "hiliftaeroml"
         or submission.get("dataset") != "HiLiftAeroML"
-        or submission.get("split_id") != "full"
-        or submission.get("case_set_id") != "caseset-ac791749e527"
+        or submission.get("split_id") != configuration["split_id"]
+        or submission.get("case_set_id") != configuration["case_set_id"]
         or submission.get("schema_version") != "3.0"
         or submission.get("approval") is not None
         or submission.get("profile_data", {}).get("format")
@@ -516,9 +673,11 @@ def registered_hiliftaeroml_preview(
     ):
         return None
     try:
-        if sha256_file(path) != HILIFT_REGISTERED_PREVIEW["submission_json_sha256"]:
+        if sha256_file(path) != binding["submission_json_sha256"]:
             return None
-        receipt = load_json(effective_root / HILIFT_REGISTERED_PREVIEW_RECORD_PATH)
+        receipt = load_json(
+            effective_root / configuration["validation_record_path"]
+        )
         dataset_spec = load_json(
             effective_root
             / "benchmark-specs"
@@ -531,7 +690,7 @@ def registered_hiliftaeroml_preview(
         return None
     if (
         receipt.get("schema")
-        != "hiliftaeroml-compact-profile-full360-validation-v1"
+        != configuration["validation_record_schema"]
         or receipt.get("status") != "complete_candidate_not_published"
         or receipt.get("usage") != "maintainer_local_candidate_dry_run_only"
         or receipt.get("activation")
@@ -541,7 +700,7 @@ def registered_hiliftaeroml_preview(
             "submissions_opened": False,
             "validation_changes_activation": False,
         }
-        or receipt.get("registered_preview") != HILIFT_REGISTERED_PREVIEW
+        or receipt.get("registered_preview") != binding
     ):
         return None
     scoring_support = dataset_spec.get("scoring_support", {})
@@ -586,16 +745,18 @@ def registered_hiliftaeroml_preview(
         return None
     if (
         assembly.get("submission_json_sha256")
-        != HILIFT_REGISTERED_PREVIEW["submission_json_sha256"]
-        or assembly.get("regular_file_bytes_each") != 14_505_024
+        != binding["submission_json_sha256"]
+        or assembly.get("regular_file_bytes_each")
+        != configuration["regular_file_bytes_each"]
         or evidence.get("status") != "submitted_evaluation"
         or evidence_sha256 != assembly.get("evaluation_evidence_sha256")
         or evidence_sha256 != evaluation.get("evidence_sha256")
         or profile_index_sha256 != assembly.get("profile_index_sha256")
-        or scope.get("split_id") != "full"
-        or scope.get("case_set_id") != "caseset-ac791749e527"
-        or scope.get("case_count") != 360
-        or scope.get("profile_series_count") != 5_400
+        or scope.get("split_id") != configuration["split_id"]
+        or scope.get("case_set_id") != configuration["case_set_id"]
+        or scope.get("case_count") != configuration["case_count"]
+        or scope.get("profile_series_count")
+        != configuration["profile_series_count"]
         or representation.get("participant_artifacts_contain_evaluator_support")
         is not False
         or representation.get("participant_artifacts_contain_truth") is not False
@@ -613,11 +774,11 @@ def registered_hiliftaeroml_preview(
         or profile_data.get("profile_ground_truth_manifest_sha256")
         != receipt.get("bindings", {}).get("source_profile_truth_manifest_sha256")
         or archives.get("sha256_each")
-        != HILIFT_REGISTERED_PREVIEW["deterministic_archive"]["sha256"]
+        != binding["deterministic_archive"]["sha256"]
         or archives.get("size_bytes_each")
-        != HILIFT_REGISTERED_PREVIEW["deterministic_archive"]["size_bytes"]
+        != binding["deterministic_archive"]["size_bytes"]
         or archives.get("member_count_each")
-        != HILIFT_REGISTERED_PREVIEW["deterministic_archive"]["member_count"]
+        != binding["deterministic_archive"]["member_count"]
         or archives.get("byte_identical") is not True
         or any(
             validation.get(package, {}).get("valid") is not True
@@ -625,7 +786,7 @@ def registered_hiliftaeroml_preview(
         )
     ):
         return None
-    return deepcopy(HILIFT_REGISTERED_PREVIEW)
+    return deepcopy(binding)
 
 
 def validate_registered_hiliftaeroml_preview_archive(

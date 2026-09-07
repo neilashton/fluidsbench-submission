@@ -127,7 +127,7 @@
     "contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
     "file": "native-profile-format-v2.json",
     "format": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate",
-    "sha256": "1e84265c60f0a50e56b1ac59c8d159b1617c920b7a717ce3fafe03ee561ee01c",
+    "sha256": "b1fd29b2cb6c1c84c694ddffc5d85f6cd68fd175b79c3695a443aa78bf962c2f",
     "representation_decision": {
       "status": "full360_sensitivity_complete_128_selected",
       "file": "compact-cp-representation-decision-v1.json",
@@ -142,14 +142,14 @@
       "status": "complete_candidate_not_published",
       "usage": "maintainer_local_candidate_dry_run_only",
       "release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
-      "manifest_sha256": "81150cc075d5b64caf0c63b9601a23bbecbf38a8f60bfd69814981e408dd712c"
+      "manifest_sha256": "6797a7a9578b2f9c34c24d218637129f37d6bb5074f0059f2410455e9e59c6ff"
     },
     "public_plot_ground_truth": {
       "status": "public_plot_only_candidate",
       "usage": "browser_visualization_only_not_metric_recomputation",
       "activation_effect": "none",
       "binding_file": "public-compact-profile-truth-binding-v1.json",
-      "binding_sha256": "c4c0598f24b375c6723fc93b09cc072cee7ef098a361b7d973a51074b5a0e22e"
+      "binding_sha256": "69bc6e8c8503fbd86bdce1ec692e8967e8502d09582a3e06fc7c67cca203cedd"
     },
     "activation_rule": "Owner approval, publication of immutable evaluator support and profile truth bound to this exact contract SHA-256, and an explicit status change are required before compact-v2 submissions open."
   },

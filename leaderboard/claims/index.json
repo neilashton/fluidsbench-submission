@@ -1,10 +1,10 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/claim-index.schema.json",
   "schema_version": "1.0",
-  "release_id": "prototype-dev-2026-09-02-78b3419d6294",
+  "release_id": "prototype-dev-2026-09-06-ef0e544bf188",
   "release_status": "prototype_dummy_data",
   "feed_file": "leaderboard/all.json",
-  "feed_sha256": "78b3419d6294e4fd3191e0dae43d001c30e86e55d1a5acdf247f52e360c44217",
+  "feed_sha256": "ef0e544bf188072e4fee197232b86d6327a57df4b886bd9e9b8badf1186fd595",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -22,11 +22,11 @@
     "comparison": "rounded_metric_value",
     "rounding": "decimal_half_up"
   },
-  "record_count": 56,
+  "record_count": 62,
   "eligible_record_count": 0,
   "records": [
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/full/ab-upt",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/full/ab-upt",
       "submission_id": "ab-upt",
       "series_id": "ab-upt",
       "version": 1,
@@ -34,10 +34,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/full/ab-upt.json",
-      "sha256": "04d88560accbccbdf43cdbf00a24f88736d73d358571545fa004d60ff22fa984"
+      "sha256": "7bfb05435c37bc0c5bbe1a2ab71e3ca9ac3c27654f8a5bd839659b9df11d5252"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/full/transolver",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/full/transolver",
       "submission_id": "transolver",
       "series_id": "transolver",
       "version": 1,
@@ -45,10 +45,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/full/transolver.json",
-      "sha256": "8fd275daa5664dfb14ac78ae645905a535ef9d4ec9b3f89ddfb5a34314205aae"
+      "sha256": "715032df680a0ff48e7333e809e90d9d2b444e7930ed9032dff4f0f40ecfd1dc"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/geometry/lno",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/geometry/lno",
       "submission_id": "lno",
       "series_id": "lno",
       "version": 1,
@@ -56,10 +56,10 @@
       "split_id": "geometry",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/geometry/lno.json",
-      "sha256": "fb359a20fa022fb42951901366afa9f747b4cb22c95154023be7451cfe6632d5"
+      "sha256": "d858423b4b2395e3a3a2001af5e5b42e8ffe5bb72772d55924466b1fc3d442ef"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/high_drag/oformer",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/high_drag/oformer",
       "submission_id": "oformer",
       "series_id": "oformer",
       "version": 1,
@@ -67,10 +67,10 @@
       "split_id": "high_drag",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/high_drag/oformer.json",
-      "sha256": "928a17f5deee183f5b6063c7eddc1570de779bdb5e9a0eb20be982b71aad8bb6"
+      "sha256": "491676f73acd1caa48d523cd7d44ee176bf35d8ccecf3c14504c15e4b432d2be"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/image_wake/transformer",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/image_wake/transformer",
       "submission_id": "transformer",
       "series_id": "transformer",
       "version": 1,
@@ -78,10 +78,10 @@
       "split_id": "image_wake",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/image_wake/transformer.json",
-      "sha256": "a5ca13fe406e88a5635625de4529bc03c7c445e6aee9ca48e94772bf45e7804c"
+      "sha256": "1b05ab8f22462d8c0c86de2112920d6c88ea2c25abb18f573799413eb2d6f46b"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/low_drag/pointnet",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/low_drag/pointnet",
       "submission_id": "pointnet",
       "series_id": "pointnet",
       "version": 1,
@@ -89,10 +89,10 @@
       "split_id": "low_drag",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/low_drag/pointnet.json",
-      "sha256": "84c4e2cd4c9e825261a46fb187bf00350554e057c6b6bef807e46a89a028fc69"
+      "sha256": "c1278a138f7a9cfe07015b6817ff9e84f51919ecb28efd9fed7eacdab062365a"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/medium/dummy-ahmedml-flowformer-v1",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/medium/dummy-ahmedml-flowformer-v1",
       "submission_id": "dummy-ahmedml-flowformer-v1",
       "series_id": "dummy-ahmedml-flowformer",
       "version": 1,
@@ -100,10 +100,10 @@
       "split_id": "medium",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/medium/dummy-ahmedml-flowformer-v1.json",
-      "sha256": "52799b2d55299e9d828410ecda8dd7e07c18a50387d5fa12c53c295e21bcd3f3"
+      "sha256": "eb323584f91a9f49ea01bbf37260bd7d17d29fd6995cf5762240a63660d00478"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/medium/upt",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/medium/upt",
       "submission_id": "upt",
       "series_id": "upt",
       "version": 1,
@@ -111,10 +111,10 @@
       "split_id": "medium",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/medium/upt.json",
-      "sha256": "18fdf4e48376ae30e71ea90b00b2a5bd798263f192bd33df2549681a581f2a8e"
+      "sha256": "68adf511b2cacebc120d18a33434c02c7c67a9b35dba5fabb5f9b26f0e58b1b5"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/scarce/gino",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/scarce/gino",
       "submission_id": "gino",
       "series_id": "gino",
       "version": 1,
@@ -122,10 +122,10 @@
       "split_id": "scarce",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/scarce/gino.json",
-      "sha256": "689820d7c9f75dbb446e13692f0ae64ff5b3f21e30a39a3d7abd5ff71f6cf1ce"
+      "sha256": "c3ea9a3886d974d031d7a41d16c38eeba5b58b3f20f8209b1e80a54d7f0c66a1"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/ahmedml/super_scarce/graph-u-net",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/ahmedml/super_scarce/graph-u-net",
       "submission_id": "graph-u-net",
       "series_id": "graph-u-net",
       "version": 1,
@@ -133,10 +133,10 @@
       "split_id": "super_scarce",
       "eligible": false,
       "file": "leaderboard/claims/ahmedml/super_scarce/graph-u-net.json",
-      "sha256": "64817f051b6532286db47caded950559e7a4fa76053655cf35aa27920353f5a6"
+      "sha256": "abf94ac8d34c94633a2d82587af0cc5d5787d8a159ffdfcd70c6f714a8e8dcd5"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/airfrans/aoa_extrapolation/airfrans-mlp-full",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/airfrans/aoa_extrapolation/airfrans-mlp-full",
       "submission_id": "airfrans-mlp-full",
       "series_id": "airfrans-mlp-full",
       "version": 1,
@@ -144,10 +144,10 @@
       "split_id": "aoa_extrapolation",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/aoa_extrapolation/airfrans-mlp-full.json",
-      "sha256": "3c2a1979e9966b2a49791e667da57415ed91a3597bc747deeff49d3e06dea0e4"
+      "sha256": "7be14e2acfc35c0f67367747a8b5ae917d91991e8e8484b3d566c6727f39fa69"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/airfrans/full/airfrans-pointnet-full",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/airfrans/full/airfrans-pointnet-full",
       "submission_id": "airfrans-pointnet-full",
       "series_id": "airfrans-pointnet-full",
       "version": 1,
@@ -155,10 +155,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/full/airfrans-pointnet-full.json",
-      "sha256": "1f260a52e988dd999ebb1c5d8b2246e58b180313874832cba3559fb1dfa4e7cb"
+      "sha256": "12406dda23d2a8fe0e84490b2f1cde3b4723aefad9692d14f608a45cef9298a9"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/airfrans/full/dummy-airfrans-airfoiloperator-v1",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/airfrans/full/dummy-airfrans-airfoiloperator-v1",
       "submission_id": "dummy-airfrans-airfoiloperator-v1",
       "series_id": "dummy-airfrans-airfoiloperator",
       "version": 1,
@@ -166,10 +166,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/full/dummy-airfrans-airfoiloperator-v1.json",
-      "sha256": "aa9d4c8ad62ffd7e77ac043c8b5e24a065c0608611058c1d56350fd956a2cce8"
+      "sha256": "7b876b894ca27db031908a2138c0acfbc9e292ce695c020a482db54638ecb64b"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
       "submission_id": "airfrans-graphsage-full",
       "series_id": "airfrans-graphsage-full",
       "version": 1,
@@ -177,10 +177,10 @@
       "split_id": "reynolds_extrapolation",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/reynolds_extrapolation/airfrans-graphsage-full.json",
-      "sha256": "efa6763a20dbf851cce8976efeb7ce10fe0f7cad094cdb9de8d78dbc868baaac"
+      "sha256": "a5beafcfa51a99d6902af5a6532e99c7e64bc519096bee4461797839d3a9f60d"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/airfrans/scarce/airfrans-graph-u-net-full",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/airfrans/scarce/airfrans-graph-u-net-full",
       "submission_id": "airfrans-graph-u-net-full",
       "series_id": "airfrans-graph-u-net-full",
       "version": 1,
@@ -188,10 +188,10 @@
       "split_id": "scarce",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/scarce/airfrans-graph-u-net-full.json",
-      "sha256": "579bcb6c55d740cd13b41a85625125013c98a372b6773f69ca68f059ec23d833"
+      "sha256": "85201c20644b8bb8297b00e1373f8e5717c0127f68bd44382fafbd184ee2e4d9"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout",
       "submission_id": "blendednet-prototype-geometry-holdout",
       "series_id": "blendednet-prototype-geometry-holdout",
       "version": 1,
@@ -199,10 +199,10 @@
       "split_id": "geometry_holdout",
       "eligible": false,
       "file": "leaderboard/claims/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout.json",
-      "sha256": "a2e975035839feafcb25119885dc269dceb6e276aa16494bb894bf624c2a805d"
+      "sha256": "3f7c2707394817503ae64a98240c0d438538876e8544c052f61b07ea0d59aa15"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaerml/full/drivaerml-transolver",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaerml/full/drivaerml-transolver",
       "submission_id": "drivaerml-transolver",
       "series_id": "drivaerml-transolver",
       "version": 1,
@@ -210,10 +210,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/drivaerml/full/drivaerml-transolver.json",
-      "sha256": "f98b56c7fec2fb8713526f0a0e92a8bebde5dba35fbc7472d999ac5541f43f31"
+      "sha256": "abf42db29f3e7625b44b98fc69316bdd5b713bcf12614e04b4f6be110c4c1818"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-ab-upt",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-ab-upt",
       "submission_id": "drivaernetpp-ab-upt",
       "series_id": "drivaernetpp-ab-upt",
       "version": 1,
@@ -221,10 +221,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-ab-upt.json",
-      "sha256": "6fc0586fb5aabb70518504937687f1c0d9fefb790d95657a4df05e43011bba21"
+      "sha256": "7e00e4dd3569bbd983fd62c7cba9291fb01d2315b6b62e68d380351e0c1c02fb"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-neuraloperator",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-neuraloperator",
       "submission_id": "drivaernetpp-neuraloperator",
       "series_id": "drivaernetpp-neuraloperator",
       "version": 1,
@@ -232,10 +232,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-neuraloperator.json",
-      "sha256": "b3bfffb41fc1979730574360401c59c67b030fe8dfb50c737ca48686c2e2a63d"
+      "sha256": "1e2c8647dc9bb1503fa82b83acf6e8e9a94775bd7c063f9260130a462070f22e"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-pointmae",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-pointmae",
       "submission_id": "drivaernetpp-pointmae",
       "series_id": "drivaernetpp-pointmae",
       "version": 1,
@@ -243,10 +243,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-pointmae.json",
-      "sha256": "1ac6b8f21510a53ceda82d8ed3ced7056f9831d06c4248945a3cc8a7b4772690"
+      "sha256": "2ee1fa8534c628e5a78575c0f8bf321a5e411b0f8c158241890c2fb74b1d367e"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-pointnet",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-pointnet",
       "submission_id": "drivaernetpp-pointnet",
       "series_id": "drivaernetpp-pointnet",
       "version": 1,
@@ -254,10 +254,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-pointnet.json",
-      "sha256": "56e523f3974efa12ede16600b2d4fc029329cb6c4cf48eeffa86968b11410d82"
+      "sha256": "310638efddb9bb451400304bafa2f223bd80cc5d8daad748c7c52ce1ba35ec32"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-pointnet-large",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-pointnet-large",
       "submission_id": "drivaernetpp-pointnet-large",
       "series_id": "drivaernetpp-pointnet-large",
       "version": 1,
@@ -265,10 +265,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-pointnet-large.json",
-      "sha256": "ca6da8f2b42ba331e67e1ad5673454ba439516fe2a047b8c9aaa3abff4165b29"
+      "sha256": "ade45b6610a668e34e3126c94a8dd428b4dc720ba2eac2d6293fa6892137eeb4"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-pointtransformer",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-pointtransformer",
       "submission_id": "drivaernetpp-pointtransformer",
       "series_id": "drivaernetpp-pointtransformer",
       "version": 1,
@@ -276,10 +276,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-pointtransformer.json",
-      "sha256": "e5755bde61e1bd6f5271308082e1dfd90873a88bfa9935301fc61ebfd389559c"
+      "sha256": "1103d9ee1bd2eae35d967adbd78c59616e5d3a03d1d0abf64a44852314566ef2"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-regdgcnn",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-regdgcnn",
       "submission_id": "drivaernetpp-regdgcnn",
       "series_id": "drivaernetpp-regdgcnn",
       "version": 1,
@@ -287,10 +287,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-regdgcnn.json",
-      "sha256": "4f0a09e9b264ef6ab69ed296be3e7204238e442841d0fde6d654dacd1fc94562"
+      "sha256": "3b8ed0b24e2e31df63a81be7990c8e3c48f586fc891407c115b27183a9a5915f"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-transolver",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-transolver",
       "submission_id": "drivaernetpp-transolver",
       "series_id": "drivaernetpp-transolver",
       "version": 1,
@@ -298,10 +298,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-transolver.json",
-      "sha256": "0262cd8d5eee86264c30e946e83fcec63ad5fb49473d160e3e4b5ed3ae87663f"
+      "sha256": "bd68305d7c164c0ff9b9bd0e98f61487f14d0ce8558722cf463bd0cd299a862f"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-transolver-large",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-transolver-large",
       "submission_id": "drivaernetpp-transolver-large",
       "series_id": "drivaernetpp-transolver-large",
       "version": 1,
@@ -309,10 +309,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-transolver-large.json",
-      "sha256": "e0ddf2972b781cfc87807278f8caff9d7b85df3471596173fcf5af1e5a365037"
+      "sha256": "8e0556c6cd85a06475cb8fc26ad5e9424dced75a7511c42171d87f58b016c65e"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-transolver-plus-plus",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-transolver-plus-plus",
       "submission_id": "drivaernetpp-transolver-plus-plus",
       "series_id": "drivaernetpp-transolver-plus-plus",
       "version": 1,
@@ -320,10 +320,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-transolver-plus-plus.json",
-      "sha256": "0c459dd427f69da770fa747b10991b6c6aaec2856ae472e8fc8999651cac8fc2"
+      "sha256": "623f58928d969fc16e85db352d45f16e00ebf6e19be3c749ae9dc7579951c51d"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/drivaernetpp-tripnet",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/drivaernetpp-tripnet",
       "submission_id": "drivaernetpp-tripnet",
       "series_id": "drivaernetpp-tripnet",
       "version": 1,
@@ -331,10 +331,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-tripnet.json",
-      "sha256": "07ca48dec573ca8162518ec5eab280896d8d69676ab0f70ddf139f52bc5a858e"
+      "sha256": "a2e781e5bedb2564c43aa266ac91b50fb791387fdf710bcdc5159a3c3fbd4d7a"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1",
       "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
       "series_id": "dummy-drivaernetplusplus-surfacegnn",
       "version": 1,
@@ -342,10 +342,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1.json",
-      "sha256": "2fcf5e4103afa41403ba6e279bd14779d6182af8bdb499de41f67b5595eff8a5"
+      "sha256": "70c2ac177734f310e8a91528d30d078aa0fcd3188feffe93e67efae2ebeaf811"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/hiliftaeroml/full/hiliftaeroml-transolver-full360-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/full/hiliftaeroml-transolver-full360-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
       "series_id": "hiliftaeroml-transolver-full360-candidate",
       "version": 1,
@@ -353,10 +353,76 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/full/hiliftaeroml-transolver-full360-candidate-v1.json",
-      "sha256": "df2d3aafdb77174911a67eebcd46f1eed9c2774bc303e04d2ff59561ebb8803d"
+      "sha256": "15b3474fbeb6616510e2379fcf2111cb58f3a2ccbd6c358c896d169ef9cb809a"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/rotor37/train_1000/rotor37-prototype-train-1000",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/geometry_scarce/hiliftaeroml-transolver-geometry-scarce-candidate-v1",
+      "submission_id": "hiliftaeroml-transolver-geometry-scarce-candidate-v1",
+      "series_id": "hiliftaeroml-transolver-geometry-scarce-candidate",
+      "version": 1,
+      "dataset_id": "hiliftaeroml",
+      "split_id": "geometry_scarce",
+      "eligible": false,
+      "file": "leaderboard/claims/hiliftaeroml/geometry_scarce/hiliftaeroml-transolver-geometry-scarce-candidate-v1.json",
+      "sha256": "104d9c8ccff54ba13046f8113a2bb2eb4f78e707a2011f25370e7c1bcc0c0044"
+    },
+    {
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/geometry_super_scarce/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1",
+      "submission_id": "hiliftaeroml-transolver-geometry-super-scarce-candidate-v1",
+      "series_id": "hiliftaeroml-transolver-geometry-super-scarce-candidate",
+      "version": 1,
+      "dataset_id": "hiliftaeroml",
+      "split_id": "geometry_super_scarce",
+      "eligible": false,
+      "file": "leaderboard/claims/hiliftaeroml/geometry_super_scarce/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1.json",
+      "sha256": "e355b9027fbf4195cc33b7a2d2be52fe8ff4fa1e61d4b26502ed8189877f9ef0"
+    },
+    {
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/single_aoa_12/hiliftaeroml-transolver-aoa12-candidate-v1",
+      "submission_id": "hiliftaeroml-transolver-aoa12-candidate-v1",
+      "series_id": "hiliftaeroml-transolver-aoa12-candidate",
+      "version": 1,
+      "dataset_id": "hiliftaeroml",
+      "split_id": "single_aoa_12",
+      "eligible": false,
+      "file": "leaderboard/claims/hiliftaeroml/single_aoa_12/hiliftaeroml-transolver-aoa12-candidate-v1.json",
+      "sha256": "e9b54beddfb9d98cbcf32ee2bb31603682b659870581aad31f9da9f46cee5d2c"
+    },
+    {
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/single_aoa_22/hiliftaeroml-transolver-aoa22-candidate-v1",
+      "submission_id": "hiliftaeroml-transolver-aoa22-candidate-v1",
+      "series_id": "hiliftaeroml-transolver-aoa22-candidate",
+      "version": 1,
+      "dataset_id": "hiliftaeroml",
+      "split_id": "single_aoa_22",
+      "eligible": false,
+      "file": "leaderboard/claims/hiliftaeroml/single_aoa_22/hiliftaeroml-transolver-aoa22-candidate-v1.json",
+      "sha256": "1ddad99ce9bd76f9e83c946ed9eba634ceb400922adea3716a4efe82ae75da7d"
+    },
+    {
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/single_aoa_4/hiliftaeroml-transolver-aoa4-candidate-v1",
+      "submission_id": "hiliftaeroml-transolver-aoa4-candidate-v1",
+      "series_id": "hiliftaeroml-transolver-aoa4-candidate",
+      "version": 1,
+      "dataset_id": "hiliftaeroml",
+      "split_id": "single_aoa_4",
+      "eligible": false,
+      "file": "leaderboard/claims/hiliftaeroml/single_aoa_4/hiliftaeroml-transolver-aoa4-candidate-v1.json",
+      "sha256": "58590c0b7d910518296a535d6ac663737931ffe2a40ae72fcd838cad351edf5a"
+    },
+    {
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/super_scarce/hiliftaeroml-transolver-super-scarce-candidate-v1",
+      "submission_id": "hiliftaeroml-transolver-super-scarce-candidate-v1",
+      "series_id": "hiliftaeroml-transolver-super-scarce-candidate",
+      "version": 1,
+      "dataset_id": "hiliftaeroml",
+      "split_id": "super_scarce",
+      "eligible": false,
+      "file": "leaderboard/claims/hiliftaeroml/super_scarce/hiliftaeroml-transolver-super-scarce-candidate-v1.json",
+      "sha256": "22470fee45d8911bfe0facd1c307cc1fd4a2cb0521fa8c97a8cc6debfb1581d1"
+    },
+    {
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/rotor37/train_1000/rotor37-prototype-train-1000",
       "submission_id": "rotor37-prototype-train-1000",
       "series_id": "rotor37-prototype-train-1000",
       "version": 1,
@@ -364,10 +430,10 @@
       "split_id": "train_1000",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_1000/rotor37-prototype-train-1000.json",
-      "sha256": "0b30fe8527bb5e6a55c17dd5d3e8a388a6926704ce47f006e593f9d984e0d7ff"
+      "sha256": "8f617e1c534de047c00799df448d39564adbca45237268f89f3103a9392f471e"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/rotor37/train_125/rotor37-prototype-train-125",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/rotor37/train_125/rotor37-prototype-train-125",
       "submission_id": "rotor37-prototype-train-125",
       "series_id": "rotor37-prototype-train-125",
       "version": 1,
@@ -375,10 +441,10 @@
       "split_id": "train_125",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_125/rotor37-prototype-train-125.json",
-      "sha256": "e7914b1e91b9cd3e93ca2371f2375c523ca2a1c0814d43c7661ca2abd0db1dcd"
+      "sha256": "7a60db12207d81e2f99307d349b3bd32d122871da41d8ea91552ae41343ef898"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/rotor37/train_16/rotor37-prototype-train-16",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/rotor37/train_16/rotor37-prototype-train-16",
       "submission_id": "rotor37-prototype-train-16",
       "series_id": "rotor37-prototype-train-16",
       "version": 1,
@@ -386,10 +452,10 @@
       "split_id": "train_16",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_16/rotor37-prototype-train-16.json",
-      "sha256": "41da802cb12f70961db97f6f9b7e312828e2c7204a77cb54bb82ba6ed95cad70"
+      "sha256": "cd00458d62bee367f42025a4c3e3de8fb8a0585b3bfe1c525040d3ef35b2804d"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/rotor37/train_250/rotor37-prototype-train-250",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/rotor37/train_250/rotor37-prototype-train-250",
       "submission_id": "rotor37-prototype-train-250",
       "series_id": "rotor37-prototype-train-250",
       "version": 1,
@@ -397,10 +463,10 @@
       "split_id": "train_250",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_250/rotor37-prototype-train-250.json",
-      "sha256": "b0250223a820a2a6edcfc2aba1fbd785f9fcfac94af24f52a5363b26bae4bf8d"
+      "sha256": "08e22a0cfa078d12e1aabc703e98fcdb9da2a745b3fb981affe1d4a1113e82f0"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/rotor37/train_32/rotor37-prototype-train-32",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/rotor37/train_32/rotor37-prototype-train-32",
       "submission_id": "rotor37-prototype-train-32",
       "series_id": "rotor37-prototype-train-32",
       "version": 1,
@@ -408,10 +474,10 @@
       "split_id": "train_32",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_32/rotor37-prototype-train-32.json",
-      "sha256": "38c83559e1ac9ac3c31542989bb2adfda20a14dc9ef82ef521c2ceabb43643de"
+      "sha256": "3101c87a9393c2bfae727a379930fb1c57afbd4933abef0b3dbcac144705a439"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/rotor37/train_500/rotor37-prototype-train-500",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/rotor37/train_500/rotor37-prototype-train-500",
       "submission_id": "rotor37-prototype-train-500",
       "series_id": "rotor37-prototype-train-500",
       "version": 1,
@@ -419,10 +485,10 @@
       "split_id": "train_500",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_500/rotor37-prototype-train-500.json",
-      "sha256": "975cc6d7c56c00b1b5cf4070f9c334c76647e12db905aeef926e6b5cd3b21e63"
+      "sha256": "558d5ef149e1c2eb1ef248a3b288e1625a59834336a12e506f2f3e53ce8ce3ca"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/rotor37/train_64/rotor37-prototype-train-64",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/rotor37/train_64/rotor37-prototype-train-64",
       "submission_id": "rotor37-prototype-train-64",
       "series_id": "rotor37-prototype-train-64",
       "version": 1,
@@ -430,10 +496,10 @@
       "split_id": "train_64",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_64/rotor37-prototype-train-64.json",
-      "sha256": "5f606a34181eb7f32facca73a19c7894868ffaf2c93d7ed974d1dd718b4d2d8f"
+      "sha256": "df6b20e6cbf432704d3ad725cef795a9b0602e2b66cac0c0cee60de9b8471ac3"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/rotor37/train_8/rotor37-prototype-train-8",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/rotor37/train_8/rotor37-prototype-train-8",
       "submission_id": "rotor37-prototype-train-8",
       "series_id": "rotor37-prototype-train-8",
       "version": 1,
@@ -441,10 +507,10 @@
       "split_id": "train_8",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_8/rotor37-prototype-train-8.json",
-      "sha256": "164c7a7c87bcb2c69e0f36d92b188b80fb0910c79f4c4fad6cb4832c49125c7a"
+      "sha256": "7ba06bdc8aebe7db82c945c1eb14822e640f260a594a3a037ebb293b5e328e73"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/vki-ls59/train/vkils59-prototype-train",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/vki-ls59/train/vkils59-prototype-train",
       "submission_id": "vkils59-prototype-train",
       "series_id": "vkils59-prototype-train",
       "version": 1,
@@ -452,10 +518,10 @@
       "split_id": "train",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train/vkils59-prototype-train.json",
-      "sha256": "95b3194995bf897e5f61b06457ef90e0940d39b105b0ba179acc4dca96a61fd7"
+      "sha256": "75e8e26ab05a98c612c31ff0fa1fd6cc966da23f185547e9ac30f943df17bfed"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/vki-ls59/train_125/vkils59-prototype-train-125",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/vki-ls59/train_125/vkils59-prototype-train-125",
       "submission_id": "vkils59-prototype-train-125",
       "series_id": "vkils59-prototype-train-125",
       "version": 1,
@@ -463,10 +529,10 @@
       "split_id": "train_125",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_125/vkils59-prototype-train-125.json",
-      "sha256": "e25695e1a048828dc4d25bd0dc72744d56d6a4dd09e86b1f3eb96aeacfe6808b"
+      "sha256": "c36e73737a09528368e3ff5b1b9d8a59acfa1ba56b4c1d14cf45b23b40a69686"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/vki-ls59/train_16/vkils59-prototype-train-16",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/vki-ls59/train_16/vkils59-prototype-train-16",
       "submission_id": "vkils59-prototype-train-16",
       "series_id": "vkils59-prototype-train-16",
       "version": 1,
@@ -474,10 +540,10 @@
       "split_id": "train_16",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_16/vkils59-prototype-train-16.json",
-      "sha256": "f7dca34bae148e4d2d817024659073cd21f31a8511cfa634d9c4fbeaf547ec22"
+      "sha256": "413abac6f7e80ca1e6bada8e8a43bec292b0249bc981680ed96015f720d76bfe"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/vki-ls59/train_250/vkils59-prototype-train-250",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/vki-ls59/train_250/vkils59-prototype-train-250",
       "submission_id": "vkils59-prototype-train-250",
       "series_id": "vkils59-prototype-train-250",
       "version": 1,
@@ -485,10 +551,10 @@
       "split_id": "train_250",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_250/vkils59-prototype-train-250.json",
-      "sha256": "4e33b71875510371e60bab20a163b7c392468c30fda3a2955eaf16d943f78035"
+      "sha256": "eff368c4a348089b47599a0df4c117a9261a51a354f0c072c68fbdffacbf165e"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/vki-ls59/train_32/vkils59-prototype-train-32",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/vki-ls59/train_32/vkils59-prototype-train-32",
       "submission_id": "vkils59-prototype-train-32",
       "series_id": "vkils59-prototype-train-32",
       "version": 1,
@@ -496,10 +562,10 @@
       "split_id": "train_32",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_32/vkils59-prototype-train-32.json",
-      "sha256": "0d5a7758f713377636ec2f4e600764d40681e85aa511160624848472d85c1a6b"
+      "sha256": "46123ac3c72b995e9b922bd3ceaca6c5fc2716b26974337cd743d03ebdd28b15"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/vki-ls59/train_500/vkils59-prototype-train-500",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/vki-ls59/train_500/vkils59-prototype-train-500",
       "submission_id": "vkils59-prototype-train-500",
       "series_id": "vkils59-prototype-train-500",
       "version": 1,
@@ -507,10 +573,10 @@
       "split_id": "train_500",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_500/vkils59-prototype-train-500.json",
-      "sha256": "e9e338bb5107f2a11a85b828f9d211a1a98dbbdb88187132077224d924acfab1"
+      "sha256": "74689f4f88656337db3a182bb020d373763ae3c860f3e8f4ee55670eda590bcf"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/vki-ls59/train_64/vkils59-prototype-train-64",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/vki-ls59/train_64/vkils59-prototype-train-64",
       "submission_id": "vkils59-prototype-train-64",
       "series_id": "vkils59-prototype-train-64",
       "version": 1,
@@ -518,10 +584,10 @@
       "split_id": "train_64",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_64/vkils59-prototype-train-64.json",
-      "sha256": "f6cf46365041b5d2b24231d0da94ea7706f4acce2302a28e785f421785b438dd"
+      "sha256": "5b6fac2b2af42ac67f2c09422d03745d0add5a45a76bd71b2aa0f7ca45023d28"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/vki-ls59/train_8/vkils59-prototype-train-8",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/vki-ls59/train_8/vkils59-prototype-train-8",
       "submission_id": "vkils59-prototype-train-8",
       "series_id": "vkils59-prototype-train-8",
       "version": 1,
@@ -529,10 +595,10 @@
       "split_id": "train_8",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_8/vkils59-prototype-train-8.json",
-      "sha256": "aff4e93400e58159da0b61edccd4b19b9d87cd86825dd076736b711136db76c4"
+      "sha256": "e809a2223adfa2e28bcbef410944f293e0f39b4653990f7decb8383778825d40"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/dummy-windsorml-wakenet-v1",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/dummy-windsorml-wakenet-v1",
       "submission_id": "dummy-windsorml-wakenet-v1",
       "series_id": "dummy-windsorml-wakenet",
       "version": 1,
@@ -540,10 +606,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/dummy-windsorml-wakenet-v1.json",
-      "sha256": "926fd345058b106d38ed5365fdd6249d14d4b566552dc8a1eb40befbfdcb6eb3"
+      "sha256": "57907c18fec608c9f207d31050f0dd5a97a9383f053ce3aa9dd6b9c19c6a82a2"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-ab-upt",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-ab-upt",
       "submission_id": "windsorml-ab-upt",
       "series_id": "windsorml-ab-upt",
       "version": 1,
@@ -551,10 +617,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-ab-upt.json",
-      "sha256": "e26f53705f3d1c234ab7b2ee8f42eb5178b581bb438f153f9714fd82a5b0b3e2"
+      "sha256": "29cdc54a5744a460f29739f71cbc9dcbb3d14895106aee56755181a429d75e14"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-gino",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-gino",
       "submission_id": "windsorml-gino",
       "series_id": "windsorml-gino",
       "version": 1,
@@ -562,10 +628,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-gino.json",
-      "sha256": "4cd9798431024499f7314ba294218f4911f38d191bc0162f25d9bb27b7f8dd3e"
+      "sha256": "b93713186270f7f6bbb2e9cbda11d129b703231d19ffb98dd6e7a705714ca2f8"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-graph-u-net",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-graph-u-net",
       "submission_id": "windsorml-graph-u-net",
       "series_id": "windsorml-graph-u-net",
       "version": 1,
@@ -573,10 +639,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-graph-u-net.json",
-      "sha256": "7c55773b535dead704270af948f213e95538b45e0bf61094590a8afc0ef0635e"
+      "sha256": "53ac03e5a358689acf8eed9805e4eec7f48ec8cd74f59fbde16de455c1ffa41b"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-lno",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-lno",
       "submission_id": "windsorml-lno",
       "series_id": "windsorml-lno",
       "version": 1,
@@ -584,10 +650,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-lno.json",
-      "sha256": "442cb1343739d8914a57c7ecbc242d59093932496e9066575a038f018a4c498d"
+      "sha256": "c68fb5c34f90f91021218dd6790a2e2cb9bdd138146e73a2d89d2e7abf9cbc96"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-oformer",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-oformer",
       "submission_id": "windsorml-oformer",
       "series_id": "windsorml-oformer",
       "version": 1,
@@ -595,10 +661,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-oformer.json",
-      "sha256": "55484bad2f92c6e11445fb91bfadb45e26031d15f761f7b52c9053d13c4b56c1"
+      "sha256": "926744c7e3b0e7a5a353f8fe706c83b4dfe3154c57d4f1edc14ed72a4920cf76"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-pointnet",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-pointnet",
       "submission_id": "windsorml-pointnet",
       "series_id": "windsorml-pointnet",
       "version": 1,
@@ -606,10 +672,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-pointnet.json",
-      "sha256": "6dadb3f898e6b9895ab428d559bbc958b8f9593249362ca0fcc089228fd96b8b"
+      "sha256": "e94bdf677f2dedaf4b890575ca466fba99819eed76e36afbeb167ddb5af02324"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-transformer",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-transformer",
       "submission_id": "windsorml-transformer",
       "series_id": "windsorml-transformer",
       "version": 1,
@@ -617,10 +683,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-transformer.json",
-      "sha256": "5b9aad010152a240bb1c9eaa6ede183dc1b9f73fda39d5372d7b7db626a49562"
+      "sha256": "97e5d6a29c6b06f4e7c87260461447b4faf784158a8bf391363ce0ef6272d3ee"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-transolver",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-transolver",
       "submission_id": "windsorml-transolver",
       "series_id": "windsorml-transolver",
       "version": 1,
@@ -628,10 +694,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-transolver.json",
-      "sha256": "fee8925bcba2e9573dc1fe4aed96a65f9cd252d711647ee36f36248a74c2a9b3"
+      "sha256": "3a11a2852cf5b6279692a3a38e3e5c4f9a7bc6d8e089ae4ecb8faafc5a91989f"
     },
     {
-      "claim_id": "prototype-dev-2026-09-02-78b3419d6294/windsorml/default/windsorml-upt",
+      "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/windsorml/default/windsorml-upt",
       "submission_id": "windsorml-upt",
       "series_id": "windsorml-upt",
       "version": 1,
@@ -639,7 +705,7 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/windsorml/default/windsorml-upt.json",
-      "sha256": "d1a995b5ce5fadaff40283c7cf671252ae2f428a7737c3230720003b2e422d06"
+      "sha256": "1018645dce04e37204cdd92dc35fb6212003cb57e5f011564e4f1b25113182bb"
     }
   ]
 }
