@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-09-09T07:15:01Z",
+  "generated_at": "2026-09-09T15:33:55Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-09-08-9a4220baccc1",
+    "id": "prototype-dev-2026-09-09-b985243a10f6",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-09-09T07:15:01Z",
+    "generated_at": "2026-09-09T15:33:55Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "9a4220baccc1fc7b24530c33b3e536397cd4d3f1c1c0371f8828e3ea07d7e6e8",
+    "feed_sha256": "b985243a10f66f85d674e05f385623310a5a6fde3683c4f3f61d896468abced1",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,14 +51,14 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "03b6d6791e875155ec3eef3caf29f573774c0260d7acbd398ad7999d95462091",
+      "index_sha256": "fb347410683b65d6181f6f503d5464a1edfb17afe330cc9ce4513d0dd1d32e83",
       "record_count": 65,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "0e46484d15440e54c72dfc41fbf1345770af7643c3757a72904b20a05a2bf6e5",
+      "sha256": "c1537e09695638c18eb9a81c09930341d0bfb5b3c80401577bc18de6a75b9edc",
       "record_count": 65,
       "series_count": 65
     }
@@ -976,7 +976,7 @@
       "contract_base_path": "benchmark-specs/drivaerml/",
       "contract_base_path_scope": "repository_relative_contract_artifact_fields_only; upstream_dataset_paths_resolve_within_source_release",
       "submission_count": 1,
-      "updated_at": "2026-08-31",
+      "updated_at": "2026-09-09",
       "submission_population": {
         "feed_row_count": 1,
         "prototype_ineligible_fixture_count": 1,

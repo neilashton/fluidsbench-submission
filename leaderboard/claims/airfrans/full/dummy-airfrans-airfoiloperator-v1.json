@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-08-9a4220baccc1/airfrans/full/dummy-airfrans-airfoiloperator-v1",
+  "claim_id": "prototype-dev-2026-09-09-b985243a10f6/airfrans/full/dummy-airfrans-airfoiloperator-v1",
   "release": {
-    "id": "prototype-dev-2026-09-08-9a4220baccc1",
+    "id": "prototype-dev-2026-09-09-b985243a10f6",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-09T07:15:01Z",
+    "published_at": "2026-09-09T15:33:55Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -53,7 +53,7 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "9a4220baccc1fc7b24530c33b3e536397cd4d3f1c1c0371f8828e3ea07d7e6e8",
+      "feed_sha256": "b985243a10f66f85d674e05f385623310a5a6fde3683c4f3f61d896468abced1",
       "row_index": 14
     },
     "source_submission": {
