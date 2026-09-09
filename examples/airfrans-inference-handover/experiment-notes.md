@@ -1,10 +1,12 @@
-# Experiment records to accompany AirfRANS predictions
+# Experiment and evaluation records for an AirfRANS candidate
 
 Existing configuration files and logs are preferable to retyping everything.
 Identify which files answer each item below. Leave unknown historical facts
 explicitly unknown for follow-up; do not estimate them as measured values.
-Maintainers will turn these records into `submission.json.methodology` and
-the spatial/evaluation records. Use a separate inference record per split.
+Use these records to populate `submission.json.methodology` and the
+spatial/evaluation records yourself. Keep a separate inference and evaluation
+record per split. Maintainers can review the interpretation and help resolve
+questions about the schema.
 
 ## Model and implementation
 
@@ -29,7 +31,7 @@ the spatial/evaluation records. Use a separate inference record per split.
   wall time and total device-hours, with the scope of those measurements.
 - Raw-file SHA-256 for **every checkpoint file actually loaded**, its role
   and the selection rule applied before evaluation. Checkpoint publication
-  is optional. If the file can be shared privately, maintainers can hash it.
+  is optional. Calculate and record the checksum of each file before inference.
 
 ## Inference and mapping, separately for Full and AoA
 
@@ -45,6 +47,21 @@ the spatial/evaluation records. Use a separate inference record per split.
   imposed during inference/postprocessing.
 - Confirmation that evaluation cases/targets were not used for fitting,
   normalization-statistic fitting or checkpoint selection.
+
+## Profiles, metrics, packaging and validation
+
+- Exact submission-repository commit, extractor/runtime versions, official
+  split identity, and source/prediction hashes.
+- Profile-extraction commands, station/sample coverage and validity checks;
+  the complete-split score and eight raw/bounded R² diagnostics.
+- Field, wall-shear and force evaluator revisions, pressure/normal/load
+  conventions, weights and mappings. Identify any pending benchmark bindings.
+- Per-case metrics and additive relative-L2 statistics, aggregate metrics,
+  spatial counts and coverage, and the schema-v3 files that contain them.
+- Profile chunk/index and package hashes, reproducible evaluation/packaging
+  commands, contributor-validation command/output, and fixes or remaining
+  release blockers. Do not record a blocked check as a successful validation.
+- Draft PR URL against `dev`, with one new submission directory for this split.
 
 ## Result metadata
 
