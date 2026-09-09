@@ -6042,6 +6042,16 @@ def validate_profiles(
         "format", "fluidsbench-profile-chunks-v1"
     )
     relative_profile = profile_format == RELATIVE_PROFILE_FORMAT
+    # A retained real-inference reference may expose fully validated relative
+    # profiles before the closed candidate release is activated.  This is not
+    # an intake path: the v1 schema independently restricts it to an explicit
+    # pre-release reference with prototype approval, while every series still
+    # passes the immutable v3 support/coordinate validator below.
+    pre_release_relative_reference = (
+        relative_profile
+        and submission.get("record_type") == "pre_release_reference"
+        and submission.get("approval", {}).get("status") == "prototype"
+    )
     hilift_native_profile = profile_format == HILIFT_PROFILE_FORMAT
     hilift_compact_profile = profile_format == HILIFT_COMPACT_PROFILE_FORMAT
     physical_coordinate_profile = (
@@ -6064,6 +6074,7 @@ def validate_profiles(
         submission.get("dataset_id") == "drivaerml"
         and isinstance(declaration, dict)
         and "activation_release" in declaration
+        and not pre_release_relative_reference
     ):
         declaration_claims_activation = (
             declaration.get("status") == "activated"
@@ -6088,14 +6099,14 @@ def validate_profiles(
             contract = declaration.get("contract")
             if isinstance(contract, dict) and isinstance(contract.get("sha256"), str):
                 relative_contract_sha256 = contract["sha256"]
-            if not release_was_checked:
+            if not release_was_checked and not pre_release_relative_reference:
                 release_valid = validate_drivaerml_relative_activation_release(
                     add,
                     dataset_spec,
                     declaration,
                     require_active=not candidate_dry_run,
                 )
-            if not candidate_dry_run and (
+            if not candidate_dry_run and not pre_release_relative_reference and (
                 declaration.get("status") != "activated"
                 or declaration.get("profile_format_enabled") is not True
                 or not release_valid
