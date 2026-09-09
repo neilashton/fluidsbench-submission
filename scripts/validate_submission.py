@@ -66,7 +66,9 @@ from reference.hiliftaeroml.compact_profile_evaluator import (
     COMPACT_PROFILE_CONTRACT_ID as HILIFT_COMPACT_PROFILE_CONTRACT_ID,
     COMPACT_PROFILE_CONTRACT_SHA256 as HILIFT_COMPACT_PROFILE_CONTRACT_SHA256,
     COMPACT_PROFILE_FORMAT as HILIFT_COMPACT_PROFILE_FORMAT,
+    CompactSupportRelease as HiLiftCompactSupportRelease,
     CompactProfileEvaluationError as HiLiftCompactProfileEvaluationError,
+    open_compact_support_release as open_hilift_compact_support_release,
     score_compact_profile_directory as score_hilift_compact_profile_directory,
 )
 from reference.methodology import methodology_errors
@@ -158,14 +160,14 @@ HILIFT_REGISTERED_PREVIEW_CONFIGS = (
         case_set_id="caseset-ac791749e527",
         case_count=360,
         submission_json_sha256=(
-            "e99e890ded93bf581d4dfbce165b7f94852ce89683d5fad2a41102d7220e1b54"
+            "43a4d81dfeb159be2b81ac655647420bc1a275784dd9635f2053f2ab4d8b5b2d"
         ),
         archive_sha256=(
-            "3f7095423154d3395e3d6a3efff1d7daca06a56a8b41236ac760bd389b3d2c94"
+            "e270e73e61d2399f4e954b0b13b09d17a637add7e61d8136c20e168647ebdedd"
         ),
-        archive_size_bytes=8_724_046,
+        archive_size_bytes=8_724_067,
         archive_member_count=403,
-        regular_file_bytes=11_758_621,
+        regular_file_bytes=11_758_641,
     ),
     _hilift_preview_configuration(
         slug="aoa4",
@@ -173,14 +175,14 @@ HILIFT_REGISTERED_PREVIEW_CONFIGS = (
         case_set_id="caseset-7a743a20b3bd",
         case_count=36,
         submission_json_sha256=(
-            "cf81d53ad3de44589f1b622fac68bcc0bbea685ff14ae9d74f859631809fc0cd"
+            "4f1fd8b465797f89bcb4dac4791d624e26f7761ca6b8ddd0632d36645c1602e0"
         ),
         archive_sha256=(
-            "6de3a8b4c1b0cafb8d4205e03625dee283362d5f0598b9f2193fffd4c48f8aa2"
+            "1b86a5aae3ec1f82080536c0214413eecafec66a452b332ca7e1b56f82aeee40"
         ),
-        archive_size_bytes=841_953,
+        archive_size_bytes=842_039,
         archive_member_count=47,
-        regular_file_bytes=1_257_729,
+        regular_file_bytes=1_258_072,
     ),
     _hilift_preview_configuration(
         slug="aoa12",
@@ -188,14 +190,14 @@ HILIFT_REGISTERED_PREVIEW_CONFIGS = (
         case_set_id="caseset-02fc12ff3494",
         case_count=36,
         submission_json_sha256=(
-            "0d52ac999e84eb9f1393411018fda99724b73021b490eba7b385cbe4698966ac"
+            "22ee1e5e8c5b4cac46825bbca8de0c940563b1f052882503dac1ffcf0e9d6221"
         ),
         archive_sha256=(
-            "236a11d222ad1222490177c5f6edeeff81a35fc3ea96d41e86c92748b8113fb9"
+            "bb7bf8d7d32eb9122f9d9a0f1234e4ae7033a075dc828709e3ac78b0c154f412"
         ),
-        archive_size_bytes=955_744,
+        archive_size_bytes=955_829,
         archive_member_count=47,
-        regular_file_bytes=1_372_152,
+        regular_file_bytes=1_372_495,
     ),
     _hilift_preview_configuration(
         slug="aoa22",
@@ -203,14 +205,14 @@ HILIFT_REGISTERED_PREVIEW_CONFIGS = (
         case_set_id="caseset-85ecccd9ccda",
         case_count=36,
         submission_json_sha256=(
-            "c89702f260dd9a300793ce769978f766b334b2fc161039c86542011d7450f119"
+            "df6cb95bcd8c22dfd3647cd696a88824000fdd8a17c0dcb6c476b45c4e58d104"
         ),
         archive_sha256=(
-            "53f9fb3360ebd3cc74482899c4bf66218cd72d7308bd11677d51ad2837c26018"
+            "56d9d893870062ff584b040a2eced5cdbac7b22f91b806a99004e5ae7fed8ce4"
         ),
-        archive_size_bytes=960_065,
+        archive_size_bytes=960_142,
         archive_member_count=47,
-        regular_file_bytes=1_375_794,
+        regular_file_bytes=1_376_137,
     ),
     _hilift_preview_configuration(
         slug="super-scarce",
@@ -218,14 +220,14 @@ HILIFT_REGISTERED_PREVIEW_CONFIGS = (
         case_set_id="caseset-ac791749e527",
         case_count=360,
         submission_json_sha256=(
-            "a6ff4b9377c31caca90389da9cac48c54e0ed9afad298bffd3fe210fa30d8afd"
+            "57087ae77adae29f36bfc868e8e86baa373c03e778516aa602b9466c16bce95d"
         ),
         archive_sha256=(
-            "1aa6b071e93b7e7fafd872ff36ac8632a7fa85ba2e6c620774addc7cd2d415f5"
+            "bcb6c2bda00150c039f6aef7019c99e855540abe126c4e9bb02a9f6f4e7656a1"
         ),
-        archive_size_bytes=10_532_403,
+        archive_size_bytes=10_532_488,
         archive_member_count=403,
-        regular_file_bytes=13_568_912,
+        regular_file_bytes=13_569_255,
     ),
     _hilift_preview_configuration(
         slug="geometry-scarce",
@@ -233,14 +235,14 @@ HILIFT_REGISTERED_PREVIEW_CONFIGS = (
         case_set_id="caseset-53990ea68fa6",
         case_count=360,
         submission_json_sha256=(
-            "db36b45ac5ea293f58d6e7996c9864ae49640caa182f1532c8a0962fb7e9774f"
+            "5be3278468041bce62b015d45d77c5482f5d79ca061527418aba999b19b8db2b"
         ),
         archive_sha256=(
-            "1f05d48acca25da8b56a30048585b2ae6405981feb296bf018c6f3efaec6cd2b"
+            "1313d869cd28466ad47e635ac57cc16325d1dd5839fe155ed2d8de5f001c3073"
         ),
-        archive_size_bytes=9_322_118,
+        archive_size_bytes=9_322_198,
         archive_member_count=403,
-        regular_file_bytes=12_364_867,
+        regular_file_bytes=12_365_210,
     ),
     _hilift_preview_configuration(
         slug="geometry-super-scarce",
@@ -248,14 +250,59 @@ HILIFT_REGISTERED_PREVIEW_CONFIGS = (
         case_set_id="caseset-53990ea68fa6",
         case_count=360,
         submission_json_sha256=(
-            "818a132d8bfe475e25d4633e48a0f2df8bc7a2377f8526d42db4828130bea104"
+            "68a649ea1933078cf4a7082bdd0daba046aafcc149bceb0489943711ba1c767d"
         ),
         archive_sha256=(
-            "3d3313fe13f6e08a958556dc4f3763c6305ab9e16e91e52f0002e6a20fe4518f"
+            "903d101210b641ac3b56075f1859f0494184a322e2af1fa183bb688557904d6e"
         ),
-        archive_size_bytes=10_205_034,
+        archive_size_bytes=10_205_122,
         archive_member_count=403,
-        regular_file_bytes=13_250_557,
+        regular_file_bytes=13_250_900,
+    ),
+    _hilift_preview_configuration(
+        slug="geometry",
+        split_id="geometry",
+        case_set_id="caseset-53990ea68fa6",
+        case_count=360,
+        submission_json_sha256=(
+            "f58c7a9d7ea549799c3f035b5b93ec66be4ae15d4863d8788e0fda81aaea5a35"
+        ),
+        archive_sha256=(
+            "1ad985b42ff6a7654b1f980498212e1cabbad6e54c25e1213ba8e47e546e0bf2"
+        ),
+        archive_size_bytes=8_517_360,
+        archive_member_count=403,
+        regular_file_bytes=11_555_256,
+    ),
+    _hilift_preview_configuration(
+        slug="ood-aoa",
+        split_id="aoa",
+        case_set_id="caseset-29693354ed8a",
+        case_count=900,
+        submission_json_sha256=(
+            "dc3c9ea0ff17bec23785ece90994010da887f7bb898fe14f5152e82e24b5104d"
+        ),
+        archive_sha256=(
+            "4bd33893d4de01f266372753cbd7c6de65a87f0535dedcf055a6d487161a42ec"
+        ),
+        archive_size_bytes=24_720_935,
+        archive_member_count=997,
+        regular_file_bytes=32_105_249,
+    ),
+    _hilift_preview_configuration(
+        slug="ood-stall",
+        split_id="stall",
+        case_set_id="caseset-804491c8956e",
+        case_count=723,
+        submission_json_sha256=(
+            "3d741145a35729e62c4854610e583c0e62d5543baa96f47d2ee5e3d2a3b25c59"
+        ),
+        archive_sha256=(
+            "dc53ddac42242c828afcffd27bd02999173b6938213504d8abd3ebee641b33c5"
+        ),
+        archive_size_bytes=19_015_374,
+        archive_member_count=803,
+        regular_file_bytes=24_979_559,
     ),
 )
 HILIFT_REGISTERED_PREVIEW = HILIFT_REGISTERED_PREVIEW_CONFIGS[0]["binding"]
@@ -5986,6 +6033,8 @@ def validate_profiles(
     registered_preview: bool = False,
     candidate_profile_truth_release: Path | None = None,
     candidate_compact_profile_support_release: Path | None = None,
+    opened_candidate_compact_profile_support_release: HiLiftCompactSupportRelease
+    | None = None,
     case_metrics: dict[str, Any] | None = None,
 ) -> dict[str, int]:
     candidate_contract_validation = candidate_dry_run or registered_preview
@@ -6711,6 +6760,9 @@ def validate_profiles(
                     split_id=submission["split_id"],
                     case_set_id=submission["case_set_id"],
                     expected_case_ids=expected_case_ids,
+                    opened_support_release=(
+                        opened_candidate_compact_profile_support_release
+                    ),
                 )
             except HiLiftCompactProfileEvaluationError as error:
                 add(f"HiLiftAeroML compact profile scoring failed: {error}")
@@ -6732,6 +6784,8 @@ def validate_submission_file(
     candidate_dry_run: bool = False,
     candidate_profile_truth_release: Path | None = None,
     candidate_compact_profile_support_release: Path | None = None,
+    opened_candidate_compact_profile_support_release: HiLiftCompactSupportRelease
+    | None = None,
 ) -> tuple[list[str], dict[str, int]]:
     errors: list[str] = []
     stats = {"cases": 0, "series": 0}
@@ -6807,7 +6861,7 @@ def validate_submission_file(
         manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
     configured_preview_path = is_registered_hiliftaeroml_preview_path(path)
     preview_binding = registered_hiliftaeroml_preview(path, submission, manifest)
-    if configured_preview_path and preview_binding is None:
+    if configured_preview_path and preview_binding is None and not candidate_dry_run:
         add(
             "registered HiLiftAeroML preview does not match its maintainer "
             "lifecycle, submission, evidence, profile-index, or archive binding"
@@ -6998,6 +7052,9 @@ def validate_submission_file(
         candidate_compact_profile_support_release=(
             candidate_compact_profile_support_release
         ),
+        opened_candidate_compact_profile_support_release=(
+            opened_candidate_compact_profile_support_release
+        ),
         case_metrics=case_metrics,
     )
     if preview_binding is not None and not contributor_stage:
@@ -7007,6 +7064,109 @@ def validate_submission_file(
             preview_binding,
         )
     return errors, stats
+
+
+def _preopened_hilift_compact_support_for_submission(
+    *,
+    path: Path,
+    manifest: dict[str, Any],
+    support_release_root: Path,
+    cache: dict[
+        tuple[Path, str, str, tuple[str, ...]], HiLiftCompactSupportRelease
+    ],
+) -> HiLiftCompactSupportRelease | None:
+    """Open one exact compact-support case set once for batch candidate checks.
+
+    This is an optimization only.  Any malformed submission or failed pre-open
+    falls back to the ordinary per-package validation path, which reports the
+    normal validation error.  A cached handle remains keyed by the resolved
+    release path, manifest digest, case-set ID, and ordered case IDs.
+    """
+
+    try:
+        submission = load_submission_json(path)
+        if (
+            submission.get("dataset_id") != "hiliftaeroml"
+            or submission.get("profile_data", {}).get("format")
+            != HILIFT_COMPACT_PROFILE_FORMAT
+        ):
+            return None
+        dataset = next(
+            (
+                item
+                for item in manifest["datasets"]
+                if item.get("slug") == "hiliftaeroml"
+            ),
+            None,
+        )
+        if not isinstance(dataset, dict):
+            return None
+        split_id = submission.get("split_id")
+        if not isinstance(split_id, str):
+            return None
+        manifest_split = split_entry(dataset, split_id)
+        if not isinstance(manifest_split, dict):
+            return None
+        specification_path = (
+            ROOT
+            / "benchmark-specs"
+            / "hiliftaeroml"
+            / "submission-spec.json"
+        )
+        specification = load_json(specification_path)
+        specification_split = next(
+            (
+                item
+                for item in specification.get("splits", [])
+                if isinstance(item, dict) and item.get("id") == split_id
+            ),
+            None,
+        )
+        if not isinstance(specification_split, dict):
+            return None
+        index_file = specification_split.get("index_file")
+        case_set_id = specification_split.get("case_set_id")
+        if not isinstance(index_file, str) or not isinstance(case_set_id, str):
+            return None
+        split_index = load_json(specification_path.parent / index_file)
+        case_ids = split_index.get("case_ids")
+        if (
+            split_index.get("case_set_id") != case_set_id
+            or not isinstance(case_ids, list)
+            or not case_ids
+            or any(not isinstance(case_id, str) for case_id in case_ids)
+        ):
+            return None
+        compact_definition = specification.get("compact_profile_definition", {})
+        declaration = compact_definition.get(
+            "candidate_dry_run_evaluator_support", {}
+        )
+        expected_manifest = declaration.get("manifest_sha256")
+        if not isinstance(expected_manifest, str):
+            return None
+        key = (
+            support_release_root.resolve(strict=True),
+            expected_manifest,
+            case_set_id,
+            tuple(case_ids),
+        )
+        if key not in cache:
+            cache[key] = open_hilift_compact_support_release(
+                release_root=support_release_root,
+                expected_manifest_sha256=expected_manifest,
+                expected_case_ids=case_ids,
+                case_set_id=case_set_id,
+            )
+        return cache[key]
+    except (
+        AttributeError,
+        OSError,
+        json.JSONDecodeError,
+        SubmissionJSONError,
+        HiLiftCompactProfileEvaluationError,
+        TypeError,
+    ):
+        return None
 
 
 def validate_many(
@@ -7041,7 +7201,25 @@ def validate_many(
     errors: list[str] = []
     totals = {"submissions": len(files), "cases": 0, "series": 0}
     seen_ids: dict[str, Path] = {}
+    compact_support_cache: dict[
+        tuple[Path, str, str, tuple[str, ...]], HiLiftCompactSupportRelease
+    ] = {}
     for path in files:
+        opened_compact_support = None
+        if (
+            candidate_dry_run
+            and candidate_compact_profile_support_release is not None
+        ):
+            opened_compact_support = (
+                _preopened_hilift_compact_support_for_submission(
+                    path=path,
+                    manifest=manifest,
+                    support_release_root=(
+                        candidate_compact_profile_support_release
+                    ),
+                    cache=compact_support_cache,
+                )
+            )
         current_errors, stats = validate_submission_file(
             path,
             manifest,
@@ -7050,6 +7228,9 @@ def validate_many(
             candidate_profile_truth_release=candidate_profile_truth_release,
             candidate_compact_profile_support_release=(
                 candidate_compact_profile_support_release
+            ),
+            opened_candidate_compact_profile_support_release=(
+                opened_compact_support
             ),
         )
         errors.extend(current_errors)

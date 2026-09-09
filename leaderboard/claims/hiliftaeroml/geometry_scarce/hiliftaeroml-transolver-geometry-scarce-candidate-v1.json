@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/geometry_scarce/hiliftaeroml-transolver-geometry-scarce-candidate-v1",
+  "claim_id": "prototype-dev-2026-09-08-9a4220baccc1/hiliftaeroml/geometry_scarce/hiliftaeroml-transolver-geometry-scarce-candidate-v1",
   "release": {
-    "id": "prototype-dev-2026-09-06-ef0e544bf188",
+    "id": "prototype-dev-2026-09-08-9a4220baccc1",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-07T01:07:29Z",
+    "published_at": "2026-09-09T07:15:01Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -15,7 +15,7 @@
       "series_id": "hiliftaeroml-transolver-geometry-scarce-candidate",
       "version": 1,
       "supersedes": null,
-      "change_summary": "Initial maintainer-local schema-v3 replay of the retained Geometry scarce epoch-1000 Transolver result.",
+      "change_summary": "Initial maintainer-local schema-v3 replay of the retained Geometry scarce Transolver result (epoch 1000).",
       "is_latest": true,
       "latest_submission_id": "hiliftaeroml-transolver-geometry-scarce-candidate-v1",
       "version_count": 1
@@ -54,20 +54,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "ef0e544bf188072e4fee197232b86d6327a57df4b886bd9e9b8badf1186fd595",
-      "row_index": 32
+      "feed_sha256": "9a4220baccc1fc7b24530c33b3e536397cd4d3f1c1c0371f8828e3ea07d7e6e8",
+      "row_index": 33
     },
     "source_submission": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-scarce-candidate-v1/submission.json",
-      "sha256": "db36b45ac5ea293f58d6e7996c9864ae49640caa182f1532c8a0962fb7e9774f"
+      "sha256": "5be3278468041bce62b015d45d77c5482f5d79ca061527418aba999b19b8db2b"
     },
     "evaluation_evidence": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-scarce-candidate-v1/evaluation-evidence.json",
-      "sha256": "f8d88582871989e514dd9d27231bc22498d73d9a38af121ab7af98be75789265"
+      "sha256": "5fe73005c15ded91a07d69ea344d78fe2e58e7f914470f2eb19998366f66aba7"
     },
     "profile_index": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-scarce-candidate-v1/profiles/index.json",
-      "sha256": "6fe7466c120124a5dd89ce8ad2863707e9d128a386442aae3825c339d064b8e2"
+      "sha256": "4b06d330a1135eda4ba0c359e6a54b010eef5c9b582456d4535c84c48f0b8b14"
     },
     "spatial_discretization": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-scarce-candidate-v1/discretization.json",
@@ -79,7 +79,7 @@
     },
     "case_metrics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-scarce-candidate-v1/metrics/cases.json",
-      "sha256": "227fc49427f5cf8f8a4740c11ad2cffe58f282ac1ffa423a18dd2333d9bc4f7f"
+      "sha256": "c3db10bdea5d47367dd10d69ecc13a6d200e325ec342c46af53b5f4c3d672028"
     },
     "regional_diagnostics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-scarce-candidate-v1/regional-diagnostics.json",

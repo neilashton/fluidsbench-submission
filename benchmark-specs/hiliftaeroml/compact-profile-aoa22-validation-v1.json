@@ -1,6 +1,6 @@
 {
   "schema": "hiliftaeroml-compact-profile-aoa22-validation-v1",
-  "recorded_on": "2026-09-06",
+  "recorded_on": "2026-09-08",
   "status": "complete_candidate_not_published",
   "usage": "maintainer_local_candidate_dry_run_only",
   "activation": {
@@ -14,10 +14,10 @@
     "record_type": "pre_release_reference",
     "submission_id": "hiliftaeroml-transolver-aoa22-candidate-v1",
     "submission_path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa22-candidate-v1/submission.json",
-    "submission_json_sha256": "c89702f260dd9a300793ce769978f766b334b2fc161039c86542011d7450f119",
+    "submission_json_sha256": "df6cb95bcd8c22dfd3647cd696a88824000fdd8a17c0dcb6c476b45c4e58d104",
     "deterministic_archive": {
-      "sha256": "53f9fb3360ebd3cc74482899c4bf66218cd72d7308bd11677d51ad2837c26018",
-      "size_bytes": 960065,
+      "sha256": "56d9d893870062ff584b040a2eced5cdbac7b22f91b806a99004e5ae7fed8ce4",
+      "size_bytes": 960142,
       "member_count": 47
     },
     "ordinary_validation_scope": "structure_hashes_inventory_and_deterministic_archive_only",
@@ -62,7 +62,7 @@
     "profile_contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
     "profile_contract_sha256": "b1fd29b2cb6c1c84c694ddffc5d85f6cd68fd175b79c3695a443aa78bf962c2f",
     "evaluator_support_release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
-    "evaluator_support_manifest_sha256": "6797a7a9578b2f9c34c24d218637129f37d6bb5074f0059f2410455e9e59c6ff",
+    "evaluator_support_manifest_sha256": "7f946510cf8f63d05adaff4c91980d74f29c45ed7209b5a8f7e604e521cb823b",
     "source_profile_truth_release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
     "source_profile_truth_manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477",
     "regional_diagnostics_contract_file": "regional-diagnostics-v2.json",
@@ -72,25 +72,23 @@
     "regional_diagnostics_report_sha256": "150ee3ab868297a23e0a5f6037a80e279031a87a2750814e2bf485a52c89eba0"
   },
   "assembly": {
-    "package_a": "../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_compact_candidate_20260906/packages-cae-final/single_aoa_22/package-a",
-    "package_b": "../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_compact_candidate_20260906/packages-cae-final/single_aoa_22/package-b",
-    "regular_file_bytes_each": 1375794,
-    "regular_file_byte_limit": 15000000,
-    "regular_file_headroom_bytes": 13624206,
+    "package_a": "../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/packages/single_aoa_22/package-a",
+    "package_b": "../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/packages/single_aoa_22/package-b",
+    "regular_file_bytes_each": 1376137,
+    "aggregate_submission_size_limit": null,
     "recursive_file_comparison_equal": true,
-    "profile_index_sha256": "a02af5cd023e0cf6ddcb8f0de6dd64b702de95351c3acdf6536fd3ab4f66624f",
-    "submission_json_sha256": "c89702f260dd9a300793ce769978f766b334b2fc161039c86542011d7450f119",
-    "evaluation_evidence_sha256": "459952e0450e2627e099a384f168e471a982fe8cdbd4dfee0ba2ad774b5028fb"
+    "profile_index_sha256": "23ee958d26eb0e60be240e6872ced6d1fd8a531fdf7f7393f0473ef4f8ec9061",
+    "submission_json_sha256": "df6cb95bcd8c22dfd3647cd696a88824000fdd8a17c0dcb6c476b45c4e58d104",
+    "evaluation_evidence_sha256": "d4d2fa08c8d690e4a8ef935d9fb2430912d6b05c90c530ebd7b5ef3f04e9f964"
   },
   "deterministic_archives": {
-    "archive_a": "../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_compact_candidate_20260906/archives/hiliftaeroml-transolver-aoa22-candidate-v1.build-a.zip",
-    "archive_b": "../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_compact_candidate_20260906/archives/hiliftaeroml-transolver-aoa22-candidate-v1.build-b.zip",
+    "archive_a": "../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/archives/hiliftaeroml-transolver-aoa22-candidate-v1.build-a.zip",
+    "archive_b": "../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/archives/hiliftaeroml-transolver-aoa22-candidate-v1.build-b.zip",
     "byte_identical": true,
-    "size_bytes_each": 960065,
+    "sha256_each": "56d9d893870062ff584b040a2eced5cdbac7b22f91b806a99004e5ae7fed8ce4",
+    "size_bytes_each": 960142,
     "member_count_each": 47,
-    "sha256_each": "53f9fb3360ebd3cc74482899c4bf66218cd72d7308bd11677d51ad2837c26018",
-    "maximum_archive_bytes": 15000000,
-    "archive_headroom_bytes": 14039935
+    "maximum_archive_bytes": null
   },
   "candidate_validation": {
     "checked_in_preview": {
@@ -141,5 +139,12 @@
       "path": "../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_compact_candidate_20260906/slurm-job-ledger.json",
       "sha256": "d96df9b99ccda783672759ee972d1de40a977dcb0c855e310a79a2cbed3fba23"
     }
+  },
+  "compact_support_migration": {
+    "status": "rebuilt_against_all_case_successor_candidate",
+    "prior_evaluator_support_manifest_sha256": "6797a7a9578b2f9c34c24d218637129f37d6bb5074f0059f2410455e9e59c6ff",
+    "evaluator_support_manifest_sha256": "7f946510cf8f63d05adaff4c91980d74f29c45ed7209b5a8f7e604e521cb823b",
+    "overlapping_case_support_records_exact": 652,
+    "activation_effect": "none"
   }
 }

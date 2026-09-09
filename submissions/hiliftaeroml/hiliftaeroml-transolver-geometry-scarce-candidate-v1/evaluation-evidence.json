@@ -14,8 +14,8 @@
     "reference_version": "hiliftaeroml-evaluator-v0.1-candidate",
     "code_revision": "68899f780d96b70f2badb5658971c87af0b17172"
   },
-  "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config examples/hiliftaeroml-v3-candidate/transolver-sixsplit-candidate-configs/transolver-geometry-scarce-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/aggregates/sixsplit_v1/geometry_scarce/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-receipts ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1_receipts/geometry_scarce/receipts-a --candidate-compact-profile-support-release ../eval_runs/hilift_compact_profile_support_v2_candidate_20260906/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_compact_candidate_20260906/packages/geometry_scarce/package-a",
-  "generated_at": "2026-09-06T11:54:23-07:00",
+  "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config ../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/configs/sixsplit/transolver-geometry-scarce-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/aggregates/sixsplit_v1/geometry_scarce/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-receipts ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1_receipts/geometry_scarce/receipts-a --candidate-compact-profile-support-release ../eval_runs/hilift_compact_profile_support_v2_all1355_candidate_20260907/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/packages/geometry_scarce/package-a",
+  "generated_at": "2026-09-08T06:44:40-07:00",
   "status": "submitted_evaluation",
   "metric_values": {
     "overall_score": 34.49728159788204,
@@ -48,13 +48,13 @@
     "c_lift_mae": 0.041328261590611315,
     "c_pitch_mae": 0.05487774537603064
   },
-  "profile_index_sha256": "6fe7466c120124a5dd89ce8ad2863707e9d128a386442aae3825c339d064b8e2",
+  "profile_index_sha256": "4b06d330a1135eda4ba0c359e6a54b010eef5c9b582456d4535c84c48f0b8b14",
   "profile_ground_truth_release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
   "profile_ground_truth_manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477",
   "scoring_support_release_id": "hiliftaeroml-native-all-splits-support-v1-candidate",
   "scoring_support_manifest_sha256": "98a9a8d015e42c80f5993e30da94201011bebf67ff44d5574a7ef68a8b5dfbee",
   "discretization_sha256": "debf59e83920808a6f16b3e92602328b2e8fb38ebad24d958715db5b1a400982",
-  "case_metrics_sha256": "227fc49427f5cf8f8a4740c11ad2cffe58f282ac1ffa423a18dd2333d9bc4f7f",
+  "case_metrics_sha256": "c3db10bdea5d47367dd10d69ecc13a6d200e325ec342c46af53b5f4c3d672028",
   "notes": "The frozen dataset-evaluator revision 68899f780d96b70f2badb5658971c87af0b17172 applies only to the native-v1 base field, force, and noncompact scoring implementation. The additive compact-v2 profile implementation is an unbound worktree candidate with no code revision or implementation-manifest SHA-256; its profile topology contract is b1fd29b2cb6c1c84c694ddffc5d85f6cd68fd175b79c3695a443aa78bf962c2f. Cp/velocity profile R2 was recomputed from prediction-only chunks against the explicitly supplied inactive local candidate evaluator-support release; this does not publish or activate profile intake.",
   "regional_diagnostics_sha256": "7cce46b51253335ac8ae58d75eaf48c6f618a952142eda34b051d050d93cc3f1",
   "compact_profile_implementation_binding": {

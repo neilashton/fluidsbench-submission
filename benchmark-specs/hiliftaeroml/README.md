@@ -5,12 +5,13 @@ not open for submissions. The machine-readable
 [`submission-spec.json`](submission-spec.json) currently has
 `submissions_open: false`. A candidate package may be used for local or
 benchmark-owner-coordinated dry runs only; it is not accepted, citable as an
-official result, or evidence of benchmark approval. Seven exact
-real-inference Transolver packages—Full, the three fixed-AoA splits, Super
-scarce, Geometry scarce, and Geometry super scarce—are additionally
-registered by path and hashes as public `pre_release_reference` rows so the
-evaluator, plots, and leaderboard integration can be exercised before intake
-opens. Their citation and promotion eligibility are all false.
+official result, or evidence of benchmark approval. Ten exact real-inference
+Transolver packages—Full, the three fixed-AoA splits, Super scarce, Geometry
+scarce, Geometry super scarce, Geometry, out-of-distribution AoA, and
+out-of-distribution stall—are additionally registered by path and hashes as
+public `pre_release_reference` rows so the evaluator, plots, and leaderboard
+integration can be exercised before intake opens. Their citation and promotion
+eligibility are all false.
 
 No private leaderboard is created or operated by this candidate workflow.
 `--candidate-dry-run` validates files locally and does not register arbitrary
@@ -194,8 +195,11 @@ and
 The prediction-free two-build materialization and compatibility evidence for
 all 1,355 cases is
 [`compact-profile-all-case-support-validation-v1.json`](compact-profile-all-case-support-validation-v1.json).
-It records a successor local candidate; it deliberately does not change the
-current candidate binding or activate submissions.
+It is the selected current local candidate binding for all eight official case
+sets; the package rebind and its ten independent A/B package checks are
+recorded in
+[`compact-profile-all-case-support-rebind-v1.json`](compact-profile-all-case-support-rebind-v1.json).
+Neither record activates submissions.
 The completed two-build size, identity, metric, and validation receipts are
 [`compact-profile-full360-validation-v1.json`](compact-profile-full360-validation-v1.json),
 [`compact-profile-aoa4-validation-v1.json`](compact-profile-aoa4-validation-v1.json),
@@ -204,7 +208,11 @@ The completed two-build size, identity, metric, and validation receipts are
 [`compact-profile-super-scarce-validation-v1.json`](compact-profile-super-scarce-validation-v1.json),
 [`compact-profile-geometry-scarce-validation-v1.json`](compact-profile-geometry-scarce-validation-v1.json),
 and
-[`compact-profile-geometry-super-scarce-validation-v1.json`](compact-profile-geometry-super-scarce-validation-v1.json).
+[`compact-profile-geometry-super-scarce-validation-v1.json`](compact-profile-geometry-super-scarce-validation-v1.json),
+[`compact-profile-geometry-validation-v1.json`](compact-profile-geometry-validation-v1.json),
+[`compact-profile-ood-aoa-validation-v1.json`](compact-profile-ood-aoa-validation-v1.json),
+and
+[`compact-profile-ood-stall-validation-v1.json`](compact-profile-ood-stall-validation-v1.json).
 The retained evaluator implementation manifest predates this additive compact
 preview and the v2 regional dashboard contract, and does not attest either.
 Their implementation provenance therefore remains explicitly
@@ -252,9 +260,8 @@ bindings, or an existing output directory.
 Validate a resulting directory with `scripts/validate_submission.py` in
 `--candidate-dry-run` mode. A pass means only that the directory implements the
 closed candidate contract. It does not open submissions, grant owner approval,
-or create a leaderboard entry. Only the seven separately registered,
-hash-bound Transolver previews are visible as non-citable pre-release
-references.
+or create a leaderboard entry. Only the ten separately registered, hash-bound
+Transolver previews are visible as non-citable pre-release references.
 
 The machine-readable authorities are:
 

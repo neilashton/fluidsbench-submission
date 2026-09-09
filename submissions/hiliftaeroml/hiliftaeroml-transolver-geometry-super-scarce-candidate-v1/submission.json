@@ -6,7 +6,7 @@
     "series_id": "hiliftaeroml-transolver-geometry-super-scarce-candidate",
     "version": 1,
     "supersedes": null,
-    "change_summary": "Initial maintainer-local schema-v3 replay of the retained Geometry super scarce epoch-1000 Transolver result."
+    "change_summary": "Initial maintainer-local schema-v3 replay of the retained Geometry super scarce Transolver result (epoch 1000)."
   },
   "model": "Transolver surface and volume, Geometry super scarce, epoch 1000",
   "model_type": "Transformer neural operator",
@@ -170,7 +170,7 @@
           "component_ids": [
             "surface-transolver"
           ],
-          "description": "From-scratch distributed training on the official Geometry super scarce surface training split.",
+          "description": "From-scratch distributed training on the official Geometry super scarce surface training split. Retained logs cover 1000 complete epochs.",
           "procedure": {
             "kind": "gradient_based",
             "loss": {
@@ -213,7 +213,7 @@
           "component_ids": [
             "volume-transolver"
           ],
-          "description": "From-scratch distributed training on the official Geometry super scarce flow-domain training split.",
+          "description": "From-scratch distributed training on the official Geometry super scarce flow-domain training split. Retained logs cover 1000 complete epochs.",
           "procedure": {
             "kind": "gradient_based",
             "loss": {
@@ -278,20 +278,20 @@
     ],
     "inference_compute": {
       "status": "measured",
-      "hardware": "Slurm GPU nodes with four GPUs allocated per paired two-case array task; exact accelerator SKU requires owner metadata confirmation",
+      "hardware": "Slurm GPU nodes with four GPUs allocated per paired two-case task; exact accelerator SKU requires owner metadata confirmation",
       "max_concurrent_device_count": 32,
       "case_count": 360,
       "campaign_wall_time_seconds": 92966.0,
       "aggregate_device_time_seconds": 399444.0,
       "includes_preprocessing": true,
       "includes_mapping": true,
-      "measurement_notes": "Exact campaign envelope and summed four-GPU allocation time from the recorded successful pilot and production Slurm tasks."
+      "measurement_notes": "Exact campaign envelope and summed four-GPU allocation time from the completed legacy retained pair-task inventory. The release predates an explicit allocation_mode field, which is reconstructed only after the full pair inventory is validated."
     }
   },
   "submitter_name": "Neil Ashton",
   "institution": "NVIDIA",
   "paper_url": "",
-  "submitted_at": "2026-09-06",
+  "submitted_at": "2026-09-08",
   "reproducibility": {
     "contract_version": "open-reproducibility-3.0",
     "access": "public",
@@ -310,9 +310,9 @@
   "split_sha256": "9ffe2f753bf4a3972ca79ba5373f91486f3a462ea883df874e2e58f92130f197",
   "evaluation": {
     "reference_version": "hiliftaeroml-evaluator-v0.1-candidate",
-    "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config examples/hiliftaeroml-v3-candidate/transolver-sixsplit-candidate-configs/transolver-geometry-super-scarce-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/aggregates/sixsplit_v1/geometry_super_scarce/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_super_scarce --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_super_scarce --native-receipts ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1_receipts/geometry_super_scarce/receipts-a --candidate-compact-profile-support-release ../eval_runs/hilift_compact_profile_support_v2_candidate_20260906/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_compact_candidate_20260906/packages/geometry_super_scarce/package-a",
+    "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config ../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/configs/sixsplit/transolver-geometry-super-scarce-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/aggregates/sixsplit_v1/geometry_super_scarce/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_super_scarce --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_super_scarce --native-receipts ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1_receipts/geometry_super_scarce/receipts-a --candidate-compact-profile-support-release ../eval_runs/hilift_compact_profile_support_v2_all1355_candidate_20260907/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/packages/geometry_super_scarce/package-a",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "80f22b62e42607272548158953b388c241b089cd4d63382ef81cd875aa3b8efc"
+    "evidence_sha256": "627b14bc89216cbb9e61608b937b9d0efda04d41d2b6d0c92f9520f0f228f3c9"
   },
   "scoring_support": {
     "status": "candidate",
@@ -328,7 +328,7 @@
   "case_metrics": {
     "format": "fluidsbench-case-metrics-v1",
     "file": "metrics/cases.json",
-    "sha256": "30a2c9c5b5003ea007cc557a00721f2fdd346725b4166a1e16838c4795617220",
+    "sha256": "5da680b7c263a91ea09fc27c1552c27217d66c073dbf613505d7781db7e28de6",
     "case_count": 360
   },
   "metric_values": {
@@ -370,7 +370,7 @@
     "profile_ground_truth_release_id": "hiliftaeroml-native-profile-truth-v1-candidate",
     "profile_ground_truth_manifest_sha256": "3e20b857e12055e16f1d248d125b8df62a3669c604411dc67322fe98d9ab4477",
     "evaluator_support_release_id": "hiliftaeroml-compact-profile-support-v2-candidate",
-    "evaluator_support_manifest_sha256": "6797a7a9578b2f9c34c24d218637129f37d6bb5074f0059f2410455e9e59c6ff",
+    "evaluator_support_manifest_sha256": "7f946510cf8f63d05adaff4c91980d74f29c45ed7209b5a8f7e604e521cb823b",
     "compact_profile_implementation_binding": {
       "status": "unbound_worktree_candidate",
       "activation_effect": "none",

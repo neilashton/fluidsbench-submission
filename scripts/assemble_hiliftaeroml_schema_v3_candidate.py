@@ -53,6 +53,7 @@ from reference.hiliftaeroml.compact_profile_evaluator import (
     COMPACT_PROFILE_CONTRACT_PATH,
     COMPACT_PROFILE_CONTRACT_SHA256,
     COMPACT_PROFILE_FORMAT,
+    CompactSupportRelease,
     CompactProfileEvaluationError,
     build_compact_profile_directory,
     open_compact_support_release,
@@ -2496,6 +2497,57 @@ def _profile_evidence_notes(
     )
 
 
+def _open_or_validate_compact_support_release(
+    *,
+    release_root: Path,
+    declaration: Mapping[str, Any],
+    case_ids: Sequence[str],
+    case_set_id: str,
+    opened_release: CompactSupportRelease | None,
+) -> CompactSupportRelease:
+    """Return an exact compact-support handle for one package assembly.
+
+    A batch invocation can provide a handle which was fully streamed and
+    verified immediately before the two independent package assemblies.  The
+    handle is still checked against this assembly's path, manifest, ordered
+    cases, and case-set identity, so it cannot cross-bind a different split or
+    support release.
+    """
+
+    expected_manifest = declaration["manifest_sha256"]
+    if opened_release is None:
+        try:
+            return open_compact_support_release(
+                release_root=release_root,
+                expected_manifest_sha256=expected_manifest,
+                expected_case_ids=case_ids,
+                case_set_id=case_set_id,
+            )
+        except CompactProfileEvaluationError as error:
+            raise HiLiftPackageAssemblyError(
+                f"local compact evaluator-support release is invalid: {error}"
+            ) from error
+    if not isinstance(opened_release, CompactSupportRelease):
+        raise HiLiftPackageAssemblyError("preopened compact support handle is invalid")
+    try:
+        expected_root = release_root.resolve(strict=True)
+    except OSError as error:
+        raise HiLiftPackageAssemblyError(
+            f"cannot resolve compact evaluator-support release: {error}"
+        ) from error
+    if (
+        opened_release.release_root != expected_root
+        or opened_release.release_id != declaration["release_id"]
+        or opened_release.manifest_sha256 != expected_manifest
+        or opened_release.case_set_id != case_set_id
+        or opened_release.case_ids != tuple(case_ids)
+    ):
+        raise HiLiftPackageAssemblyError(
+            "preopened compact support handle differs from this package binding"
+        )
+    return opened_release
+
+
 def assemble_package(
     *,
     config_path: Path,
@@ -2508,6 +2560,7 @@ def assemble_package(
     native_surface_outputs_root: Path | None = None,
     native_volume_outputs_root: Path | None = None,
     candidate_compact_profile_support_release_root: Path | None = None,
+    opened_compact_support_release: CompactSupportRelease | None = None,
 ) -> dict[str, Any]:
     config = load_json(config_path, label="package config")
     if config.get("schema") != CONFIG_SCHEMA:
@@ -2519,6 +2572,10 @@ def assemble_package(
         raise HiLiftPackageAssemblyError(
             "assembly requires exactly one local profile release: native-v1 truth "
             "or compact-v2 evaluator support"
+        )
+    if opened_compact_support_release is not None and not compact_profile_mode:
+        raise HiLiftPackageAssemblyError(
+            "a preopened compact support handle requires compact-v2 evaluator support"
         )
     profile_cases_per_chunk, include_regional_diagnostics = _validate_config_envelope(
         config
@@ -2559,19 +2616,13 @@ def assemble_package(
             specification, specification_path
         )
         assert candidate_compact_profile_support_release_root is not None
-        try:
-            compact_support_release = open_compact_support_release(
-                release_root=candidate_compact_profile_support_release_root,
-                expected_manifest_sha256=compact_support_declaration[
-                    "manifest_sha256"
-                ],
-                expected_case_ids=case_ids,
-                case_set_id=split["case_set_id"],
-            )
-        except CompactProfileEvaluationError as error:
-            raise HiLiftPackageAssemblyError(
-                f"local compact evaluator-support release is invalid: {error}"
-            ) from error
+        compact_support_release = _open_or_validate_compact_support_release(
+            release_root=candidate_compact_profile_support_release_root,
+            declaration=compact_support_declaration,
+            case_ids=case_ids,
+            case_set_id=split["case_set_id"],
+            opened_release=opened_compact_support_release,
+        )
         if (
             compact_support_release.release_id
             != compact_support_declaration["release_id"]
@@ -2692,6 +2743,7 @@ def assemble_package(
                         profiles_root=staging / "profiles",
                         cases_per_chunk=profile_cases_per_chunk,
                         expected_case_artifact_sha256=profile_artifact_sha256,
+                        opened_support_release=compact_support_release,
                     )
                 )
                 profile_metrics = score_compact_profile_directory(
@@ -2706,6 +2758,7 @@ def assemble_package(
                     split_id=split_id,
                     case_set_id=split["case_set_id"],
                     expected_case_ids=case_ids,
+                    opened_support_release=compact_support_release,
                 )
             except CompactProfileEvaluationError as error:
                 raise HiLiftPackageAssemblyError(
@@ -3227,7 +3280,16 @@ def build_parser() -> argparse.ArgumentParser:
             "dry-run use only and mutually exclusive with the native-v1 truth path"
         ),
     )
-    parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--output",
+        type=Path,
+        action="append",
+        help=(
+            "participant package directory; repeat exactly twice to build two "
+            "independent packages while reusing one already-validated compact "
+            "support handle"
+        ),
+    )
     parser.add_argument(
         "--list-blockers",
         action="store_true",
@@ -3259,13 +3321,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 0
         missing = [
             name
-            for name in (
-                "native_aggregate",
-                "native_receipts",
-                "output",
-            )
+            for name in ("native_aggregate", "native_receipts")
             if getattr(args, name) is None
         ]
+        if not args.output:
+            missing.append("output")
         if missing:
             raise HiLiftPackageAssemblyError(
                 "assembly requires arguments: "
@@ -3288,22 +3348,70 @@ def main(argv: Sequence[str] | None = None) -> int:
             surface_outputs_root=args.native_surface_outputs,
             volume_outputs_root=args.native_volume_outputs,
         )
-        result = assemble_package(
-            config_path=args.config,
-            specification_path=args.submission_specification,
-            native_aggregate_root=args.native_aggregate,
-            native_outputs_root=args.native_outputs,
-            native_surface_outputs_root=args.native_surface_outputs,
-            native_volume_outputs_root=args.native_volume_outputs,
-            native_receipts_root=args.native_receipts,
-            candidate_profile_truth_release_root=(
-                args.candidate_profile_truth_release
-            ),
-            candidate_compact_profile_support_release_root=(
-                args.candidate_compact_profile_support_release
-            ),
-            output_path=args.output,
-        )
+        outputs = args.output
+        if len(outputs) > 2:
+            raise HiLiftPackageAssemblyError(
+                "assembly accepts one output or exactly two independent outputs"
+            )
+        if len({path.resolve() for path in outputs}) != len(outputs):
+            raise HiLiftPackageAssemblyError(
+                "assembly output directories must be distinct"
+            )
+        opened_compact_support_release: CompactSupportRelease | None = None
+        if (
+            args.candidate_compact_profile_support_release is not None
+            and len(outputs) > 1
+        ):
+            config = load_json(args.config, label="package config")
+            specification = load_json(
+                args.submission_specification,
+                label="HiLiftAeroML specification",
+            )
+            split_id = config.get("split_id")
+            if not isinstance(split_id, str):
+                raise HiLiftPackageAssemblyError("config.split_id must be a string")
+            split, case_ids, _ = _find_split(
+                specification, args.submission_specification, split_id
+            )
+            _, compact_declaration = _compact_profile_declaration(
+                specification, args.submission_specification
+            )
+            opened_compact_support_release = _open_or_validate_compact_support_release(
+                release_root=args.candidate_compact_profile_support_release,
+                declaration=compact_declaration,
+                case_ids=case_ids,
+                case_set_id=split["case_set_id"],
+                opened_release=None,
+            )
+        results = [
+            assemble_package(
+                config_path=args.config,
+                specification_path=args.submission_specification,
+                native_aggregate_root=args.native_aggregate,
+                native_outputs_root=args.native_outputs,
+                native_surface_outputs_root=args.native_surface_outputs,
+                native_volume_outputs_root=args.native_volume_outputs,
+                native_receipts_root=args.native_receipts,
+                candidate_profile_truth_release_root=(
+                    args.candidate_profile_truth_release
+                ),
+                candidate_compact_profile_support_release_root=(
+                    args.candidate_compact_profile_support_release
+                ),
+                output_path=output,
+                opened_compact_support_release=opened_compact_support_release,
+            )
+            for output in outputs
+        ]
+        result: dict[str, Any]
+        if len(results) == 1:
+            result = results[0]
+        else:
+            result = {
+                "status": "candidate_packages_assembled_not_approved",
+                "output_count": len(results),
+                "packages": results,
+            }
     except HiLiftPackageAssemblyError as error:
         print(
             json.dumps({"status": "blocked", "error": str(error)}, sort_keys=True),

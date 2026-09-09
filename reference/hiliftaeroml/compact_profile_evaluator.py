@@ -1351,6 +1351,42 @@ def _validate_builder_inputs(
     return submission_id, safe_split, safe_case_set, cases, hashes
 
 
+def _opened_support_release(
+    *,
+    support_release_root: Path,
+    support_manifest_sha256: str,
+    case_ids: tuple[str, ...],
+    case_set_id: str,
+    opened_support_release: CompactSupportRelease | None,
+) -> CompactSupportRelease:
+    """Return one exact support handle, opening it only when necessary.
+
+    An assembler may already have fully validated the immutable evaluator-owned
+    release for this exact case set.  Reusing that in-process handle avoids
+    streaming the same private support bytes again while preserving every
+    release, digest, case-set, and ordered-case binding.
+    """
+
+    if opened_support_release is None:
+        return open_compact_support_release(
+            release_root=support_release_root,
+            expected_manifest_sha256=support_manifest_sha256,
+            expected_case_ids=case_ids,
+            case_set_id=case_set_id,
+        )
+    if not isinstance(opened_support_release, CompactSupportRelease):
+        _fail("opened compact support release handle is invalid")
+    if (
+        opened_support_release.release_root.resolve()
+        != support_release_root.resolve()
+        or opened_support_release.manifest_sha256 != support_manifest_sha256
+        or opened_support_release.case_set_id != case_set_id
+        or opened_support_release.case_ids != case_ids
+    ):
+        _fail("opened compact support release differs from the requested binding")
+    return opened_support_release
+
+
 def build_compact_profile_directory(
     *,
     submission_id: str,
@@ -1365,6 +1401,7 @@ def build_compact_profile_directory(
     expected_case_artifact_sha256: Mapping[str, Mapping[str, str]],
     surface_outputs_root: Path | None = None,
     volume_outputs_root: Path | None = None,
+    opened_support_release: CompactSupportRelease | None = None,
 ) -> tuple[str, dict[str, dict[str, float]]]:
     """Build a deterministic prediction-only compact participant directory."""
 
@@ -1382,11 +1419,12 @@ def build_compact_profile_directory(
         cases_per_chunk=cases_per_chunk,
         expected_case_artifact_sha256=expected_case_artifact_sha256,
     )
-    release = open_compact_support_release(
-        release_root=support_release_root,
-        expected_manifest_sha256=support_manifest_sha256,
-        expected_case_ids=cases,
+    release = _opened_support_release(
+        support_release_root=support_release_root,
+        support_manifest_sha256=support_manifest_sha256,
+        case_ids=cases,
         case_set_id=checked_case_set,
+        opened_support_release=opened_support_release,
     )
     surface_root = surface_outputs_root or outputs_root
     volume_root = volume_outputs_root or outputs_root
@@ -1626,6 +1664,7 @@ def score_compact_profile_directory(
     split_id: str,
     case_set_id: str,
     expected_case_ids: Sequence[str],
+    opened_support_release: CompactSupportRelease | None = None,
 ) -> dict[str, dict[str, float]]:
     """Strictly validate and score one compact participant profile directory."""
 
@@ -1646,11 +1685,12 @@ def score_compact_profile_directory(
             for case_id in expected_case_ids
         },
     )
-    release = open_compact_support_release(
-        release_root=support_release_root,
-        expected_manifest_sha256=support_manifest_sha256,
-        expected_case_ids=cases,
+    release = _opened_support_release(
+        support_release_root=support_release_root,
+        support_manifest_sha256=support_manifest_sha256,
+        case_ids=cases,
         case_set_id=checked_case_set,
+        opened_support_release=opened_support_release,
     )
     root = _root_directory(profiles_root, "compact profile directory")
     index, _ = _load_canonical_json(

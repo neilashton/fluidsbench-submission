@@ -327,7 +327,7 @@ releases use `archive_url: null`; an official release must provide an immutable 
 release-view URLs containing the release ID. The separate full `source_commit` records repository provenance without creating a
 self-referential commit hash.
 
-HiLiftAeroML's seven registered Transolver previews use the compact-v2
+HiLiftAeroML's ten registered Transolver previews use the compact-v2
 prediction contract. Their public Cp and velocity comparison truth lives in
 the website repository as a deduplicated 1,355-case release covering all eight
 official case sets. It is bound as plot-only metadata; the private lossless

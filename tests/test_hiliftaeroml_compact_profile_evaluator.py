@@ -186,6 +186,7 @@ def _build_directory(
     manifest_sha: str,
     source_hashes: dict[str, dict[str, str]],
     destination: Path,
+    opened_support_release: compact_evaluator.CompactSupportRelease | None = None,
 ) -> tuple[str, dict[str, dict[str, float]]]:
     return build_compact_profile_directory(
         submission_id=SUBMISSION_ID,
@@ -198,6 +199,7 @@ def _build_directory(
         profiles_root=destination,
         cases_per_chunk=1,
         expected_case_artifact_sha256=source_hashes,
+        opened_support_release=opened_support_release,
     )
 
 
@@ -318,6 +320,51 @@ def test_release_and_participant_directory_are_strict_private_and_deterministic(
         case_set_id=CASE_SET_ID,
         expected_case_ids=[CASE_ID],
     ) == first_metrics
+
+
+def test_preopened_support_handle_preserves_exact_bindings_and_scores(
+    tmp_path: Path,
+) -> None:
+    outputs = tmp_path / "outputs"
+    release, manifest_sha, source_hashes = _make_release(tmp_path, outputs)
+    handle = open_compact_support_release(
+        release_root=release,
+        expected_manifest_sha256=manifest_sha,
+        expected_case_ids=[CASE_ID],
+        case_set_id=CASE_SET_ID,
+    )
+    profiles = tmp_path / "profiles"
+    _index_sha, expected_metrics = _build_directory(
+        outputs=outputs,
+        release=release,
+        manifest_sha=manifest_sha,
+        source_hashes=source_hashes,
+        destination=profiles,
+        opened_support_release=handle,
+    )
+    assert score_compact_profile_directory(
+        profiles_root=profiles,
+        support_release_root=release,
+        support_manifest_sha256=manifest_sha,
+        submission_id=SUBMISSION_ID,
+        split_id=SPLIT_ID,
+        case_set_id=CASE_SET_ID,
+        expected_case_ids=[CASE_ID],
+        opened_support_release=handle,
+    ) == expected_metrics
+    with pytest.raises(
+        CompactProfileEvaluationError, match="requested binding"
+    ):
+        score_compact_profile_directory(
+            profiles_root=profiles,
+            support_release_root=release,
+            support_manifest_sha256="0" * 64,
+            submission_id=SUBMISSION_ID,
+            split_id=SPLIT_ID,
+            case_set_id=CASE_SET_ID,
+            expected_case_ids=[CASE_ID],
+            opened_support_release=handle,
+        )
 
 
 def test_release_loader_rejects_wrong_binding_case_set_and_extra_file(

@@ -9,7 +9,7 @@
       "series_id": "hiliftaeroml-transolver-geometry-scarce-candidate",
       "version": 1,
       "supersedes": null,
-      "change_summary": "Initial maintainer-local schema-v3 replay of the retained Geometry scarce epoch-1000 Transolver result."
+      "change_summary": "Initial maintainer-local schema-v3 replay of the retained Geometry scarce Transolver result (epoch 1000)."
     },
     "model": "Transolver surface and volume, Geometry scarce, epoch 1000",
     "model_type": "Transformer neural operator",
@@ -173,7 +173,7 @@
             "component_ids": [
               "surface-transolver"
             ],
-            "description": "From-scratch distributed training on the official Geometry scarce surface training split.",
+            "description": "From-scratch distributed training on the official Geometry scarce surface training split. Retained logs cover 1000 complete epochs.",
             "procedure": {
               "kind": "gradient_based",
               "loss": {
@@ -216,7 +216,7 @@
             "component_ids": [
               "volume-transolver"
             ],
-            "description": "From-scratch distributed training on the official Geometry scarce flow-domain training split.",
+            "description": "From-scratch distributed training on the official Geometry scarce flow-domain training split. Retained logs cover 1000 complete epochs.",
             "procedure": {
               "kind": "gradient_based",
               "loss": {
@@ -281,20 +281,20 @@
       ],
       "inference_compute": {
         "status": "measured",
-        "hardware": "Slurm GPU nodes with four GPUs allocated per paired two-case array task; exact accelerator SKU requires owner metadata confirmation",
+        "hardware": "Slurm GPU nodes with four GPUs allocated per paired two-case task; exact accelerator SKU requires owner metadata confirmation",
         "max_concurrent_device_count": 32,
         "case_count": 360,
         "campaign_wall_time_seconds": 90090.0,
         "aggregate_device_time_seconds": 400828.0,
         "includes_preprocessing": true,
         "includes_mapping": true,
-        "measurement_notes": "Exact campaign envelope and summed four-GPU allocation time from the recorded successful pilot and production Slurm tasks."
+        "measurement_notes": "Exact campaign envelope and summed four-GPU allocation time from the completed legacy retained pair-task inventory. The release predates an explicit allocation_mode field, which is reconstructed only after the full pair inventory is validated."
       }
     },
     "submitter_name": "Neil Ashton",
     "institution": "NVIDIA",
     "paper_url": "",
-    "submitted_at": "2026-09-06",
+    "submitted_at": "2026-09-08",
     "reproducibility": {
       "contract_version": "open-reproducibility-3.0",
       "access": "public",
@@ -304,12 +304,12 @@
     "note": "Maintainer-local Geometry scarce candidate dry run only; not an accepted or owner-approved FluidsBench result."
   },
   "evaluation": {
-    "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config examples/hiliftaeroml-v3-candidate/transolver-sixsplit-candidate-configs/transolver-geometry-scarce-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/aggregates/sixsplit_v1/geometry_scarce/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-receipts ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1_receipts/geometry_scarce/receipts-a --candidate-profile-truth-release ../eval_runs/hilift_native_profile_truth_v1_candidate_20260901/release/hiliftaeroml-native-profile-truth-v1-candidate --output ../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_candidate_20260906/packages/geometry_scarce/package-a",
-    "generated_at": "2026-09-06T11:54:23-07:00"
+    "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config ../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/configs/sixsplit/transolver-geometry-scarce-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/aggregates/sixsplit_v1/geometry_scarce/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-receipts ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1_receipts/geometry_scarce/receipts-a --candidate-profile-truth-release ../eval_runs/hilift_native_profile_truth_v1_candidate_20260901/release/hiliftaeroml-native-profile-truth-v1-candidate --output ../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/packages/geometry_scarce/package-a",
+    "generated_at": "2026-09-08T06:44:40-07:00"
   },
   "compact_evaluation": {
-    "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config examples/hiliftaeroml-v3-candidate/transolver-sixsplit-candidate-configs/transolver-geometry-scarce-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/aggregates/sixsplit_v1/geometry_scarce/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-receipts ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1_receipts/geometry_scarce/receipts-a --candidate-compact-profile-support-release ../eval_runs/hilift_compact_profile_support_v2_candidate_20260906/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/sixsplit_schema_v3_compact_candidate_20260906/packages/geometry_scarce/package-a",
-    "generated_at": "2026-09-06T11:54:23-07:00"
+    "command": "python scripts/assemble_hiliftaeroml_schema_v3_candidate.py --config ../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/configs/sixsplit/transolver-geometry-scarce-candidate-config.json --native-aggregate ../hiliftaeroml-transolver-submission-v1/aggregates/sixsplit_v1/geometry_scarce/aggregate-a --native-surface-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-volume-outputs ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1/geometry_scarce --native-receipts ../hiliftaeroml-transolver-submission-v1/outputs/sixsplit_v1_receipts/geometry_scarce/receipts-a --candidate-compact-profile-support-release ../eval_runs/hilift_compact_profile_support_v2_all1355_candidate_20260907/release/hiliftaeroml-compact-profile-support-v2-candidate --output ../hiliftaeroml-transolver-submission-v1/release/all10_compact_support_rebind_nodecache_candidate_20260908/packages/geometry_scarce/package-a",
+    "generated_at": "2026-09-08T06:44:40-07:00"
   },
   "spatial_discretization": {
     "training": {
