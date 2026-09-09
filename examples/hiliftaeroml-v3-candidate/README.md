@@ -1,16 +1,18 @@
 # HiLiftAeroML FluidsBench schema-v3 candidate package
 
 This directory contains a reusable configuration template, the concrete
-Full360 Transolver candidate configuration, and six retained-split Transolver
-configurations. None is itself a submission, scoring-support release, or
+Full360 Transolver candidate configuration, six retained-split Transolver
+configurations, and three additional finished-split Transolver configurations.
+None is itself a submission, scoring-support release, or
 accepted leaderboard result.
 HiLiftAeroML remains a closed owner-review candidate.  Strings beginning with
 `__REPLACE_` and `__UNRESOLVED_HILIFTAEROML_` are machine-detectable blockers
 rather than illustrative release identities.
 
 `transolver-full360-candidate-config.json` and the files under
-`transolver-sixsplit-candidate-configs/` record the real retained Table 5
-epoch-1000 Transolver replays. Their `evaluation.command` values are executable
+`transolver-sixsplit-candidate-configs/` and
+`transolver-finished-split-candidate-configs/` record real Transolver replays.
+Their `evaluation.command` values are executable
 from the FluidsBench repository root once all referenced campaign products
 exist and target the canonical `package-a` directories. The evaluator
 `code_revision` is
@@ -156,7 +158,7 @@ and the
 [`compact-cp-representation-audit-v1.md`](../../benchmark-specs/hiliftaeroml/compact-cp-representation-audit-v1.md).
 
 With authorized native outputs and native-profile truth, materialize the local
-evaluator-support release for the five distinct case sets used by the seven
+evaluator-support release for the eight official case sets used by the ten
 previews:
 
 ```bash
@@ -177,6 +179,12 @@ python scripts/materialize_hiliftaeroml_compact_profile_support.py \
   --split benchmark-specs/hiliftaeroml/splits/single_aoa_22.json \
   --surface-outputs-root /path/to/aoa22/native/outputs \
   --volume-outputs-root /path/to/aoa22/native/outputs \
+  --split benchmark-specs/hiliftaeroml/splits/aoa.json \
+  --surface-outputs-root /path/to/ood-aoa/native/outputs \
+  --volume-outputs-root /path/to/ood-aoa/native/outputs \
+  --split benchmark-specs/hiliftaeroml/splits/stall.json \
+  --surface-outputs-root /path/to/ood-stall/native/outputs \
+  --volume-outputs-root /path/to/ood-stall/native/outputs \
   --source-truth-release /path/to/hiliftaeroml-native-profile-truth-v1-candidate \
   --output-root /path/to/hiliftaeroml-compact-profile-support-v2-candidate
 ```
@@ -221,29 +229,34 @@ python scripts/validate_submission.py \
   /path/to/hiliftaeroml-my-model-compact-v2
 ```
 
-The compact assembler has a hard 15,000,000-byte limit on the sum of regular
-files in the assembled package. Passing that limit, deterministic archive
-checks, and local validation is not publication, activation, owner approval,
+The compact assembler validates the complete package inventory before retaining
+output. The benchmark does not impose a HiLift-specific package or ZIP size
+cap; normal repository and hosting limits still apply. Deterministic archive
+checks and local validation are not publication, activation, owner approval,
 or evidence for a case set other than the package's exact declared split. The
 native-v1 workflow and its retained package hashes above remain unchanged.
 
-The retained seven-split compact exercise completed two independent assemblies
-per split. All 14 package trees passed candidate dry-run validation against the
-evaluator-owned support, each A/B pair compared equal recursively, and each
-independent deterministic ZIP pair is byte-identical.
+The ten-split compact exercise completed two independent assemblies per split.
+The ten canonical package trees passed candidate dry-run validation against the
+evaluator-owned all-case support; each corresponding A/B pair compared equal
+recursively, and each independent deterministic ZIP pair is byte-identical.
+The support selection and rebind receipt are
+[`compact-profile-all-case-support-rebind-v1.json`](../../benchmark-specs/hiliftaeroml/compact-profile-all-case-support-rebind-v1.json).
 
 | Split receipt | Cases | Regular package bytes | ZIP bytes |
 | --- | ---: | ---: | ---: |
-| [Full](../../benchmark-specs/hiliftaeroml/compact-profile-full360-validation-v1.json) | 360 | 11,758,621 | 8,724,046 |
-| [AoA 4](../../benchmark-specs/hiliftaeroml/compact-profile-aoa4-validation-v1.json) | 36 | 1,257,729 | 841,953 |
-| [AoA 12](../../benchmark-specs/hiliftaeroml/compact-profile-aoa12-validation-v1.json) | 36 | 1,372,152 | 955,744 |
-| [AoA 22](../../benchmark-specs/hiliftaeroml/compact-profile-aoa22-validation-v1.json) | 36 | 1,375,794 | 960,065 |
-| [Super scarce](../../benchmark-specs/hiliftaeroml/compact-profile-super-scarce-validation-v1.json) | 360 | 13,568,912 | 10,532,403 |
-| [Geometry scarce](../../benchmark-specs/hiliftaeroml/compact-profile-geometry-scarce-validation-v1.json) | 360 | 12,364,867 | 9,322,118 |
-| [Geometry super scarce](../../benchmark-specs/hiliftaeroml/compact-profile-geometry-super-scarce-validation-v1.json) | 360 | 13,250,557 | 10,205,034 |
+| [Full](../../benchmark-specs/hiliftaeroml/compact-profile-full360-validation-v1.json) | 360 | 11,758,641 | 8,724,067 |
+| [AoA 4](../../benchmark-specs/hiliftaeroml/compact-profile-aoa4-validation-v1.json) | 36 | 1,258,072 | 842,039 |
+| [AoA 12](../../benchmark-specs/hiliftaeroml/compact-profile-aoa12-validation-v1.json) | 36 | 1,372,495 | 955,829 |
+| [AoA 22](../../benchmark-specs/hiliftaeroml/compact-profile-aoa22-validation-v1.json) | 36 | 1,376,137 | 960,142 |
+| [Super scarce](../../benchmark-specs/hiliftaeroml/compact-profile-super-scarce-validation-v1.json) | 360 | 13,569,255 | 10,532,488 |
+| [Geometry scarce](../../benchmark-specs/hiliftaeroml/compact-profile-geometry-scarce-validation-v1.json) | 360 | 12,365,210 | 9,322,198 |
+| [Geometry super scarce](../../benchmark-specs/hiliftaeroml/compact-profile-geometry-super-scarce-validation-v1.json) | 360 | 13,250,900 | 10,205,122 |
+| [Geometry](../../benchmark-specs/hiliftaeroml/compact-profile-geometry-validation-v1.json) | 360 | 11,555,256 | 8,517,360 |
+| [OoD AoA](../../benchmark-specs/hiliftaeroml/compact-profile-ood-aoa-validation-v1.json) | 900 | 32,105,249 | 24,720,935 |
+| [OoD stall](../../benchmark-specs/hiliftaeroml/compact-profile-ood-stall-validation-v1.json) | 723 | 24,979,559 | 19,015,374 |
 
-Every package and ZIP remains below the 15,000,000-byte portability gate. The
-Full ZIP is 99.6147% smaller than the retained native-v1 ZIP. Each linked
+There is no HiLift-specific aggregate package or ZIP byte ceiling. Each linked
 inactive-candidate receipt records the exact package, archive, evaluator
 support, profile-contract, case-set, and metric hashes.
 

@@ -375,11 +375,12 @@ this closed workflow.
 
 ### Optional local compact-v2 exercise
 
-Seven retained real-surrogate compact packages cover Full, the three fixed-AoA
-splits, Super scarce, Geometry scarce, and Geometry super scarce. The public
-plot-only truth separately covers every official case set. A maintainer with
-the authorized native-profile truth and complete native outputs for the target
-case set can materialize an evaluator-owned scoring support release locally:
+Ten retained real-surrogate compact packages cover Full, the three fixed-AoA
+splits, Super scarce, Geometry scarce, Geometry super scarce, Geometry,
+out-of-distribution AoA, and out-of-distribution stall. The public plot-only
+truth separately covers every official case set. A maintainer with the
+authorized native-profile truth and complete native outputs for the target case
+set can materialize an evaluator-owned scoring support release locally:
 
 ```bash
 python scripts/materialize_hiliftaeroml_compact_profile_support.py \
@@ -419,8 +420,10 @@ records how the authority record/payload hashes occupy the support format's
 four legacy source-hash provenance slots. The completed two-build all-case
 evidence is
 [`compact-profile-all-case-support-validation-v1.json`](compact-profile-all-case-support-validation-v1.json).
-That record is intentionally non-activating until the owner selects the final
-release binding.
+It is the selected current local candidate support binding, and its ten-preview
+rebind is recorded in
+[`compact-profile-all-case-support-rebind-v1.json`](compact-profile-all-case-support-rebind-v1.json).
+Both records remain intentionally non-activating.
 
 The output is benchmark/evaluator-owned local support and must remain outside
 the participant package. Use it in place of, not alongside,

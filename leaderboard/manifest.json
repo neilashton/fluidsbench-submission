@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-09-07T01:07:29Z",
+  "generated_at": "2026-09-09T07:15:01Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-09-06-ef0e544bf188",
+    "id": "prototype-dev-2026-09-08-9a4220baccc1",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-09-07T01:07:29Z",
+    "generated_at": "2026-09-09T07:15:01Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "ef0e544bf188072e4fee197232b86d6327a57df4b886bd9e9b8badf1186fd595",
+    "feed_sha256": "9a4220baccc1fc7b24530c33b3e536397cd4d3f1c1c0371f8828e3ea07d7e6e8",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,16 +51,16 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "05196dc27e96452ea4619a0348d13220d964805f35cf4e24dbbc4f02ae558610",
-      "record_count": 62,
+      "index_sha256": "03b6d6791e875155ec3eef3caf29f573774c0260d7acbd398ad7999d95462091",
+      "record_count": 65,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "347784bbfbe280c177fc349c249e8d4b1164c82d49a9857b14d5a07a585896e6",
-      "record_count": 62,
-      "series_count": 62
+      "sha256": "0e46484d15440e54c72dfc41fbf1345770af7643c3757a72904b20a05a2bf6e5",
+      "record_count": 65,
+      "series_count": 65
     }
   },
   "all_file": "leaderboard/all.json",
@@ -978,8 +978,8 @@
       "submission_count": 1,
       "updated_at": "2026-08-31",
       "submission_population": {
-        "feed_row_count": 10,
-        "prototype_ineligible_fixture_count": 10,
+        "feed_row_count": 1,
+        "prototype_ineligible_fixture_count": 1,
         "eligible_submission_count": 0,
         "scientific_result_count": 0,
         "submission_count_semantics": "all_current_feed_rows_are_structural_prototype_fixtures_not_eligible_submissions",
@@ -2128,8 +2128,8 @@
       "name": "HiLiftAeroML",
       "slug": "hiliftaeroml",
       "file": "leaderboard/datasets/hiliftaeroml.json",
-      "submission_count": 7,
-      "updated_at": "2026-09-06",
+      "submission_count": 10,
+      "updated_at": "2026-09-08",
       "metrics": {
         "dimensional_fields": [
           "surface_pressure",
@@ -2768,7 +2768,7 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 7,
+      "revision_count": 10,
       "profile_definition": {
         "status": "candidate_owner_review_required",
         "contract_id": "hiliftaeroml-native-profile-predictions-v1-candidate",

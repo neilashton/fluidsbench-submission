@@ -63,6 +63,27 @@ EXPECTED_PREVIEWS = (
         360,
         5_400,
     ),
+    (
+        "geometry",
+        "hiliftaeroml-transolver-geometry-candidate-v1",
+        "caseset-53990ea68fa6",
+        360,
+        5_400,
+    ),
+    (
+        "aoa",
+        "hiliftaeroml-transolver-ood-aoa-candidate-v1",
+        "caseset-29693354ed8a",
+        900,
+        13_500,
+    ),
+    (
+        "stall",
+        "hiliftaeroml-transolver-ood-stall-candidate-v1",
+        "caseset-804491c8956e",
+        723,
+        10_845,
+    ),
 )
 
 

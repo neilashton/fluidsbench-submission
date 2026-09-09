@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-06-ef0e544bf188/hiliftaeroml/single_aoa_12/hiliftaeroml-transolver-aoa12-candidate-v1",
+  "claim_id": "prototype-dev-2026-09-08-9a4220baccc1/hiliftaeroml/single_aoa_12/hiliftaeroml-transolver-aoa12-candidate-v1",
   "release": {
-    "id": "prototype-dev-2026-09-06-ef0e544bf188",
+    "id": "prototype-dev-2026-09-08-9a4220baccc1",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-07T01:07:29Z",
+    "published_at": "2026-09-09T07:15:01Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -15,7 +15,7 @@
       "series_id": "hiliftaeroml-transolver-aoa12-candidate",
       "version": 1,
       "supersedes": null,
-      "change_summary": "Initial maintainer-local schema-v3 replay of the retained AoA 12 epoch-1000 Transolver result.",
+      "change_summary": "Initial maintainer-local schema-v3 replay of the retained AoA 12 Transolver result (epoch 1000).",
       "is_latest": true,
       "latest_submission_id": "hiliftaeroml-transolver-aoa12-candidate-v1",
       "version_count": 1
@@ -54,20 +54,20 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "ef0e544bf188072e4fee197232b86d6327a57df4b886bd9e9b8badf1186fd595",
+      "feed_sha256": "9a4220baccc1fc7b24530c33b3e536397cd4d3f1c1c0371f8828e3ea07d7e6e8",
       "row_index": 28
     },
     "source_submission": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12-candidate-v1/submission.json",
-      "sha256": "0d52ac999e84eb9f1393411018fda99724b73021b490eba7b385cbe4698966ac"
+      "sha256": "22ee1e5e8c5b4cac46825bbca8de0c940563b1f052882503dac1ffcf0e9d6221"
     },
     "evaluation_evidence": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12-candidate-v1/evaluation-evidence.json",
-      "sha256": "a41529083d4a315eb203980e846c097831354c7c812f9fc1134125d4435dfd37"
+      "sha256": "ad1355e1e798ebccf43465672acba454a2d88b66d0bd5f840e314813089fd290"
     },
     "profile_index": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12-candidate-v1/profiles/index.json",
-      "sha256": "aa7820713e838f94ac2d1d259dd32feed6cfcfd875c89494d668d8f5ae430dab"
+      "sha256": "38cb2f3e3a8fc447269f963c87bd2fc7a45daa57381133bf729d274a13e3433c"
     },
     "spatial_discretization": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12-candidate-v1/discretization.json",
@@ -79,7 +79,7 @@
     },
     "case_metrics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12-candidate-v1/metrics/cases.json",
-      "sha256": "5ac09685ac3c183364488b181a481493e75b159cb72e63b6a0c48abc2a41e1b5"
+      "sha256": "6f4c9b401c8360c5ceba3515739cbc4f283bd9f57eb692cd70cc63a36bf9b7d1"
     },
     "regional_diagnostics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-aoa12-candidate-v1/regional-diagnostics.json",
