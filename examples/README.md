@@ -50,6 +50,12 @@ velocity profiles. It is intentionally abridged and is not a complete benchmark 
 pinned extractor for AirfRANS extrados velocity profiles. It also demonstrates evaluating native point-ordered NumPy or PyTorch
 velocity predictions without serializing a predicted VTU mesh.
 
+For model authors who will run inference while maintainers assemble the result,
+[`airfrans-inference-handover/`](airfrans-inference-handover/) describes a native
+velocity/pressure NumPy export, a complete-split array and mesh-order check,
+and the experiment records needed for later assembly. This preparatory handover
+does not open AirfRANS submissions or replace official schema-v3 validation.
+
 For a historical v1 prototype directory that passes the dummy-data validator, inspect the AhmedML
 [`transolver`](../submissions/ahmedml/transolver/) submission. It includes all prototype case IDs, chunk checksums, required
 pressure stations, optional velocity stations, metadata, and scalar metrics. Do not use it as a real-submission template.
