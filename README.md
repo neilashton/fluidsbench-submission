@@ -2,8 +2,9 @@
 
 Submission repository and approved-data feed for the [FluidsBench leaderboard](https://fluidsbench.org/).
 
-> FluidsBench is currently a work in progress. The `dev` branch, split indexes, submissions, metrics, and profile curves are
-> prototype dummy data and are not approved benchmark results.
+> FluidsBench is currently a work in progress. Nothing on the `dev` branch is an approved benchmark result, and most rows remain
+> illustrative prototype data. The explicitly registered HiLiftAeroML Transolver and GeoTransolver previews are checksum-bound
+> retained surrogate inferences with real CFD comparison truth, but remain non-citable pre-release references.
 
 ## Responsibilities
 
@@ -327,8 +328,9 @@ releases use `archive_url: null`; an official release must provide an immutable 
 release-view URLs containing the release ID. The separate full `source_commit` records repository provenance without creating a
 self-referential commit hash.
 
-HiLiftAeroML's ten registered Transolver previews use the compact-v2
-prediction contract. Their public Cp and velocity comparison truth lives in
+HiLiftAeroML's ten registered Transolver previews and eleven registered
+GeoTransolver previews use the compact-v2 prediction contract. Their public
+Cp and velocity comparison truth lives in
 the website repository as a deduplicated 1,355-case release covering all eight
 official case sets. It is bound as plot-only metadata; the private lossless
 evaluator truth remains the scoring authority and is not copied into this

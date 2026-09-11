@@ -134,13 +134,17 @@ def test_frozen_evaluator_revision_is_consistent_and_nonactivating() -> None:
     dataset = next(
         item for item in manifest["datasets"] if item["slug"] == "hiliftaeroml"
     )
+    preview_rows = load(ROOT / "leaderboard" / "datasets" / "hiliftaeroml.json")
     support = specification["scoring_support"]
     evaluator = support["dataset_evaluator_binding"]
 
     assert dataset["scoring_support"] == support
-    assert dataset["submission_count"] == 7
-    assert dataset["revision_count"] == 7
-    assert dataset["updated_at"] == "2026-09-06"
+    assert len(preview_rows) == 21
+    assert dataset["submission_count"] == len(preview_rows)
+    assert dataset["revision_count"] == len(preview_rows)
+    assert dataset["updated_at"] == max(
+        row["submitted_at"] for row in preview_rows
+    )
     assert evaluator["status"] == "frozen"
     assert evaluator["evaluator_reference_version"] == specification[
         "evaluation_reference_version"
