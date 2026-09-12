@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from collections import Counter
 from copy import deepcopy
 from pathlib import Path
 from unittest.mock import patch
@@ -80,6 +81,83 @@ EXPECTED_PREVIEWS = (
     (
         "stall",
         "hiliftaeroml-transolver-ood-stall-candidate-v1",
+        "caseset-804491c8956e",
+        723,
+        10_845,
+    ),
+    (
+        "full",
+        "hiliftaeroml-geotransolver-full360-candidate-v1",
+        "caseset-ac791749e527",
+        360,
+        5_400,
+    ),
+    (
+        "single_aoa_4",
+        "hiliftaeroml-geotransolver-aoa4-candidate-v1",
+        "caseset-7a743a20b3bd",
+        36,
+        540,
+    ),
+    (
+        "single_aoa_12",
+        "hiliftaeroml-geotransolver-aoa12-candidate-v1",
+        "caseset-02fc12ff3494",
+        36,
+        540,
+    ),
+    (
+        "single_aoa_22",
+        "hiliftaeroml-geotransolver-aoa22-candidate-v1",
+        "caseset-85ecccd9ccda",
+        36,
+        540,
+    ),
+    (
+        "geometry",
+        "hiliftaeroml-geotransolver-geometry-candidate-v1",
+        "caseset-53990ea68fa6",
+        360,
+        5_400,
+    ),
+    (
+        "geometry_scarce",
+        "hiliftaeroml-geotransolver-geometry-scarce-candidate-v1",
+        "caseset-53990ea68fa6",
+        360,
+        5_400,
+    ),
+    (
+        "geometry_super_scarce",
+        "hiliftaeroml-geotransolver-geometry-super-scarce-candidate-v1",
+        "caseset-53990ea68fa6",
+        360,
+        5_400,
+    ),
+    (
+        "super_scarce",
+        "hiliftaeroml-geotransolver-super-scarce-candidate-v1",
+        "caseset-ac791749e527",
+        360,
+        5_400,
+    ),
+    (
+        "aoa",
+        "hiliftaeroml-geotransolver-ood-aoa-candidate-v1",
+        "caseset-29693354ed8a",
+        900,
+        13_500,
+    ),
+    (
+        "deflection",
+        "hiliftaeroml-geotransolver-ood-deflection-candidate-v1",
+        "caseset-c0ecb14de138",
+        360,
+        5_400,
+    ),
+    (
+        "stall",
+        "hiliftaeroml-geotransolver-ood-stall-candidate-v1",
         "caseset-804491c8956e",
         723,
         10_845,
@@ -245,7 +323,7 @@ class HiLiftRegisteredPreviewTests(unittest.TestCase):
             [],
         )
 
-    def test_generated_feed_has_one_rank_per_split(self) -> None:
+    def test_generated_feed_has_every_registered_rank_per_split(self) -> None:
         rows = validator.load_json(
             ROOT / "leaderboard" / "datasets" / "hiliftaeroml.json"
         )
@@ -253,12 +331,22 @@ class HiLiftRegisteredPreviewTests(unittest.TestCase):
             len(rows), len(validator.HILIFT_REGISTERED_PREVIEW_CONFIGS)
         )
         rows_by_id = {row["submission_id"]: row for row in rows}
+        split_counts = Counter(
+            configuration["split_id"]
+            for configuration in validator.HILIFT_REGISTERED_PREVIEW_CONFIGS
+        )
         for configuration in validator.HILIFT_REGISTERED_PREVIEW_CONFIGS:
             row = rows_by_id[configuration["binding"]["submission_id"]]
             self.assertEqual(row["split_id"], configuration["split_id"])
             self.assertEqual(row["record_type"], "pre_release_reference")
-            self.assertEqual(row["ranking"]["rank"], 1)
-            self.assertEqual(row["ranking"]["ranked_result_count"], 1)
+            self.assertGreaterEqual(row["ranking"]["rank"], 1)
+            self.assertLessEqual(
+                row["ranking"]["rank"], split_counts[configuration["split_id"]]
+            )
+            self.assertEqual(
+                row["ranking"]["ranked_result_count"],
+                split_counts[configuration["split_id"]],
+            )
             self.assertFalse(row["claim_eligibility"]["academic_citation"])
             self.assertFalse(row["claim_eligibility"]["promotion"])
 

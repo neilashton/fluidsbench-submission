@@ -100,6 +100,8 @@ HILIFT_COMPACT_PROFILE_IMPLEMENTATION_BINDING = {
 def _hilift_preview_configuration(
     *,
     slug: str,
+    model_slug: str = "transolver",
+    validation_slug: str | None = None,
     split_id: str,
     case_set_id: str,
     case_count: int,
@@ -111,8 +113,10 @@ def _hilift_preview_configuration(
 ) -> dict[str, Any]:
     """Build one explicit, code-pinned HiLift pre-release registration."""
 
-    submission_id = f"hiliftaeroml-transolver-{slug}-candidate-v1"
-    validation_name = f"compact-profile-{slug}-validation-v1"
+    submission_id = f"hiliftaeroml-{model_slug}-{slug}-candidate-v1"
+    validation_name = (
+        f"compact-profile-{validation_slug or slug}-validation-v1"
+    )
     binding = {
         "status": "registered_pre_release_reference",
         "record_type": "pre_release_reference",
@@ -303,6 +307,193 @@ HILIFT_REGISTERED_PREVIEW_CONFIGS = (
         archive_size_bytes=19_015_374,
         archive_member_count=803,
         regular_file_bytes=24_979_559,
+    ),
+    _hilift_preview_configuration(
+        slug="full360",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-full360",
+        split_id="full",
+        case_set_id="caseset-ac791749e527",
+        case_count=360,
+        submission_json_sha256=(
+            "da274a509a586ce8dd00705d570e993124c564cd4185d997d47428e6d7a3169e"
+        ),
+        archive_sha256=(
+            "97c7150f958788bb1e662d25688c5b1e7529bfb11800c92a5ec542b99c59f1d8"
+        ),
+        archive_size_bytes=8_964_582,
+        archive_member_count=403,
+        regular_file_bytes=12_002_142,
+    ),
+    _hilift_preview_configuration(
+        slug="aoa4",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-aoa4",
+        split_id="single_aoa_4",
+        case_set_id="caseset-7a743a20b3bd",
+        case_count=36,
+        submission_json_sha256=(
+            "333e0867424115c5a3675374597d7bcd193ab7ef2aa0cf16e66e1a3333fc7996"
+        ),
+        archive_sha256=(
+            "fa2d77e2fd77e6920b96fe0a40e684d6a5e53da5911f455b6f939a7674c8671b"
+        ),
+        archive_size_bytes=891_073,
+        archive_member_count=47,
+        regular_file_bytes=1_307_990,
+    ),
+    _hilift_preview_configuration(
+        slug="aoa12",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-aoa12",
+        split_id="single_aoa_12",
+        case_set_id="caseset-02fc12ff3494",
+        case_count=36,
+        submission_json_sha256=(
+            "5bf17fa2f42c94aefa925bd45b84a34ef1f791aeb7867e27954b1ac62c40bc03"
+        ),
+        archive_sha256=(
+            "87287a12053304a147a2624039365bad3cccb964df79d1105a31396b26165543"
+        ),
+        archive_size_bytes=968_185,
+        archive_member_count=47,
+        regular_file_bytes=1_385_492,
+    ),
+    _hilift_preview_configuration(
+        slug="aoa22",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-aoa22",
+        split_id="single_aoa_22",
+        case_set_id="caseset-85ecccd9ccda",
+        case_count=36,
+        submission_json_sha256=(
+            "bfcd27cc9ca57e4dac64ce466f7b933451c00be73bc71ca1633217b95514fa52"
+        ),
+        archive_sha256=(
+            "146f28436326fab089afda212b2798033839c2a8c89d5c2a2be37eaf6dd10e8f"
+        ),
+        archive_size_bytes=1_027_593,
+        archive_member_count=47,
+        regular_file_bytes=1_444_217,
+    ),
+    _hilift_preview_configuration(
+        slug="geometry",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-geometry",
+        split_id="geometry",
+        case_set_id="caseset-53990ea68fa6",
+        case_count=360,
+        submission_json_sha256=(
+            "6c174b7117696c22031e42d60cb787ff7d09d294c42a08c29bc28858730917e7"
+        ),
+        archive_sha256=(
+            "a2e4fd58b889e377be1fb8962b53647fbd0c6429042a9e02c612260a12abca45"
+        ),
+        archive_size_bytes=8_653_787,
+        archive_member_count=403,
+        regular_file_bytes=11_694_031,
+    ),
+    _hilift_preview_configuration(
+        slug="geometry-scarce",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-geometry-scarce",
+        split_id="geometry_scarce",
+        case_set_id="caseset-53990ea68fa6",
+        case_count=360,
+        submission_json_sha256=(
+            "4755cf5e41f8582444bd27fe2b672c8abdc4730425a5837325ba15ef7b54b8a1"
+        ),
+        archive_sha256=(
+            "4d70db3198e902870a6b95ea45505552e64f3dae692b8ee2f1ae331920d12651"
+        ),
+        archive_size_bytes=10_114_473,
+        archive_member_count=403,
+        regular_file_bytes=13_158_992,
+    ),
+    _hilift_preview_configuration(
+        slug="geometry-super-scarce",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-geometry-super-scarce",
+        split_id="geometry_super_scarce",
+        case_set_id="caseset-53990ea68fa6",
+        case_count=360,
+        submission_json_sha256=(
+            "dbbe2aab6a43e02e063dff10565f7a1ab059175994074315eb740be2d3f979f7"
+        ),
+        archive_sha256=(
+            "3799fd4bfa747bf35451f84f1562639191aa3e479865e188f19f7a7f1847c36d"
+        ),
+        archive_size_bytes=11_092_082,
+        archive_member_count=403,
+        regular_file_bytes=14_137_677,
+    ),
+    _hilift_preview_configuration(
+        slug="super-scarce",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-super-scarce",
+        split_id="super_scarce",
+        case_set_id="caseset-ac791749e527",
+        case_count=360,
+        submission_json_sha256=(
+            "e23adaef21962b0a7e16d3de0fe3e36b0975fff85cc441138c1efd8e4acc9983"
+        ),
+        archive_sha256=(
+            "30efc9a3468459862477a4734cf330ac1942b594740346dad0f2d214fb36c10b"
+        ),
+        archive_size_bytes=10_934_679,
+        archive_member_count=403,
+        regular_file_bytes=13_971_416,
+    ),
+    _hilift_preview_configuration(
+        slug="ood-aoa",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-ood-aoa",
+        split_id="aoa",
+        case_set_id="caseset-29693354ed8a",
+        case_count=900,
+        submission_json_sha256=(
+            "27fa07b886ee3168016cd5ed1356da90bded93364ba174c92887b5ec709073fd"
+        ),
+        archive_sha256=(
+            "ea2e455de205202bd6cf89139f7e5659e0f5f7ce403e847ea4e19a654d32dc3c"
+        ),
+        archive_size_bytes=26_779_386,
+        archive_member_count=997,
+        regular_file_bytes=34_170_217,
+    ),
+    _hilift_preview_configuration(
+        slug="ood-deflection",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-ood-deflection",
+        split_id="deflection",
+        case_set_id="caseset-c0ecb14de138",
+        case_count=360,
+        submission_json_sha256=(
+            "939072a9c57c3a58563f4a37a41fab96f50ac7d1264bd7a1af7c25aa32161a9c"
+        ),
+        archive_sha256=(
+            "26674828ec6bab1b30a8d34f0491879806eddf79595eb45bbd1630017f7b78bc"
+        ),
+        archive_size_bytes=9_056_573,
+        archive_member_count=403,
+        regular_file_bytes=12_101_235,
+    ),
+    _hilift_preview_configuration(
+        slug="ood-stall",
+        model_slug="geotransolver",
+        validation_slug="geotransolver-ood-stall",
+        split_id="stall",
+        case_set_id="caseset-804491c8956e",
+        case_count=723,
+        submission_json_sha256=(
+            "bfedac34341e08c7b23ef7206c4c87941defcefc6282c70bc36df6da02d1f2bc"
+        ),
+        archive_sha256=(
+            "bfb8478a52c74227ee89997aad83032669386fb0dd7a78f864db26555aa4847a"
+        ),
+        archive_size_bytes=19_833_594,
+        archive_member_count=803,
+        regular_file_bytes=25_800_404,
     ),
 )
 HILIFT_REGISTERED_PREVIEW = HILIFT_REGISTERED_PREVIEW_CONFIGS[0]["binding"]
