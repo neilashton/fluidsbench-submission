@@ -650,6 +650,18 @@ class DrivAerMLCandidatePackageAssemblerTests(unittest.TestCase):
                     devices_per_job=4,
                     max_concurrent_device_count=40,
                 )
+            for stage in method["training"]["stages"]:
+                stage["compute"].update(measurement_basis="estimated", cost_scope="final_training")
+            inference = method["inference_compute"]
+            inference.update(
+                timing_protocol="fluidsbench-complete-case-v1",
+                hardware_identity_basis="owner_confirmed",
+                execution={"precision": "fp32", "batch_size": 1, "batch_unit": "case",
+                           "warmup_cases": 0, "software": "Synthetic test runtime 1.0"},
+                campaign_runs=[{"wall_time_seconds": inference["campaign_wall_time_seconds"],
+                                "aggregate_device_time_seconds": inference["aggregate_device_time_seconds"]}],
+                includes_preprocessing=True, includes_mapping=True,
+            )
             write_json(paths["config"], config)
             updated_output = Path(temporary) / "with-gpu-metadata"
             assembler.assemble_package(**arguments, output_path=updated_output)
