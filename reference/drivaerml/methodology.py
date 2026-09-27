@@ -150,8 +150,9 @@ def _compute_capacity_error(
     aggregate = compute.get(aggregate_key)
     values = (campaign, aggregate)
     if (
-        not isinstance(device_count, int)
+        not isinstance(device_count, (int, float))
         or isinstance(device_count, bool)
+        or isinstance(device_count, float) and not device_count.is_integer()
         or device_count < 1
         or not all(
             isinstance(value, (int, float))
@@ -182,6 +183,52 @@ def _compute_capacity_error(
             f"max_concurrent_device_count * {campaign_key}"
         )
     return None
+
+
+def _inference_campaign_errors(compute: Any) -> list[str]:
+    """Keep repeated complete-split timings paired; never multiply case_count."""
+    if not isinstance(compute, dict):
+        return []
+    runs = compute.get("campaign_runs")
+    if not isinstance(runs, list) or not runs:
+        return []  # Schema validation handles malformed or required metadata.
+    errors = []
+    valid = []
+    for index, run in enumerate(runs):
+        if not isinstance(run, dict):
+            continue
+        values = [run.get("wall_time_seconds"), run.get("aggregate_device_time_seconds")]
+        try:
+            valid_values = all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                               and math.isfinite(v) and v > 0 for v in values)
+        except OverflowError:
+            valid_values = False
+        if not valid_values:
+            errors.append(f"methodology.inference_compute.campaign_runs[{index}] timing values must be finite positive numbers")
+            continue
+        valid.append(run)
+        error = _compute_capacity_error(
+            {**run, "max_concurrent_device_count": compute.get("max_concurrent_device_count")},
+            label=f"methodology.inference_compute.campaign_runs[{index}]",
+            campaign_key="wall_time_seconds", aggregate_key="aggregate_device_time_seconds",
+        )
+        if error:
+            errors.append(error)
+    if len(valid) != len(runs):
+        return errors
+    representative = sorted(valid, key=lambda run: run["wall_time_seconds"])[(len(valid) - 1) // 2]
+    for target, source in [("campaign_wall_time_seconds", "wall_time_seconds"),
+                           ("aggregate_device_time_seconds", "aggregate_device_time_seconds")]:
+        value = compute.get(target)
+        try:
+            matches = isinstance(value, (int, float)) and not isinstance(value, bool) and math.isclose(
+                value, representative[source], rel_tol=1e-9, abs_tol=1e-9
+            )
+        except OverflowError:
+            matches = False
+        if not matches:
+            errors.append(f"methodology.inference_compute.{target} must match the same lower-median-wall-time campaign run")
+    return errors
 
 
 def methodology_errors(
@@ -526,6 +573,7 @@ def methodology_errors(
     errors.extend(_compute_allocation_errors(
         inference, label="methodology.inference_compute",
     ))
+    errors.extend(_inference_campaign_errors(inference))
     inference_compute_error = _compute_capacity_error(
         inference,
         label="methodology.inference_compute",
