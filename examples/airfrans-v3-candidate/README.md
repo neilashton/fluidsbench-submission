@@ -60,9 +60,11 @@ compute the same derived quantities (wall shear, forces, curve
 pressure) from the prediction. `--predictions-dir` expects one
 `<case_id>.npz` per case with `velocity`, `pressure`,
 `internal_points`, and `airfoil_points` arrays in unchanged native
-point order (see `AirfRANS_Inference_Handover/pack_predictions.py` for
-an example packer). Writes a `kind: scored_predictions` manifest
-directly consumable by `reference.evaluate_predictions`.
+point order. `pack_native_predictions.py` in this directory is a
+template for producing them: only its `load_raw_prediction` function is
+model-specific, and it stops (rather than interpolating) if the model's
+points are not in native order. Writes a `kind: scored_predictions`
+manifest directly consumable by `reference.evaluate_predictions`.
 
 ### 3. Metric scoring
 
