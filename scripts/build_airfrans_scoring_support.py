@@ -111,7 +111,7 @@ def _metric_binding(metric_id, quantity_id, reduction, dataset_weighting, aggreg
     }
 
 
-def build_manifest(case_count: int) -> dict:
+def build_manifest(case_count: int, case_set_id: str, release_id: str) -> dict:
     domain_support = {
         "id": DOMAIN_SUPPORT_ID,
         "domain": "volume",
@@ -350,7 +350,7 @@ def build_manifest(case_count: int) -> dict:
     return {
         "$schema": "https://fluidsbench.org/schemas/scoring-support/v1/manifest.schema.json",
         "schema_version": "1.0",
-        "release_id": RELEASE_ID,
+        "release_id": release_id,
         "status": "candidate",
         "published_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "dataset_id": DATASET_ID,
@@ -366,9 +366,9 @@ def build_manifest(case_count: int) -> dict:
         "supports": [domain_support, curve_support, force_support],
         "case_sets": [
             {
-                "id": "standard",
+                "id": case_set_id,
                 "case_count": case_count,
-                "index_file": "case-sets/standard/index.json",
+                "index_file": f"case-sets/{case_set_id}/index.json",
                 "index_sha256": None,  # filled in after the index file is written
             }
         ],
@@ -511,6 +511,11 @@ def main(argv=None) -> int:
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--split-file", type=Path, default=DEFAULT_SPLIT_FILE)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--release-id",
+        default=RELEASE_ID,
+        help="Use a distinct id per case set (e.g. for aoa_extrapolation) so releases never collide.",
+    )
     parser.add_argument("--limit", type=int, default=None, help="only process the first N cases (debugging)")
     args = parser.parse_args(argv)
 
@@ -524,7 +529,10 @@ def main(argv=None) -> int:
     if args.limit is not None:
         case_ids = case_ids[: args.limit]
 
-    data_dir = args.output / "case-sets" / "standard" / "data"
+    case_set_id = split["case_set_id"]
+    release_id = args.release_id
+    case_set_dir = args.output / "case-sets" / case_set_id
+    data_dir = case_set_dir / "data"
     chunk_cases = []
     summaries = []
     t_start = time.time()
@@ -545,28 +553,28 @@ def main(argv=None) -> int:
             flush=True,
         )
 
-    chunk_path = args.output / "case-sets" / "standard" / "chunk-000.json"
+    chunk_path = case_set_dir / "chunk-000.json"
     chunk_sha256 = write_json(
         chunk_path,
         {
             "$schema": "https://fluidsbench.org/schemas/scoring-support/v1/case-chunk.schema.json",
             "schema_version": "1.0",
-            "release_id": RELEASE_ID,
+            "release_id": release_id,
             "dataset_id": DATASET_ID,
-            "case_set_id": "standard",
+            "case_set_id": case_set_id,
             "cases": chunk_cases,
         },
     )
 
-    index_path = args.output / "case-sets" / "standard" / "index.json"
+    index_path = case_set_dir / "index.json"
     index_sha256 = write_json(
         index_path,
         {
             "$schema": "https://fluidsbench.org/schemas/scoring-support/v1/case-index.schema.json",
             "schema_version": "1.0",
-            "release_id": RELEASE_ID,
+            "release_id": release_id,
             "dataset_id": DATASET_ID,
-            "case_set_id": "standard",
+            "case_set_id": case_set_id,
             "case_count": len(case_ids),
             "chunks": [
                 {
@@ -579,7 +587,7 @@ def main(argv=None) -> int:
         },
     )
 
-    manifest = build_manifest(len(case_ids))
+    manifest = build_manifest(len(case_ids), case_set_id, release_id)
     manifest["case_sets"][0]["index_sha256"] = index_sha256
     manifest_path = args.output / "manifest.json"
     write_json(manifest_path, manifest)
@@ -588,7 +596,7 @@ def main(argv=None) -> int:
     write_json(
         summary_path,
         {
-            "release_id": RELEASE_ID,
+            "release_id": release_id,
             "case_count": len(case_ids),
             "elapsed_seconds": time.time() - t_start,
             "cases": summaries,
