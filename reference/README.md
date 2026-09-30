@@ -197,6 +197,17 @@ dataset-specific weightings and component sets, including a diagnostic group con
 validator derives these scores from the same transformations and weights as the overall composite rather than maintaining a
 second hard-coded formula.
 
+AirfRANS uses `airfrans-scoring-v2-candidate`: 50% fields, 25% forces, and 25% profiles.
+Its overall weights are 15% airfoil pressure, 10% wall shear, 15% domain velocity, 10% domain pressure,
+15% drag R2, 10% lift R2, and 25% balanced velocity-profile R2. The field error caps remain
+15%, 20%, 12%, and 15%, respectively. This aligns its field and force weights with AhmedML,
+HiLiftAeroML, and WindsorML. AirfRANS has no scored Cp-cut family, so its existing velocity-profile
+metric receives the entire profile allocation. The four-station/two-component profile reduction,
+native fields, physical weights, and case averaging are unchanged. This replaces the prior
+67%/22%/11% prototype balance; recompute all derived group and overall scores from the original
+base metrics when migrating a package. The new reference version does not open submissions or
+replace the required ground-truth and scoring-support release bindings.
+
 For the four newly unified rankings, the same generic rule simplifies to `100 - blended_surface_rel_l2` for BlendedNet,
 `100 - surface_pressure_rel_l2` for DrivAerNet++, and `100 * (1 - total_error)` for Rotor37 and VKI-LS59, with the result bounded
 to `[0, 100]`. The composite is calculated from the underlying four, one, six, or eight declared components respectively rather

@@ -73,6 +73,11 @@ two-component combinations, bounds each group R2 to `[0, 1]`, and averages the
 eight values equally. This gives streamwise and transverse velocity equal total
 weight and prevents the scale of one component from masking another.
 
+Under `airfrans-scoring-v2-candidate`, this balanced velocity-profile metric carries
+25% of the overall score; fields carry 50% and drag/lift carry 25%. The profile
+reduction and extraction are unchanged. See the [score definitions](../../reference/README.md#benchmark-scores)
+for the component weights and migration from the former 67%/22%/11% balance.
+
 Ground truth and predictions may each be supplied as one file or as multiple
 profile chunks:
 

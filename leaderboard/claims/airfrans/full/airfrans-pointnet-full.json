@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-16-deb0cb44c653/airfrans/full/airfrans-pointnet-full",
+  "claim_id": "prototype-dev-2026-09-16-4c51b08f226c/airfrans/full/airfrans-pointnet-full",
   "release": {
-    "id": "prototype-dev-2026-09-16-deb0cb44c653",
+    "id": "prototype-dev-2026-09-16-4c51b08f226c",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-23T11:15:50Z",
+    "published_at": "2026-09-30T08:42:07Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -29,9 +29,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 37.06166666666667,
-    "ranked_value": 37.1,
-    "display_value": "37.1",
+    "value": 48.54833333333333,
+    "ranked_value": 48.5,
+    "display_value": "48.5",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -53,16 +53,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "deb0cb44c653c9895703f109139b9118f778092245d7cdfb45e696eaa3fda59f",
+      "feed_sha256": "4c51b08f226cb29361eaba8ff32274a14ecd69902bf79c72425689f7e57d69b8",
       "row_index": 4
     },
     "source_submission": {
       "path": "submissions/airfrans/airfrans-pointnet-full/submission.json",
-      "sha256": "076af83fe2305ae229eb8976ff8e77decd4d067fc75fcbdbb2eac85c6f745bda"
+      "sha256": "8413767839f8294c8e698ecad3c985542949cf6972391f0cef6dfcf288d7f5e6"
     },
     "evaluation_evidence": {
       "path": "submissions/airfrans/airfrans-pointnet-full/evaluation-evidence.json",
-      "sha256": "f86a4297c70e0cbb88e53a7a5c18f5a743178dd5c4c504da5b3bd11ed77630bc"
+      "sha256": "7c8605ff3eaa94d382e04dc8522f0662b34f589cd6ebba1f146c589c058352ba"
     },
     "profile_index": {
       "path": "submissions/airfrans/airfrans-pointnet-full/profiles/index.json",

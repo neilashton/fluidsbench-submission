@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-16-deb0cb44c653/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
+  "claim_id": "prototype-dev-2026-09-16-4c51b08f226c/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
   "release": {
-    "id": "prototype-dev-2026-09-16-deb0cb44c653",
+    "id": "prototype-dev-2026-09-16-4c51b08f226c",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-23T11:15:50Z",
+    "published_at": "2026-09-30T08:42:07Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -29,9 +29,9 @@
   },
   "ranking": {
     "metric_id": "overall_score",
-    "value": 55.33533333333334,
-    "ranked_value": 55.3,
-    "display_value": "55.3",
+    "value": 62.611666666666665,
+    "ranked_value": 62.6,
+    "display_value": "62.6",
     "unit": "",
     "direction": "higher",
     "decimal_places": 1,
@@ -53,16 +53,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "deb0cb44c653c9895703f109139b9118f778092245d7cdfb45e696eaa3fda59f",
+      "feed_sha256": "4c51b08f226cb29361eaba8ff32274a14ecd69902bf79c72425689f7e57d69b8",
       "row_index": 2
     },
     "source_submission": {
       "path": "submissions/airfrans/airfrans-graphsage-full/submission.json",
-      "sha256": "b33391320184883bff61b250639efd09b749b6129be60c691d7f3bc223d1901a"
+      "sha256": "9a8bbb1e4db53167e00ec4d0a83f7d5ccbece8021f8a71eb2e5258475a3d90b1"
     },
     "evaluation_evidence": {
       "path": "submissions/airfrans/airfrans-graphsage-full/evaluation-evidence.json",
-      "sha256": "7030df4474b769bc67534d86cac58177db588cfb6bd9b1e81999551053cbab27"
+      "sha256": "d97e845d01ec260c6ba4592e186ed6ac8d0ee4bb4f17909105a691cc3a870481"
     },
     "profile_index": {
       "path": "submissions/airfrans/airfrans-graphsage-full/profiles/index.json",
