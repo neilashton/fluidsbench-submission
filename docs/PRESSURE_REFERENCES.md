@@ -91,7 +91,7 @@ The paper’s training-set mean/std normalization is a model preprocessing step,
 <details>
 <summary>Evaluator and specification trace</summary>
 
-- [benchmark-specs/airfrans/submission-spec.json](../benchmark-specs/airfrans/submission-spec.json): The audited dev scoring specification; not modified by this documentation audit.
+- [benchmark-specs/airfrans/submission-spec.json](../benchmark-specs/airfrans/submission-spec.json): The dev scoring specification. Re-audited 2026-09-30 after the scoring-v2 composite-weight update: pressure fields, units, offsets, metric definitions, and extraction remain unchanged.
 - [reference/airfrans_profiles.py](../reference/airfrans_profiles.py): Velocity-profile helper does not define a new pressure gauge.
 - [reference/evaluate_predictions.py](../reference/evaluate_predictions.py): Field reductions operate on aligned supplied truth and prediction arrays; they do not infer a gauge.
 

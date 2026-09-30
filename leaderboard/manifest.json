@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-09-23T10:58:05Z",
+  "generated_at": "2026-09-30T08:42:06Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-09-16-deb0cb44c653",
+    "id": "prototype-dev-2026-09-16-4c51b08f226c",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-09-23T10:58:05Z",
+    "generated_at": "2026-09-30T08:42:06Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "deb0cb44c653c9895703f109139b9118f778092245d7cdfb45e696eaa3fda59f",
+    "feed_sha256": "4c51b08f226cb29361eaba8ff32274a14ecd69902bf79c72425689f7e57d69b8",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,14 +51,14 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "a0736e4375bcd7d85d9513e118d8a92a6b412a02f124273469731c20716c40ce",
+      "index_sha256": "55f8310c44c59c5df293d0fd29c72d2a0e0a66cce228847960bfe0253c33c7d4",
       "record_count": 58,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "aef2bd8b2ae3c5eb26496b6ac285a99dddbb6bc158678dd4f723c3a21b92b832",
+      "sha256": "d2c098098d24f979944be5b162e17ee66f452b6bfe8d9e4bba56694ccbdf05aa",
       "record_count": 59,
       "series_count": 59
     }
@@ -930,31 +930,31 @@
         "components": [
           {
             "metric_id": "surface_pressure_rel_l2",
-            "weight": 0.16,
+            "weight": 0.15,
             "transform": "bounded_error",
             "cap": 15.0
           },
           {
             "metric_id": "surface_wall_shear_rel_l2",
-            "weight": 0.18,
+            "weight": 0.1,
             "transform": "bounded_error",
             "cap": 20.0
           },
           {
             "metric_id": "flow_domain_velocity_rel_l2",
-            "weight": 0.22,
+            "weight": 0.15,
             "transform": "bounded_error",
             "cap": 12.0
           },
           {
             "metric_id": "flow_domain_pressure_rel_l2",
-            "weight": 0.11,
+            "weight": 0.1,
             "transform": "bounded_error",
             "cap": 15.0
           },
           {
             "metric_id": "cd_r2",
-            "weight": 0.12,
+            "weight": 0.15,
             "transform": "bounded_quality"
           },
           {
@@ -964,7 +964,7 @@
           },
           {
             "metric_id": "velocity_profile_r2",
-            "weight": 0.11,
+            "weight": 0.25,
             "transform": "bounded_quality"
           }
         ],

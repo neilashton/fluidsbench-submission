@@ -106,8 +106,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/airfrans/submission-spec.json",
-          "sha256": "fa6b9b77a81c4a12d89642b17a64f7007f6f997599028f76ba4f742cb7d8d098",
-          "finding": "The audited dev scoring specification; not modified by this documentation audit."
+          "sha256": "3136e684ec208f49508d0ae35ccbbf74022088f796a703909e6cff5950ffdf5f",
+          "finding": "The dev scoring specification. Re-audited 2026-09-30 after the scoring-v2 composite-weight update: pressure fields, units, offsets, metric definitions, and extraction remain unchanged."
         },
         {
           "path": "reference/airfrans_profiles.py",
