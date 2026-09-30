@@ -74,7 +74,7 @@
     "sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c",
     "status": "owner_review_required"
   },
-  "evaluation_reference_version": "prototype-1",
+  "evaluation_reference_version": "airfrans-scoring-v2-candidate",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {
     "metric_id": "overall_score",
@@ -87,13 +87,13 @@
     "metric_id": "overall_score",
     "operation": "weighted_component_scores",
     "components": [
-      { "metric_id": "surface_pressure_rel_l2", "weight": 0.16, "transform": "bounded_error", "cap": 15.0 },
-      { "metric_id": "surface_wall_shear_rel_l2", "weight": 0.18, "transform": "bounded_error", "cap": 20.0 },
-      { "metric_id": "flow_domain_velocity_rel_l2", "weight": 0.22, "transform": "bounded_error", "cap": 12.0 },
-      { "metric_id": "flow_domain_pressure_rel_l2", "weight": 0.11, "transform": "bounded_error", "cap": 15.0 },
-      { "metric_id": "cd_r2", "weight": 0.12, "transform": "bounded_quality" },
+      { "metric_id": "surface_pressure_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 15.0 },
+      { "metric_id": "surface_wall_shear_rel_l2", "weight": 0.10, "transform": "bounded_error", "cap": 20.0 },
+      { "metric_id": "flow_domain_velocity_rel_l2", "weight": 0.15, "transform": "bounded_error", "cap": 12.0 },
+      { "metric_id": "flow_domain_pressure_rel_l2", "weight": 0.10, "transform": "bounded_error", "cap": 15.0 },
+      { "metric_id": "cd_r2", "weight": 0.15, "transform": "bounded_quality" },
       { "metric_id": "cl_r2", "weight": 0.10, "transform": "bounded_quality" },
-      { "metric_id": "velocity_profile_r2", "weight": 0.11, "transform": "bounded_quality" }
+      { "metric_id": "velocity_profile_r2", "weight": 0.25, "transform": "bounded_quality" }
     ],
     "tolerance": 1e-06
   },

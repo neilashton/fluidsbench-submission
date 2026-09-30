@@ -25,18 +25,18 @@
   "code_url": "",
   "submitted_at": "2023-06-01",
   "evaluation": {
-    "reference_version": "prototype-1",
+    "reference_version": "airfrans-scoring-v2-candidate",
     "code_revision": "prototype-dummy-data",
     "command": "not-applicable (illustrative dummy data)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "cd37ee481f0ff531a1ea1dd859808debabd2faa920b5e966c1f3d5a18d43c8c0"
+    "evidence_sha256": "0805b7c9aa2c0ee4dc2ccee7c6a0f5926f1250c8899727a2376e36563b2d35ee"
   },
   "approval": {
     "status": "prototype",
     "note": "Illustrative dummy data; not scientifically reviewed or approved."
   },
   "metric_values": {
-    "overall_score": 54.155,
+    "overall_score": 61.67166666666667,
     "surface_pressure_rel_l2": 33.62,
     "surface_pressure_rel_l1": 24.206,
     "surface_wall_shear_rel_l2": 4.29,
@@ -50,8 +50,8 @@
     "velocity_profile_r2": 0.902,
     "c_drag_mae": 0.0058,
     "c_lift_mae": 0.0017,
-    "field_score": 34.07313432835821,
-    "force_score": 97.29090909090911,
+    "field_score": 29.693333333333335,
+    "force_score": 97.10000000000001,
     "diagnostic_score": 90.2,
     "surface_pressure_equal_entity_rel_l2": 31.939,
     "surface_wall_shear_equal_entity_rel_l2": 4.0755,
