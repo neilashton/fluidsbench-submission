@@ -258,7 +258,7 @@
     "reference_version": "prototype-1",
     "command": "python3 -m reference.evaluate_predictions --support-manifest /mnt/Data_A/AirfRANS_Inference_Handover_2026-09-09/FluidsBench/airfrans-scoring-support/airfrans-native-ground-truth-v1-candidate/manifest.json --case-set standard --prediction-manifest <layer2-output>/manifest.json --submission-id transolverpp-full-v1 --split-id full --output metrics/cases.json ; python3 scripts/finalize_airfrans_metrics.py (folds in velocity_profile_r2 + composite scores)",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "a05429bcc66c5b871b5007455849c63d9e86e3cd297403ee29ba9f9d2f315651"
+    "evidence_sha256": "480627ec071082118cc01eef79c3e4103e077b507cbde224453e5c3efdd6e5a0"
   },
   "reproducibility": {
     "contract_version": "open-reproducibility-3.0",
@@ -275,7 +275,7 @@
   "spatial_discretization": {
     "format": "fluidsbench-discretization-v1",
     "file": "discretization.json",
-    "sha256": "180bf4b02b68f221f91b8f59076cd9f0a7462b6af1b5c1bfcd4f381a32019c20"
+    "sha256": "2f03678cdbc422667b12485eabfb5e05614a20e29f016dd0bc20195a16482d9b"
   },
   "case_metrics": {
     "format": "fluidsbench-case-metrics-v1",
@@ -314,5 +314,5 @@
     "profile_ground_truth_release_id": "airfrans-boundary-layer-v1",
     "profile_ground_truth_manifest_sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c"
   },
-  "note": "Candidate AirfRANS schema-v3 package. AirfRANS submissions remain closed (owner_review_required) pending the owner_decisions_required checklist in benchmark-specs/airfrans/submission-spec.json. scoring_support.manifest_url is a placeholder (not resolvable): no AirfRANS scoring-support release has been published anywhere yet; replace it once/if the dataset owner publishes one."
+  "note": "Candidate AirfRANS schema-v3 package. AirfRANS submissions remain closed (owner_review_required) pending the owner_decisions_required checklist in benchmark-specs/airfrans/submission-spec.json. scoring_support.manifest_url is a placeholder (not resolvable): no AirfRANS scoring-support release has been published anywhere yet; replace it once/if the dataset owner publishes one. Profile ground-truth release binding remains unresolved: the recorded profile_ground_truth_* fields identify the extraction definition and must be replaced with the actual data release before approval. Discretization metadata has been repaired; submitted metrics and profile values are unchanged."
 }

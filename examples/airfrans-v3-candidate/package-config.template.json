@@ -12,7 +12,9 @@
   "participant": {
     "model": "__REPLACE_WITH_MODEL_DISPLAY_NAME__",
     "model_type": "__REPLACE_WITH_MODEL_TYPE__",
-    "model_types": ["__REPLACE_WITH_MODEL_TYPE__"],
+    "model_types": [
+      "__REPLACE_WITH_MODEL_TYPE__"
+    ],
     "training_regime": "__REPLACE_WITH_TRAINING_REGIME__",
     "target_data_used": "__REPLACE_WITH_TARGET_DATA_USED__",
     "external_pretraining": "__REPLACE_WITH_BOOLEAN__",
@@ -114,8 +116,9 @@
       "manifest_url": "__UNRESOLVED_AIRFRANS_SCORING_SUPPORT_NOT_YET_PUBLISHED__"
     },
     "profile_ground_truth": {
-      "release_id": "airfrans-boundary-layer-v1",
-      "manifest_sha256_source": "benchmark-specs/airfrans/submission-spec.json#profile_definition.sha256"
+      "release_id": "__UNRESOLVED_AIRFRANS_PROFILE_GROUND_TRUTH_RELEASE_ID__",
+      "manifest_sha256": "__UNRESOLVED_AIRFRANS_PROFILE_GROUND_TRUTH_MANIFEST_SHA256__",
+      "_note": "Supply the dataset-owner-confirmed profile ground-truth release binding. The extraction definition ID and SHA-256 do not identify ground-truth data."
     },
     "evaluator": {
       "reference_version": "prototype-1",

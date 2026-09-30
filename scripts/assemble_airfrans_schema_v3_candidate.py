@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import statistics
 import sys
 import time
@@ -101,6 +102,26 @@ def validate_against_schema(schema_relative_path: str, document: Any, label: str
     if errors:
         details = "; ".join(f"{list(e.path)}: {e.message}" for e in errors[:5])
         raise AssembleError(f"{label} failed schema validation ({len(errors)} errors): {details}")
+
+
+def profile_ground_truth_binding(config: dict, spec: dict) -> dict[str, str]:
+    """Require an explicit release binding; an extraction definition is not truth."""
+    binding = config.get("release_bindings", {}).get("profile_ground_truth", {})
+    if not isinstance(binding, dict):
+        raise AssembleError("release_bindings.profile_ground_truth must be an object")
+    release_id = binding.get("release_id")
+    digest = binding.get("manifest_sha256")
+    definition = spec["profile_definition"]
+    if digest == definition["sha256"] or (digest is None and "manifest_sha256_source" in binding):
+        raise AssembleError(
+            "profile_ground_truth must identify the ground-truth release and its "
+            "manifest SHA-256, not the profile extraction definition"
+        )
+    if not isinstance(release_id, str) or not re.fullmatch(r"[a-z0-9][a-z0-9._-]{0,159}", release_id):
+        raise AssembleError("profile_ground_truth.release_id must identify the actual ground-truth release")
+    if not isinstance(digest, str) or not re.fullmatch(r"[a-f0-9]{64}", digest):
+        raise AssembleError("profile_ground_truth.manifest_sha256 must be the actual release manifest SHA-256")
+    return {"release_id": release_id, "manifest_sha256": digest}
 
 
 # --------------------------------------------------------------------------
@@ -185,12 +206,8 @@ def build_discretization(
                     "queries_per_forward_pass": per_case_count_bare(domain_counts),
                 }
             ],
-            # Only the two spatial supports Neil's submission-spec.json declares under
-            # public_supports get a discretization mapping. Force/coefficients are a
-            # derived scalar quantity (re-integrated by the evaluator from the domain
-            # prediction, like HiLift's forces), not a separate declared support, so it
-            # is scored via metrics/cases.json but intentionally has no mapping entry
-            # here.
+            # Every support in the scoring manifest needs a mapping, including
+            # coefficients derived by integrating the predicted fields.
             "mappings": [
                 {
                     "support_id": "two-dimensional-domain-native",
@@ -208,6 +225,20 @@ def build_discretization(
                     "method": {
                         "kind": "reference_rule",
                         "rule_id": "airfrans-surface-subset-reorganize-v1",
+                        "rule_version": "1",
+                    },
+                    "implementation": "scripts/derive_airfrans_predicted_fields.py",
+                    "extrapolation_policy": "forbidden",
+                    "unmapped_fraction": 0.0,
+                    "extrapolated_fraction": 0.0,
+                    "final_coverage_fraction": 1.0,
+                },
+                {
+                    "support_id": "airfoil-force-coefficients-native",
+                    "source_output_id": "native-domain-velocity-pressure",
+                    "method": {
+                        "kind": "reference_rule",
+                        "rule_id": "airfrans-force-integration-v1",
                         "rule_version": "1",
                     },
                     "implementation": "scripts/derive_airfrans_predicted_fields.py",
@@ -239,12 +270,12 @@ def build_discretization(
                 "inference": {
                     "inputs": [
                         {
-                            "id": "native-domain-points",
-                            "entity_counts": [{"entity": "domain_points", "count": record["n_domain"]}],
-                        },
-                        {
                             "id": "native-curve-points",
                             "entity_counts": [{"entity": "airfoil_curve_points", "count": record["n_curve"]}],
+                        },
+                        {
+                            "id": "native-domain-points",
+                            "entity_counts": [{"entity": "domain_points", "count": record["n_domain"]}],
                         },
                     ],
                     "direct_outputs": [
@@ -268,6 +299,15 @@ def build_discretization(
                             "source_output_id": "native-domain-velocity-pressure",
                             "support_count": record["n_curve"],
                             "scored_count": record["n_curve"],
+                            "unmapped_count": 0,
+                            "extrapolated_count": 0,
+                            "final_coverage_fraction": 1.0,
+                        },
+                        {
+                            "support_id": "airfoil-force-coefficients-native",
+                            "source_output_id": "native-domain-velocity-pressure",
+                            "support_count": 1,
+                            "scored_count": 1,
                             "unmapped_count": 0,
                             "extrapolated_count": 0,
                             "final_coverage_fraction": 1.0,
@@ -345,6 +385,7 @@ def assemble(
         raise AssembleError(f"output directory already exists, refusing to overwrite: {output_dir}")
 
     spec = load_json(spec_path)
+    profile_truth = profile_ground_truth_binding(config, spec)
     support_manifest = load_json(scoring_support_manifest_path)
     support_manifest_sha256 = sha256_file(scoring_support_manifest_path)
     metrics_cases = load_json(metrics_cases_path)
@@ -388,8 +429,6 @@ def assemble(
     profile_index_sha256 = sha256_file(output_dir / "profiles" / "index.json")
 
     profile_score = load_json(profile_score_path)
-    profile_definition_sha256 = spec["profile_definition"]["sha256"]
-    profile_definition_id = spec["profile_definition"]["id"]
 
     # evaluation-evidence.json
     evaluation_evidence = {
@@ -413,8 +452,8 @@ def assemble(
         "status": "submitted_evaluation",
         "metric_values": metrics_cases["metric_values"],
         "profile_index_sha256": profile_index_sha256,
-        "profile_ground_truth_release_id": profile_definition_id,
-        "profile_ground_truth_manifest_sha256": profile_definition_sha256,
+        "profile_ground_truth_release_id": profile_truth["release_id"],
+        "profile_ground_truth_manifest_sha256": profile_truth["manifest_sha256"],
         "scoring_support_release_id": support_manifest["release_id"],
         "scoring_support_manifest_sha256": support_manifest_sha256,
         "discretization_sha256": discretization_sha256,
@@ -495,8 +534,8 @@ def assemble(
             "index_file": "profiles/index.json",
             "case_count": profile_case_count,
             "case_set_id": case_set_id,
-            "profile_ground_truth_release_id": profile_definition_id,
-            "profile_ground_truth_manifest_sha256": profile_definition_sha256,
+            "profile_ground_truth_release_id": profile_truth["release_id"],
+            "profile_ground_truth_manifest_sha256": profile_truth["manifest_sha256"],
         },
         "note": (
             "Candidate AirfRANS schema-v3 package. AirfRANS submissions remain "
@@ -530,6 +569,11 @@ def main(argv: list[str] | None = None) -> int:
 
     config = load_json(args.config)
     blockers = find_blockers(config)
+    if not blockers:
+        try:
+            profile_ground_truth_binding(config, load_json(args.spec))
+        except AssembleError as error:
+            blockers.append(str(error))
     if args.list_blockers:
         if blockers:
             print(f"{len(blockers)} blocker(s) in {args.config}:")
@@ -541,7 +585,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if blockers:
         parser.error(
-            f"{len(blockers)} unresolved config token(s); rerun with --list-blockers to see them"
+            f"{len(blockers)} configuration blocker(s); rerun with --list-blockers to see them"
         )
     for required in (
         "scoring_support_manifest",
