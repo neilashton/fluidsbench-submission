@@ -13,8 +13,18 @@ accepted result. `scripts/validate_submission.py --contributor-stage`
 will still report failures tracing back to that closed status (missing
 official scoring-support manifest binding, dataset not marked
 `"official"`, no leaderboard entry for the profile ground truth) — all
-three are on the dataset owner's own pending-approvals list, not a
-defect in the package.
+three require dataset-owner action before these candidates can be accepted.
+
+The checked-in candidates still carry an unresolved historical profile-truth
+binding: their `profile_ground_truth_*` fields identify the extraction
+definition, not a ground-truth data release. Do not approve those bindings.
+Their configs now mark the actual release ID and manifest SHA-256 as unresolved,
+and the assembler rejects the old definition-based binding. Once the owner
+provides the release used for scoring, update the config and regenerate the
+package, including its evidence hashes. Confirm the submitter/institution and
+result-data licence at the same time. The corrected discretization metadata
+covers all three scoring supports, including integrated force coefficients;
+the submitted metrics and profile predictions have not been recomputed.
 
 ## Pipeline
 
@@ -96,8 +106,14 @@ pipeline) and computes the composite scores
 Copy `package-config.template.json` outside the repository and replace
 every `__REPLACE_WITH_...__` token with the submitted method's real
 methodology (architecture, parameter counts, training/checkpoint
-details, measured compute) and submitter identity. List what's still
-unresolved without writing output:
+details, measured compute) and submitter identity.
+
+Set `release_bindings.profile_ground_truth.release_id` and `manifest_sha256`
+from the actual profile ground-truth release manifest used for scoring.
+`submission-spec.json#profile_definition` describes how to extract profiles;
+its ID and hash cannot be used as the ground-truth release binding.
+
+List what's still unresolved without writing output:
 
 ```bash
 python scripts/assemble_airfrans_schema_v3_candidate.py \

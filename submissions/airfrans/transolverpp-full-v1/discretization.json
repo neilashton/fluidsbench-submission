@@ -184,13 +184,27 @@
         "unmapped_fraction": 0.0,
         "extrapolated_fraction": 0.0,
         "final_coverage_fraction": 1.0
+      },
+      {
+        "support_id": "airfoil-force-coefficients-native",
+        "source_output_id": "native-domain-velocity-pressure",
+        "method": {
+          "kind": "reference_rule",
+          "rule_id": "airfrans-force-integration-v1",
+          "rule_version": "1"
+        },
+        "implementation": "scripts/derive_airfrans_predicted_fields.py",
+        "extrapolation_policy": "forbidden",
+        "unmapped_fraction": 0.0,
+        "extrapolated_fraction": 0.0,
+        "final_coverage_fraction": 1.0
       }
     ]
   },
   "case_manifest": {
     "format": "jsonl",
     "file": "discretization/cases.jsonl",
-    "sha256": "c7945bcf210ceafcf1805fab1a22f0fdde9ddb555fd6eec27e702e9ea17fa6fa",
+    "sha256": "ea86673e97c16cdeab67f0c6f748ff55d3df2491293b3921a1ca3cde3ed6dc49",
     "case_count": 200
   }
 }

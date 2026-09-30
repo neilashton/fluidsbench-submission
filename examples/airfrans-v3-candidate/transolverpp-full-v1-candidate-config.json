@@ -328,8 +328,9 @@
       "_manifest_url_note": "Placeholder only: AirfRANS scoring-support has not been published anywhere yet (submission-spec.json scoring_support.status=owner_review_required, submissions_open=false). This URL is not resolvable and must be replaced once/if the dataset owner publishes an official or candidate scoring-support release."
     },
     "profile_ground_truth": {
-      "release_id": "airfrans-boundary-layer-v1",
-      "manifest_sha256_source": "benchmark-specs/airfrans/submission-spec.json#profile_definition.sha256"
+      "release_id": "__UNRESOLVED_AIRFRANS_PROFILE_GROUND_TRUTH_RELEASE_ID__",
+      "manifest_sha256": "__UNRESOLVED_AIRFRANS_PROFILE_GROUND_TRUTH_MANIFEST_SHA256__",
+      "_note": "Supply the dataset-owner-confirmed profile ground-truth release binding. The extraction definition ID and SHA-256 do not identify ground-truth data."
     },
     "evaluator": {
       "reference_version": "prototype-1",

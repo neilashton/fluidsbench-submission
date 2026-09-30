@@ -39,7 +39,7 @@
   "profile_ground_truth_manifest_sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c",
   "scoring_support_release_id": "airfrans-native-ground-truth-v1-candidate",
   "scoring_support_manifest_sha256": "a2f5f2d63c50de09324837763676f8352454fcfb37fe995673b1c325abbbe4e1",
-  "discretization_sha256": "180bf4b02b68f221f91b8f59076cd9f0a7462b6af1b5c1bfcd4f381a32019c20",
+  "discretization_sha256": "2f03678cdbc422667b12485eabfb5e05614a20e29f016dd0bc20195a16482d9b",
   "case_metrics_sha256": "216bd29e6d568a6fed29cbbbf77bfec98498524ab7e3baccd6a4d5bd925bd528",
-  "notes": "AirfRANS remains closed (submission-spec.json scoring_support.status=owner_review_required, submissions_open=false); this is a candidate package, not an accepted result."
+  "notes": "AirfRANS remains closed (submission-spec.json scoring_support.status=owner_review_required, submissions_open=false); this is a candidate package, not an accepted result. Profile ground-truth release binding remains unresolved: the recorded profile_ground_truth_* fields identify the extraction definition and must be replaced with the actual data release before approval. Discretization metadata has been repaired; submitted metrics and profile values are unchanged."
 }
