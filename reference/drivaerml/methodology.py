@@ -110,6 +110,30 @@ def _known_reference_errors(
     return errors
 
 
+def _compute_allocation_errors(compute: Any, *, label: str) -> list[str]:
+    """Compare per-job allocation with the campaign peak in the same device unit.
+
+    Omitted/null allocation is intentionally compatible with historical records
+    and variable allocations. Schema validation handles types and positivity.
+    """
+    if not isinstance(compute, dict):
+        return []
+    per_job = compute.get("devices_per_job")
+    peak = compute.get("max_concurrent_device_count")
+    # JSON Schema integers include numbers written as 4.0 in JSON.
+    valid_counts = all(
+        not isinstance(value, bool)
+        and (isinstance(value, int) or isinstance(value, float) and value.is_integer())
+        and value > 0
+        for value in (per_job, peak)
+    )
+    if valid_counts and per_job > peak:
+        return [
+            f"{label}.devices_per_job cannot exceed max_concurrent_device_count"
+        ]
+    return []
+
+
 def _compute_capacity_error(
     compute: Any,
     *,
@@ -126,8 +150,9 @@ def _compute_capacity_error(
     aggregate = compute.get(aggregate_key)
     values = (campaign, aggregate)
     if (
-        not isinstance(device_count, int)
+        not isinstance(device_count, (int, float))
         or isinstance(device_count, bool)
+        or isinstance(device_count, float) and not device_count.is_integer()
         or device_count < 1
         or not all(
             isinstance(value, (int, float))
@@ -158,6 +183,52 @@ def _compute_capacity_error(
             f"max_concurrent_device_count * {campaign_key}"
         )
     return None
+
+
+def _inference_campaign_errors(compute: Any) -> list[str]:
+    """Keep repeated complete-split timings paired; never multiply case_count."""
+    if not isinstance(compute, dict):
+        return []
+    runs = compute.get("campaign_runs")
+    if not isinstance(runs, list) or not runs:
+        return []  # Schema validation handles malformed or required metadata.
+    errors = []
+    valid = []
+    for index, run in enumerate(runs):
+        if not isinstance(run, dict):
+            continue
+        values = [run.get("wall_time_seconds"), run.get("aggregate_device_time_seconds")]
+        try:
+            valid_values = all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                               and math.isfinite(v) and v > 0 for v in values)
+        except OverflowError:
+            valid_values = False
+        if not valid_values:
+            errors.append(f"methodology.inference_compute.campaign_runs[{index}] timing values must be finite positive numbers")
+            continue
+        valid.append(run)
+        error = _compute_capacity_error(
+            {**run, "max_concurrent_device_count": compute.get("max_concurrent_device_count")},
+            label=f"methodology.inference_compute.campaign_runs[{index}]",
+            campaign_key="wall_time_seconds", aggregate_key="aggregate_device_time_seconds",
+        )
+        if error:
+            errors.append(error)
+    if len(valid) != len(runs):
+        return errors
+    representative = sorted(valid, key=lambda run: run["wall_time_seconds"])[(len(valid) - 1) // 2]
+    for target, source in [("campaign_wall_time_seconds", "wall_time_seconds"),
+                           ("aggregate_device_time_seconds", "aggregate_device_time_seconds")]:
+        value = compute.get(target)
+        try:
+            matches = isinstance(value, (int, float)) and not isinstance(value, bool) and math.isclose(
+                value, representative[source], rel_tol=1e-9, abs_tol=1e-9
+            )
+        except OverflowError:
+            matches = False
+        if not matches:
+            errors.append(f"methodology.inference_compute.{target} must match the same lower-median-wall-time campaign run")
+    return errors
 
 
 def methodology_errors(
@@ -418,6 +489,10 @@ def methodology_errors(
                         f"methodology.training.stages[{index}].random_seeds must be "
                         "empty when stochastic is false"
                     )
+            errors.extend(_compute_allocation_errors(
+                stage.get("compute"),
+                label=f"methodology.training.stages[{index}].compute",
+            ))
             compute_error = _compute_capacity_error(
                 stage.get("compute"),
                 label=f"methodology.training.stages[{index}].compute",
@@ -495,6 +570,10 @@ def methodology_errors(
                 "methodology.inference_compute.case_count must equal the official "
                 f"evaluation case count {expected_case_count}"
             )
+    errors.extend(_compute_allocation_errors(
+        inference, label="methodology.inference_compute",
+    ))
+    errors.extend(_inference_campaign_errors(inference))
     inference_compute_error = _compute_capacity_error(
         inference,
         label="methodology.inference_compute",

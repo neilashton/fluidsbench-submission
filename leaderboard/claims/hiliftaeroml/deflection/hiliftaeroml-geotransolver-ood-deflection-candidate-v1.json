@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-16-b1cafe65dc8c/hiliftaeroml/deflection/hiliftaeroml-geotransolver-ood-deflection-candidate-v1",
+  "claim_id": "prototype-dev-2026-09-16-4c51b08f226c/hiliftaeroml/deflection/hiliftaeroml-geotransolver-ood-deflection-candidate-v1",
   "release": {
-    "id": "prototype-dev-2026-09-16-b1cafe65dc8c",
+    "id": "prototype-dev-2026-09-16-4c51b08f226c",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-17T09:07:13Z",
+    "published_at": "2026-09-30T08:42:06Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -54,16 +54,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "b1cafe65dc8ca6a7154bfa857983a178786d6a7e06065364eb4cdb638b7a4f85",
+      "feed_sha256": "4c51b08f226cb29361eaba8ff32274a14ecd69902bf79c72425689f7e57d69b8",
       "row_index": 27
     },
     "source_submission": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-geotransolver-ood-deflection-candidate-v1/submission.json",
-      "sha256": "939072a9c57c3a58563f4a37a41fab96f50ac7d1264bd7a1af7c25aa32161a9c"
+      "sha256": "205f9f4ebd0e91988497dcb4d56498175b4539b8bc667f16f8bae6eb491d9967"
     },
     "evaluation_evidence": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-geotransolver-ood-deflection-candidate-v1/evaluation-evidence.json",
-      "sha256": "39237c15567ed38c6fb10c2a35964a7da7398203c3db236502c162b5090756a4"
+      "sha256": "18f2b6caa572714d1fbb991c814e7f49c3601ee0e5fc3909bbd350bdf6527f84"
     },
     "profile_index": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-geotransolver-ood-deflection-candidate-v1/profiles/index.json",
@@ -79,7 +79,7 @@
     },
     "case_metrics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-geotransolver-ood-deflection-candidate-v1/metrics/cases.json",
-      "sha256": "62b86bf1cfabaa3bbf24997ea04186d5d010ed3e17b87d08658b1e952b4089e2"
+      "sha256": "d1925512bd19d75e76b72cbe89586f8a2f0c0245d732eba01859cc168d81614d"
     },
     "regional_diagnostics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-geotransolver-ood-deflection-candidate-v1/regional-diagnostics.json",

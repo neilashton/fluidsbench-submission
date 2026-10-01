@@ -255,10 +255,10 @@
   "paper_url": "",
   "submitted_at": "2026-09-28",
   "evaluation": {
-    "reference_version": "prototype-1",
-    "command": "python3 -m reference.evaluate_predictions --support-manifest /mnt/Data_A/AirfRANS_Inference_Handover_2026-09-09/FluidsBench/airfrans-scoring-support/airfrans-native-ground-truth-v1-candidate/manifest.json --case-set standard --prediction-manifest <layer2-output>/manifest.json --submission-id transolverpp-full-v1 --split-id full --output metrics/cases.json ; python3 scripts/finalize_airfrans_metrics.py (folds in velocity_profile_r2 + composite scores)",
+    "reference_version": "airfrans-scoring-v2-candidate",
+    "command": "python3 -m reference.evaluate_predictions --support-manifest /mnt/Data_A/AirfRANS_Inference_Handover_2026-09-09/FluidsBench/airfrans-scoring-support/airfrans-native-ground-truth-v1-candidate/manifest.json --case-set standard --prediction-manifest <layer2-output>/manifest.json --submission-id transolverpp-full-v1 --split-id full --output metrics/cases.json ; python3 scripts/finalize_airfrans_metrics.py (folds in velocity_profile_r2 + composite scores) ; python3 scripts/rescore_airfrans_candidate.py --package-dir submissions/airfrans/transolverpp-full-v1 --scoring-support-manifest <scoring-support>/airfrans-native-ground-truth-v1-candidate/manifest.json",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "480627ec071082118cc01eef79c3e4103e077b507cbde224453e5c3efdd6e5a0"
+    "evidence_sha256": "aa320c73ee5e48523c27271523a2340923a076fa3cbe2fdf9c6840068b8c1f01"
   },
   "reproducibility": {
     "contract_version": "open-reproducibility-3.0",
@@ -270,17 +270,17 @@
     "status": "candidate",
     "release_id": "airfrans-native-ground-truth-v1-candidate",
     "manifest_url": "https://fluidsbench.org/not-yet-published/airfrans-native-ground-truth-v1-candidate/manifest.json",
-    "manifest_sha256": "a2f5f2d63c50de09324837763676f8352454fcfb37fe995673b1c325abbbe4e1"
+    "manifest_sha256": "e26c7ce6dd2fad3e4015eb17c9aaa8603d42e6efe293b3fbd5b6969560971d63"
   },
   "spatial_discretization": {
     "format": "fluidsbench-discretization-v1",
     "file": "discretization.json",
-    "sha256": "2f03678cdbc422667b12485eabfb5e05614a20e29f016dd0bc20195a16482d9b"
+    "sha256": "4ee58ee8ff973a359653d7463b5f9772e51be869820bf6a79c5bcf0903f412c0"
   },
   "case_metrics": {
     "format": "fluidsbench-case-metrics-v1",
     "file": "metrics/cases.json",
-    "sha256": "216bd29e6d568a6fed29cbbbf77bfec98498524ab7e3baccd6a4d5bd925bd528",
+    "sha256": "4b9496548c83c9dad6d1dda1de2b39a77e8645ae90a18886985764429a8cbc97",
     "case_count": 200
   },
   "metric_values": {
@@ -301,9 +301,9 @@
     "c_drag_mae": 0.006422177320908966,
     "c_lift_mae": 0.030370605925999366,
     "velocity_profile_r2": 0.9568143654645883,
-    "overall_score": 44.26613723140171,
-    "field_score": 35.51375660049415,
-    "force_score": 45.21346494981887,
+    "overall_score": 53.406145927728495,
+    "field_score": 39.077649004307276,
+    "force_score": 39.787849155840604,
     "diagnostic_score": 95.68143654645883
   },
   "profile_data": {

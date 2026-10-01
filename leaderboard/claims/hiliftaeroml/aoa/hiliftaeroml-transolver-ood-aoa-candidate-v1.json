@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-16-b1cafe65dc8c/hiliftaeroml/aoa/hiliftaeroml-transolver-ood-aoa-candidate-v1",
+  "claim_id": "prototype-dev-2026-09-16-4c51b08f226c/hiliftaeroml/aoa/hiliftaeroml-transolver-ood-aoa-candidate-v1",
   "release": {
-    "id": "prototype-dev-2026-09-16-b1cafe65dc8c",
+    "id": "prototype-dev-2026-09-16-4c51b08f226c",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-17T09:07:13Z",
+    "published_at": "2026-09-30T08:42:06Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -54,16 +54,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "b1cafe65dc8ca6a7154bfa857983a178786d6a7e06065364eb4cdb638b7a4f85",
+      "feed_sha256": "4c51b08f226cb29361eaba8ff32274a14ecd69902bf79c72425689f7e57d69b8",
       "row_index": 38
     },
     "source_submission": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-ood-aoa-candidate-v1/submission.json",
-      "sha256": "dc3c9ea0ff17bec23785ece90994010da887f7bb898fe14f5152e82e24b5104d"
+      "sha256": "dbb12127ee5ef5bc1d414007202f762a13dcc15ee1babd5603b45cdc932c25b0"
     },
     "evaluation_evidence": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-ood-aoa-candidate-v1/evaluation-evidence.json",
-      "sha256": "d7112b375f48741586a758ca9553868601f9e876377bfa510203454be1f0d146"
+      "sha256": "ea031b1b635a67960443889dc68eaee2c14ce011fc7ed9c3d5802ef6f2f5233f"
     },
     "profile_index": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-ood-aoa-candidate-v1/profiles/index.json",
@@ -79,7 +79,7 @@
     },
     "case_metrics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-ood-aoa-candidate-v1/metrics/cases.json",
-      "sha256": "fc32d74fff43f82378232ad5badbde7e16ef979527e23d633442e644ce7572a5"
+      "sha256": "d5c0cb7beb83193b439f3eb2db38912768b74a3952f64170be46dfe11dd8e582"
     },
     "regional_diagnostics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-ood-aoa-candidate-v1/regional-diagnostics.json",

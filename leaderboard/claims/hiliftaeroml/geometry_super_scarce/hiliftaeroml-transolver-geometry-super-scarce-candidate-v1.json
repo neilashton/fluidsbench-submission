@@ -1,11 +1,11 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
   "schema_version": "1.0",
-  "claim_id": "prototype-dev-2026-09-16-b1cafe65dc8c/hiliftaeroml/geometry_super_scarce/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1",
+  "claim_id": "prototype-dev-2026-09-16-4c51b08f226c/hiliftaeroml/geometry_super_scarce/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1",
   "release": {
-    "id": "prototype-dev-2026-09-16-b1cafe65dc8c",
+    "id": "prototype-dev-2026-09-16-4c51b08f226c",
     "status": "prototype_dummy_data",
-    "published_at": "2026-09-17T09:07:13Z",
+    "published_at": "2026-09-30T08:42:06Z",
     "archive_url": null,
     "release_view_url": null
   },
@@ -54,16 +54,16 @@
   "bindings": {
     "result": {
       "feed_file": "leaderboard/all.json",
-      "feed_sha256": "b1cafe65dc8ca6a7154bfa857983a178786d6a7e06065364eb4cdb638b7a4f85",
+      "feed_sha256": "4c51b08f226cb29361eaba8ff32274a14ecd69902bf79c72425689f7e57d69b8",
       "row_index": 37
     },
     "source_submission": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1/submission.json",
-      "sha256": "68a649ea1933078cf4a7082bdd0daba046aafcc149bceb0489943711ba1c767d"
+      "sha256": "f77bf911d69c8b92c521e7b2e153eb3c0e1ddf184090c89de93681c5dafb38df"
     },
     "evaluation_evidence": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1/evaluation-evidence.json",
-      "sha256": "627b14bc89216cbb9e61608b937b9d0efda04d41d2b6d0c92f9520f0f228f3c9"
+      "sha256": "d2dd8d6776f614b256dc567e68b572e2e1ca0be09dc3f19091b1e24d30b892ee"
     },
     "profile_index": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1/profiles/index.json",
@@ -79,7 +79,7 @@
     },
     "case_metrics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1/metrics/cases.json",
-      "sha256": "5da680b7c263a91ea09fc27c1552c27217d66c073dbf613505d7781db7e28de6"
+      "sha256": "3ba9506d9d17d427e56c5a7d9145a0be3bf0d5f451a1800882f1e9a2f8d19bdb"
     },
     "regional_diagnostics": {
       "path": "submissions/hiliftaeroml/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1/regional-diagnostics.json",

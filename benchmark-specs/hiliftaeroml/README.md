@@ -1,4 +1,18 @@
-# HiLiftAeroML closed-candidate submission contract
+<a id="hiliftaeroml-closed-candidate-submission-contract"></a>
+
+# HiLiftAeroML: prepare a candidate result
+
+**Public submissions are closed.** Follow the [participant guide](PARTICIPANT_GUIDE.md) and
+[compact-v2 packaging example](../../examples/hiliftaeroml-v3-candidate/README.md) for a local, owner-coordinated dry run.
+You need complete native surface and volume predictions, evaluator aggregates and case receipts, actual methodology/spatial
+records, and authorized compact-v2 scoring support. Public plot truth alone is insufficient.
+
+Every case requires four fields: surface pressure and wall shear, volume pressure and velocity. There is no surface-only option.
+Use the evaluator's loads and compact-v2 profiles; regional reports are optional and have zero score weight.
+Check the [activation checklist](CANDIDATE_ACTIVATION_CHECKLIST.md) before treating any candidate as ready for intake.
+
+<details>
+<summary>Current candidate status and the 23 registered real-inference previews</summary>
 
 HiLiftAeroML has a participant-shaped FluidsBench schema-v3 contract, but it is
 not open for submissions. The machine-readable
@@ -33,27 +47,29 @@ The detailed workflow is in [`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md).
 The activation work that remains is tracked separately in
 [`CANDIDATE_ACTIVATION_CHECKLIST.md`](CANDIDATE_ACTIVATION_CHECKLIST.md).
 
+</details>
+
 ## Official evaluation labels and case sets
 
 Each package declares exactly one `split_id`. The 14 accepted labels map to
 eight exact ordered evaluation case sets:
 
-| `split_id` | Display label | Evaluation cases | Case-set ID |
-| --- | --- | ---: | --- |
-| `full` | Full | 360 | `caseset-ac791749e527` |
-| `medium` | Medium | 360 | `caseset-ac791749e527` |
-| `scarce` | Scarce | 360 | `caseset-ac791749e527` |
-| `super_scarce` | Super scarce | 360 | `caseset-ac791749e527` |
-| `geometry` | Geometry | 360 | `caseset-53990ea68fa6` |
-| `geometry_medium` | Geometry medium | 360 | `caseset-53990ea68fa6` |
-| `geometry_scarce` | Geometry scarce | 360 | `caseset-53990ea68fa6` |
-| `geometry_super_scarce` | Geometry super scarce | 360 | `caseset-53990ea68fa6` |
-| `single_aoa_4` | AoA 4 | 36 | `caseset-7a743a20b3bd` |
-| `single_aoa_12` | AoA 12 | 36 | `caseset-02fc12ff3494` |
-| `single_aoa_22` | AoA 22 | 36 | `caseset-85ecccd9ccda` |
-| `aoa` | AoA extrapolation | 900 | `caseset-29693354ed8a` |
-| `deflection` | Deflection | 360 | `caseset-c0ecb14de138` |
-| `stall` | Stall | 723 | `caseset-804491c8956e` |
+| `split_id`              | Display label         | Evaluation cases | Case-set ID            |
+| ----------------------- | --------------------- | ---------------: | ---------------------- |
+| `full`                  | Full                  |              360 | `caseset-ac791749e527` |
+| `medium`                | Medium                |              360 | `caseset-ac791749e527` |
+| `scarce`                | Scarce                |              360 | `caseset-ac791749e527` |
+| `super_scarce`          | Super scarce          |              360 | `caseset-ac791749e527` |
+| `geometry`              | Geometry              |              360 | `caseset-53990ea68fa6` |
+| `geometry_medium`       | Geometry medium       |              360 | `caseset-53990ea68fa6` |
+| `geometry_scarce`       | Geometry scarce       |              360 | `caseset-53990ea68fa6` |
+| `geometry_super_scarce` | Geometry super scarce |              360 | `caseset-53990ea68fa6` |
+| `single_aoa_4`          | AoA 4                 |               36 | `caseset-7a743a20b3bd` |
+| `single_aoa_12`         | AoA 12                |               36 | `caseset-02fc12ff3494` |
+| `single_aoa_22`         | AoA 22                |               36 | `caseset-85ecccd9ccda` |
+| `aoa`                   | AoA extrapolation     |              900 | `caseset-29693354ed8a` |
+| `deflection`            | Deflection            |              360 | `caseset-c0ecb14de138` |
+| `stall`                 | Stall                 |              723 | `caseset-804491c8956e` |
 
 The union contains 1,355 unique physical cases. Labels that share a case set
 still represent distinct declared training regimes; they are not interchangeable
@@ -65,15 +81,18 @@ checkpoint selection, or manual model selection.
 
 ## Native fields and reductions
 
+<details>
+<summary>Read native fields and reductions requirements</summary>
+
 The closed candidate requires all four logical predictions for every case in
 the selected evaluation set:
 
-| Support | Required prediction | Primary spatial weight |
-| --- | --- | --- |
-| all native boundary `PointData` points | scalar surface pressure | published native nodal dual area |
-| all native boundary `PointData` points | three-component wall shear | published native nodal dual area |
-| retained native volume `PointData` points | scalar volume pressure | one per valid point |
-| retained native volume `PointData` points | three-component velocity | one per valid point |
+| Support                                   | Required prediction        | Primary spatial weight           |
+| ----------------------------------------- | -------------------------- | -------------------------------- |
+| all native boundary `PointData` points    | scalar surface pressure    | published native nodal dual area |
+| all native boundary `PointData` points    | three-component wall shear | published native nodal dual area |
+| retained native volume `PointData` points | scalar volume pressure     | one per valid point              |
+| retained native volume `PointData` points | three-component velocity   | one per valid point              |
 
 The volume validity rule is the raw Float32 `avg(P) != 0.0` test before
 normalization. There is no dual-volume or cell-volume-weighted secondary
@@ -92,10 +111,19 @@ in the selected split. It is not a pooled all-point ratio and never an average
 of chunk-local metrics.
 
 Relative metrics use `(P-p_inf)/q_inf`, `tau_wall/q_inf`, and `U/|U_inf|`.
-The companion MAE and RMSE diagnostics are converted back to their dimensional
-bases per case before equal-case macro aggregation.
+For dimensional MAE/RMSE, the assembler preserves each case's native inverse
+scale, then converts pressure and wall shear from `slug/(in*s²)` to Pa
+(`× 574.5631077637795`) and velocity from in/s to m/s (`× 0.0254`) before
+equal-case macro aggregation. Supply the frozen evaluator's native outputs;
+do not preconvert them. This SI export is recorded separately in the evidence.
+See the [versioned correction](DIMENSIONAL_EXPORT_CORRECTION.md) for existing previews.
+
+</details>
 
 ## Loads and composite score
+
+<details>
+<summary>Read loads and composite score requirements</summary>
 
 The evaluator derives loads from the same complete native surface prediction;
 participants do not provide an independently fitted force value. Pressure and
@@ -115,21 +143,26 @@ their prediction-side integration.
 
 The bounded candidate composite is:
 
-| Component | Transform | Weight |
-| --- | --- | ---: |
-| surface pressure relative L2 | `clip(100 * (1 - error/15), 0, 100)` | 0.15 |
-| surface wall-shear relative L2 | `clip(100 * (1 - error/20), 0, 100)` | 0.10 |
-| volume velocity relative L2 | `clip(100 * (1 - error/12), 0, 100)` | 0.15 |
-| volume pressure relative L2 | `clip(100 * (1 - error/15), 0, 100)` | 0.10 |
-| `Cd` R2 | `100 * clip(R2, 0, 1)` | 0.15 |
-| `Cl` R2 | `100 * clip(R2, 0, 1)` | 0.10 |
-| velocity-profile R2 | `100 * clip(R2, 0, 1)` | 0.15 |
-| Cp-cut R2 | `100 * clip(R2, 0, 1)` | 0.10 |
+| Component                      | Transform                            | Weight |
+| ------------------------------ | ------------------------------------ | -----: |
+| surface pressure relative L2   | `clip(100 * (1 - error/15), 0, 100)` |   0.15 |
+| surface wall-shear relative L2 | `clip(100 * (1 - error/20), 0, 100)` |   0.10 |
+| volume velocity relative L2    | `clip(100 * (1 - error/12), 0, 100)` |   0.15 |
+| volume pressure relative L2    | `clip(100 * (1 - error/15), 0, 100)` |   0.10 |
+| `Cd` R2                        | `100 * clip(R2, 0, 1)`               |   0.15 |
+| `Cl` R2                        | `100 * clip(R2, 0, 1)`               |   0.10 |
+| velocity-profile R2            | `100 * clip(R2, 0, 1)`               |   0.15 |
+| Cp-cut R2                      | `100 * clip(R2, 0, 1)`               |   0.10 |
 
 This preserves 50% field, 25% force, and 25% profile weight. The specification,
 not this prose summary, is the numerical source of truth.
 
+</details>
+
 ## Profile diagnostics
+
+<details>
+<summary>Read profile diagnostics requirements</summary>
 
 Every complete case has ten pressure-cut rows, `A` through `J`. Cp scoring
 retains every disconnected physical cut graph, centers truth independently
@@ -142,13 +175,17 @@ Volume velocity uses exactly five stations: `B.2`, `B.3`, `C.1`, `C.2`, and
 mask, physical polyline arc-length weights, and explicit gaps. Truth is centered
 within each station; station SSE and SST are pooled within the case before the
 equal-case macro average. Invalid runs remain serialized with zero weight and
-must not be interpolated or bridged.
+must not be interpolated or bridged in evaluator support; participant arrays
+contain only the valid rows in evaluator-defined order.
 
-The package profile chunks contain predictions and alignment support, not
-ground truth. Candidate truth is a separate unpublished benchmark-owned
-release used only for an authorized local dry run. See
-[`native-profile-format-v1.json`](native-profile-format-v1.json) and
-[`NATIVE_PROFILE_TRUTH_EXPORT.md`](NATIVE_PROFILE_TRUTH_EXPORT.md).
+Compact profile-v2 is the official and sole participant-facing profile
+representation. Earlier HiLift profile package formats are not accepted. The current
+`submission-spec.json` selects the unchanged compact contract. Its historical
+`-candidate` identifiers and contract metadata remain frozen to preserve the
+validated support, all 23 package archives, and their recorded scores.
+Representation selection does not publish support or attest the implementation.
+Participant artifacts contain predictions only; evaluator-owned alignment,
+topology, weights, masks, and truth remain outside the package.
 
 The website repository now publishes a separate, checksum-bound float32
 projection of the Cp and velocity truth for all 1,355 unique cases in all
@@ -159,10 +196,10 @@ and cannot be used for metric recomputation. Its exact cross-repository binding
 is
 [`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json).
 
-### Additive compact profile-v2 candidate
+### Official compact profile-v2 representation
 
-An additive, inactive v2 candidate removes geometry and topology arrays from
-the participant profile artifacts. The evaluator owns that immutable support,
+Compact profile-v2 removes geometry and topology arrays from the participant
+profile artifacts. The evaluator owns that immutable support,
 joins it outside the submission, and accepts exactly two prediction-value
 arrays per case: quantized Cp deltas and scalar Float32 velocity-profile
 values. The exact velocity float32 bits use a lossless unsigned-delta and byte
@@ -176,7 +213,7 @@ replay additionally confirms that a closed native contour is unwrapped by
 repeating its first vertex, thereby retaining its existing closing segment
 without creating a new edge; this does not change any Full360 support bytes.
 Velocity retains the
-five v1 stations and submits all and only evaluator-selected valid rows as
+five stations and submits all and only evaluator-selected valid rows as
 scalar `float32` speed-over-freestream values; the on-disk `uint8` transform
 round-trips every bit. This compact path changes only
 Cp-cut and velocity-profile plotting/scoring payloads. Complete native-surface
@@ -225,7 +262,12 @@ Their implementation provenance therefore remains explicitly
 immutable evaluator revision are frozen; preview registration does not
 activate or implicitly revise that older attestation.
 
+</details>
+
 ## Regional reporting
+
+<details>
+<summary>Read regional reporting requirements</summary>
 
 [`regional-diagnostics-v2.json`](regional-diagnostics-v2.json) defines four
 surface regions and four volume regions. They reuse the native predictions and
@@ -251,14 +293,16 @@ is close to zero. Local regional relative L2 and regional R2 remain visible as
 diagnostics. All regional values still have weight `0.0`; the official volume
 metrics, component scores, weights, and overall score are unchanged.
 
+</details>
+
 ## Closed schema-v3 workflow
 
 Use the configuration template and instructions in
 [`../../examples/hiliftaeroml-v3-candidate/`](../../examples/hiliftaeroml-v3-candidate/)
 and [`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md). The assembler consumes the
 native evaluator's complete case-set aggregate, separate surface and volume
-output roots if necessary, case receipts, and the authorized local candidate
-profile-truth release. It writes a normal FluidsBench schema-v3 package and
+output roots if necessary, case receipts, and the authorized local compact-v2
+evaluator-support release. It writes a normal FluidsBench schema-v3 package and
 refuses missing cases, placeholder values, stale hashes, unresolved release
 bindings, or an existing output directory.
 
@@ -275,8 +319,8 @@ The machine-readable authorities are:
   aliases, and lifecycle status;
 - [`methodology-contract.json`](methodology-contract.json) for required model
   outputs;
-- [`native-profile-format-v1.json`](native-profile-format-v1.json) for
-  prediction-only profile serialization;
+- [`native-profile-format-v2.json`](native-profile-format-v2.json) for the sole
+  accepted prediction-only profile serialization;
 - [`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json)
   for the non-scoring all-case browser-plot truth;
 - [`regional-diagnostics-v2.json`](regional-diagnostics-v2.json) for optional
@@ -284,7 +328,6 @@ The machine-readable authorities are:
 - [`candidate-evaluator-release-binding.json`](candidate-evaluator-release-binding.json)
   for the fail-closed release hand-off.
 
-The additive [`native-profile-format-v2.json`](native-profile-format-v2.json)
-is a candidate contract only. Its evaluator-owned scoring support is not
-public; publishing the plot-only derivative does not supersede the v1
-authority or activate compact-profile intake.
+The compact-v2 representation is official. Its evaluator-owned scoring support
+is not yet public for every enabled case set, so publishing the plot-only
+derivative does not open profile intake.
