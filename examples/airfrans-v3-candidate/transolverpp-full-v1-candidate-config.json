@@ -243,9 +243,9 @@
         "measurement_notes": "Single uninterrupted run over all 200 Full-split cases (batch size 1, sequential, single GPU), covering data loading, normalization, GPU transfer and the forward pass, with per-case reseeding. The GPU was simultaneously at 100% utilization from an unrelated training job, so this wall time is an upper bound rather than dedicated-GPU performance. Excludes plotting and the separate packing step onto native mesh points."
       }
     },
-    "submitter_name": "Dummy Submitter",
-    "institution": "Dummy Institution",
-    "paper_url": ""
+    "submitter_name": "FluidsBench maintainers",
+    "institution": "Pre-release validation reference",
+    "paper_url": "https://arxiv.org/abs/2502.02414"
   },
   "reproducibility": {
     "contract_version": "open-reproducibility-3.0",
