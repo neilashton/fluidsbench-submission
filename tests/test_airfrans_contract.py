@@ -6,6 +6,8 @@ import math
 import unittest
 from pathlib import Path
 
+from reference.scores import composite_component_group_scores, composite_overall_score
+
 ROOT = Path(__file__).resolve().parents[1]
 AIRFRANS_ROOT = ROOT / "benchmark-specs" / "airfrans"
 AIRFRANS_EXAMPLE_ROOT = ROOT / "examples" / "airfrans-profile-extraction"
@@ -36,6 +38,70 @@ class AirfransContractTests(unittest.TestCase):
         binding = self.specification["profile_definition"]
         self.profile_definition_path = AIRFRANS_ROOT / binding["file"]
         self.profile_definition = load_json(self.profile_definition_path)
+
+    def test_score_matches_ahmed_field_force_and_profile_balance(self) -> None:
+        values = {
+            "surface_pressure_rel_l2": 3.0,
+            "surface_wall_shear_rel_l2": 10.0,
+            "flow_domain_velocity_rel_l2": 9.0,
+            "flow_domain_pressure_rel_l2": 15.0,
+            "cd_r2": 0.8,
+            "cl_r2": 0.6,
+            "velocity_profile_r2": 0.4,
+        }
+        composite = self.specification["overall_score_composite"]
+        groups = composite_component_group_scores(
+            values, composite, self.specification["component_score_groups"]
+        )
+        self.assertAlmostEqual(groups["field_score"], 41.5)
+        self.assertAlmostEqual(groups["force_score"], 72.0)
+        self.assertAlmostEqual(groups["diagnostic_score"], 40.0)
+        score = composite_overall_score(values, composite)
+        self.assertAlmostEqual(score, 48.75)
+        self.assertAlmostEqual(
+            score,
+            0.5 * groups["field_score"]
+            + 0.25 * groups["force_score"]
+            + 0.25 * groups["diagnostic_score"],
+        )
+        ahmed = load_json(ROOT / "benchmark-specs/ahmedml/submission-spec.json")
+        ahmed_values = {
+            **values,
+            "volume_velocity_rel_l2": values["flow_domain_velocity_rel_l2"],
+            "volume_pressure_rel_l2": values["flow_domain_pressure_rel_l2"],
+            "cp_cut_r2": values["velocity_profile_r2"],
+        }
+        self.assertAlmostEqual(
+            score, composite_overall_score(ahmed_values, ahmed["overall_score_composite"])
+        )
+        self.assertNotIn("cp_cut_r2", {m["id"] for m in self.specification["metrics"]})
+
+    def test_prototype_packages_bind_the_revised_scores_and_evidence(self) -> None:
+        self.assertEqual(
+            self.specification["evaluation_reference_version"], "airfrans-scoring-v2-candidate"
+        )
+        self.assertFalse(self.specification["scoring_support"]["submissions_open"])
+        for path in sorted((ROOT / "submissions/airfrans").glob("*/submission.json")):
+            with self.subTest(submission=path.parent.name):
+                submission = load_json(path)
+                evidence_path = path.parent / submission["evaluation"]["evidence_file"]
+                evidence = load_json(evidence_path)
+                version = self.specification["evaluation_reference_version"]
+                self.assertEqual(submission["evaluation"]["reference_version"], version)
+                self.assertEqual(evidence["reference_version"], version)
+                self.assertEqual(submission["evaluation"]["evidence_sha256"], sha256_file(evidence_path))
+                self.assertEqual(submission["metric_values"], evidence["metric_values"])
+                values = submission["metric_values"]
+                self.assertAlmostEqual(
+                    values["overall_score"],
+                    composite_overall_score(values, self.specification["overall_score_composite"]),
+                )
+                groups = composite_component_group_scores(
+                    values, self.specification["overall_score_composite"],
+                    self.specification["component_score_groups"],
+                )
+                for metric_id, expected in groups.items():
+                    self.assertAlmostEqual(values[metric_id], expected)
 
     def test_profile_definition_is_pinned_and_matches_submission_panel(self) -> None:
         binding = self.specification["profile_definition"]

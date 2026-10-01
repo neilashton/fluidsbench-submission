@@ -3,12 +3,25 @@
 This guide describes how to prepare and locally validate a HiLiftAeroML
 FluidsBench schema-v3 candidate. It is intentionally not an invitation to
 submit a result. The checked-in specification has `submissions_open: false`,
-the profile truth is not public, and final evaluator/owner release gates remain
+the evaluator scoring truth is not fully published (the separate public plot truth is not scoring support), and final evaluator/owner release gates remain
 authoritative.
 
 No private leaderboard is part of this work. The commands below create and
 validate local files only. They do not upload a result or make it visible in a
 public or private leaderboard.
+
+Use the shared [hardware and compute fields](../../METHODOLOGY.md#hardware-and-compute)
+for each training stage and inference campaign, including GPU model and allocation counts.
+
+## Before you start
+
+Run packaging commands from the repository root with the [validation dependencies](../../SUBMITTING.md#4-validate-locally).
+You also need the dataset evaluator's complete native surface/volume outputs, aggregates and receipts, plus authorized local
+compact-v2 evaluator support. The public plot-only truth cannot replace that support. Inspect
+[assembly blockers](#9-inspect-blockers-assemble-and-dry-run) before committing to a large evaluation.
+
+Workflow: choose a split → record the method → predict all four fields → run the evaluator for fields, loads and profiles →
+close the case-set receipts → assemble → candidate dry-run. The detailed rules below remain required even when using an assembler.
 
 ## 1. Select one declared evaluation label
 
@@ -16,22 +29,7 @@ Choose one `split_id` from [`splits/`](splits/) and preserve its exact ordered
 `case_ids`. A package names one label even when another label shares the same
 evaluation case set.
 
-| `split_id` | Label | Cases | Exact case-set ID |
-| --- | --- | ---: | --- |
-| `full` | Full | 360 | `caseset-ac791749e527` |
-| `medium` | Medium | 360 | `caseset-ac791749e527` |
-| `scarce` | Scarce | 360 | `caseset-ac791749e527` |
-| `super_scarce` | Super scarce | 360 | `caseset-ac791749e527` |
-| `geometry` | Geometry | 360 | `caseset-53990ea68fa6` |
-| `geometry_medium` | Geometry medium | 360 | `caseset-53990ea68fa6` |
-| `geometry_scarce` | Geometry scarce | 360 | `caseset-53990ea68fa6` |
-| `geometry_super_scarce` | Geometry super scarce | 360 | `caseset-53990ea68fa6` |
-| `single_aoa_4` | AoA 4 | 36 | `caseset-7a743a20b3bd` |
-| `single_aoa_12` | AoA 12 | 36 | `caseset-02fc12ff3494` |
-| `single_aoa_22` | AoA 22 | 36 | `caseset-85ecccd9ccda` |
-| `aoa` | AoA extrapolation | 900 | `caseset-29693354ed8a` |
-| `deflection` | Deflection | 360 | `caseset-c0ecb14de138` |
-| `stall` | Stall | 723 | `caseset-804491c8956e` |
+See the [label and case-set table](README.md#official-evaluation-labels-and-case-sets) for all exact IDs and counts.
 
 These are 14 labels over eight unique case sets and 1,355 unique cases in the
 union. The JSON files bind evaluation membership and order; they do not invent
@@ -44,7 +42,46 @@ Before expensive inference, verify that the chosen label, ordered case list,
 and case-set identity agree with [`submission-spec.json`](submission-spec.json).
 Never substitute a similarly named local split or sort the cases differently.
 
-## 2. Predict all four native fields
+<a id="7-record-method-and-discretization-provenance"></a>
+
+## 2. Record method and discretization provenance
+
+Every schema-v3 package includes a `fluidsbench-method-v1` methodology record
+covering all four required outputs in
+[`methodology-contract.json`](methodology-contract.json). It must describe:
+
+- every architecture component and its role, distinguishing surface and volume
+  models when they are separate;
+- exact total learned parameters and exact parameters updated by the submitter;
+- all input features, direct or deterministically derived outputs, key
+  hyperparameters, normalization, preprocessing, and sampling;
+- every training or upstream stage, its data/procedure, seeds, and measured
+  compute as applicable;
+- the raw-file SHA-256 of every checkpoint file actually loaded, including
+  shards, adapters, or separate surface/volume checkpoints; and
+- measured complete-selected-set inference hardware, maximum concurrency,
+  wall time excluding queue delay, aggregate device time, and whether timing
+  includes preprocessing and native-support mapping.
+
+The exact checkpoint digests identify local bytes; they do not require model
+weights to be uploaded. Sharing complete native prediction fields is optional,
+but omission of those large fields does not relax the evaluator receipt,
+metric, profile, or methodology requirements.
+
+`discretization.json` and ordered `discretization/cases.jsonl` separately record
+the actual training and inference representations: input/support sizes,
+sampling, supervision, direct outputs, and mapping back to the canonical native
+supports. Methodology and discretization must describe the same pipeline.
+
+Start from
+[`../../examples/hiliftaeroml-v3-candidate/package-config.template.json`](../../examples/hiliftaeroml-v3-candidate/package-config.template.json).
+Every `__REPLACE_...__` or `__UNRESOLVED_HILIFTAEROML_...__` string is a real
+blocker, not a sample value. Do not invent a revision, release hash, or metric
+to replace one.
+
+<a id="2-predict-all-four-native-fields"></a>
+
+## 3. Predict all four native fields
 
 The current HiLiftAeroML candidate has one required scope: complete surface and
 volume prediction. It does not define the DrivAerML `surface_only` zero-score
@@ -80,7 +117,9 @@ describe that conversion. If it predicts these nondimensional quantities
 directly, do not scale them a second time. The evaluator uses each case's own
 freestream data to produce the dimensional MAE/RMSE diagnostics.
 
-## 3. Chunk without changing the metric
+<a id="3-chunk-without-changing-the-metric"></a>
+
+## 4. Chunk without changing the metric
 
 Native cases are large and may be processed in bounded-memory chunks. Chunking
 is an execution detail, not a change of support or scoring. Across one case,
@@ -106,15 +145,27 @@ is complete, macro-average its derived field metric equally across the selected
 case set; a 900-case split does not give larger native meshes more weight than
 smaller ones.
 
+The package assembler converts native dimensional field MAE/RMSE to SI once:
+pressure and wall shear `× 574.5631077637795` into Pa; velocity `× 0.0254` into
+m/s. Pass the frozen evaluator's native outputs without preconverting them.
+The conversion preserves per-case inverse scales and leaves relative errors,
+coefficients, profiles, regional diagnostics and scores unchanged. The evidence
+records [`hiliftaeroml-dimensional-export-si-v1`](dimensional-export-si-v1.json).
+
 Incomplete cases fail closed. Do not insert zeros, NaNs, imputed metrics, or
 copied truth to make an aggregate appear complete.
 
-## 4. Derive forces and exact pitching moment
+<a id="4-derive-forces-and-exact-pitching-moment"></a>
+
+## 5. Derive forces and exact pitching moment
 
 Use the frozen evaluator to integrate the same native surface prediction used
 for the field metrics. Do not train or submit a separate force head as a
 replacement for integration, and do not hand-edit the evaluator-produced load
 values.
+
+<details>
+<summary>Required load convention, exact integration, normalization, and diagnostics</summary>
 
 The load stream consumes `Cp` and `Cf` on the training-`q_inf` basis. For each
 case it:
@@ -142,11 +193,27 @@ The numerical reasoning and retained audit scope are described in
 the frozen evaluator product, not reproduce a separate interpretation from the
 audit prose.
 
-## 5. Produce the exact Cp and velocity profiles
+</details>
 
-Profiles are deterministic derivatives of the complete native predictions.
-They are not independent model outputs and must not be replaced with values
-sampled on a participant-defined mesh.
+<a id="5-produce-the-official-compact-v2-profiles"></a>
+
+## 6. Produce the official compact-v2 profiles
+
+Compact profile-v2 is the sole accepted HiLiftAeroML profile representation.
+Earlier native profile package formats are not accepted. The immutable wire
+identifiers retain their historical `-candidate` suffix so existing support
+and validated packages remain byte-identical. Current format selection is
+recorded in `submission-spec.json`, separately from release activation. Profiles are
+deterministic derivatives of the complete native predictions; they are not
+independent model outputs and must not be sampled on a participant-defined
+mesh.
+
+Every case uses Cp rows A–J and the five velocity stations `B.2`, `B.3`, `C.1`, `C.2`, `C.3`. Preserve evaluator-defined
+topology, ordering, validity masks, and gaps. The prediction-only NPZ has exactly `cp_q_delta` and
+`velocity_speed_over_u_inf`; support and truth stay outside the package.
+
+<details>
+<summary>Required Cp/velocity reductions and compact encoding; distinction between plot truth and scoring support</summary>
 
 ### Surface Cp rows A-J
 
@@ -168,22 +235,12 @@ native support mapping, validity mask, physical polyline arc-length weights,
 and explicit gap intervals.
 
 Do not change the validity mask, fill invalid values, or bridge an invalid run
-with a trapezoidal edge. Invalid rows remain represented, their prediction
-entries remain NaN as required by the profile format, and their weights are
-zero. Truth is centered within each station; station-weighted SSE and SST are
-pooled within the case before complete-case R2 is macro-averaged equally.
+with a trapezoidal edge. Invalid rows are omitted from the participant array
+and retained in evaluator support with zero weight. Truth is centered within
+each station; station-weighted SSE and SST are pooled within the case before
+complete-case R2 is macro-averaged equally.
 
-The participant profile NPZ chunks are prediction-only. They include the exact
-alignment/topology support required by
-[`native-profile-format-v1.json`](native-profile-format-v1.json), but no truth
-or reference arrays. Hidden truth is joined only by the candidate validator
-from the separately supplied, benchmark-owned local release. The evaluator
-must emit every selected case and all ten Cp plus five velocity station aliases.
-
-### Inactive compact profile-v2 alternative
-
-The additive compact candidate is a maintainer-local alternative for the
-profile payload only. Its evaluator-owned release holds cut geometry,
+The evaluator-owned support release holds cut geometry,
 connected-graph topology, branch boundaries, sample placement, velocity
 validity masks, weights, alignment, and hidden truth outside the submission.
 Each participant case artifact contains exactly the two prediction arrays
@@ -208,18 +265,28 @@ selection evidence is recorded in
 and
 [`compact-cp-representation-audit-v1.md`](compact-cp-representation-audit-v1.md).
 
-This alternative does not compact or replace the canonical native surface
-prediction. Full native Cp and wall-shear field metrics, forces, and pitching
-moment remain unchanged. A float32, plot-only projection of truth for all
+This profile representation does not replace the full native surface
+prediction used for field metrics. Full native Cp and wall-shear field metrics,
+forces, and pitching moment remain unchanged. A float32, plot-only projection of truth for all
 1,355 unique cases across the eight official case sets is publicly bound for
 dashboard comparison by
 [`public-compact-profile-truth-binding-v1.json`](public-compact-profile-truth-binding-v1.json),
-but it omits scoring weights and is not an evaluator release. The v2 candidate
-therefore remains unbound for submission intake and inactive; access to either
-the public plot bundle or a local support directory changes none of those
-lifecycle facts.
+but it omits scoring weights and is not an evaluator release. The compact-v2
+format itself is official; submission intake remains closed until evaluator
+support is published for every enabled case set and the independent scoring
+and owner-approval gates are complete.
 
-## 6. Include regional reports only when complete
+</details>
+
+<a id="6-include-regional-reports-only-when-complete"></a>
+
+## 7. Include regional reports only when complete
+
+Set `include_regional_diagnostics=true` only for a complete selected-set evaluator aggregate. Otherwise set it to `false`
+and omit the report. Regions reuse predictions, have weight zero, and cannot change official metrics or ranking.
+
+<details>
+<summary>Region identities, geometric meaning, global reconstruction, and v2 comparison metric</summary>
 
 Regional diagnostics answer where a method is performing well or poorly using
 the same predictions and sufficient statistics. They require no new model
@@ -256,40 +323,7 @@ fabricating or partially aggregating it. The authoritative definition is
 uses equal-case whole-support-normalized RMSE as the primary volume-region
 comparison while retaining local relative L2 and R2 as zero-weight diagnostics.
 
-## 7. Record method and discretization provenance
-
-Every schema-v3 package includes a `fluidsbench-method-v1` methodology record
-covering all four required outputs in
-[`methodology-contract.json`](methodology-contract.json). It must describe:
-
-- every architecture component and its role, distinguishing surface and volume
-  models when they are separate;
-- exact total learned parameters and exact parameters updated by the submitter;
-- all input features, direct or deterministically derived outputs, key
-  hyperparameters, normalization, preprocessing, and sampling;
-- every training or upstream stage, its data/procedure, seeds, and measured
-  compute as applicable;
-- the raw-file SHA-256 of every checkpoint file actually loaded, including
-  shards, adapters, or separate surface/volume checkpoints; and
-- measured complete-selected-set inference hardware, maximum concurrency,
-  wall time excluding queue delay, aggregate device time, and whether timing
-  includes preprocessing and native-support mapping.
-
-The exact checkpoint digests identify local bytes; they do not require model
-weights to be uploaded. Sharing complete native prediction fields is optional,
-but omission of those large fields does not relax the evaluator receipt,
-metric, profile, or methodology requirements.
-
-`discretization.json` and ordered `discretization/cases.jsonl` separately record
-the actual training and inference representations: input/support sizes,
-sampling, supervision, direct outputs, and mapping back to the canonical native
-supports. Methodology and discretization must describe the same pipeline.
-
-Start from
-[`../../examples/hiliftaeroml-v3-candidate/package-config.template.json`](../../examples/hiliftaeroml-v3-candidate/package-config.template.json).
-Every `__REPLACE_...__` or `__UNRESOLVED_HILIFTAEROML_...__` string is a real
-blocker, not a sample value. Do not invent a revision, release hash, or metric
-to replace one.
+</details>
 
 ## 8. Close the evaluator-native case set
 
@@ -331,13 +365,13 @@ python scripts/assemble_hiliftaeroml_schema_v3_candidate.py \
   --native-surface-outputs /path/to/native/surface-outputs \
   --native-volume-outputs /path/to/native/volume-outputs \
   --native-receipts /path/to/native/case-receipts \
-  --candidate-profile-truth-release /authorized/local/hiliftaeroml-native-profile-truth-v1-candidate \
+  --profile-support-release /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate \
   --list-blockers
 ```
 
-Do not bypass reported blockers. In particular, access to a local inactive
-truth release does not publish that truth, freeze the evaluator, approve a
-method, or open submissions.
+Do not bypass reported blockers. Access to a local support release does not
+publish that support, freeze the evaluator, approve a method, or open
+submissions.
 
 When blocker inspection reports that full assembly validation is ready, create
 a new local output directory. The path must not already exist:
@@ -349,8 +383,8 @@ python scripts/assemble_hiliftaeroml_schema_v3_candidate.py \
   --native-surface-outputs /path/to/native/surface-outputs \
   --native-volume-outputs /path/to/native/volume-outputs \
   --native-receipts /path/to/native/case-receipts \
-  --candidate-profile-truth-release /authorized/local/hiliftaeroml-native-profile-truth-v1-candidate \
-  --output /path/to/local/hiliftaeroml-my-method-v1
+  --profile-support-release /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate \
+  --output /path/to/local/hiliftaeroml-my-method-v2
 ```
 
 If both domains share one parent, `--native-outputs` is the backward-compatible
@@ -359,13 +393,13 @@ and creates participant-owned schema-v3 files only. It does not create
 `approval`, `maintainer-validation.json`, or
 `prediction-artifact-checks.json`.
 
-Validate the package against the same authorized local candidate truth:
+Validate the package against the same authorized local evaluator support:
 
 ```bash
 python scripts/validate_submission.py \
   --candidate-dry-run \
-  --candidate-profile-truth-release /authorized/local/hiliftaeroml-native-profile-truth-v1-candidate \
-  /path/to/local/hiliftaeroml-my-method-v1
+  --profile-support-release /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate \
+  /path/to/local/hiliftaeroml-my-method-v2
 ```
 
 A successful command reports candidate dry-run validity only. It does not
@@ -373,90 +407,20 @@ grant official acceptance, benchmark-owner approval, contributor-stage
 eligibility, or leaderboard visibility. Do not use `--contributor-stage` for
 this closed workflow.
 
-### Optional local compact-v2 exercise
+<a id="materialize-local-support-for-a-coordinated-dry-run"></a>
 
-Twenty-three retained real-surrogate compact packages comprise eleven Transolver
-results and twelve GeoTransolver results. Together they cover Full, Scarce, the
-three fixed-AoA splits, Super scarce, Geometry scarce, Geometry super scarce,
-Geometry, and all three out-of-distribution splits (AoA, deflection, and stall).
-The public plot-only truth separately covers every official case set. A maintainer with the
-authorized native-profile truth and complete native outputs for the target case
-set can materialize an evaluator-owned scoring support release locally:
-
-```bash
-python scripts/materialize_hiliftaeroml_compact_profile_support.py \
-  --submission-spec benchmark-specs/hiliftaeroml/submission-spec.json \
-  --split benchmark-specs/hiliftaeroml/splits/full.json \
-  --surface-outputs-root /path/to/native/surface/per-case/outputs \
-  --volume-outputs-root /path/to/native/volume/per-case/outputs \
-  --source-truth-release /authorized/local/hiliftaeroml-native-profile-truth-v1-candidate \
-  --output-root /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate
-```
-
-The `--split`, `--surface-outputs-root`, and `--volume-outputs-root` groups may
-be repeated in matching order. Maintainers can instead reconstruct support for
-all eight official case sets without prediction outputs from the exact frozen
-authority already bound into the native-profile truth release:
-
-```bash
-python scripts/materialize_hiliftaeroml_compact_profile_support.py \
-  --submission-spec benchmark-specs/hiliftaeroml/submission-spec.json \
-  --split benchmark-specs/hiliftaeroml/splits/full.json \
-  --split benchmark-specs/hiliftaeroml/splits/geometry_scarce.json \
-  --split benchmark-specs/hiliftaeroml/splits/single_aoa_4.json \
-  --split benchmark-specs/hiliftaeroml/splits/single_aoa_12.json \
-  --split benchmark-specs/hiliftaeroml/splits/single_aoa_22.json \
-  --split benchmark-specs/hiliftaeroml/splits/aoa.json \
-  --split benchmark-specs/hiliftaeroml/splits/deflection.json \
-  --split benchmark-specs/hiliftaeroml/splits/stall.json \
-  --prerequisite-authority-index /authorized/local/hiliftaeroml-native-profile-truth-authority-v1.json \
-  --source-truth-release /authorized/local/hiliftaeroml-native-profile-truth-v1-candidate \
-  --output-root /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate
-```
-
-That path validates the authority against the truth-release binding, reads no
-surrogate prediction output, applies the same limit of 128 Cp points per
-physical graph, and stores every overlapping physical case once. Its receipt
-records how the authority record/payload hashes occupy the support format's
-four legacy source-hash provenance slots. The completed two-build all-case
-evidence is
-[`compact-profile-all-case-support-validation-v1.json`](compact-profile-all-case-support-validation-v1.json).
-It is the selected current local candidate support binding, and its ten-preview
-rebind is recorded in
-[`compact-profile-all-case-support-rebind-v1.json`](compact-profile-all-case-support-rebind-v1.json).
-Both records remain intentionally non-activating.
+Maintainers who need to build local support should use the [support materialization instructions](../../docs/MAINTAINERS.md#hiliftaeroml-local-support-for-a-coordinated-dry-run).
 
 The output is benchmark/evaluator-owned local support and must remain outside
-the participant package. Use it in place of, not alongside,
-`--candidate-profile-truth-release` when inspecting blockers or assembling:
-
-Compact assembly also requires a top-level `compact_evaluation` object in the
-package configuration with the exact compact assembler `command` and its
-RFC3339 `generated_at` time. Keep the native-v1 `evaluation` object unchanged;
-the assembler selects between the two records strictly by profile mode.
-
-```bash
-python scripts/assemble_hiliftaeroml_schema_v3_candidate.py \
-  --config /path/to/package-config.json \
-  --native-aggregate /path/to/native/case-set-aggregate \
-  --native-surface-outputs /path/to/native/surface/per-case/outputs \
-  --native-volume-outputs /path/to/native/volume/per-case/outputs \
-  --native-receipts /path/to/native/case-receipts \
-  --candidate-compact-profile-support-release /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate \
-  --output /path/to/local/hiliftaeroml-my-method-compact-v2
-
-python scripts/validate_submission.py \
-  --candidate-dry-run \
-  --candidate-compact-profile-support-release /authorized/local/hiliftaeroml-compact-profile-support-v2-candidate \
-  /path/to/local/hiliftaeroml-my-method-compact-v2
-```
+the participant package. The package configuration has one top-level
+`evaluation` object containing the exact assembler `command` and RFC3339
+`generated_at` time. There is no alternate profile-mode selector.
 
 The assembler reports the completed package size but has no aggregate byte
 ceiling, because the official splits have materially different case counts.
 The bounded per-file/archive checks and the validator remain in force. Passing
 them remains only local candidate evidence; it does not publish support,
-approve the evaluator, or open submissions. The native profile-v1 commands
-above remain the retained workflow.
+approve the evaluator, or open submissions.
 
 ## 10. Package boundary while submissions are closed
 
