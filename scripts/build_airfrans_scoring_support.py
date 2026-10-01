@@ -60,7 +60,6 @@ from reference.weightings import evaluator_weighting  # noqa: E402
 RELEASE_ID = "airfrans-native-ground-truth-v1-candidate"
 DATASET_ID = "airfrans"
 DATASET_VERSION = "prototype-1"
-EVALUATION_REFERENCE_VERSION = "prototype-1"
 
 DOMAIN_SUPPORT_ID = "two-dimensional-domain-native"
 CURVE_SUPPORT_ID = "airfoil-curve-native"
@@ -355,7 +354,9 @@ def build_manifest(case_count: int, case_set_id: str, release_id: str) -> dict:
         "published_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "dataset_id": DATASET_ID,
         "dataset_version": DATASET_VERSION,
-        "evaluation_reference_version": EVALUATION_REFERENCE_VERSION,
+        "evaluation_reference_version": json.loads(DEFAULT_SPEC.read_text(encoding="utf-8"))[
+            "evaluation_reference_version"
+        ],
         "coordinate_frame": {
             "id": "airfrans-native-physical-v1",
             "axis_order": ["x", "y"],

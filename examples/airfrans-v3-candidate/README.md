@@ -140,3 +140,26 @@ The assembler writes `submission.json`, `evaluation-evidence.json`,
 `metrics/cases.json`, and `profiles/index.json` + per-case chunks. It
 never writes `approval`, `maintainer-validation.json`, or
 `prediction-artifact-checks.json` — those are maintainer-only records.
+
+### Rescoring after a scoring-specification change
+
+When `submission-spec.json` changes its composite weights and
+`evaluation_reference_version`, an assembled package keeps valid base
+metrics but carries stale derived scores. Regenerate only the derived
+values (`overall_score` and the group scores) and their hashes, without
+re-running inference or the evaluator:
+
+```bash
+python scripts/rescore_airfrans_candidate.py --check --package-dir submissions/airfrans/my-model-full-v1
+python scripts/rescore_airfrans_candidate.py --package-dir submissions/airfrans/my-model-full-v1
+```
+
+The validator also requires the scoring-support manifest to carry the
+spec's `evaluation_reference_version`. If the manifest has been re-stamped
+for the new version, add `--scoring-support-manifest
+/path/to/<release>/manifest.json` to rebind its SHA-256 in
+`discretization.json`, `metrics/cases.json`, `evaluation-evidence.json` and
+`submission.json`.
+
+The script refuses a package whose metric values or hashes disagree, and
+leaves every base metric, per-case record and profile unchanged.
