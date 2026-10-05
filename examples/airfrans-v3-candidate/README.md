@@ -163,3 +163,29 @@ for the new version, add `--scoring-support-manifest
 
 The script refuses a package whose metric values or hashes disagree, and
 leaves every base metric, per-case record and profile unchanged.
+
+### Profile-truth release (maintainer step)
+
+The ground-truth profiles behind `velocity_profile_r2` are packaged once, as a
+candidate profile-truth release in the HiLiftAeroML layout (manifest, master
+index, case records, chunks, one thin index per split, provenance and
+receipt). Cases shared by several splits are stored once, and each truth file
+is kept byte for byte as written by
+`examples/airfrans-profile-extraction/extract.py`:
+
+```bash
+python scripts/export_airfrans_profile_truth.py \
+  --source full=/path/to/full/reference-profiles \
+  --source aoa_extrapolation=/path/to/aoa/reference-profiles \
+  --scoring-support-manifest full=/path/to/airfrans-native-ground-truth-v1-candidate/manifest.json \
+  --scoring-support-manifest aoa_extrapolation=/path/to/airfrans-native-ground-truth-aoa-v1-candidate/manifest.json \
+  --extractor-commit <commit of the extract.py that produced the truth> \
+  --output /path/to/airfrans-native-profile-truth-v1-candidate
+
+python scripts/validate_airfrans_profile_truth.py \
+  --release /path/to/airfrans-native-profile-truth-v1-candidate \
+  --source-replay --dataset-root /path/to/AirfRANS/Dataset --python /path/to/eval-env/bin/python
+```
+
+Rerun the exporter with `--check` to compare every byte of an existing
+release. Packaging does not publish the release or open submissions.
