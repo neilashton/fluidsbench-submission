@@ -479,6 +479,14 @@ def main() -> int:
         "splits": splits,
     }
 
+    # Preserve the independently versioned surface-only extension when the
+    # full native specification is regenerated from its frozen decisions.
+    current = json.loads((SPEC_DIR / "submission-spec.json").read_text())
+    for key in ("prediction_scopes", "prediction_scope_contract_version", "surface_only_implementation_binding"):
+        document["scoring_support"][key] = current["scoring_support"][key]
+    document["overall_score_composite"]["surface_only_policy"] = current["overall_score_composite"]["surface_only_policy"]
+    for panel in document["profile_panels"]:
+        panel["required_prediction_scopes"] = ["surface_and_volume"] if panel["id"] == "velocity_profiles" else ["surface_and_volume", "surface_only"]
     args.out.write_text(json.dumps(document, indent=2) + "\n")
     weight_sum = sum(c["weight"] for c in components)
     print(f"wrote {args.out}")

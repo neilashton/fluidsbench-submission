@@ -12,7 +12,6 @@ import math
 import re
 from collections.abc import Mapping, Sequence
 
-
 REGIONAL_DIAGNOSTICS_CONTRACT_SHA256 = (
     "8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4"
 )
@@ -386,16 +385,18 @@ def validate_aggregate_regional_diagnostics(
 
     if not isinstance(report, Mapping):
         raise HiLiftRegionalAggregateError("regional report must be an object")
+    surface_only = report.get("prediction_scope") == "surface_only"
+    required_top_level = _REQUIRED_TOP_LEVEL - ({"volume"} if surface_only else set())
     keys = set(report)
-    if not _REQUIRED_TOP_LEVEL.issubset(keys) or not keys.issubset(
-        _REQUIRED_TOP_LEVEL | _OPTIONAL_TOP_LEVEL
+    if not required_top_level.issubset(keys) or not keys.issubset(
+        required_top_level | _OPTIONAL_TOP_LEVEL
     ):
         raise HiLiftRegionalAggregateError("regional report top-level keys differ")
     if (
         report.get("schema") != AGGREGATE_REGIONAL_REPORT_SCHEMA
         or report.get("contract_sha256") != REGIONAL_DIAGNOSTICS_CONTRACT_SHA256
         or report.get("dataset_id") != "hiliftaeroml"
-        or report.get("prediction_scope") != "surface_and_volume"
+        or report.get("prediction_scope") not in {"surface_and_volume", "surface_only"}
     ):
         raise HiLiftRegionalAggregateError("regional report identity differs")
     if "schema_version" in report and report.get("schema_version") != 2:
@@ -431,15 +432,16 @@ def validate_aggregate_regional_diagnostics(
         required_primary_fields=frozenset({"pressure", "tau_wall"}),
         case_count=len(expected_case_ids),
     )
-    checked_regions += _support(
-        report["volume"],
-        label="volume",
-        expected_support_id=VOLUME_SUPPORT_ID,
-        expected_regions=VOLUME_REGION_IDS,
-        allowed_fields=VOLUME_FIELDS,
-        required_primary_fields=frozenset({"pressure", "velocity"}),
-        case_count=len(expected_case_ids),
-    )
+    if not surface_only:
+        checked_regions += _support(
+            report["volume"],
+            label="volume",
+            expected_support_id=VOLUME_SUPPORT_ID,
+            expected_regions=VOLUME_REGION_IDS,
+            allowed_fields=VOLUME_FIELDS,
+            required_primary_fields=frozenset({"pressure", "velocity"}),
+            case_count=len(expected_case_ids),
+        )
     reconstruction = report["reconstruction"]
     expected_reconstruction_keys = {
         "status",

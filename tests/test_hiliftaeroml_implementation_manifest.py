@@ -10,7 +10,6 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 import scripts.build_hiliftaeroml_implementation_manifest as builder
 
-
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_PATH = ROOT / builder.DEFAULT_OUTPUT_RELATIVE
 SCHEMA_PATH = ROOT / builder.MANIFEST_SCHEMA_RELATIVE
@@ -75,6 +74,14 @@ def group_identity(manifest: dict, group_id: str, path: str) -> dict:
 
 
 def restore_frozen_manifest_science(specification: dict) -> None:
+    # The retained native-v1 manifest predates the independently bound
+    # surface-only extension. Compare its original full-physics projection.
+    support = specification["scoring_support"]
+    for key in ("prediction_scopes", "prediction_scope_contract_version", "surface_only_implementation_binding"):
+        support.pop(key, None)
+    specification["overall_score_composite"].pop("surface_only_policy", None)
+    for panel in specification.get("profile_panels", []):
+        panel.pop("required_prediction_scopes", None)
     current_profile = specification["profile_definition"]
     assert current_profile["status"] == "official"
     assert current_profile["prior_profile_formats_accepted"] is False

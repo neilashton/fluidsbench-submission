@@ -19,6 +19,8 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 
+from reference.prediction_scope import UNAVAILABLE_COMPONENTS, unavailable_metrics
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
 from reference.scores import composite_component_group_scores, composite_overall_score
 
 from .contract import read_json
@@ -27,7 +29,6 @@ from .profiles import (
     WindsorMLProfileError,
     validate_profile_evidence,
 )
-
 
 DATASET_EVIDENCE_SCHEMA = "windsorml-candidate-dataset-evaluation-v1"
 DATASET_EVIDENCE_STATUS = "non_ranked_development_evidence_not_official_submission"
@@ -123,9 +124,13 @@ def score_candidate_dataset(
     submission_specification: str | Path,
     split_id: str,
     case_evidence_directory: str | Path,
+    prediction_scope: str = "surface_and_volume",
 ) -> CandidateDatasetEvaluation:
     """Reduce exact case evidence for one declared WindsorML test split."""
 
+    scope = checked_prediction_scope(prediction_scope)
+    surface_only = scope == "surface_only"
+    fixed_zero = UNAVAILABLE_COMPONENTS if surface_only else ()
     spec_path = Path(submission_specification).expanduser().resolve()
     specification = read_json(spec_path, label="WindsorML submission specification")
     if specification.get("dataset_id") != "windsorml":
@@ -175,22 +180,31 @@ def score_candidate_dataset(
                 f"{case_id} evidence is not marked candidate-only"
             )
 
+        if evidence.get("prediction_scope", "surface_and_volume") != scope:
+            raise WindsorMLDatasetScorerError(f"{case_id} prediction scope differs")
         surface = _mapping(evidence.get("surface"), f"{case_id}.surface")
         surface_metrics = _mapping(surface.get("metrics"), f"{case_id}.surface.metrics")
+        if surface_only and unavailable_metrics("windsorml", surface_metrics):
+            raise WindsorMLDatasetScorerError(f"{case_id} surface_only contains unavailable raw metrics")
         volume = evidence.get("volume")
-        if volume is None:
-            raise WindsorMLDatasetScorerError(
-                f"{case_id} has no volume evidence; the split scores volume metrics"
+        if surface_only:
+            if volume is not None:
+                raise WindsorMLDatasetScorerError(f"{case_id} surface_only contains volume evidence")
+            volume_metrics = {}
+        else:
+            if volume is None:
+                raise WindsorMLDatasetScorerError(
+                    f"{case_id} has no volume evidence; the split scores volume metrics"
+                )
+            volume_metrics = _mapping(
+                _mapping(volume, f"{case_id}.volume").get("metrics"),
+                f"{case_id}.volume.metrics",
             )
-        volume_metrics = _mapping(
-            _mapping(volume, f"{case_id}.volume").get("metrics"),
-            f"{case_id}.volume.metrics",
-        )
 
         values: dict[str, float] = {}
         for name in SURFACE_METRICS:
             values[name] = _finite(surface_metrics.get(name), f"{case_id}.{name}")
-        for name in VOLUME_METRICS:
+        for name in (() if surface_only else VOLUME_METRICS):
             values[name] = _finite(volume_metrics.get(name), f"{case_id}.{name}")
         per_case[case_id] = MappingProxyType(values)
 
@@ -206,7 +220,7 @@ def score_candidate_dataset(
 
         try:
             series = validate_profile_evidence(
-                evidence.get("profiles"), case_id=case_id
+                evidence.get("profiles"), case_id=case_id, surface_only=surface_only
             )
         except WindsorMLProfileError as error:
             raise WindsorMLDatasetScorerError(str(error)) from error
@@ -215,7 +229,7 @@ def score_candidate_dataset(
             profile_prediction[family].extend(prediction_values)
 
     metric_values: dict[str, float] = {}
-    for name in (*SURFACE_METRICS, *VOLUME_METRICS):
+    for name in (*SURFACE_METRICS, *(() if surface_only else VOLUME_METRICS)):
         metric_values[name] = float(
             np.mean([per_case[c][name] for c in case_ids], dtype=np.float64)
         )
@@ -232,9 +246,9 @@ def score_candidate_dataset(
         )
 
     composite = specification["overall_score_composite"]
-    overall = composite_overall_score(metric_values, composite)
+    overall = composite_overall_score(metric_values, composite, fixed_zero_component_ids=fixed_zero)
     groups = composite_component_group_scores(
-        metric_values, composite, specification["component_score_groups"]
+        metric_values, composite, specification["component_score_groups"], fixed_zero_component_ids=fixed_zero
     )
     metric_values["overall_score"] = overall
     metric_values.update(groups)
@@ -246,6 +260,7 @@ def score_candidate_dataset(
                 "status": DATASET_EVIDENCE_STATUS,
                 "official_submission_artifact": False,
                 "dataset_id": "windsorml",
+                "prediction_scope": scope,
                 "dataset_version": specification.get("dataset_version"),
                 "split_id": split_id,
                 "case_count": len(case_ids),

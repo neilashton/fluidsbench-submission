@@ -46,6 +46,7 @@ from reference.drivaerml.source import (
     index_inline_binary_vtk_xml,
     stream_inline_binary_payload,
 )
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
 
 from .contract import (
     DRAG_AXIS_INDEX,
@@ -69,13 +70,14 @@ from .prediction_chunks import (
 )
 from .profiles import (
     PROFILE_SERIES_SOURCE,
-    PROFILE_SUPPORT_SCHEMA as PROFILE_SUPPORT_SCHEMA,
     PROFILE_TRUTH_ATOL,
     ProfileSupport,
     WindsorMLProfileError,
     load_profile_support,
 )
-
+from .profiles import (
+    PROFILE_SUPPORT_SCHEMA as PROFILE_SUPPORT_SCHEMA,
+)
 
 EVIDENCE_SCHEMA = "windsorml-candidate-case-evaluation-v1"
 EVIDENCE_SCHEMA_VERSION = 1
@@ -652,6 +654,7 @@ def evaluate_candidate_case(
     dataset_root: str | Path,
     surface_manifest: PredictionChunkManifest | str | Path,
     volume_manifest: PredictionChunkManifest | str | Path | None = None,
+    prediction_scope: str = "surface_and_volume",
     profile_support: Mapping[str, object] | str | Path | None = None,
     hash_chunk_bytes: int = DEFAULT_HASH_CHUNK_BYTES,
     validation_block_rows: int = DEFAULT_VALIDATION_BLOCK_ROWS,
@@ -659,6 +662,10 @@ def evaluate_candidate_case(
     maximum_prediction_chunk_rows: int = DEFAULT_MAX_PREDICTION_CHUNK_ROWS,
 ) -> CandidateCaseEvaluation:
     """Score one complete native WindsorML case against verified predictions."""
+
+    scope = checked_prediction_scope(prediction_scope)
+    if scope == "surface_only" and volume_manifest is not None:
+        raise WindsorMLCandidateEvaluatorError("surface_only forbids volume predictions")
 
     _positive_integer(hash_chunk_bytes, "hash_chunk_bytes")
     _positive_integer(validation_block_rows, "validation_block_rows")
@@ -799,6 +806,7 @@ def evaluate_candidate_case(
         "status": EVIDENCE_STATUS,
         "official_submission_artifact": False,
         "case_id": case.case_id,
+        "prediction_scope": scope,
         "run_id": case.run_id,
         "surface": {
             "support_id": WINDSORML_SURFACE_SUPPORT_ID,

@@ -71,7 +71,12 @@
       }
     },
     "training_regime": {
-      "enum": ["from_scratch", "pretrained_zero_shot", "pretrained_official_train", "other"]
+      "enum": [
+        "from_scratch",
+        "pretrained_zero_shot",
+        "pretrained_official_train",
+        "other"
+      ]
     },
     "training_regime_explanation": {
       "type": "string",
@@ -79,7 +84,11 @@
       "maxLength": 2000
     },
     "target_data_used": {
-      "enum": ["none", "official_train", "other"]
+      "enum": [
+        "none",
+        "official_train",
+        "other"
+      ]
     },
     "external_pretraining": {
       "type": "boolean"
@@ -96,7 +105,9 @@
           {
             "type": "object",
             "additionalProperties": false,
-            "required": ["name"],
+            "required": [
+              "name"
+            ],
             "properties": {
               "name": {
                 "type": "string",
@@ -140,7 +151,10 @@
       "$ref": "#/$defs/sha256"
     },
     "prediction_scope": {
-      "enum": ["surface_and_volume", "surface_only"]
+      "enum": [
+        "surface_and_volume",
+        "surface_only"
+      ]
     },
     "parameter_count_millions": {
       "type": "number",
@@ -178,7 +192,12 @@
     "evaluation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["reference_version", "command", "evidence_file", "evidence_sha256"],
+      "required": [
+        "reference_version",
+        "command",
+        "evidence_file",
+        "evidence_sha256"
+      ],
       "properties": {
         "reference_version": {
           "type": "string",
@@ -211,7 +230,11 @@
     "spatial_discretization": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["format", "file", "sha256"],
+      "required": [
+        "format",
+        "file",
+        "sha256"
+      ],
       "properties": {
         "format": {
           "const": "fluidsbench-discretization-v1"
@@ -227,7 +250,12 @@
     "case_metrics": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["format", "file", "sha256", "case_count"],
+      "required": [
+        "format",
+        "file",
+        "sha256",
+        "case_count"
+      ],
       "properties": {
         "format": {
           "const": "fluidsbench-case-metrics-v1"
@@ -266,6 +294,27 @@
     },
     "regional_diagnostics": {
       "$ref": "#/$defs/regional_diagnostics"
+    },
+    "prediction_scope_implementation_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "file",
+        "sha256"
+      ],
+      "properties": {
+        "version": {
+          "const": "aerodynamic-surface-only-v1"
+        },
+        "file": {
+          "const": "reference/aerodynamic-surface-only-implementation-v1.json"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
     }
   },
   "$defs": {
@@ -284,7 +333,12 @@
     "result_revision": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["series_id", "version", "supersedes", "change_summary"],
+      "required": [
+        "series_id",
+        "version",
+        "supersedes",
+        "change_summary"
+      ],
       "properties": {
         "series_id": {
           "$ref": "#/$defs/submission_id"
@@ -315,7 +369,13 @@
       "pattern": "^[a-z0-9][a-z0-9-]*$"
     },
     "data_license": {
-      "enum": ["CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0", "ODC-BY-1.0", "ODbL-1.0"]
+      "enum": [
+        "CC0-1.0",
+        "CC-BY-4.0",
+        "CC-BY-SA-4.0",
+        "ODC-BY-1.0",
+        "ODbL-1.0"
+      ]
     },
     "code_license": {
       "enum": [
@@ -339,7 +399,17 @@
       ]
     },
     "model_license": {
-      "enum": ["Apache-2.0", "MIT", "BSD-2-Clause", "BSD-3-Clause", "ISC", "MPL-2.0", "CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0"]
+      "enum": [
+        "Apache-2.0",
+        "MIT",
+        "BSD-2-Clause",
+        "BSD-3-Clause",
+        "ISC",
+        "MPL-2.0",
+        "CC0-1.0",
+        "CC-BY-4.0",
+        "CC-BY-SA-4.0"
+      ]
     },
     "fluidsbench_methodology": {
       "type": "object",
@@ -359,7 +429,11 @@
           "const": "fluidsbench-method-v1"
         },
         "record_kind": {
-          "enum": ["submitter_reported", "prototype_fixture", "format_example"]
+          "enum": [
+            "submitter_reported",
+            "prototype_fixture",
+            "format_example"
+          ]
         },
         "record_note": {
           "type": "string",
@@ -389,7 +463,10 @@
               "$ref": "#/$defs/methodology_parameter_count"
             },
             "parameter_count_basis": {
-              "enum": ["exact", "rounded_from_reported_millions"]
+              "enum": [
+                "exact",
+                "rounded_from_reported_millions"
+              ]
             },
             "submitter_trainable_parameter_count": {
               "$ref": "#/$defs/methodology_parameter_count"
@@ -400,7 +477,13 @@
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["id", "family", "role", "description", "parameter_count"],
+                "required": [
+                  "id",
+                  "family",
+                  "role",
+                  "description",
+                  "parameter_count"
+                ],
                 "properties": {
                   "id": {
                     "$ref": "#/$defs/safe_id"
@@ -431,7 +514,13 @@
               "items": {
                 "type": "object",
                 "additionalProperties": false,
-                "required": ["id", "component_ids", "name", "value", "description"],
+                "required": [
+                  "id",
+                  "component_ids",
+                  "name",
+                  "value",
+                  "description"
+                ],
                 "properties": {
                   "id": {
                     "$ref": "#/$defs/safe_id"
@@ -445,7 +534,11 @@
                     "maxLength": 160
                   },
                   "value": {
-                    "type": ["string", "number", "boolean"]
+                    "type": [
+                      "string",
+                      "number",
+                      "boolean"
+                    ]
                   },
                   "description": {
                     "type": "string",
@@ -482,7 +575,15 @@
                     "maxLength": 160
                   },
                   "domain": {
-                    "enum": ["case", "curve", "surface", "volume", "domain", "mesh", "global"]
+                    "enum": [
+                      "case",
+                      "curve",
+                      "surface",
+                      "volume",
+                      "domain",
+                      "mesh",
+                      "global"
+                    ]
                   },
                   "component_count": {
                     "type": "integer",
@@ -516,7 +617,14 @@
                     "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,239}$"
                   },
                   "domain": {
-                    "enum": ["case", "curve", "surface", "volume", "domain", "global"]
+                    "enum": [
+                      "case",
+                      "curve",
+                      "surface",
+                      "volume",
+                      "domain",
+                      "global"
+                    ]
                   },
                   "component_count": {
                     "type": "integer",
@@ -526,7 +634,10 @@
                     "$ref": "#/$defs/methodology_component_ids"
                   },
                   "production": {
-                    "enum": ["direct_model_output", "derived_from_model_output"]
+                    "enum": [
+                      "direct_model_output",
+                      "derived_from_model_output"
+                    ]
                   },
                   "description": {
                     "type": "string",
@@ -541,7 +652,11 @@
         "data_handling": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["normalization", "preprocessing", "sampling"],
+          "required": [
+            "normalization",
+            "preprocessing",
+            "sampling"
+          ],
           "properties": {
             "normalization": {
               "type": "string",
@@ -563,16 +678,24 @@
         "training": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["stages"],
+          "required": [
+            "stages"
+          ],
           "properties": {
             "stages": {
               "type": "array",
               "minItems": 1,
               "items": {
                 "oneOf": [
-                  {"$ref": "#/$defs/methodology_submitter_training_stage"},
-                  {"$ref": "#/$defs/methodology_upstream_training_stage"},
-                  {"$ref": "#/$defs/methodology_prototype_training_stage"}
+                  {
+                    "$ref": "#/$defs/methodology_submitter_training_stage"
+                  },
+                  {
+                    "$ref": "#/$defs/methodology_upstream_training_stage"
+                  },
+                  {
+                    "$ref": "#/$defs/methodology_prototype_training_stage"
+                  }
                 ]
               }
             }
@@ -625,8 +748,12 @@
         },
         "inference_compute": {
           "oneOf": [
-            {"$ref": "#/$defs/methodology_measured_inference_compute"},
-            {"$ref": "#/$defs/methodology_unmeasured_inference_compute"}
+            {
+              "$ref": "#/$defs/methodology_measured_inference_compute"
+            },
+            {
+              "$ref": "#/$defs/methodology_unmeasured_inference_compute"
+            }
           ]
         }
       }
@@ -675,8 +802,12 @@
         },
         "procedure": {
           "oneOf": [
-            {"$ref": "#/$defs/methodology_gradient_training_procedure"},
-            {"$ref": "#/$defs/methodology_other_training_procedure"}
+            {
+              "$ref": "#/$defs/methodology_gradient_training_procedure"
+            },
+            {
+              "$ref": "#/$defs/methodology_other_training_procedure"
+            }
           ]
         },
         "run_count": {
@@ -700,7 +831,13 @@
     "methodology_upstream_training_stage": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "status", "component_ids", "description", "upstream_reference"],
+      "required": [
+        "id",
+        "status",
+        "component_ids",
+        "description",
+        "upstream_reference"
+      ],
       "properties": {
         "id": {
           "$ref": "#/$defs/safe_id"
@@ -726,7 +863,12 @@
     "methodology_prototype_training_stage": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "status", "component_ids", "description"],
+      "required": [
+        "id",
+        "status",
+        "component_ids",
+        "description"
+      ],
       "properties": {
         "id": {
           "$ref": "#/$defs/safe_id"
@@ -747,7 +889,13 @@
     "methodology_gradient_training_procedure": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "loss", "optimizers", "batch", "duration"],
+      "required": [
+        "kind",
+        "loss",
+        "optimizers",
+        "batch",
+        "duration"
+      ],
       "properties": {
         "kind": {
           "const": "gradient_based"
@@ -755,7 +903,10 @@
         "loss": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["description", "weighting"],
+          "required": [
+            "description",
+            "weighting"
+          ],
           "properties": {
             "description": {
               "type": "string",
@@ -775,7 +926,11 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["name", "learning_rate", "schedule"],
+            "required": [
+              "name",
+              "learning_rate",
+              "schedule"
+            ],
             "properties": {
               "name": {
                 "type": "string",
@@ -797,7 +952,11 @@
         "batch": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["value", "unit", "gradient_accumulation_steps"],
+          "required": [
+            "value",
+            "unit",
+            "gradient_accumulation_steps"
+          ],
           "properties": {
             "value": {
               "type": "integer",
@@ -822,7 +981,11 @@
     "methodology_other_training_procedure": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "description", "duration"],
+      "required": [
+        "kind",
+        "description",
+        "duration"
+      ],
       "properties": {
         "kind": {
           "const": "other"
@@ -856,28 +1019,57 @@
         }
       },
       "anyOf": [
-        {"required": ["epochs"]},
-        {"required": ["optimizer_steps"]},
-        {"required": ["description"]}
+        {
+          "required": [
+            "epochs"
+          ]
+        },
+        {
+          "required": [
+            "optimizer_steps"
+          ]
+        },
+        {
+          "required": [
+            "description"
+          ]
+        }
       ]
     },
     "methodology_accelerator": {
       "description": "Identity of the devices counted by the compute record. Use null for unconfirmed identity; explain unknown or mixed hardware in hardware and measurement_notes.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "vendor", "model"],
+      "required": [
+        "type",
+        "vendor",
+        "model"
+      ],
       "properties": {
         "type": {
-          "enum": ["gpu", "cpu", "tpu", "other", "mixed", "unknown"]
+          "enum": [
+            "gpu",
+            "cpu",
+            "tpu",
+            "other",
+            "mixed",
+            "unknown"
+          ]
         },
         "vendor": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1,
           "maxLength": 80,
           "pattern": "\\S"
         },
         "model": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1,
           "maxLength": 160,
           "pattern": "\\S"
@@ -885,18 +1077,48 @@
       },
       "allOf": [
         {
-          "if": {"properties": {"type": {"enum": ["mixed", "unknown"]}}},
-          "then": {"properties": {"model": {"type": "null"}}}
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "mixed",
+                  "unknown"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "model": {
+                "type": "null"
+              }
+            }
+          }
         },
         {
-          "if": {"properties": {"type": {"const": "unknown"}}},
-          "then": {"properties": {"vendor": {"type": "null"}}}
+          "if": {
+            "properties": {
+              "type": {
+                "const": "unknown"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "vendor": {
+                "type": "null"
+              }
+            }
+          }
         }
       ]
     },
     "methodology_devices_per_job": {
       "description": "Devices allocated to one job, using the same device unit as max_concurrent_device_count. Null when unknown or variable; explain job scope and allocation in measurement_notes.",
-      "type": ["integer", "null"],
+      "type": [
+        "integer",
+        "null"
+      ],
       "minimum": 1
     },
     "methodology_compute_execution": {
@@ -995,13 +1217,46 @@
         "measurement_notes"
       ],
       "properties": {
-        "hardware_identity_basis": {"enum": ["machine_recorded", "owner_confirmed", "submitter_reported", "unknown"]},
-        "execution": {"$ref": "#/$defs/methodology_compute_execution"},
-        "peak_device_memory_bytes": {"type": ["integer", "null"], "minimum": 0},
-        "measurement_basis": {"enum": ["measured", "estimated", "unknown"]},
-        "cost_scope": {"enum": ["final_training", "hyperparameter_search", "mixed", "other", "unknown"]},
-        "accelerator": {"$ref": "#/$defs/methodology_accelerator"},
-        "devices_per_job": {"$ref": "#/$defs/methodology_devices_per_job"},
+        "hardware_identity_basis": {
+          "enum": [
+            "machine_recorded",
+            "owner_confirmed",
+            "submitter_reported",
+            "unknown"
+          ]
+        },
+        "execution": {
+          "$ref": "#/$defs/methodology_compute_execution"
+        },
+        "peak_device_memory_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "measurement_basis": {
+          "enum": [
+            "measured",
+            "estimated",
+            "unknown"
+          ]
+        },
+        "cost_scope": {
+          "enum": [
+            "final_training",
+            "hyperparameter_search",
+            "mixed",
+            "other",
+            "unknown"
+          ]
+        },
+        "accelerator": {
+          "$ref": "#/$defs/methodology_accelerator"
+        },
+        "devices_per_job": {
+          "$ref": "#/$defs/methodology_devices_per_job"
+        },
         "hardware": {
           "type": "string",
           "minLength": 1,
@@ -1118,19 +1373,59 @@
         "status": {
           "const": "measured"
         },
-        "hardware_identity_basis": {"enum": ["machine_recorded", "owner_confirmed", "submitter_reported", "unknown"]},
-        "execution": {"$ref": "#/$defs/methodology_compute_execution"},
-        "peak_device_memory_bytes": {"type": ["integer", "null"], "minimum": 0},
-        "timing_protocol": {"enum": ["legacy_reported", "fluidsbench-complete-case-v1"]},
-        "max_concurrent_jobs": {"type": ["integer", "null"], "minimum": 1},
-        "setup_wall_time_seconds": {"type": ["number", "null"], "minimum": 0},
+        "hardware_identity_basis": {
+          "enum": [
+            "machine_recorded",
+            "owner_confirmed",
+            "submitter_reported",
+            "unknown"
+          ]
+        },
+        "execution": {
+          "$ref": "#/$defs/methodology_compute_execution"
+        },
+        "peak_device_memory_bytes": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "timing_protocol": {
+          "enum": [
+            "legacy_reported",
+            "fluidsbench-complete-case-v1"
+          ]
+        },
+        "max_concurrent_jobs": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "setup_wall_time_seconds": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
         "campaign_runs": {
           "description": "Independent complete-split repetitions. Top-level times must come from the same lower-median-wall-time run (stable input order for ties). case_count is unique cases per run, never multiplied by repetitions.",
-          "type": "array", "minItems": 1, "maxItems": 1000,
-          "items": {"$ref": "#/$defs/methodology_inference_campaign_run"}
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1000,
+          "items": {
+            "$ref": "#/$defs/methodology_inference_campaign_run"
+          }
         },
-        "accelerator": {"$ref": "#/$defs/methodology_accelerator"},
-        "devices_per_job": {"$ref": "#/$defs/methodology_devices_per_job"},
+        "accelerator": {
+          "$ref": "#/$defs/methodology_accelerator"
+        },
+        "devices_per_job": {
+          "$ref": "#/$defs/methodology_devices_per_job"
+        },
         "hardware": {
           "type": "string",
           "minLength": 1,
@@ -1168,7 +1463,10 @@
     "methodology_unmeasured_inference_compute": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "reason"],
+      "required": [
+        "status",
+        "reason"
+      ],
       "properties": {
         "status": {
           "const": "not_measured"
@@ -1183,7 +1481,12 @@
     "reproducibility": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["contract_version", "access", "public_test_data_use", "result_data_license_spdx"],
+      "required": [
+        "contract_version",
+        "access",
+        "public_test_data_use",
+        "result_data_license_spdx"
+      ],
       "properties": {
         "contract_version": {
           "const": "open-reproducibility-3.0"
@@ -1200,7 +1503,11 @@
         "code": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["repository_url", "commit", "license_spdx"],
+          "required": [
+            "repository_url",
+            "commit",
+            "license_spdx"
+          ],
           "properties": {
             "repository_url": {
               "type": "string",
@@ -1219,7 +1526,11 @@
         "model_artifact": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["url", "sha256", "license_spdx"],
+          "required": [
+            "url",
+            "sha256",
+            "license_spdx"
+          ],
           "properties": {
             "url": {
               "type": "string",
@@ -1237,10 +1548,17 @@
         "environment": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["kind", "url", "sha256"],
+          "required": [
+            "kind",
+            "url",
+            "sha256"
+          ],
           "properties": {
             "kind": {
-              "enum": ["container", "lockfile"]
+              "enum": [
+                "container",
+                "lockfile"
+              ]
             },
             "url": {
               "type": "string",
@@ -1262,10 +1580,18 @@
     "scoring_support": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "release_id", "manifest_url", "manifest_sha256"],
+      "required": [
+        "status",
+        "release_id",
+        "manifest_url",
+        "manifest_sha256"
+      ],
       "properties": {
         "status": {
-          "enum": ["candidate", "official"]
+          "enum": [
+            "candidate",
+            "official"
+          ]
         },
         "release_id": {
           "$ref": "#/$defs/safe_id"
@@ -1283,10 +1609,17 @@
     "coverage": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "case_count", "expected_case_count"],
+      "required": [
+        "kind",
+        "case_count",
+        "expected_case_count"
+      ],
       "properties": {
         "kind": {
-          "enum": ["complete_split", "example_cases"]
+          "enum": [
+            "complete_split",
+            "example_cases"
+          ]
         },
         "case_count": {
           "type": "integer",
@@ -1315,10 +1648,14 @@
                 "const": "example_cases"
               }
             },
-            "required": ["kind"]
+            "required": [
+              "kind"
+            ]
           },
           "then": {
-            "required": ["case_ids"]
+            "required": [
+              "case_ids"
+            ]
           }
         }
       ]
@@ -1345,7 +1682,10 @@
           "$ref": "#/$defs/safe_id"
         },
         "kind": {
-          "enum": ["scored_predictions", "direct_model_outputs"]
+          "enum": [
+            "scored_predictions",
+            "direct_model_outputs"
+          ]
         },
         "repository_url": {
           "type": "string",
@@ -1387,7 +1727,13 @@
     "approval": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "approved_by", "approved_at", "pull_request_url", "validation"],
+      "required": [
+        "status",
+        "approved_by",
+        "approved_at",
+        "pull_request_url",
+        "validation"
+      ],
       "properties": {
         "status": {
           "const": "approved"
@@ -1408,7 +1754,10 @@
         "validation": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["evidence_file", "evidence_sha256"],
+          "required": [
+            "evidence_file",
+            "evidence_sha256"
+          ],
           "properties": {
             "evidence_file": {
               "const": "maintainer-validation.json"
@@ -1476,7 +1825,14 @@
     "profile_data": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["format", "index_file", "case_count", "case_set_id", "profile_ground_truth_release_id", "profile_ground_truth_manifest_sha256"],
+      "required": [
+        "format",
+        "index_file",
+        "case_count",
+        "case_set_id",
+        "profile_ground_truth_release_id",
+        "profile_ground_truth_manifest_sha256"
+      ],
       "properties": {
         "format": {
           "enum": [
@@ -1518,10 +1874,18 @@
             "base_dataset_evaluator_scope"
           ],
           "properties": {
-            "status": { "const": "unbound_worktree_candidate" },
-            "activation_effect": { "const": "none" },
-            "code_revision": { "type": "null" },
-            "implementation_manifest_sha256": { "type": "null" },
+            "status": {
+              "const": "unbound_worktree_candidate"
+            },
+            "activation_effect": {
+              "const": "none"
+            },
+            "code_revision": {
+              "type": "null"
+            },
+            "implementation_manifest_sha256": {
+              "type": "null"
+            },
             "base_dataset_evaluator_scope": {
               "const": "native_v1_base_field_force_and_noncompact_scoring_only"
             }
@@ -1536,7 +1900,9 @@
                 "const": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
               }
             },
-            "required": ["format"]
+            "required": [
+              "format"
+            ]
           },
           "then": {
             "required": [
@@ -1548,9 +1914,21 @@
           "else": {
             "not": {
               "anyOf": [
-                {"required": ["evaluator_support_release_id"]},
-                {"required": ["evaluator_support_manifest_sha256"]},
-                {"required": ["compact_profile_implementation_binding"]}
+                {
+                  "required": [
+                    "evaluator_support_release_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "evaluator_support_manifest_sha256"
+                  ]
+                },
+                {
+                  "required": [
+                    "compact_profile_implementation_binding"
+                  ]
+                }
               ]
             }
           }
@@ -1563,13 +1941,52 @@
       "if": {
         "properties": {
           "scoring_support": {
-            "properties": { "status": { "const": "candidate" } },
-            "required": ["status"]
+            "properties": {
+              "status": {
+                "const": "candidate"
+              }
+            },
+            "required": [
+              "status"
+            ]
           }
         },
-        "required": ["scoring_support"]
+        "required": [
+          "scoring_support"
+        ]
       },
-      "then": { "not": { "required": ["approval"] } }
+      "then": {
+        "not": {
+          "required": [
+            "approval"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "prediction_scope",
+          "dataset_id"
+        ],
+        "properties": {
+          "prediction_scope": {
+            "const": "surface_only"
+          },
+          "dataset_id": {
+            "enum": [
+              "ahmedml",
+              "windsorml",
+              "hiliftaeroml"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "prediction_scope_implementation_binding"
+        ]
+      }
     }
   ]
 }

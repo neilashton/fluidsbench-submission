@@ -38,6 +38,7 @@ from typing import Any
 
 import numpy as np
 
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
 
 COMPACT_PROFILE_FORMAT = (
     "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
@@ -1006,11 +1007,14 @@ def compact_case_metadata(
 
 
 def validate_compact_case_metadata(
-    metadata: Mapping[str, Any], *, support: Mapping[str, np.ndarray]
+    metadata: Mapping[str, Any], *, support: Mapping[str, np.ndarray],
+    prediction_scope: str = "surface_and_volume",
 ) -> None:
     """Require chunk-side support/order bindings to match live support exactly."""
 
     expected = compact_case_metadata(support)
+    if checked_prediction_scope(prediction_scope) == "surface_only":
+        expected = {"surface_cp": expected["surface_cp"]}
     if metadata != expected:
         _fail("compact case metadata differs from evaluator-owned support")
 
@@ -1019,7 +1023,8 @@ def encode_compact_predictions(
     *,
     support: Mapping[str, np.ndarray],
     cp_prediction: np.ndarray,
-    velocity_speed_over_u_inf: np.ndarray,
+    velocity_speed_over_u_inf: np.ndarray | None = None,
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, np.ndarray]:
     """Encode aligned prediction values without copying evaluator-owned support."""
 
@@ -1053,6 +1058,11 @@ def encode_compact_predictions(
             _fail("delta-coded Cp prediction overflows int16 within a branch")
         deltas[start:end] = wide_delta.astype(np.int16)
 
+    if checked_prediction_scope(prediction_scope) == "surface_only":
+        if velocity_speed_over_u_inf is not None:
+            _fail("surface_only forbids velocity predictions")
+        return {"cp_q_delta": deltas}
+
     speed = np.asarray(velocity_speed_over_u_inf)
     if speed.dtype != np.dtype(np.float64) or speed.shape != (VELOCITY_ROW_COUNT,):
         _fail(
@@ -1084,7 +1094,8 @@ def encode_native_predictions(
     *,
     support: Mapping[str, np.ndarray],
     cp_native: Mapping[str, np.ndarray],
-    velocity_native: Mapping[str, np.ndarray],
+    velocity_native: Mapping[str, np.ndarray] | None = None,
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, np.ndarray]:
     """Convert validated native-v1 prediction arrays to compact-v2 values."""
 
@@ -1093,7 +1104,8 @@ def encode_native_predictions(
         cp_prediction=sample_native_cp_prediction(cp_native, support),
         velocity_speed_over_u_inf=native_velocity_speed_prediction(
             velocity_native, support
-        ),
+        ) if checked_prediction_scope(prediction_scope) != "surface_only" else None,
+        prediction_scope=prediction_scope,
     )
 
 
@@ -1167,12 +1179,13 @@ def validate_compact_predictions(
     *,
     support: Mapping[str, np.ndarray],
     metadata: Mapping[str, Any],
+    prediction_scope: str = "surface_and_volume",
 ) -> None:
     """Strictly validate a participant compact-v2 prediction artifact."""
 
     validate_compact_support(support)
-    validate_compact_case_metadata(metadata, support=support)
-    _require_exact_keys(artifact, PREDICTION_ARRAYS, "compact prediction")
+    validate_compact_case_metadata(metadata, support=support, prediction_scope=prediction_scope)
+    _require_exact_keys(artifact, ("cp_q_delta",) if checked_prediction_scope(prediction_scope) == "surface_only" else PREDICTION_ARRAYS, "compact prediction")
     deltas = _require_array(
         artifact,
         "cp_q_delta",
@@ -1180,6 +1193,8 @@ def validate_compact_predictions(
         shape=(len(support["cp_truth"]),),
     )
     _decode_cp_delta(deltas, support["cp_branch_point_offsets"])
+    if prediction_scope == "surface_only":
+        return
     speed = _require_array(
         artifact,
         "velocity_speed_over_u_inf",
@@ -1195,14 +1210,17 @@ def decode_compact_predictions(
     *,
     support: Mapping[str, np.ndarray],
     metadata: Mapping[str, Any],
+    prediction_scope: str = "surface_and_volume",
 ) -> tuple[np.ndarray, np.ndarray]:
     """Decode Cp and speed to float64 arrays aligned with evaluator support."""
 
-    validate_compact_predictions(artifact, support=support, metadata=metadata)
+    validate_compact_predictions(artifact, support=support, metadata=metadata, prediction_scope=prediction_scope)
     quantized = _decode_cp_delta(
         artifact["cp_q_delta"], support["cp_branch_point_offsets"]
     )
     cp = quantized.astype(np.float64) / float(CP_FIXED_POINT_SCALE)
+    if prediction_scope == "surface_only":
+        return cp, None
     valid = support["velocity_valid_mask"]
     speed = np.full(VELOCITY_ROW_COUNT, np.nan, dtype=np.float64)
     speed[valid] = artifact["velocity_speed_over_u_inf"].astype(np.float64)
@@ -1331,12 +1349,15 @@ def score_compact_profiles(
     *,
     support: Mapping[str, np.ndarray],
     metadata: Mapping[str, Any],
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, float]:
     """Score only the compact Cp-cut and five-line velocity diagnostics."""
 
     cp, speed = decode_compact_predictions(
-        artifact, support=support, metadata=metadata
+        artifact, support=support, metadata=metadata, prediction_scope=prediction_scope
     )
+    if prediction_scope == "surface_only":
+        return {"cp_cut_r2": _score_cp(cp, support)}
     return {
         "cp_cut_r2": _score_cp(cp, support),
         "velocity_profile_r2": _score_velocity(speed, support),
@@ -1392,9 +1413,10 @@ def deterministic_prediction_npz_bytes(
 
     _require_exact_keys(arrays, order, "deterministic prediction NPZ")
     stored = dict(arrays)
-    stored["velocity_speed_over_u_inf"] = encode_velocity_storage(
-        np.asarray(arrays["velocity_speed_over_u_inf"])
-    )
+    if "velocity_speed_over_u_inf" in arrays:
+        stored["velocity_speed_over_u_inf"] = encode_velocity_storage(
+            np.asarray(arrays["velocity_speed_over_u_inf"])
+        )
     return deterministic_npz_bytes(stored, order=order)
 
 
@@ -1427,12 +1449,13 @@ def write_compact_prediction_npz(
     *,
     support: Mapping[str, np.ndarray],
     metadata: Mapping[str, Any],
+    prediction_scope: str = "surface_and_volume",
 ) -> str:
     """Write a canonical prediction-only participant artifact."""
 
-    validate_compact_predictions(artifact, support=support, metadata=metadata)
+    validate_compact_predictions(artifact, support=support, metadata=metadata, prediction_scope=prediction_scope)
     payload = deterministic_prediction_npz_bytes(
-        artifact, order=PREDICTION_ARRAYS
+        artifact, order=("cp_q_delta",) if prediction_scope == "surface_only" else PREDICTION_ARRAYS
     )
     return _write_exclusive(path, payload, label="compact prediction artifact")
 
@@ -1479,19 +1502,21 @@ def load_compact_prediction_npz(
     *,
     support: Mapping[str, np.ndarray],
     metadata: Mapping[str, Any],
+    prediction_scope: str = "surface_and_volume",
 ) -> tuple[dict[str, np.ndarray], str]:
     """Load and strictly validate a prediction-only participant artifact."""
 
     stored, digest = _load_npz_exact(
-        path, order=PREDICTION_ARRAYS, label="compact prediction artifact"
+        path, order=("cp_q_delta",) if prediction_scope == "surface_only" else PREDICTION_ARRAYS, label="compact prediction artifact"
     )
     artifact = dict(stored)
-    artifact["velocity_speed_over_u_inf"] = decode_velocity_storage(
-        stored["velocity_speed_over_u_inf"]
-    )
-    validate_compact_predictions(artifact, support=support, metadata=metadata)
+    if prediction_scope != "surface_only":
+        artifact["velocity_speed_over_u_inf"] = decode_velocity_storage(
+            stored["velocity_speed_over_u_inf"]
+        )
+    validate_compact_predictions(artifact, support=support, metadata=metadata, prediction_scope=prediction_scope)
     canonical = deterministic_prediction_npz_bytes(
-        artifact, order=PREDICTION_ARRAYS
+        artifact, order=("cp_q_delta",) if prediction_scope == "surface_only" else PREDICTION_ARRAYS
     )
     if hashlib.sha256(canonical).hexdigest() != digest:
         _fail("compact prediction bytes are not in canonical deterministic form")

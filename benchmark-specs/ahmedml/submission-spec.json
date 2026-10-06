@@ -110,6 +110,46 @@
       "manifest_file": "scoring-support/ahmedml-native-all-splits-support-v1-candidate/manifest.json",
       "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/ahmedml/scoring-support/ahmedml-native-all-splits-support-v1-candidate/manifest.json",
       "manifest_sha256": "c727bad2ca2566dfed44920cc334af136f2fbe32f3c8886b2fcb130f495fd124"
+    },
+    "prediction_scopes": {
+      "surface_and_volume": {
+        "surface_predictions_required": true,
+        "volume_predictions_required": true
+      },
+      "surface_only": {
+        "surface_predictions_required": true,
+        "volume_predictions_forbidden": true,
+        "unavailable_component_metric_ids": [
+          "volume_velocity_rel_l2",
+          "volume_pressure_rel_l2",
+          "velocity_profile_r2"
+        ],
+        "unavailable_component_score": 0.0,
+        "component_weight_renormalization": false,
+        "maximum_overall_score": 60.0,
+        "unavailable_raw_metric_ids": [
+          "velocity_profile_r2",
+          "volume_pressure_mae",
+          "volume_pressure_physical_rel_l2",
+          "volume_pressure_rel_l1",
+          "volume_pressure_rel_l2",
+          "volume_pressure_rmse",
+          "volume_velocity_mae",
+          "volume_velocity_physical_rel_l2",
+          "volume_velocity_rel_l1",
+          "volume_velocity_rel_l2",
+          "volume_velocity_rmse"
+        ],
+        "required_profile_panel_ids": [
+          "pressure_profiles"
+        ]
+      }
+    },
+    "prediction_scope_contract_version": "aerodynamic-prediction-scopes-v1",
+    "surface_only_implementation_binding": {
+      "version": "aerodynamic-surface-only-v1",
+      "file": "reference/aerodynamic-surface-only-implementation-v1.json",
+      "sha256": "2fab84fce263aee88e0e78b5032e1e6261bbd0b552848affa2ed576dec251185"
     }
   },
   "evaluation_reference_version": "ahmedml-evaluator-v0.1-candidate",
@@ -170,7 +210,17 @@
         "transform": "bounded_quality"
       }
     ],
-    "tolerance": 1e-06
+    "tolerance": 1e-06,
+    "surface_only_policy": {
+      "unavailable_component_metric_ids": [
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "velocity_profile_r2"
+      ],
+      "unavailable_component_score": 0.0,
+      "component_weight_renormalization": false,
+      "maximum_overall_score": 60.0
+    }
   },
   "component_score_groups": {
     "operation": "normalized_weighted_component_scores",
@@ -512,6 +562,10 @@
       },
       "quantity_ids": [
         "cp"
+      ],
+      "required_prediction_scopes": [
+        "surface_and_volume",
+        "surface_only"
       ]
     },
     {
@@ -559,6 +613,9 @@
       },
       "quantity_ids": [
         "ux_over_uinf"
+      ],
+      "required_prediction_scopes": [
+        "surface_and_volume"
       ]
     }
   ],

@@ -177,7 +177,7 @@ def build_registry_entry(
         or submission.get("schema_version") != "3.0"
         or submission.get("dataset_id") != "ahmedml"
         or submission.get("dataset") != "AhmedML"
-        or submission.get("prediction_scope") != "surface_and_volume"
+        or submission.get("prediction_scope") not in {"surface_and_volume", "surface_only"}
         or "approval" in submission
         or not isinstance(scoring_support, Mapping)
         or scoring_support.get("status") != "candidate"
@@ -228,6 +228,7 @@ def build_registry_entry(
         or evidence.get("dataset_id") != "ahmedml"
         or evidence.get("split_id") != submission.get("split_id")
         or evidence.get("case_set_id") != submission.get("case_set_id")
+        or evidence.get("prediction_scope", "surface_and_volume") != submission.get("prediction_scope")
         or evidence.get("notes") != GENUINE_INFERENCE_ATTESTATION
         or artifacts["evaluation_evidence"]["sha256"]
         != evaluation.get("evidence_sha256")
@@ -290,7 +291,7 @@ def build_registry_entry(
                 raise AhmedMLPreReleaseError("profile chunk contains an invalid case")
             observed_case_count += 1
             series_count += len(case["series"])
-    if observed_case_count != case_count or series_count != case_count * 7:
+    if observed_case_count != case_count or series_count != case_count * (3 if submission.get("prediction_scope") == "surface_only" else 7):
         raise AhmedMLPreReleaseError(
             "profile package must contain exactly seven series for every case"
         )

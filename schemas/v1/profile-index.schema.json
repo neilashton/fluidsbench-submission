@@ -4,9 +4,19 @@
   "title": "FluidsBench profile index",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "submission_id", "dataset_id", "split_id", "case_set_id", "case_count", "chunks"],
+  "required": [
+    "schema_version",
+    "submission_id",
+    "dataset_id",
+    "split_id",
+    "case_set_id",
+    "case_count",
+    "chunks"
+  ],
   "properties": {
-    "schema_version": {"const": "1.0"},
+    "schema_version": {
+      "const": "1.0"
+    },
     "format": {
       "enum": [
         "fluidsbench-profile-chunks-v1",
@@ -15,29 +25,85 @@
         "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
       ]
     },
-    "contract_id": {"type": "string", "minLength": 1},
-    "contract_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-    "evaluator_support_release_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,159}$"},
-    "evaluator_support_manifest_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-    "submission_id": {"type": "string", "minLength": 1},
-    "dataset_id": {"type": "string", "minLength": 1},
-    "split_id": {"type": "string", "minLength": 1},
-    "case_set_id": {"type": "string", "minLength": 1},
-    "case_count": {"type": "integer", "minimum": 1},
-    "case_id_status": {"enum": ["official", "prototype_generated"]},
+    "contract_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "evaluator_support_release_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,159}$"
+    },
+    "evaluator_support_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "submission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dataset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "split_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case_set_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "case_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "case_id_status": {
+      "enum": [
+        "official",
+        "prototype_generated"
+      ]
+    },
     "chunks": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["file", "case_ids", "sha256"],
+        "required": [
+          "file",
+          "case_ids",
+          "sha256"
+        ],
         "properties": {
-          "file": {"type": "string", "pattern": "^chunk-[0-9]{3}\\.json$"},
-          "case_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+          "file": {
+            "type": "string",
+            "pattern": "^chunk-[0-9]{3}\\.json$"
+          },
+          "case_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
         }
       }
+    },
+    "prediction_scope": {
+      "enum": [
+        "surface_and_volume",
+        "surface_only"
+      ]
     }
   },
   "allOf": [
@@ -51,16 +117,30 @@
             ]
           }
         },
-        "required": ["format"]
+        "required": [
+          "format"
+        ]
       },
       "then": {
-        "required": ["format", "contract_id", "contract_sha256"]
+        "required": [
+          "format",
+          "contract_id",
+          "contract_sha256"
+        ]
       },
       "else": {
         "not": {
           "anyOf": [
-            {"required": ["contract_id"]},
-            {"required": ["contract_sha256"]}
+            {
+              "required": [
+                "contract_id"
+              ]
+            },
+            {
+              "required": [
+                "contract_sha256"
+              ]
+            }
           ]
         }
       }
@@ -72,7 +152,9 @@
             "const": "fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate"
           }
         },
-        "required": ["format"]
+        "required": [
+          "format"
+        ]
       },
       "then": {
         "required": [
@@ -83,8 +165,16 @@
       "else": {
         "not": {
           "anyOf": [
-            {"required": ["evaluator_support_release_id"]},
-            {"required": ["evaluator_support_manifest_sha256"]}
+            {
+              "required": [
+                "evaluator_support_release_id"
+              ]
+            },
+            {
+              "required": [
+                "evaluator_support_manifest_sha256"
+              ]
+            }
           ]
         }
       }

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -9,7 +10,6 @@ import pytest
 import scripts.assemble_hiliftaeroml_schema_v3_candidate as assembler
 from reference.hiliftaeroml.compact_profile_evaluator import CompactSupportRelease
 from scripts import validate_submission as submission_validator
-
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASET = ROOT / "benchmark-specs" / "hiliftaeroml"
@@ -948,6 +948,27 @@ def test_receipt_chain_binds_summaries_and_every_consumed_profile_file(
             case_set_sha256="a" * 64,
             case_records=records,
         )
+
+    paths["cp_cut_values"].write_bytes(f"retained-{case_id}-cp_cut_values".encode("ascii"))
+    shutil.rmtree(volume_outputs)
+    receipt["prediction_scope"] = "surface_only"
+    receipt["domains"].pop("volume")
+    receipt.pop("content_fingerprint")
+    receipt["content_fingerprint"] = assembler._canonical_fingerprint(receipt)
+    write_json(receipt_path, receipt)
+    records[case_id]["prediction_scope"] = "surface_only"
+    records[case_id]["input_sha256"] = {
+        key: value for key, value in inputs.items()
+        if not key.startswith("volume_")
+    }
+    records[case_id]["input_sha256"]["receipt"] = digest(receipt_path)
+    surface_result = assembler._verify_native_receipts(
+        receipts_root=receipts, outputs_root=None,
+        surface_outputs_root=surface_outputs, case_ids=[case_id],
+        case_set_id="caseset-test", case_set_sha256="a" * 64,
+        case_records=records, prediction_scope="surface_only",
+    )
+    assert set(surface_result[case_id]) == {"cp_profile_metrics", "cp_cut_values"}
 
 
 def test_native_output_root_cli_preserves_shared_shorthand_and_allows_split() -> None:

@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-09-30T08:42:06Z",
+  "generated_at": "2026-10-06T06:30:04Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -21,7 +21,7 @@
   "data_release": {
     "id": "prototype-dev-2026-09-16-4c51b08f226c",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-09-30T08:42:06Z",
+    "generated_at": "2026-10-06T06:30:04Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
@@ -51,14 +51,14 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "55f8310c44c59c5df293d0fd29c72d2a0e0a66cce228847960bfe0253c33c7d4",
+      "index_sha256": "c7765ff1c58839e529e1ade75cd6fd157d6c630cbc57c0ae54e9418516b688bb",
       "record_count": 58,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "d2c098098d24f979944be5b162e17ee66f452b6bfe8d9e4bba56694ccbdf05aa",
+      "sha256": "47c8a1c7b0852be3d3626b002d389110f7f8211f0c2fabeb827ec9708e27a143",
       "record_count": 59,
       "series_count": 59
     }
@@ -600,6 +600,46 @@
           "manifest_file": "scoring-support/ahmedml-native-all-splits-support-v1-candidate/manifest.json",
           "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/ahmedml/scoring-support/ahmedml-native-all-splits-support-v1-candidate/manifest.json",
           "manifest_sha256": "c727bad2ca2566dfed44920cc334af136f2fbe32f3c8886b2fcb130f495fd124"
+        },
+        "prediction_scopes": {
+          "surface_and_volume": {
+            "surface_predictions_required": true,
+            "volume_predictions_required": true
+          },
+          "surface_only": {
+            "surface_predictions_required": true,
+            "volume_predictions_forbidden": true,
+            "unavailable_component_metric_ids": [
+              "volume_velocity_rel_l2",
+              "volume_pressure_rel_l2",
+              "velocity_profile_r2"
+            ],
+            "unavailable_component_score": 0.0,
+            "component_weight_renormalization": false,
+            "maximum_overall_score": 60.0,
+            "unavailable_raw_metric_ids": [
+              "velocity_profile_r2",
+              "volume_pressure_mae",
+              "volume_pressure_physical_rel_l2",
+              "volume_pressure_rel_l1",
+              "volume_pressure_rel_l2",
+              "volume_pressure_rmse",
+              "volume_velocity_mae",
+              "volume_velocity_physical_rel_l2",
+              "volume_velocity_rel_l1",
+              "volume_velocity_rel_l2",
+              "volume_velocity_rmse"
+            ],
+            "required_profile_panel_ids": [
+              "pressure_profiles"
+            ]
+          }
+        },
+        "prediction_scope_contract_version": "aerodynamic-prediction-scopes-v1",
+        "surface_only_implementation_binding": {
+          "version": "aerodynamic-surface-only-v1",
+          "file": "reference/aerodynamic-surface-only-implementation-v1.json",
+          "sha256": "2fab84fce263aee88e0e78b5032e1e6261bbd0b552848affa2ed576dec251185"
         }
       },
       "overall_score_composite": {
@@ -651,7 +691,17 @@
             "transform": "bounded_quality"
           }
         ],
-        "tolerance": 1e-06
+        "tolerance": 1e-06,
+        "surface_only_policy": {
+          "unavailable_component_metric_ids": [
+            "volume_velocity_rel_l2",
+            "volume_pressure_rel_l2",
+            "velocity_profile_r2"
+          ],
+          "unavailable_component_score": 0.0,
+          "component_weight_renormalization": false,
+          "maximum_overall_score": 60.0
+        }
       },
       "component_score_groups": {
         "operation": "normalized_weighted_component_scores",
@@ -2740,7 +2790,49 @@
           "freeze_lossless_cp_connected_graph_and_five_station_velocity_profile_serialization_and_public_truth_release",
           "owner_approve_the_frozen_dataset_evaluator_git_revision_without_public_activation",
           "approve_the_zero_weight_regional_contract_and_complete_split_aggregator"
-        ]
+        ],
+        "prediction_scopes": {
+          "surface_and_volume": {
+            "surface_predictions_required": true,
+            "volume_predictions_required": true
+          },
+          "surface_only": {
+            "surface_predictions_required": true,
+            "volume_predictions_forbidden": true,
+            "unavailable_component_metric_ids": [
+              "volume_velocity_rel_l2",
+              "volume_pressure_rel_l2",
+              "velocity_profile_r2"
+            ],
+            "unavailable_component_score": 0.0,
+            "component_weight_renormalization": false,
+            "maximum_overall_score": 60.0,
+            "unavailable_raw_metric_ids": [
+              "velocity_profile_r2",
+              "volume_pressure_mae",
+              "volume_pressure_rel_l1",
+              "volume_pressure_rel_l2",
+              "volume_pressure_rmse",
+              "volume_velocity_mae",
+              "volume_velocity_rel_l1",
+              "volume_velocity_rel_l2",
+              "volume_velocity_rmse"
+            ],
+            "required_profile_panel_ids": [
+              "pressure_profiles"
+            ],
+            "methodology_contract": {
+              "file": "methodology-prediction-scopes-v1.json",
+              "sha256": "76b232be003fba55f29472f2f10cba742ef310da6a1d5e35ad4b87a834a1e9d9"
+            }
+          }
+        },
+        "prediction_scope_contract_version": "aerodynamic-prediction-scopes-v1",
+        "surface_only_implementation_binding": {
+          "version": "aerodynamic-surface-only-v1",
+          "file": "reference/aerodynamic-surface-only-implementation-v1.json",
+          "sha256": "2fab84fce263aee88e0e78b5032e1e6261bbd0b552848affa2ed576dec251185"
+        }
       },
       "overall_score_composite": {
         "metric_id": "overall_score",
@@ -2791,7 +2883,17 @@
             "transform": "bounded_quality"
           }
         ],
-        "tolerance": 1e-06
+        "tolerance": 1e-06,
+        "surface_only_policy": {
+          "unavailable_component_metric_ids": [
+            "volume_velocity_rel_l2",
+            "volume_pressure_rel_l2",
+            "velocity_profile_r2"
+          ],
+          "unavailable_component_score": 0.0,
+          "component_weight_renormalization": false,
+          "maximum_overall_score": 60.0
+        }
       },
       "component_score_groups": {
         "operation": "normalized_weighted_component_scores",
@@ -3370,7 +3472,40 @@
         },
         "owner_decisions_required": [
           "approve_release_and_open_submissions"
-        ]
+        ],
+        "prediction_scopes": {
+          "surface_and_volume": {
+            "surface_predictions_required": true,
+            "volume_predictions_required": true
+          },
+          "surface_only": {
+            "surface_predictions_required": true,
+            "volume_predictions_forbidden": true,
+            "unavailable_component_metric_ids": [
+              "volume_velocity_rel_l2",
+              "volume_pressure_rel_l2",
+              "velocity_profile_r2"
+            ],
+            "unavailable_component_score": 0.0,
+            "component_weight_renormalization": false,
+            "maximum_overall_score": 60.0,
+            "unavailable_raw_metric_ids": [
+              "velocity_profile_r2",
+              "velocity_profile_relative_r2",
+              "volume_pressure_rel_l2",
+              "volume_velocity_rel_l2"
+            ],
+            "required_profile_panel_ids": [
+              "pressure_profiles"
+            ]
+          }
+        },
+        "prediction_scope_contract_version": "aerodynamic-prediction-scopes-v1",
+        "surface_only_implementation_binding": {
+          "version": "aerodynamic-surface-only-v1",
+          "file": "reference/aerodynamic-surface-only-implementation-v1.json",
+          "sha256": "2fab84fce263aee88e0e78b5032e1e6261bbd0b552848affa2ed576dec251185"
+        }
       },
       "overall_score_composite": {
         "metric_id": "overall_score",
@@ -3421,7 +3556,17 @@
             "transform": "bounded_quality"
           }
         ],
-        "tolerance": 1e-06
+        "tolerance": 1e-06,
+        "surface_only_policy": {
+          "unavailable_component_metric_ids": [
+            "volume_velocity_rel_l2",
+            "volume_pressure_rel_l2",
+            "velocity_profile_r2"
+          ],
+          "unavailable_component_score": 0.0,
+          "component_weight_renormalization": false,
+          "maximum_overall_score": 60.0
+        }
       },
       "component_score_groups": {
         "operation": "normalized_weighted_component_scores",

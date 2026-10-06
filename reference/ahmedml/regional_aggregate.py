@@ -13,8 +13,9 @@ from collections.abc import Mapping, Sequence
 from statistics import median
 from typing import Any
 
-from .contract import REGION_DEFINITION_SHA256, VOLUME_REGION_DEFINITION_SHA256
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
 
+from .contract import REGION_DEFINITION_SHA256, VOLUME_REGION_DEFINITION_SHA256
 
 AGGREGATE_REGIONAL_REPORT_SCHEMA = "ahmedml-regional-diagnostics-aggregate-v2"
 REGIONAL_DEFINITION_ID = "ahmedml-native-regions-v2-candidate"
@@ -391,9 +392,13 @@ def build_aggregate_regional_diagnostics(
     case_ids: Sequence[str],
     case_evidence: Mapping[str, Mapping[str, Any]],
     split_id: str,
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, Any]:
     """Reduce complete evaluator evidence into a dashboard-ready report."""
 
+    scope = checked_prediction_scope(prediction_scope)
+    if any(evidence.get("prediction_scope", "surface_and_volume") != scope for evidence in case_evidence.values()):
+        raise AhmedMLRegionalAggregateError("case evidence prediction scope differs")
     if not case_ids or len(case_ids) != len(set(case_ids)):
         raise AhmedMLRegionalAggregateError("case_ids must be non-empty and unique")
     if set(case_evidence) != set(case_ids):
@@ -404,6 +409,8 @@ def build_aggregate_regional_diagnostics(
     }
     supports: dict[str, Any] = {}
     for support_id, definition in SUPPORT_DEFINITIONS.items():
+        if scope == "surface_only" and "volume" in support_id:
+            continue
         field_reports = {
             field_id: _reduce_field(
                 field_id=field_id,
@@ -431,7 +438,7 @@ def build_aggregate_regional_diagnostics(
         "contract_sha256": REGION_DEFINITION_SHA256,
         "dataset_id": "ahmedml",
         "split_id": split_id,
-        "prediction_scope": "surface_and_volume",
+        "prediction_scope": scope,
         "case_count": len(case_ids),
         "case_ids": list(case_ids),
         "scoring": {
@@ -464,6 +471,8 @@ def validate_aggregate_regional_diagnostics(
 ) -> None:
     """Fail closed on a published AhmedML regional aggregate."""
 
+    scope = checked_prediction_scope(report.get("prediction_scope", "surface_and_volume"))
+    definitions = {key: value for key, value in SUPPORT_DEFINITIONS.items() if scope != "surface_only" or "volume" not in key}
     expected_header = {
         "schema": AGGREGATE_REGIONAL_REPORT_SCHEMA,
         "schema_version": 2,
@@ -472,7 +481,7 @@ def validate_aggregate_regional_diagnostics(
         "contract_sha256": REGION_DEFINITION_SHA256,
         "dataset_id": "ahmedml",
         "split_id": expected_split_id,
-        "prediction_scope": "surface_and_volume",
+        "prediction_scope": scope,
         "case_count": len(expected_case_ids),
     }
     for key, expected in expected_header.items():
@@ -495,9 +504,9 @@ def validate_aggregate_regional_diagnostics(
     }:
         raise AhmedMLRegionalAggregateError("regional validation declaration differs")
     supports = _mapping(report.get("supports"), "supports")
-    if set(supports) != set(SUPPORT_DEFINITIONS):
+    if set(supports) != set(definitions):
         raise AhmedMLRegionalAggregateError("regional support set differs")
-    for support_id, definition in SUPPORT_DEFINITIONS.items():
+    for support_id, definition in definitions.items():
         support = _mapping(supports.get(support_id), support_id)
         if support.get("definition_sha256") != definition["definition_sha256"]:
             raise AhmedMLRegionalAggregateError(

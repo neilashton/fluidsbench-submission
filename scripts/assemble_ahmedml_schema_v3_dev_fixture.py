@@ -113,7 +113,7 @@ def _r2(truth: Sequence[float], prediction: Sequence[float]) -> float:
     return 1.0 - numerator / denominator
 
 
-def _case_profiles(evidence: Mapping[str, Any], case_id: str) -> tuple[list[dict[str, Any]], float, float]:
+def _case_profiles(evidence: Mapping[str, Any], case_id: str, surface_only: bool = False) -> tuple[list[dict[str, Any]], float, float]:
     profiles = _mapping(evidence.get("profiles"), f"{case_id}.profiles")
     if (
         profiles.get("profile_definition_sha256") != PROFILE_DEFINITION_SHA256
@@ -121,7 +121,7 @@ def _case_profiles(evidence: Mapping[str, Any], case_id: str) -> tuple[list[dict
     ):
         raise AssemblyError(f"{case_id} profile contract differs")
     raw_series = profiles.get("series")
-    if not isinstance(raw_series, list) or len(raw_series) != 7:
+    if not isinstance(raw_series, list) or len(raw_series) != (3 if surface_only else 7):
         raise AssemblyError(f"{case_id} must contain seven evaluator-derived series")
     output: list[dict[str, Any]] = []
     cp_truth: list[float] = []
@@ -162,7 +162,7 @@ def _case_profiles(evidence: Mapping[str, Any], case_id: str) -> tuple[list[dict
             velocity_prediction.extend(predictions)
         else:
             raise AssemblyError(f"{case_id} profile panel differs")
-    return output, _r2(cp_truth, cp_prediction), _r2(velocity_truth, velocity_prediction)
+    return output, _r2(cp_truth, cp_prediction), None if surface_only else _r2(velocity_truth, velocity_prediction)
 
 
 def _support_counts(release: Any, case_id: str) -> dict[str, int]:
@@ -230,7 +230,8 @@ def _case_metrics(
     case_id: str,
     counts: Mapping[str, int],
     cp_r2: float,
-    velocity_r2: float,
+    velocity_r2: float | None,
+    surface_only: bool = False,
 ) -> dict[str, Any]:
     values = _mapping(evidence.get("metric_values"), f"{case_id}.metric_values")
     fields = _mapping(evidence.get("field_statistics"), f"{case_id}.field_statistics")
@@ -264,14 +265,14 @@ def _case_metrics(
             "volume_pressure_rmse",
             "volume_velocity_mae",
             "volume_velocity_rmse",
-        )
+        ) if not surface_only
     }
     surface_count = counts["ahmedml-surface-native-cells-v1"]
     volume_count = counts["ahmedml-volume-native-cells-v1"]
     surface_pressure = _mapping(fields.get("surface_pressure"), "surface_pressure")
     surface_shear = _mapping(fields.get("surface_wall_shear"), "surface_wall_shear")
-    volume_pressure = _mapping(fields.get("volume_pressure"), "volume_pressure")
-    volume_velocity = _mapping(fields.get("volume_velocity"), "volume_velocity")
+    volume_pressure = _mapping(fields.get("volume_pressure"), "volume_pressure") if not surface_only else {}
+    volume_velocity = _mapping(fields.get("volume_velocity"), "volume_velocity") if not surface_only else {}
     surface_statistics = {
         "surface_pressure_rel_l2": _relative_l2_statistics(
             field=surface_pressure,
@@ -323,14 +324,14 @@ def _case_metrics(
             dataset_weighting="cell_volume",
             entity_count=volume_count,
         ),
-    }
+    } if not surface_only else {}
     truth_cd = _finite(force.get("truth_cd"), f"{case_id}.truth_cd")
     prediction_cd = _finite(force.get("prediction_cd"), f"{case_id}.prediction_cd")
     truth_cl = _finite(force.get("truth_cl"), f"{case_id}.truth_cl")
     prediction_cl = _finite(force.get("prediction_cl"), f"{case_id}.prediction_cl")
     drag_mae = abs(prediction_cd - truth_cd)
     lift_mae = abs(prediction_cl - truth_cl)
-    return {
+    result = {
         "case_id": case_id,
         "supports": [
             _support_record(
@@ -368,7 +369,7 @@ def _case_metrics(
             "c_drag_mae": drag_mae,
             "c_lift_mae": lift_mae,
             "cp_cut_r2": cp_r2,
-            "velocity_profile_r2": velocity_r2,
+            **({"velocity_profile_r2": velocity_r2} if not surface_only else {}),
         },
         "force_coefficients": {
             "truth_cd": truth_cd,
@@ -378,6 +379,9 @@ def _case_metrics(
         },
     }
 
+    if surface_only:
+        result["supports"] = [support for support in result["supports"] if "volume" not in support["support_id"]]
+    return result
 
 def _count_summary(values: Sequence[int]) -> dict[str, Any]:
     return {

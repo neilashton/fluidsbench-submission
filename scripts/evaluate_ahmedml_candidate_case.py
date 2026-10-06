@@ -63,10 +63,11 @@ def main() -> int:
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--case-support", type=Path, required=True)
     parser.add_argument("--surface-prediction-manifest", type=Path, required=True)
-    parser.add_argument("--volume-prediction-manifest", type=Path, required=True)
+    parser.add_argument("--volume-prediction-manifest", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--source-identity", type=Path, default=DEFAULT_SOURCE_IDENTITY)
     parser.add_argument("--maximum-prediction-chunk-rows", type=int, default=1_000_000)
+    parser.add_argument("--prediction-scope", choices=("surface_and_volume", "surface_only"), default="surface_and_volume")
     args = parser.parse_args()
     try:
         identity = load_source_identity(args.source_identity)
@@ -78,6 +79,7 @@ def main() -> int:
             case_support=support,
             surface_prediction_manifest=args.surface_prediction_manifest,
             volume_prediction_manifest=args.volume_prediction_manifest,
+            prediction_scope=args.prediction_scope,
             maximum_prediction_chunk_rows=args.maximum_prediction_chunk_rows,
         )
         write_atomic(args.output.expanduser().resolve(), result.to_json())

@@ -1,0 +1,124 @@
+{
+  "schema": "aerodynamic-surface-only-implementation-v1",
+  "version": "aerodynamic-surface-only-v1",
+  "activation_effect": "none",
+  "datasets": [
+    "ahmedml",
+    "windsorml",
+    "hiliftaeroml"
+  ],
+  "unavailable_component_metric_ids": [
+    "volume_velocity_rel_l2",
+    "volume_pressure_rel_l2",
+    "velocity_profile_r2"
+  ],
+  "unavailable_component_score": 0.0,
+  "component_weight_renormalization": false,
+  "maximum_overall_score": 60.0,
+  "artifacts": [
+    {
+      "file": "benchmark-specs/ahmedml/methodology-contract.json",
+      "sha256": "da2a073122c2737dd716d436d797c8f364378b0074013a56ea4a6f94adfba4af"
+    },
+    {
+      "file": "benchmark-specs/hiliftaeroml/methodology-contract.json",
+      "sha256": "835f55a8f5c296f8635cbfdb9f09315fdcec16832ec14c4cd96e5eed08e96d9c"
+    },
+    {
+      "file": "benchmark-specs/hiliftaeroml/methodology-prediction-scopes-v1.json",
+      "sha256": "76b232be003fba55f29472f2f10cba742ef310da6a1d5e35ad4b87a834a1e9d9"
+    },
+    {
+      "file": "benchmark-specs/windsorml/methodology-contract.json",
+      "sha256": "899a0e7f3ca85c0557ea5642bfa9b70ab186782a2ad95cbf8e3a6ee38f528868"
+    },
+    {
+      "file": "reference/ahmedml/dataset_scorer.py",
+      "sha256": "614b4487f4273e3b82f5d5cab69a13f80931abbdbe95aa9e33b06aede728844c"
+    },
+    {
+      "file": "reference/ahmedml/evaluator.py",
+      "sha256": "6eb7fdbc852e2855fb7559dcbb6e9f27683ec34e2481393931cdb89df9d5dbca"
+    },
+    {
+      "file": "reference/ahmedml/pre_release.py",
+      "sha256": "dc04d948c1fe01f3a9898f53a14ae55e31f3bd7831c6e6659553f6b2812d048a"
+    },
+    {
+      "file": "reference/ahmedml/regional_aggregate.py",
+      "sha256": "767d9aa535bc9307c1fc3698e065f56b1d6762ef5f2f37b407a50e8acdaf5bc9"
+    },
+    {
+      "file": "reference/drivaerml/methodology.py",
+      "sha256": "9f3a5b9837c8ef796ef28c7898e3394c7a3627c366e64b7617c317db187489af"
+    },
+    {
+      "file": "reference/hiliftaeroml/compact_profile_evaluator.py",
+      "sha256": "1afab1871e018b6f9d2b8f47368485b00fc026221c16bc2240262b16b266d1dc"
+    },
+    {
+      "file": "reference/hiliftaeroml/compact_profiles.py",
+      "sha256": "7bf7b2ca7a19a5578bff5af6c13a363f6bdd0b84bf58b6fe4afa91199d3a3326"
+    },
+    {
+      "file": "reference/hiliftaeroml/regional_aggregate.py",
+      "sha256": "07a753be66b8093717e1caa035811dcb46e7b5c8c38941d127e5354a873355ca"
+    },
+    {
+      "file": "reference/prediction_scope.py",
+      "sha256": "9e3b8876f2a210a2715e3cffb8f8d00bbf2d583ccc8acebc903b7c1d0b5401e9"
+    },
+    {
+      "file": "reference/scores.py",
+      "sha256": "1e496b51aa2c1e924309785cb2a5976e8fd840c44b677e0322d6f4f7bf042e06"
+    },
+    {
+      "file": "reference/windsorml/dataset_scorer.py",
+      "sha256": "08b9bbf7020f7004d946bc165fa90cede2d6ac3225588f1709415f153e0403d2"
+    },
+    {
+      "file": "reference/windsorml/evaluator.py",
+      "sha256": "a79ded7680e911637f280dcb08ff8f2aec0893b0757c3b81fe4c1d5a4257f033"
+    },
+    {
+      "file": "reference/windsorml/profiles.py",
+      "sha256": "5d1ea65ea062199180ec465410dbe17f54bd82ae7e7afddb8613da17af6866dc"
+    },
+    {
+      "file": "schemas/v1/hiliftaeroml-compact-profile-chunk.schema.json",
+      "sha256": "9b82a7034be6db7007d39bb7581bebcb959bca8dcd0c02222313f40ee656a3fc"
+    },
+    {
+      "file": "schemas/v1/profile-index.schema.json",
+      "sha256": "52a284831e87ab75bb8094f9e3c0b47bd9cc53415e50d2322f12a7553d51efe7"
+    },
+    {
+      "file": "schemas/v3/evaluation-evidence.schema.json",
+      "sha256": "cba7b540a84e70f1e6e64dcc8c8405d19051dea860b2bc9cb06bc99724e8b409"
+    },
+    {
+      "file": "schemas/v3/submission.schema.json",
+      "sha256": "fab49edc41f8600221869703c10e7ce68bdaf03a14bc4bbe1d49facb0a9d1822"
+    },
+    {
+      "file": "scripts/assemble_ahmedml_schema_v3_candidate.py",
+      "sha256": "4418150b7b035bcdf471c7feb0e57d617dbb3996cea11025e93bb95a4b12aaae"
+    },
+    {
+      "file": "scripts/assemble_ahmedml_schema_v3_dev_fixture.py",
+      "sha256": "6454a753ffa0c4714c3a945a384f66dbeb3f8f2fd0bbe291ddd33cccf42c7d90"
+    },
+    {
+      "file": "scripts/assemble_hiliftaeroml_schema_v3_candidate.py",
+      "sha256": "8810a04c4c417c778bd5e63f7eb397e7fd11a86e355c23b2055da309d985e174"
+    },
+    {
+      "file": "scripts/build_windsorml_submission_spec.py",
+      "sha256": "dcdb6797d1befd8207a17d119b60e1ac2d0df3da50dddb5a2acddcb3d555370b"
+    },
+    {
+      "file": "scripts/validate_submission.py",
+      "sha256": "d2135631633ca65d8c4dc8c715b7e8c44ebf0943615377a39c262377ae4a9ea4"
+    }
+  ]
+}

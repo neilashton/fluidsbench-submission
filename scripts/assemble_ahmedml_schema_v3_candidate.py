@@ -27,7 +27,6 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in os.sys.path:
     os.sys.path.insert(0, str(ROOT))
@@ -57,12 +56,16 @@ from reference.methodology import (  # noqa: E402
     derived_parameter_count_millions,
     require_methodology,
 )
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
+from reference.prediction_scope import unavailable_metrics
 from reference.scoring_support import (  # noqa: E402
     ScoringSupportError,
     load_support_release,
 )
 from scripts.assemble_ahmedml_schema_v3_dev_fixture import (  # noqa: E402
     AssemblyError as EvidenceNormalizationError,
+)
+from scripts.assemble_ahmedml_schema_v3_dev_fixture import (
     _case_metrics,
     _case_profiles,
     _support_counts,
@@ -71,7 +74,6 @@ from scripts.assemble_ahmedml_schema_v3_dev_fixture import (  # noqa: E402
 from scripts.validate_scoring_supports import (  # noqa: E402
     validate_candidate_manifest_release,
 )
-
 
 DEFAULT_SPECIFICATION = ROOT / "benchmark-specs" / "ahmedml" / "submission-spec.json"
 CONFIG_SCHEMA = "ahmedml-fluidsbench-schema-v3-package-config-v1"
@@ -511,6 +513,8 @@ def _prediction_input_integrity(
         ("surface", "ahmedml-surface-native-cells-v1"),
         ("volume", "ahmedml-volume-native-cells-v1"),
     ):
+        if evidence.get("prediction_scope") == "surface_only" and domain == "volume":
+            continue
         value = _mapping(prediction_inputs.get(domain), f"{case_id}.{domain}")
         chunks = value.get("chunk_sha256")
         if (
@@ -542,6 +546,8 @@ def assemble_package(
     dataset_evidence_path: Path | None = None,
 ) -> dict[str, Any]:
     config = load_json(config_path, label="package config")
+    scope = checked_prediction_scope(config.get("prediction_scope", "surface_and_volume"))
+    surface_only = scope == "surface_only"
     if config.get("schema") != CONFIG_SCHEMA:
         raise PackageAssemblyError(f"config.schema must equal {CONFIG_SCHEMA!r}")
     blockers = unresolved_tokens(config)
@@ -563,7 +569,7 @@ def assemble_package(
     if attestation != {
         "actual_model_inference": True,
         "evaluation_truth_generated_predictions": False,
-        "scope": "all_declared_cases_and_surface_volume_fields",
+        "scope": "all_declared_cases_and_surface_fields" if surface_only else "all_declared_cases_and_surface_volume_fields",
     }:
         raise PackageAssemblyError(
             "config.inference_attestation must explicitly declare genuine complete "
@@ -639,6 +645,7 @@ def assemble_package(
             submission_specification=specification_path,
             split_id=split_id,
             case_evidence_directory=case_evidence_root,
+            prediction_scope=scope,
         ).to_json()
     except AhmedMLDatasetScorerError as error:
         raise PackageAssemblyError(str(error)) from error
@@ -697,7 +704,7 @@ def assemble_package(
     )
     participant_submission = copy.deepcopy(participant)
     participant_submission["dataset_id"] = "ahmedml"
-    participant_submission["prediction_scope"] = "surface_and_volume"
+    participant_submission["prediction_scope"] = scope
     try:
         participant_submission["parameter_count_millions"] = (
             derived_parameter_count_millions(methodology)
@@ -744,7 +751,7 @@ def assemble_package(
                 f"{case_id} evidence changed after the exact dataset reduction"
             )
         try:
-            profiles, cp_r2, velocity_r2 = _case_profiles(evidence, case_id)
+            profiles, cp_r2, velocity_r2 = _case_profiles(evidence, case_id, surface_only=surface_only)
             counts = _support_counts(release, case_id)
             metric_record = _case_metrics(
                 evidence,
@@ -752,6 +759,7 @@ def assemble_package(
                 counts=counts,
                 cp_r2=cp_r2,
                 velocity_r2=velocity_r2,
+                surface_only=surface_only,
             )
         except EvidenceNormalizationError as error:
             raise PackageAssemblyError(str(error)) from error
@@ -765,6 +773,8 @@ def assemble_package(
         for metric in specification.get("metrics", [])
         if isinstance(metric, Mapping) and isinstance(metric.get("id"), str)
     ]
+    if surface_only:
+        required_metric_ids = [metric_id for metric_id in required_metric_ids if metric_id not in unavailable_metrics("ahmedml", required_metric_ids)]
     raw_metrics = recomputed_evidence.get("metric_values")
     if not isinstance(raw_metrics, Mapping) or set(raw_metrics) != set(
         required_metric_ids
@@ -876,6 +886,7 @@ def assemble_package(
         regional = build_aggregate_regional_diagnostics(
             case_ids=case_ids,
             case_evidence=case_documents,
+            prediction_scope=scope,
             split_id=split_id,
         )
         regional_sha = _write_json(
@@ -891,7 +902,7 @@ def assemble_package(
             "split_id": split_id,
             "split_sha256": split_sha,
             "case_set_id": split["case_set_id"],
-            "prediction_scope": "surface_and_volume",
+            "prediction_scope": scope,
             "reference_version": specification["evaluation_reference_version"],
             "command": command,
             "generated_at": generated_at,
@@ -938,7 +949,7 @@ def assemble_package(
             "split_id": split_id,
             "case_set_id": split["case_set_id"],
             "split_sha256": split_sha,
-            "prediction_scope": "surface_and_volume",
+            "prediction_scope": scope,
             "evaluation": {
                 "reference_version": specification["evaluation_reference_version"],
                 "command": command,

@@ -145,7 +145,40 @@
     },
     "owner_decisions_required": [
       "approve_release_and_open_submissions"
-    ]
+    ],
+    "prediction_scopes": {
+      "surface_and_volume": {
+        "surface_predictions_required": true,
+        "volume_predictions_required": true
+      },
+      "surface_only": {
+        "surface_predictions_required": true,
+        "volume_predictions_forbidden": true,
+        "unavailable_component_metric_ids": [
+          "volume_velocity_rel_l2",
+          "volume_pressure_rel_l2",
+          "velocity_profile_r2"
+        ],
+        "unavailable_component_score": 0.0,
+        "component_weight_renormalization": false,
+        "maximum_overall_score": 60.0,
+        "unavailable_raw_metric_ids": [
+          "velocity_profile_r2",
+          "velocity_profile_relative_r2",
+          "volume_pressure_rel_l2",
+          "volume_velocity_rel_l2"
+        ],
+        "required_profile_panel_ids": [
+          "pressure_profiles"
+        ]
+      }
+    },
+    "prediction_scope_contract_version": "aerodynamic-prediction-scopes-v1",
+    "surface_only_implementation_binding": {
+      "version": "aerodynamic-surface-only-v1",
+      "file": "reference/aerodynamic-surface-only-implementation-v1.json",
+      "sha256": "2fab84fce263aee88e0e78b5032e1e6261bbd0b552848affa2ed576dec251185"
+    }
   },
   "evaluation_reference_version": "windsorml-evaluator-v0.1-candidate",
   "default_field_reduction": "per_geometry_then_macro_average",
@@ -205,7 +238,17 @@
         "transform": "bounded_quality"
       }
     ],
-    "tolerance": 1e-06
+    "tolerance": 1e-06,
+    "surface_only_policy": {
+      "unavailable_component_metric_ids": [
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "velocity_profile_r2"
+      ],
+      "unavailable_component_score": 0.0,
+      "component_weight_renormalization": false,
+      "maximum_overall_score": 60.0
+    }
   },
   "component_score_groups": {
     "operation": "normalized_weighted_component_scores",
@@ -433,7 +476,11 @@
         "cp"
       ],
       "source": "evaluator_derived_from_the_submitted_native_surface_field",
-      "note": "Stations are aligned with AutoCFD Case 1, the same 1/4-scale Windsor body. Published in a constant family (scored) and a body-height-relative family (report only, zero weight)."
+      "note": "Stations are aligned with AutoCFD Case 1, the same 1/4-scale Windsor body. Published in a constant family (scored) and a body-height-relative family (report only, zero weight).",
+      "required_prediction_scopes": [
+        "surface_and_volume",
+        "surface_only"
+      ]
     },
     {
       "id": "velocity_profiles",
@@ -461,7 +508,10 @@
         "ux_over_uinf"
       ],
       "source": "evaluator_derived_from_the_submitted_native_volume_field",
-      "note": "The prototype's four fabricated stations were removed. These five are sited from the measured wake of run_0: two inside the recirculation (ux/uinf reaches -0.251 and -0.154), one just past closure, one in the recovering wake, plus a spanwise cut. The relative family rescales the vertical coordinate by each case's body height, which varies from 0.316 m to 0.473 m."
+      "note": "The prototype's four fabricated stations were removed. These five are sited from the measured wake of run_0: two inside the recirculation (ux/uinf reaches -0.251 and -0.154), one just past closure, one in the recovering wake, plus a spanwise cut. The relative family rescales the vertical coordinate by each case's body height, which varies from 0.316 m to 0.473 m.",
+      "required_prediction_scopes": [
+        "surface_and_volume"
+      ]
     }
   ],
   "splits": [

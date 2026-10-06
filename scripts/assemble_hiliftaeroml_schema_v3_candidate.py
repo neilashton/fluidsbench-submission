@@ -29,7 +29,6 @@ from urllib.parse import urlparse
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -39,11 +38,20 @@ from reference.hiliftaeroml.compact_profile_evaluator import (
     COMPACT_PROFILE_CONTRACT_PATH,
     COMPACT_PROFILE_CONTRACT_SHA256,
     COMPACT_PROFILE_FORMAT,
-    CompactSupportRelease,
     CompactProfileEvaluationError,
+    CompactSupportRelease,
     build_compact_profile_directory,
     open_compact_support_release,
     score_compact_profile_directory,
+)
+from reference.hiliftaeroml.dimensional_units import (
+    export_binding as dimensional_export_binding,
+)
+from reference.hiliftaeroml.dimensional_units import (
+    native_error_to_si,
+)
+from reference.hiliftaeroml.dimensional_units import (
+    validate_contract as validate_dimensional_export_contract,
 )
 from reference.hiliftaeroml.regional_aggregate import (
     AGGREGATE_REGIONAL_REPORT_SCHEMA,
@@ -57,15 +65,15 @@ from reference.methodology import (
     derived_parameter_count_millions,
     require_methodology,
 )
+from reference.prediction_scope import (
+    UNAVAILABLE_COMPONENTS,
+    surface_only_implementation_binding,
+    unavailable_metrics,
+)
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
 from reference.scores import composite_component_group_scores, composite_overall_score
 from reference.scoring_support import ScoringSupportError, load_support_release
-from reference.hiliftaeroml.dimensional_units import (
-    export_binding as dimensional_export_binding,
-    native_error_to_si,
-    validate_contract as validate_dimensional_export_contract,
-)
 from scripts.validate_scoring_supports import validate_candidate_manifest_release
-
 
 DEFAULT_SPECIFICATION = ROOT / "benchmark-specs" / "hiliftaeroml" / "submission-spec.json"
 SCHEMA_ROOT = ROOT / "schemas"
@@ -292,6 +300,7 @@ def _resolve_native_output_roots(
     outputs_root: Path | None,
     surface_outputs_root: Path | None = None,
     volume_outputs_root: Path | None = None,
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, Path]:
     """Resolve domain roots while retaining ``outputs_root`` as shorthand."""
 
@@ -299,6 +308,12 @@ def _resolve_native_output_roots(
         surface_outputs_root if surface_outputs_root is not None else outputs_root
     )
     volume = volume_outputs_root if volume_outputs_root is not None else outputs_root
+    if checked_prediction_scope(prediction_scope) == "surface_only":
+        if surface is None:
+            raise HiLiftPackageAssemblyError("surface native output root is required")
+        if volume_outputs_root is not None:
+            raise HiLiftPackageAssemblyError("surface_only forbids a volume output root")
+        return {"surface": surface}
     missing = [
         domain
         for domain, value in (("surface", surface), ("volume", volume))
@@ -774,7 +789,9 @@ def _verify_native_aggregate(
     case_ids: Sequence[str],
     case_set_id: str,
     case_set_sha256: str,
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, dict[str, Any]]:
+    surface_only = checked_prediction_scope(prediction_scope) == "surface_only"
     _require_sha(case_set_sha256, "selected case-set digest")
     if not aggregate_root.is_dir() or aggregate_root.is_symlink():
         raise HiLiftPackageAssemblyError(
@@ -806,6 +823,8 @@ def _verify_native_aggregate(
         raise HiLiftPackageAssemblyError(
             "legacy Full360 native aggregate is bounded to its retained 360-case set"
         )
+    if artifact.get("prediction_scope", "surface_and_volume") != prediction_scope:
+        raise HiLiftPackageAssemblyError("native aggregate prediction scope differs")
     _verify_fingerprint(artifact, "native aggregate artifact manifest")
     declared = artifact.get("artifacts")
     expected_declared = NATIVE_AGGREGATE_FILES - {"artifact_manifest.json"}
@@ -917,8 +936,10 @@ def _verify_native_aggregate(
             raise HiLiftPackageAssemblyError(
                 f"native aggregate {record.get('case_id')} {index_key} differs"
             )
+        if record.get("prediction_scope", "surface_and_volume") != prediction_scope:
+            raise HiLiftPackageAssemblyError("native case prediction scope differs")
         inputs = record.get("input_sha256")
-        if not isinstance(inputs, Mapping) or set(inputs) != NATIVE_CASE_INPUT_SHA256_KEYS:
+        if not isinstance(inputs, Mapping) or set(inputs) != (NATIVE_CASE_INPUT_SHA256_KEYS - {"volume_support", "volume_regional"} if surface_only else NATIVE_CASE_INPUT_SHA256_KEYS):
             raise HiLiftPackageAssemblyError(
                 f"native aggregate {record.get('case_id')} input SHA-256 inventory differs"
             )
@@ -936,7 +957,7 @@ def _case_input_sha256(
             f"native aggregate has no case record for {case_id}"
         )
     inputs = record.get("input_sha256")
-    if not isinstance(inputs, Mapping) or set(inputs) != NATIVE_CASE_INPUT_SHA256_KEYS:
+    if not isinstance(inputs, Mapping) or set(inputs) != (NATIVE_CASE_INPUT_SHA256_KEYS - {"volume_support", "volume_regional"} if record.get("prediction_scope", "surface_and_volume") == "surface_only" else NATIVE_CASE_INPUT_SHA256_KEYS):
         raise HiLiftPackageAssemblyError(
             f"native aggregate {case_id} input SHA-256 inventory differs"
         )
@@ -1011,6 +1032,7 @@ def _verify_native_receipts(
     case_records: Mapping[str, Mapping[str, Any]],
     surface_outputs_root: Path | None = None,
     volume_outputs_root: Path | None = None,
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, dict[str, str]]:
     """Verify aggregate -> receipt -> summary -> consumed-artifact provenance."""
 
@@ -1022,6 +1044,7 @@ def _verify_native_receipts(
         outputs_root=outputs_root,
         surface_outputs_root=surface_outputs_root,
         volume_outputs_root=volume_outputs_root,
+        prediction_scope=prediction_scope,
     )
     for domain, root in output_roots.items():
         if not root.is_dir() or root.is_symlink():
@@ -1044,6 +1067,8 @@ def _verify_native_receipts(
                 case_records, case_id=case_id, artifact_id="receipt"
             ),
         )
+        if receipt.get("prediction_scope", "surface_and_volume") != prediction_scope:
+            raise HiLiftPackageAssemblyError(f"{case_id} receipt prediction scope differs")
         receipt_schema = receipt.get("schema_id")
         if receipt_schema not in {
             NATIVE_RECEIPT_SCHEMA,
@@ -1107,12 +1132,12 @@ def _verify_native_receipts(
                 )
 
         domains = receipt.get("domains")
-        if not isinstance(domains, Mapping) or set(domains) != {"surface", "volume"}:
+        if not isinstance(domains, Mapping) or set(domains) != set(output_roots):
             raise HiLiftPackageAssemblyError(
                 f"{case_id} receipt domain inventory differs"
             )
         case_profile_sha256: dict[str, str] = {}
-        for domain in ("surface", "volume"):
+        for domain in output_roots:
             receipt_domain = domains[domain]
             if not isinstance(receipt_domain, Mapping):
                 raise HiLiftPackageAssemblyError(
@@ -1641,7 +1666,10 @@ def _case_metrics_and_values(
     support_release_id: str,
     support_manifest_sha256: str,
     generated_at: str,
+    prediction_scope: str = "surface_and_volume",
 ) -> tuple[dict[str, Any], dict[str, float]]:
+    surface_only = checked_prediction_scope(prediction_scope) == "surface_only"
+    fixed_zero = UNAVAILABLE_COMPONENTS if surface_only else ()
     bindings = _support_bindings(support_release.manifest)
     if set(bindings) != {SURFACE_SUPPORT_ID, VOLUME_SUPPORT_ID, SCALAR_SUPPORT_ID}:
         raise HiLiftPackageAssemblyError("candidate scoring-support IDs differ")
@@ -1670,24 +1698,26 @@ def _case_metrics_and_values(
                 concise, case_id=case_id, artifact_id="surface_support"
             ),
         )
-        native_volume = _load_native_support(
-            volume_outputs_root
-            / case_id
-            / "volume_submission_stream"
-            / "submission_support_score.json",
-            case_id=case_id,
-            support_id=NATIVE_VOLUME_SUPPORT_ID,
-            expected_sha256=_case_input_sha256(
-                concise, case_id=case_id, artifact_id="volume_support"
-            ),
-        )
+        native_volume = None
+        if not surface_only:
+            native_volume = _load_native_support(
+                volume_outputs_root
+                / case_id
+                / "volume_submission_stream"
+                / "submission_support_score.json",
+                case_id=case_id,
+                support_id=NATIVE_VOLUME_SUPPORT_ID,
+                expected_sha256=_case_input_sha256(
+                    concise, case_id=case_id, artifact_id="volume_support"
+                ),
+            )
         expected_instances = {
             instance["support_id"]: instance["entity_count"]
             for instance in support_release.cases[case_id]["support_instances"]
         }
         if (
             native_surface["coverage"]["point_count"] != expected_instances[SURFACE_SUPPORT_ID]
-            or native_volume["coverage"]["point_count"] != expected_instances[VOLUME_SUPPORT_ID]
+            or (not surface_only and native_volume["coverage"]["point_count"] != expected_instances[VOLUME_SUPPORT_ID])
             or expected_instances[SCALAR_SUPPORT_ID] != 1
         ):
             raise HiLiftPackageAssemblyError(
@@ -1708,13 +1738,16 @@ def _case_metrics_and_values(
             concise_case=concise[case_id],
             bindings=bindings[SURFACE_SUPPORT_ID],
         )
-        volume_record, volume_values = _field_support_record(
-            case_id=case_id,
-            support_id=VOLUME_SUPPORT_ID,
-            native_support=native_volume,
-            concise_case=concise[case_id],
-            bindings=bindings[VOLUME_SUPPORT_ID],
-        )
+        volume_values = {}
+        volume_record = None
+        if not surface_only:
+            volume_record, volume_values = _field_support_record(
+                case_id=case_id,
+                support_id=VOLUME_SUPPORT_ID,
+                native_support=native_volume,
+                concise_case=concise[case_id],
+                bindings=bindings[VOLUME_SUPPORT_ID],
+            )
         scalar_values = {
             "c_drag_mae": abs(load["predicted_c_drag"] - load["truth_c_drag"]),
             "c_lift_mae": abs(load["predicted_c_lift"] - load["truth_c_lift"]),
@@ -1739,22 +1772,17 @@ def _case_metrics_and_values(
             "metric_sufficient_statistics": {},
         }
         profiles = profile_metrics.get(case_id)
-        if not isinstance(profiles, Mapping) or set(profiles) != {
-            "cp_cut_r2",
-            "velocity_profile_r2",
-        }:
+        if not isinstance(profiles, Mapping) or set(profiles) != ({"cp_cut_r2"} if surface_only else {"cp_cut_r2", "velocity_profile_r2"}):
             raise HiLiftPackageAssemblyError(f"{case_id} profile metrics are incomplete")
         nonspatial = {
             **scalar_values,
             "cp_cut_r2": _finite(profiles["cp_cut_r2"], f"{case_id} Cp R2"),
-            "velocity_profile_r2": _finite(
-                profiles["velocity_profile_r2"], f"{case_id} velocity R2"
-            ),
+            **({"velocity_profile_r2": _finite(profiles["velocity_profile_r2"], f"{case_id} velocity R2")} if not surface_only else {}),
         }
         case_documents.append(
             {
                 "case_id": case_id,
-                "supports": [surface_record, volume_record, scalar_record],
+                "supports": [surface_record, scalar_record] if surface_only else [surface_record, volume_record, scalar_record],
                 "nonspatial_metric_values": nonspatial,
                 "force_coefficients": _force_coefficient_evidence(load),
             }
@@ -1783,10 +1811,10 @@ def _case_metrics_and_values(
         raise HiLiftPackageAssemblyError("HiLiftAeroML composite score declarations are absent")
     try:
         metric_values.update(
-            composite_component_group_scores(metric_values, composite, groups)
+            composite_component_group_scores(metric_values, composite, groups, fixed_zero_component_ids=fixed_zero)
         )
         metric_values[composite["metric_id"]] = composite_overall_score(
-            metric_values, composite
+            metric_values, composite, fixed_zero_component_ids=fixed_zero
         )
     except (KeyError, TypeError, ValueError) as error:
         raise HiLiftPackageAssemblyError(
@@ -1797,6 +1825,8 @@ def _case_metrics_and_values(
         for metric in specification.get("metrics", [])
         if isinstance(metric, dict) and isinstance(metric.get("id"), str)
     ]
+    if surface_only:
+        required_ids = [metric_id for metric_id in required_ids if metric_id not in unavailable_metrics("hiliftaeroml", required_ids)]
     if set(metric_values) != set(required_ids):
         raise HiLiftPackageAssemblyError(
             "native adapter cannot provide every specification metric; "
@@ -1903,6 +1933,7 @@ def _convert_regional(
     surface_outputs_root: Path,
     volume_outputs_root: Path,
     case_records: Mapping[str, Mapping[str, Any]],
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, Any]:
     if (
         native.get("schema_id") != NATIVE_REGIONAL_SCHEMA
@@ -1912,6 +1943,7 @@ def _convert_regional(
         or native.get("contract_sha256") != NATIVE_REGIONAL_CONTRACT_SHA256
     ):
         raise HiLiftPackageAssemblyError("native regional aggregate identity differs")
+    surface_only = checked_prediction_scope(prediction_scope) == "surface_only"
     domains: dict[str, Any] = {}
     checked_fields = 0
     output_roots = {
@@ -1922,6 +1954,8 @@ def _convert_regional(
         ("surface", NATIVE_SURFACE_SUPPORT_ID, SURFACE_REGION_ORDER),
         ("volume", NATIVE_VOLUME_SUPPORT_ID, VOLUME_REGION_ORDER),
     ):
+        if surface_only and domain == "volume":
+            continue
         raw_domain = native.get("domains", {}).get(domain)
         if (
             not isinstance(raw_domain, Mapping)
@@ -2147,7 +2181,7 @@ def _convert_regional(
         "contract_sha256": REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
         "dataset_id": "hiliftaeroml",
         "split_id": split_id,
-        "prediction_scope": "surface_and_volume",
+        "prediction_scope": prediction_scope,
         "case_count": len(case_ids),
         "case_ids": list(case_ids),
         "scoring": {
@@ -2157,7 +2191,7 @@ def _convert_regional(
             "official_score_changed": False,
         },
         "surface": domains["surface"],
-        "volume": domains["volume"],
+        **({"volume": domains["volume"]} if not surface_only else {}),
         "reconstruction": {
             "status": "pass",
             "relative_tolerance": 5e-12,
@@ -2373,6 +2407,7 @@ def _participant_submission(
         "regional_diagnostics",
         "approval",
         "prediction_artifacts",
+        "prediction_scope",
         "parameter_count_millions",
     }
     overlap = sorted(forbidden.intersection(participant))
@@ -2382,7 +2417,7 @@ def _participant_submission(
         )
     submission = copy.deepcopy(participant)
     submission["dataset_id"] = "hiliftaeroml"
-    submission["prediction_scope"] = "surface_and_volume"
+    submission["prediction_scope"] = checked_prediction_scope(config.get("prediction_scope", "surface_and_volume"))
     try:
         submission["parameter_count_millions"] = derived_parameter_count_millions(
             participant.get("methodology")
@@ -2409,6 +2444,7 @@ def _validate_config_envelope(config: Mapping[str, Any]) -> tuple[int, bool]:
     }
     optional = {
         "profile_cases_per_chunk",
+        "prediction_scope",
         "include_regional_diagnostics",
     }
     if not required.issubset(config) or not set(config).issubset(required | optional):
@@ -2533,6 +2569,7 @@ def assemble_package(
     opened_compact_support_release: CompactSupportRelease | None = None,
 ) -> dict[str, Any]:
     config = load_json(config_path, label="package config")
+    scope = checked_prediction_scope(config.get("prediction_scope", "surface_and_volume"))
     if config.get("schema") != CONFIG_SCHEMA:
         raise HiLiftPackageAssemblyError(f"config.schema must equal {CONFIG_SCHEMA!r}")
     profile_cases_per_chunk, include_regional_diagnostics = _validate_config_envelope(
@@ -2550,6 +2587,7 @@ def assemble_package(
         outputs_root=native_outputs_root,
         surface_outputs_root=native_surface_outputs_root,
         volume_outputs_root=native_volume_outputs_root,
+        prediction_scope=scope,
     )
     specification = load_json(specification_path, label="HiLiftAeroML specification")
     if specification.get("dataset_id") != "hiliftaeroml":
@@ -2591,7 +2629,7 @@ def assemble_package(
             "compact evaluator support differs from its contract or source-truth binding"
         )
     methodology_contract = load_json(
-        specification_path.parent / "methodology-contract.json",
+        specification_path.parent / ("methodology-prediction-scopes-v1.json" if scope == "surface_only" else "methodology-contract.json"),
         label="HiLiftAeroML methodology contract",
     )
     participant = _participant_submission(
@@ -2604,16 +2642,18 @@ def assemble_package(
         case_ids=case_ids,
         case_set_id=split["case_set_id"],
         case_set_sha256=split_index["case_set_sha256"],
+        prediction_scope=scope,
     )
     native_case_records = _native_case_records(native_documents)
     profile_artifact_sha256 = _verify_native_receipts(
         receipts_root=native_receipts_root,
         outputs_root=None,
         surface_outputs_root=output_roots["surface"],
-        volume_outputs_root=output_roots["volume"],
+        volume_outputs_root=output_roots.get("volume"),
         case_ids=case_ids,
         case_set_id=split["case_set_id"],
         case_set_sha256=split_index["case_set_sha256"],
+        prediction_scope=scope,
         case_records=native_case_records,
     )
     required_metric_ids = {
@@ -2670,11 +2710,12 @@ def assemble_package(
                     ],
                     outputs_root=None,
                     surface_outputs_root=output_roots["surface"],
-                    volume_outputs_root=output_roots["volume"],
+                    volume_outputs_root=output_roots.get("volume"),
                     profiles_root=staging / "profiles",
                     cases_per_chunk=profile_cases_per_chunk,
                     expected_case_artifact_sha256=profile_artifact_sha256,
                     opened_support_release=compact_support_release,
+                    prediction_scope=scope,
                 )
             )
             profile_metrics = score_compact_profile_directory(
@@ -2688,6 +2729,7 @@ def assemble_package(
                 case_set_id=split["case_set_id"],
                 expected_case_ids=case_ids,
                 opened_support_release=compact_support_release,
+                prediction_scope=scope,
             )
         except CompactProfileEvaluationError as error:
             raise HiLiftPackageAssemblyError(
@@ -2701,12 +2743,13 @@ def assemble_package(
             support_release=support_release,
             native_documents=native_documents,
             surface_outputs_root=output_roots["surface"],
-            volume_outputs_root=output_roots["volume"],
+            volume_outputs_root=output_roots.get("volume"),
             profile_metrics=profile_metrics,
             specification=specification,
             support_release_id=candidate["release_id"],
             support_manifest_sha256=candidate["manifest_sha256"],
             generated_at=generated_at,
+            prediction_scope=scope,
         )
         case_metrics_sha = write_json(staging / "metrics" / "cases.json", case_metrics)
 
@@ -2754,8 +2797,9 @@ def assemble_package(
                 case_ids=case_ids,
                 split_id=split_id,
                 surface_outputs_root=output_roots["surface"],
-                volume_outputs_root=output_roots["volume"],
+                volume_outputs_root=output_roots.get("volume"),
                 case_records=native_case_records,
+                prediction_scope=scope,
             )
             regional_sha = write_json(staging / "regional-diagnostics.json", regional)
             regional_declaration = {
@@ -2782,6 +2826,7 @@ def assemble_package(
             "it is not covered by the earlier frozen native-evaluator binding."
         )
         evidence = {
+            **({"prediction_scope_implementation_binding": surface_only_implementation_binding(specification)} if scope == "surface_only" else {}),
             "$schema": "https://fluidsbench.org/schemas/v3/evaluation-evidence.schema.json",
             "schema_version": "3.0",
             "submission_id": participant["submission_id"],
@@ -2790,7 +2835,7 @@ def assemble_package(
             "split_id": split_id,
             "split_sha256": split["sha256"],
             "case_set_id": split["case_set_id"],
-            "prediction_scope": "surface_and_volume",
+            "prediction_scope": scope,
             "reference_version": evaluator["reference_version"],
             "dataset_evaluator_binding": _dataset_evaluator_evidence(evaluator),
             "dimensional_unit_conversion": dimensional_export_binding(),
@@ -2817,6 +2862,7 @@ def assemble_package(
         _require_schema(evidence, "v3/evaluation-evidence.schema.json", "evaluation-evidence.json")
         evidence_sha = write_json(staging / "evaluation-evidence.json", evidence)
         submission = {
+            **({"prediction_scope_implementation_binding": surface_only_implementation_binding(specification)} if scope == "surface_only" else {}),
             "$schema": "https://fluidsbench.org/schemas/v3/submission.schema.json",
             "schema_version": "3.0",
             **participant,
@@ -2827,7 +2873,7 @@ def assemble_package(
             "split_id": split_id,
             "case_set_id": split["case_set_id"],
             "split_sha256": split["sha256"],
-            "prediction_scope": "surface_and_volume",
+            "prediction_scope": scope,
             "evaluation": {
                 "reference_version": evaluator["reference_version"],
                 "command": command,

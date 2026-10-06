@@ -28,5 +28,47 @@
       "component_count": 1,
       "description": "Dataset-native mean pressure used by the AhmedML flow-domain metrics."
     }
-  ]
+  ],
+  "required_predicted_fields_by_prediction_scope": {
+    "surface_and_volume": [
+      {
+        "field_id": "surface-native.pMean",
+        "domain": "surface",
+        "component_count": 1,
+        "description": "Dataset-native mean surface pressure used by the AhmedML surface-pressure metrics."
+      },
+      {
+        "field_id": "surface-native.wallShearStressMean",
+        "domain": "surface",
+        "component_count": 3,
+        "description": "Dataset-native mean wall-shear-stress vector used by the AhmedML surface wall-shear metrics."
+      },
+      {
+        "field_id": "flow-domain-native.UMean",
+        "domain": "volume",
+        "component_count": 3,
+        "description": "Dataset-native mean velocity vector used by the AhmedML flow-domain metrics."
+      },
+      {
+        "field_id": "flow-domain-native.pMean",
+        "domain": "volume",
+        "component_count": 1,
+        "description": "Dataset-native mean pressure used by the AhmedML flow-domain metrics."
+      }
+    ],
+    "surface_only": [
+      {
+        "field_id": "surface-native.pMean",
+        "domain": "surface",
+        "component_count": 1,
+        "description": "Dataset-native mean surface pressure used by the AhmedML surface-pressure metrics."
+      },
+      {
+        "field_id": "surface-native.wallShearStressMean",
+        "domain": "surface",
+        "component_count": 3,
+        "description": "Dataset-native mean wall-shear-stress vector used by the AhmedML surface wall-shear metrics."
+      }
+    ]
+  }
 }

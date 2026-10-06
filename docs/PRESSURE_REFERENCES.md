@@ -59,8 +59,8 @@ Use the static-pressure field. total(p)_coeffMean is a different quantity. Absol
 <details>
 <summary>Evaluator and specification trace</summary>
 
-- [benchmark-specs/ahmedml/submission-spec.json](../benchmark-specs/ahmedml/submission-spec.json): The audited dev scoring specification; not modified by this documentation audit.
-- [reference/ahmedml/evaluator.py](../reference/ahmedml/evaluator.py): Native pMean enters field accumulators directly; no fitted pressure offset.
+- [benchmark-specs/ahmedml/submission-spec.json](../benchmark-specs/ahmedml/submission-spec.json): The audited dev scoring specification; not modified by this documentation audit. Re-audited 2026-10-06 for the separately versioned surface-only path: pressure units, reference, offsets, native spatial reductions and SI conversion factors are unchanged; unavailable volume and velocity-profile score weights remain zero without renormalization.
+- [reference/ahmedml/evaluator.py](../reference/ahmedml/evaluator.py): Native pMean enters field accumulators directly; no fitted pressure offset. Re-audited 2026-10-06 for the separately versioned surface-only path: pressure units, reference, offsets, native spatial reductions and SI conversion factors are unchanged; unavailable volume and velocity-profile score weights remain zero without renormalization.
 - [reference/ahmedml/contract.py](../reference/ahmedml/contract.py): Surface and volume both require native CellData pMean.
 
 SHA-256 identities for these files and downloaded sources are recorded in the JSON inventory.
@@ -209,15 +209,15 @@ The catalog source snapshot is bbec30b; the field-support archive identity retai
 <details>
 <summary>Evaluator and specification trace</summary>
 
-- [benchmark-specs/hiliftaeroml/submission-spec.json](../benchmark-specs/hiliftaeroml/submission-spec.json): Keeps Cp for relative pressure errors and now states the explicit native-to-SI dimensional export factors.
+- [benchmark-specs/hiliftaeroml/submission-spec.json](../benchmark-specs/hiliftaeroml/submission-spec.json): Keeps Cp for relative pressure errors and now states the explicit native-to-SI dimensional export factors. Re-audited 2026-10-06 for the separately versioned surface-only path: pressure units, reference, offsets, native spatial reductions and SI conversion factors are unchanged; unavailable volume and velocity-profile score weights remain zero without renormalization.
 - [reference/hiliftaeroml/native_profile_truth_materializer.py](../reference/hiliftaeroml/native_profile_truth_materializer.py): Computes q∞ from per-case metadata and Cp from raw pressure.
 - [benchmark-specs/hiliftaeroml/evaluator-implementation-manifest.candidate.json](../benchmark-specs/hiliftaeroml/evaluator-implementation-manifest.candidate.json): Binds external inference/metric implementation hashes; source roots still have pending candidate revision bindings.
 - [scripts/prepare_hiliftaeroml_schema_v3_candidate.py](../scripts/prepare_hiliftaeroml_schema_v3_candidate.py): Generates the explicit per-case inverse-normalization and native-to-SI export convention.
 - [benchmark-specs/hiliftaeroml/dimensional-export-si-v1.json](../benchmark-specs/hiliftaeroml/dimensional-export-si-v1.json): Versioned eight-metric SI export contract; relative statistics and scoring are unchanged.
 - [benchmark-specs/hiliftaeroml/dimensional-export-correction-v1.json](../benchmark-specs/hiliftaeroml/dimensional-export-correction-v1.json): Pins original and corrected metadata, evidence, case files and deterministic archives for 23 preview packages.
 - [reference/hiliftaeroml/dimensional_units.py](../reference/hiliftaeroml/dimensional_units.py): Converts only dimensional field errors, rejects repeated conversion and checks the immutable correction registry.
-- [scripts/assemble_hiliftaeroml_schema_v3_candidate.py](../scripts/assemble_hiliftaeroml_schema_v3_candidate.py): Applies the SI conversion to each completed native case before macro aggregation and records the separate export version.
-- [scripts/validate_submission.py](../scripts/validate_submission.py): Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged.
+- [scripts/assemble_hiliftaeroml_schema_v3_candidate.py](../scripts/assemble_hiliftaeroml_schema_v3_candidate.py): Applies the SI conversion to each completed native case before macro aggregation and records the separate export version. Re-audited 2026-10-06 for the separately versioned surface-only path: pressure units, reference, offsets, native spatial reductions and SI conversion factors are unchanged; unavailable volume and velocity-profile score weights remain zero without renormalization.
+- [scripts/validate_submission.py](../scripts/validate_submission.py): Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Re-audited 2026-10-06 for the separately versioned surface-only path: pressure units, reference, offsets, native spatial reductions and SI conversion factors are unchanged; unavailable volume and velocity-profile score weights remain zero without renormalization.
 - [benchmark-specs/hiliftaeroml/dimensional-export-correction-v1/verification.json](../benchmark-specs/hiliftaeroml/dimensional-export-correction-v1/verification.json): Records the independent manuscript comparison and unchanged scores, ordering, case statistics and non-dimensional artifacts; states test limits.
 
 SHA-256 identities for these files and downloaded sources are recorded in the JSON inventory.
@@ -263,9 +263,9 @@ Table 6 calls pressureavg relative kinematic pressure. The pinned run_1 volume X
 <details>
 <summary>Evaluator and specification trace</summary>
 
-- [benchmark-specs/windsorml/submission-spec.json](../benchmark-specs/windsorml/submission-spec.json): The audited dev scoring specification; not modified by this documentation audit.
+- [benchmark-specs/windsorml/submission-spec.json](../benchmark-specs/windsorml/submission-spec.json): The audited dev scoring specification; not modified by this documentation audit. Re-audited 2026-10-06 for the separately versioned surface-only path: pressure units, reference, offsets, native spatial reductions and SI conversion factors are unchanged; unavailable volume and velocity-profile score weights remain zero without renormalization.
 - [reference/windsorml/contract.py](../reference/windsorml/contract.py): Surface cpavg and volume pressureavg are separate native fields.
-- [reference/windsorml/evaluator.py](../reference/windsorml/evaluator.py): Both scalar arrays enter statistics directly; no volume pressure-reference subtraction.
+- [reference/windsorml/evaluator.py](../reference/windsorml/evaluator.py): Both scalar arrays enter statistics directly; no volume pressure-reference subtraction. Re-audited 2026-10-06 for the separately versioned surface-only path: pressure units, reference, offsets, native spatial reductions and SI conversion factors are unchanged; unavailable volume and velocity-profile score weights remain zero without renormalization.
 
 SHA-256 identities for these files and downloaded sources are recorded in the JSON inventory.
 

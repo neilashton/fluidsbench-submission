@@ -13,6 +13,8 @@ from typing import Any, Mapping, Sequence
 
 import numpy as np
 
+from reference.prediction_scope import UNAVAILABLE_COMPONENTS, unavailable_metrics
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
 from reference.scores import (
     composite_component_group_scores,
     composite_overall_score,
@@ -31,7 +33,6 @@ from .support import (
     VOLUME_COORDINATE_INTERVALS,
     VOLUME_STATIONS,
 )
-
 
 DATASET_EVIDENCE_SCHEMA = "ahmedml-candidate-dataset-evaluation-v1"
 DATASET_EVIDENCE_STATUS = "non_ranked_development_evidence_not_official_submission"
@@ -135,6 +136,7 @@ def _series(
     evidence: Mapping[str, Any],
     *,
     case_id: str,
+    surface_only: bool = False,
 ) -> tuple[list[float], list[float], list[float], list[float]]:
     profiles = _mapping(evidence.get("profiles"), f"{case_id}.profiles")
     if (
@@ -143,8 +145,8 @@ def _series(
     ):
         raise AhmedMLDatasetScorerError(f"{case_id} profile contract differs")
     raw_series = profiles.get("series")
-    if not isinstance(raw_series, list) or len(raw_series) != 7:
-        raise AhmedMLDatasetScorerError(f"{case_id} must contain exactly seven series")
+    if not isinstance(raw_series, list) or len(raw_series) != (3 if surface_only else 7):
+        raise AhmedMLDatasetScorerError(f"{case_id} must contain every required profile series")
     expected = (
         *(
             ("pressure_profiles", station, "cp", interval)
@@ -159,6 +161,8 @@ def _series(
             )
         ),
     )
+    if surface_only:
+        expected = expected[:3]
     cp_truth: list[float] = []
     cp_prediction: list[float] = []
     velocity_truth: list[float] = []
@@ -220,9 +224,13 @@ def score_candidate_dataset(
     submission_specification: str | Path,
     split_id: str,
     case_evidence_directory: str | Path,
+    prediction_scope: str = "surface_and_volume",
 ) -> CandidateDatasetEvaluation:
     """Reduce exact case evidence for one declared AhmedML test split."""
 
+    scope = checked_prediction_scope(prediction_scope)
+    surface_only = scope == "surface_only"
+    fixed_zero = UNAVAILABLE_COMPONENTS if surface_only else ()
     spec_path = Path(submission_specification).expanduser().resolve()
     specification, specification_sha = _read_json(
         spec_path, "AhmedML submission specification"
@@ -300,6 +308,10 @@ def score_candidate_dataset(
             or document.get("case_id") != case_id
         ):
             raise AhmedMLDatasetScorerError(f"{case_id} evidence header differs")
+        if document.get("prediction_scope", "surface_and_volume") != scope:
+            raise AhmedMLDatasetScorerError(f"{case_id} prediction scope differs")
+        if surface_only and ("volume" in document.get("prediction_inputs", {}) or any(key.startswith("volume_") for key in document.get("field_statistics", {}))):
+            raise AhmedMLDatasetScorerError(f"{case_id} surface_only contains volume evidence")
         case_source = _mapping(document.get("source"), f"{case_id}.source")
         if (
             case_source.get("repository_revision") != REPOSITORY_REVISION
@@ -313,6 +325,8 @@ def score_candidate_dataset(
         ):
             raise AhmedMLDatasetScorerError(f"{case_id} coverage is incomplete")
         metrics = _mapping(document.get("metric_values"), f"{case_id}.metric_values")
+        if surface_only and unavailable_metrics(DATASET_ID, metrics):
+            raise AhmedMLDatasetScorerError(f"{case_id} surface_only contains unavailable raw metrics")
         for metric_id, value in metrics.items():
             field_values.setdefault(metric_id, []).append(
                 _finite(value, f"{case_id}.{metric_id}")
@@ -327,7 +341,7 @@ def score_candidate_dataset(
             _finite(force.get("prediction_cl"), f"{case_id}.prediction_cl")
         )
         case_cp_truth, case_cp_prediction, case_u_truth, case_u_prediction = _series(
-            document, case_id=case_id
+            document, case_id=case_id, surface_only=surface_only
         )
         cp_truth.extend(case_cp_truth)
         cp_prediction.extend(case_cp_prediction)
@@ -344,7 +358,7 @@ def score_candidate_dataset(
         metric_id: float(math.fsum(values) / len(values))
         for metric_id, values in sorted(field_values.items())
     }
-    missing_primary = set(PRIMARY_FIELD_METRICS) - set(metric_values)
+    missing_primary = (set(PRIMARY_FIELD_METRICS) - set(fixed_zero)) - set(metric_values)
     if missing_primary:
         raise AhmedMLDatasetScorerError(
             f"case evidence lacks primary fields {sorted(missing_primary)}"
@@ -360,11 +374,10 @@ def score_candidate_dataset(
                 np.mean(np.abs(np.asarray(cl_prediction) - np.asarray(cl_truth)))
             ),
             "cp_cut_r2": _r2(cp_truth, cp_prediction, "Cp profiles"),
-            "velocity_profile_r2": _r2(
-                velocity_truth, velocity_prediction, "velocity profiles"
-            ),
         }
     )
+    if not surface_only:
+        metric_values["velocity_profile_r2"] = _r2(velocity_truth, velocity_prediction, "velocity profiles")
     overall = _mapping(
         specification.get("overall_score_composite"), "overall_score_composite"
     )
@@ -373,10 +386,10 @@ def score_candidate_dataset(
     )
     try:
         metric_values.update(
-            composite_component_group_scores(metric_values, overall, groups)
+            composite_component_group_scores(metric_values, overall, groups, fixed_zero_component_ids=fixed_zero)
         )
         metric_values["overall_score"] = composite_overall_score(
-            metric_values, overall
+            metric_values, overall, fixed_zero_component_ids=fixed_zero
         )
     except (KeyError, TypeError, ValueError) as error:
         raise AhmedMLDatasetScorerError(
@@ -390,6 +403,7 @@ def score_candidate_dataset(
         "official_submission": False,
         "leaderboard_eligible": False,
         "dataset_id": DATASET_ID,
+        "prediction_scope": scope,
         "dataset_version": specification.get("dataset_version"),
         "split_id": split_id,
         "case_set_id": split.get("case_set_id"),

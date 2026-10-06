@@ -22,17 +22,38 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from reference.scores import (
-    composite_component_group_scores,
-    composite_overall_score,
-    legacy_aero_scores,
+from reference.ahmedml.contract import (
+    REGION_DEFINITION_SHA256 as AHMEDML_REGION_DEFINITION_SHA256,
 )
-from reference.weightings import evaluator_weighting
+from reference.ahmedml.pre_release import (
+    REGISTRY_SCHEMA as AHMEDML_PRE_RELEASE_REGISTRY_SCHEMA,
+)
+from reference.ahmedml.pre_release import (
+    REGISTRY_STATUS as AHMEDML_PRE_RELEASE_REGISTRY_STATUS,
+)
+from reference.ahmedml.pre_release import (
+    AhmedMLPreReleaseError,
+)
+from reference.ahmedml.pre_release import (
+    build_registry_entry as build_ahmedml_pre_release_registry_entry,
+)
+from reference.ahmedml.regional_aggregate import (
+    AGGREGATE_REGIONAL_REPORT_SCHEMA as AHMEDML_AGGREGATE_REGIONAL_REPORT_SCHEMA,
+)
+from reference.ahmedml.regional_aggregate import (
+    REGIONAL_DEFINITION_ID as AHMEDML_REGION_DEFINITION_ID,
+)
+from reference.ahmedml.regional_aggregate import (
+    AhmedMLRegionalAggregateError,
+)
+from reference.ahmedml.regional_aggregate import (
+    validate_aggregate_regional_diagnostics as validate_ahmedml_aggregate_regional_diagnostics,
+)
 from reference.drivaerml.dataset_scorer import (
-    DrivAerDatasetScorerError,
     RELATIVE_PROFILE_CONTRACT_ID,
     RELATIVE_PROFILE_CONTRACT_SHA256,
     RELATIVE_PROFILE_FORMAT,
+    DrivAerDatasetScorerError,
     validate_schema_v3_candidate_nonspatial_metrics,
     validate_schema_v3_relative_profile_chunk_candidate,
 )
@@ -42,44 +63,68 @@ from reference.drivaerml.regional_aggregate import (
     RegionalAggregateError,
     validate_aggregate_regional_diagnostics,
 )
-from reference.hiliftaeroml.regional_aggregate import (
-    AGGREGATE_REGIONAL_REPORT_SCHEMA as HILIFT_AGGREGATE_REGIONAL_REPORT_SCHEMA,
-    REGIONAL_DEFINITION_ID as HILIFT_REGIONAL_DEFINITION_ID,
-    REGIONAL_DIAGNOSTICS_CONTRACT_SHA256 as HILIFT_REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
-    HiLiftRegionalAggregateError,
-    validate_aggregate_regional_diagnostics as validate_hilift_aggregate_regional_diagnostics,
-)
 from reference.hiliftaeroml.compact_profile_evaluator import (
     COMPACT_PROFILE_CONTRACT_ID as HILIFT_PROFILE_CONTRACT_ID,
+)
+from reference.hiliftaeroml.compact_profile_evaluator import (
     COMPACT_PROFILE_CONTRACT_SHA256 as HILIFT_PROFILE_CONTRACT_SHA256,
+)
+from reference.hiliftaeroml.compact_profile_evaluator import (
     COMPACT_PROFILE_FORMAT as HILIFT_PROFILE_FORMAT,
+)
+from reference.hiliftaeroml.compact_profile_evaluator import (
     CompactProfileEvaluationError as HiLiftProfileEvaluationError,
-    score_compact_profile_directory as score_hilift_profile_directory,
+)
+from reference.hiliftaeroml.compact_profile_evaluator import (
     CompactSupportRelease as HiLiftCompactSupportRelease,
+)
+from reference.hiliftaeroml.compact_profile_evaluator import (
     open_compact_support_release as open_hilift_compact_support_release,
 )
-from reference.ahmedml.regional_aggregate import (
-    AGGREGATE_REGIONAL_REPORT_SCHEMA as AHMEDML_AGGREGATE_REGIONAL_REPORT_SCHEMA,
-    REGIONAL_DEFINITION_ID as AHMEDML_REGION_DEFINITION_ID,
-    AhmedMLRegionalAggregateError,
-    validate_aggregate_regional_diagnostics as validate_ahmedml_aggregate_regional_diagnostics,
+from reference.hiliftaeroml.compact_profile_evaluator import (
+    score_compact_profile_directory as score_hilift_profile_directory,
 )
-from reference.ahmedml.contract import (
-    REGION_DEFINITION_SHA256 as AHMEDML_REGION_DEFINITION_SHA256,
-)
-from reference.ahmedml.pre_release import (
-    AhmedMLPreReleaseError,
-    REGISTRY_SCHEMA as AHMEDML_PRE_RELEASE_REGISTRY_SCHEMA,
-    REGISTRY_STATUS as AHMEDML_PRE_RELEASE_REGISTRY_STATUS,
-    build_registry_entry as build_ahmedml_pre_release_registry_entry,
-)
-from reference.methodology import methodology_errors
 from reference.hiliftaeroml.dimensional_units import (
     CORRECTION_PATH as HILIFT_SI_CORRECTION_PATH,
+)
+from reference.hiliftaeroml.dimensional_units import (
     corrected_registration_view as hilift_corrected_registration_view,
+)
+from reference.hiliftaeroml.dimensional_units import (
     export_binding as hilift_dimensional_export_binding,
+)
+from reference.hiliftaeroml.dimensional_units import (
     validate_contract as validate_hilift_dimensional_export_contract,
 )
+from reference.hiliftaeroml.regional_aggregate import (
+    AGGREGATE_REGIONAL_REPORT_SCHEMA as HILIFT_AGGREGATE_REGIONAL_REPORT_SCHEMA,
+)
+from reference.hiliftaeroml.regional_aggregate import (
+    REGIONAL_DEFINITION_ID as HILIFT_REGIONAL_DEFINITION_ID,
+)
+from reference.hiliftaeroml.regional_aggregate import (
+    REGIONAL_DIAGNOSTICS_CONTRACT_SHA256 as HILIFT_REGIONAL_DIAGNOSTICS_CONTRACT_SHA256,
+)
+from reference.hiliftaeroml.regional_aggregate import (
+    HiLiftRegionalAggregateError,
+)
+from reference.hiliftaeroml.regional_aggregate import (
+    validate_aggregate_regional_diagnostics as validate_hilift_aggregate_regional_diagnostics,
+)
+from reference.methodology import methodology_errors
+from reference.prediction_scope import (
+    UNAVAILABLE_COMPONENTS,
+    is_surface_only,
+    surface_only_implementation_binding,
+    unavailable_metrics,
+    unavailable_support,
+)
+from reference.scores import (
+    composite_component_group_scores,
+    composite_overall_score,
+    legacy_aero_scores,
+)
+from reference.weightings import evaluator_weighting
 
 try:
     from jsonschema import Draft202012Validator, FormatChecker
@@ -3565,10 +3610,7 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
     values = submission.get("metric_values", {})
     expected_ids = set(dataset.get("metric_ids", []))
     fixed_zero_components: set[str] = set()
-    surface_only = (
-        submission.get("dataset_id") == "drivaerml"
-        and submission.get("prediction_scope") == "surface_only"
-    )
+    surface_only = is_surface_only(submission)
     if surface_only:
         policy = dataset.get("overall_score_composite", {}).get("surface_only_policy", {})
         unavailable = policy.get("unavailable_component_metric_ids")
@@ -3584,18 +3626,19 @@ def validate_metrics(add: Any, submission: dict[str, Any], dataset: dict[str, An
             or policy.get("component_weight_renormalization") is not False
             or policy.get("maximum_overall_score") != 60.0
         ):
-            add("DrivAerML surface-only scoring policy is malformed")
+            add("surface-only scoring policy is malformed")
         else:
             fixed_zero_components = set(unavailable)
     actual_ids = set(values)
-    missing = sorted((expected_ids - fixed_zero_components) - actual_ids)
+    unavailable_raw = unavailable_metrics(submission.get("dataset_id"), expected_ids) if surface_only else set()
+    missing = sorted((expected_ids - unavailable_raw) - actual_ids)
     unknown = sorted(actual_ids - expected_ids)
     if missing:
         add(f"metric_values is missing: {', '.join(missing)}")
     if unknown:
         add(f"metric_values contains unknown metrics: {', '.join(unknown)}")
     if surface_only:
-        fabricated = sorted(actual_ids & fixed_zero_components)
+        fabricated = sorted(actual_ids & unavailable_raw)
         if fabricated:
             add(
                 "surface_only metric_values must omit unavailable raw metrics: "
@@ -4469,15 +4512,14 @@ def validate_v3_case_metrics(
 ) -> dict[str, Any] | None:
     """Validate the per-case metric evidence and its aggregate scalar binding."""
 
-    surface_only = (
-        submission.get("dataset_id") == "drivaerml"
-        and submission.get("prediction_scope") == "surface_only"
-    )
+    surface_only = is_surface_only(submission)
     unavailable_metric_ids = (
-        {"volume_velocity_rel_l2", "volume_pressure_rel_l2", "velocity_profile_r2"}
+        unavailable_metrics(submission.get("dataset_id"), set(UNAVAILABLE_COMPONENTS) | set(submission.get("metric_values", {})) | {binding.get("metric_id") for support in (support_manifest or {}).get("supports", []) for binding in support.get("metric_bindings", []) if isinstance(binding, dict) and isinstance(binding.get("metric_id"), str)})
         if surface_only
         else set()
     )
+
+    unavailable_support_ids = {support.get("id") for support in (support_manifest or {}).get("supports", []) if unavailable_support(support)}
 
     declaration = submission["case_metrics"]
     path = safe_submission_path(
@@ -4577,12 +4619,18 @@ def validate_v3_case_metrics(
         if not isinstance(case, dict):
             continue
         case_id = case.get("case_id")
+        if surface_only:
+            claimed = set(case.get("nonspatial_metric_values", {}))
+            claimed.update(metric_id for support in case.get("supports", []) for metric_id in support.get("metric_values", {}))
+            fabricated = unavailable_metrics(submission.get("dataset_id"), claimed) & claimed
+            if fabricated:
+                add(f"{case_id} surface_only case metrics contain unavailable raw metrics: {sorted(fabricated)}")
         expected_for_case = expected_instances.get(case_id, {})
         if surface_only:
             expected_for_case = {
                 support_id: count
                 for support_id, count in expected_for_case.items()
-                if support_id != "volume_native_cells"
+                if support_id not in unavailable_support_ids
             }
         observed_support_ids: set[str] = set()
         for support in case.get("supports", []):
@@ -4825,10 +4873,9 @@ def validate_v3_discretization(
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     """Validate the spatial summary and ordered per-evaluation-case JSONL records."""
 
-    surface_only = (
-        submission.get("dataset_id") == "drivaerml"
-        and submission.get("prediction_scope") == "surface_only"
-    )
+    surface_only = is_surface_only(submission)
+
+    unavailable_support_ids = {support.get("id") for support in (support_manifest or {}).get("supports", []) if unavailable_support(support)}
 
     declaration = submission["spatial_discretization"]
     path = safe_submission_path(
@@ -5018,7 +5065,7 @@ def validate_v3_discretization(
         if isinstance(support, dict) and isinstance(support.get("id"), str)
     }
     if surface_only:
-        official_supports.pop("volume_native_cells", None)
+        official_supports = {key: value for key, value in official_supports.items() if key not in unavailable_support_ids}
     for mapping in summary_mappings:
         if not isinstance(mapping, dict):
             continue
@@ -5075,7 +5122,7 @@ def validate_v3_discretization(
         if isinstance(support, dict) and isinstance(support.get("id"), str)
     }
     if surface_only:
-        official_support_ids.discard("volume_native_cells")
+        official_support_ids -= unavailable_support_ids
     extrapolation_policies = {
         support.get("id"): support.get("extrapolation_policy")
         for support in (support_manifest or {}).get("supports", [])
@@ -5095,7 +5142,7 @@ def validate_v3_discretization(
             case_id: {
                 support_id: count
                 for support_id, count in counts.items()
-                if support_id != "volume_native_cells"
+                if support_id not in unavailable_support_ids
             }
             for case_id, counts in expected_support_counts.items()
         }
@@ -6428,7 +6475,7 @@ def _validate_hilift_profile_score_bindings(
 ) -> None:
     """Bind submitted HiLift profile scores to hidden-truth recomputation."""
 
-    metric_ids = ("cp_cut_r2", "velocity_profile_r2")
+    metric_ids = ("cp_cut_r2",) if is_surface_only(submission) else ("cp_cut_r2", "velocity_profile_r2")
     if case_metrics is None:
         add(
             "HiLiftAeroML hidden profile-truth recomputation requires valid "
@@ -6780,6 +6827,8 @@ def validate_profiles(
     if submission["profile_data"].get("case_set_id") != submission.get("case_set_id"):
         add("profile_data.case_set_id must equal submission case_set_id")
 
+    if index.get("prediction_scope", "surface_and_volume") != submission.get("prediction_scope", "surface_and_volume") and hilift_profile:
+        add("compact profile index prediction_scope must match submission")
     panels = {panel["id"]: panel for panel in dataset_spec["profile_panels"]}
     prototype_fixture = submission.get("approval", {}).get("status") == "prototype"
     indexed_case_ids: list[str] = []
@@ -6884,7 +6933,9 @@ def validate_profiles(
                     add(f"profile artifact {relative_artifact} byte_size differs")
                 if sha256_file(artifact_path) != artifact.get("sha256"):
                     add(f"profile artifact {relative_artifact} SHA-256 differs")
-            series_count += 15 * len(chunk_case_ids)
+            if chunk.get("prediction_scope", "surface_and_volume") != submission.get("prediction_scope", "surface_and_volume"):
+                add("compact profile chunk prediction_scope must match submission")
+            series_count += (10 if is_surface_only(submission) else 15) * len(chunk_case_ids)
             continue
 
         if relative_profile:
@@ -6903,6 +6954,8 @@ def validate_profiles(
                 if not isinstance(series, dict):
                     continue
                 panel_id = series.get("panel_id")
+                if is_surface_only(submission) and panel_id == "velocity_profiles":
+                    add("surface_only profiles must omit unavailable velocity predictions")
                 panel = panels.get(panel_id)
                 station_id = series.get("station_id")
                 quantity_id = series.get("quantity_id")
@@ -7006,8 +7059,7 @@ def validate_profiles(
             provided_set = set(provided)
             for panel_id, panel in panels.items():
                 if (
-                    submission.get("dataset_id") == "drivaerml"
-                    and submission.get("prediction_scope") == "surface_only"
+                    is_surface_only(submission)
                     and panel_id == "velocity_profiles"
                 ):
                     continue
@@ -7059,6 +7111,7 @@ def validate_profiles(
                     split_id=submission["split_id"],
                     case_set_id=submission["case_set_id"],
                     expected_case_ids=expected_case_ids,
+                    prediction_scope=submission.get("prediction_scope", "surface_and_volume"),
                     opened_support_release=(
                         opened_profile_support_release
                     ),
@@ -7235,7 +7288,7 @@ def validate_submission_file(
     if dataset_spec.get("dataset_id") != submission["dataset_id"]:
         add("benchmark specification dataset_id does not match submission.json")
         return errors, stats
-    methodology_contract_path = spec_path.parent / "methodology-contract.json"
+    methodology_contract_path = spec_path.parent / ("methodology-prediction-scopes-v1.json" if is_surface_only(submission) and submission.get("dataset_id") == "hiliftaeroml" else "methodology-contract.json")
     methodology_contract: dict[str, Any] | None = None
     if not methodology_contract_path.is_file():
         add(
@@ -7353,6 +7406,13 @@ def validate_submission_file(
         submission,
         dataset_spec,
     )
+    if is_surface_only(submission) and submission.get("dataset_id") != "drivaerml":
+        try:
+            scope_binding = surface_only_implementation_binding(dataset_spec)
+            if submission.get("prediction_scope_implementation_binding") != scope_binding or not isinstance(evidence, dict) or evidence.get("prediction_scope_implementation_binding") != scope_binding:
+                add("surface-only implementation binding must match the versioned benchmark declaration")
+        except (ValueError, OSError, KeyError) as error:
+            add(f"surface-only implementation binding is invalid: {error}")
     if submission_schema_version == "3.0" or has_regional_diagnostics:
         validate_regional_diagnostics(
             add,

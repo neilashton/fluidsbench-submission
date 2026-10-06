@@ -34,8 +34,8 @@ from reference.hiliftaeroml.compact_profiles import (
     PREDICTION_ARRAYS,
     SUPPORT_ARRAYS,
     VELOCITY_ROW_COUNT,
-    VELOCITY_STORAGE_ENCODING,
     VELOCITY_STATIONS,
+    VELOCITY_STORAGE_ENCODING,
     CompactProfileError,
     compact_case_metadata,
     encode_native_predictions,
@@ -56,7 +56,7 @@ from reference.hiliftaeroml.native_profiles import (
     validate_cp_source,
     validate_velocity_source,
 )
-
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPACT_PROFILE_CONTRACT_PATH = (
@@ -1323,6 +1323,7 @@ def _validate_builder_inputs(
     case_ids: Sequence[str],
     cases_per_chunk: int,
     expected_case_artifact_sha256: Mapping[str, Mapping[str, str]],
+    prediction_scope: str = "surface_and_volume",
 ) -> tuple[str, str, str, tuple[str, ...], dict[str, dict[str, str]]]:
     if not isinstance(submission_id, str) or _SAFE_SUBMISSION_ID.fullmatch(
         submission_id
@@ -1341,6 +1342,13 @@ def _validate_builder_inputs(
         expected_case_artifact_sha256
     ) != set(cases):
         _fail("receipt-bound compact profile case inventory differs")
+    if checked_prediction_scope(prediction_scope) == "surface_only":
+        keys = {"cp_profile_metrics", "cp_cut_values"}
+        hashes = {}
+        for case_id in cases:
+            value = _require_exact_keys(expected_case_artifact_sha256[case_id], keys, f"{case_id} Cp artifact hashes")
+            hashes[case_id] = {key: _require_sha(value[key], f"{case_id}/{key}") for key in keys}
+        return submission_id, safe_split, safe_case_set, cases, hashes
     hashes = {
         case_id: _source_hashes(
             expected_case_artifact_sha256[case_id],
@@ -1402,6 +1410,7 @@ def build_compact_profile_directory(
     surface_outputs_root: Path | None = None,
     volume_outputs_root: Path | None = None,
     opened_support_release: CompactSupportRelease | None = None,
+    prediction_scope: str = "surface_and_volume",
 ) -> tuple[str, dict[str, dict[str, float]]]:
     """Build a deterministic prediction-only compact participant directory."""
 
@@ -1418,6 +1427,7 @@ def build_compact_profile_directory(
         case_ids=case_ids,
         cases_per_chunk=cases_per_chunk,
         expected_case_artifact_sha256=expected_case_artifact_sha256,
+        prediction_scope=prediction_scope,
     )
     release = _opened_support_release(
         support_release_root=support_release_root,
@@ -1426,12 +1436,14 @@ def build_compact_profile_directory(
         case_set_id=checked_case_set,
         opened_support_release=opened_support_release,
     )
+    surface_only = checked_prediction_scope(prediction_scope) == "surface_only"
     surface_root = surface_outputs_root or outputs_root
     volume_root = volume_outputs_root or outputs_root
-    if surface_root is None or volume_root is None:
+    if surface_root is None or (not surface_only and volume_root is None):
         _fail("surface and volume native-output roots are both required")
     surface_root = _root_directory(surface_root, "surface native-output root")
-    volume_root = _root_directory(volume_root, "volume native-output root")
+    if not surface_only:
+        volume_root = _root_directory(volume_root, "volume native-output root")
     if profiles_root.exists() or profiles_root.is_symlink():
         _fail(f"compact profile output already exists: {profiles_root}")
     final_profiles_root = profiles_root
@@ -1471,29 +1483,31 @@ def build_compact_profile_directory(
                     f"{case_id}/surface_submission_stream/cp_cut_values.npz",
                     f"{case_id} Cp native NPZ",
                 )
-                velocity_metrics_path = _safe_child(
-                    volume_root,
-                    (
-                        f"{case_id}/volume_submission_stream/"
-                        "velocity_profile_metrics.json"
-                    ),
-                    f"{case_id} velocity metrics",
-                )
-                velocity_npz_path = _safe_child(
-                    volume_root,
-                    f"{case_id}/volume_submission_stream/velocity_profiles.npz",
-                    f"{case_id} velocity native NPZ",
-                )
+                if not surface_only:
+                    velocity_metrics_path = _safe_child(
+                        volume_root,
+                        (
+                            f"{case_id}/volume_submission_stream/"
+                            "velocity_profile_metrics.json"
+                        ),
+                        f"{case_id} velocity metrics",
+                    )
+                    velocity_npz_path = _safe_child(
+                        volume_root,
+                        f"{case_id}/volume_submission_stream/velocity_profiles.npz",
+                        f"{case_id} velocity native NPZ",
+                    )
                 _bounded_regular_file(
                     cp_metrics_path,
                     maximum=_MAX_NATIVE_METADATA_JSON_BYTES,
                     label=f"{case_id} Cp metrics",
                 )
-                _bounded_regular_file(
-                    velocity_metrics_path,
-                    maximum=_MAX_NATIVE_METADATA_JSON_BYTES,
-                    label=f"{case_id} velocity metrics",
-                )
+                if not surface_only:
+                    _bounded_regular_file(
+                        velocity_metrics_path,
+                        maximum=_MAX_NATIVE_METADATA_JSON_BYTES,
+                        label=f"{case_id} velocity metrics",
+                    )
                 _preflight_npz(
                     cp_npz_path,
                     order=CP_SOURCE_ARRAYS,
@@ -1503,15 +1517,16 @@ def build_compact_profile_directory(
                         _MAX_NATIVE_PROFILE_UNCOMPRESSED_BYTES
                     ),
                 )
-                _preflight_npz(
-                    velocity_npz_path,
-                    order=VELOCITY_SOURCE_ARRAYS,
-                    label=f"{case_id} velocity native NPZ",
-                    maximum_archive_bytes=_MAX_NATIVE_PROFILE_NPZ_BYTES,
-                    maximum_uncompressed_bytes=(
-                        _MAX_NATIVE_PROFILE_UNCOMPRESSED_BYTES
-                    ),
-                )
+                if not surface_only:
+                    _preflight_npz(
+                        velocity_npz_path,
+                        order=VELOCITY_SOURCE_ARRAYS,
+                        label=f"{case_id} velocity native NPZ",
+                        maximum_archive_bytes=_MAX_NATIVE_PROFILE_NPZ_BYTES,
+                        maximum_uncompressed_bytes=(
+                            _MAX_NATIVE_PROFILE_UNCOMPRESSED_BYTES
+                        ),
+                    )
                 try:
                     cp_arrays, _ = validate_cp_source(
                         metrics_path=cp_metrics_path,
@@ -1523,25 +1538,29 @@ def build_compact_profile_directory(
                             "cp_cut_values"
                         ],
                     )
-                    velocity_arrays, _ = validate_velocity_source(
-                        case_id=case_id,
-                        metrics_path=velocity_metrics_path,
-                        npz_path=velocity_npz_path,
-                        expected_metrics_sha256=expected_hashes[case_id][
-                            "velocity_profile_metrics"
-                        ],
-                        expected_npz_sha256=expected_hashes[case_id][
-                            "velocity_profiles"
-                        ],
-                    )
+                    if not surface_only:
+                        velocity_arrays, _ = validate_velocity_source(
+                            case_id=case_id,
+                            metrics_path=velocity_metrics_path,
+                            npz_path=velocity_npz_path,
+                            expected_metrics_sha256=expected_hashes[case_id][
+                                "velocity_profile_metrics"
+                            ],
+                            expected_npz_sha256=expected_hashes[case_id][
+                                "velocity_profiles"
+                            ],
+                        )
                     artifact = encode_native_predictions(
                         support=support,
                         cp_native=cp_arrays,
-                        velocity_native=velocity_arrays,
+                        velocity_native=velocity_arrays if not surface_only else None,
+                        prediction_scope=prediction_scope,
                     )
                 except (NativeProfileError, CompactProfileError) as error:
                     raise CompactProfileEvaluationError(str(error)) from error
                 metadata = compact_case_metadata(support)
+                if surface_only:
+                    metadata = {"surface_cp": metadata["surface_cp"]}
                 artifact_path = (
                     profiles_root
                     / "artifacts"
@@ -1554,9 +1573,10 @@ def build_compact_profile_directory(
                         artifact,
                         support=support,
                         metadata=metadata,
+                        prediction_scope=prediction_scope,
                     )
                     case_metrics = score_compact_profiles(
-                        artifact, support=support, metadata=metadata
+                        artifact, support=support, metadata=metadata, prediction_scope=prediction_scope
                     )
                 except CompactProfileError as error:
                     raise CompactProfileEvaluationError(str(error)) from error
@@ -1570,16 +1590,17 @@ def build_compact_profile_directory(
                             ).as_posix(),
                             "sha256": artifact_sha,
                             "byte_size": artifact_path.stat().st_size,
-                            "array_order": list(PREDICTION_ARRAYS),
+                            "array_order": ["cp_q_delta"] if surface_only else list(PREDICTION_ARRAYS),
                             "ownership": "participant",
                             "content": "predictions_only",
                         },
                         "surface_cp": metadata["surface_cp"],
-                        "volume_velocity": metadata["volume_velocity"],
+                        **({"volume_velocity": metadata["volume_velocity"]} if not surface_only else {}),
                     }
                 )
                 metrics[case_id] = case_metrics
             chunk = {
+                **({"prediction_scope": prediction_scope} if surface_only else {}),
                 "schema": COMPACT_PROFILE_CHUNK_SCHEMA,
                 "schema_version": COMPACT_PROFILE_SCHEMA_VERSION,
                 "format": COMPACT_PROFILE_FORMAT,
@@ -1599,6 +1620,7 @@ def build_compact_profile_directory(
                 {"file": filename, "case_ids": selected, "sha256": digest}
             )
         index = {
+            **({"prediction_scope": prediction_scope} if surface_only else {}),
             "schema_version": COMPACT_PROFILE_INDEX_SCHEMA_VERSION,
             "format": COMPACT_PROFILE_FORMAT,
             "contract_id": COMPACT_PROFILE_CONTRACT_ID,
@@ -1627,7 +1649,7 @@ def build_compact_profile_directory(
         raise
 
 
-def _artifact_descriptor(value: Any, *, case_id: str) -> Mapping[str, Any]:
+def _artifact_descriptor(value: Any, *, case_id: str, surface_only: bool = False) -> Mapping[str, Any]:
     descriptor = _require_exact_keys(
         value,
         {
@@ -1645,7 +1667,7 @@ def _artifact_descriptor(value: Any, *, case_id: str) -> Mapping[str, Any]:
         descriptor.get("format") != "numpy-npz-v1"
         or descriptor.get("file")
         != f"artifacts/{case_id}/compact-profile-predictions.npz"
-        or descriptor.get("array_order") != list(PREDICTION_ARRAYS)
+        or descriptor.get("array_order") != (["cp_q_delta"] if surface_only else list(PREDICTION_ARRAYS))
         or descriptor.get("ownership") != "participant"
         or descriptor.get("content") != "predictions_only"
     ):
@@ -1665,9 +1687,11 @@ def score_compact_profile_directory(
     case_set_id: str,
     expected_case_ids: Sequence[str],
     opened_support_release: CompactSupportRelease | None = None,
+    prediction_scope: str = "surface_and_volume",
 ) -> dict[str, dict[str, float]]:
     """Strictly validate and score one compact participant profile directory."""
 
+    surface_only = checked_prediction_scope(prediction_scope) == "surface_only"
     (
         checked_submission,
         checked_split,
@@ -1681,9 +1705,10 @@ def score_compact_profile_directory(
         case_ids=expected_case_ids,
         cases_per_chunk=1,
         expected_case_artifact_sha256={
-            case_id: {key: "0" * 64 for key in SOURCE_ARTIFACT_SHA256_KEYS}
+            case_id: {key: "0" * 64 for key in (("cp_profile_metrics", "cp_cut_values") if surface_only else SOURCE_ARTIFACT_SHA256_KEYS)}
             for case_id in expected_case_ids
         },
+        prediction_scope=prediction_scope,
     )
     release = _opened_support_release(
         support_release_root=support_release_root,
@@ -1700,6 +1725,7 @@ def score_compact_profile_directory(
     _require_exact_keys(
         index,
         {
+            *(("prediction_scope",) if surface_only else ()),
             "schema_version",
             "format",
             "contract_id",
@@ -1716,6 +1742,8 @@ def score_compact_profile_directory(
         },
         "compact profile index",
     )
+    if index.get("prediction_scope", "surface_and_volume") != prediction_scope:
+        _fail("compact profile index prediction scope differs")
     if (
         index.get("schema_version") != COMPACT_PROFILE_INDEX_SCHEMA_VERSION
         or index.get("format") != COMPACT_PROFILE_FORMAT
@@ -1765,6 +1793,7 @@ def score_compact_profile_directory(
         _require_exact_keys(
             chunk,
             {
+                *(("prediction_scope",) if surface_only else ()),
                 "schema",
                 "schema_version",
                 "format",
@@ -1778,6 +1807,8 @@ def score_compact_profile_directory(
             },
             f"compact profile {expected_filename}",
         )
+        if chunk.get("prediction_scope", "surface_and_volume") != prediction_scope:
+            _fail("compact profile chunk prediction scope differs")
         if (
             chunk.get("schema") != COMPACT_PROFILE_CHUNK_SCHEMA
             or chunk.get("schema_version") != COMPACT_PROFILE_SCHEMA_VERSION
@@ -1797,7 +1828,7 @@ def score_compact_profile_directory(
         for entry in entries:
             value = _require_exact_keys(
                 entry,
-                {"case_id", "artifact", "surface_cp", "volume_velocity"},
+                {"case_id", "artifact", "surface_cp"} | (set() if surface_only else {"volume_velocity"}),
                 f"{expected_filename} compact profile case",
             )
             case_id = value.get("case_id")
@@ -1811,13 +1842,16 @@ def score_compact_profile_directory(
                 "surface_cp": value.get("surface_cp"),
                 "volume_velocity": value.get("volume_velocity"),
             }
-            _support_array_contract(
-                metadata, label=f"{case_id} compact participant metadata"
-            )
-            if metadata != compact_case_metadata(support):
+            expected_metadata = compact_case_metadata(support)
+            if surface_only:
+                metadata.pop("volume_velocity")
+                expected_metadata = {"surface_cp": expected_metadata["surface_cp"]}
+            else:
+                _support_array_contract(metadata, label=f"{case_id} compact participant metadata")
+            if metadata != expected_metadata:
                 _fail(f"{case_id} compact metadata differs from evaluator support")
             artifact_descriptor = _artifact_descriptor(
-                value.get("artifact"), case_id=case_id
+                value.get("artifact"), case_id=case_id, surface_only=surface_only
             )
             artifact_path = _safe_child(
                 root,
@@ -1841,9 +1875,11 @@ def score_compact_profile_directory(
                     ),
                 ),
             }
+            if surface_only:
+                prediction_contract.pop("velocity_speed_over_u_inf")
             _preflight_npz(
                 artifact_path,
-                order=PREDICTION_ARRAYS,
+                order=("cp_q_delta",) if surface_only else PREDICTION_ARRAYS,
                 label=f"{case_id} compact prediction artifact",
                 maximum_archive_bytes=_MAX_COMPACT_PREDICTION_NPZ_BYTES,
                 maximum_uncompressed_bytes=_MAX_COMPACT_PREDICTION_NPZ_BYTES,
@@ -1852,10 +1888,10 @@ def score_compact_profile_directory(
             )
             try:
                 artifact, artifact_sha = load_compact_prediction_npz(
-                    artifact_path, support=support, metadata=metadata
+                    artifact_path, support=support, metadata=metadata, prediction_scope=prediction_scope
                 )
                 case_scores = score_compact_profiles(
-                    artifact, support=support, metadata=metadata
+                    artifact, support=support, metadata=metadata, prediction_scope=prediction_scope
                 )
             except CompactProfileError as error:
                 raise CompactProfileEvaluationError(str(error)) from error

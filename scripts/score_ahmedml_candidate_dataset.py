@@ -50,12 +50,14 @@ def main() -> int:
         type=Path,
         default=ROOT / "benchmark-specs" / "ahmedml" / "submission-spec.json",
     )
+    parser.add_argument("--prediction-scope", choices=("surface_and_volume", "surface_only"), default="surface_and_volume")
     args = parser.parse_args()
     try:
         result = score_candidate_dataset(
             submission_specification=args.submission_specification,
             split_id=args.split_id,
             case_evidence_directory=args.case_evidence_directory,
+            prediction_scope=args.prediction_scope,
         )
         write_atomic(args.output.expanduser().resolve(), result.to_json())
     except (AhmedMLDatasetScorerError, OSError, ValueError) as error:

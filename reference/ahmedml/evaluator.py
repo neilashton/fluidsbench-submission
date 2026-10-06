@@ -7,23 +7,22 @@ import math
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, BinaryIO, Iterator, Mapping
+from typing import BinaryIO, Iterator, Mapping
 
 import numpy as np
 
-from reference.drivaerml.accumulators import (
-    DrivAerAccumulatorError,
-    FinalizedFieldStatistics,
-    StreamingFieldAccumulator,
-)
 from reference.ahmedml.prediction_chunks import (
     DEFAULT_HASH_CHUNK_BYTES,
     DEFAULT_VALIDATION_BLOCK_ROWS,
-    PredictionChunk,
     PredictionChunkError,
     PredictionChunkManifest,
     iter_prediction_chunks,
     load_prediction_chunk_manifest,
+)
+from reference.drivaerml.accumulators import (
+    DrivAerAccumulatorError,
+    FinalizedFieldStatistics,
+    StreamingFieldAccumulator,
 )
 from reference.drivaerml.retained_file import RetainedFileError, RetainedVerifiedFile
 from reference.drivaerml.source import (
@@ -34,12 +33,12 @@ from reference.drivaerml.source import (
     index_inline_binary_vtk_xml,
     stream_inline_binary_payload,
 )
+from reference.prediction_scope import prediction_scope as checked_prediction_scope
 
 from .contract import (
     PROFILE_DEFINITION_SHA256,
     REGION_DEFINITION_SHA256,
     VOLUME_REGION_DEFINITION_SHA256,
-    AhmedMLSourceCase,
     AhmedMLSourceIdentity,
     SourceFileIdentity,
 )
@@ -51,7 +50,6 @@ from .support import (
     load_profile_support,
     open_support_array,
 )
-
 
 EVIDENCE_SCHEMA = "ahmedml-candidate-case-evaluation-v2"
 EVIDENCE_SCHEMA_VERSION = 2
@@ -700,50 +698,55 @@ def _field_evidence(result: _FieldResult) -> dict[str, object]:
 def _metric_values(
     surface_pressure: _FieldResult,
     surface_shear: _FieldResult,
-    volume_pressure: _FieldResult,
-    volume_velocity: _FieldResult,
+    volume_pressure: _FieldResult | None,
+    volume_velocity: _FieldResult | None,
 ) -> dict[str, float]:
     sp = surface_pressure.statistics.metric_values()
     sw = surface_shear.statistics.metric_values()
-    vp = volume_pressure.statistics.metric_values()
-    vv = volume_velocity.statistics.metric_values()
-    return {
+    values = {
         "surface_pressure_rel_l2": sp["physical"]["relative_l2_percent"],
         "surface_pressure_equal_entity_rel_l2": sp["uniform"]["relative_l2_percent"],
         "surface_wall_shear_rel_l2": sw["physical"]["relative_l2_percent"],
         "surface_wall_shear_equal_entity_rel_l2": sw["uniform"]["relative_l2_percent"],
-        "volume_pressure_rel_l2": vp["uniform"]["relative_l2_percent"],
-        "volume_pressure_physical_rel_l2": vp["physical"]["relative_l2_percent"],
-        "volume_velocity_rel_l2": vv["uniform"]["relative_l2_percent"],
-        "volume_velocity_physical_rel_l2": vv["physical"]["relative_l2_percent"],
         "surface_pressure_rel_l1": surface_pressure.relative_l1_physical_percent,
         "surface_wall_shear_rel_l1": surface_shear.relative_l1_physical_percent,
-        "volume_pressure_rel_l1": volume_pressure.relative_l1_uniform_percent,
-        "volume_velocity_rel_l1": volume_velocity.relative_l1_uniform_percent,
         "surface_pressure_mae": sp["physical"]["mae"],
         "surface_pressure_rmse": sp["physical"]["rmse"],
         "surface_wall_shear_mae": sw["physical"]["mae"],
         "surface_wall_shear_rmse": sw["physical"]["rmse"],
-        "volume_pressure_mae": vp["uniform"]["mae"],
-        "volume_pressure_rmse": vp["uniform"]["rmse"],
-        "volume_velocity_mae": vv["uniform"]["mae"],
-        "volume_velocity_rmse": vv["uniform"]["rmse"],
     }
+    if volume_pressure is not None and volume_velocity is not None:
+        vp = volume_pressure.statistics.metric_values()
+        vv = volume_velocity.statistics.metric_values()
+        values.update({
+            "volume_pressure_rel_l2": vp["uniform"]["relative_l2_percent"],
+            "volume_pressure_physical_rel_l2": vp["physical"]["relative_l2_percent"],
+            "volume_velocity_rel_l2": vv["uniform"]["relative_l2_percent"],
+            "volume_velocity_physical_rel_l2": vv["physical"]["relative_l2_percent"],
+            "volume_pressure_rel_l1": volume_pressure.relative_l1_uniform_percent,
+            "volume_velocity_rel_l1": volume_velocity.relative_l1_uniform_percent,
+            "volume_pressure_mae": vp["uniform"]["mae"],
+            "volume_pressure_rmse": vp["uniform"]["rmse"],
+            "volume_velocity_mae": vv["uniform"]["mae"],
+            "volume_velocity_rmse": vv["uniform"]["rmse"],
+        })
+    return values
 
 
 def _profiles(
     profile_support: Mapping[str, np.ndarray],
     surface_pressure: _FieldResult,
-    volume_velocity: _FieldResult,
+    volume_velocity: _FieldResult | None,
 ) -> dict[str, object]:
     if surface_pressure.sampled_truth is None or surface_pressure.sampled_prediction is None:
         raise AhmedMLCandidateEvaluatorError("surface profile samples are unavailable")
-    if volume_velocity.sampled_truth is None or volume_velocity.sampled_prediction is None:
+    if volume_velocity is not None and (volume_velocity.sampled_truth is None or volume_velocity.sampled_prediction is None):
         raise AhmedMLCandidateEvaluatorError("volume profile samples are unavailable")
     surface_truth = surface_pressure.sampled_truth.reshape(3, 128)
     surface_prediction = surface_pressure.sampled_prediction.reshape(3, 128)
-    volume_truth = volume_velocity.sampled_truth.reshape(4, 128)
-    volume_prediction = volume_velocity.sampled_prediction.reshape(4, 128)
+    if volume_velocity is not None:
+        volume_truth = volume_velocity.sampled_truth.reshape(4, 128)
+        volume_prediction = volume_velocity.sampled_prediction.reshape(4, 128)
     if not np.allclose(
         surface_truth,
         profile_support["surface_truth_cp"],
@@ -753,15 +756,16 @@ def _profiles(
         raise AhmedMLCandidateEvaluatorError(
             "decoded native surface truth differs from frozen profile truth"
         )
-    if not np.allclose(
-        volume_truth,
-        profile_support["volume_truth_ux_over_uinf"],
-        rtol=0.0,
-        atol=2.0e-7,
-    ):
-        raise AhmedMLCandidateEvaluatorError(
-            "decoded native volume truth differs from frozen profile truth"
-        )
+    if volume_velocity is not None:
+        if not np.allclose(
+            volume_truth,
+            profile_support["volume_truth_ux_over_uinf"],
+            rtol=0.0,
+            atol=2.0e-7,
+        ):
+            raise AhmedMLCandidateEvaluatorError(
+                "decoded native volume truth differs from frozen profile truth"
+            )
     series: list[dict[str, object]] = []
     for index, station_id in enumerate(SURFACE_STATIONS):
         series.append(
@@ -776,19 +780,20 @@ def _profiles(
                 "source": "evaluator_derived_from_complete_native_fields",
             }
         )
-    for index, station_id in enumerate(VOLUME_STATIONS):
-        series.append(
-            {
-                "panel_id": "velocity_profiles",
-                "station_id": station_id,
-                "quantity_id": "ux_over_uinf",
-                "coordinate": profile_support["volume_coordinate"][index].tolist(),
-                "truth": volume_truth[index].tolist(),
-                "prediction": volume_prediction[index].tolist(),
-                "sample_count": 128,
-                "source": "evaluator_derived_from_complete_native_fields",
-            }
-        )
+    if volume_velocity is not None:
+        for index, station_id in enumerate(VOLUME_STATIONS):
+            series.append(
+                {
+                    "panel_id": "velocity_profiles",
+                    "station_id": station_id,
+                    "quantity_id": "ux_over_uinf",
+                    "coordinate": profile_support["volume_coordinate"][index].tolist(),
+                    "truth": volume_truth[index].tolist(),
+                    "prediction": volume_prediction[index].tolist(),
+                    "sample_count": 128,
+                    "source": "evaluator_derived_from_complete_native_fields",
+                }
+            )
     return {
         "profile_definition_sha256": PROFILE_DEFINITION_SHA256,
         "participant_profile_payload_accepted": False,
@@ -831,7 +836,8 @@ def evaluate_candidate_case(
     source_identity: AhmedMLSourceIdentity,
     case_support: AhmedMLCaseSupport,
     surface_prediction_manifest: PredictionChunkManifest | str | Path,
-    volume_prediction_manifest: PredictionChunkManifest | str | Path,
+    volume_prediction_manifest: PredictionChunkManifest | str | Path | None = None,
+    prediction_scope: str = "surface_and_volume",
     maximum_prediction_chunk_rows: int = DEFAULT_MAX_PREDICTION_CHUNK_ROWS,
     hash_chunk_bytes: int = DEFAULT_HASH_CHUNK_BYTES,
     validation_block_rows: int = DEFAULT_VALIDATION_BLOCK_ROWS,
@@ -843,6 +849,12 @@ def evaluate_candidate_case(
     future frozen evaluator is a separate owner-reviewed release operation.
     """
 
+    scope = checked_prediction_scope(prediction_scope)
+    surface_only = scope == "surface_only"
+    if surface_only and volume_prediction_manifest is not None:
+        raise AhmedMLCandidateEvaluatorError("surface_only forbids volume predictions")
+    if not surface_only and volume_prediction_manifest is None:
+        raise AhmedMLCandidateEvaluatorError("surface_and_volume requires volume predictions")
     case = source_identity.case(case_id)
     if case_support.case_id != case_id:
         raise AhmedMLCandidateEvaluatorError("case support belongs to another case")
@@ -856,7 +868,7 @@ def evaluate_candidate_case(
     encoded_bytes = _positive_integer(encoded_chunk_bytes, "encoded_chunk_bytes")
     try:
         surface_manifest = _manifest(surface_prediction_manifest)
-        volume_manifest = _manifest(volume_prediction_manifest)
+        volume_manifest = _manifest(volume_prediction_manifest) if not surface_only else None
     except PredictionChunkError as error:
         raise AhmedMLCandidateEvaluatorError(str(error)) from error
     _validate_manifest(
@@ -866,13 +878,14 @@ def evaluate_candidate_case(
         expected_count=case.surface_entity_count,
         maximum_rows=maximum_rows,
     )
-    _validate_manifest(
-        volume_manifest,
-        case_id=case_id,
-        support_id=VOLUME_SUPPORT_ID,
-        expected_count=case.volume_entity_count,
-        maximum_rows=maximum_rows,
-    )
+    if not surface_only:
+        _validate_manifest(
+            volume_manifest,
+            case_id=case_id,
+            support_id=VOLUME_SUPPORT_ID,
+            expected_count=case.volume_entity_count,
+            maximum_rows=maximum_rows,
+        )
     try:
         profile_support = load_profile_support(case_support)
         with (
@@ -884,12 +897,12 @@ def evaluate_candidate_case(
                 dataset_root,
                 label=f"{case_id} surface area",
             ) as surface_area_source,
-            _open_verified_source(
+            (_open_verified_source(
                 case.volume, dataset_root, label=f"{case_id} volume"
-            ) as volume,
+            ) if not surface_only else contextlib.nullcontext()) as volume,
             open_support_array(case_support, "surface_area_vector") as area_vectors,
-            open_support_array(case_support, "volume_cell_volume") as cell_volumes,
-            open_support_array(case_support, "volume_region_code") as region_codes,
+            (open_support_array(case_support, "volume_cell_volume") if not surface_only else contextlib.nullcontext()) as cell_volumes,
+            (open_support_array(case_support, "volume_region_code") if not surface_only else contextlib.nullcontext()) as region_codes,
         ):
             surface_area_source.handle.seek(0)
             surface_areas = np.load(
@@ -916,13 +929,13 @@ def evaluate_candidate_case(
                 volume.handle,
                 expected_type="UnstructuredGrid",
                 expected_cells=case.volume_entity_count,
-            )
+            ) if not surface_only else None
             surface_pressure_array = _required_array(boundary_index, "pMean", 1)
             surface_shear_array = _required_array(
                 boundary_index, "wallShearStressMean", 3
             )
-            volume_pressure_array = _required_array(volume_index, "pMean", 1)
-            volume_velocity_array = _required_array(volume_index, "UMean", 3)
+            volume_pressure_array = _required_array(volume_index, "pMean", 1) if not surface_only else None
+            volume_velocity_array = _required_array(volume_index, "UMean", 3) if not surface_only else None
             surface_codes = surface_region_codes(area_vectors)
 
             surface_pressure = _evaluate_field(
@@ -965,46 +978,48 @@ def evaluate_candidate_case(
                 validation_block_rows=validation_rows,
                 encoded_chunk_bytes=encoded_bytes,
             )
-            volume_pressure = _evaluate_field(
-                stream=volume.handle,
-                vtk_index=volume_index,
-                array=volume_pressure_array,
-                manifest=volume_manifest,
-                field_id="volume_pressure",
-                field_name="pMean",
-                weights=cell_volumes,
-                region_codes=region_codes,
-                region_ids=VOLUME_REGION_IDS,
-                region_domain="volume",
-                sample_ids=None,
-                sample_component=None,
-                sample_scale=1.0,
-                area_vectors=None,
-                force_sign=None,
-                hash_chunk_bytes=hash_bytes,
-                validation_block_rows=validation_rows,
-                encoded_chunk_bytes=encoded_bytes,
-            )
-            volume_velocity = _evaluate_field(
-                stream=volume.handle,
-                vtk_index=volume_index,
-                array=volume_velocity_array,
-                manifest=volume_manifest,
-                field_id="volume_velocity",
-                field_name="UMean",
-                weights=cell_volumes,
-                region_codes=region_codes,
-                region_ids=VOLUME_REGION_IDS,
-                region_domain="volume",
-                sample_ids=profile_support["volume_raw_cell_id"],
-                sample_component=0,
-                sample_scale=1.0,
-                area_vectors=None,
-                force_sign=None,
-                hash_chunk_bytes=hash_bytes,
-                validation_block_rows=validation_rows,
-                encoded_chunk_bytes=encoded_bytes,
-            )
+            volume_pressure = volume_velocity = None
+            if not surface_only:
+                volume_pressure = _evaluate_field(
+                    stream=volume.handle,
+                    vtk_index=volume_index,
+                    array=volume_pressure_array,
+                    manifest=volume_manifest,
+                    field_id="volume_pressure",
+                    field_name="pMean",
+                    weights=cell_volumes,
+                    region_codes=region_codes,
+                    region_ids=VOLUME_REGION_IDS,
+                    region_domain="volume",
+                    sample_ids=None,
+                    sample_component=None,
+                    sample_scale=1.0,
+                    area_vectors=None,
+                    force_sign=None,
+                    hash_chunk_bytes=hash_bytes,
+                    validation_block_rows=validation_rows,
+                    encoded_chunk_bytes=encoded_bytes,
+                )
+                volume_velocity = _evaluate_field(
+                    stream=volume.handle,
+                    vtk_index=volume_index,
+                    array=volume_velocity_array,
+                    manifest=volume_manifest,
+                    field_id="volume_velocity",
+                    field_name="UMean",
+                    weights=cell_volumes,
+                    region_codes=region_codes,
+                    region_ids=VOLUME_REGION_IDS,
+                    region_domain="volume",
+                    sample_ids=profile_support["volume_raw_cell_id"],
+                    sample_component=0,
+                    sample_scale=1.0,
+                    area_vectors=None,
+                    force_sign=None,
+                    hash_chunk_bytes=hash_bytes,
+                    validation_block_rows=validation_rows,
+                    encoded_chunk_bytes=encoded_bytes,
+                )
     except (AhmedMLSupportError, RetainedFileError) as error:
         raise AhmedMLCandidateEvaluatorError(str(error)) from error
 
@@ -1015,7 +1030,7 @@ def evaluate_candidate_case(
             surface_shear,
             volume_pressure,
             volume_velocity,
-        )
+        ) if result is not None
     }
     metric_values = _metric_values(
         surface_pressure, surface_shear, volume_pressure, volume_velocity
@@ -1050,8 +1065,8 @@ def evaluate_candidate_case(
                 "entity_count": case.surface_entity_count,
             },
             "volume": {
-                "manifest_sha256": volume_manifest.sha256,
-                "chunk_sha256": list(volume_pressure.chunk_sha256),
+                "manifest_sha256": volume_manifest.sha256 if volume_manifest else None,
+                "chunk_sha256": list(volume_pressure.chunk_sha256) if volume_pressure else [],
                 "entity_count": case.volume_entity_count,
             },
         },
@@ -1071,8 +1086,8 @@ def evaluate_candidate_case(
             "ranking_effect": "none",
             "surface_pressure": dict(surface_pressure.regional_diagnostics or {}),
             "surface_wall_shear": dict(surface_shear.regional_diagnostics or {}),
-            "volume_pressure": dict(volume_pressure.regional_diagnostics or {}),
-            "volume_velocity": dict(volume_velocity.regional_diagnostics or {}),
+            "volume_pressure": dict(volume_pressure.regional_diagnostics or {}) if volume_pressure else {},
+            "volume_velocity": dict(volume_velocity.regional_diagnostics or {}) if volume_velocity else {},
         },
         "execution": {
             "maximum_prediction_chunk_rows": maximum_rows,
@@ -1081,6 +1096,12 @@ def evaluate_candidate_case(
             "prediction_validation_block_rows": validation_rows,
         },
     }
+    evidence["prediction_scope"] = scope
+    if surface_only:
+        evidence["prediction_inputs"].pop("volume")
+        evidence["coverage"].pop("volume_raw_cell_interval")
+        for field_id in ("volume_pressure", "volume_velocity"):
+            evidence["report_only_regional_diagnostics"].pop(field_id)
     return CandidateCaseEvaluation(MappingProxyType(evidence))
 
 

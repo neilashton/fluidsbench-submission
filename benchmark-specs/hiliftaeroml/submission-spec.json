@@ -99,7 +99,49 @@
       "freeze_lossless_cp_connected_graph_and_five_station_velocity_profile_serialization_and_public_truth_release",
       "owner_approve_the_frozen_dataset_evaluator_git_revision_without_public_activation",
       "approve_the_zero_weight_regional_contract_and_complete_split_aggregator"
-    ]
+    ],
+    "prediction_scopes": {
+      "surface_and_volume": {
+        "surface_predictions_required": true,
+        "volume_predictions_required": true
+      },
+      "surface_only": {
+        "surface_predictions_required": true,
+        "volume_predictions_forbidden": true,
+        "unavailable_component_metric_ids": [
+          "volume_velocity_rel_l2",
+          "volume_pressure_rel_l2",
+          "velocity_profile_r2"
+        ],
+        "unavailable_component_score": 0.0,
+        "component_weight_renormalization": false,
+        "maximum_overall_score": 60.0,
+        "unavailable_raw_metric_ids": [
+          "velocity_profile_r2",
+          "volume_pressure_mae",
+          "volume_pressure_rel_l1",
+          "volume_pressure_rel_l2",
+          "volume_pressure_rmse",
+          "volume_velocity_mae",
+          "volume_velocity_rel_l1",
+          "volume_velocity_rel_l2",
+          "volume_velocity_rmse"
+        ],
+        "required_profile_panel_ids": [
+          "pressure_profiles"
+        ],
+        "methodology_contract": {
+          "file": "methodology-prediction-scopes-v1.json",
+          "sha256": "76b232be003fba55f29472f2f10cba742ef310da6a1d5e35ad4b87a834a1e9d9"
+        }
+      }
+    },
+    "prediction_scope_contract_version": "aerodynamic-prediction-scopes-v1",
+    "surface_only_implementation_binding": {
+      "version": "aerodynamic-surface-only-v1",
+      "file": "reference/aerodynamic-surface-only-implementation-v1.json",
+      "sha256": "2fab84fce263aee88e0e78b5032e1e6261bbd0b552848affa2ed576dec251185"
+    }
   },
   "profile_definition": {
     "status": "official",
@@ -207,7 +249,17 @@
         "transform": "bounded_quality"
       }
     ],
-    "tolerance": 1e-06
+    "tolerance": 1e-06,
+    "surface_only_policy": {
+      "unavailable_component_metric_ids": [
+        "volume_velocity_rel_l2",
+        "volume_pressure_rel_l2",
+        "velocity_profile_r2"
+      ],
+      "unavailable_component_score": 0.0,
+      "component_weight_renormalization": false,
+      "maximum_overall_score": 60.0
+    }
   },
   "component_score_groups": {
     "operation": "normalized_weighted_component_scores",
@@ -537,7 +589,11 @@
       },
       "weighting": "physical_connected_cut_arc_length",
       "r2_protocol": "center truth independently within each physical connected cut graph, pool graph SSE/SST across rows A-J within a case, then macro-average complete-case R2 values equally",
-      "serialization_gate": "freeze a lossless disconnected-graph profile-chunk mapping and matching public profile-ground-truth release before activation"
+      "serialization_gate": "freeze a lossless disconnected-graph profile-chunk mapping and matching public profile-ground-truth release before activation",
+      "required_prediction_scopes": [
+        "surface_and_volume",
+        "surface_only"
+      ]
     },
     {
       "id": "velocity_profiles",
@@ -564,7 +620,10 @@
       },
       "quantity_source": "velocity_magnitude/|U_inf|",
       "weighting": "physical_polyline_arc_length",
-      "r2_protocol": "center truth within each of B.2/B.3/C.1/C.2/C.3, pool station SSE/SST within a case, then macro-average complete-case R2 values equally"
+      "r2_protocol": "center truth within each of B.2/B.3/C.1/C.2/C.3, pool station SSE/SST within a case, then macro-average complete-case R2 values equally",
+      "required_prediction_scopes": [
+        "surface_and_volume"
+      ]
     }
   ],
   "splits": [

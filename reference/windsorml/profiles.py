@@ -18,7 +18,6 @@ import numpy as np
 
 from .contract import SOURCE_IDENTITY_SHA256
 
-
 SPEC_DIRECTORY = Path(__file__).resolve().parents[2] / "benchmark-specs" / "windsorml"
 PROFILE_DEFINITION_PATH = SPEC_DIRECTORY / "profile-definition-v2.json"
 PROFILE_MANIFEST_PATH = (
@@ -209,7 +208,7 @@ def load_profile_support(
 
 
 def validate_profile_evidence(
-    value: object, *, case_id: str
+    value: object, *, case_id: str, surface_only: bool = False
 ) -> dict[str, tuple[list[float], list[float]]]:
     """Return complete series in definition order after checking their binding."""
 
@@ -226,16 +225,15 @@ def validate_profile_evidence(
             f"{case_id} profiles must be evaluator-derived, never submitted"
         )
     families = _mapping(evidence.get("families"), f"{case_id} profile families")
-    expected_families = {
-        family["family_id"] for family in support.definition["families"]
-    }
+    definitions = [family for family in support.definition["families"] if not surface_only or family["quantity_id"] == "cp"]
+    expected_families = {family["family_id"] for family in definitions}
     if set(families) != expected_families:
         raise WindsorMLProfileError(
             f"{case_id} profile families differ from frozen support"
         )
     count = support.document["sample_count"]
     result = {}
-    for family in support.definition["families"]:
+    for family in definitions:
         family_id = family["family_id"]
         series = families[family_id]
         if not isinstance(series, list) or len(series) != len(family["station_ids"]):

@@ -51,6 +51,12 @@
       "items": {
         "$ref": "#/$defs/case"
       }
+    },
+    "prediction_scope": {
+      "enum": [
+        "surface_and_volume",
+        "surface_only"
+      ]
     }
   },
   "$defs": {
@@ -94,9 +100,14 @@
           "minimum": 1
         },
         "array_order": {
-          "const": [
-            "cp_q_delta",
-            "velocity_speed_over_u_inf"
+          "enum": [
+            [
+              "cp_q_delta",
+              "velocity_speed_over_u_inf"
+            ],
+            [
+              "cp_q_delta"
+            ]
           ]
         },
         "ownership": {
@@ -233,8 +244,7 @@
       "required": [
         "case_id",
         "artifact",
-        "surface_cp",
-        "volume_velocity"
+        "surface_cp"
       ],
       "properties": {
         "case_id": {
@@ -252,5 +262,66 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "prediction_scope"
+        ],
+        "properties": {
+          "prediction_scope": {
+            "const": "surface_only"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "cases": {
+            "items": {
+              "not": {
+                "required": [
+                  "volume_velocity"
+                ]
+              },
+              "properties": {
+                "artifact": {
+                  "properties": {
+                    "array_order": {
+                      "const": [
+                        "cp_q_delta"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "cases": {
+            "items": {
+              "required": [
+                "volume_velocity"
+              ],
+              "properties": {
+                "artifact": {
+                  "properties": {
+                    "array_order": {
+                      "const": [
+                        "cp_q_delta",
+                        "velocity_speed_over_u_inf"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
