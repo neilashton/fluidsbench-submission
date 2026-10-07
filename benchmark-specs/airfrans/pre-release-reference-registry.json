@@ -1,0 +1,70 @@
+{
+  "schema": "airfrans-pre-release-reference-registry-v1",
+  "status": "closed_candidate_dev_only",
+  "dataset_id": "airfrans",
+  "activation": {
+    "owner_approval_complete": false,
+    "published": false,
+    "submissions_opened": false,
+    "registration_changes_activation": false
+  },
+  "entries": [
+    {
+      "submission_path": "submissions/airfrans/transolverpp-full-v1/submission.json",
+      "submission_id": "transolverpp-full-v1",
+      "split_id": "full",
+      "case_set_id": "standard",
+      "record_type": "pre_release_reference",
+      "package_tree": {
+        "algorithm": "sha256-posix-path-size-content-sha256-v1",
+        "sha256": "7a8c1490687a2bc91b60ad48fc302cf802c2ff00865f1b8cbc1d7b5e09c95003",
+        "file_count": 206,
+        "total_bytes": 93036944
+      },
+      "candidate_manifest": {
+        "status": "candidate",
+        "release_id": "airfrans-native-ground-truth-v1-candidate",
+        "manifest_url": "https://fluidsbench.org/not-yet-published/airfrans-native-ground-truth-v1-candidate/manifest.json",
+        "manifest_sha256": "e26c7ce6dd2fad3e4015eb17c9aaa8603d42e6efe293b3fbd5b6969560971d63",
+        "manifest_file": "pre-release/transolverpp-full-v1/scoring-support/manifest.json"
+      },
+      "profile_ground_truth": {
+        "status": "candidate",
+        "release_id": "airfrans-native-profile-truth-v1-candidate",
+        "manifest_sha256": "7e4320cd3a62b7f8577bb1f73c80850d8b0d37e3af6f885a41da0763088bc7ac"
+      },
+      "validation_receipt": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/validation.json",
+      "artifacts": [
+        {
+          "file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/profile-score.json",
+          "sha256": "f38e78428a76dd7784e6ce8cda7ae7bd19dfda1b15a669398c37f47dab3a698a"
+        },
+        {
+          "file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/profile-truth-manifest.json",
+          "sha256": "7e4320cd3a62b7f8577bb1f73c80850d8b0d37e3af6f885a41da0763088bc7ac"
+        },
+        {
+          "file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/scoring-support/build-summary.json",
+          "sha256": "e82c0cd26099c5f4fa338c5183e3f40211312d705be5f7bebdc66267bf5ed2f4"
+        },
+        {
+          "file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/scoring-support/case-sets/standard/chunk-000.json",
+          "sha256": "665f9ccf535f61cdcc09c71de672c928ff2fb0dc7b7d2b330aa476ddf97118eb"
+        },
+        {
+          "file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/scoring-support/case-sets/standard/index.json",
+          "sha256": "223c5a5b6d969b9a0cd0abf012c9f623b1106e0d62963bdb6d4aef2473591342"
+        },
+        {
+          "file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/scoring-support/manifest.json",
+          "sha256": "e26c7ce6dd2fad3e4015eb17c9aaa8603d42e6efe293b3fbd5b6969560971d63"
+        },
+        {
+          "file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/validation.json",
+          "sha256": "310d88f9a84eb392d135f682323ee8d16a5711b6bd8641757a4b123426531984"
+        }
+      ],
+      "profile_truth_manifest_file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/profile-truth-manifest.json"
+    }
+  ]
+}
