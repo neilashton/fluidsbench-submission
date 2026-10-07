@@ -83,13 +83,20 @@ class AirfransCandidateAssemblerTests(unittest.TestCase):
             {"release_id": definition["id"], "manifest_sha256_source": "profile_definition.sha256"},
             {"release_id": "test-profile-truth", "manifest_sha256": definition["sha256"]},
             {"release_id": "test-profile-truth", "manifest_sha256": "not-a-digest"},
-            self.config["release_bindings"]["profile_ground_truth"],
+            {"release_id": "__UNRESOLVED_AIRFRANS_PROFILE_GROUND_TRUTH_RELEASE_ID__",
+             "manifest_sha256": "__UNRESOLVED_AIRFRANS_PROFILE_GROUND_TRUTH_MANIFEST_SHA256__"},
         ]
         for binding in bad_bindings:
             with self.subTest(binding=binding):
                 self.config["release_bindings"]["profile_ground_truth"] = binding
                 with self.assertRaises(AssembleError):
                     profile_ground_truth_binding(self.config, self.spec)
+
+    def test_registered_example_uses_the_retained_data_release_binding(self) -> None:
+        binding = profile_ground_truth_binding(self.config, self.spec)
+        submission = read(self.package / "submission.json")
+        self.assertEqual(binding["release_id"], submission["profile_data"]["profile_ground_truth_release_id"])
+        self.assertEqual(binding["manifest_sha256"], submission["profile_data"]["profile_ground_truth_manifest_sha256"])
 
     def test_legacy_binding_is_reported_by_list_blockers(self) -> None:
         self.config["release_bindings"]["profile_ground_truth"] = {
@@ -103,6 +110,10 @@ class AirfransCandidateAssemblerTests(unittest.TestCase):
             self.assertIn("not the profile extraction definition", output.getvalue())
 
     def test_assembly_rejects_unresolved_truth_before_writing_output(self) -> None:
+        self.config["release_bindings"]["profile_ground_truth"] = {
+            "release_id": "__UNRESOLVED_AIRFRANS_PROFILE_GROUND_TRUTH_RELEASE_ID__",
+            "manifest_sha256": "__UNRESOLVED_AIRFRANS_PROFILE_GROUND_TRUTH_MANIFEST_SHA256__",
+        }
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "package"
             with self.assertRaises(AssembleError):
