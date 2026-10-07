@@ -1,0 +1,51 @@
+{
+  "schema": "airfrans-native-profile-truth-manifest-v1-candidate",
+  "schema_version": 1,
+  "format": "fluidsbench-airfrans-native-profile-truth-v1-candidate",
+  "status": "candidate_owner_review_required",
+  "dataset_id": "airfrans",
+  "release_id": "airfrans-native-profile-truth-v1-candidate",
+  "profile_definition": {
+    "id": "airfrans-boundary-layer-v1",
+    "sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c"
+  },
+  "case_count": 355,
+  "case_set_count": 2,
+  "master_index": {
+    "file": "index.json",
+    "sha256": "62e3a0d69a472ed197fc32ed4c2d093926bad46e5cfd15f85d0ea6d68bc02af7",
+    "byte_size": 296629
+  },
+  "provenance": {
+    "file": "provenance.json",
+    "sha256": "f09b87fc0159e94fc0ff2e1661c3eb458b5d3236ea2183be3a40a3696ca9cf79",
+    "byte_size": 2192
+  },
+  "case_sets": [
+    {
+      "case_set_id": "standard",
+      "split_id": "full",
+      "case_count": 200,
+      "file": "case-sets/standard.json",
+      "sha256": "29f9669a880f5af41f851829671cbdcb99396102aff8e6ca0870d420e269d400",
+      "byte_size": 11693
+    },
+    {
+      "case_set_id": "aoa_extrapolation",
+      "split_id": "aoa_extrapolation",
+      "case_count": 196,
+      "file": "case-sets/aoa_extrapolation.json",
+      "sha256": "eaa79068b46c2774a08e9d317bcf89ab19eb661a8a47db3984264f8f16628454",
+      "byte_size": 11645
+    }
+  ],
+  "storage": {
+    "truth_artifact_bytes": 163623068,
+    "case_artifacts_duplicated_across_case_sets": 0
+  },
+  "activation": {
+    "owner_approval_complete": false,
+    "published": false,
+    "submissions_opened": false
+  }
+}

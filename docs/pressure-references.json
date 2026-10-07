@@ -359,8 +359,8 @@
         },
         {
           "path": "scripts/validate_submission.py",
-          "sha256": "b0b1d6203013a53795b18b46d30148a3fdd99eff5545c3bfece5a3975e3c8129",
-          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged."
+          "sha256": "a99fa6d6e06ecdb87d7ec175601d89b2f33f029b1128830b6ca0d69abb63e2fe",
+          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Rechecked for the AirfRANS pre-release registration: the new per-package candidate view is restricted to hash-bound AirfRANS references; HiLiftAeroML pressure and SI export validation are unchanged."
         },
         {
           "path": "benchmark-specs/hiliftaeroml/dimensional-export-correction-v1/verification.json",
