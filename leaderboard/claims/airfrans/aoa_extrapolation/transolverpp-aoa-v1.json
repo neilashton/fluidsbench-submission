@@ -1,0 +1,96 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/releases/result-claim.schema.json",
+  "schema_version": "1.0",
+  "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/airfrans/aoa_extrapolation/transolverpp-aoa-v1",
+  "release": {
+    "id": "prototype-dev-2026-09-29-b7435a38c0c1",
+    "status": "prototype_dummy_data",
+    "published_at": "2026-10-07T15:59:22Z",
+    "archive_url": null,
+    "release_view_url": null
+  },
+  "result": {
+    "submission_id": "transolverpp-aoa-v1",
+    "result_revision": {
+      "series_id": "transolverpp-aoa",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": "Initial candidate AirfRANS AoA-extrapolation submission for Transolver++ trained on the official aoa_train partition with a validation holdout carved from it.",
+      "is_latest": true,
+      "latest_submission_id": "transolverpp-aoa-v1",
+      "version_count": 1
+    },
+    "model": "Transolver++",
+    "dataset": "AirfRANS",
+    "dataset_id": "airfrans",
+    "split": "AoA extrapolation",
+    "split_id": "aoa_extrapolation",
+    "submission_schema_version": "3.0"
+  },
+  "ranking": {
+    "metric_id": "overall_score",
+    "value": 40.61097117469603,
+    "ranked_value": 40.6,
+    "display_value": "40.6",
+    "unit": "",
+    "direction": "higher",
+    "decimal_places": 1,
+    "rounding": "decimal_half_up",
+    "method": "competition",
+    "rank": 2,
+    "ranked_result_count": 2,
+    "tied": false,
+    "tie_count": 1
+  },
+  "eligibility": {
+    "academic_citation": false,
+    "promotion": false,
+    "reason_code": "pre_release_reference",
+    "reason": "AirfRANS pre-release model-inference data retained to exercise the evaluator and dev leaderboard while submissions remain closed; it is not an official benchmark result or ranking claim."
+  },
+  "result_permalink": null,
+  "claim_record_url": null,
+  "bindings": {
+    "result": {
+      "feed_file": "leaderboard/all.json",
+      "feed_sha256": "b7435a38c0c1451135a070b54f3d6118a43fc0a22a64ac91de92d99a41f2d1c9",
+      "row_index": 6
+    },
+    "source_submission": {
+      "path": "submissions/airfrans/transolverpp-aoa-v1/submission.json",
+      "sha256": "5aa036a48b7424c62dbcd6fa941e5670199d2f69518e5a332aace9187552048a"
+    },
+    "evaluation_evidence": {
+      "path": "submissions/airfrans/transolverpp-aoa-v1/evaluation-evidence.json",
+      "sha256": "25a173f9cf168c882df41914e329f38db0e501262c4fd80a3d5f34ecc09f583e"
+    },
+    "profile_index": {
+      "path": "submissions/airfrans/transolverpp-aoa-v1/profiles/index.json",
+      "sha256": "c44253d42287ffe175cd71ed7f6e0177e236d594095b8c992d20efb823e7bb50"
+    },
+    "spatial_discretization": {
+      "path": "submissions/airfrans/transolverpp-aoa-v1/discretization.json",
+      "sha256": "ccc4100a81797e0a61e209aa3c8ddc0a8d58f83576c2b3915659093a2489ba18"
+    },
+    "discretization_cases": {
+      "path": "submissions/airfrans/transolverpp-aoa-v1/discretization/cases.jsonl",
+      "sha256": "73213a914783b7b0849c2ad826b83e1bd04f48bb0c75c1ba4b3fb7cb555eaf3e"
+    },
+    "case_metrics": {
+      "path": "submissions/airfrans/transolverpp-aoa-v1/metrics/cases.json",
+      "sha256": "be3fb2e8697da3445ff385acceecdea465c6b96f10d6c38befb83ecad41d95eb"
+    },
+    "scoring_support": {
+      "release_id": "airfrans-native-ground-truth-aoa-v1-candidate",
+      "manifest_url": "https://fluidsbench.org/not-yet-published/airfrans-native-ground-truth-aoa-v1-candidate/manifest.json",
+      "manifest_sha256": "2da8342f34d719fdfb6d0c3d9b9b0b9206cf76557c17f0d063c4a63163c96066",
+      "path": "benchmark-specs/airfrans/pre-release/transolverpp-aoa-v1/scoring-support/manifest.json"
+    }
+  },
+  "prediction_artifacts": {
+    "sharing": "not_declared",
+    "declared_artifact_count": 0,
+    "maintainer_check_status": "not_recorded",
+    "checked_artifact_count": 0
+  }
+}

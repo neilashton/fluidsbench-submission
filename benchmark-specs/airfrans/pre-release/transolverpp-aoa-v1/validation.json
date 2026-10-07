@@ -1,0 +1,30 @@
+{
+  "schema": "airfrans-pre-release-validation-v1",
+  "activation": {
+    "owner_approval_complete": false,
+    "published": false,
+    "submissions_opened": false,
+    "registration_changes_activation": false
+  },
+  "package_tree": {
+    "algorithm": "sha256-posix-path-size-content-sha256-v1",
+    "sha256": "bf4cad7da1057a43e5dd8f977c21964abf1515aa933e413d003611903730a0b3",
+    "file_count": 202,
+    "total_bytes": 91277636
+  },
+  "case_count": 196,
+  "native_supports_loaded": 588,
+  "profile_scores_reproduced": true,
+  "profile_score_sha256": "c8f725de0b9ddbc951a6f2f90ef7e54115cf854ce324ebaca8cca5655055cfc3",
+  "release_graph_valid": true,
+  "scoring_support_manifest_sha256": "2da8342f34d719fdfb6d0c3d9b9b0b9206cf76557c17f0d063c4a63163c96066",
+  "profile_ground_truth": {
+    "status": "candidate",
+    "release_id": "airfrans-native-profile-truth-v1-candidate",
+    "manifest_sha256": "7e4320cd3a62b7f8577bb1f73c80850d8b0d37e3af6f885a41da0763088bc7ac"
+  },
+  "source_replay_complete": false,
+  "model_inference_replayed": false,
+  "handover_url": "https://drive.google.com/drive/folders/14Tgs28bccp5HP-OXE8LVaIC-9RtFjqWC",
+  "handover_checksums_sha256": "53aa2bb6324a968da49a574e831cd56adee2c14f5fbd0aa7dd0fd258239a8156"
+}

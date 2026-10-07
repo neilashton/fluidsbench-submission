@@ -1,10 +1,10 @@
 {
   "$schema": "https://fluidsbench.org/schemas/releases/claim-index.schema.json",
   "schema_version": "1.0",
-  "release_id": "prototype-dev-2026-09-28-fdedb77fbe12",
+  "release_id": "prototype-dev-2026-09-29-b7435a38c0c1",
   "release_status": "prototype_dummy_data",
   "feed_file": "leaderboard/all.json",
-  "feed_sha256": "fdedb77fbe125205f9b71401ccf3dc554684cafc5a1836bea9b2498c8e0acec9",
+  "feed_sha256": "b7435a38c0c1451135a070b54f3d6118a43fc0a22a64ac91de92d99a41f2d1c9",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -22,11 +22,11 @@
     "comparison": "rounded_metric_value",
     "rounding": "decimal_half_up"
   },
-  "record_count": 59,
+  "record_count": 60,
   "eligible_record_count": 0,
   "records": [
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/airfrans/aoa_extrapolation/airfrans-mlp-full",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/airfrans/aoa_extrapolation/airfrans-mlp-full",
       "submission_id": "airfrans-mlp-full",
       "series_id": "airfrans-mlp-full",
       "version": 1,
@@ -34,10 +34,21 @@
       "split_id": "aoa_extrapolation",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/aoa_extrapolation/airfrans-mlp-full.json",
-      "sha256": "cf1dc4ddee053a6cfc8ad0dbf40cd52b7d704487fc4c01d9e7193191e5a466c1"
+      "sha256": "189b8c444edc351065d89e98198464ccd645ba24d4f04c62054ccc1d5d23cfb4"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/airfrans/full/airfrans-pointnet-full",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/airfrans/aoa_extrapolation/transolverpp-aoa-v1",
+      "submission_id": "transolverpp-aoa-v1",
+      "series_id": "transolverpp-aoa",
+      "version": 1,
+      "dataset_id": "airfrans",
+      "split_id": "aoa_extrapolation",
+      "eligible": false,
+      "file": "leaderboard/claims/airfrans/aoa_extrapolation/transolverpp-aoa-v1.json",
+      "sha256": "ed827a2e592733f742851e9a86833b6b32850a7c59bdfd0ab656c98c3d88e745"
+    },
+    {
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/airfrans/full/airfrans-pointnet-full",
       "submission_id": "airfrans-pointnet-full",
       "series_id": "airfrans-pointnet-full",
       "version": 1,
@@ -45,10 +56,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/full/airfrans-pointnet-full.json",
-      "sha256": "34300b5236fb0227356350c4595bd5db0cb4c42a0692c94e9cb45ed8a3d5494b"
+      "sha256": "966863ba31c0354e179757266578bea7994997e0e1ed04d0d98643ffc50c1310"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/airfrans/full/dummy-airfrans-airfoiloperator-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/airfrans/full/dummy-airfrans-airfoiloperator-v1",
       "submission_id": "dummy-airfrans-airfoiloperator-v1",
       "series_id": "dummy-airfrans-airfoiloperator",
       "version": 1,
@@ -56,10 +67,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/full/dummy-airfrans-airfoiloperator-v1.json",
-      "sha256": "9c2630eb3ab2456226369b393d6ef0475990eef1fefeac1917d1e3b2129bf0e3"
+      "sha256": "1e1394676b573ba4bfa5dacc50ab2a1b29b9b4f82498d43016d46b02c2761976"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/airfrans/full/transolverpp-full-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/airfrans/full/transolverpp-full-v1",
       "submission_id": "transolverpp-full-v1",
       "series_id": "transolverpp-full",
       "version": 1,
@@ -67,10 +78,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/full/transolverpp-full-v1.json",
-      "sha256": "411c5c42b7a036924ac1fa5c6f38f266162d2360690adc9904c8c177de0bf19c"
+      "sha256": "fee326e9e68137323c58cf3fd6eefd69ee5648ce61ed4446274736df603a4159"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/airfrans/reynolds_extrapolation/airfrans-graphsage-full",
       "submission_id": "airfrans-graphsage-full",
       "series_id": "airfrans-graphsage-full",
       "version": 1,
@@ -78,10 +89,10 @@
       "split_id": "reynolds_extrapolation",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/reynolds_extrapolation/airfrans-graphsage-full.json",
-      "sha256": "8667eaa3636f7df3bfb0917c455c26e444c7945561ce0ecfdb81f3e67c3aa36f"
+      "sha256": "fd85fbe86ca3c3eb358e6ee975c7c5bddd0a7dae03a9362941ca7cf18fb1f8b3"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/airfrans/scarce/airfrans-graph-u-net-full",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/airfrans/scarce/airfrans-graph-u-net-full",
       "submission_id": "airfrans-graph-u-net-full",
       "series_id": "airfrans-graph-u-net-full",
       "version": 1,
@@ -89,10 +100,10 @@
       "split_id": "scarce",
       "eligible": false,
       "file": "leaderboard/claims/airfrans/scarce/airfrans-graph-u-net-full.json",
-      "sha256": "e78f8777aef983d167471bfa2ec13c980b6e7aa60eb6eea6027f123e4c4acd1b"
+      "sha256": "6de3bdd6cda61c32cacc32bba183e4740fca8c51edffd096419118694c4ea32b"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout",
       "submission_id": "blendednet-prototype-geometry-holdout",
       "series_id": "blendednet-prototype-geometry-holdout",
       "version": 1,
@@ -100,10 +111,10 @@
       "split_id": "geometry_holdout",
       "eligible": false,
       "file": "leaderboard/claims/blendednet/geometry_holdout/blendednet-prototype-geometry-holdout.json",
-      "sha256": "557c2d8734f40b5e207d14acdfba44ab7cea263e96f0a2948060b687d702cd81"
+      "sha256": "208a3421bad7d0eccaee2a42167a64a6b8415415d041cf81f87d0f8fc32be527"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaerml/full/drivaerml-transolver",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaerml/full/drivaerml-transolver",
       "submission_id": "drivaerml-transolver",
       "series_id": "drivaerml-transolver",
       "version": 1,
@@ -111,10 +122,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/drivaerml/full/drivaerml-transolver.json",
-      "sha256": "510f15def19eeb80eb1145828a4564b35bbdcbd80382e13958ff50011afa633e"
+      "sha256": "c6b16c1df08dd82e76fdafc27a83e2eff6d9ed4c5ee01851294facb17b9c8400"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-ab-upt",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-ab-upt",
       "submission_id": "drivaernetpp-ab-upt",
       "series_id": "drivaernetpp-ab-upt",
       "version": 1,
@@ -122,10 +133,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-ab-upt.json",
-      "sha256": "23a5503aba137e8187bdcf55c10a7a9e259fddc143cdf29c3d4e27001bb43df6"
+      "sha256": "728fbac9d3e1e291f70b25b09b4ae5396bb086dca2dc98679319dd39b7d0066a"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-neuraloperator",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-neuraloperator",
       "submission_id": "drivaernetpp-neuraloperator",
       "series_id": "drivaernetpp-neuraloperator",
       "version": 1,
@@ -133,10 +144,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-neuraloperator.json",
-      "sha256": "ce09e0202e7ed5852d9c1ac703e9839eff9454f02efefd583bf84a2c301641e8"
+      "sha256": "dfe4bc972c2ad8647c6b1d6098efe5b463c79724048aefde98fa45762cf1d60c"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-pointmae",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-pointmae",
       "submission_id": "drivaernetpp-pointmae",
       "series_id": "drivaernetpp-pointmae",
       "version": 1,
@@ -144,10 +155,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-pointmae.json",
-      "sha256": "48d9402bd777013dccaf741d2b8f0a0ca1854e49c6b8b2a49137ef549b06ebf8"
+      "sha256": "2369bf2aa691f67749258edee41fddf1f3080e37256b5d77a8a14cacfadfb26b"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-pointnet",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-pointnet",
       "submission_id": "drivaernetpp-pointnet",
       "series_id": "drivaernetpp-pointnet",
       "version": 1,
@@ -155,10 +166,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-pointnet.json",
-      "sha256": "28ab760347edce665b87fe718159dbf36c9a405c1ab071f6c23f319cb47c83a9"
+      "sha256": "220e4a7c453e5e25dfb84f19facc7baec3138f76fb8f3f54ef256ef9646b7630"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-pointnet-large",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-pointnet-large",
       "submission_id": "drivaernetpp-pointnet-large",
       "series_id": "drivaernetpp-pointnet-large",
       "version": 1,
@@ -166,10 +177,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-pointnet-large.json",
-      "sha256": "080f03e1e7746bf3a712ce09a636336371993505f271abe7f8fc737760444de2"
+      "sha256": "7584bd6f8a2d731089534049f5b910279099cbcf40b2e7582be58f77a685c4a3"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-pointtransformer",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-pointtransformer",
       "submission_id": "drivaernetpp-pointtransformer",
       "series_id": "drivaernetpp-pointtransformer",
       "version": 1,
@@ -177,10 +188,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-pointtransformer.json",
-      "sha256": "7b00cea52b81f52cc0e7a81f7082327cc43d76c19ecaf511a378d6bffd1ade25"
+      "sha256": "872ed3492428ca70e75351dd952f0f1646208efea7cac82430392b7684f6f3f9"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-regdgcnn",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-regdgcnn",
       "submission_id": "drivaernetpp-regdgcnn",
       "series_id": "drivaernetpp-regdgcnn",
       "version": 1,
@@ -188,10 +199,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-regdgcnn.json",
-      "sha256": "7bb3e10a91776d3153087bfaf7fdebcbc5ce998e0fb32001a18f9d4ec884cd71"
+      "sha256": "a770df105c750f99d97d31ee1fc4741b899385afb82b0e33e54d5a589a933b1b"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-transolver",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-transolver",
       "submission_id": "drivaernetpp-transolver",
       "series_id": "drivaernetpp-transolver",
       "version": 1,
@@ -199,10 +210,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-transolver.json",
-      "sha256": "2c0331db3579a5e1c549f8dfc29c5d7ebe73bb0c82c9a087735547e945e0bb3c"
+      "sha256": "61a690e6d965d5ef6275b97949f545f28671e001c4daa95b93617ef34fe1a71e"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-transolver-large",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-transolver-large",
       "submission_id": "drivaernetpp-transolver-large",
       "series_id": "drivaernetpp-transolver-large",
       "version": 1,
@@ -210,10 +221,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-transolver-large.json",
-      "sha256": "a264cfc20134b7fdc5e9d21d7b2444daebaa45e7b59814af91fe5619d05dc00e"
+      "sha256": "855ee4f8398f1b95c8582bdb5ed5fca0e7ef7280d596deb2ba6edf4cab4b3163"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-transolver-plus-plus",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-transolver-plus-plus",
       "submission_id": "drivaernetpp-transolver-plus-plus",
       "series_id": "drivaernetpp-transolver-plus-plus",
       "version": 1,
@@ -221,10 +232,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-transolver-plus-plus.json",
-      "sha256": "84e2d3820f659dbccdb9fd0780166700c0c2d516649c229cf8de2ebe7628558a"
+      "sha256": "30a73a8213ad63bc0a4280d81f3e938bcf30d76569d847e4540b15bdf6504d1b"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/drivaernetpp-tripnet",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/drivaernetpp-tripnet",
       "submission_id": "drivaernetpp-tripnet",
       "series_id": "drivaernetpp-tripnet",
       "version": 1,
@@ -232,10 +243,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/drivaernetpp-tripnet.json",
-      "sha256": "113ac97eb5649d4ae33e2eddbdaefdbaa81858317bb9f73e9917a5004c5b292c"
+      "sha256": "be9a2c97fe913a8ed8495b85956d32264c763fc5c8e7381b8e4ac419904fc7cd"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1",
       "submission_id": "dummy-drivaernetplusplus-surfacegnn-v1",
       "series_id": "dummy-drivaernetplusplus-surfacegnn",
       "version": 1,
@@ -243,10 +254,10 @@
       "split_id": "default",
       "eligible": false,
       "file": "leaderboard/claims/drivaernetplusplus/default/dummy-drivaernetplusplus-surfacegnn-v1.json",
-      "sha256": "b65126128989e0482275da8a497b709fff4b93ddfa8ef20a5d4875edbf11f428"
+      "sha256": "79cab60b8b89a7bddb08e0376dd2a6a110fabd54e7eac46d297fddada8966d3d"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/aoa/hiliftaeroml-geotransolver-ood-aoa-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/aoa/hiliftaeroml-geotransolver-ood-aoa-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-ood-aoa-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-ood-aoa-candidate",
       "version": 1,
@@ -254,10 +265,10 @@
       "split_id": "aoa",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/aoa/hiliftaeroml-geotransolver-ood-aoa-candidate-v1.json",
-      "sha256": "3f601e6419803dcabb952115e16b1abd22a28ef726241483c591545ca985f3da"
+      "sha256": "844c23b2e8b2cb99784fa6b790878599acc2fe8730acf61bd8b1edba08fbfccf"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/aoa/hiliftaeroml-transolver-ood-aoa-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/aoa/hiliftaeroml-transolver-ood-aoa-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-ood-aoa-candidate-v1",
       "series_id": "hiliftaeroml-transolver-ood-aoa-candidate",
       "version": 1,
@@ -265,10 +276,10 @@
       "split_id": "aoa",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/aoa/hiliftaeroml-transolver-ood-aoa-candidate-v1.json",
-      "sha256": "3232c1287d5269543f92a11a5f7ad20dac8648f23a95e7fed4fa00b550d202e4"
+      "sha256": "033db82d09a99e120bb93876e0c2a2918d99ff95fe13e0c1b2ddb0e9e20823c7"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/deflection/hiliftaeroml-geotransolver-ood-deflection-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/deflection/hiliftaeroml-geotransolver-ood-deflection-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-ood-deflection-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-ood-deflection-candidate",
       "version": 1,
@@ -276,10 +287,10 @@
       "split_id": "deflection",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/deflection/hiliftaeroml-geotransolver-ood-deflection-candidate-v1.json",
-      "sha256": "12441a16c8f3dcf0f0bf719d17df3df5da9dd5205790bf7a45d9e428a0b78c0e"
+      "sha256": "fbf73d3dc0cbd44eaab8d8f3d700d6405c8a2756156c4f601b455a15e0b062d0"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/deflection/hiliftaeroml-transolver-ood-deflection-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/deflection/hiliftaeroml-transolver-ood-deflection-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-ood-deflection-candidate-v1",
       "series_id": "hiliftaeroml-transolver-ood-deflection-candidate",
       "version": 1,
@@ -287,10 +298,10 @@
       "split_id": "deflection",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/deflection/hiliftaeroml-transolver-ood-deflection-candidate-v1.json",
-      "sha256": "f92450d3300fdf0e3baaa0e36523ead06eb59d2dcb9bd0177a037f90ae8bff45"
+      "sha256": "c7564c969c9ed0fa8229a04b6b2cc541408af4f668a2f7a70c391bbd6d8476c4"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/full/hiliftaeroml-geotransolver-full360-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/full/hiliftaeroml-geotransolver-full360-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-full360-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-full360-candidate",
       "version": 1,
@@ -298,10 +309,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/full/hiliftaeroml-geotransolver-full360-candidate-v1.json",
-      "sha256": "8d1b3f74c41dc5fbaa543af6e5208e46b86ec4ee9a482042d24cceb0882381bd"
+      "sha256": "cbad4166c3fb9e0662f8a84c04cdcc6b40ba2675ad36d9d0d6c82c21ab58bdff"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/full/hiliftaeroml-transolver-full360-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/full/hiliftaeroml-transolver-full360-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-full360-candidate-v1",
       "series_id": "hiliftaeroml-transolver-full360-candidate",
       "version": 1,
@@ -309,10 +320,10 @@
       "split_id": "full",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/full/hiliftaeroml-transolver-full360-candidate-v1.json",
-      "sha256": "25c9b609bfe2162579307d80e323fba727609ebab057670f6a07c89e9dd8afa3"
+      "sha256": "f814984e76e310394500d95769c5e4844181128aacd52df7022d9cd4593adb4e"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/geometry/hiliftaeroml-geotransolver-geometry-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/geometry/hiliftaeroml-geotransolver-geometry-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-geometry-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-geometry-candidate",
       "version": 1,
@@ -320,10 +331,10 @@
       "split_id": "geometry",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/geometry/hiliftaeroml-geotransolver-geometry-candidate-v1.json",
-      "sha256": "17ae2792b5dd24e71e9f9e797105cab31ceb117d65d9ef09c6fea6b7e1946fea"
+      "sha256": "a4ded31235dbc8b452f330f6147ea7993721ea07c1b4587a5b278d9c16ae8c48"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/geometry/hiliftaeroml-transolver-geometry-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/geometry/hiliftaeroml-transolver-geometry-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-geometry-candidate-v1",
       "series_id": "hiliftaeroml-transolver-geometry-candidate",
       "version": 1,
@@ -331,10 +342,10 @@
       "split_id": "geometry",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/geometry/hiliftaeroml-transolver-geometry-candidate-v1.json",
-      "sha256": "f439c53bf753a3e50903f3a0cd5ac688303405a423dc12a79ee8204593d5dd78"
+      "sha256": "6ae37bfb86804c7e5b8417c86d542c63375e5fab4668fd46fc1c79f2592bc52a"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/geometry_scarce/hiliftaeroml-geotransolver-geometry-scarce-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/geometry_scarce/hiliftaeroml-geotransolver-geometry-scarce-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-geometry-scarce-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-geometry-scarce-candidate",
       "version": 1,
@@ -342,10 +353,10 @@
       "split_id": "geometry_scarce",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/geometry_scarce/hiliftaeroml-geotransolver-geometry-scarce-candidate-v1.json",
-      "sha256": "298982bfdb1b039834ab855566da0456518ea6cf9387d63584a30d840da15d5c"
+      "sha256": "1923c3b8d7d67f79db52cc07ec104788abc659a384b282889bce931252f8bdce"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/geometry_scarce/hiliftaeroml-transolver-geometry-scarce-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/geometry_scarce/hiliftaeroml-transolver-geometry-scarce-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-geometry-scarce-candidate-v1",
       "series_id": "hiliftaeroml-transolver-geometry-scarce-candidate",
       "version": 1,
@@ -353,10 +364,10 @@
       "split_id": "geometry_scarce",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/geometry_scarce/hiliftaeroml-transolver-geometry-scarce-candidate-v1.json",
-      "sha256": "ec5b7e20d61bfa2867ff382e1bec792eeef27961f6dd53511d6bc00af0b764da"
+      "sha256": "017e47b5f5d4335ab8b49267fb010f48d26fca576147705320fd8fe3acb698d9"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/geometry_super_scarce/hiliftaeroml-geotransolver-geometry-super-scarce-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/geometry_super_scarce/hiliftaeroml-geotransolver-geometry-super-scarce-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-geometry-super-scarce-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-geometry-super-scarce-candidate",
       "version": 1,
@@ -364,10 +375,10 @@
       "split_id": "geometry_super_scarce",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/geometry_super_scarce/hiliftaeroml-geotransolver-geometry-super-scarce-candidate-v1.json",
-      "sha256": "a54805d6fa8759909c4f085dec8299b7cfd7455bb31ee4d90326f4e2dca8aeef"
+      "sha256": "f4fc43787a6e05dc45a633dc06593a25f3d0c56b068f61d8fee8b4bc0aa12d46"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/geometry_super_scarce/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/geometry_super_scarce/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-geometry-super-scarce-candidate-v1",
       "series_id": "hiliftaeroml-transolver-geometry-super-scarce-candidate",
       "version": 1,
@@ -375,10 +386,10 @@
       "split_id": "geometry_super_scarce",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/geometry_super_scarce/hiliftaeroml-transolver-geometry-super-scarce-candidate-v1.json",
-      "sha256": "9e51ea7163eb8e56cdb3f59d4d4e231d92ed56546beaae80c02ba84fd3f2be5e"
+      "sha256": "775835a11ffa29a5220d735fc90eb67210def90962b22afe89c3bdd42e2af9f3"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/scarce/hiliftaeroml-geotransolver-scarce-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/scarce/hiliftaeroml-geotransolver-scarce-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-scarce-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-scarce-candidate",
       "version": 1,
@@ -386,10 +397,10 @@
       "split_id": "scarce",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/scarce/hiliftaeroml-geotransolver-scarce-candidate-v1.json",
-      "sha256": "1688dcae3cb38368af24085e75eef3128a06de7cc36976e4b5eb9c067d565b4a"
+      "sha256": "f721d7fbd3566bb4826476ce2287cbd83a90e27a023199dd83c7c82de1bd3580"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/single_aoa_12/hiliftaeroml-geotransolver-aoa12-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/single_aoa_12/hiliftaeroml-geotransolver-aoa12-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-aoa12-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-aoa12-candidate",
       "version": 1,
@@ -397,10 +408,10 @@
       "split_id": "single_aoa_12",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/single_aoa_12/hiliftaeroml-geotransolver-aoa12-candidate-v1.json",
-      "sha256": "619d7576720cd2e8eb9f8084cf0c1c666ba031ae8ce517889b9c7522e10b414b"
+      "sha256": "d307c230b75b1a21453ffe11a759dbde391018650b4062639fcc7bcef7fa0d68"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/single_aoa_12/hiliftaeroml-transolver-aoa12-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/single_aoa_12/hiliftaeroml-transolver-aoa12-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-aoa12-candidate-v1",
       "series_id": "hiliftaeroml-transolver-aoa12-candidate",
       "version": 1,
@@ -408,10 +419,10 @@
       "split_id": "single_aoa_12",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/single_aoa_12/hiliftaeroml-transolver-aoa12-candidate-v1.json",
-      "sha256": "b2a7bd30d10148d0203baaa7432d7755599ee9a495ddfdca5a12c538597cfaf4"
+      "sha256": "7acda1200e379b2f951b55c637b863e5ecefe82cb483c4ff9f9e5bf96322b26a"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/single_aoa_22/hiliftaeroml-geotransolver-aoa22-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/single_aoa_22/hiliftaeroml-geotransolver-aoa22-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-aoa22-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-aoa22-candidate",
       "version": 1,
@@ -419,10 +430,10 @@
       "split_id": "single_aoa_22",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/single_aoa_22/hiliftaeroml-geotransolver-aoa22-candidate-v1.json",
-      "sha256": "a91430b7180e0f5bda93b4d58ca776d0cf690026189c790d434078781e8aaadb"
+      "sha256": "6ee96f06815666746ec9b009395f843ed9aee6bc3bb6614dfd84b49e47961241"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/single_aoa_22/hiliftaeroml-transolver-aoa22-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/single_aoa_22/hiliftaeroml-transolver-aoa22-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-aoa22-candidate-v1",
       "series_id": "hiliftaeroml-transolver-aoa22-candidate",
       "version": 1,
@@ -430,10 +441,10 @@
       "split_id": "single_aoa_22",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/single_aoa_22/hiliftaeroml-transolver-aoa22-candidate-v1.json",
-      "sha256": "a1e1b349c53faf9b58f898197a151c081c113b675d12fff6abc40aec9fd17791"
+      "sha256": "21a98186ac3ebf3a446343124197362d1f05323e8f795b4848836b5269b349d6"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/single_aoa_4/hiliftaeroml-geotransolver-aoa4-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/single_aoa_4/hiliftaeroml-geotransolver-aoa4-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-aoa4-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-aoa4-candidate",
       "version": 1,
@@ -441,10 +452,10 @@
       "split_id": "single_aoa_4",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/single_aoa_4/hiliftaeroml-geotransolver-aoa4-candidate-v1.json",
-      "sha256": "aaf2289fac309b3aeed32e79b7c69a7a080a009c21a369a0abba164c5202e15f"
+      "sha256": "be2684a621db2ed6d5cad344d5dc8ed5309a50c95c93957e19a6d04bf77d4f6c"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/single_aoa_4/hiliftaeroml-transolver-aoa4-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/single_aoa_4/hiliftaeroml-transolver-aoa4-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-aoa4-candidate-v1",
       "series_id": "hiliftaeroml-transolver-aoa4-candidate",
       "version": 1,
@@ -452,10 +463,10 @@
       "split_id": "single_aoa_4",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/single_aoa_4/hiliftaeroml-transolver-aoa4-candidate-v1.json",
-      "sha256": "0723a8b62bcaf4608193302f347e40ddba66ad14eff7f5f1ccdfbd8fea7bff6f"
+      "sha256": "a3545d6e8b0d27ce034cb87e6c3016f764dda6d1a656496fa337e53dc049027c"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/stall/hiliftaeroml-geotransolver-ood-stall-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/stall/hiliftaeroml-geotransolver-ood-stall-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-ood-stall-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-ood-stall-candidate",
       "version": 1,
@@ -463,10 +474,10 @@
       "split_id": "stall",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/stall/hiliftaeroml-geotransolver-ood-stall-candidate-v1.json",
-      "sha256": "8fa9bc40d0616b2f34e1886ca9d47f84a51faeebdcf6ca1686208d724193600d"
+      "sha256": "fdd0edf3e6896bc3d11ebb14e8afa9d14fc9a99d79dbe4e55d30891e9cb1d6cb"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/stall/hiliftaeroml-transolver-ood-stall-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/stall/hiliftaeroml-transolver-ood-stall-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-ood-stall-candidate-v1",
       "series_id": "hiliftaeroml-transolver-ood-stall-candidate",
       "version": 1,
@@ -474,10 +485,10 @@
       "split_id": "stall",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/stall/hiliftaeroml-transolver-ood-stall-candidate-v1.json",
-      "sha256": "080e5ccecf89fb42ffc6310c5d321cac1f5e5a853364d947017e71e7883ac8ef"
+      "sha256": "687c2b5e3bd93f436bf2e0b426ceaf9e0a3a2635a3a9b515d78b9748b8d67b00"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/super_scarce/hiliftaeroml-geotransolver-super-scarce-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/super_scarce/hiliftaeroml-geotransolver-super-scarce-candidate-v1",
       "submission_id": "hiliftaeroml-geotransolver-super-scarce-candidate-v1",
       "series_id": "hiliftaeroml-geotransolver-super-scarce-candidate",
       "version": 1,
@@ -485,10 +496,10 @@
       "split_id": "super_scarce",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/super_scarce/hiliftaeroml-geotransolver-super-scarce-candidate-v1.json",
-      "sha256": "2399b235b29ddf3c37e372d195a0e99920f5184501881ab25bd2773f454164db"
+      "sha256": "80fff9bad879b0177ed726cb885cce7c6e0e525f89d17182f623b3335cd8c91c"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/hiliftaeroml/super_scarce/hiliftaeroml-transolver-super-scarce-candidate-v1",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/hiliftaeroml/super_scarce/hiliftaeroml-transolver-super-scarce-candidate-v1",
       "submission_id": "hiliftaeroml-transolver-super-scarce-candidate-v1",
       "series_id": "hiliftaeroml-transolver-super-scarce-candidate",
       "version": 1,
@@ -496,10 +507,10 @@
       "split_id": "super_scarce",
       "eligible": false,
       "file": "leaderboard/claims/hiliftaeroml/super_scarce/hiliftaeroml-transolver-super-scarce-candidate-v1.json",
-      "sha256": "3db4886009e077a2a6e4fba2785b81d4c6f4512c2bc49160ef4476af2be60139"
+      "sha256": "9c1ff77b31a8c8cc55b32bcfd1e802446a7763575f23538605655d6291377c0f"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/rotor37/train_1000/rotor37-prototype-train-1000",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/rotor37/train_1000/rotor37-prototype-train-1000",
       "submission_id": "rotor37-prototype-train-1000",
       "series_id": "rotor37-prototype-train-1000",
       "version": 1,
@@ -507,10 +518,10 @@
       "split_id": "train_1000",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_1000/rotor37-prototype-train-1000.json",
-      "sha256": "50c49826bc06f1b959dff6b4362ca05bbb6354b9ea0a88efce07fc341550986c"
+      "sha256": "05662243e3c055701a096c3c7d95629dbd4c60556524de04c8bfeb84744e08f6"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/rotor37/train_125/rotor37-prototype-train-125",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/rotor37/train_125/rotor37-prototype-train-125",
       "submission_id": "rotor37-prototype-train-125",
       "series_id": "rotor37-prototype-train-125",
       "version": 1,
@@ -518,10 +529,10 @@
       "split_id": "train_125",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_125/rotor37-prototype-train-125.json",
-      "sha256": "7d310e8c62507fc0c7f7598577247c685c92abc6e67b8132907e508f3f0bccf2"
+      "sha256": "4dd72d32144242dd6fa905ac0e9b4ea742706c64b12ef6f44e07029398818172"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/rotor37/train_16/rotor37-prototype-train-16",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/rotor37/train_16/rotor37-prototype-train-16",
       "submission_id": "rotor37-prototype-train-16",
       "series_id": "rotor37-prototype-train-16",
       "version": 1,
@@ -529,10 +540,10 @@
       "split_id": "train_16",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_16/rotor37-prototype-train-16.json",
-      "sha256": "2ec871afc4e05348f6360e48fc927b48dfd6566110056eb9dfdd5294d9a55b0e"
+      "sha256": "a442ae4d90cf947ceb008627ad64cbe269098a715bcc6c79fcc23e5dc1df4f0f"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/rotor37/train_250/rotor37-prototype-train-250",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/rotor37/train_250/rotor37-prototype-train-250",
       "submission_id": "rotor37-prototype-train-250",
       "series_id": "rotor37-prototype-train-250",
       "version": 1,
@@ -540,10 +551,10 @@
       "split_id": "train_250",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_250/rotor37-prototype-train-250.json",
-      "sha256": "0092660b47c1daf049bb405a23a52ec9327d161245c1878d10b5907f65a7132e"
+      "sha256": "5748b99e71c88fc34f5c3f38562dd53d65439bc22023d3357f604522840d8482"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/rotor37/train_32/rotor37-prototype-train-32",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/rotor37/train_32/rotor37-prototype-train-32",
       "submission_id": "rotor37-prototype-train-32",
       "series_id": "rotor37-prototype-train-32",
       "version": 1,
@@ -551,10 +562,10 @@
       "split_id": "train_32",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_32/rotor37-prototype-train-32.json",
-      "sha256": "ef55a6b355dd25667fe6c15b4ddfc015dfc5feac2aa0bc67aea10057171a26ac"
+      "sha256": "a0b2c0196581ad0eba77f721b910485c949fdefa7360f64eb9aa4bdbd316e58a"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/rotor37/train_500/rotor37-prototype-train-500",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/rotor37/train_500/rotor37-prototype-train-500",
       "submission_id": "rotor37-prototype-train-500",
       "series_id": "rotor37-prototype-train-500",
       "version": 1,
@@ -562,10 +573,10 @@
       "split_id": "train_500",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_500/rotor37-prototype-train-500.json",
-      "sha256": "2abeb3df2c32cc308249f7d1834882f078d090fbc7bc077cccee686f80fe61fa"
+      "sha256": "e79efc4973cfaffddbe6519961c5b0057c2c376fa5e4e4f725fe7031210f2fa9"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/rotor37/train_64/rotor37-prototype-train-64",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/rotor37/train_64/rotor37-prototype-train-64",
       "submission_id": "rotor37-prototype-train-64",
       "series_id": "rotor37-prototype-train-64",
       "version": 1,
@@ -573,10 +584,10 @@
       "split_id": "train_64",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_64/rotor37-prototype-train-64.json",
-      "sha256": "a21bc3f376bb6a7acb6d75e32763c227b4a7aa105158ac9c6ba72a0635dce791"
+      "sha256": "7182e043459fc4936b271ef17af6e6fc311d4364430bf26cd910352dee18ee9f"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/rotor37/train_8/rotor37-prototype-train-8",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/rotor37/train_8/rotor37-prototype-train-8",
       "submission_id": "rotor37-prototype-train-8",
       "series_id": "rotor37-prototype-train-8",
       "version": 1,
@@ -584,10 +595,10 @@
       "split_id": "train_8",
       "eligible": false,
       "file": "leaderboard/claims/rotor37/train_8/rotor37-prototype-train-8.json",
-      "sha256": "733b5925e1138d52095f72421d8384cbe8ad758229063af53440b9f3b020d406"
+      "sha256": "dcd3420cf92ba0b527e8d45b006f1f5b854415dee2e0a15590998418ecf6d4c0"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/vki-ls59/train/vkils59-prototype-train",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/vki-ls59/train/vkils59-prototype-train",
       "submission_id": "vkils59-prototype-train",
       "series_id": "vkils59-prototype-train",
       "version": 1,
@@ -595,10 +606,10 @@
       "split_id": "train",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train/vkils59-prototype-train.json",
-      "sha256": "d225e70a97377e7ad78413b449db6b364dff48410e834800dbea5a1b0489b0a8"
+      "sha256": "7d25e4ac77e6ae3d6bd59abf88e923f04d9e2f948453f8113c3f89a129b14530"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/vki-ls59/train_125/vkils59-prototype-train-125",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/vki-ls59/train_125/vkils59-prototype-train-125",
       "submission_id": "vkils59-prototype-train-125",
       "series_id": "vkils59-prototype-train-125",
       "version": 1,
@@ -606,10 +617,10 @@
       "split_id": "train_125",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_125/vkils59-prototype-train-125.json",
-      "sha256": "3a6488d14576d2947822686d027ed59b6e685f1696b1bc1f0529a543a4cfc78a"
+      "sha256": "886fc8608923a376ec5134a052d25d9266333650849c006791c16fbcc7957bb2"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/vki-ls59/train_16/vkils59-prototype-train-16",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/vki-ls59/train_16/vkils59-prototype-train-16",
       "submission_id": "vkils59-prototype-train-16",
       "series_id": "vkils59-prototype-train-16",
       "version": 1,
@@ -617,10 +628,10 @@
       "split_id": "train_16",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_16/vkils59-prototype-train-16.json",
-      "sha256": "aff059d1a5441a6199154773dfcc18d0dccf858a98346bbc9eb686b0fffab0ed"
+      "sha256": "d02287f049d5349b02eed321add2995d2bec8d509e28f4c7a1d93338d3c3a448"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/vki-ls59/train_250/vkils59-prototype-train-250",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/vki-ls59/train_250/vkils59-prototype-train-250",
       "submission_id": "vkils59-prototype-train-250",
       "series_id": "vkils59-prototype-train-250",
       "version": 1,
@@ -628,10 +639,10 @@
       "split_id": "train_250",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_250/vkils59-prototype-train-250.json",
-      "sha256": "32da6b838ec96f284b2d645b4dd17163bfd3b76bbc95ef2cfcb699cae9f85593"
+      "sha256": "0529c5709a77239b6ed2e3e42f106fbbf06570fd5cb68d3f1e789f867a42be86"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/vki-ls59/train_32/vkils59-prototype-train-32",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/vki-ls59/train_32/vkils59-prototype-train-32",
       "submission_id": "vkils59-prototype-train-32",
       "series_id": "vkils59-prototype-train-32",
       "version": 1,
@@ -639,10 +650,10 @@
       "split_id": "train_32",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_32/vkils59-prototype-train-32.json",
-      "sha256": "4f266262a8309ea7abb2363569032d06f42168e7cc598ae75892afdd2d4d8511"
+      "sha256": "02e8e4dfb00b6b5f102cf1e2fdb7230044584962bdd52bf5877bf9b62a401945"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/vki-ls59/train_500/vkils59-prototype-train-500",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/vki-ls59/train_500/vkils59-prototype-train-500",
       "submission_id": "vkils59-prototype-train-500",
       "series_id": "vkils59-prototype-train-500",
       "version": 1,
@@ -650,10 +661,10 @@
       "split_id": "train_500",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_500/vkils59-prototype-train-500.json",
-      "sha256": "33ae5fff479f36729b1da212030f6f88844d71a35520a718dbc6ca6195d3a10a"
+      "sha256": "407e4c19dc9416074ad5e859b9f8c6757bf8ca1e9cc8dfa875a5467068175312"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/vki-ls59/train_64/vkils59-prototype-train-64",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/vki-ls59/train_64/vkils59-prototype-train-64",
       "submission_id": "vkils59-prototype-train-64",
       "series_id": "vkils59-prototype-train-64",
       "version": 1,
@@ -661,10 +672,10 @@
       "split_id": "train_64",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_64/vkils59-prototype-train-64.json",
-      "sha256": "7de153e003ae6825315cf1ec30d0098c188e1ec417cafdf6db817daf08d7129b"
+      "sha256": "f148e0054d2fdfc29a6b4420fe1380b07034e572587c7f12c5acc5ee7638e48e"
     },
     {
-      "claim_id": "prototype-dev-2026-09-28-fdedb77fbe12/vki-ls59/train_8/vkils59-prototype-train-8",
+      "claim_id": "prototype-dev-2026-09-29-b7435a38c0c1/vki-ls59/train_8/vkils59-prototype-train-8",
       "submission_id": "vkils59-prototype-train-8",
       "series_id": "vkils59-prototype-train-8",
       "version": 1,
@@ -672,7 +683,7 @@
       "split_id": "train_8",
       "eligible": false,
       "file": "leaderboard/claims/vki-ls59/train_8/vkils59-prototype-train-8.json",
-      "sha256": "803119576f2984c1ae285d353499b982b59cbe78ad2dcde28aa59eec5b63f68b"
+      "sha256": "d29e9849d0933195d73e6e57f373bb599119bf64f77e9481a7426abfaf364a42"
     }
   ]
 }
