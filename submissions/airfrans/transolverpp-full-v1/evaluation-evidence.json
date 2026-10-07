@@ -35,11 +35,11 @@
     "diagnostic_score": 95.68143654645883
   },
   "profile_index_sha256": "1f66796a405c0c116841a94f80291ce704b1b462c429b954e6e1f2022ba62aea",
-  "profile_ground_truth_release_id": "airfrans-boundary-layer-v1",
-  "profile_ground_truth_manifest_sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c",
+  "profile_ground_truth_release_id": "airfrans-native-profile-truth-v1-candidate",
+  "profile_ground_truth_manifest_sha256": "7e4320cd3a62b7f8577bb1f73c80850d8b0d37e3af6f885a41da0763088bc7ac",
   "scoring_support_release_id": "airfrans-native-ground-truth-v1-candidate",
   "scoring_support_manifest_sha256": "e26c7ce6dd2fad3e4015eb17c9aaa8603d42e6efe293b3fbd5b6969560971d63",
   "discretization_sha256": "4ee58ee8ff973a359653d7463b5f9772e51be869820bf6a79c5bcf0903f412c0",
   "case_metrics_sha256": "4b9496548c83c9dad6d1dda1de2b39a77e8645ae90a18886985764429a8cbc97",
-  "notes": "AirfRANS remains closed (submission-spec.json scoring_support.status=owner_review_required, submissions_open=false); this is a candidate package, not an accepted result. Profile ground-truth release binding remains unresolved: the recorded profile_ground_truth_* fields identify the extraction definition and must be replaced with the actual data release before approval. Discretization metadata has been repaired; submitted metrics and profile values are unchanged. Derived group and overall scores regenerated under airfrans-scoring-v2-candidate from the unchanged base metrics. Scoring-support manifest SHA-256 rebound to the manifest stamped with airfrans-scoring-v2-candidate."
+  "notes": "Closed AirfRANS pre-release reference. Native scoring-support files and profile truth were verified locally; profile scores reproduced byte-for-byte. The ground-truth binding identifies the candidate data release, not the extraction definition. No source-data re-extraction or full model-inference replay was performed by this registration. Submitted metrics and prediction values are unchanged. Registration does not grant owner approval or open submissions."
 }

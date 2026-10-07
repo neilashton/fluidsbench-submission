@@ -73,6 +73,10 @@ from reference.ahmedml.pre_release import (
     REGISTRY_STATUS as AHMEDML_PRE_RELEASE_REGISTRY_STATUS,
     build_registry_entry as build_ahmedml_pre_release_registry_entry,
 )
+from reference.airfrans.pre_release import (
+    registered_airfrans_pre_release_reference,
+    candidate_validation_view as airfrans_candidate_validation_view,
+)
 from reference.methodology import methodology_errors
 from reference.hiliftaeroml.dimensional_units import (
     CORRECTION_PATH as HILIFT_SI_CORRECTION_PATH,
@@ -7203,8 +7207,15 @@ def validate_submission_file(
         and not contributor_stage
         and not candidate_dry_run
     )
+    airfrans_pre_release = registered_airfrans_pre_release_reference(
+        path, submission, manifest, root=ROOT
+    )
+    if contributor_stage and airfrans_pre_release is not None:
+        add("maintainer-registered AirfRANS references are unavailable in contributor-stage validation")
+    registered_airfrans = airfrans_pre_release is not None and not contributor_stage
     candidate_contract_validation = (
         candidate_dry_run
+        or registered_airfrans
         or registered_preview
         or registered_ahmedml_pre_release
         or registered_development_fixture
@@ -7232,6 +7243,10 @@ def validate_submission_file(
         add(f"missing benchmark specification: {spec_path.relative_to(ROOT)}")
         return errors, stats
     dataset_spec = load_json(spec_path)
+    if registered_airfrans:
+        dataset_spec, manifest = airfrans_candidate_validation_view(
+            dataset_spec, manifest, airfrans_pre_release
+        )
     if dataset_spec.get("dataset_id") != submission["dataset_id"]:
         add("benchmark specification dataset_id does not match submission.json")
         return errors, stats

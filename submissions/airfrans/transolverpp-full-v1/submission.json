@@ -258,7 +258,7 @@
     "reference_version": "airfrans-scoring-v2-candidate",
     "command": "python3 -m reference.evaluate_predictions --support-manifest /mnt/Data_A/AirfRANS_Inference_Handover_2026-09-09/FluidsBench/airfrans-scoring-support/airfrans-native-ground-truth-v1-candidate/manifest.json --case-set standard --prediction-manifest <layer2-output>/manifest.json --submission-id transolverpp-full-v1 --split-id full --output metrics/cases.json ; python3 scripts/finalize_airfrans_metrics.py (folds in velocity_profile_r2 + composite scores) ; python3 scripts/rescore_airfrans_candidate.py --package-dir submissions/airfrans/transolverpp-full-v1 --scoring-support-manifest <scoring-support>/airfrans-native-ground-truth-v1-candidate/manifest.json",
     "evidence_file": "evaluation-evidence.json",
-    "evidence_sha256": "aa320c73ee5e48523c27271523a2340923a076fa3cbe2fdf9c6840068b8c1f01"
+    "evidence_sha256": "e3bf05a84565295c3be8a65d5186a1b34234ccc4bbd714b0f94008ff7cff1a3f"
   },
   "reproducibility": {
     "contract_version": "open-reproducibility-3.0",
@@ -311,8 +311,8 @@
     "index_file": "profiles/index.json",
     "case_count": 200,
     "case_set_id": "standard",
-    "profile_ground_truth_release_id": "airfrans-boundary-layer-v1",
-    "profile_ground_truth_manifest_sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c"
+    "profile_ground_truth_release_id": "airfrans-native-profile-truth-v1-candidate",
+    "profile_ground_truth_manifest_sha256": "7e4320cd3a62b7f8577bb1f73c80850d8b0d37e3af6f885a41da0763088bc7ac"
   },
   "note": "Candidate AirfRANS schema-v3 package. AirfRANS submissions remain closed (owner_review_required) pending the owner_decisions_required checklist in benchmark-specs/airfrans/submission-spec.json. scoring_support.manifest_url is a placeholder (not resolvable): no AirfRANS scoring-support release has been published anywhere yet; replace it once/if the dataset owner publishes one. Profile ground-truth release binding remains unresolved: the recorded profile_ground_truth_* fields identify the extraction definition and must be replaced with the actual data release before approval. Discretization metadata has been repaired; submitted metrics and profile values are unchanged."
 }
