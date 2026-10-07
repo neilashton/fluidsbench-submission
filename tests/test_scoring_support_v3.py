@@ -21,6 +21,7 @@ from reference.scoring_support import (
     ScoringSupport,
     ScoringSupportError,
     load_support_release,
+    load_scoring_support,
     sha256_file,
 )
 
@@ -60,6 +61,42 @@ class ScoringSupportV3Tests(unittest.TestCase):
         release = load_support_release(SUPPORT_MANIFEST, "standard")
         self.assertEqual(list(release.cases), ["case-001", "case-002"])
         self.assertEqual(list(release.supports), ["volume-points-v1"])
+
+    def test_installed_archive_member_is_exact_and_cannot_escape_release(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            copied = Path(temporary) / "support"
+            shutil.copytree(TEMPLATE / "support", copied)
+            manifest = json.loads((copied / "manifest.json").read_text())
+            case_set = manifest["case_sets"][0]
+            index_path = copied / case_set["index_file"]
+            index = json.loads(index_path.read_text())
+            chunk_path = index_path.parent / index["chunks"][0]["file"]
+            chunk = json.loads(chunk_path.read_text())
+            artifact = chunk["cases"][0]["support_instances"][0]["artifacts"][0]
+            original = chunk_path.parent / artifact.pop("path")
+            destination = copied / "installed/table.json"
+            destination.parent.mkdir()
+            shutil.copyfile(original, destination)
+            artifact["archive"] = {"url": "https://example.org/release/tables.tar",
+                                   "sha256": "a" * 64, "member": "installed/table.json"}
+
+            def load():
+                write_json(chunk_path, chunk)
+                index["chunks"][0]["sha256"] = sha256_file(chunk_path)
+                write_json(index_path, index)
+                case_set["index_sha256"] = sha256_file(index_path)
+                write_json(copied / "manifest.json", manifest)
+                release = load_support_release(copied / "manifest.json", "standard")
+                return load_scoring_support(release, "case-001", "volume-points-v1")
+
+            support = load()
+            self.assertEqual(len(support.support_ids), 3)
+            destination.write_text("{}")
+            with self.assertRaisesRegex(ScoringSupportError, "SHA-256 mismatch"):
+                load()
+            artifact["archive"]["member"] = "../../outside.json"
+            with self.assertRaisesRegex(ScoringSupportError, "escapes its declared directory"):
+                load()
 
     def test_exact_id_join_and_case_macro_average(self) -> None:
         result = self.evaluate_fixture()

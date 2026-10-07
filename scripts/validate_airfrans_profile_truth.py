@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate an AirfRANS candidate profile-truth release.
+"""Validate an AirfRANS candidate or official profile-truth release.
 
 The default check walks the whole release from ``manifest.json`` down: every
 file is listed with a matching SHA-256 and size, every truth file is a
@@ -93,7 +93,7 @@ def main(argv: list[str] | None = None) -> int:
     record = {
         "schema": "airfrans-native-profile-truth-validation-v1-candidate",
         "schema_version": 1,
-        "release_id": RELEASE_ID,
+        "release_id": summary["release_id"],
         "manifest_sha256": summary["manifest_sha256"],
         "case_count": summary["case_count"],
         "case_sets": summary["case_sets"],

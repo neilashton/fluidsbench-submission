@@ -106,8 +106,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/airfrans/submission-spec.json",
-          "sha256": "3136e684ec208f49508d0ae35ccbbf74022088f796a703909e6cff5950ffdf5f",
-          "finding": "The dev scoring specification. Re-audited 2026-09-30 after the scoring-v2 composite-weight update: pressure fields, units, offsets, metric definitions, and extraction remain unchanged."
+          "sha256": "e165ecdf6fd3f5ebbd897ba62f118fff1e02deb7ed906f62fa86895ad1f1af95",
+          "finding": "The dev scoring specification. Re-audited 2026-09-30 after the scoring-v2 composite-weight update: pressure fields, units, offsets, metric definitions, and extraction remain unchanged. Re-audited 2026-10-07: the added approved-release pointer does not change the active pressure contract."
         },
         {
           "path": "reference/airfrans_profiles.py",
