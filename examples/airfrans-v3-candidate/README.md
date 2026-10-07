@@ -15,16 +15,15 @@ official scoring-support manifest binding, dataset not marked
 `"official"`, no leaderboard entry for the profile ground truth) — all
 three require dataset-owner action before these candidates can be accepted.
 
-The checked-in candidates still carry an unresolved historical profile-truth
-binding: their `profile_ground_truth_*` fields identify the extraction
-definition, not a ground-truth data release. Do not approve those bindings.
-Their configs now mark the actual release ID and manifest SHA-256 as unresolved,
-and the assembler rejects the old definition-based binding. Once the owner
-provides the release used for scoring, update the config and regenerate the
-package, including its evidence hashes. Confirm the submitter/institution and
-result-data licence at the same time. The corrected discretization metadata
-covers all three scoring supports, including integrated force coefficients;
-the submitted metrics and profile predictions have not been recomputed.
+The registered dev references now bind the verified candidate profile-truth
+release `airfrans-native-profile-truth-v1-candidate`, rather than the extraction
+definition. Their configs carry the same immutable manifest SHA-256.
+The assembler still rejects definition-based ground-truth bindings.
+[The pre-release registration](../../benchmark-specs/airfrans/pre-release/README.md)
+records the downloaded artifact checks, reproduced profile scores and exact
+package hashes. It permits unranked dev inspection while official intake stays
+closed. Submitter attribution and CC-BY-4.0 are retained as confirmed in the PR
+handover. Submitted metrics and profile predictions are unchanged.
 
 ## Pipeline
 
