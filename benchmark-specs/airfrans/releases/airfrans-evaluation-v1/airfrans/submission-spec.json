@@ -7,7 +7,7 @@
   "scoring_support": {
     "status": "official",
     "submissions_open": false,
-    "closed_reason": "Official support published; real dev intake awaits a complete contributor/approval trial. Reynolds is outside this release.",
+    "closed_reason": "Approved dev-only draft. Public publication and the contributor/approval trial remain pending. Reynolds is outside this release.",
     "coverage_contract": {
       "dimensionality": "2D flow domain and 1D airfoil curve",
       "rule": "complete_original_public_release_entities",
@@ -63,7 +63,7 @@
     "release_id": "airfrans-native-support-v1",
     "manifest_file": "scoring-support/airfrans-native-support-v1/manifest.json",
     "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/airfrans-native-support-v1/manifest.json",
-    "manifest_sha256": "8181ad22fbcbeda3a42f9d935ad06bd9d7128625add85bc0c5085f98f15bb6e4",
+    "manifest_sha256": "18231e558012d74c39ed4df4083ee2d5a60e7b9c6492ed3c10496a3ca70fd606",
     "owner_approval": {
       "approved_by": "Neil Ashton",
       "approved_at": "2026-10-07",
@@ -74,12 +74,12 @@
       "validated_by": "Codex automated artifact validation",
       "validated_at": "2026-10-07T19:02:21Z",
       "validator_file": "publication-validator.py",
-      "validator_sha256": "a288e387233193df2de9804d6f72ff0b92b98fc0ef9dab88be9dbc354df878a5",
+      "validator_sha256": "3438dc41cdb6b9ac23d015d17152679885be009a41c829426a21ea90b90b01ec",
       "case_count": 396,
       "unique_case_count": 355,
       "support_instance_count": 1188,
       "normalized_support_sha256": "4473f04ad692b3d4151585bac024987e389599d369837b348860890b8d5cd1fb",
-      "manifest_sha256": "8181ad22fbcbeda3a42f9d935ad06bd9d7128625add85bc0c5085f98f15bb6e4",
+      "manifest_sha256": "18231e558012d74c39ed4df4083ee2d5a60e7b9c6492ed3c10496a3ca70fd606",
       "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/47"
     }
   },
@@ -89,9 +89,9 @@
     "sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c",
     "status": "official",
     "profile_ground_truth": {
-      "status": "published",
+      "status": "prepared_dev_only",
       "release_id": "airfrans-native-profile-truth-v1",
-      "manifest_sha256": "65bafd816dbe7da6a567a374d87ee6d9aa94e93200e5e4fc28cb6ecff4c412d7",
+      "manifest_sha256": "a0d752e9d92fc7ad78cbfcf065c939a817d64a068cc8e83cc2a91d02c2aba805",
       "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/airfrans-native-profile-truth-v1/manifest.json"
     }
   },
@@ -439,5 +439,6 @@
       "case_id_status": "official",
       "sha256": "58621bbd012d3d14f45f49783696ddb4f03766bd2db144624c2d77711b17961b"
     }
-  ]
+  ],
+  "publication_status": "prepared_dev_only"
 }

@@ -1,6 +1,12 @@
-# AirfRANS evaluation releases
+# AirfRANS approved dev release drafts
 
-The first official evaluation release covers Full and Scarce (the same ordered
+**Development only:** the contract is approved, and the artifacts are prepared
+and validated. No GitHub release has been published, no release locking is
+enabled, and neither `main` nor the production site is changed. Proposed release
+URLs are reserved destinations and do not yet serve downloads. Drafts can be
+corrected and regenerated during review.
+
+The first approved evaluation draft covers Full and Scarce (the same ordered
 200-case evaluation set) and AoA extrapolation (196 cases). Its native field,
 curve, force, and lossless profile truth covers 355 unique cases. Reynolds
 extrapolation remains unpublished and closed; 318 of its 496 cases are outside
@@ -12,19 +18,19 @@ physical/equal-entity reductions, vector semantics, additive chunk reductions,
 equal-case aggregation, force coefficients, boundary-layer extraction, bounded
 profile R2, and the existing overall-score weights and caps.
 
-Publication creates a frozen, separately versioned official contract. The active
+The draft prepares a separately versioned approved contract. The active
 prototype specification and existing pre-release reference packages retain
 their historical identities. Switching real contributor intake to the official
 contract requires a separate dev submission trial and activation change. No
 participant result is approved or ranked by this publication.
 
-The release binding, approval record, publication validation, immutable download
+The release binding, approval record, local artifact validation, proposed download
 URLs, and SHA-256 digests are recorded under `releases/`. Participant prediction
 fields and model inference were not rerun as part of truth publication. Native
 support artifacts and lossless profile arrays retain their verified handover
 bytes; changed release metadata is independently hash-bound.
 
-## Official release identities
+## Proposed release identities
 
 - Contract: [`airfrans-evaluation-v1`](releases/airfrans-evaluation-v1/airfrans/submission-spec.json).
 - Dataset version: `airfrans-native-v1`.
@@ -43,12 +49,12 @@ nodes. Alternate equal-entity/physical-weight errors remain diagnostics. The
 four profile stations, two Cartesian quantities, and 1,001 samples per series
 remain bound to `airfrans-boundary-layer-v1`.
 
-## Download, install, and verify
+## Install and verify locally; public downloads are pending
 
-Use the source repository at the immutable release tag. Download **all** assets
-from each release and check `SHA256SUMS` in that download directory before
-extracting. The support release includes its frozen JSON schemas; use these
-instead of a moving schema copy when auditing the release.
+Use the source repository on this dev branch. Local prepared asset directories
+contain `SHA256SUMS`; check it before extracting. Public downloads and tags are
+pending a separate publication decision. The support assets include their JSON
+schemas so the draft can be audited with its own schema version.
 
 Extract `support-metadata.tar.gz` and `native-tables.tar` into the same empty
 directory. The resulting `manifest.json`, `case-sets/`, and `tables/` constitute
@@ -72,7 +78,7 @@ validation checks all 355 lossless case artifacts and their source-mesh,
 extractor, runtime, case-set, and hash bindings. CI checks the committed metadata
 graph and publication receipt without downloading the large arrays.
 
-The official contract is published separately while the active prototype
+The approved contract is staged separately while the active prototype
 contract retains historical fixtures. Real contributors must wait for the dev
 intake activation change, which will select the official release and run the
 complete contributor-to-maintainer approval trial. Reynolds support is absent

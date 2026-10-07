@@ -596,7 +596,7 @@ def validate_release(
     require(release_id in {RELEASE_ID, OFFICIAL_RELEASE_ID}, "unknown profile-truth release identity")
     official = release_id == OFFICIAL_RELEASE_ID
     activation = (
-        {"owner_approval_complete": True, "published": True, "submissions_opened": False}
+        {"owner_approval_complete": True, "published": manifest.get("publication_status") != "prepared_dev_only", "submissions_opened": False}
         if official else ACTIVATION
     )
     if official:

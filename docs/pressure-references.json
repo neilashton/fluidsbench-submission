@@ -106,7 +106,7 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/airfrans/submission-spec.json",
-          "sha256": "c9f9b7ce989444b725a47cbeb22d04d842b1f14fc30e66e583cc1401770920e9",
+          "sha256": "e165ecdf6fd3f5ebbd897ba62f118fff1e02deb7ed906f62fa86895ad1f1af95",
           "finding": "The dev scoring specification. Re-audited 2026-09-30 after the scoring-v2 composite-weight update: pressure fields, units, offsets, metric definitions, and extraction remain unchanged. Re-audited 2026-10-07: the added approved-release pointer does not change the active pressure contract."
         },
         {

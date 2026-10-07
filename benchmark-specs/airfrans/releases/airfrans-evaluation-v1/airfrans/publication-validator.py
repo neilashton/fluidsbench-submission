@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Package the approved AirfRANS evaluation releases without opening intake.
+"""Prepare approved AirfRANS evaluation drafts on dev without publishing.
 
 Only release metadata changes. Native tables and lossless extraction JSON retain
 their candidate bytes. Archives have deterministic headers; no network upload
@@ -151,7 +151,7 @@ def native_release(full, aoa, output, approval, timestamp):
     manifest.update(release_id=SUPPORT_ID, status="official", published_at=timestamp,
                     dataset_version=DATASET_VERSION, evaluation_reference_version=EVALUATOR_VERSION,
                     owner_approval=approval, case_sets=descriptors,
-                    notes="Official native support for Full, Scarce and AoA; intake remains closed pending its dev trial. Native table bytes are unchanged from the verified public-CFD candidate handover.")
+                    notes="Approved dev-only draft support for Full, Scarce and AoA. Public publication and intake remain pending. Native table bytes are unchanged from the verified public-CFD candidate handover; download URLs are reserved destinations, not published assets.")
     write(root / "manifest.json", manifest)
     return root, verify_native(root)
 
@@ -204,14 +204,14 @@ def promote_truth(candidate, output, support_root, approval, timestamp):
                                "truth_payload_bytes_changed": False, "source_replay_performed": False}
     write(root / "provenance.json", provenance)
     manifest = official(candidate_manifest)
-    manifest.update(owner_approval=approval, published_at=timestamp, enabled_split_ids=ENABLED_SPLITS,
+    manifest.update(owner_approval=approval, prepared_at=timestamp, publication_status="prepared_dev_only", enabled_split_ids=ENABLED_SPLITS,
                     master_index=descriptor(root / "index.json", root),
                     provenance=descriptor(root / "provenance.json", root), case_sets=case_sets,
-                    activation={"owner_approval_complete": True, "published": True, "submissions_opened": False})
+                    activation={"owner_approval_complete": True, "published": False, "submissions_opened": False})
     manifest_hash = write(root / "manifest.json", manifest)
     receipt = official(read(candidate / "release-receipt.json"))
     receipt.update(manifest_sha256=manifest_hash, status="official",
-                   owner_approval_complete=True, published=True, submissions_opened=False)
+                   owner_approval_complete=True, published=False, submissions_opened=False)
     write(root / "release-receipt.json", receipt)
     summary = validate_truth(release_root=root, profile_definition_path=SPEC / "velocity-profiles-v1.json", repository_root=ROOT)
     make_tar(output / "truth-assets/profile-truth.tar.gz",
@@ -238,7 +238,7 @@ def build(args):
         copy_exact(SPEC / filename, destination / filename)
     contract = read(SPEC / "submission-spec.json")
     contract.pop("approved_release", None)
-    contract.update(status="official", dataset_version=DATASET_VERSION, evaluation_reference_version=EVALUATOR_VERSION)
+    contract.update(status="official", publication_status="prepared_dev_only", dataset_version=DATASET_VERSION, evaluation_reference_version=EVALUATOR_VERSION)
     contract["splits"] = [s for s in contract["splits"] if s["id"] in ENABLED_SPLITS]
     for split in contract["splits"]:
         copy_exact(SPEC / split["index_file"], destination / split["index_file"])
@@ -246,7 +246,7 @@ def build(args):
     support = contract["scoring_support"]
     support.pop("owner_decisions_required", None)
     support.update(status="official", submissions_open=False,
-                   closed_reason="Official support published; real dev intake awaits a complete contributor/approval trial. Reynolds is outside this release.",
+                   closed_reason="Approved dev-only draft. Public publication and the contributor/approval trial remain pending. Reynolds is outside this release.",
                    release_id=SUPPORT_ID, manifest_file=f"scoring-support/{SUPPORT_ID}/manifest.json",
                    manifest_url=RELEASE_BASE + SUPPORT_ID + "/manifest.json",
                    manifest_sha256=sha256_file(native / "manifest.json"), owner_approval=approval,
@@ -255,7 +255,7 @@ def build(args):
                        "validator_sha256": sha256_file(Path(__file__)), **normalized,
                        "manifest_sha256": sha256_file(native / "manifest.json"), "pull_request_url": args.approval_pr})
     contract["profile_definition"].update(status="official", profile_ground_truth={
-        "status": "published", "release_id": TRUTH_ID, "manifest_sha256": sha256_file(truth / "manifest.json"),
+        "status": "prepared_dev_only", "release_id": TRUTH_ID, "manifest_sha256": sha256_file(truth / "manifest.json"),
         "manifest_url": RELEASE_BASE + TRUTH_ID + "/manifest.json"})
     write(destination / "submission-spec.json", contract)
     errors = validate_specification(destination / "submission-spec.json", spec_root=RELEASE_DIR)
@@ -267,13 +267,14 @@ def build(args):
         "enabled_split_ids": ENABLED_SPLITS, "excluded_split_ids": ["reynolds_extrapolation"],
         "evaluator": {"version": EVALUATOR_VERSION, "repository": "https://github.com/neilashton/fluidsbench-submission",
                       "scientific_implementation_commit": EVALUATOR_COMMIT},
+        "publication_status": "prepared_dev_only", "publicly_published": False,
         "contract_sha256": sha256_file(destination / "submission-spec.json"),
         "scoring_support_manifest_sha256": sha256_file(native / "manifest.json"),
         "profile_truth_manifest_sha256": sha256_file(truth / "manifest.json"),
         "submissions_opened": False, "participant_results_approved": False,
         "source_reextraction_performed": False, "model_inference_performed": False}
     write(RELEASE_DIR / "approval.json", approval_record)
-    receipt = {"schema": "airfrans-official-publication-validation-v1", "status": "passed",
+    receipt = {"schema": "airfrans-official-publication-validation-v1", "status": "passed", "publicly_published": False,
         "validated_at": args.published_at, "native_support": normalized, "profile_truth": truth_summary,
         "native_table_bytes_changed": False, "profile_payload_bytes_changed": False,
         "source_reextraction_performed": False, "model_inference_performed": False,
@@ -297,7 +298,7 @@ def build(args):
                            assets / (schema + ".schema.json"))
         archive_files = sorted(p for p in assets.iterdir() if p.is_file() and p.name != "SHA256SUMS")
         (assets / "SHA256SUMS").write_text("".join(f"{sha256_file(p)}  {p.name}\n" for p in archive_files))
-    binding = {"schema": "airfrans-approved-release-binding-v1", "status": "official_published_intake_closed",
+    binding = {"schema": "airfrans-approved-release-binding-v1", "status": "dev_approved_draft", "publicly_published": False,
         "contract_id": CONTRACT_ID, "enabled_split_ids": ENABLED_SPLITS, "submissions_opened": False,
         "contract": descriptor(destination / "submission-spec.json", SPEC),
         "approval": descriptor(RELEASE_DIR / "approval.json", SPEC),

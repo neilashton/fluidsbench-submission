@@ -14,12 +14,15 @@ TRUTH = SPEC / "releases/airfrans-evaluation-v1/airfrans/profile-truth/airfrans-
 
 
 class AirfransOfficialReleaseTests(unittest.TestCase):
-    def test_official_publication_does_not_open_or_promote_candidates(self):
+    def test_approved_draft_does_not_publish_open_or_promote_candidates(self):
         self.assertEqual(check()["enabled_split_ids"], ["full", "scarce", "aoa_extrapolation"])
         self.assertFalse(check()["intake_open"])
+        self.assertFalse(check()["publicly_published"])
         active = json.loads((SPEC / "submission-spec.json").read_text())
         self.assertFalse(active["scoring_support"]["submissions_open"])
         self.assertEqual(active["status"], "prototype_dummy_data")
+        truth_manifest = json.loads((TRUTH / "manifest.json").read_text())
+        self.assertFalse(truth_manifest["activation"]["published"])
 
     def test_missing_arrays_cannot_pass_full_truth_validation(self):
         with self.assertRaises((OSError, ProfileTruthError)):

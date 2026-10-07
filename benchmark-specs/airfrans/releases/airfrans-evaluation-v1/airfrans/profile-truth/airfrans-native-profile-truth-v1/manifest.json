@@ -45,7 +45,7 @@
   },
   "activation": {
     "owner_approval_complete": true,
-    "published": true,
+    "published": false,
     "submissions_opened": false
   },
   "owner_approval": {
@@ -53,7 +53,8 @@
     "approved_at": "2026-10-07",
     "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/47"
   },
-  "published_at": "2026-10-07T19:02:21Z",
+  "prepared_at": "2026-10-07T19:02:21Z",
+  "publication_status": "prepared_dev_only",
   "enabled_split_ids": [
     "full",
     "scarce",

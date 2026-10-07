@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Check the approved AirfRANS release metadata while intake remains closed.
+"""Check approved AirfRANS dev draft metadata while publication/intake remain closed.
 
-CI validates the committed hash graph and full-publication receipt. Arrays live
-in immutable release archives; their complete load was performed at publication,
+CI validates the committed hash graph and full-artifact validation receipt. Arrays
+remain in prepared local archives; their complete load was performed at preparation,
 and can be repeated with publish_airfrans_official_release.verify_native.
 """
 from __future__ import annotations
@@ -40,13 +40,14 @@ def check(root=ROOT):
     binding_path = bound({"file": declaration["binding_file"], "sha256": declaration["binding_sha256"]})
     binding = json.loads(binding_path.read_text())
     require(binding["schema"] == "airfrans-approved-release-binding-v1", "unknown AirfRANS binding")
-    require(binding["status"] == "official_published_intake_closed" and binding["submissions_opened"] is False,
-            "publication cannot open intake")
+    require(binding["status"] == "dev_approved_draft" and binding["submissions_opened"] is False and binding["publicly_published"] is False,
+            "dev drafts cannot claim publication or open intake")
     require(binding["enabled_split_ids"] == ["full", "scarce", "aoa_extrapolation"], "official split scope differs")
     contract_path = bound(binding["contract"])
     contract = json.loads(contract_path.read_text())
     require(contract["status"] == "official" and contract["scoring_support"]["submissions_open"] is False,
-            "published contract must be official and closed")
+            "approved contract must be official and closed")
+    require(contract["publication_status"] == "prepared_dev_only", "contract must remain a dev draft")
     require([s["id"] for s in contract["splits"]] == binding["enabled_split_ids"], "contract split scope differs")
     require("approved_release" not in contract, "a release contract cannot recursively select another release")
     errors = validate_specification(contract_path, spec_root=contract_path.parent.parent)
@@ -57,8 +58,9 @@ def check(root=ROOT):
     require(approval["owner_approval"] == contract["scoring_support"]["owner_approval"], "owner approval differs")
     require(approval["submissions_opened"] is False and approval["participant_results_approved"] is False,
             "release approval cannot approve participant results")
+    require(approval["publicly_published"] is False, "approval cannot claim public publication")
     receipt = json.loads(bound(binding["publication_validation"]).read_text())
-    require(receipt["status"] == "passed", "publication validation did not pass")
+    require(receipt["status"] == "passed" and receipt["publicly_published"] is False, "draft validation did not pass")
     native = receipt["native_support"]
     require((native["case_count"], native["unique_case_count"], native["support_instance_count"]) == (396, 355, 1188),
             "native publication coverage differs")
@@ -94,7 +96,7 @@ def check(root=ROOT):
     require(all(a["url"].startswith("https://github.com/neilashton/fluidsbench-submission/releases/download/" + a["release_id"] + "/")
                 and "?" not in a["url"] and "#" not in a["url"] for a in assets.values()), "asset URL is not immutable")
     return {"contract_id": binding["contract_id"], "enabled_split_ids": binding["enabled_split_ids"],
-            "unique_cases": 355, "intake_open": False}
+            "unique_cases": 355, "intake_open": False, "publicly_published": False}
 
 
 if __name__ == "__main__":
