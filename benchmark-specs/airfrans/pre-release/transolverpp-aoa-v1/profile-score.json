@@ -1,0 +1,78 @@
+{
+  "metric_id": "velocity_profile_r2",
+  "aggregation": "equal_station_equal_quantity_mean_bounded_r2_across_split",
+  "value": 0.93444828670955,
+  "case_count": 196,
+  "expected_case_count": 196,
+  "case_coverage": "complete_official_split",
+  "station_count": 4,
+  "quantity_count": 2,
+  "group_count": 8,
+  "groups": [
+    {
+      "station_id": "upper_x_0_25c",
+      "quantity_id": "velocity_x_ratio",
+      "raw_r2": 0.9808553058265649,
+      "bounded_r2": 0.9808553058265649,
+      "case_count": 196,
+      "sample_count": 196196
+    },
+    {
+      "station_id": "upper_x_0_25c",
+      "quantity_id": "velocity_y_ratio",
+      "raw_r2": 0.8931219064066022,
+      "bounded_r2": 0.8931219064066022,
+      "case_count": 196,
+      "sample_count": 196196
+    },
+    {
+      "station_id": "upper_x_0_50c",
+      "quantity_id": "velocity_x_ratio",
+      "raw_r2": 0.9632051417933667,
+      "bounded_r2": 0.9632051417933667,
+      "case_count": 196,
+      "sample_count": 196196
+    },
+    {
+      "station_id": "upper_x_0_50c",
+      "quantity_id": "velocity_y_ratio",
+      "raw_r2": 0.8267866968270597,
+      "bounded_r2": 0.8267866968270597,
+      "case_count": 196,
+      "sample_count": 196196
+    },
+    {
+      "station_id": "upper_x_0_75c",
+      "quantity_id": "velocity_x_ratio",
+      "raw_r2": 0.9516340325174304,
+      "bounded_r2": 0.9516340325174304,
+      "case_count": 196,
+      "sample_count": 196196
+    },
+    {
+      "station_id": "upper_x_0_75c",
+      "quantity_id": "velocity_y_ratio",
+      "raw_r2": 0.9353236634212628,
+      "bounded_r2": 0.9353236634212628,
+      "case_count": 196,
+      "sample_count": 196196
+    },
+    {
+      "station_id": "upper_x_0_95c",
+      "quantity_id": "velocity_x_ratio",
+      "raw_r2": 0.9554961634952801,
+      "bounded_r2": 0.9554961634952801,
+      "case_count": 196,
+      "sample_count": 196196
+    },
+    {
+      "station_id": "upper_x_0_95c",
+      "quantity_id": "velocity_y_ratio",
+      "raw_r2": 0.9691633833888333,
+      "bounded_r2": 0.9691633833888333,
+      "case_count": 196,
+      "sample_count": 196196
+    }
+  ],
+  "split_id": "aoa_extrapolation"
+}

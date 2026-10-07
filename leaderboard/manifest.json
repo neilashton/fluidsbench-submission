@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-10-07T15:55:19Z",
+  "generated_at": "2026-10-07T15:59:22Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,13 +19,13 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-09-28-fdedb77fbe12",
+    "id": "prototype-dev-2026-09-29-b7435a38c0c1",
     "status": "prototype_dummy_data",
-    "generated_at": "2026-10-07T15:55:19Z",
+    "generated_at": "2026-10-07T15:59:22Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "fdedb77fbe125205f9b71401ccf3dc554684cafc5a1836bea9b2498c8e0acec9",
+    "feed_sha256": "b7435a38c0c1451135a070b54f3d6118a43fc0a22a64ac91de92d99a41f2d1c9",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
@@ -51,16 +51,16 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "517c4a31085cb08c028158e990f372558b15f86c17efb7a60e36377ca4e9943e",
-      "record_count": 59,
+      "index_sha256": "2f3d0f4b24cfc1c53f1bb4e2ab9cf0985c527919af4b897a042cd66908a0efa0",
+      "record_count": 60,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "ef43013f197ae4d6b307e972d714042a0f6d7b469e77bf2743fa199e360f760c",
-      "record_count": 60,
-      "series_count": 60
+      "sha256": "efaa9e7d9660a4c971f3ab4c6583022532fe0f8d6a6873aa34595178de8cb0f1",
+      "record_count": 61,
+      "series_count": 61
     }
   },
   "all_file": "leaderboard/all.json",
@@ -695,8 +695,8 @@
       "name": "AirfRANS",
       "slug": "airfrans",
       "file": "leaderboard/datasets/airfrans.json",
-      "submission_count": 6,
-      "updated_at": "2026-09-28",
+      "submission_count": 7,
+      "updated_at": "2026-09-29",
       "metrics": {
         "dimensional_fields": [
           "surface_pressure",
@@ -1004,7 +1004,7 @@
         "sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c",
         "status": "owner_review_required"
       },
-      "revision_count": 6
+      "revision_count": 7
     },
     {
       "name": "DrivAerML",
