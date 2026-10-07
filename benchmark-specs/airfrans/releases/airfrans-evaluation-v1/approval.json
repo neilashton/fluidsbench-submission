@@ -1,0 +1,32 @@
+{
+  "schema": "airfrans-official-scoring-approval-v1",
+  "status": "approved",
+  "dataset_id": "airfrans",
+  "contract_id": "airfrans-evaluation-v1",
+  "owner_approval": {
+    "approved_by": "Neil Ashton",
+    "approved_at": "2026-10-07",
+    "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/47"
+  },
+  "approval_basis": "Neil Ashton explicitly requested approval and official publication on 2026-10-07.",
+  "enabled_split_ids": [
+    "full",
+    "scarce",
+    "aoa_extrapolation"
+  ],
+  "excluded_split_ids": [
+    "reynolds_extrapolation"
+  ],
+  "evaluator": {
+    "version": "airfrans-scoring-v2",
+    "repository": "https://github.com/neilashton/fluidsbench-submission",
+    "scientific_implementation_commit": "b320575e35d6f61f94ac852fdb084dec080e4ecb"
+  },
+  "contract_sha256": "58ee9a1225265c4c4e6cdd6b0a78a47770849ad1a4a9179a7c544a3346aace67",
+  "scoring_support_manifest_sha256": "8181ad22fbcbeda3a42f9d935ad06bd9d7128625add85bc0c5085f98f15bb6e4",
+  "profile_truth_manifest_sha256": "65bafd816dbe7da6a567a374d87ee6d9aa94e93200e5e4fc28cb6ecff4c412d7",
+  "submissions_opened": false,
+  "participant_results_approved": false,
+  "source_reextraction_performed": false,
+  "model_inference_performed": false
+}

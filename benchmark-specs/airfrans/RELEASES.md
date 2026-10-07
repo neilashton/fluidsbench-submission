@@ -23,3 +23,57 @@ URLs, and SHA-256 digests are recorded under `releases/`. Participant prediction
 fields and model inference were not rerun as part of truth publication. Native
 support artifacts and lossless profile arrays retain their verified handover
 bytes; changed release metadata is independently hash-bound.
+
+## Official release identities
+
+- Contract: [`airfrans-evaluation-v1`](releases/airfrans-evaluation-v1/airfrans/submission-spec.json).
+- Dataset version: `airfrans-native-v1`.
+- Evaluator version: `airfrans-scoring-v2`; the scientific implementation is
+  pinned to `b320575e35d6f61f94ac852fdb084dec080e4ecb`.
+- Native scoring support: [airfrans-native-support-v1](https://github.com/neilashton/fluidsbench-submission/releases/tag/airfrans-native-support-v1).
+- Lossless profile truth: [airfrans-native-profile-truth-v1](https://github.com/neilashton/fluidsbench-submission/releases/tag/airfrans-native-profile-truth-v1).
+- Approval: [PR #47](https://github.com/neilashton/fluidsbench-submission/pull/47),
+  with the exact release bindings in [`official-release-binding.json`](official-release-binding.json).
+
+The score weights are unchanged: curve pressure 15%, curve wall shear 10%,
+domain velocity 15%, domain pressure 10%, drag R2 15%, lift R2 10%, and boundary
+layer profile R2 25%. Field caps remain 15, 20, 12, and 15 respectively. Curve
+primary errors use native dual lengths; domain primary errors use equal native
+nodes. Alternate equal-entity/physical-weight errors remain diagnostics. The
+four profile stations, two Cartesian quantities, and 1,001 samples per series
+remain bound to `airfrans-boundary-layer-v1`.
+
+## Download, install, and verify
+
+Use the source repository at the immutable release tag. Download **all** assets
+from each release and check `SHA256SUMS` in that download directory before
+extracting. The support release includes its frozen JSON schemas; use these
+instead of a moving schema copy when auditing the release.
+
+Extract `support-metadata.tar.gz` and `native-tables.tar` into the same empty
+directory. The resulting `manifest.json`, `case-sets/`, and `tables/` constitute
+the installed support release. Archive-backed artifact descriptors bind both
+the archive digest and each individual member digest. The evaluator reads only
+verified installed members and performs no automatic network fetch.
+
+```bash
+python scripts/publish_airfrans_official_release.py --verify-native /path/to/installed/support
+```
+
+Extract `profile-truth.tar.gz` into a different empty directory, then validate:
+
+```bash
+python scripts/validate_airfrans_profile_truth.py --release /path/to/installed/profile-truth
+```
+
+Native publication validation loads 1,188 support instances across the two
+ordered case sets (396 case references, 355 unique cases). Full profile-truth
+validation checks all 355 lossless case artifacts and their source-mesh,
+extractor, runtime, case-set, and hash bindings. CI checks the committed metadata
+graph and publication receipt without downloading the large arrays.
+
+The official contract is published separately while the active prototype
+contract retains historical fixtures. Real contributors must wait for the dev
+intake activation change, which will select the official release and run the
+complete contributor-to-maintainer approval trial. Reynolds support is absent
+from the official contract and cannot be submitted under these release IDs.

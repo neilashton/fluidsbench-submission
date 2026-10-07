@@ -407,12 +407,18 @@ def _local_artifact(
         raise ScoringSupportError(
             f"{case_id}/{instance.get('support_id')} is missing artifact role {role!r}"
         )
-    if "path" not in artifact:
+    if "archive" in artifact:
+        # Archive members are installed relative to the manifest, never the
+        # current directory. Downloading/extracting is a separate, hash-checked
+        # operation; evaluation cannot fetch mutable remote bytes implicitly.
+        path = _safe_relative(release.manifest_path.parent, artifact["archive"]["member"])
+    elif "path" in artifact:
+        path = _safe_relative(release.case_directories[case_id], artifact["path"])
+    else:
         raise ScoringSupportError(
             "the generic evaluator accepts local support artifacts only; fetch and verify "
             "the immutable release before evaluation"
         )
-    path = _safe_relative(release.case_directories[case_id], artifact["path"])
     if not path.is_file():
         raise ScoringSupportError(f"missing scoring-support artifact: {path}")
     if sha256_file(path) != artifact["sha256"]:

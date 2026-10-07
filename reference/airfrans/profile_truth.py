@@ -37,6 +37,7 @@ from typing import Any, Mapping, Sequence
 
 DATASET_ID = "airfrans"
 RELEASE_ID = "airfrans-native-profile-truth-v1-candidate"
+OFFICIAL_RELEASE_ID = "airfrans-native-profile-truth-v1"
 TRUTH_FORMAT = "fluidsbench-airfrans-native-profile-truth-v1-candidate"
 STATUS = "candidate_owner_review_required"
 CASES_PER_CHUNK = 20
@@ -273,6 +274,7 @@ def build_release(
     records, so the recorded commit really produced the truth.
     """
 
+    repository_root = repository_root.resolve()
     definition = load_profile_definition(profile_definition_path)
     payloads: dict[str, bytes] = {}
     facts: dict[str, dict[str, Any]] = {}
@@ -564,7 +566,8 @@ def _require_exact_tree(output_root: Path, expected_files: set[str]) -> None:
 
 
 def validate_release(
-    *, release_root: Path, profile_definition_path: Path, repository_root: Path
+    *, release_root: Path, profile_definition_path: Path, repository_root: Path,
+    metadata_only: bool = False,
 ) -> dict[str, Any]:
     """Check the whole release graph from the manifest down; return a summary.
 
@@ -589,13 +592,27 @@ def validate_release(
     definition = load_profile_definition(profile_definition_path)
     manifest_path = release_root / "manifest.json"
     manifest = _load_json(manifest_path, "release manifest")
+    release_id = manifest.get("release_id")
+    require(release_id in {RELEASE_ID, OFFICIAL_RELEASE_ID}, "unknown profile-truth release identity")
+    official = release_id == OFFICIAL_RELEASE_ID
+    activation = (
+        {"owner_approval_complete": True, "published": True, "submissions_opened": False}
+        if official else ACTIVATION
+    )
+    if official:
+        require(manifest.get("status") == "official", "official truth manifest status differs")
+        require(manifest.get("format") == "fluidsbench-airfrans-native-profile-truth-v1", "official truth format differs")
+        approval = manifest.get("owner_approval", {})
+        require(all(isinstance(approval.get(key), str) and approval[key].strip()
+                    for key in ("approved_by", "approved_at", "pull_request_url")),
+                "official truth requires owner approval")
     manifest_sha = sha256_file(manifest_path)
     receipt = _load_json(release_root / "release-receipt.json", "release receipt")
     require(receipt.get("manifest_sha256") == manifest_sha, "release receipt manifest SHA-256 differs")
     for document, label in ((manifest, "manifest"), (receipt, "release receipt")):
-        require(document.get("release_id") == RELEASE_ID, f"{label} release_id differs")
+        require(document.get("release_id") == release_id, f"{label} release_id differs")
         require(document.get("dataset_id") == DATASET_ID, f"{label} dataset_id differs")
-        for key, value in ACTIVATION.items():
+        for key, value in activation.items():
             flags = document.get("activation", document)
             require(flags.get(key) is value, f"{label} must declare {key}={value}")
     require(
@@ -645,8 +662,11 @@ def validate_release(
         record_path = release_root / location["case_record_file"]
         require(sha256_file(record_path) == location["case_record_sha256"], f"{case_id} case record differs")
         record = _load_json(record_path, "case record")
-        require(record["case_id"] == case_id and record["release_id"] == RELEASE_ID, f"{case_id} record identity differs")
+        require(record["case_id"] == case_id and record["release_id"] == release_id, f"{case_id} record identity differs")
         require(record["truth_artifact"] == location["truth_artifact"], f"{case_id} truth descriptor differs")
+        if metadata_only:
+            extractor_hashes.add(record["extractor_sha256"])
+            continue
         truth = check_descriptor(record["truth_artifact"], f"{case_id} truth artifact")
         facts = check_truth_document(truth, case_id, definition)
         require(record["source_mesh_sha256"] == facts["source_mesh_sha256"], f"{case_id} source-mesh hashes differ")
@@ -677,13 +697,16 @@ def validate_release(
     expected = expected_release_files(universe, len(index["chunks"]), [
         {"case_set_id": descriptor["case_set_id"]} for descriptor in manifest["case_sets"]
     ])
+    if metadata_only:
+        expected -= {f"cases/{case_id}.json" for case_id in universe}
     _require_exact_tree(release_root, expected)
     return {
-        "release_id": RELEASE_ID,
+        "release_id": release_id,
         "manifest_sha256": manifest_sha,
         "case_count": len(universe),
         "case_sets": case_set_summary,
         "file_count": len(expected),
+        "truth_arrays_checked": not metadata_only,
     }
 
 

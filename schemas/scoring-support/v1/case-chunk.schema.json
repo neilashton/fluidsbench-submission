@@ -39,6 +39,16 @@
         "role": { "$ref": "#/$defs/safe_id" },
         "path": { "$ref": "#/$defs/relative_path" },
         "url": { "type": "string", "pattern": "^https://", "format": "uri" },
+        "archive": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["url", "sha256", "member"],
+          "properties": {
+            "url": { "type": "string", "pattern": "^https://", "format": "uri" },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "member": { "$ref": "#/$defs/relative_path" }
+          }
+        },
         "sha256": { "$ref": "#/$defs/sha256" },
         "byte_size": { "type": "integer", "minimum": 1 },
         "format": {
@@ -46,8 +56,9 @@
         }
       },
       "oneOf": [
-        { "required": ["path"], "not": { "required": ["url"] } },
-        { "required": ["url"], "not": { "required": ["path"] } }
+        { "required": ["path"], "not": { "anyOf": [{ "required": ["url"] }, { "required": ["archive"] }] } },
+        { "required": ["url"], "not": { "anyOf": [{ "required": ["path"] }, { "required": ["archive"] }] } },
+        { "required": ["archive"], "not": { "anyOf": [{ "required": ["path"] }, { "required": ["url"] }] } }
       ]
     },
     "support_instance": {
