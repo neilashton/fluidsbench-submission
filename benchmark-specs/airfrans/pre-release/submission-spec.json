@@ -2,11 +2,12 @@
   "schema_version": "1.1",
   "dataset_id": "airfrans",
   "dataset_name": "AirfRANS",
-  "dataset_version": "airfrans-native-v1",
-  "status": "official",
+  "dataset_version": "prototype-1",
+  "status": "prototype_dummy_data",
   "scoring_support": {
-    "status": "official",
-    "submissions_open": true,
+    "status": "owner_review_required",
+    "submissions_open": false,
+    "closed_reason": "Submissions are currently closed.",
     "coverage_contract": {
       "dimensionality": "2D flow domain and 1D airfoil curve",
       "rule": "complete_original_public_release_entities",
@@ -59,42 +60,21 @@
       "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
       "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
     },
-    "release_id": "airfrans-native-support-v1",
-    "manifest_file": "releases/airfrans-evaluation-v1/airfrans/scoring-support/airfrans-native-support-v1/manifest.json",
-    "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/airfrans-native-support-v1/manifest.json",
-    "manifest_sha256": "18231e558012d74c39ed4df4083ee2d5a60e7b9c6492ed3c10496a3ca70fd606",
-    "owner_approval": {
-      "approved_by": "Neil Ashton",
-      "approved_at": "2026-10-07",
-      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/47"
-    },
-    "publication_validation": {
-      "status": "passed",
-      "validated_by": "Codex automated artifact validation",
-      "validated_at": "2026-10-07T19:02:21Z",
-      "validator_file": "releases/airfrans-evaluation-v1/airfrans/publication-validator.py",
-      "validator_sha256": "3438dc41cdb6b9ac23d015d17152679885be009a41c829426a21ea90b90b01ec",
-      "case_count": 396,
-      "unique_case_count": 355,
-      "support_instance_count": 1188,
-      "normalized_support_sha256": "4473f04ad692b3d4151585bac024987e389599d369837b348860890b8d5cd1fb",
-      "manifest_sha256": "18231e558012d74c39ed4df4083ee2d5a60e7b9c6492ed3c10496a3ca70fd606",
-      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/47"
-    }
+    "owner_decisions_required": [
+      "pin_exact_public_release_files_revisions_and_hashes",
+      "confirm_array_names_entity_associations_masks_and_order",
+      "publish_authoritative_physical_weights_and_stable_entity_ids",
+      "approve_public_ground_truth_case_set_and_split_bindings",
+      "approve_loader_evaluator_and_immutable_scoring_support_manifest"
+    ]
   },
   "profile_definition": {
     "id": "airfrans-boundary-layer-v1",
     "file": "velocity-profiles-v1.json",
     "sha256": "2d662d89a133dd9329ee6540325883825907f5a1ff771af3904e1dc477a2753c",
-    "status": "official",
-    "profile_ground_truth": {
-      "status": "prepared_dev_only",
-      "release_id": "airfrans-native-profile-truth-v1",
-      "manifest_sha256": "a0d752e9d92fc7ad78cbfcf065c939a817d64a068cc8e83cc2a91d02c2aba805",
-      "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/airfrans-native-profile-truth-v1/manifest.json"
-    }
+    "status": "owner_review_required"
   },
-  "evaluation_reference_version": "airfrans-scoring-v2",
+  "evaluation_reference_version": "airfrans-scoring-v2-candidate",
   "default_field_reduction": "per_geometry_then_macro_average",
   "ranking": {
     "metric_id": "overall_score",
@@ -430,6 +410,15 @@
       "sha256": "c63cb0e1ccc480623ab2fb953335e37086b5203350a7ab4b9563ea4872cf9ebb"
     },
     {
+      "id": "reynolds_extrapolation",
+      "label": "Reynolds extrapolation",
+      "index_file": "splits/reynolds_extrapolation.json",
+      "case_count": 496,
+      "case_set_id": "reynolds_extrapolation",
+      "case_id_status": "official",
+      "sha256": "1c1a11cbee7f7445622f4603b5f190b73692bd0804358746af538cb336587188"
+    },
+    {
       "id": "aoa_extrapolation",
       "label": "AoA extrapolation",
       "index_file": "splits/aoa_extrapolation.json",
@@ -438,11 +427,5 @@
       "case_id_status": "official",
       "sha256": "58621bbd012d3d14f45f49783696ddb4f03766bd2db144624c2d77711b17961b"
     }
-  ],
-  "publication_status": "dev_intake",
-  "intake_branch": "dev",
-  "approved_release": {
-    "binding_file": "official-release-binding.json",
-    "binding_sha256": "d85da818db5b1fb94e086d850477a5a8a119cb5fac150d3d6f4ce1bed3050c78"
-  }
+  ]
 }

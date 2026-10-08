@@ -123,5 +123,56 @@
       ],
       "profile_truth_manifest_file": "benchmark-specs/airfrans/pre-release/transolverpp-full-v1/profile-truth-manifest.json"
     }
+  ],
+  "contract_snapshot": {
+    "file": "benchmark-specs/airfrans/pre-release/submission-spec.json",
+    "sha256": "fb51e3218942eb228ea246879a95f976e3451d7d86f68f992f5bcf83c1c73f20"
+  },
+  "prototype_packages": [
+    {
+      "submission_path": "submissions/airfrans/airfrans-graph-u-net-full/submission.json",
+      "package_tree": {
+        "algorithm": "sha256-posix-path-size-content-sha256-v1",
+        "sha256": "7cb785795041cd917a5172f3a58cd77ddeb4405a0bbb69aea3ff59e1ef4f31e6",
+        "file_count": 4,
+        "total_bytes": 567029
+      }
+    },
+    {
+      "submission_path": "submissions/airfrans/airfrans-graphsage-full/submission.json",
+      "package_tree": {
+        "algorithm": "sha256-posix-path-size-content-sha256-v1",
+        "sha256": "789d25f1635d8a4eddd6416c992c071178f45ad5392d7b6c2e237dcf536d33ce",
+        "file_count": 4,
+        "total_bytes": 1392263
+      }
+    },
+    {
+      "submission_path": "submissions/airfrans/airfrans-mlp-full/submission.json",
+      "package_tree": {
+        "algorithm": "sha256-posix-path-size-content-sha256-v1",
+        "sha256": "ce2c45634e3d70d6dfbf67ff8dba5bf9b5ed5eb1985353deaf487d361ae0d388",
+        "file_count": 4,
+        "total_bytes": 556104
+      }
+    },
+    {
+      "submission_path": "submissions/airfrans/airfrans-pointnet-full/submission.json",
+      "package_tree": {
+        "algorithm": "sha256-posix-path-size-content-sha256-v1",
+        "sha256": "79ebe532643ef2821c68393c22d3130c77abd6428f56389c9d401e7ccebc0c86",
+        "file_count": 4,
+        "total_bytes": 567086
+      }
+    },
+    {
+      "submission_path": "submissions/airfrans/dummy-airfrans-airfoiloperator-v1/submission.json",
+      "package_tree": {
+        "algorithm": "sha256-posix-path-size-content-sha256-v1",
+        "sha256": "d8dbf28e20de8ce8142350416b9579c19ddf8710bafb53ba57f28fb662012745",
+        "file_count": 4,
+        "total_bytes": 566732
+      }
+    }
   ]
 }

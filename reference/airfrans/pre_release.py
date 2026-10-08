@@ -21,13 +21,49 @@ ACTIVATION = {
 }
 
 
+def historical_contract(*, root=None):
+    """Load the hash-bound closed contract used by retained dev references."""
+    root = Path(root or Path(__file__).resolve().parents[2]).resolve()
+    registry = json.loads((root / REGISTRY_PATH).read_text())
+    binding = registry["contract_snapshot"]
+    path = root / binding["file"]
+    if path.is_symlink() or not path.resolve().is_relative_to(root / "benchmark-specs/airfrans"):
+        raise ValueError("historical AirfRANS contract escapes its dataset")
+    if sha256_file(path) != binding["sha256"]:
+        raise ValueError("historical AirfRANS contract digest differs")
+    spec = json.loads(path.read_text())
+    if (spec["scoring_support"]["status"] != "owner_review_required"
+            or spec["scoring_support"]["submissions_open"] is not False
+            or "owner_approval" in spec["scoring_support"]):
+        raise ValueError("historical AirfRANS contract must remain closed")
+    return spec
+
+
+def registered_prototype_contract(path, submission, manifest, *, root=None):
+    """Use the old contract only for exact retained prototype package bytes."""
+    root = Path(root or Path(__file__).resolve().parents[2]).resolve()
+    try:
+        relative = path.resolve().relative_to(root).as_posix()
+        registry = json.loads((root / REGISTRY_PATH).read_text())
+        entry = next(e for e in registry["prototype_packages"] if e["submission_path"] == relative)
+        if (manifest.get("data_release", {}).get("status") != "prototype_dummy_data"
+                or submission.get("schema_version") != "1.0"
+                or submission.get("approval", {}).get("status") != "prototype"
+                or json.loads(path.read_text()) != submission
+                or package_tree_binding(path.parent) != entry["package_tree"]):
+            return None
+        return historical_contract(root=root)
+    except (OSError, ValueError, KeyError, TypeError, StopIteration):
+        return None
+
+
 def registered_airfrans_pre_release_reference(path, submission, manifest, *, root=None):
     """Recognize only a complete, byte-bound package in the prototype feed."""
     root = Path(root or Path(__file__).resolve().parents[2]).resolve()
     try:
         relative = path.resolve().relative_to(root).as_posix()
         registry = json.loads((root / REGISTRY_PATH).read_text())
-        spec = json.loads((root / "benchmark-specs/airfrans/submission-spec.json").read_text())
+        spec = historical_contract(root=root)
         if (
             registry["schema"] != "airfrans-pre-release-reference-registry-v1"
             or registry["status"] != "closed_candidate_dev_only"
@@ -106,9 +142,9 @@ def registered_airfrans_pre_release_reference(path, submission, manifest, *, roo
     return deepcopy(entry)
 
 
-def candidate_validation_view(spec, manifest, binding):
+def candidate_validation_view(spec, manifest, binding, *, root=None):
     """Build a per-package candidate view; never mutate published contracts."""
-    spec, manifest = deepcopy(spec), deepcopy(manifest)
+    spec, manifest = historical_contract(root=root), deepcopy(manifest)
     spec["status"] = "owner_review_required"
     spec["scoring_support"]["candidate_manifest"] = deepcopy(binding["candidate_manifest"])
     manifest["data_release"]["profile_ground_truth"] = deepcopy(binding["profile_ground_truth"])

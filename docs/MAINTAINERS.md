@@ -31,13 +31,14 @@ citation eligibility, or promotion eligibility.
 1. Commit exactly one new submission directory. Do not modify schemas, specifications, validators, workflows, generated feeds, or
    existing submissions in the same pull request. Use a new globally unique `<series-id>-vN` submission ID and the revision rules
    in the [result reference](RESULT_FORMAT.md#result-versions).
-2. Open a pull request against `main` once FluidsBench announces that the dataset is accepting real submissions.
+2. For AirfRANS development intake, open the pull request against `dev`. Full, Scarce and AoA are enabled; Reynolds is closed.
+   Production intake remains closed. Future production submissions will target `main` after an explicit production launch.
 3. Complete the pull request checklist and resolve all automated validation failures.
 4. Maintainers review scientific provenance, public-evaluation-use eligibility, metadata, submitted values, result-data licence,
    and any declared artifact metadata, then merge the contributor package while it is still unapproved and absent from public
    feeds.
 5. A maintainer can run the **Maintainer approve and regenerate** workflow with the exact submission path, validator/approver
-   identities, validation timestamp, and approval date. It creates the validation record, binds the resulting draft PR URL,
+   identities, validation timestamp, and approval date. Select `dev` for dev intake: the approval PR targets the dispatched branch. It creates the validation record, binds the resulting draft PR URL,
    rebuilds and verifies the compact feeds, and opens the protected-branch PR. The final merge remains manual.
 6. Optional prediction checks are descriptive and never change approval or claim eligibility. The separate **Check optional
    prediction artifact metadata** workflow checks declarations only; it cannot award the blue badge. Follow the

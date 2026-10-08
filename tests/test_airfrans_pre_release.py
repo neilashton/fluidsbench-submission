@@ -39,6 +39,9 @@ class AirfransPreReleaseTests(unittest.TestCase):
         receipt_path.write_text(json.dumps(receipt))
         for item in self.entry['artifacts']:
             item['sha256'] = sha256_file(self.root / item['file'])
+        snapshot = self.root / registry['contract_snapshot']['file']
+        snapshot.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / registry['contract_snapshot']['file'], snapshot)
         registry['entries'] = [self.entry]
         self.registry = registry
         self.save_registry()
@@ -80,10 +83,11 @@ class AirfransPreReleaseTests(unittest.TestCase):
         self.manifest['data_release']['status'] = 'official'
         self.assertIsNone(self.binding())
 
-    def test_open_dataset_is_rejected(self):
-        spec = json.loads(self.spec_path.read_text())
+    def test_open_historical_contract_is_rejected(self):
+        snapshot = self.root / self.registry['contract_snapshot']['file']
+        spec = json.loads(snapshot.read_text())
         spec['scoring_support']['submissions_open'] = True
-        self.spec_path.write_text(json.dumps(spec))
+        snapshot.write_text(json.dumps(spec))
         self.assertIsNone(self.binding())
 
     def test_incomplete_receipt_is_rejected_even_when_rehashed(self):
@@ -100,7 +104,7 @@ class AirfransPreReleaseTests(unittest.TestCase):
     def test_candidate_view_preserves_closed_published_contract(self):
         spec = json.loads(self.spec_path.read_text())
         original = copy.deepcopy(spec)
-        view, manifest = candidate_validation_view(spec, self.manifest, self.entry)
+        view, manifest = candidate_validation_view(spec, self.manifest, self.entry, root=self.root)
         self.assertEqual(spec, original)
         self.assertNotIn('profile_ground_truth', self.manifest['data_release'])
         self.assertFalse(view['scoring_support']['submissions_open'])

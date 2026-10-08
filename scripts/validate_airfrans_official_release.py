@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check approved AirfRANS dev draft metadata while publication/intake remain closed.
+"""Check the approved AirfRANS draft and its active dev intake contract.
 
 CI validates the committed hash graph and full-artifact validation receipt. Arrays
 remain in prepared local archives; their complete load was performed at preparation,
@@ -94,9 +94,23 @@ def check(root=ROOT):
     require(all(url in assets and assets[url]["sha256"] == digest for url, digest in archive_bindings),
             "native table archive differs from the published asset binding")
     require(all(a["url"].startswith("https://github.com/neilashton/fluidsbench-submission/releases/download/" + a["release_id"] + "/")
-                and "?" not in a["url"] and "#" not in a["url"] for a in assets.values()), "asset URL is not immutable")
+                and "?" not in a["url"] and "#" not in a["url"] for a in assets.values()), "asset URL must identify its versioned dev prerelease")
+    if active.get("publication_status") == "dev_intake":
+        require(active.get("intake_branch") == "dev", "AirfRANS intake must target dev")
+        expected = json.loads(json.dumps(contract))
+        expected["publication_status"] = "dev_intake"
+        expected["intake_branch"] = "dev"
+        expected["approved_release"] = declaration
+        expected["scoring_support"]["submissions_open"] = True
+        expected["scoring_support"].pop("closed_reason", None)
+        prefix = "releases/airfrans-evaluation-v1/airfrans/"
+        expected["scoring_support"]["manifest_file"] = prefix + expected["scoring_support"]["manifest_file"]
+        expected["scoring_support"]["publication_validation"]["validator_file"] = prefix + "publication-validator.py"
+        require(active == expected, "dev intake differs from the approved scoring contract")
+    else:
+        require(active["scoring_support"]["submissions_open"] is False, "unknown AirfRANS activation")
     return {"contract_id": binding["contract_id"], "enabled_split_ids": binding["enabled_split_ids"],
-            "unique_cases": 355, "intake_open": False, "publicly_published": False}
+            "unique_cases": 355, "intake_open": active["scoring_support"]["submissions_open"], "publicly_published": False}
 
 
 if __name__ == "__main__":
