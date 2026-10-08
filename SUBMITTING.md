@@ -1,5 +1,10 @@
 # Submitting a result
 
+AirfRANS intake is open on `dev` for Full, Scarce and AoA extrapolation. Follow the
+[dev download and intake guide](benchmark-specs/airfrans/RELEASES.md); open submission PRs against `dev`.
+Reynolds and other datasets are still closed.
+
+
 **Intake is closed for every dataset.** Use a candidate workflow only for local or dataset-owner-coordinated review until the
 dataset's specification declares an official, owner-approved support release with `submissions_open=true`.
 Candidate, prototype, and pre-release reference results do not establish an official leaderboard claim.
@@ -150,7 +155,7 @@ recompute submitted base metrics.
 
 1. Commit exactly one entirely new submission directory. Do not change specifications, schemas, scripts, workflows, generated
    feeds, existing submissions, or maintainer-owned files in that PR.
-2. Open the PR against `main` after FluidsBench announces that the dataset is accepting real submissions.
+2. For AirfRANS dev intake, target `dev`. Production `main` intake remains closed until an explicit production launch.
 3. Complete the [contributor checklist](.github/pull_request_template.md) and resolve all automated failures.
 4. Retain the evaluation evidence: maintainers review scientific provenance, data use, submitted values, licences, and any
    declared artifacts, and may request calculation evidence.

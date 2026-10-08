@@ -458,7 +458,8 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
             with self.subTest(dataset_id=dataset_id):
                 self.assertEqual(
                     manifest_datasets[dataset_id].get("scoring_support"),
-                    specification["scoring_support"],
+                    {key: value for key, value in specification["scoring_support"].items()
+                     if key != "manifest_file"},
                 )
 
 

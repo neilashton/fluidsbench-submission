@@ -6299,6 +6299,9 @@ def validate_open_reproducibility(
                 "HiLiftAeroML candidate dry-run profile truth has no benchmark "
                 "declaration"
             )
+    elif submission.get("dataset_id") == "airfrans" and not candidate_dry_run:
+        ground_truth = dataset_spec.get("profile_definition", {}).get("profile_ground_truth", {})
+        ground_truth_source = "the AirfRANS dataset contract"
     else:
         ground_truth = manifest.get("data_release", {}).get(
             "profile_ground_truth", {}
@@ -7245,8 +7248,13 @@ def validate_submission_file(
     dataset_spec = load_json(spec_path)
     if registered_airfrans:
         dataset_spec, manifest = airfrans_candidate_validation_view(
-            dataset_spec, manifest, airfrans_pre_release
+            dataset_spec, manifest, airfrans_pre_release, root=ROOT
         )
+    elif submission["dataset_id"] == "airfrans" and not contributor_stage:
+        from reference.airfrans.pre_release import registered_prototype_contract
+        historical = registered_prototype_contract(path, submission, manifest, root=ROOT)
+        if historical is not None:
+            dataset_spec = historical
     if dataset_spec.get("dataset_id") != submission["dataset_id"]:
         add("benchmark specification dataset_id does not match submission.json")
         return errors, stats

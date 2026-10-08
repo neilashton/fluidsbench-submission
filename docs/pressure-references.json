@@ -106,8 +106,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/airfrans/submission-spec.json",
-          "sha256": "e165ecdf6fd3f5ebbd897ba62f118fff1e02deb7ed906f62fa86895ad1f1af95",
-          "finding": "The dev scoring specification. Re-audited 2026-09-30 after the scoring-v2 composite-weight update: pressure fields, units, offsets, metric definitions, and extraction remain unchanged. Re-audited 2026-10-07: the added approved-release pointer does not change the active pressure contract."
+          "sha256": "d12207fb79ccde80dba2563028ef9f36079dd1e1343c5289f97e3388178752d0",
+          "finding": "The dev scoring specification. Re-audited 2026-09-30 after the scoring-v2 composite-weight update: pressure fields, units, offsets, metric definitions, and extraction remain unchanged. Re-audited 2026-10-07: the added approved-release pointer does not change the active pressure contract. Re-audited 2026-10-07 for dev intake activation: approved native-v1/scoring-v2 pressure fields, units, reference and metric definitions exactly match the archived candidate contract."
         },
         {
           "path": "reference/airfrans_profiles.py",
@@ -359,8 +359,8 @@
         },
         {
           "path": "scripts/validate_submission.py",
-          "sha256": "a99fa6d6e06ecdb87d7ec175601d89b2f33f029b1128830b6ca0d69abb63e2fe",
-          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Rechecked for the AirfRANS pre-release registration: the new per-package candidate view is restricted to hash-bound AirfRANS references; HiLiftAeroML pressure and SI export validation are unchanged."
+          "sha256": "b7376318fd18a54c61fe7d0283ef4793a3826f9f97711f041f0a172fe5600867",
+          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Rechecked for the AirfRANS pre-release registration: the new per-package candidate view is restricted to hash-bound AirfRANS references; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-08: the validator change selects AirfRANS dataset-local truth and its retained historical contract; the HiLiftAeroML pressure, units and evaluation paths remain unchanged."
         },
         {
           "path": "benchmark-specs/hiliftaeroml/dimensional-export-correction-v1/verification.json",

@@ -2,7 +2,9 @@
 
 # Dataset contracts
 
-**All datasets are currently closed to public submissions.** Choose a dataset below, then follow [SUBMITTING.md](../SUBMITTING.md).
+**AirfRANS Full, Scarce and AoA extrapolation are open on `dev`.**
+Follow the [dev intake guide](airfrans/RELEASES.md) and submit PRs against `dev`. Reynolds and the other datasets remain closed.
+Choose a dataset below, then follow [SUBMITTING.md](../SUBMITTING.md).
 Each `submission-spec.json` defines the accepted splits, exact native fields and associations, support identities, metrics,
 units, weights, profiles, evaluator version, and lifecycle gates consumed by the validator.
 

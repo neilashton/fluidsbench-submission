@@ -6,6 +6,7 @@ import math
 import unittest
 from pathlib import Path
 
+from reference.airfrans.pre_release import historical_contract
 from reference.scores import composite_component_group_scores, composite_overall_score
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -77,16 +78,15 @@ class AirfransContractTests(unittest.TestCase):
         self.assertNotIn("cp_cut_r2", {m["id"] for m in self.specification["metrics"]})
 
     def test_prototype_packages_bind_the_revised_scores_and_evidence(self) -> None:
-        self.assertEqual(
-            self.specification["evaluation_reference_version"], "airfrans-scoring-v2-candidate"
-        )
-        self.assertFalse(self.specification["scoring_support"]["submissions_open"])
+        legacy = historical_contract(root=ROOT)
+        self.assertEqual(legacy["evaluation_reference_version"], "airfrans-scoring-v2-candidate")
+        self.assertFalse(legacy["scoring_support"]["submissions_open"])
         for path in sorted((ROOT / "submissions/airfrans").glob("*/submission.json")):
             with self.subTest(submission=path.parent.name):
                 submission = load_json(path)
                 evidence_path = path.parent / submission["evaluation"]["evidence_file"]
                 evidence = load_json(evidence_path)
-                version = self.specification["evaluation_reference_version"]
+                version = legacy["evaluation_reference_version"]
                 self.assertEqual(submission["evaluation"]["reference_version"], version)
                 self.assertEqual(evidence["reference_version"], version)
                 self.assertEqual(submission["evaluation"]["evidence_sha256"], sha256_file(evidence_path))
@@ -107,7 +107,7 @@ class AirfransContractTests(unittest.TestCase):
         binding = self.specification["profile_definition"]
         self.assertEqual(binding["id"], "airfrans-boundary-layer-v1")
         self.assertEqual(binding["sha256"], sha256_file(self.profile_definition_path))
-        self.assertEqual(binding["status"], "owner_review_required")
+        self.assertEqual(binding["status"], "official")
 
         source = self.profile_definition["source_library"]
         self.assertEqual(source["version"], "0.1.5.1")
@@ -318,7 +318,6 @@ class AirfransContractTests(unittest.TestCase):
         expected_manifest_keys = {
             "full": "full_test",
             "scarce": "full_test",
-            "reynolds_extrapolation": "reynolds_test",
             "aoa_extrapolation": "aoa_test",
         }
         spec_splits = {entry["id"]: entry for entry in self.specification["splits"]}
