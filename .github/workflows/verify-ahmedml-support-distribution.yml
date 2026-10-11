@@ -13,10 +13,10 @@ jobs:
   verify-full-split:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      FLUIDSBENCH_AHMEDML_SUPPORT_ROOT: ${{ runner.temp }}/ahmedml-full-support
     steps:
       - uses: actions/checkout@v4
+      - name: Select an empty runner-local cache
+        run: echo "FLUIDSBENCH_AHMEDML_SUPPORT_ROOT=$RUNNER_TEMP/ahmedml-full-support" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
