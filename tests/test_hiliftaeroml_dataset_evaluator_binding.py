@@ -72,6 +72,7 @@ def _submission_and_evidence() -> tuple[dict, dict]:
         "command": submission["evaluation"]["command"],
         "generated_at": "2026-09-02T12:00:00Z",
         "status": "submitted_evaluation",
+        "dimensional_unit_conversion": assembler.dimensional_export_binding(),
         "metric_values": metric_values,
         "profile_index_sha256": "6" * 64,
         "profile_ground_truth_release_id": submission["profile_data"][

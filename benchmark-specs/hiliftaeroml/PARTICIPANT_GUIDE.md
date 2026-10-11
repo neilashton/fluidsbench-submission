@@ -1,4 +1,4 @@
-# HiLiftAeroML closed-candidate participant guide
+# HiLiftAeroML candidate participant guide
 
 This guide describes how to prepare and locally validate a HiLiftAeroML
 FluidsBench schema-v3 candidate. It is intentionally not an invitation to
@@ -6,12 +6,21 @@ submit a result. The checked-in specification has `submissions_open: false`,
 the evaluator scoring truth is not fully published (the separate public plot truth is not scoring support), and final evaluator/owner release gates remain
 authoritative.
 
-No private leaderboard is part of this work. The commands below create and
-validate local files only. They do not upload a result or make it visible in a
-public or private leaderboard.
+The legacy dry-run commands below create and validate local files only. The
+separate development workflow adds a PR and maintainer registration step for
+non-citable results on the dev leaderboard.
 
 Use the shared [hardware and compute fields](../../METHODOLOGY.md#hardware-and-compute)
 for each training stage and inference campaign, including GPU model and allocation counts.
+
+## Development submissions
+
+For a new development PR, follow the [dev workflow](../../examples/hiliftaeroml-v3-candidate/README.md#development-pr-workflow).
+It resolves benchmark release fields, verifies local checkpoint bytes, validates
+new packages, and registers reviewed results for the dev leaderboard. The
+complete compact scoring-support bundle is required; its download publication
+is still pending. The legacy local dry-run route below remains available.
+Official approval and public intake remain separate, closed gates.
 
 ## Before you start
 

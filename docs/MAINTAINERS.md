@@ -246,3 +246,42 @@ rebind is recorded in
 Both records remain intentionally non-activating.
 
 Keep this benchmark/evaluator-owned support outside participant packages. Creating it does not publish support, approve the evaluator, or open submissions.
+
+
+## HiLiftAeroML dev registration and support transport
+
+New development submissions use the [dev workflow](../examples/hiliftaeroml-v3-candidate/README.md#development-pr-workflow).
+The 23 historical previews retain their exact legacy archive registrations.
+New registrations are data records in
+`benchmark-specs/hiliftaeroml/pre-release-reference-registry.json`; they bind the
+whole package and require actual-inference attestation plus verified checkpoint
+identities. Neither route grants official approval.
+
+One prerequisite remains before clean external PR runners can validate a new
+package: distribute the complete existing compact support. Its manifest hash is
+`7f946510cf8f63d05adaff4c91980d74f29c45ed7209b5a8f7e604e521cb823b`, covering
+1,355 unique cases in eight ordered case sets and 1,028,030,877 regular-file bytes.
+The public plot truth is not an alternative scoring input.
+
+With that exact authorized local bundle, prepare a deterministic archive:
+
+```bash
+python scripts/prepare_hiliftaeroml_dev_support.py \
+  --source-release /path/to/hiliftaeroml-compact-profile-support-v2-candidate \
+  --archive /path/to/hiliftaeroml-dev-support.zip
+```
+
+Publish the archive as a development prerequisite and bind its HTTPS URL plus
+the returned SHA-256, byte size and expanded byte size in `support_transport`
+of `benchmark-specs/hiliftaeroml/dev-release.json`. This is a transport binding;
+it must not rewrite the support's historical manifest or activation records.
+Check retrieval on a clean cache before advertising the workflow as ready.
+The resolver verifies the archive and the canonical support's transitive
+inventory before caching it. Local environments may use
+`FLUIDSBENCH_HILIFT_PROFILE_SUPPORT` or `--profile-support-release` instead.
+Missing or incorrect support fails closed; no PR label bypasses recomputation.
+
+A maintainer then runs `register_hiliftaeroml_pre_release.py --register`, builds
+and checks the dev feed, and commits those generated changes on a branch based
+on the contributor PR. Only exact registrations appear on the dev leaderboard;
+publication does not require editing hard-coded validator lists.

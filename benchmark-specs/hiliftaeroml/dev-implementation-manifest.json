@@ -1,0 +1,391 @@
+{
+  "schema": "hiliftaeroml-dev-implementation-manifest-v1",
+  "scope": "local_compact_profile_adapter_SI_export_regional_aggregation_packaging_validation_and_dev_registration",
+  "native_field_force_evaluator": "separately_bound_by_submission_specification",
+  "files": [
+    {
+      "file": "benchmark-specs/hiliftaeroml/dimensional-export-si-v1.json",
+      "sha256": "a25f25b24228b72b0798704a155745ea5aab40db928e3e27a01904ec868acc59"
+    },
+    {
+      "file": "benchmark-specs/hiliftaeroml/methodology-contract.json",
+      "sha256": "835f55a8f5c296f8635cbfdb9f09315fdcec16832ec14c4cd96e5eed08e96d9c"
+    },
+    {
+      "file": "benchmark-specs/hiliftaeroml/native-profile-format-v2.json",
+      "sha256": "b1fd29b2cb6c1c84c694ddffc5d85f6cd68fd175b79c3695a443aa78bf962c2f"
+    },
+    {
+      "file": "benchmark-specs/hiliftaeroml/regional-diagnostics-v2.json",
+      "sha256": "8cf926d06706b8cc7fd58d821f395bf8cb6565ef1f3aabe6be18e0a279101da4"
+    },
+    {
+      "file": "benchmark-specs/hiliftaeroml/submission-spec.json",
+      "sha256": "864c80b632c9b6c4ba21ffa92b0da64b09a30987a5b6eb1e8f75ea72768bbfee"
+    },
+    {
+      "file": "reference/__init__.py",
+      "sha256": "5074f013dc81c742462061ca500896991389d20cfb6e252a8fc9a1f7890e6575"
+    },
+    {
+      "file": "reference/ahmedml/__init__.py",
+      "sha256": "4fd49ad7b9cf1b19019ad7bef258e95f828f004f291f525f711ee5806a66fc06"
+    },
+    {
+      "file": "reference/ahmedml/contract.py",
+      "sha256": "5afaff188080f04295969c8323b04f5b91bcbbc51c9f4917f0c5affe9f057bb7"
+    },
+    {
+      "file": "reference/ahmedml/dataset_scorer.py",
+      "sha256": "d3c3a7c170e387b62ce5f8203e23b7195471034f4f88b5b7d5a26cf2b23d03e6"
+    },
+    {
+      "file": "reference/ahmedml/evaluator.py",
+      "sha256": "29667f5a5234f9a50b71cb19cc6e41ce6ec56e8baf9817422e0688f73e7fcfc9"
+    },
+    {
+      "file": "reference/ahmedml/pre_release.py",
+      "sha256": "59359f6af5bc7067dc03e22c5860d1e4c597df2a60731e36e267c257efe84360"
+    },
+    {
+      "file": "reference/ahmedml/prediction_chunks.py",
+      "sha256": "4278d743934fefc1eff26609f544a93e0222a8726bce8f7d1be28aa0a9cfbeef"
+    },
+    {
+      "file": "reference/ahmedml/regional_aggregate.py",
+      "sha256": "255ec895c04a4748bc555497c952d3c72ddb90727772715c28469c30763f34b8"
+    },
+    {
+      "file": "reference/ahmedml/support.py",
+      "sha256": "5c2e039f8f3a5b5470c99b6f6677987780ab17c7052d5e5ef0c23dda67e1b4b8"
+    },
+    {
+      "file": "reference/airfrans/geometry.py",
+      "sha256": "665da63746963362236b3531c2ee01311989f478c695ce49cec6b04b568408b8"
+    },
+    {
+      "file": "reference/airfrans/pre_release.py",
+      "sha256": "f00d8498a1c846e0f357f9d98cb14931d5797c6224047071d29e734311cd2733"
+    },
+    {
+      "file": "reference/airfrans/profile_truth.py",
+      "sha256": "a46df7ddc90f1eaee94efd834449a1599a0841fe513f4ca5bb226233ef88ae35"
+    },
+    {
+      "file": "reference/airfrans_profiles.py",
+      "sha256": "daf8db3682fe323c3a13d3a7878272af16bb6aa287eea56d7ce6bb24d01cf5f0"
+    },
+    {
+      "file": "reference/drivaerml/__init__.py",
+      "sha256": "6206c42ee88eb6a6daa3088b1134b9e01c542db18c16226be5a3eb3fdea4936e"
+    },
+    {
+      "file": "reference/drivaerml/accumulators.py",
+      "sha256": "595079a4d88d059cdd25ebd7b2810bf7d3a44542197d84b489138e315dbbea9b"
+    },
+    {
+      "file": "reference/drivaerml/autocfd5.py",
+      "sha256": "1ca2b1557575bca6201d828fc5ddeecee5fe461f00ff16365d12bbf1bd52d57a"
+    },
+    {
+      "file": "reference/drivaerml/coordinate_identity.py",
+      "sha256": "5a2dbce1e08b4d5231b9c38fa93d16615e5c9d04ce4f0f85caeb7c6ed1914916"
+    },
+    {
+      "file": "reference/drivaerml/cp_mapping.py",
+      "sha256": "1eed9df98ccb63703bd62395302030e5715c3c2f5645144c63f3a2c72d35c2bb"
+    },
+    {
+      "file": "reference/drivaerml/dataset_scorer.py",
+      "sha256": "304ecbb7c3fd3c2e405451e0d5de4696e95ff95fee7d2b6d837f46d5868c9628"
+    },
+    {
+      "file": "reference/drivaerml/dev_profiles.py",
+      "sha256": "de15483370a708d443f988612a71704051f588c01afbfbca4c10d26d355d563a"
+    },
+    {
+      "file": "reference/drivaerml/dev_workflow.py",
+      "sha256": "f95cc56955277e20bd9bb6a9d65190f41f13fec7f2f2f56e6a31120d13101d63"
+    },
+    {
+      "file": "reference/drivaerml/diagnostic_evaluator.py",
+      "sha256": "257ce8b01184951b0d805206e6a46b3e213903abdca56f59b8449da589c3e2a0"
+    },
+    {
+      "file": "reference/drivaerml/evaluator.py",
+      "sha256": "be5a8682a98bee5387c11d46eb190eacd1d555d983930c0ef797bf027010ed4c"
+    },
+    {
+      "file": "reference/drivaerml/methodology.py",
+      "sha256": "9f3a5b9837c8ef796ef28c7898e3394c7a3627c366e64b7617c317db187489af"
+    },
+    {
+      "file": "reference/drivaerml/native_fields.py",
+      "sha256": "235caa27914717f74b302933387928a0bb0b56257c47b6fcbbc101c6e05ca25d"
+    },
+    {
+      "file": "reference/drivaerml/native_surface.py",
+      "sha256": "d204ba6776b8c7cc4738dd946f6e65b2e529cb506a1555452c18b07f65927837"
+    },
+    {
+      "file": "reference/drivaerml/native_volume_geometry.py",
+      "sha256": "de5ccaf8877318f0e6ace555e5481ca61f6f023ae1ca63d98d6e9588702370a1"
+    },
+    {
+      "file": "reference/drivaerml/pre_release.py",
+      "sha256": "67fc58165aca1d85e485f91257606ebece357fcd692c280491fe326d2c284690"
+    },
+    {
+      "file": "reference/drivaerml/prediction_chunks.py",
+      "sha256": "16cf46cd04a831b0400573ed1c0c470208ea2d5fa0c41a61ff3cf22c70016e8d"
+    },
+    {
+      "file": "reference/drivaerml/profile_convergence.py",
+      "sha256": "a79e9c9b9c2d9d06a5a9aff236eb89dbfb5ce81bcbd91579cd75c324bb20b25c"
+    },
+    {
+      "file": "reference/drivaerml/profile_convergence_evaluator.py",
+      "sha256": "96207fbe44925edfd46c1fb2f01881c9b2defba498535d753443db8163075143"
+    },
+    {
+      "file": "reference/drivaerml/regional_aggregate.py",
+      "sha256": "a8f7093e87600a0c5dca51d015ecb4b43dc2df2afcbf2f237500b923afce4b15"
+    },
+    {
+      "file": "reference/drivaerml/regional_diagnostics.py",
+      "sha256": "41e3c78064d23940de15a4ad92a455a130156500395c9d970c68b69fa5fb487c"
+    },
+    {
+      "file": "reference/drivaerml/retained_file.py",
+      "sha256": "d9a4bd7a9633c8d0bb528fba8eb77ed15bf6a3281c7761cb7b26b0791b8ef1e1"
+    },
+    {
+      "file": "reference/drivaerml/source.py",
+      "sha256": "c5fd75580e13929246dd1591e2578ffba819b35ec653ce3b039f48fd27d7ccc2"
+    },
+    {
+      "file": "reference/drivaerml/surface_forces.py",
+      "sha256": "1783e2f63b5c52401af9b2a38bbd51d05c7cdf5bf44b9e705da802f9ba52374b"
+    },
+    {
+      "file": "reference/drivaerml/velocity_assignments.py",
+      "sha256": "f3120fef41b8a2373de65fe67a91a65c190cd9c3305f251df07a4f09cd1b384b"
+    },
+    {
+      "file": "reference/drivaerml/volume_regions.py",
+      "sha256": "43473312c87fc8d1de1a306af191877eeb44312f80d6508448f003bc7fbf5166"
+    },
+    {
+      "file": "reference/evaluate_predictions.py",
+      "sha256": "90f9061dbfd02e59ab7c5bcd0d57af650eb54ecec8c08dabe507e0154db25df8"
+    },
+    {
+      "file": "reference/example_calculation.py",
+      "sha256": "ed26eca2e53938aa62ea7aa31f774302784187efc32665e0358a9e76c089e596"
+    },
+    {
+      "file": "reference/hiliftaeroml/__init__.py",
+      "sha256": "5542e8724d6ad93f1042a88e7b52dda67ff740a4a116d2308f840081a9d232e4"
+    },
+    {
+      "file": "reference/hiliftaeroml/compact_profile_evaluator.py",
+      "sha256": "dc098deb5b538ff816261f2fb15223f4f6d85418cdd05d128e161fffac51e324"
+    },
+    {
+      "file": "reference/hiliftaeroml/compact_profiles.py",
+      "sha256": "8dc93c742d307b9e6f5f478bcf63e2f02fd4bc24de566e1229f71570fb62f48a"
+    },
+    {
+      "file": "reference/hiliftaeroml/dev_release.py",
+      "sha256": "c7d7c8ccd715dab46b2843d43a046d9faf5a8c119d95a328800d78837207b5b8"
+    },
+    {
+      "file": "reference/hiliftaeroml/dev_support.py",
+      "sha256": "45d6eb07644ef688e707ae8e56456763ad77dcedd02ea840f557ca103012b3e8"
+    },
+    {
+      "file": "reference/hiliftaeroml/dimensional_units.py",
+      "sha256": "4826cc142b584e1606ea5b19ae9eea767d96cf3d42d41a3707ebebbc2922ad73"
+    },
+    {
+      "file": "reference/hiliftaeroml/exact_moment_audit.py",
+      "sha256": "9a8c81a9c30f73d531198709c2de1d93f682290acb27a47ba77607d107441773"
+    },
+    {
+      "file": "reference/hiliftaeroml/exact_moment_numba.py",
+      "sha256": "3c01e0ab6074fe687bb7e6afa5b78e2c0ac0724fe49848e956032f21bc5d0969"
+    },
+    {
+      "file": "reference/hiliftaeroml/native_profile_evaluator.py",
+      "sha256": "089545cec8644fd79021723d4a93c9a98c300619960bd670279a622fdf3453b4"
+    },
+    {
+      "file": "reference/hiliftaeroml/native_profile_truth.py",
+      "sha256": "f847e85d1574a90ccb39b6bb4f5fb54b4281f8b0866a5f90b74c8062a2c53928"
+    },
+    {
+      "file": "reference/hiliftaeroml/native_profile_truth_materializer.py",
+      "sha256": "4034ac7c615dd8c17536dbc70021ecf68ca155e6ba229006c8fb774fd8071e5d"
+    },
+    {
+      "file": "reference/hiliftaeroml/native_profiles.py",
+      "sha256": "685c454f6cd4702f0dccd6325dc61e480af2c0f7e74aac7fd3f9d674bea70364"
+    },
+    {
+      "file": "reference/hiliftaeroml/pre_release.py",
+      "sha256": "9093962d1daaed41b9e40390de117d47a6161dc23a8b6ef6721879d926a2cf4e"
+    },
+    {
+      "file": "reference/hiliftaeroml/regional_aggregate.py",
+      "sha256": "cfe2fb6ef1cd6f8d16453f258a5198531301dccb0d2a521f4208c96bed3083ca"
+    },
+    {
+      "file": "reference/methodology.py",
+      "sha256": "44afcc538d8199a1c36fdd58c37be9e83b21fef0e40ae5576a66f729436ff088"
+    },
+    {
+      "file": "reference/metrics.py",
+      "sha256": "0a46d1fc44c1621ddb6f246cceb299ebe4bbb501c61a5eb567e8eeafe6f3017a"
+    },
+    {
+      "file": "reference/scores.py",
+      "sha256": "1e496b51aa2c1e924309785cb2a5976e8fd840c44b677e0322d6f4f7bf042e06"
+    },
+    {
+      "file": "reference/scoring_support.py",
+      "sha256": "8b3cfe26785ba39e5801ef5553700e2fd211cf595c67d5de5b746ffba8ce6948"
+    },
+    {
+      "file": "reference/weightings.py",
+      "sha256": "ddd158a533eb03b3927054a61d4e435f3fa0b2afbc2f242e4f9d7c713ea97f48"
+    },
+    {
+      "file": "reference/windsorml/__init__.py",
+      "sha256": "d307bd457606adbb4c516662e38c7ccbf6e01690a332c84adcc234f02d66b448"
+    },
+    {
+      "file": "reference/windsorml/contract.py",
+      "sha256": "c57e37acfa3bff13b6302bc57b6c20c0dab3b0f9a38b643fe91747183366bb3c"
+    },
+    {
+      "file": "reference/windsorml/dataset_scorer.py",
+      "sha256": "0c93b6cdd044d52d194c427557409cfd4e5a5cf197c1c14f82d8f142d87021f9"
+    },
+    {
+      "file": "reference/windsorml/evaluator.py",
+      "sha256": "01b0e1495bec40c9eb5fc6479350d1103bce7d43d39b6b81d8b9bd18e0e223f9"
+    },
+    {
+      "file": "reference/windsorml/package.py",
+      "sha256": "071975b5b50593981f113eac2fdbf7e304b4ceea6dc770ab7357cf8c499d120b"
+    },
+    {
+      "file": "reference/windsorml/pre_release.py",
+      "sha256": "cf9856b2d0d774a46597e38f665acf938c309400bed053f70de68aebdba2953e"
+    },
+    {
+      "file": "reference/windsorml/prediction_chunks.py",
+      "sha256": "f97388a388a02785f166db709e6c9f6e6095fbf50358f76b1b3c72d20bc57875"
+    },
+    {
+      "file": "reference/windsorml/profiles.py",
+      "sha256": "3678ba33ecbdd8b8f472702f387dc5ec732c1cfc5b4da73eb6261e7c5c69c14e"
+    },
+    {
+      "file": "schemas/v1/drivaerml-relative-profile-chunk.schema.json",
+      "sha256": "ff5c5965bb00633303b9372360879d02535f7946c882b9cfcefe1ee55446a0d2"
+    },
+    {
+      "file": "schemas/v1/drivaerml-surface-profile-chunk.schema.json",
+      "sha256": "91fb01ff725d9b34eb5f3f65843393f1df736bf7cdce5d7f07e771c7577c4234"
+    },
+    {
+      "file": "schemas/v1/evaluation-evidence.schema.json",
+      "sha256": "3203681adb46720f33ae5762033e7d255f96747dd5a9b08876fce783561b5522"
+    },
+    {
+      "file": "schemas/v1/hiliftaeroml-compact-profile-chunk.schema.json",
+      "sha256": "ac01a161cf3a10c3eae67e1149c639510c31d576b7122f390e7530dd5c057bfd"
+    },
+    {
+      "file": "schemas/v1/hiliftaeroml-native-profile-chunk.schema.json",
+      "sha256": "2b85d21f966f51e9b54075e5fad50e6d781815fa029863b8d054c2e6dc662da5"
+    },
+    {
+      "file": "schemas/v1/maintainer-replay.schema.json",
+      "sha256": "c940339a778c46e330edf0c4472f990f0875295b54b3893f5e8bb62400f5c71b"
+    },
+    {
+      "file": "schemas/v1/profile-chunk.schema.json",
+      "sha256": "cc35849a0eeaa3c6117db8dd8e185f12786c44cfceb5210e85ed9c879b9d1c81"
+    },
+    {
+      "file": "schemas/v1/profile-index.schema.json",
+      "sha256": "015339871feda42600d6a1846ee79c05144036885afab7958238082f58ceef12"
+    },
+    {
+      "file": "schemas/v1/submission.schema.json",
+      "sha256": "589f6c4f40ead84aaddbeef7e080f974a526f1a23afdf6931309ace76623a0f4"
+    },
+    {
+      "file": "schemas/v3/case-metrics.schema.json",
+      "sha256": "0cbaab018706b6dd491bde84dd89ae31e1c93b34932470320580da2ec6dc4f84"
+    },
+    {
+      "file": "schemas/v3/discretization-case.schema.json",
+      "sha256": "c1161501eb6c864ec2638656c435393e62c67538dc9b78e106bf185df5dc1920"
+    },
+    {
+      "file": "schemas/v3/discretization.schema.json",
+      "sha256": "6dd6a99c2614e5c161d5eb153e5494a46634aeed7ec9865654024bb3cb9de845"
+    },
+    {
+      "file": "schemas/v3/evaluation-evidence.schema.json",
+      "sha256": "9ed3ca0bee9eee76f0e9d3517a857b182c681ca09a80f8d3a14ae84385700e15"
+    },
+    {
+      "file": "schemas/v3/maintainer-validation.schema.json",
+      "sha256": "0ee2aff4b2b33e8a9af759b494388af66a6917316849251c7aa6a6ccb7d35ace"
+    },
+    {
+      "file": "schemas/v3/prediction-artifact-checks.schema.json",
+      "sha256": "c3d8bb166e54ad487e703feae417d49890a840a83ae706d76b13c20bce2600c6"
+    },
+    {
+      "file": "schemas/v3/prediction-artifact.schema.json",
+      "sha256": "e99e50f3fe65bed88068b3e80b3bebdbfd01d661d443deca7cd2b8a816fa3177"
+    },
+    {
+      "file": "schemas/v3/submission.schema.json",
+      "sha256": "ed97fd7ab8b0fdb27db6ac69864655d404c2e204a0b72ec7018b618b1e605411"
+    },
+    {
+      "file": "scripts/assemble_hiliftaeroml_schema_v3_candidate.py",
+      "sha256": "be0b346924f65c0e062c915d2dedbfc2fdc0514027423d0b986cb6aac25b9d25"
+    },
+    {
+      "file": "scripts/assemble_windsorml_schema_v3_candidate.py",
+      "sha256": "3ef6a47ad70857a670a035356a33d0b36f406182864db166f30a29007ef24aa3"
+    },
+    {
+      "file": "scripts/manage_leaderboard.py",
+      "sha256": "314b5e5aa42f445d7861f8faf4fe0cc4f87e93717b62b47164a8cbdce7359bec"
+    },
+    {
+      "file": "scripts/prepare_hiliftaeroml_dev_support.py",
+      "sha256": "91a2ab69597040850042fe51a07209c8959149fba60b9fdbdbdbc40a661098db"
+    },
+    {
+      "file": "scripts/register_hiliftaeroml_pre_release.py",
+      "sha256": "4264b2c15306e61605b24f173a7ec25ab64c06f45296790ddc15b0637041f5ba"
+    },
+    {
+      "file": "scripts/validate_scoring_supports.py",
+      "sha256": "b173ec9b6ecdb349042388065e9247b397b6e8b6f2c43f8d787cf3a791803334"
+    },
+    {
+      "file": "scripts/validate_submission.py",
+      "sha256": "d5eccfba0d55f92ad2c3fc2db7c1eeb61bf3d727f2ac9e69fec38539d4441cb8"
+    }
+  ]
+}
