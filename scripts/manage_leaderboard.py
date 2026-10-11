@@ -1440,8 +1440,13 @@ def main() -> int:
     subparsers = parser.add_subparsers(dest="command", required=True)
     validate_parser = subparsers.add_parser("validate", help="validate submission directories")
     validate_parser.add_argument("paths", nargs="*", type=Path)
-    subparsers.add_parser("build", help="validate and regenerate all leaderboard feeds")
-    subparsers.add_parser("check", help="validate submissions and verify generated feeds")
+    build_parser = subparsers.add_parser("build", help="validate and regenerate all leaderboard feeds")
+    check_parser = subparsers.add_parser("check", help="validate submissions and verify generated feeds")
+    for intake_parser in (validate_parser, build_parser, check_parser):
+        intake_parser.add_argument(
+            "--dev-intake", action="store_true",
+            help="validate unapproved AhmedML development candidates without publishing them",
+        )
     approve_parser = subparsers.add_parser(
         "approve",
         help="create a maintainer validation/approval record and rebuild feeds",
@@ -1489,7 +1494,7 @@ def main() -> int:
 
     paths = getattr(args, "paths", None) or None
     manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
-    errors, totals = validate_many(paths, manifest=manifest)
+    errors, totals = validate_many(paths, manifest=manifest, dev_intake=args.dev_intake)
     if errors:
         return print_errors(errors)
     errors = release_contract_errors(manifest)

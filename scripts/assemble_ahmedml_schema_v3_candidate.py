@@ -71,6 +71,7 @@ from scripts.assemble_ahmedml_schema_v3_dev_fixture import (  # noqa: E402
 from scripts.validate_scoring_supports import (  # noqa: E402
     validate_candidate_manifest_release,
 )
+from scripts.fetch_profile_ground_truth import fetch_manifest  # noqa: E402
 
 
 DEFAULT_SPECIFICATION = ROOT / "benchmark-specs" / "ahmedml" / "submission-spec.json"
@@ -1013,6 +1014,10 @@ def assemble_package(
         "candidate_dry_run_command": (
             f"python scripts/validate_submission.py --candidate-dry-run {output_path}"
         ),
+        "dev_intake_validation_command": (
+            f"python scripts/validate_submission.py --dev-intake --contributor-stage {output_path}"
+        ),
+        "pull_request_target": "dev",
         "registration_command": registration_command,
         "registration_requirement": (
             "candidate must first be retained at "
@@ -1032,7 +1037,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--case-evidence-directory", type=Path)
     parser.add_argument("--dataset-evidence", type=Path)
     parser.add_argument("--discretization-cases", type=Path)
-    parser.add_argument("--profile-ground-truth-manifest", type=Path)
+    parser.add_argument(
+        "--profile-ground-truth-manifest", type=Path,
+        help="local manifest for offline use; otherwise download and verify the pinned manifest automatically",
+    )
     parser.add_argument(
         "--checkpoint",
         action="append",
@@ -1072,7 +1080,6 @@ def main(argv: Sequence[str] | None = None) -> int:
             for name in (
                 "case_evidence_directory",
                 "discretization_cases",
-                "profile_ground_truth_manifest",
                 "output",
             )
             if getattr(args, name) is None
@@ -1082,22 +1089,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "assembly requires arguments: "
                 + ", ".join(f"--{name.replace('_', '-')}" for name in missing)
             )
-        result = assemble_package(
-            config_path=args.config.expanduser().resolve(),
-            specification_path=args.submission_specification.expanduser().resolve(),
-            case_evidence_root=args.case_evidence_directory.expanduser().resolve(),
-            discretization_cases_path=args.discretization_cases.expanduser().resolve(),
-            profile_truth_manifest_path=(
+        with tempfile.TemporaryDirectory(prefix="ahmedml-profile-truth-") as temporary:
+            truth_path = (
                 args.profile_ground_truth_manifest.expanduser().resolve()
-            ),
-            checkpoint_paths=_checkpoint_arguments(args.checkpoint),
-            output_path=args.output.expanduser().resolve(),
-            dataset_evidence_path=(
-                args.dataset_evidence.expanduser().resolve()
-                if args.dataset_evidence is not None
-                else None
-            ),
-        )
+                if args.profile_ground_truth_manifest is not None
+                else fetch_manifest(Path(temporary) / "manifest.json")
+            )
+            result = assemble_package(
+                config_path=args.config.expanduser().resolve(),
+                specification_path=args.submission_specification.expanduser().resolve(),
+                case_evidence_root=args.case_evidence_directory.expanduser().resolve(),
+                discretization_cases_path=args.discretization_cases.expanduser().resolve(),
+                profile_truth_manifest_path=truth_path,
+                checkpoint_paths=_checkpoint_arguments(args.checkpoint),
+                output_path=args.output.expanduser().resolve(),
+                dataset_evidence_path=(
+                    args.dataset_evidence.expanduser().resolve()
+                    if args.dataset_evidence is not None
+                    else None
+                ),
+            )
     except (
         PackageAssemblyError,
         ScoringSupportError,

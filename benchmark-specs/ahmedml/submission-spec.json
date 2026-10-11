@@ -7,7 +7,7 @@
   "scoring_support": {
     "status": "owner_review_required",
     "submissions_open": false,
-    "closed_reason": "AhmedML native evaluator and support are under owner review; only the explicit non-ranked development fixture may be exercised.",
+    "closed_reason": "Official AhmedML submissions remain closed pending owner review. Genuine-inference candidates may be submitted to dev using --dev-intake.",
     "coverage_contract": {
       "dimensionality": "3D surface and 3D flow domain",
       "rule": "complete_original_public_release_entities",

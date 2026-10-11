@@ -52,8 +52,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/ahmedml/submission-spec.json",
-          "sha256": "e87462f702c1bf0e7133902acdf46263b2dc9ee0cc5434d972e110c1005d18b4",
-          "finding": "The audited dev scoring specification; not modified by this documentation audit."
+          "sha256": "7fcab80981005024ec6d1744683e785dd86dab54f26901bf60e5dea82c2b170a",
+          "finding": "The audited dev scoring specification; not modified by this documentation audit. Re-audited 2026-10-11: only the closed-reason text now documents AhmedML development intake; pressure fields, units and scoring definitions are unchanged."
         },
         {
           "path": "reference/ahmedml/evaluator.py",
@@ -359,8 +359,8 @@
         },
         {
           "path": "scripts/validate_submission.py",
-          "sha256": "b7376318fd18a54c61fe7d0283ef4793a3826f9f97711f041f0a172fe5600867",
-          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Rechecked for the AirfRANS pre-release registration: the new per-package candidate view is restricted to hash-bound AirfRANS references; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-08: the validator change selects AirfRANS dataset-local truth and its retained historical contract; the HiLiftAeroML pressure, units and evaluation paths remain unchanged."
+          "sha256": "db1cf66dffb87e5f3c5340bc1a56daed9bd89d1a7538e5284dbfe1d8360d0256",
+          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Rechecked for the AirfRANS pre-release registration: the new per-package candidate view is restricted to hash-bound AirfRANS references; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-08: the validator change selects AirfRANS dataset-local truth and its retained historical contract; the HiLiftAeroML pressure, units and evaluation paths remain unchanged. Re-audited 2026-10-11: the new development intake path is restricted to AhmedML candidates in the prototype dev release; HiLiftAeroML pressure and SI export validation are unchanged."
         },
         {
           "path": "benchmark-specs/hiliftaeroml/dimensional-export-correction-v1/verification.json",

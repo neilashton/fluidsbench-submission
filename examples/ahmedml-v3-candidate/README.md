@@ -2,7 +2,8 @@
 
 This directory is a reusable configuration template, not a submission. The
 AhmedML native evaluator remains a closed owner-review candidate and public
-submissions are not open. The assembler creates an unapproved candidate package
+submissions are not open. Development candidate PRs are accepted against `dev`.
+The assembler creates an unapproved candidate package
 for any of the eight official split labels only after all placeholder tokens,
 checkpoint hashes, complete evaluator evidence, and spatial records agree.
 
@@ -66,15 +67,25 @@ python scripts/assemble_ahmedml_schema_v3_candidate.py \
   --case-evidence-directory /path/to/case-evidence \
   --dataset-evidence /path/to/optional-retained-split-reduction.json \
   --discretization-cases /path/to/discretization/cases.jsonl \
-  --profile-ground-truth-manifest /path/to/profile-ground-truth/manifest.json \
   --checkpoint surface-model=/path/to/surface/model_best.pt \
   --checkpoint volume-model=/path/to/volume/model_best.pt \
   --output submissions/ahmedml/ahmedml-my-model-full-v1
 
 python scripts/validate_submission.py \
-  --candidate-dry-run \
+  --dev-intake --contributor-stage \
   submissions/ahmedml/ahmedml-my-model-full-v1
 ```
+
+The assembler automatically downloads the exact profile-ground-truth manifest pinned by
+`leaderboard/manifest.json` and verifies its SHA-256 and release ID. No maintainer-supplied
+file is required. For an offline evaluator, download it once on a connected machine:
+
+```bash
+python scripts/fetch_profile_ground_truth.py --output /path/to/profile-ground-truth/manifest.json
+```
+
+Then pass `--profile-ground-truth-manifest /path/to/profile-ground-truth/manifest.json`
+to the assembler. Keep the bytes unchanged; reformatting JSON changes its checksum.
 
 Use exactly one `--checkpoint ID=PATH` for each methodology checkpoint ID. A
 single joint model needs one argument; separate surface and volume models need
@@ -89,9 +100,22 @@ per case and 128 values per series, complete per-case sufficient statistics,
 discretization evidence, and zero-weight regional diagnostics. It contains no
 `approval`, maintainer validation, or official claim.
 
-## Dev-only pre-release registration
+## Submit the development candidate
 
-Maintainer-only registration can expose an exact candidate on the dev feed. Candidate validation alone does not publish it or approve it.
+1. Update your fork from the upstream `dev` branch before assembling the package.
+2. Run the assembler and `--dev-intake --contributor-stage` validator above.
+3. Commit only `submissions/ahmedml/<submission-id>/` and open a PR targeting **`dev`**.
+4. Complete the contributor checklist and let the normal PR checks run.
+
+CI selects development intake automatically for PRs targeting `dev`. A passing candidate
+can be reviewed and merged without changing its package, registering it, modifying
+specifications, or regenerating feeds. It stays unapproved and out of the leaderboard.
+`main` continues to require an official open release. `--candidate-dry-run` remains
+available for isolated local evaluation checks, but is not the contributor PR command.
+
+## Optional dev-only pre-release registration
+
+Maintainer-only registration can expose a reviewed candidate on the dev feed. This is a separate optional publication step, not a submission prerequisite. Candidate intake alone does not publish or approve the result.
 
 <details>
 <summary>Inspect or register an immutable pre-release binding</summary>
@@ -113,7 +137,7 @@ python scripts/register_ahmedml_pre_release.py \
   --register \
   submissions/ahmedml/ahmedml-my-model-full-v1/submission.json
 
-python scripts/manage_leaderboard.py build
+python scripts/manage_leaderboard.py build --dev-intake
 ```
 
 Registration affects only the prototype dev feed. The resulting row is labeled

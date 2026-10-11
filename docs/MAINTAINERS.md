@@ -60,6 +60,19 @@ Complete this checklist in the separate maintainer-owned validation/approval pul
 - [ ] The validation record binds the scoring support, spatial report, per-case metrics, profiles, and evaluation evidence.
 - [ ] A maintainer added the validation checksum, `approval.status`, approver, approval date, and this pull-request URL.
 
+## Receive an AhmedML development candidate
+
+AhmedML candidate PRs target `dev` and add one new submission directory. CI uses
+`--dev-intake` for source validation, contributor validation, and generated-feed checks.
+It verifies the complete candidate contract, checkpoint declarations, inference attestation,
+and artifact hashes without requiring a registry entry. Review and merge the unapproved
+package normally; no package edits, feed regeneration, or activation changes are needed.
+
+Local repository checks and builds on `dev` must include `--dev-intake` when unregistered
+AhmedML candidates are present. They remain absent from feeds. Optional publication of a
+reviewed `pre_release_reference` still uses the existing exact registration procedure in
+the [AhmedML guide](../examples/ahmedml-v3-candidate/README.md#optional-dev-only-pre-release-registration).
+
 ## Activate a dataset support release
 
 Dataset support is approved independently.A dataset collaborator changes only their dataset directory in one pull request:

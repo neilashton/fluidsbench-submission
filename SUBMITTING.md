@@ -117,13 +117,24 @@ source .venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-Validate one directory:
+Validate one directory for an official open release:
 
 ```bash
 python3 scripts/validate_submission.py --contributor-stage submissions/ahmedml/my-model-v1
 ```
 
-Dataset owners may exercise a closed schema-v3 candidate before activation
+For an AhmedML development candidate, update from `dev`, follow the
+[AhmedML packaging guide](examples/ahmedml-v3-candidate/README.md), and use:
+
+```bash
+python3 scripts/validate_submission.py --dev-intake --contributor-stage submissions/ahmedml/my-model-v1
+```
+
+Open the PR against `dev`. CI accepts a complete, unapproved genuine-inference candidate
+without maintainer registration; accepting the package does not publish a leaderboard row.
+For repository-wide development checks use `python3 scripts/manage_leaderboard.py check --dev-intake`.
+
+Dataset owners may exercise other closed schema-v3 candidates before activation
 only when the dataset specification pins an exact
 `scoring_support.candidate_manifest` (status, release ID, repository file,
 public URL, and SHA-256):
@@ -155,7 +166,7 @@ recompute submitted base metrics.
 
 1. Commit exactly one entirely new submission directory. Do not change specifications, schemas, scripts, workflows, generated
    feeds, existing submissions, or maintainer-owned files in that PR.
-2. For AirfRANS dev intake, target `dev`. Production `main` intake remains closed until an explicit production launch.
+2. For AirfRANS dev intake or AhmedML development candidates, target `dev`. Production `main` intake remains closed until an explicit production launch.
 3. Complete the [contributor checklist](.github/pull_request_template.md) and resolve all automated failures.
 4. Retain the evaluation evidence: maintainers review scientific provenance, data use, submitted values, licences, and any
    declared artifacts, and may request calculation evidence.

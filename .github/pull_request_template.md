@@ -10,7 +10,7 @@
 ## Contributor checklist
 
 - [ ] **Dataset and release:** I used the exact dataset/split version recorded in `submission.json`; the exact scoring-support
-      release is official, owner-approved, and open for submissions.
+      release is official, owner-approved, and open for submissions, or this is an AhmedML development candidate targeting `dev`.
 - [ ] **Evaluation data:** I used public evaluation fields only for final evaluation, not fitting, selection, tuning, or
       preprocessing statistics. I disclosed any earlier contact below.
 - [ ] **Complete evaluation:** I followed the published equations and dataset-specific reductions. `metrics/cases.json` covers
@@ -32,7 +32,7 @@
       declared open result-data licence.
 - [ ] **Validation and review:** I successfully ran
       `python3 scripts/validate_submission.py --contributor-stage <submission-directory>` and retained the calculation evidence
-      that maintainers may request before approval.
+      that maintainers may request before approval. For AhmedML development candidates, I also passed `--dev-intake`.
 
 ## Optional metric verification
 

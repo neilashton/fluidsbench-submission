@@ -7088,6 +7088,7 @@ def validate_submission_file(
     *,
     contributor_stage: bool = False,
     candidate_dry_run: bool = False,
+    dev_intake: bool = False,
     profile_support_release: Path | None = None,
     opened_profile_support_release: HiLiftCompactSupportRelease | None = None,
 ) -> tuple[list[str], dict[str, int]]:
@@ -7142,6 +7143,27 @@ def validate_submission_file(
     if errors:
         return errors, stats
 
+    if manifest is None:
+        manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
+    if dev_intake and (
+        submission.get("dataset_id") == "ahmedml"
+        and submission.get("scoring_support", {}).get("status") == "candidate"
+        and submission.get("submission_id") != AHMEDML_DEVELOPMENT_FIXTURE_ID
+        and not is_registered_ahmedml_pre_release_path(path)
+    ):
+        release = manifest.get("data_release", {})
+        if release.get("status") != "prototype_dummy_data" or release.get("source_ref") != "dev":
+            add("AhmedML development intake requires the prototype dev release")
+            return errors, stats
+        try:
+            # Reuse the exact package/inference checks without registering or
+            # publishing a row. The ordinary candidate validator runs below.
+            build_ahmedml_pre_release_registry_entry(path, repository_root=ROOT)
+        except (AhmedMLPreReleaseError, OSError, ValueError) as error:
+            add(f"invalid AhmedML development submission: {error}")
+            return errors, stats
+        candidate_dry_run = True
+
     if candidate_dry_run:
         if "approval" in submission:
             add("candidate dry-run packages must not contain approval metadata")
@@ -7153,8 +7175,6 @@ def validate_submission_file(
             if (path.parent / filename).exists():
                 add(f"candidate dry-run packages must not contain {filename}")
 
-    if manifest is None:
-        manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
     configured_preview_path = is_registered_hiliftaeroml_preview_path(path)
     preview_binding = registered_hiliftaeroml_preview(path, submission, manifest)
     if configured_preview_path and preview_binding is None and not candidate_dry_run:
@@ -7525,6 +7545,7 @@ def validate_many(
     *,
     contributor_stage: bool = False,
     candidate_dry_run: bool = False,
+    dev_intake: bool = False,
     profile_support_release: Path | None = None,
     manifest: dict[str, Any] | None = None,
 ) -> tuple[list[str], dict[str, int]]:
@@ -7571,6 +7592,7 @@ def validate_many(
             manifest,
             contributor_stage=contributor_stage,
             candidate_dry_run=candidate_dry_run,
+            dev_intake=dev_intake,
             profile_support_release=profile_support_release,
             opened_profile_support_release=opened_compact_support,
         )
@@ -7623,6 +7645,11 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--dev-intake",
+        action="store_true",
+        help="also accept unapproved genuine-inference AhmedML candidates in the prototype dev release",
+    )
+    parser.add_argument(
         "--prediction-check",
         choices=("metadata",),
         help=(
@@ -7643,6 +7670,7 @@ def main(argv: list[str] | None = None) -> int:
         args.paths or None,
         contributor_stage=args.contributor_stage,
         candidate_dry_run=args.candidate_dry_run,
+        dev_intake=args.dev_intake,
         profile_support_release=args.profile_support_release,
     )
     if errors:
@@ -7656,6 +7684,12 @@ def main(argv: list[str] | None = None) -> int:
             f"{totals['submissions']} package(s), {totals['cases']} test cases, "
             f"and {totals['series']} profile series. This is not official "
             "acceptance, approval, or leaderboard eligibility."
+        )
+    elif args.dev_intake:
+        message = (
+            f"DEV INTAKE VALID: {totals['submissions']} package(s), "
+            f"{totals['cases']} test cases, and {totals['series']} profile series. "
+            "Development intake does not approve or publish candidate results."
         )
     else:
         message = (

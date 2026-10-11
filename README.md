@@ -7,9 +7,15 @@ This repository holds the dataset contracts, evaluators, result packages, and ge
 
 **AirfRANS submissions are open on `dev` for Full, Scarce and AoA extrapolation.**
 Use the [dev intake and download guide](benchmark-specs/airfrans/RELEASES.md) and target your PR at `dev`.
-Reynolds and all other datasets remain closed. Production is unchanged. Work on `dev` is pre-release: prototype rows are illustrative;
+Reynolds and official intake for the other datasets remain closed. Production is unchanged. Work on `dev` is pre-release: prototype rows are illustrative;
 registered HiLiftAeroML Transolver and GeoTransolver previews retain real inference and CFD comparison truth but remain
 unapproved and non-citable. A local candidate validation pass does not open submissions or create a leaderboard entry.
+
+**AhmedML development candidate PRs are accepted on `dev`.** Follow the
+[candidate packaging guide](examples/ahmedml-v3-candidate/README.md); the assembler downloads
+the pinned profile manifest automatically. Validate with `--dev-intake --contributor-stage`
+and target `dev` in your PR. Repository-wide development checks use
+`python scripts/manage_leaderboard.py check --dev-intake`. Candidates remain unapproved and unpublished.
 
 ## Start here
 

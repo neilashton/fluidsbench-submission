@@ -25,7 +25,11 @@ jobs:
       - name: Validate package and prediction declaration
         env:
           SUBMISSION_DIRECTORY: ${{ inputs.submission_directory }}
-        run: python scripts/validate_submission.py --prediction-check metadata "$SUBMISSION_DIRECTORY"
+          TARGET_BRANCH: ${{ github.ref_name }}
+        run: |
+          intake_args=()
+          if [[ "$TARGET_BRANCH" == "dev" ]]; then intake_args+=(--dev-intake); fi
+          python scripts/validate_submission.py --prediction-check metadata "${intake_args[@]}" "$SUBMISSION_DIRECTORY"
       - name: Explain scope
         run: |
           echo "Metadata mode validates the optional declaration and local hash bindings only."

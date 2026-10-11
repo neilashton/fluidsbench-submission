@@ -11,6 +11,8 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +32,10 @@ jobs:
       - name: Verify prototype methodology fixtures
         run: python scripts/add_prototype_methodologies.py --check
       - name: Validate source submissions
-        run: python scripts/validate_submission.py
+        run: |
+          intake_args=()
+          if [[ "$TARGET_BRANCH" == "dev" ]]; then intake_args+=(--dev-intake); fi
+          python scripts/validate_submission.py "${intake_args[@]}"
       - name: Enforce external contributor pull-request scope
         if: >-
           github.event_name == 'pull_request' &&
@@ -63,6 +68,11 @@ jobs:
             echo "Contributor pull requests must use a new globally unique submission ID." >&2
             exit 1
           fi
-          python scripts/validate_submission.py --contributor-stage "$submission_dir"
+          intake_args=()
+          if [[ "$TARGET_BRANCH" == "dev" ]]; then intake_args+=(--dev-intake); fi
+          python scripts/validate_submission.py --contributor-stage "${intake_args[@]}" "$submission_dir"
       - name: Verify generated feeds
-        run: python scripts/manage_leaderboard.py check
+        run: |
+          intake_args=()
+          if [[ "$TARGET_BRANCH" == "dev" ]]; then intake_args+=(--dev-intake); fi
+          python scripts/manage_leaderboard.py check "${intake_args[@]}"
