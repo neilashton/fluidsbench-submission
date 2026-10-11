@@ -272,6 +272,9 @@ def repository(tmp_path, completed, monkeypatch):
         "DEFAULT_REGISTRY",
         tmp_path / "benchmark-specs/windsorml/pre-release-reference-registry.json",
     )
+    for name in ("CLAIMS_ROOT", "CLAIMS_INDEX_PATH", "REVISION_HISTORY_PATH"):
+        relative = getattr(manager, name).relative_to(ROOT)
+        monkeypatch.setattr(manager, name, tmp_path / relative)
     return (
         tmp_path,
         output / "submission.json",
@@ -307,6 +310,15 @@ def test_complete_package_intake_and_registration(repository):
         eligibility["academic_citation"] is False and eligibility["promotion"] is False
     )
     assert "WindsorML" in eligibility["reason"]
+    assert manager.build(manifest) == []
+    generated = load(root / "leaderboard/manifest.json")
+    assert manager.check_generated_feeds(generated) == []
+    published = load(root / "leaderboard/datasets/windsorml.json")
+    assert len(published) == 1
+    assert published[0]["profile_data"]["index_sha256"] == validator.sha256_file(
+        path.parent / "profiles/index.json"
+    )
+    assert published[0]["claim_eligibility"]["academic_citation"] is False
     (path.parent / "unexpected.txt").write_text("changed package")
     errors, _ = validator.validate_submission_file(path, manifest)
     assert any("package tree" in e for e in errors)

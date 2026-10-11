@@ -726,6 +726,21 @@ def scoring_support_file_binding(row: dict[str, Any]) -> dict[str, str] | None:
         return None
     directory = ROOT / "benchmark-specs" / row["dataset_id"] / "scoring-support"
     candidates = list(directory.glob("**/manifest.json"))
+    # Candidate releases may use a compact metadata directory outside the
+    # historical scoring-support/ layout. Follow the benchmark-owned binding
+    # and still require the exact row digest before exposing a claim artifact.
+    spec_path = directory.parent / "submission-spec.json"
+    if declaration.get("status") == "candidate" and spec_path.is_file():
+        candidate = load_json(spec_path).get("scoring_support", {}).get("candidate_manifest", {})
+        relative = candidate.get("manifest_file")
+        if (
+            isinstance(relative, str)
+            and candidate.get("manifest_sha256") == expected_sha256
+            and candidate.get("release_id") == declaration.get("release_id")
+        ):
+            bound_path = (directory.parent / relative).resolve()
+            if bound_path.is_relative_to(directory.parent.resolve()) and bound_path.is_file():
+                candidates.append(bound_path)
     if row.get("dataset_id") == "airfrans" and row.get("record_type") == "pre_release_reference":
         candidates.extend((directory.parent / "pre-release").glob("*/scoring-support/manifest.json"))
     for path in sorted(candidates):
