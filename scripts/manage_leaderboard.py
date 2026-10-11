@@ -23,6 +23,7 @@ if __package__:
         normalized_result_revision,
         registered_ahmedml_development_fixture,
         registered_ahmedml_pre_release_reference,
+        registered_windsorml_pre_release_reference,
         registered_airfrans_pre_release_reference,
         registered_hiliftaeroml_preview,
         schema_errors,
@@ -38,6 +39,7 @@ else:
         normalized_result_revision,
         registered_ahmedml_development_fixture,
         registered_ahmedml_pre_release_reference,
+        registered_windsorml_pre_release_reference,
         registered_airfrans_pre_release_reference,
         registered_hiliftaeroml_preview,
         schema_errors,
@@ -314,6 +316,7 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
             manifest,
             root=ROOT,
         )
+        windsorml_pre_release = registered_windsorml_pre_release_reference(path, submission, manifest, root=ROOT)
         airfrans_pre_release = registered_airfrans_pre_release_reference(
             path, submission, manifest, root=ROOT
         )
@@ -326,6 +329,7 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
         if (
             registered_preview is None
             and ahmedml_pre_release is None
+            and windsorml_pre_release is None
             and airfrans_pre_release is None
             and development_fixture is None
             and submission.get("approval", {}).get("status")
@@ -338,6 +342,8 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
             row["record_type"] = registered_preview["record_type"]
         elif ahmedml_pre_release is not None:
             row["record_type"] = ahmedml_pre_release["record_type"]
+        elif windsorml_pre_release is not None:
+            row["record_type"] = windsorml_pre_release["record_type"]
         elif airfrans_pre_release is not None:
             row["record_type"] = airfrans_pre_release["record_type"]
         elif development_fixture is not None:
@@ -557,6 +563,13 @@ def claim_eligibility(release_status: str, row: dict[str, Any]) -> dict[str, Any
             elif row.get("dataset_id") == "ahmedml":
                 reason = (
                     "Genuine AhmedML pre-release model-inference data retained "
+                    "to exercise the evaluator and dev leaderboard while "
+                    "submissions remain closed; it is not an official benchmark "
+                    "result or ranking claim."
+                )
+            elif row.get("dataset_id") == "windsorml":
+                reason = (
+                    "Genuine WindsorML pre-release model-inference data retained "
                     "to exercise the evaluator and dev leaderboard while "
                     "submissions remain closed; it is not an official benchmark "
                     "result or ranking claim."
@@ -1445,7 +1458,7 @@ def main() -> int:
     for intake_parser in (validate_parser, build_parser, check_parser):
         intake_parser.add_argument(
             "--dev-intake", action="store_true",
-            help="validate unapproved AhmedML development candidates without publishing them",
+            help="validate unapproved AhmedML and WindsorML development candidates without publishing them",
         )
     approve_parser = subparsers.add_parser(
         "approve",

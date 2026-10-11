@@ -951,6 +951,15 @@ def evaluate_candidate_case(
             )
         evidence["profiles"] = profiles
 
+    evidence["prediction_inputs"] = {
+        domain: {
+            "manifest_sha256": manifest.sha256,
+            "chunk_sha256": [chunk.sha256 for chunk in manifest.chunks],
+            "entity_count": manifest.total_row_count,
+        }
+        for domain, manifest in (("surface", surface), ("volume", volume if volume_manifest is not None else None))
+        if manifest is not None
+    }
     return CandidateCaseEvaluation(value=MappingProxyType(evidence))
 
 

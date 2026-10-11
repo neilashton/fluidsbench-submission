@@ -344,6 +344,14 @@ class WindsorMLEvaluatorTests(unittest.TestCase):
 
     def test_perfect_prediction_scores_zero_error(self) -> None:
         evidence = self._evaluate()
+        for domain, count in (("surface", 4), ("volume", 3)):
+            manifest_path = self.root / f"{domain}-1-1.0" / "manifest.json"
+            document = json.loads(manifest_path.read_text())
+            self.assertEqual(evidence["prediction_inputs"][domain], {
+                "manifest_sha256": sha256(manifest_path),
+                "chunk_sha256": [chunk["sha256"] for chunk in document["chunks"]],
+                "entity_count": count,
+            })
         surface_metrics = evidence["surface"]["metrics"]
         for name, value in surface_metrics.items():
             self.assertAlmostEqual(value, 0.0, places=9, msg=f"{name} should be zero")

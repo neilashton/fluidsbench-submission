@@ -188,6 +188,7 @@ def validate_split_index(
     dataset_directory: Path,
     dataset_id: str,
     split: Any,
+    *, expected_case_id_status: str = "official",
 ) -> tuple[str | None, list[str] | None]:
     label = f"{dataset_id}.splits"
     if not isinstance(split, dict):
@@ -198,8 +199,8 @@ def validate_split_index(
     if not isinstance(split_id, str) or not split_id:
         errors.append(f"{split_label}.id must be a non-empty string")
         return None, None
-    if split.get("case_id_status") != "official":
-        errors.append(f"{split_label}.case_id_status must be official")
+    if split.get("case_id_status") != expected_case_id_status:
+        errors.append(f"{split_label}.case_id_status must be {expected_case_id_status}")
     case_set_id = split.get("case_set_id")
     if not isinstance(case_set_id, str) or not case_set_id:
         errors.append(f"{split_label}.case_set_id must be a non-empty string")
@@ -232,7 +233,7 @@ def validate_split_index(
         "dataset_id": dataset_id,
         "split_id": split_id,
         "case_set_id": case_set_id,
-        "case_id_status": "official",
+        "case_id_status": expected_case_id_status,
     }
     for key, expected in identities.items():
         if index.get(key) != expected:
@@ -780,6 +781,7 @@ def validate_candidate_manifest_release(
             dataset_directory,
             dataset_id,
             split,
+            expected_case_id_status=("official_intersected_with_published" if dataset_id == "windsorml" else "official"),
         )
         if case_set_id is None or case_ids is None:
             continue

@@ -3389,7 +3389,14 @@
         },
         "owner_decisions_required": [
           "approve_release_and_open_submissions"
-        ]
+        ],
+        "candidate_manifest": {
+          "status": "candidate",
+          "release_id": "windsorml-native-support-v1-candidate",
+          "manifest_file": "scoring-support-candidate/manifest.json",
+          "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/windsorml/scoring-support-candidate/manifest.json",
+          "manifest_sha256": "0e24e419c158133a7b9c9cc47634d278d2b94f713a2bbeedfd91959d7dce7b5b"
+        }
       },
       "overall_score_composite": {
         "metric_id": "overall_score",
@@ -3471,7 +3478,12 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 0
+      "revision_count": 0,
+      "profile_definition": {
+        "id": "windsorml-profile-definition-v2",
+        "file": "profile-definition-v2.json",
+        "sha256": "d58014ae66d92ea5ffce3c4f3b8e206447873d563d8bc3ffb4cbeee81539e056"
+      }
     },
     {
       "name": "VKI-LS59",

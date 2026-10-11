@@ -3,11 +3,14 @@
 New results use schema v3. **Public intake is closed.** Follow the selected [dataset guide](../benchmark-specs/README.md) and
 [submission workflow](../SUBMITTING.md); examples do not bypass release or approval gates.
 
+Development intake for AhmedML and WindsorML is available on `dev`; official intake remains closed for these datasets.
+
 ## Dataset candidate configurations
 
 | Example                                             | Inputs and limits                                                                                                                                                                                                                                                            |
 | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [AhmedML](ahmedml-v3-candidate/README.md)           | Genuine inference on any of eight official splits; verifies each local checkpoint and re-reduces complete case evidence into metrics, profiles, spatial records, and regional reports. Separate from the synthetic development fixture.                                      |
+| [WindsorML](windsorml-v3-candidate/README.md) | Complete native point/cell inference, all eight split labels, 16 fixed/relative profiles, checkpoint verification and exact dev registration. |
 | [DrivAerML](drivaerml-v3-candidate/README.md)       | Requires matching candidate support, evaluator, profile-v10, and profile-truth bindings. Unresolved release tokens block assembly. Config-v2 describes a schema-v3 package with the common methodology record and scope-specific outputs.                                    |
 | [HiLiftAeroML](hiliftaeroml-v3-candidate/README.md) | Supports all official labels, native fields, disconnected Cp graphs, five velocity stations, and optional zero-weight regions. Requires complete truth-load coverage and authorized local compact-v2 support; evaluator-revision and public-release gates remain unresolved. |
 

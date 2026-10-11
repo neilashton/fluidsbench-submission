@@ -11,6 +11,8 @@ AhmedML, or HiLiftAeroML about what ``bounded_error`` means.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
@@ -21,7 +23,7 @@ import numpy as np
 
 from reference.scores import composite_component_group_scores, composite_overall_score
 
-from .contract import read_json
+from .contract import read_json, sha256_file, _unique_object
 from .profiles import (
     PROFILE_MANIFEST_SHA256,
     WindsorMLProfileError,
@@ -36,6 +38,8 @@ DATASET_EVIDENCE_STATUS = "non_ranked_development_evidence_not_official_submissi
 SURFACE_METRICS = (
     "surface_pressure_rel_l2",
     "surface_wall_shear_rel_l2",
+    "surface_pressure_equal_entity_rel_l2",
+    "surface_wall_shear_equal_entity_rel_l2",
 )
 VOLUME_METRICS = (
     "volume_velocity_rel_l2",
@@ -148,6 +152,8 @@ def score_candidate_dataset(
     split_document = read_json(
         spec_path.parent / split_entry["index_file"], label=f"{split_id} split"
     )
+    if sha256_file(spec_path.parent / split_entry["index_file"]) != split_entry["sha256"]:
+        raise WindsorMLDatasetScorerError("split SHA-256 differs from the specification")
     case_ids = list(split_document["case_ids"])
     if len(case_ids) != split_entry["case_count"]:
         raise WindsorMLDatasetScorerError(
@@ -163,11 +169,17 @@ def score_candidate_dataset(
     profile_truth: dict[str, list[float]] = {f: [] for f in PROFILE_FAMILY_METRICS}
     profile_prediction: dict[str, list[float]] = {f: [] for f in PROFILE_FAMILY_METRICS}
 
+    evidence_bindings = []
     for case_id in case_ids:
         path = root / f"{case_id}.json"
         if not path.is_file():
             raise WindsorMLDatasetScorerError(f"missing case evidence for {case_id}")
-        evidence = read_json(path, label=f"{case_id} evidence")
+        payload = path.read_bytes()
+        evidence = json.loads(payload, object_pairs_hook=_unique_object,
+                              parse_constant=lambda token: (_ for _ in ()).throw(WindsorMLDatasetScorerError(f"non-finite JSON: {token}")))
+        if not isinstance(evidence, dict):
+            raise WindsorMLDatasetScorerError(f"{case_id} evidence must be an object")
+        evidence_bindings.append({"case_id": case_id, "sha256": hashlib.sha256(payload).hexdigest()})
         if evidence.get("case_id") != case_id:
             raise WindsorMLDatasetScorerError(f"{path} does not bind {case_id}")
         if evidence.get("official_submission_artifact") is not False:
@@ -255,6 +267,7 @@ def score_candidate_dataset(
                 ),
                 "metric_values": dict(metric_values),
                 "per_case": {c: dict(per_case[c]) for c in case_ids},
+                "case_evidence": evidence_bindings,
             }
         )
     )

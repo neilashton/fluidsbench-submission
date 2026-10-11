@@ -145,7 +145,14 @@
     },
     "owner_decisions_required": [
       "approve_release_and_open_submissions"
-    ]
+    ],
+    "candidate_manifest": {
+      "status": "candidate",
+      "release_id": "windsorml-native-support-v1-candidate",
+      "manifest_file": "scoring-support-candidate/manifest.json",
+      "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/windsorml/scoring-support-candidate/manifest.json",
+      "manifest_sha256": "0e24e419c158133a7b9c9cc47634d278d2b94f713a2bbeedfd91959d7dce7b5b"
+    }
   },
   "evaluation_reference_version": "windsorml-evaluator-v0.1-candidate",
   "default_field_reduction": "per_geometry_then_macro_average",
@@ -427,7 +434,10 @@
       "station_ids": [
         "cp_centreline_upper",
         "cp_base_vertical",
-        "cp_side_horizontal_y_0p194"
+        "cp_side_horizontal_y_0p194",
+        "cp_centreline_upper_relative",
+        "cp_base_vertical_relative",
+        "cp_side_horizontal_relative"
       ],
       "quantity_ids": [
         "cp"
@@ -455,7 +465,12 @@
         "wake_vertical_x_0p10l",
         "wake_vertical_x_0p25l",
         "wake_vertical_x_0p50l",
-        "wake_lateral_x_0p10l_y_0p194"
+        "wake_lateral_x_0p10l_y_0p194",
+        "wake_vertical_x_0p05l_relative",
+        "wake_vertical_x_0p10l_relative",
+        "wake_vertical_x_0p25l_relative",
+        "wake_vertical_x_0p50l_relative",
+        "wake_lateral_x_0p10l_relative"
       ],
       "quantity_ids": [
         "ux_over_uinf"
@@ -537,5 +552,10 @@
       "case_id_status": "official_intersected_with_published",
       "sha256": "5c2ea7f84965b6b3f87518ef639ea25de7800e2ba5ea34fefbf4d3b3adc07b35"
     }
-  ]
+  ],
+  "profile_definition": {
+    "id": "windsorml-profile-definition-v2",
+    "file": "profile-definition-v2.json",
+    "sha256": "d58014ae66d92ea5ffce3c4f3b8e206447873d563d8bc3ffb4cbeee81539e056"
+  }
 }

@@ -90,6 +90,8 @@ def case_evidence(
             "metrics": {
                 "surface_pressure_rel_l2": field_error,
                 "surface_wall_shear_rel_l2": field_error,
+                "surface_pressure_equal_entity_rel_l2": field_error,
+                "surface_wall_shear_equal_entity_rel_l2": field_error,
             },
         },
         "volume": {

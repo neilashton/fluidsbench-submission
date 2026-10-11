@@ -11,10 +11,14 @@ test suite. The prototype material it replaces was dummy data — a single
 fabricated case ID (`windsorml_default_test_0001`), four fabricated velocity
 stations, and ten dummy submissions — none of which should ever have been scored.
 
-Two things are **not** ready and are held back deliberately: the profile panels
-(the velocity stations were invented and need a real physical choice), and the
-cell-volume-weighted volume metrics (the sidecars are unaffordable at this mesh
-size). Submissions stay closed pending owner review.
+Current status (2026-10-11): all 233 profile support files are generated and
+hash-pinned. Schema-v3 support metadata, contributor evaluator and packaging
+commands, dev intake, and exact pre-release registration are implemented. See
+[the current guide](README.md) and [packaging workflow](../../examples/windsorml-v3-candidate/README.md).
+The next validation step is Daniel's complete real-model submission trial.
+Official submissions remain closed; cell-volume-weighted volume metrics remain
+deferred by the existing contract. The measurements below are the historical
+2026-09-17 audit, followed by subsequent profile-completion notes.
 
 WindsorML is in several respects *easier* than AhmedML: its field associations
 are unambiguous, and its surface quadrature weights are published rather than
