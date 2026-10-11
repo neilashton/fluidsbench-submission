@@ -108,11 +108,16 @@
         "implementation_manifest_sha256",
         "base_dataset_evaluator_scope"
       ],
+      "allOf": [{
+        "if": {"properties": {"status": {"const": "frozen_dev_candidate"}}},
+        "then": {"properties": {"code_revision": {"type": "string"}, "implementation_manifest_sha256": {"type": "string"}}},
+        "else": {"properties": {"code_revision": {"type": "null"}, "implementation_manifest_sha256": {"type": "null"}}}
+      }],
       "properties": {
-        "status": { "const": "unbound_worktree_candidate" },
+        "status": { "enum": ["unbound_worktree_candidate", "frozen_dev_candidate"] },
         "activation_effect": { "const": "none" },
-        "code_revision": { "type": "null" },
-        "implementation_manifest_sha256": { "type": "null" },
+        "code_revision": { "type": ["null", "string"], "pattern": "^[a-f0-9]{40}$" },
+        "implementation_manifest_sha256": { "type": ["null", "string"], "pattern": "^[a-f0-9]{64}$" },
         "base_dataset_evaluator_scope": {
           "const": "native_v1_base_field_force_and_noncompact_scoring_only"
         }

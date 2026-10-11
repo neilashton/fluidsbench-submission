@@ -36,8 +36,8 @@ contract before the benchmark owner considers activation.
   `68899f780d96b70f2badb5658971c87af0b17172`, frozen for maintainer-local
   candidate dry runs only with no activation effect.
 - Official and exclusive profile representation:
-  `fluidsbench-hiliftaeroml-compact-profile-chunks-v2`, contract SHA-256
-  `44651f4da2add287e51807f02f329f5aa226dd1fb2ae21d99e129ba2fc9000b5`.
+  `fluidsbench-hiliftaeroml-compact-profile-chunks-v2-candidate`, contract SHA-256
+  `b1fd29b2cb6c1c84c694ddffc5d85f6cd68fd175b79c3695a443aa78bf962c2f`.
 
 The scoring-support generator verifies all 1,355 unique evaluation cases
 against the complete internal 1,800-case surface and volume integrity

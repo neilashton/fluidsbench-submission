@@ -85,6 +85,12 @@ from reference.drivaerml.pre_release import (
     REGISTRY_STATUS as DRIVAERML_PRE_RELEASE_REGISTRY_STATUS,
     build_registry_entry as build_drivaerml_pre_release_registry_entry,
 )
+from reference.hiliftaeroml.pre_release import (
+    HiLiftAeroMLPreReleaseError,
+    REGISTRY_SCHEMA as HILIFT_DEV_PRE_RELEASE_REGISTRY_SCHEMA,
+    REGISTRY_STATUS as HILIFT_DEV_PRE_RELEASE_REGISTRY_STATUS,
+    build_registry_entry as build_hiliftaeroml_pre_release_registry_entry,
+)
 from reference.airfrans.pre_release import (
     registered_airfrans_pre_release_reference,
     candidate_validation_view as airfrans_candidate_validation_view,
@@ -575,6 +581,9 @@ WINDSORML_PRE_RELEASE_REGISTRY_PATH = (
 )
 DRIVAERML_PRE_RELEASE_REGISTRY_PATH = (
     Path("benchmark-specs") / "drivaerml" / "pre-release-reference-registry.json"
+)
+HILIFT_DEV_PRE_RELEASE_REGISTRY_PATH = (
+    Path("benchmark-specs") / "hiliftaeroml" / "pre-release-reference-registry.json"
 )
 LEGACY_V1_SUBMISSION_ID = re.compile(r"^(?P<series>[a-z0-9][a-z0-9-]{2,69})-v1$")
 
@@ -1524,6 +1533,120 @@ def registered_drivaerml_pre_release_reference(
         )
     except (
         DrivAerMLPreReleaseError,
+        OSError,
+        json.JSONDecodeError,
+        ValueError,
+    ):
+        return None
+    if retained_submission != submission or observed != expected:
+        return None
+    return deepcopy(expected)
+
+
+def _hiliftaeroml_pre_release_registry(
+    *, root: Path | None = None
+) -> dict[str, Any] | None:
+    """Load the closed dev-only HiLiftAeroML registry, failing closed."""
+
+    effective_root = (root or ROOT).resolve()
+    try:
+        registry = load_submission_json(
+            effective_root / HILIFT_DEV_PRE_RELEASE_REGISTRY_PATH
+        )
+    except (OSError, UnicodeError, ValueError):
+        return None
+    expected_activation = {
+        "owner_approval_complete": False,
+        "published": False,
+        "submissions_opened": False,
+        "registration_changes_activation": False,
+    }
+    entries = registry.get("entries") if isinstance(registry, dict) else None
+    if (
+        not isinstance(registry, dict)
+        or registry.get("schema") != HILIFT_DEV_PRE_RELEASE_REGISTRY_SCHEMA
+        or registry.get("status") != HILIFT_DEV_PRE_RELEASE_REGISTRY_STATUS
+        or registry.get("dataset_id") != "hiliftaeroml"
+        or registry.get("activation") != expected_activation
+        or not isinstance(entries, list)
+        or not all(isinstance(entry, dict) for entry in entries)
+    ):
+        return None
+    paths = [entry.get("submission_path") for entry in entries]
+    identifiers = [entry.get("submission_id") for entry in entries]
+    if (
+        any(not isinstance(value, str) or not value for value in paths + identifiers)
+        or len(paths) != len(set(paths))
+        or len(identifiers) != len(set(identifiers))
+    ):
+        return None
+    return registry
+
+
+def _registered_hiliftaeroml_pre_release_entry(
+    path: Path,
+    *,
+    root: Path | None = None,
+) -> dict[str, Any] | None:
+    effective_root = (root or ROOT).resolve()
+    try:
+        relative_path = path.resolve().relative_to(effective_root).as_posix()
+    except (OSError, ValueError):
+        return None
+    registry = _hiliftaeroml_pre_release_registry(root=effective_root)
+    if registry is None:
+        return None
+    return next(
+        (
+            entry
+            for entry in registry["entries"]
+            if entry.get("submission_path") == relative_path
+        ),
+        None,
+    )
+
+
+def is_registered_hiliftaeroml_pre_release_path(
+    path: Path,
+    *,
+    root: Path | None = None,
+) -> bool:
+    """Return whether the maintainer registry names this exact dev path."""
+
+    return _registered_hiliftaeroml_pre_release_entry(path, root=root) is not None
+
+
+def registered_hiliftaeroml_pre_release_reference(
+    path: Path,
+    submission: dict[str, Any],
+    manifest: dict[str, Any],
+    *,
+    root: Path | None = None,
+) -> dict[str, Any] | None:
+    """Recognize one hash-bound genuine-inference HiLiftAeroML dev reference.
+
+    The registry is deliberately outside the participant package.  An entry is
+    effective only in the prototype feed and only while every package byte,
+    artifact hash, checkpoint declaration, scope value, and inference
+    attestation recomputes to the exact reviewed entry.
+    """
+
+    effective_root = (root or ROOT).resolve()
+    expected = _registered_hiliftaeroml_pre_release_entry(path, root=effective_root)
+    if (
+        expected is None
+        or manifest.get("data_release", {}).get("status") != "prototype_dummy_data"
+        or manifest.get("data_release", {}).get("source_ref") != "dev"
+    ):
+        return None
+    try:
+        retained_submission = load_submission_json(path)
+        observed = build_hiliftaeroml_pre_release_registry_entry(
+            path,
+            repository_root=effective_root,
+        )
+    except (
+        HiLiftAeroMLPreReleaseError,
         OSError,
         json.JSONDecodeError,
         ValueError,
@@ -6097,16 +6220,23 @@ def _validate_hiliftaeroml_dataset_evaluator_binding(
     evidence_compact_binding = evidence.get(
         "compact_profile_implementation_binding"
     )
+    expected_compact_binding = HILIFT_PROFILE_IMPLEMENTATION_BINDING
+    if isinstance(submitted_compact_binding, dict) and submitted_compact_binding.get("status") == "frozen_dev_candidate":
+        try:
+            from reference.hiliftaeroml.dev_release import implementation_binding
+            expected_compact_binding = implementation_binding(ROOT)
+        except (OSError, ValueError, KeyError) as error:
+            add(f"HiLiftAeroML dev implementation binding failed: {error}")
     if compact_profile:
-        if submitted_compact_binding != HILIFT_PROFILE_IMPLEMENTATION_BINDING:
+        if submitted_compact_binding != expected_compact_binding:
             add(
-                "submission.json compact profile_data requires the exact unbound "
+                "submission.json compact profile_data requires the exact benchmark-bound "
                 "compact_profile_implementation_binding"
             )
-        if evidence_compact_binding != HILIFT_PROFILE_IMPLEMENTATION_BINDING:
+        if evidence_compact_binding != expected_compact_binding:
             add(
                 "evaluation-evidence.json compact profile evaluation requires the "
-                "exact unbound compact_profile_implementation_binding"
+                "exact benchmark-bound compact_profile_implementation_binding"
             )
         if submitted_compact_binding != evidence_compact_binding:
             add(
@@ -7398,10 +7528,11 @@ def validate_submission_file(
     if (
         profile_support_release is not None
         and not candidate_dry_run
+        and not dev_intake
     ):
         add(
             "--profile-support-release requires "
-            "--candidate-dry-run"
+            "--candidate-dry-run or --dev-intake"
         )
         return errors, stats
 
@@ -7493,6 +7624,25 @@ def validate_submission_file(
             build_drivaerml_pre_release_registry_entry(path, repository_root=ROOT)
         except (DrivAerMLPreReleaseError, OSError, ValueError) as error:
             add(f"invalid DrivAerML development submission: {error}")
+            return errors, stats
+        candidate_dry_run = True
+
+    if (
+        dev_intake
+        and submission.get("dataset_id") == "hiliftaeroml"
+        and not is_registered_hiliftaeroml_preview_path(path)
+        and not is_registered_hiliftaeroml_pre_release_path(path)
+    ):
+        release = manifest.get("data_release", {})
+        if release.get("status") != "prototype_dummy_data" or release.get("source_ref") != "dev":
+            add("HiLiftAeroML development intake requires the prototype dev release")
+            return errors, stats
+        try:
+            from reference.hiliftaeroml.dev_support import resolve_support
+            build_hiliftaeroml_pre_release_registry_entry(path, repository_root=ROOT)
+            profile_support_release = resolve_support(profile_support_release, root=ROOT)
+        except (OSError, ValueError, KeyError) as error:
+            add(f"invalid HiLiftAeroML development submission: {error}")
             return errors, stats
         candidate_dry_run = True
 
@@ -7608,6 +7758,34 @@ def validate_submission_file(
         and not contributor_stage
         and not candidate_dry_run
     )
+    configured_hiliftaeroml_pre_release_path = is_registered_hiliftaeroml_pre_release_path(
+        path
+    )
+    hiliftaeroml_pre_release_binding = registered_hiliftaeroml_pre_release_reference(
+        path,
+        submission,
+        manifest,
+    )
+    if (
+        configured_hiliftaeroml_pre_release_path
+        and hiliftaeroml_pre_release_binding is None
+        and not candidate_dry_run
+    ):
+        add(
+            "registered HiLiftAeroML pre-release reference does not match its "
+            "maintainer lifecycle, package tree, artifacts, checkpoint "
+            "declarations, or inference attestation"
+        )
+    if contributor_stage and hiliftaeroml_pre_release_binding is not None:
+        add(
+            "the maintainer-registered HiLiftAeroML pre-release reference is "
+            "unavailable in contributor-stage validation"
+        )
+    registered_hiliftaeroml_pre_release = (
+        hiliftaeroml_pre_release_binding is not None
+        and not contributor_stage
+        and not candidate_dry_run
+    )
     development_fixture_binding = registered_ahmedml_development_fixture(
         path,
         submission,
@@ -7631,6 +7809,7 @@ def validate_submission_file(
         or registered_ahmedml_pre_release
         or registered_windsorml_pre_release
         or registered_drivaerml_pre_release
+        or registered_hiliftaeroml_pre_release
         or registered_development_fixture
     )
     if (
@@ -7638,6 +7817,7 @@ def validate_submission_file(
         or registered_ahmedml_pre_release
         or registered_windsorml_pre_release
         or registered_drivaerml_pre_release
+        or registered_hiliftaeroml_pre_release
     ):
         if "approval" in submission:
             add("registered pre-release references must not contain approval metadata")
@@ -7818,7 +7998,7 @@ def validate_submission_file(
         dataset_spec,
         spec_split,
         candidate_dry_run=candidate_contract_validation,
-        registered_preview=registered_preview,
+        registered_preview=(registered_preview or registered_hiliftaeroml_pre_release),
         profile_support_release=profile_support_release,
         opened_profile_support_release=opened_profile_support_release,
         case_metrics=case_metrics,
@@ -7963,10 +8143,11 @@ def validate_many(
     if (
         profile_support_release is not None
         and not candidate_dry_run
+        and not dev_intake
     ):
         return [
             "--profile-support-release requires "
-            "--candidate-dry-run"
+            "--candidate-dry-run or --dev-intake"
         ], {"submissions": 0, "cases": 0, "series": 0}
     files = submission_files(paths)
     if not files:

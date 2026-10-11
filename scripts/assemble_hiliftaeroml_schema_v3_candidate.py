@@ -2531,8 +2531,17 @@ def assemble_package(
     native_surface_outputs_root: Path | None = None,
     native_volume_outputs_root: Path | None = None,
     opened_compact_support_release: CompactSupportRelease | None = None,
+    dev_intake: bool = False,
+    checkpoint_paths: dict[str, Path] | None = None,
 ) -> dict[str, Any]:
     config = load_json(config_path, label="package config")
+    implementation = COMPACT_PROFILE_IMPLEMENTATION_BINDING
+    if dev_intake:
+        from reference.hiliftaeroml.dev_release import implementation_binding, resolve_config
+        from scripts.assemble_windsorml_schema_v3_candidate import _verify_checkpoints
+        config = resolve_config(config, load_json(specification_path, label="HiLiftAeroML specification"))
+        implementation = implementation_binding()
+        _verify_checkpoints(config.get("participant", {}).get("methodology", {}), checkpoint_paths or {})
     if config.get("schema") != CONFIG_SCHEMA:
         raise HiLiftPackageAssemblyError(f"config.schema must equal {CONFIG_SCHEMA!r}")
     profile_cases_per_chunk, include_regional_diagnostics = _validate_config_envelope(
@@ -2772,8 +2781,10 @@ def assemble_package(
         reproducibility = participant.get("reproducibility")
         code = reproducibility.get("code") if isinstance(reproducibility, dict) else None
         participant_revision = code.get("commit") if isinstance(code, dict) else None
-        evidence_notes = _profile_evidence_notes(
-            evaluator_revision=evaluator["code_revision"],
+        evidence_notes = (
+            "The immutable dev adapter binds compact profile scoring, regional aggregation, "
+            "and SI export separately from the frozen native field/force evaluator."
+            if dev_intake else _profile_evidence_notes(evaluator_revision=evaluator["code_revision"])
         )
         validate_dimensional_export_contract()
         evidence_notes += (
@@ -2781,6 +2792,9 @@ def assemble_package(
             "by the separately versioned dimensional_unit_conversion export stage; "
             "it is not covered by the earlier frozen native-evaluator binding."
         )
+        if dev_intake:
+            from reference.hiliftaeroml.pre_release import GENUINE_INFERENCE_ATTESTATION
+            evidence_notes += " " + GENUINE_INFERENCE_ATTESTATION
         evidence = {
             "$schema": "https://fluidsbench.org/schemas/v3/evaluation-evidence.schema.json",
             "schema_version": "3.0",
@@ -2810,7 +2824,7 @@ def assemble_package(
         if regional_sha is not None:
             evidence["regional_diagnostics_sha256"] = regional_sha
         evidence["compact_profile_implementation_binding"] = dict(
-            COMPACT_PROFILE_IMPLEMENTATION_BINDING
+            implementation
         )
         if participant_revision is not None:
             evidence["code_revision"] = participant_revision
@@ -2868,7 +2882,7 @@ def assemble_package(
                     compact_support_release.manifest_sha256
                 ),
                 "compact_profile_implementation_binding": dict(
-                    COMPACT_PROFILE_IMPLEMENTATION_BINDING
+                    implementation
                 ),
             }
         )
@@ -2915,9 +2929,20 @@ def inspect_blockers(
     profile_support_release_root: Path | None = None,
     native_surface_outputs_root: Path | None = None,
     native_volume_outputs_root: Path | None = None,
+    dev_intake: bool = False,
+    checkpoint_paths: dict[str, Path] | None = None,
 ) -> dict[str, Any]:
     blockers: list[dict[str, Any]] = []
     config = load_json(config_path, label="package config")
+    if dev_intake:
+        from reference.hiliftaeroml.dev_release import implementation_binding, resolve_config
+        from scripts.assemble_windsorml_schema_v3_candidate import _verify_checkpoints
+        config = resolve_config(config, load_json(specification_path, label="HiLiftAeroML specification"))
+        try:
+            implementation_binding()
+            _verify_checkpoints(config.get("participant", {}).get("methodology", {}), checkpoint_paths or {})
+        except (ValueError, OSError, KeyError) as error:
+            blockers.append({"gate": "dev_implementation_and_checkpoints", "detail": str(error)})
     for token in unresolved_tokens(config):
         blockers.append({"gate": "configuration_token", **token})
     specification = load_json(specification_path, label="HiLiftAeroML specification")
@@ -3097,6 +3122,8 @@ def inspect_blockers(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dev-intake", action="store_true", help="prepare a checkpoint-verified package for the dev PR workflow")
+    parser.add_argument("--checkpoint", action="append", default=[], metavar="ID=PATH")
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--submission-specification", type=Path, default=DEFAULT_SPECIFICATION)
     parser.add_argument("--native-aggregate", type=Path)
@@ -3145,6 +3172,11 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
+        if args.dev_intake and not args.list_blockers:
+            from reference.hiliftaeroml.dev_support import resolve_support
+            args.profile_support_release = resolve_support(args.profile_support_release)
+        from scripts.assemble_windsorml_schema_v3_candidate import _checkpoint_arguments
+        checkpoint_paths = _checkpoint_arguments(args.checkpoint)
         if args.list_blockers:
             result = inspect_blockers(
                 config_path=args.config,
@@ -3155,6 +3187,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 native_volume_outputs_root=args.native_volume_outputs,
                 native_receipts_root=args.native_receipts,
                 profile_support_release_root=args.profile_support_release,
+                dev_intake=args.dev_intake,
+                checkpoint_paths=checkpoint_paths,
             )
             print(json.dumps(result, indent=2, sort_keys=True))
             return 0
@@ -3224,6 +3258,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ),
                 output_path=output,
                 opened_compact_support_release=opened_compact_support_release,
+                dev_intake=args.dev_intake,
+                checkpoint_paths=checkpoint_paths,
             )
             for output in outputs
         ]
@@ -3236,7 +3272,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "output_count": len(results),
                 "packages": results,
             }
-    except HiLiftPackageAssemblyError as error:
+    except (ValueError, OSError) as error:
         print(
             json.dumps({"status": "blocked", "error": str(error)}, sort_keys=True),
             file=sys.stderr,
