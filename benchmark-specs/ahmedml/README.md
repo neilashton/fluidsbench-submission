@@ -26,7 +26,7 @@ derived from the same complete fields used for spatial scoring; a submission
 cannot supply its own profile values.
 
 Start with the [candidate packaging instructions](../../examples/ahmedml-v3-candidate/README.md).
-You need the pinned public files, a verified derived cache, complete evaluator outputs for one official split, and actual model
+You need the pinned public files, the automatically downloadable prepared cache, complete evaluator outputs for one official split, and actual model
 checkpoint/spatial records. Run commands from the repository root. Shared package, version, and optional-artifact rules are in
 [SUBMITTING.md](../../SUBMITTING.md).
 
@@ -35,7 +35,12 @@ for each training stage and inference campaign, including GPU model and allocati
 
 ## Canonical public data and derived cache
 
-The public dataset is canonical. A production evaluator must install/rebuild and verify its derived cache once before evaluating submissions; it must never rebuild support during an individual evaluation.
+The public dataset is canonical. Install the prepared cache for your split with
+`python scripts/fetch_ahmedml_support.py --split full` (replace `full` as needed).
+The evaluator finds the default cache automatically and downloads a missing
+case before starting evaluation. Participants do not need to rebuild support.
+The [first-time setup guide](../../examples/ahmedml-v3-candidate/README.md#first-time-setup)
+covers alternate storage, offline use and the separately required public CFD files.
 
 <details>
 <summary>Source files, cache verification commands, profile geometry, and the run_492 force exception</summary>
@@ -59,27 +64,35 @@ cache products replaces or extends the canonical dataset.
 
 `derived-cache-contract-v1.json` pins the public dataset revision, builder Git
 revision and file digest, exact Python/NumPy/VTK environment, generated
-artifact rules, and compact per-case hash manifest. The approximately 39 GB
-payload therefore does not need a second public upload. A production evaluator
-must preinstall or rebuild it once and verify it before accepting submissions;
-it must never rebuild support during an individual submission evaluation.
+artifact rules, and compact per-case hash manifest. The approximately 41.45 GB
+payload is available as an optional, byte-identical public mirror in the
+[`ahmedml-derived-cache-v1-dev` prerelease](https://github.com/neilashton/fluidsbench-submission/releases/tag/ahmedml-derived-cache-v1-dev).
+`support-distribution-v1.json` pins one compressed archive per case. The mirror
+does not replace the canonical dataset or change the scientific cache contract.
+An evaluator installs or reuses verified support before evaluation; it never
+rebuilds geometry during an individual submission. Maintainers can still
+reconstruct and verify the identical cache from the public data when needed.
 
 Use the metadata preflight for a quick deployment check and the deep mode when
 provisioning the production cache:
 
 ```bash
 python scripts/verify_ahmedml_derived_cache.py \
-  --cache-root /path/to/preinstalled/ahmedml-cache
+  --cache-root /path/to/preinstalled/ahmedml-cache \
+  --split full
 
 python scripts/verify_ahmedml_derived_cache.py \
   --cache-root /path/to/preinstalled/ahmedml-cache \
+  --split full \
   --deep \
   --output /path/to/ahmedml-cache-verification.json
 ```
 
 Deep mode hashes every generated NPY/NPZ payload against the exact expected
 digest. Normal scoring repeats the relevant retained-file hash verification as
-each support array is opened.
+each support array is opened. Omit `--split` to verify all 316 cases, or use
+`--case-id run_N` for individual installed cases. Deep native-array verification
+runs on Linux; the downloader's checksum verification also works on macOS.
 
 The profile geometry follows each case rather than remaining at fixed physical
 coordinates. Cp targets use the case body/slant dimensions and actual surface
@@ -136,6 +149,9 @@ dataset-owned evaluator path intended for future real submissions.
 - `reference/ahmedml/`: support loading, field evaluation, dataset reduction,
   and regional aggregation.
 - `scripts/build_ahmedml_case_support.py`: materializes evaluator-owned support.
+- `scripts/fetch_ahmedml_support.py`: installs the frozen prepared cache by split or case.
+- `support-distribution-v1.json`: binds the public mirror to the unchanged scientific release.
+- [Support distribution maintenance](../../docs/AHMEDML_SUPPORT_DISTRIBUTION.md): packaging and fresh-download verification.
 - `scripts/verify_ahmedml_derived_cache.py`: validates a preinstalled cache in
   metadata or full-payload mode and can emit a deployment receipt.
 - `requirements-ahmedml-support-builder.txt`: exact NumPy and VTK versions for

@@ -12,7 +12,6 @@ import tempfile
 from pathlib import Path
 from typing import Any, Mapping
 
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in os.sys.path:
     os.sys.path.insert(0, str(ROOT))
@@ -34,7 +33,6 @@ from reference.scoring_support import (  # noqa: E402
     load_support_release,
 )
 from scripts.list_ahmedml_support_cases import ordered_case_ids  # noqa: E402
-
 
 DATASET_DIR = ROOT / "benchmark-specs" / "ahmedml"
 DEFAULT_CONTRACT = DATASET_DIR / "derived-cache-contract-v1.json"
@@ -96,7 +94,9 @@ def _dataset_path(contract_path: Path, value: object, label: str) -> Path:
     try:
         candidate.relative_to(contract_path.parent.resolve())
     except ValueError as error:
-        raise CacheVerificationError(f"{label} escapes the AhmedML contract directory") from error
+        raise CacheVerificationError(
+            f"{label} escapes the AhmedML contract directory"
+        ) from error
     if not candidate.is_file():
         raise CacheVerificationError(f"{label} is missing: {candidate}")
     return candidate
@@ -174,8 +174,12 @@ def _validate_contract(
         implementation.get("requirements_sha256"),
         "derivation_implementation.requirements_sha256",
     ):
-        raise CacheVerificationError("AhmedML support-builder requirements SHA-256 differs")
-    runtime = _mapping(implementation.get("runtime"), "derivation_implementation.runtime")
+        raise CacheVerificationError(
+            "AhmedML support-builder requirements SHA-256 differs"
+        )
+    runtime = _mapping(
+        implementation.get("runtime"), "derivation_implementation.runtime"
+    )
     if runtime != {
         "python": "3.12.3",
         "numpy": "2.5.2",
@@ -200,7 +204,9 @@ def _validate_contract(
         "expected_outputs.candidate_manifest_sha256",
     )
     if sha256_file(candidate_manifest_path) != candidate_sha:
-        raise CacheVerificationError("candidate scoring-support manifest SHA-256 differs")
+        raise CacheVerificationError(
+            "candidate scoring-support manifest SHA-256 differs"
+        )
 
     specification = read_json(
         specification_path, label="AhmedML submission specification"
@@ -220,8 +226,7 @@ def _validate_contract(
         ) from error
     if (
         binding.get("status") != "candidate"
-        or binding.get("classification")
-        != "deterministic_rebuildable_evaluator_cache"
+        or binding.get("classification") != "deterministic_rebuildable_evaluator_cache"
         or binding.get("contract_file") != relative_contract.as_posix()
         or binding.get("contract_sha256") != sha256_file(contract_path)
         or binding.get("remote_payload_required") is not False
@@ -268,8 +273,9 @@ def verify_cache(
     contract_path: Path = DEFAULT_CONTRACT,
     specification_path: Path = DEFAULT_SPECIFICATION,
     deep: bool,
+    case_ids: list[str] | None = None,
 ) -> dict[str, object]:
-    """Verify all official AhmedML test-case cache entries and return a receipt."""
+    """Verify the selected frozen cache entries (all by default) and return a receipt."""
 
     cache_root = cache_root.expanduser().resolve()
     if not cache_root.is_dir():
@@ -280,10 +286,21 @@ def verify_cache(
     )
     identity = load_source_identity(source_identity_path)
     expected_hashes = _expected_case_manifest_hashes(candidate_manifest_path)
-    case_ids = ordered_case_ids()
-    if set(expected_hashes) != set(case_ids) or len(expected_hashes) != 316:
+    all_case_ids = ordered_case_ids()
+    if set(expected_hashes) != set(all_case_ids) or len(expected_hashes) != 316:
         raise CacheVerificationError(
             "candidate scoring-support cases differ from the 316-case official union"
+        )
+
+    if case_ids is None:
+        case_ids = all_case_ids
+    elif (
+        not case_ids
+        or len(set(case_ids)) != len(case_ids)
+        or not set(case_ids) <= set(all_case_ids)
+    ):
+        raise CacheVerificationError(
+            "selected cache cases must be unique members of the frozen test sets"
         )
 
     artifact_count = 0
@@ -294,7 +311,9 @@ def verify_cache(
             source_identity=identity,
         )
         if support.case_id != case_id:
-            raise CacheVerificationError(f"cache entry {case_id} resolved as {support.case_id}")
+            raise CacheVerificationError(
+                f"cache entry {case_id} resolved as {support.case_id}"
+            )
         if support.manifest_sha256 != expected_hashes[case_id]:
             raise CacheVerificationError(f"{case_id} case-support SHA-256 differs")
         artifact_count += len(support.artifacts)
@@ -328,6 +347,8 @@ def verify_cache(
         "builder_sha256": implementation["builder_sha256"],
         "cache_root": str(cache_root),
         "case_count": len(case_ids),
+        "case_ids": case_ids,
+        "complete_test_case_union": set(case_ids) == set(all_case_ids),
         "artifact_count": artifact_count,
         "payload_bytes": payload_bytes,
     }
@@ -367,13 +388,34 @@ def main() -> int:
         help="also hash every generated NPY/NPZ payload; use for production installation",
     )
     parser.add_argument("--output", type=Path)
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument(
+        "--split",
+        choices=(
+            "full",
+            "medium",
+            "scarce",
+            "super_scarce",
+            "geometry",
+            "high_drag",
+            "low_drag",
+            "image_wake",
+        ),
+    )
+    selection.add_argument("--case-id", action="append", dest="case_ids")
     args = parser.parse_args()
     try:
+        case_ids = args.case_ids
+        if args.split:
+            case_ids = read_json(
+                DATASET_DIR / "splits" / f"{args.split}.json", label="split"
+            )["case_ids"]
         receipt = verify_cache(
             cache_root=args.cache_root,
             contract_path=args.contract,
             specification_path=args.submission_specification,
             deep=args.deep,
+            case_ids=case_ids,
         )
         if args.output is None:
             print(json.dumps(receipt, indent=2, sort_keys=False))

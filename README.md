@@ -12,8 +12,10 @@ registered HiLiftAeroML Transolver and GeoTransolver previews retain real infere
 unapproved and non-citable. A local candidate validation pass does not open submissions or create a leaderboard entry.
 
 **AhmedML development candidate PRs are accepted on `dev`.** Follow the
-[candidate packaging guide](examples/ahmedml-v3-candidate/README.md); the assembler downloads
-the pinned profile manifest automatically. Validate with `--dev-intake --contributor-stage`
+[candidate packaging guide](examples/ahmedml-v3-candidate/README.md). Prepared evaluator
+support is available through `python scripts/fetch_ahmedml_support.py --split full`;
+evaluation downloads missing cases automatically, and the assembler downloads the
+pinned profile manifest. Validate with `--dev-intake --contributor-stage`
 and target `dev` in your PR. Repository-wide development checks use
 `python scripts/manage_leaderboard.py check --dev-intake`. Candidates remain unapproved and unpublished.
 

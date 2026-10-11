@@ -9,7 +9,6 @@ import os
 import tempfile
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in os.sys.path:
     os.sys.path.insert(0, str(ROOT))
@@ -26,7 +25,7 @@ from reference.ahmedml.support import (  # noqa: E402
     AhmedMLSupportError,
     load_case_support,
 )
-
+from reference.ahmedml.distribution import resolve_case_support  # noqa: E402
 
 DEFAULT_SOURCE_IDENTITY = (
     ROOT
@@ -61,7 +60,22 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--dataset-root", type=Path, required=True)
-    parser.add_argument("--case-support", type=Path, required=True)
+    location = parser.add_mutually_exclusive_group()
+    location.add_argument(
+        "--case-support",
+        type=Path,
+        help="existing case-support.json; never downloads when supplied",
+    )
+    location.add_argument(
+        "--support-root",
+        type=Path,
+        help="prepared cache destination; defaults to the managed AhmedML cache",
+    )
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="require existing support and never download it",
+    )
     parser.add_argument("--surface-prediction-manifest", type=Path, required=True)
     parser.add_argument("--volume-prediction-manifest", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -70,7 +84,14 @@ def main() -> int:
     args = parser.parse_args()
     try:
         identity = load_source_identity(args.source_identity)
-        support = load_case_support(args.case_support, source_identity=identity)
+        identity.case(args.case_id)
+        support_path = resolve_case_support(
+            args.case_id,
+            explicit=args.case_support,
+            destination=args.support_root,
+            offline=args.offline,
+        )
+        support = load_case_support(support_path, source_identity=identity)
         result = evaluate_candidate_case(
             case_id=args.case_id,
             dataset_root=args.dataset_root,

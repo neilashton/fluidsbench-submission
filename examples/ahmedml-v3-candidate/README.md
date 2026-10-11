@@ -19,6 +19,47 @@ of every checkpoint named by the methodology record.
 Use the shared [hardware and compute fields](../../METHODOLOGY.md#hardware-and-compute)
 for each training stage and inference campaign, including GPU model and allocation counts.
 
+## First-time setup
+
+Update your fork from upstream `dev`. Use Linux and Python 3.12 for native
+evaluation; the native-array protections use Linux descriptor semantics.
+Install the evaluator dependencies from the repository root:
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+Choose the split you will submit and download its prepared evaluator support:
+
+```bash
+python scripts/fetch_ahmedml_support.py --split full --dry-run
+python scripts/fetch_ahmedml_support.py --split full
+```
+
+Full, Medium, Scarce and Super-scarce share 50 test cases: approximately
+1.74 GB to download and 6.62 GB installed. Other splits need approximately
+3.45–3.48 GB to download and 12.61–13.59 GB installed. Shared cases are reused.
+The default location is `~/.cache/fluidsbench/ahmedml/<scientific-manifest-sha256>/`
+(or under `XDG_CACHE_HOME`). Each archive and extracted file is checked against
+the frozen release. Interrupted runs can be repeated; verified cases are reused.
+You do not build geometry support or obtain private maintainer files.
+
+For HPC scratch or shared storage, use `--destination /scratch/ahmedml-support`
+and pass `--support-root /scratch/ahmedml-support` to the evaluator, or set
+`FLUIDSBENCH_AHMEDML_SUPPORT_ROOT`. Pre-stage on a connected machine and add
+`--offline` to evaluation when compute nodes have no network access.
+
+The cache is additional to the public CFD data. Obtain the selected cases from
+[`neashton/ahmedml` at the pinned revision](https://huggingface.co/datasets/neashton/ahmedml/tree/02688c727cdb8dc8678e28abc6bbbb7e93c5fa15):
+`boundary_N.vtp`, `boundary_cell_area_N.npy`, `volume_N.vtu`,
+`geo_parameters_N.csv`, and `force_mom_N.csv` within each `run_N/` directory.
+The split files list the required case IDs; the
+[public source identity](../../benchmark-specs/ahmedml/public-source-identity/ahmedml-public-source-identity-v1.json)
+pins their paths, sizes and hashes. An existing copy of these exact files is reusable.
+The support download does not download raw CFD or model predictions.
+
 ## Inputs and blockers
 
 Copy `package-config.template.json` outside the repository and replace every
@@ -39,11 +80,16 @@ the complete surface and volume native-order prediction manifests:
 python scripts/evaluate_ahmedml_candidate_case.py \
   --case-id run_N \
   --dataset-root /path/to/ahmedml-public-revision-02688c7 \
-  --case-support /path/to/local-support/run_N/manifest.json \
   --surface-prediction-manifest /path/to/predictions/run_N/surface/manifest.json \
   --volume-prediction-manifest /path/to/predictions/run_N/volume/manifest.json \
   --output /path/to/case-evidence/run_N.json
 ```
+
+The evaluator finds the prepared cache automatically. If a case is missing, it
+downloads and verifies that case before evaluation begins. To use an existing
+cache explicitly, add `--case-support /path/to/local-support/run_N/case-support.json`;
+an explicit path is never downloaded or replaced. Prepared support also works
+with `--support-root` and `--offline` as described above.
 
 The prediction transport may be chunked, but it must cover every native cell
 exactly once and preserve native order. The evaluator derives all field scores,
