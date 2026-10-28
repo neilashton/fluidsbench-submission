@@ -1152,6 +1152,27 @@ def expected_outputs(
         dataset["submission_count"] = len(rows)
         dataset["revision_count"] = len(revision_rows)
         dataset["updated_at"] = latest
+        if "submission_population" in dataset:
+            eligible_count = sum(
+                row.get("claim_eligibility", {}).get("academic_citation") is True
+                for row in rows
+            )
+            dataset["submission_population"] = {
+                "feed_row_count": len(rows),
+                "prototype_ineligible_fixture_count": sum(
+                    row.get("approval", {}).get("status") == "prototype"
+                    for row in rows
+                ),
+                "pre_release_reference_count": sum(
+                    row.get("record_type") == "pre_release_reference"
+                    for row in rows
+                ),
+                "eligible_submission_count": eligible_count,
+                "scientific_result_count": eligible_count,
+                "scientific_result_count_semantics": "official_citable_results_only",
+                "submission_count_semantics": "published_feed_rows_including_pre_release_references",
+                "updated_at_semantics": "latest_submitted_at_date_among_published_result_revisions",
+            }
         if latest is not None:
             latest_dates.append(latest)
         all_rows.extend(rows)

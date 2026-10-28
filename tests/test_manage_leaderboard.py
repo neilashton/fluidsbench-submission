@@ -218,6 +218,43 @@ class ManageLeaderboardTests(unittest.TestCase):
         self.assertEqual(revision_history["record_count"], 1)
         self.assertEqual(revision_history["series_count"], 1)
 
+    def test_population_tracks_published_references_without_granting_eligibility(self) -> None:
+        manifest = self.ranking_manifest()
+        manifest["all_file"] = "leaderboard/all.json"
+        manifest["datasets"][0]["submission_population"] = {"feed_row_count": 99}
+        prototype = {
+            "submission_id": "prototype", "submitted_at": "2026-09-01",
+            "dataset_id": "example", "split_id": "full", "metric_values": {"score": 70.0},
+            "approval": {"status": "prototype"},
+            "record_type": "pre_release_reference",
+        }
+        participant = {
+            "submission_id": "participant", "submitted_at": "2026-10-28",
+            "dataset_id": "example", "split_id": "full", "metric_values": {"score": 80.0},
+            "record_type": "pre_release_reference",
+        }
+        for published in ([], [prototype], [prototype, participant]):
+            source_rows = {"Example": deepcopy(published)}
+            manage_leaderboard.annotate_result_revisions(source_rows)
+            with self.subTest(count=len(published)), patch.object(
+                manage_leaderboard, "source_rows_by_dataset",
+                return_value=source_rows,
+            ), patch.object(
+                manage_leaderboard, "expected_claim_artifacts",
+                return_value=({"schema_version": "1.0", "record_count": len(published),
+                               "eligible_record_count": 0}, {}),
+            ):
+                updated, _, _, _ = manage_leaderboard.expected_outputs(manifest)
+                dataset = updated["datasets"][0]
+                population = dataset["submission_population"]
+                self.assertEqual(population["feed_row_count"], len(published))
+                self.assertEqual(dataset["submission_count"], len(published))
+                self.assertEqual(population["prototype_ineligible_fixture_count"], int(bool(published)))
+                self.assertEqual(population["pre_release_reference_count"], len(published))
+                self.assertEqual(population["eligible_submission_count"], 0)
+                self.assertEqual(population["scientific_result_count"], 0)
+                self.assertEqual(dataset["updated_at"], published[-1]["submitted_at"] if published else None)
+
     def test_official_release_requires_archive_and_license_provenance(self) -> None:
         manifest = {"data_release": {"status": "official", "archive_url": None}}
         errors = manage_leaderboard.release_contract_errors(manifest)
