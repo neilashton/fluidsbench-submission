@@ -1,0 +1,430 @@
+{
+  "$schema": "https://fluidsbench.org/schemas/v3/discretization.schema.json",
+  "schema_version": "1.0",
+  "submission_id": "drivaerml-canto-full-v1",
+  "dataset_id": "drivaerml",
+  "split_id": "full",
+  "scoring_support_release_id": "drivaerml-native-dev-v2-candidate",
+  "scoring_support_manifest_sha256": "7c6648f333e508eff77b14a475106a26671eb99a0d25bf8c6e48e13fe9a527dc",
+  "training": {
+    "surface_input": {
+      "used": true,
+      "representation": "untrimmed NURBS patches of the car converted from the public DrivAerML CAD: control nets and knot vectors",
+      "entity_counts": [
+        {
+          "entity": "control_points",
+          "count": {
+            "kind": "per_case",
+            "minimum": 3624926,
+            "median": 7236731.5,
+            "maximum": 7521781
+          }
+        },
+        {
+          "entity": "patches",
+          "count": {
+            "kind": "per_case",
+            "minimum": 18858,
+            "median": 44302.5,
+            "maximum": 45857
+          }
+        }
+      ],
+      "native_comparison": {
+        "status": "not_applicable"
+      },
+      "sampling": {
+        "kind": "none"
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
+      "connectivity": "regular",
+      "notes": "Parametric geometry, not a mesh: every patch and control point of the case is encoded. Each patch token is also a surface anchor positioned at its control-point centroid; 20 percent of the surface anchors are dropped at random at each step. Counts are over the 400 training cases."
+    },
+    "surface_supervision": {
+      "used": true,
+      "representation": "native surface cell centres with pressure and wall-shear-stress targets",
+      "entity_counts": [
+        {
+          "entity": "cells",
+          "count": {
+            "kind": "fixed",
+            "value": 16384
+          }
+        }
+      ],
+      "native_comparison": {
+        "status": "reported",
+        "native_entity_counts": [
+          {
+            "entity": "cells",
+            "count": {
+              "kind": "per_case",
+              "minimum": 7284102,
+              "median": 8412812.0,
+              "maximum": 10201795
+            }
+          }
+        ],
+        "fractions": [
+          {
+            "entity": "cells",
+            "fraction": {
+              "kind": "per_case",
+              "minimum": 0.0016059918867218955,
+              "median": 0.0019475058082063994,
+              "maximum": 0.002249282066615761
+            }
+          }
+        ]
+      },
+      "sampling": {
+        "kind": "resampled_each_epoch",
+        "method": "contiguous 16384-row block at a uniform random offset in the once-shuffled case arrays, redrawn at every visit",
+        "seed": null
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
+      "connectivity": "none"
+    },
+    "volume_input": {
+      "used": true,
+      "representation": "native volume cell centres used as volume anchor positions",
+      "entity_counts": [
+        {
+          "entity": "cells",
+          "count": {
+            "kind": "fixed",
+            "value": 16384
+          }
+        }
+      ],
+      "native_comparison": {
+        "status": "reported",
+        "native_entity_counts": [
+          {
+            "entity": "cells",
+            "count": {
+              "kind": "per_case",
+              "minimum": 121635947,
+              "median": 140420188.0,
+              "maximum": 165420657
+            }
+          }
+        ],
+        "fractions": [
+          {
+            "entity": "cells",
+            "fraction": {
+              "kind": "per_case",
+              "minimum": 9.90444621435641e-05,
+              "median": 0.00011667838032975307,
+              "maximum": 0.0001346970234054247
+            }
+          }
+        ]
+      },
+      "sampling": {
+        "kind": "resampled_each_epoch",
+        "method": "contiguous 16384-row block at a uniform random offset in the once-shuffled case arrays, redrawn at every visit",
+        "seed": null
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
+      "connectivity": "none"
+    },
+    "volume_supervision": {
+      "used": true,
+      "representation": "native volume cell centres with total-pressure-coefficient and velocity targets",
+      "entity_counts": [
+        {
+          "entity": "cells",
+          "count": {
+            "kind": "fixed",
+            "value": 16384
+          }
+        }
+      ],
+      "native_comparison": {
+        "status": "reported",
+        "native_entity_counts": [
+          {
+            "entity": "cells",
+            "count": {
+              "kind": "per_case",
+              "minimum": 121635947,
+              "median": 140420188.0,
+              "maximum": 165420657
+            }
+          }
+        ],
+        "fractions": [
+          {
+            "entity": "cells",
+            "fraction": {
+              "kind": "per_case",
+              "minimum": 9.90444621435641e-05,
+              "median": 0.00011667838032975307,
+              "maximum": 0.0001346970234054247
+            }
+          }
+        ]
+      },
+      "sampling": {
+        "kind": "resampled_each_epoch",
+        "method": "contiguous 16384-row block at a uniform random offset in the once-shuffled case arrays, redrawn at every visit",
+        "seed": null
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
+      "connectivity": "none"
+    }
+  },
+  "inference": {
+    "geometry_dependency": "native_cfd_mesh",
+    "geometry_dependency_explanation": "Geometry enters the model only through the NURBS patches. The native surface and volume meshes supply cell-centre positions alone: every native cell is decoded as a query, and 16384 native volume cell centres per case serve as volume anchor positions, so predictions depend on the native volume mesh. No native field value is read.",
+    "surface_input": {
+      "used": true,
+      "case_record_id": "nurbs-control-net",
+      "representation": "untrimmed NURBS patches of the car converted from the public DrivAerML CAD: control nets and knot vectors",
+      "entity_counts": [
+        {
+          "entity": "control_points",
+          "count": {
+            "kind": "per_case",
+            "minimum": 6536403,
+            "median": 7231750.5,
+            "maximum": 7385664
+          }
+        },
+        {
+          "entity": "patches",
+          "count": {
+            "kind": "per_case",
+            "minimum": 43156,
+            "median": 44386.5,
+            "maximum": 45647
+          }
+        }
+      ],
+      "native_comparison": {
+        "status": "not_applicable"
+      },
+      "sampling": {
+        "kind": "none"
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
+      "connectivity": "regular",
+      "notes": "Parametric geometry, not a mesh: every patch and control point of the case is encoded, and each patch token is also a surface anchor positioned at its control-point centroid. Inference keeps every anchor."
+    },
+    "volume_input": {
+      "used": true,
+      "case_record_id": "volume-anchor-cells",
+      "representation": "native volume cell centres used as volume anchor positions",
+      "entity_counts": [
+        {
+          "entity": "cells",
+          "count": {
+            "kind": "fixed",
+            "value": 16384
+          }
+        }
+      ],
+      "native_comparison": {
+        "status": "reported",
+        "native_entity_counts": [
+          {
+            "entity": "cells",
+            "count": {
+              "kind": "per_case",
+              "minimum": 127867654,
+              "median": 143765175.5,
+              "maximum": 163659811
+            }
+          }
+        ],
+        "fractions": [
+          {
+            "entity": "cells",
+            "fraction": {
+              "kind": "per_case",
+              "minimum": 0.00010011009972387173,
+              "median": 0.00011396362204524017,
+              "maximum": 0.0001281324829811924
+            }
+          }
+        ]
+      },
+      "sampling": {
+        "kind": "fixed",
+        "method": "uniform random draw without replacement, once per case, by a GPU permutation seeded with the case run number",
+        "seed": null
+      },
+      "domain": {
+        "kind": "full_dataset_domain"
+      },
+      "connectivity": "none"
+    },
+    "direct_outputs": [
+      {
+        "id": "surface-native-output",
+        "domain": "surface",
+        "representation": {
+          "used": true,
+          "representation": "every native surface cell centre decoded directly",
+          "entity_counts": [
+            {
+              "entity": "cells",
+              "count": {
+                "kind": "per_case",
+                "minimum": 7515248,
+                "median": 8710610.0,
+                "maximum": 10081563
+              }
+            }
+          ],
+          "native_comparison": {
+            "status": "reported",
+            "native_entity_counts": [
+              {
+                "entity": "cells",
+                "count": {
+                  "kind": "per_case",
+                  "minimum": 7515248,
+                  "median": 8710610.0,
+                  "maximum": 10081563
+                }
+              }
+            ],
+            "fractions": [
+              {
+                "entity": "cells",
+                "fraction": {
+                  "kind": "fixed",
+                  "value": 1.0
+                }
+              }
+            ]
+          },
+          "sampling": {
+            "kind": "none"
+          },
+          "domain": {
+            "kind": "full_dataset_domain"
+          },
+          "connectivity": "native"
+        },
+        "queries_per_forward_pass": {
+          "kind": "fixed",
+          "value": 2000000
+        }
+      },
+      {
+        "id": "volume-native-output",
+        "domain": "volume",
+        "representation": {
+          "used": true,
+          "representation": "every native volume cell centre decoded directly",
+          "entity_counts": [
+            {
+              "entity": "cells",
+              "count": {
+                "kind": "per_case",
+                "minimum": 127867654,
+                "median": 143765175.5,
+                "maximum": 163659811
+              }
+            }
+          ],
+          "native_comparison": {
+            "status": "reported",
+            "native_entity_counts": [
+              {
+                "entity": "cells",
+                "count": {
+                  "kind": "per_case",
+                  "minimum": 127867654,
+                  "median": 143765175.5,
+                  "maximum": 163659811
+                }
+              }
+            ],
+            "fractions": [
+              {
+                "entity": "cells",
+                "fraction": {
+                  "kind": "fixed",
+                  "value": 1.0
+                }
+              }
+            ]
+          },
+          "sampling": {
+            "kind": "none"
+          },
+          "domain": {
+            "kind": "full_dataset_domain"
+          },
+          "connectivity": "native"
+        },
+        "queries_per_forward_pass": {
+          "kind": "fixed",
+          "value": 2000000
+        }
+      }
+    ],
+    "mappings": [
+      {
+        "support_id": "surface_native_cells",
+        "source_output_id": "surface-native-output",
+        "method": {
+          "kind": "identity"
+        },
+        "implementation": "Predictions are written at every native cell in the exact native CellData entity order (raw_cell_id).",
+        "extrapolation_policy": "forbidden",
+        "unmapped_fraction": 0.0,
+        "extrapolated_fraction": 0.0,
+        "final_coverage_fraction": 1.0
+      },
+      {
+        "support_id": "volume_native_cells",
+        "source_output_id": "volume-native-output",
+        "method": {
+          "kind": "identity"
+        },
+        "implementation": "Predictions are written at every native cell in the exact native CellData entity order (raw_cell_id).",
+        "extrapolation_policy": "forbidden",
+        "unmapped_fraction": 0.0,
+        "extrapolated_fraction": 0.0,
+        "final_coverage_fraction": 1.0
+      },
+      {
+        "support_id": "drivaerml-force-coefficients-v1",
+        "source_output_id": "surface-native-output",
+        "method": {
+          "kind": "reference_rule",
+          "rule_id": "drivaerml-force-coefficients-v1",
+          "rule_version": "drivaerml-evaluator-v3-candidate"
+        },
+        "implementation": "The reference evaluator integrates the force coefficients from the complete predicted native surface fields (field_integrated).",
+        "extrapolation_policy": "forbidden",
+        "unmapped_fraction": 0.0,
+        "extrapolated_fraction": 0.0,
+        "final_coverage_fraction": 1.0
+      }
+    ]
+  },
+  "case_manifest": {
+    "format": "jsonl",
+    "file": "discretization/cases.jsonl",
+    "sha256": "899b22f302935bffde3ad1eace079b91fd9bc9f6e11f4e9552b6b21eb8c7435d",
+    "case_count": 50
+  },
+  "notes": "Geometry enters only through the NURBS description; the native meshes contribute cell-centre positions alone, as query points and as volume anchor positions. Every native cell is decoded directly, so every mapping is the identity with coverage 1.0 and no interpolation, nearest-neighbour assignment or extrapolation is applied. Surface and volume queries are decoded in chunks of 2000000, the last chunk of each holding the remainder; each forward pass decodes one surface chunk and one volume chunk against the same geometry and anchor context, recomputed from identical inputs, and query points are never attention keys, so chunking changes nothing beyond the run-to-run GPU rounding differences described in the method record. Training counts are over the 400 training cases and inference counts over the 50 test cases."
+}
