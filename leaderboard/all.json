@@ -3568,6 +3568,885 @@
     }
   },
   {
+    "schema_version": "3.0",
+    "submission_id": "drivaerml-canto-full-v1",
+    "result_revision": {
+      "series_id": "drivaerml-canto-full",
+      "version": 1,
+      "supersedes": null,
+      "change_summary": "Initial submitted result.",
+      "is_latest": true,
+      "latest_submission_id": "drivaerml-canto-full-v1",
+      "version_count": 1
+    },
+    "model": "CANTO",
+    "model_type": "Neural transformer operator",
+    "model_types": [
+      "Neural transformer operator",
+      "Anchored branched transformer",
+      "NURBS geometry encoder"
+    ],
+    "training_regime": "from_scratch",
+    "target_data_used": "official_train",
+    "external_pretraining": false,
+    "pretraining_data": [],
+    "methodology": {
+      "format": "fluidsbench-method-v1",
+      "record_kind": "submitter_reported",
+      "record_note": "CANTO predicts the complete native DrivAerML surface and volume fields from the NURBS description of each car. The geometry input is the case's set of untrimmed rectangular NURBS patches converted from the public DrivAerML CAD (43156 to 45647 patches and 6.5 to 7.4 million control points per test case); every patch token also serves as a surface anchor. The native meshes supply cell-centre positions only, as query points and, for 16384 volume cells per case, as volume anchor positions, and never field data. Predictions come from actual inference with the single checkpoint declared below, decoded at every native cell in source order, so no interpolation or mapping is applied before scoring. The model was trained from scratch on the 400 cases of the official Full training split, none of them among the 50 test cases, and evaluated during training on the 34 official validation cases only; no test-split metric was computed during training. The declared checkpoint, model.pt, is the last checkpoint written by the single training run, at optimizer step 200500: the run continued at the 1e-6 floor learning rate for 500 steps after its 200000-step cosine schedule ended, until the 21st four-hour job reached its time limit 24 seconds after writing this checkpoint, and it was not resubmitted. Code provenance: the run used a working tree whose uncommitted edits were later committed as aie-cfd 4a64903 (with aie-core 2bfd2f1). Configuration, algorithm and dataset files were edited during the run, before its last two jobs (steps 180000 to 200500); the earlier tree is not recoverable, but the recipe, optimizer and schedule are identical before and after, and inference parses the recorded configuration and loads the checkpoint with strict key matching. No random seed was set for training; see the training stage. GPU inference is not bitwise reproducible: the model sums per-patch control-point centroids with CUDA atomic additions, whose order varies between runs, and runs under bf16 autocast. Exporting run_11 a second time with the same volume anchors changed the surface predictions by a median of 0.14 percent (pressure) and 0.47 percent (wall shear stress) of the field RMS, its metric values by at most 0.17 percent relative and its drag coefficient by 0.00008; the submitted run_11 prediction is the second export. Every normalisation constant that affects the model equals its value computed from the training cases alone, as checked by recomputation (see data handling).",
+      "architecture": {
+        "description": "Two-stage model. A Perceiver-style NURBS geometry encoder turns each patch into one token: bucketed variable-length attention pools the patch's control points into 32 latents, separate pools encode its u and v knot vectors, and an MLP projects the concatenated latents to a single 192-wide token; six self-attention blocks then refine the patch tokens, about 44000 per case. An anchored branched transformer (AB-UPT) conditions on these geometry tokens: a shared trunk is followed by separate surface and volume branches, each of which predicts at a set of anchor positions and then lets arbitrary query points attend to those anchors. The patch tokens double as surface anchors, positioned at each patch's control-point centroid, and the volume anchors are 16384 native volume cell centres. Query points are never attention keys, so any number of them can be decoded in chunks. Control points and query coordinates share one union min/max normalisation frame.",
+        "total_parameter_count": 14066956,
+        "parameter_count_basis": "exact",
+        "submitter_trainable_parameter_count": 14066956,
+        "components": [
+          {
+            "id": "nurbs-geometry-encoder",
+            "family": "perceiver",
+            "role": "geometry_encoder",
+            "description": "Bucketed variable-length Perceiver pool over each patch's control points (32 latents, width 192, 3 heads, depth 2) with separate u and v knot-vector pools (4 latents, width 64, 2 heads, depth 1), an MLP projecting the 6656 pooled values to one 192-wide token per patch, and six self-attention blocks over the patch tokens. Produces the geometry token set consumed by every downstream branch.",
+            "parameter_count": 6055744
+          },
+          {
+            "id": "shared-trunk",
+            "family": "transformer",
+            "role": "shared_backbone",
+            "description": "Shared AB-UPT trunk applied to geometry tokens before the surface and volume branches diverge.",
+            "parameter_count": 2447808
+          },
+          {
+            "id": "surface-branch",
+            "family": "transformer",
+            "role": "surface_predictor",
+            "description": "Anchored surface branch. Embeds the patch-centroid anchor positions, predicts at those anchors, then decodes arbitrary surface query points by attention to them. Outputs pressure and three wall-shear-stress components.",
+            "parameter_count": 2818564
+          },
+          {
+            "id": "volume-branch",
+            "family": "transformer",
+            "role": "volume_predictor",
+            "description": "Anchored volume branch. Predicts at the sampled volume anchors, then decodes arbitrary volume query points by attention to them. Its decoder has eight output channels, of which only the first four (total-pressure coefficient and three velocity components) are supervised and used.",
+            "parameter_count": 2744840
+          }
+        ],
+        "key_hyperparameters": [
+          {
+            "id": "model-dim",
+            "component_ids": [
+              "shared-trunk",
+              "surface-branch",
+              "volume-branch"
+            ],
+            "name": "token width and head count",
+            "value": "dim 192, 3 heads, MLP ratio 4, RMS-normalised queries and keys",
+            "description": "Width of the AB-UPT trunk and both branches."
+          },
+          {
+            "id": "block-pattern",
+            "component_ids": [
+              "shared-trunk",
+              "surface-branch",
+              "volume-branch"
+            ],
+            "name": "block pattern and branch depth",
+            "value": "pscscs, 6 surface blocks, 6 volume blocks",
+            "description": "Interleaving of pooling, self-attention and cross-attention blocks in the trunk, and the number of blocks in each branch."
+          },
+          {
+            "id": "geometry-depth",
+            "component_ids": [
+              "nurbs-geometry-encoder"
+            ],
+            "name": "geometry self-attention depth",
+            "value": "6",
+            "description": "Self-attention blocks applied to the patch tokens after pooling."
+          },
+          {
+            "id": "pool-config",
+            "component_ids": [
+              "nurbs-geometry-encoder"
+            ],
+            "name": "Perceiver pool configuration",
+            "value": "32 latents, width 192, 3 heads, depth 2, positional encoding 192, self-attention on, variable-length on, ReZero off; knot pools 4 latents, width 64, 2 heads, depth 1, positional encoding 64",
+            "description": "Per-patch pooling of the control net and knot vectors into one token."
+          },
+          {
+            "id": "anchor-counts",
+            "component_ids": [
+              "surface-branch",
+              "volume-branch"
+            ],
+            "name": "anchor and query counts",
+            "value": "one surface anchor per NURBS patch, 16384 volume anchors, 16384 surface and 16384 volume queries per training step",
+            "description": "Training draws new surface queries, volume anchors and volume queries at every visit of a case. Inference draws the volume anchors once per case and decodes every native cell, in chunks of 2000000 queries."
+          },
+          {
+            "id": "anchor-dropout",
+            "component_ids": [
+              "surface-branch"
+            ],
+            "name": "surface anchor dropout",
+            "value": "0.2",
+            "description": "Fraction of surface anchor tokens dropped at random at each training step. Inference keeps every anchor."
+          },
+          {
+            "id": "shared-frame",
+            "component_ids": [
+              "nurbs-geometry-encoder",
+              "surface-branch",
+              "volume-branch"
+            ],
+            "name": "shared control-point and query coordinate frame",
+            "value": "enabled, union of volume-coordinate and control-point bounds",
+            "description": "Control points and query coordinates are normalised in one min/max frame, the union of the training volume-coordinate bounds and the control-point bounds. Only the lower z bound comes from the control points: the untrimmed patches reach 0.59 m below the lowest volume cell centre."
+          }
+        ],
+        "input_features": [
+          {
+            "id": "nurbs-control-points",
+            "component_ids": [
+              "nurbs-geometry-encoder"
+            ],
+            "name": "NURBS control net",
+            "domain": "case",
+            "component_count": 6,
+            "description": "Control points of every untrimmed NURBS patch of the car as homogeneous coordinates (x, y, z, w) in metres, all weights equal to 1, plus each point's normalised (i, j) grid index within its patch. Test cases have 43156 to 45647 patches and 6.5 to 7.4 million control points. This is the complete geometry input; no native mesh entity is read as geometry."
+          },
+          {
+            "id": "nurbs-knot-vectors",
+            "component_ids": [
+              "nurbs-geometry-encoder"
+            ],
+            "name": "knot vectors",
+            "domain": "case",
+            "component_count": 2,
+            "description": "Per-patch u and v knot vectors, encoded by dedicated knot pooling modules."
+          },
+          {
+            "id": "surface-anchor-centroids",
+            "component_ids": [
+              "surface-branch"
+            ],
+            "name": "NURBS patch control-point centroids",
+            "domain": "surface",
+            "component_count": 3,
+            "description": "One anchor position per patch, the mean of its control points, computed in the model from the same NURBS input; not sampled from the native mesh."
+          },
+          {
+            "id": "query-coordinates",
+            "component_ids": [
+              "surface-branch",
+              "volume-branch"
+            ],
+            "name": "native cell centre coordinates",
+            "domain": "case",
+            "component_count": 3,
+            "description": "Cell-centre coordinates of the native surface and volume meshes, used as query positions and, for 16384 volume cells per case, as volume anchor positions. No native field value is read at inference time."
+          }
+        ],
+        "predicted_fields": [
+          {
+            "field_id": "surface_native_cells.pMeanTrim",
+            "domain": "surface",
+            "component_count": 1,
+            "component_ids": [
+              "surface-branch"
+            ],
+            "production": "direct_model_output",
+            "description": "Direct surface branch output channel, de-standardised to the dataset's kinematic pressure units (m^2/s^2). One value per native surface cell."
+          },
+          {
+            "field_id": "surface_native_cells.wallShearStressMeanTrim",
+            "domain": "surface",
+            "component_count": 3,
+            "component_ids": [
+              "surface-branch"
+            ],
+            "production": "direct_model_output",
+            "description": "Direct surface branch output channels, de-standardised to the dataset's kinematic units (m^2/s^2). Three components per native surface cell."
+          },
+          {
+            "field_id": "volume_native_cells.pMeanTrim",
+            "domain": "volume",
+            "component_count": 1,
+            "component_ids": [
+              "volume-branch"
+            ],
+            "production": "derived_from_model_output",
+            "description": "Derived from the volume branch's total-pressure-coefficient and velocity outputs at the same cell: pMeanTrim = 0.5 * 38.889^2 * Cpt - 0.5 * |U|^2 (kinematic, free-stream speed 38.889 m/s), the relation the dataset's own pressure, velocity and Cpt satisfy. One value per native volume cell."
+          },
+          {
+            "field_id": "volume_native_cells.UMeanTrim",
+            "domain": "volume",
+            "component_count": 3,
+            "component_ids": [
+              "volume-branch"
+            ],
+            "production": "direct_model_output",
+            "description": "Direct volume branch output channels, de-standardised to m/s. Three components per native volume cell."
+          }
+        ]
+      },
+      "data_handling": {
+        "normalization": "Surface output channels (pressure and three wall-shear-stress components) are standardised by the per-channel mean and standard deviation in surface_flow_stats.pt, and volume output channels (total-pressure coefficient and three velocity components) by those in volume_flow_stats_with_cpt.pt. Recomputing over the 400 official training cases reproduces the surface statistics bit for bit, and the volume flow and coordinate statistics were written by the same training-only pass. Control points and query coordinates share one min/max frame, the union of the training volume-coordinate bounds (volume_coords_stats.pt) and the control-point bounds in the NURBS statistics file. That file came from a scan that included non-training archives (its x minimum comes from validation run 150, and its moments best match a scan of all 488 archives, test cases included), but the frame takes only its lower z bound, -0.9072 m, which training run 437 attains and which therefore equals the training-only value; every other frame bound comes from the volume coordinates, and the file's means and standard deviations are not used. Predictions are de-standardised to physical units before being written, so the evaluator receives raw dataset units.",
+        "preprocessing": "Training reads HDF5 shards converted once from the public VTP and VTU files, carrying cell-centre coordinates and field values for every native surface and volume cell in a once-shuffled row order; the volume shards also carry the total-pressure coefficient. Inference takes its query positions straight from the pinned native VTP and VTU files, recomputing the cell centres exactly as the conversion did (surface: VTK cell centres; volume: mean of each cell's vertices); for every test case the sorted centres equal the training-format coordinates exactly. Geometry comes from the per-case NURBS archives: untrimmed rectangular patches in metres converted from the public DrivAerML CAD. No remeshing, decimation or smoothing is applied at any stage.",
+        "sampling": "Training visits each of the 400 training cases once per epoch (one case per GPU per step, four GPUs, 100 steps per epoch). At every visit it takes three independent blocks of 16384 rows, each a contiguous block at a uniform random offset in the case's once-shuffled arrays: surface queries, volume anchors and volume queries; it also drops 20 percent of the surface anchor tokens. No random seed was set. Inference does not subsample the outputs: every native surface and volume cell is decoded exactly once in source order, in chunks of 2000000 queries, each chunk a full forward pass against the same geometry and anchor context. The 16384 volume anchors are drawn once per case from the native volume cell centres by a GPU random permutation seeded with the case's run number."
+      },
+      "training": {
+        "stages": [
+          {
+            "id": "joint-surface-volume-training",
+            "status": "performed_by_submitter",
+            "component_ids": [
+              "nurbs-geometry-encoder",
+              "shared-trunk",
+              "surface-branch",
+              "volume-branch"
+            ],
+            "description": "Single joint stage training all components end to end from random initialisation on the 400 cases of the official Full training split, with the 34 official validation cases evaluated every five epochs. No pretraining and no staged freezing. No random seed was set: the configuration's seed is None and the trainer seeds only when a value is given, so each of the 21 jobs started from fresh entropy-seeded generator states. The schema requires one integer per stochastic run, so random_seeds holds -1 as a sentinel meaning not set; it is not a seed.",
+            "procedure": {
+              "kind": "gradient_based",
+              "loss": {
+                "description": "Mean squared error between standardised predictions and targets at the sampled surface and volume query points. The surface target has four channels (pressure and three wall-shear-stress components); the volume target has four (total-pressure coefficient and three velocity components).",
+                "weighting": "Surface loss plus 0.2 times volume loss. Within each term every sampled cell and every channel carries equal weight: the loss is not weighted by surface face area or cell volume, and query cells are drawn uniformly by cell, not by area."
+              },
+              "optimizers": [
+                {
+                  "name": "Lion",
+                  "learning_rate": 0.0003,
+                  "schedule": "Linear warmup over 5000 steps, then cosine annealing to 1e-6 at step 200000, held at 1e-6 until the run stopped at step 200500. Betas (0.9, 0.99), weight decay 0.05, gradient-norm clipping at 1.0, bf16 mixed precision."
+                }
+              ],
+              "batch": {
+                "value": 4,
+                "unit": "geometries per optimizer step, one per GPU",
+                "gradient_accumulation_steps": 1
+              },
+              "duration": {
+                "epochs": 2005,
+                "optimizer_steps": 200500
+              }
+            },
+            "run_count": 1,
+            "stochastic": true,
+            "random_seeds": [
+              -1
+            ],
+            "compute": {
+              "hardware": "NVIDIA GB200, four GPUs on one node per job",
+              "hardware_identity_basis": "machine_recorded",
+              "measurement_basis": "measured",
+              "cost_scope": "final_training",
+              "accelerator": {
+                "type": "gpu",
+                "vendor": "NVIDIA",
+                "model": "GB200"
+              },
+              "devices_per_job": 4,
+              "max_concurrent_device_count": 4,
+              "campaign_wall_time_hours": 178.8,
+              "aggregate_device_hours": 336.37,
+              "measurement_notes": "One training run executed as 21 consecutive single-node scheduler jobs of four GPUs, each resuming from the previous rolling checkpoint and ending at its four-hour time limit; the scheduler recorded four allocated GPUs for every job and the experiment tracker recorded four NVIDIA GB200 devices for every job. Elapsed campaign time runs from the first job's start (2026-09-10T01:41:51Z) to the last job's end (2026-09-17T12:29:39Z), 178.8 hours, including queue gaps of 1 minute to 27.6 hours between jobs, during which no devices were held. Aggregate device time sums the actual allocations: 21 jobs totalling 84.09 hours on four GPUs, 336.4 GPU-hours. Both include job start-up, dependency installation, checkpoint input and output, and the validation evaluations every five epochs. The last job wrote the declared step-200500 checkpoint 24 seconds before its time limit. Earlier exploratory runs and hyperparameter search are not counted."
+            }
+          }
+        ]
+      },
+      "checkpoints": [
+        {
+          "id": "canto-joint-model",
+          "component_ids": [
+            "nurbs-geometry-encoder",
+            "shared-trunk",
+            "surface-branch",
+            "volume-branch"
+          ],
+          "sha256": "47c5d0c4a00925187b619aeeb21cf68c1419d9dfcde2057603202107116f0edc",
+          "digest_scope": "raw_loaded_file",
+          "bytes_description": "The exact 56422423-byte PyTorch checkpoint file (model.pt) loaded for every case in this submission, containing the state dictionary of all four components of the single joint model. It is byte-identical to the run's rolling step-200500 checkpoint.",
+          "role": "joint_surface_and_volume_model",
+          "selection_rule": "The last checkpoint written by the single training run (model.pt, optimizer step 200500), not the run's validation-selected checkpoint (model_best.pt). The rule to submit the final checkpoint was fixed before any test-split score was seen, and no other checkpoint was run on test cases."
+        }
+      ],
+      "inference_compute": {
+        "status": "measured",
+        "hardware": "NVIDIA GB200, four GPUs on one node",
+        "hardware_identity_basis": "machine_recorded",
+        "accelerator": {
+          "type": "gpu",
+          "vendor": "NVIDIA",
+          "model": "GB200"
+        },
+        "devices_per_job": 4,
+        "max_concurrent_device_count": 4,
+        "case_count": 50,
+        "campaign_wall_time_seconds": 1690,
+        "aggregate_device_time_seconds": 6760,
+        "includes_preprocessing": false,
+        "includes_mapping": true,
+        "measurement_notes": "One scheduler job on one node with four GPUs; the fifty cases were dealt round-robin in run-number order to four worker processes, one per GPU, each recording its device as NVIDIA GB200. Wall time is the job's elapsed time and includes container dependency installation, checkpoint and geometry loading, and writing 185 GB of prediction chunks to shared storage, so it overstates pure model cost; the workers' per-case times sum to 6196 s, of which 6059 s are forward passes. Aggregate device time is wall time multiplied by the four allocated GPUs, idle time included. Forward passes use bf16 autocast. Mapping is the identity because every native cell is decoded directly, so no separate mapping cost exists. Native cell-centre extraction from the published VTP and VTU files ran earlier as separate CPU jobs and is excluded."
+      }
+    },
+    "submitter_name": "Daniel Leibovici",
+    "institution": "NVIDIA",
+    "paper_url": "",
+    "submitted_at": "2026-10-26",
+    "reproducibility": {
+      "contract_version": "open-reproducibility-3.0",
+      "access": "public",
+      "public_test_data_use": "evaluation_only",
+      "result_data_license_spdx": "CC-BY-4.0"
+    },
+    "note": "Candidate dry-run package from genuine model inference; not accepted or owner-approved.",
+    "dataset_id": "drivaerml",
+    "prediction_scope": "surface_and_volume",
+    "parameter_count_millions": 14.066956,
+    "dataset": "DrivAerML",
+    "dataset_version": "drivaerml-native-v3-candidate",
+    "split": "Full",
+    "split_id": "full",
+    "case_set_id": "standard",
+    "split_sha256": "8023cb3212c19b6039f7fb3fbd67b8c97d3514f9a3dce1cad6f88b2f3990f388",
+    "evaluation": {
+      "reference_version": "drivaerml-evaluator-v3-candidate",
+      "command": "Inference: export_drivaerml_native_predictions.py --checkpoint model.pt --seed 0 (defaults --query-chunk 2000000 --rows-per-chunk 1000000 --context-points 16384; four workers, one GPU each, per-case anchor seed 0 + run number). Evaluation: evaluate_cases_parallel.py runs the reference per-case evaluation (participant_workflow.run_case, unchanged) in 50 processes and writes the same verified case checkpoints; then python scripts/drivaerml.py evaluate-entry entry --dataset-root <drivaerml-dataset-root> --support-root support --offline --output eval-full --resume re-verifies every case checkpoint and reduces the split. Packaging: python scripts/drivaerml.py package --evaluation-root eval-full/evaluation --config package-config.json --discretization-cases discretization/cases.jsonl --checkpoint canto-joint-model=model.pt --output <package> --support-root support",
+      "evidence_file": "evaluation-evidence.json",
+      "evidence_sha256": "e7417f5f140e9b5de4c557af0c802c8c72f57d24e3b82dc8d9addeac8df827f3"
+    },
+    "scoring_support": {
+      "status": "candidate",
+      "release_id": "drivaerml-native-dev-v2-candidate",
+      "manifest_url": "https://raw.githubusercontent.com/neilashton/fluidsbench-submission/fa321e6fe6ce05a7bae41bd3961108d11ef467a6/benchmark-specs/drivaerml/scoring-support/drivaerml-native-dev-v2-candidate/manifest.json",
+      "manifest_sha256": "7c6648f333e508eff77b14a475106a26671eb99a0d25bf8c6e48e13fe9a527dc"
+    },
+    "spatial_discretization": {
+      "format": "fluidsbench-discretization-v1",
+      "file": "submissions/drivaerml/drivaerml-canto-full-v1/discretization.json",
+      "sha256": "972cb016de0bc6b5ce7be2e05c399315b53d407f74f091edccc9105f06975a65",
+      "summary": {
+        "$schema": "https://fluidsbench.org/schemas/v3/discretization.schema.json",
+        "schema_version": "1.0",
+        "submission_id": "drivaerml-canto-full-v1",
+        "dataset_id": "drivaerml",
+        "split_id": "full",
+        "scoring_support_release_id": "drivaerml-native-dev-v2-candidate",
+        "scoring_support_manifest_sha256": "7c6648f333e508eff77b14a475106a26671eb99a0d25bf8c6e48e13fe9a527dc",
+        "training": {
+          "surface_input": {
+            "used": true,
+            "representation": "untrimmed NURBS patches of the car converted from the public DrivAerML CAD: control nets and knot vectors",
+            "entity_counts": [
+              {
+                "entity": "control_points",
+                "count": {
+                  "kind": "per_case",
+                  "minimum": 3624926,
+                  "median": 7236731.5,
+                  "maximum": 7521781
+                }
+              },
+              {
+                "entity": "patches",
+                "count": {
+                  "kind": "per_case",
+                  "minimum": 18858,
+                  "median": 44302.5,
+                  "maximum": 45857
+                }
+              }
+            ],
+            "native_comparison": {
+              "status": "not_applicable"
+            },
+            "sampling": {
+              "kind": "none"
+            },
+            "domain": {
+              "kind": "full_dataset_domain"
+            },
+            "connectivity": "regular",
+            "notes": "Parametric geometry, not a mesh: every patch and control point of the case is encoded. Each patch token is also a surface anchor positioned at its control-point centroid; 20 percent of the surface anchors are dropped at random at each step. Counts are over the 400 training cases."
+          },
+          "surface_supervision": {
+            "used": true,
+            "representation": "native surface cell centres with pressure and wall-shear-stress targets",
+            "entity_counts": [
+              {
+                "entity": "cells",
+                "count": {
+                  "kind": "fixed",
+                  "value": 16384
+                }
+              }
+            ],
+            "native_comparison": {
+              "status": "reported",
+              "native_entity_counts": [
+                {
+                  "entity": "cells",
+                  "count": {
+                    "kind": "per_case",
+                    "minimum": 7284102,
+                    "median": 8412812.0,
+                    "maximum": 10201795
+                  }
+                }
+              ],
+              "fractions": [
+                {
+                  "entity": "cells",
+                  "fraction": {
+                    "kind": "per_case",
+                    "minimum": 0.0016059918867218955,
+                    "median": 0.0019475058082063994,
+                    "maximum": 0.002249282066615761
+                  }
+                }
+              ]
+            },
+            "sampling": {
+              "kind": "resampled_each_epoch",
+              "method": "contiguous 16384-row block at a uniform random offset in the once-shuffled case arrays, redrawn at every visit",
+              "seed": null
+            },
+            "domain": {
+              "kind": "full_dataset_domain"
+            },
+            "connectivity": "none"
+          },
+          "volume_input": {
+            "used": true,
+            "representation": "native volume cell centres used as volume anchor positions",
+            "entity_counts": [
+              {
+                "entity": "cells",
+                "count": {
+                  "kind": "fixed",
+                  "value": 16384
+                }
+              }
+            ],
+            "native_comparison": {
+              "status": "reported",
+              "native_entity_counts": [
+                {
+                  "entity": "cells",
+                  "count": {
+                    "kind": "per_case",
+                    "minimum": 121635947,
+                    "median": 140420188.0,
+                    "maximum": 165420657
+                  }
+                }
+              ],
+              "fractions": [
+                {
+                  "entity": "cells",
+                  "fraction": {
+                    "kind": "per_case",
+                    "minimum": 9.90444621435641e-05,
+                    "median": 0.00011667838032975307,
+                    "maximum": 0.0001346970234054247
+                  }
+                }
+              ]
+            },
+            "sampling": {
+              "kind": "resampled_each_epoch",
+              "method": "contiguous 16384-row block at a uniform random offset in the once-shuffled case arrays, redrawn at every visit",
+              "seed": null
+            },
+            "domain": {
+              "kind": "full_dataset_domain"
+            },
+            "connectivity": "none"
+          },
+          "volume_supervision": {
+            "used": true,
+            "representation": "native volume cell centres with total-pressure-coefficient and velocity targets",
+            "entity_counts": [
+              {
+                "entity": "cells",
+                "count": {
+                  "kind": "fixed",
+                  "value": 16384
+                }
+              }
+            ],
+            "native_comparison": {
+              "status": "reported",
+              "native_entity_counts": [
+                {
+                  "entity": "cells",
+                  "count": {
+                    "kind": "per_case",
+                    "minimum": 121635947,
+                    "median": 140420188.0,
+                    "maximum": 165420657
+                  }
+                }
+              ],
+              "fractions": [
+                {
+                  "entity": "cells",
+                  "fraction": {
+                    "kind": "per_case",
+                    "minimum": 9.90444621435641e-05,
+                    "median": 0.00011667838032975307,
+                    "maximum": 0.0001346970234054247
+                  }
+                }
+              ]
+            },
+            "sampling": {
+              "kind": "resampled_each_epoch",
+              "method": "contiguous 16384-row block at a uniform random offset in the once-shuffled case arrays, redrawn at every visit",
+              "seed": null
+            },
+            "domain": {
+              "kind": "full_dataset_domain"
+            },
+            "connectivity": "none"
+          }
+        },
+        "inference": {
+          "geometry_dependency": "native_cfd_mesh",
+          "geometry_dependency_explanation": "Geometry enters the model only through the NURBS patches. The native surface and volume meshes supply cell-centre positions alone: every native cell is decoded as a query, and 16384 native volume cell centres per case serve as volume anchor positions, so predictions depend on the native volume mesh. No native field value is read.",
+          "surface_input": {
+            "used": true,
+            "case_record_id": "nurbs-control-net",
+            "representation": "untrimmed NURBS patches of the car converted from the public DrivAerML CAD: control nets and knot vectors",
+            "entity_counts": [
+              {
+                "entity": "control_points",
+                "count": {
+                  "kind": "per_case",
+                  "minimum": 6536403,
+                  "median": 7231750.5,
+                  "maximum": 7385664
+                }
+              },
+              {
+                "entity": "patches",
+                "count": {
+                  "kind": "per_case",
+                  "minimum": 43156,
+                  "median": 44386.5,
+                  "maximum": 45647
+                }
+              }
+            ],
+            "native_comparison": {
+              "status": "not_applicable"
+            },
+            "sampling": {
+              "kind": "none"
+            },
+            "domain": {
+              "kind": "full_dataset_domain"
+            },
+            "connectivity": "regular",
+            "notes": "Parametric geometry, not a mesh: every patch and control point of the case is encoded, and each patch token is also a surface anchor positioned at its control-point centroid. Inference keeps every anchor."
+          },
+          "volume_input": {
+            "used": true,
+            "case_record_id": "volume-anchor-cells",
+            "representation": "native volume cell centres used as volume anchor positions",
+            "entity_counts": [
+              {
+                "entity": "cells",
+                "count": {
+                  "kind": "fixed",
+                  "value": 16384
+                }
+              }
+            ],
+            "native_comparison": {
+              "status": "reported",
+              "native_entity_counts": [
+                {
+                  "entity": "cells",
+                  "count": {
+                    "kind": "per_case",
+                    "minimum": 127867654,
+                    "median": 143765175.5,
+                    "maximum": 163659811
+                  }
+                }
+              ],
+              "fractions": [
+                {
+                  "entity": "cells",
+                  "fraction": {
+                    "kind": "per_case",
+                    "minimum": 0.00010011009972387173,
+                    "median": 0.00011396362204524017,
+                    "maximum": 0.0001281324829811924
+                  }
+                }
+              ]
+            },
+            "sampling": {
+              "kind": "fixed",
+              "method": "uniform random draw without replacement, once per case, by a GPU permutation seeded with the case run number",
+              "seed": null
+            },
+            "domain": {
+              "kind": "full_dataset_domain"
+            },
+            "connectivity": "none"
+          },
+          "direct_outputs": [
+            {
+              "id": "surface-native-output",
+              "domain": "surface",
+              "representation": {
+                "used": true,
+                "representation": "every native surface cell centre decoded directly",
+                "entity_counts": [
+                  {
+                    "entity": "cells",
+                    "count": {
+                      "kind": "per_case",
+                      "minimum": 7515248,
+                      "median": 8710610.0,
+                      "maximum": 10081563
+                    }
+                  }
+                ],
+                "native_comparison": {
+                  "status": "reported",
+                  "native_entity_counts": [
+                    {
+                      "entity": "cells",
+                      "count": {
+                        "kind": "per_case",
+                        "minimum": 7515248,
+                        "median": 8710610.0,
+                        "maximum": 10081563
+                      }
+                    }
+                  ],
+                  "fractions": [
+                    {
+                      "entity": "cells",
+                      "fraction": {
+                        "kind": "fixed",
+                        "value": 1.0
+                      }
+                    }
+                  ]
+                },
+                "sampling": {
+                  "kind": "none"
+                },
+                "domain": {
+                  "kind": "full_dataset_domain"
+                },
+                "connectivity": "native"
+              },
+              "queries_per_forward_pass": {
+                "kind": "fixed",
+                "value": 2000000
+              }
+            },
+            {
+              "id": "volume-native-output",
+              "domain": "volume",
+              "representation": {
+                "used": true,
+                "representation": "every native volume cell centre decoded directly",
+                "entity_counts": [
+                  {
+                    "entity": "cells",
+                    "count": {
+                      "kind": "per_case",
+                      "minimum": 127867654,
+                      "median": 143765175.5,
+                      "maximum": 163659811
+                    }
+                  }
+                ],
+                "native_comparison": {
+                  "status": "reported",
+                  "native_entity_counts": [
+                    {
+                      "entity": "cells",
+                      "count": {
+                        "kind": "per_case",
+                        "minimum": 127867654,
+                        "median": 143765175.5,
+                        "maximum": 163659811
+                      }
+                    }
+                  ],
+                  "fractions": [
+                    {
+                      "entity": "cells",
+                      "fraction": {
+                        "kind": "fixed",
+                        "value": 1.0
+                      }
+                    }
+                  ]
+                },
+                "sampling": {
+                  "kind": "none"
+                },
+                "domain": {
+                  "kind": "full_dataset_domain"
+                },
+                "connectivity": "native"
+              },
+              "queries_per_forward_pass": {
+                "kind": "fixed",
+                "value": 2000000
+              }
+            }
+          ],
+          "mappings": [
+            {
+              "support_id": "surface_native_cells",
+              "source_output_id": "surface-native-output",
+              "method": {
+                "kind": "identity"
+              },
+              "implementation": "Predictions are written at every native cell in the exact native CellData entity order (raw_cell_id).",
+              "extrapolation_policy": "forbidden",
+              "unmapped_fraction": 0.0,
+              "extrapolated_fraction": 0.0,
+              "final_coverage_fraction": 1.0
+            },
+            {
+              "support_id": "volume_native_cells",
+              "source_output_id": "volume-native-output",
+              "method": {
+                "kind": "identity"
+              },
+              "implementation": "Predictions are written at every native cell in the exact native CellData entity order (raw_cell_id).",
+              "extrapolation_policy": "forbidden",
+              "unmapped_fraction": 0.0,
+              "extrapolated_fraction": 0.0,
+              "final_coverage_fraction": 1.0
+            },
+            {
+              "support_id": "drivaerml-force-coefficients-v1",
+              "source_output_id": "surface-native-output",
+              "method": {
+                "kind": "reference_rule",
+                "rule_id": "drivaerml-force-coefficients-v1",
+                "rule_version": "drivaerml-evaluator-v3-candidate"
+              },
+              "implementation": "The reference evaluator integrates the force coefficients from the complete predicted native surface fields (field_integrated).",
+              "extrapolation_policy": "forbidden",
+              "unmapped_fraction": 0.0,
+              "extrapolated_fraction": 0.0,
+              "final_coverage_fraction": 1.0
+            }
+          ]
+        },
+        "case_manifest": {
+          "format": "jsonl",
+          "file": "submissions/drivaerml/drivaerml-canto-full-v1/discretization/cases.jsonl",
+          "sha256": "899b22f302935bffde3ad1eace079b91fd9bc9f6e11f4e9552b6b21eb8c7435d",
+          "case_count": 50
+        },
+        "notes": "Geometry enters only through the NURBS description; the native meshes contribute cell-centre positions alone, as query points and as volume anchor positions. Every native cell is decoded directly, so every mapping is the identity with coverage 1.0 and no interpolation, nearest-neighbour assignment or extrapolation is applied. Surface and volume queries are decoded in chunks of 2000000, the last chunk of each holding the remainder; each forward pass decodes one surface chunk and one volume chunk against the same geometry and anchor context, recomputed from identical inputs, and query points are never attention keys, so chunking changes nothing beyond the run-to-run GPU rounding differences described in the method record. Training counts are over the 400 training cases and inference counts over the 50 test cases."
+      }
+    },
+    "case_metrics": {
+      "format": "fluidsbench-case-metrics-v1",
+      "file": "submissions/drivaerml/drivaerml-canto-full-v1/metrics/cases.json",
+      "sha256": "d5f8c18c39385e87bdd20d9dfbd5956c11d74238a1345a6610f2b43d780bbd1d",
+      "case_count": 50
+    },
+    "metric_values": {
+      "overall_score": 82.83940913194824,
+      "field_score": 66.78199507746545,
+      "force_score": 98.13235407333116,
+      "diagnostic_score": 99.66129229953088,
+      "cd_r2": 0.9811874252640943,
+      "cl_r2": 0.9691066762717078,
+      "c_pitch_r2": 0.9939487516025675,
+      "velocity_profile_r2": 0.9957770031473359,
+      "cp_cut_r2": 0.9978668027672684,
+      "surface_pressure_rel_l2": 4.170419515261586,
+      "surface_pressure_equal_entity_rel_l2": 3.963951237450424,
+      "surface_wall_shear_rel_l2": 6.348535013321623,
+      "surface_wall_shear_equal_entity_rel_l2": 7.12102326004356,
+      "volume_velocity_rel_l2": 5.142830457582247,
+      "volume_pressure_rel_l2": 4.253666051050598,
+      "drivaerml_surface_pressure_area_mae": 6.046248459798071,
+      "drivaerml_surface_pressure_area_rmse": 10.3359388638072,
+      "drivaerml_surface_pressure_equal_entity_mae": 8.41060127514373,
+      "drivaerml_surface_pressure_equal_entity_rmse": 13.982518747449612,
+      "drivaerml_surface_wall_shear_area_mae": 0.08647188697443328,
+      "drivaerml_surface_wall_shear_area_rmse": 0.13636272688959644,
+      "drivaerml_surface_wall_shear_equal_entity_mae": 0.12424382002671502,
+      "drivaerml_surface_wall_shear_equal_entity_rmse": 0.21032409134881358,
+      "drivaerml_volume_velocity_equal_entity_mae": 0.8962781975051528,
+      "drivaerml_volume_velocity_equal_entity_rmse": 1.3230960354665842,
+      "drivaerml_volume_pressure_equal_entity_mae": 8.945547954240572,
+      "drivaerml_volume_pressure_equal_entity_rmse": 13.900447085295442,
+      "field_integrated_cd_rmse": 0.00411317802273878,
+      "field_integrated_cl_rmse": 0.010024895611020756,
+      "field_integrated_cmpitch_rmse": 0.003225756676236049,
+      "field_integrated_clf_rmse": 0.004608032098823533,
+      "field_integrated_clr_rmse": 0.007058774508592401,
+      "field_integrated_lift_closure_max_abs": 2.7755575615628914e-17,
+      "velocity_profile_uinf_rmse": 0.013083981315583488,
+      "velocity_profile_experimental_subset_uinf_rmse": 0.013890952482093155,
+      "cp_cut_rmse": 0.012774448927125426
+    },
+    "profile_data": {
+      "format": "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate",
+      "index_file": "submissions/drivaerml/drivaerml-canto-full-v1/profiles/index.json",
+      "case_count": 50,
+      "case_set_id": "standard",
+      "profile_ground_truth_release_id": "prototype-profile-ground-truth-2026-09-04",
+      "profile_ground_truth_manifest_sha256": "3d3b0d7c8546925f6bace2113969eab62b0258edb5e4fdba99c0e65e29b02fdc",
+      "index_sha256": "cc34f9240a1c964a9bb9d5f1e5d4459986df7aa0bab042261cc2e327fd675765"
+    },
+    "regional_diagnostics": {
+      "format": "drivaerml-regional-aggregate-v2",
+      "file": "submissions/drivaerml/drivaerml-canto-full-v1/regional-diagnostics.json",
+      "sha256": "ac316600f736b98ca2fd91a0ff8fc9c532a5878a7a4822d898a10a317663f3c3",
+      "contract_sha256": "2bfd372817989112642056e4c76cfb418dbdcee445c57ee20ca37ee9ca158583",
+      "case_count": 50,
+      "role": "report_only",
+      "weight": 0.0,
+      "official_score_changed": false
+    },
+    "record_type": "pre_release_reference",
+    "parameter_count": 14.066956,
+    "prediction_artifact_status": {
+      "sharing": "not_declared",
+      "declared_artifact_count": 0,
+      "maintainer_check_status": "not_recorded",
+      "checked_artifact_count": 0
+    },
+    "ranking": {
+      "metric_id": "overall_score",
+      "value": 82.83940913194824,
+      "ranked_value": 82.8,
+      "display_value": "82.8",
+      "unit": "",
+      "direction": "higher",
+      "decimal_places": 1,
+      "rounding": "decimal_half_up",
+      "method": "competition",
+      "rank": 1,
+      "ranked_result_count": 2,
+      "tied": false,
+      "tie_count": 1
+    },
+    "claim_eligibility": {
+      "academic_citation": false,
+      "promotion": false,
+      "reason_code": "pre_release_reference",
+      "reason": "Genuine pre-release reference data retained to validate the DrivAerML workflow before submissions open; it is not an official benchmark result or ranking claim."
+    }
+  },
+  {
     "schema_version": "1.0",
     "submission_id": "drivaerml-transolver",
     "model": "Transolver",
@@ -3681,8 +4560,8 @@
       "decimal_places": 1,
       "rounding": "decimal_half_up",
       "method": "competition",
-      "rank": 1,
-      "ranked_result_count": 1,
+      "rank": 2,
+      "ranked_result_count": 2,
       "tied": false,
       "tie_count": 1
     },

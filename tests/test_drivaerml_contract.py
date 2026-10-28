@@ -5,7 +5,7 @@ import math
 import unittest
 from pathlib import Path
 
-from scripts.validate_submission import sha256_file
+from scripts.validate_submission import registered_drivaerml_pre_release_reference, sha256_file
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -574,37 +574,45 @@ class DrivAerMLContractTests(unittest.TestCase):
         # Pending contributor packages are valid source submissions but are not
         # published until maintainer registration. Population metadata describes
         # the published feed, not every package awaiting review in submissions/.
-        fixtures = load_json(ROOT / "leaderboard" / "datasets" / "drivaerml.json")
-        self.assertTrue(fixtures)
-        for fixture in fixtures:
-            source = load_json(
+        rows = load_json(ROOT / "leaderboard" / "datasets" / "drivaerml.json")
+        self.assertTrue(rows)
+        for row in rows:
+            source_path = (
                 ROOT / "submissions" / "drivaerml"
-                / fixture["submission_id"] / "submission.json"
+                / row["submission_id"] / "submission.json"
             )
-            with self.subTest(submission_id=fixture["submission_id"]):
-                self.assertEqual(source["approval"]["status"], "prototype")
-                self.assertEqual(source["submitted_at"], fixture["submitted_at"])
+            source = load_json(source_path)
+            with self.subTest(submission_id=row["submission_id"]):
+                if source.get("approval", {}).get("status") != "prototype":
+                    self.assertIsNotNone(registered_drivaerml_pre_release_reference(
+                        source_path, source, manifest, root=ROOT
+                    ))
+                    self.assertEqual(row["record_type"], "pre_release_reference")
+                self.assertEqual(source["submitted_at"], row["submitted_at"])
+                self.assertFalse(row["claim_eligibility"]["academic_citation"])
         population = dataset["submission_population"]
-        self.assertEqual(dataset["submission_count"], len(fixtures))
-        self.assertEqual(population["feed_row_count"], len(fixtures))
+        self.assertEqual(dataset["submission_count"], len(rows))
+        self.assertEqual(population["feed_row_count"], len(rows))
         self.assertEqual(
-            population["prototype_ineligible_fixture_count"], len(fixtures)
+            population["prototype_ineligible_fixture_count"],
+            sum(row.get("approval", {}).get("status") == "prototype" for row in rows),
+        )
+        self.assertEqual(
+            population["pre_release_reference_count"],
+            sum(row.get("record_type") == "pre_release_reference" for row in rows),
         )
         self.assertEqual(population["eligible_submission_count"], 0)
         self.assertEqual(population["scientific_result_count"], 0)
         self.assertEqual(
             population["submission_count_semantics"],
-            "all_current_feed_rows_are_structural_prototype_fixtures_not_eligible_submissions",
-        )
-        self.assertTrue(
-            all(item["approval"]["status"] == "prototype" for item in fixtures)
+            "published_feed_rows_including_pre_release_references",
         )
         self.assertEqual(
-            dataset["updated_at"], max(item["submitted_at"] for item in fixtures)
+            dataset["updated_at"], max(item["submitted_at"] for item in rows)
         )
         self.assertEqual(
             population["updated_at_semantics"],
-            "latest_submitted_at_date_among_prototype_fixture_rows_not_a_contract_or_scientific_evidence_update",
+            "latest_submitted_at_date_among_published_result_revisions",
         )
 
 
