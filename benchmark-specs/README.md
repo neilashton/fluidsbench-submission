@@ -1,48 +1,27 @@
 <a id="benchmark-submission-specifications"></a>
 
-# Dataset contracts
+# Dataset index
 
-**AirfRANS Full, Scarce and AoA extrapolation are open on `dev`.**
-Follow the [participant quickstart](airfrans/QUICKSTART.md). **AhmedML, WindsorML, DrivAerML and DrivAerNet++ also accept
-development-candidate PRs targeting `dev`.** Their official support releases remain closed; reviewed candidates require separate
-maintainer registration before appearing as unranked dev references.
+Choose a dataset and follow its quickstart. Each guide covers the data, prediction format, evaluation and package generation.
+For validation commands and the pull-request target, see [Submitting a result](../SUBMITTING.md#4-validate-locally).
 
-Production `main` intake, AirfRANS Reynolds and new result intake for the remaining datasets, including HiLiftAeroML, remain
-closed. Choose a dataset below, then follow the [accepted routes and validation commands](../SUBMITTING.md).
-Each `submission-spec.json` defines the accepted splits, exact native fields and associations, support identities, metrics,
-units, weights, profiles, evaluator version, and lifecycle gates consumed by the validator.
+| Dataset | Submission availability | Supported scope | Start here |
+| --- | --- | --- | --- |
+| AirfRANS | Accepting | Full, Scarce and AoA extrapolation; Reynolds is closed | [Quickstart](airfrans/QUICKSTART.md) · [Specification](airfrans/submission-spec.json) |
+| AhmedML | Accepting for preview | Eight prescribed splits; surface and volume | [Quickstart](ahmedml/QUICKSTART.md) · [Dataset guide](ahmedml/README.md) |
+| WindsorML | Accepting for preview | Eight prescribed splits; surface and volume | [Quickstart](windsorml/QUICKSTART.md) · [Dataset guide](windsorml/README.md) |
+| DrivAerML | Accepting for preview | Eight prescribed splits; surface and volume, or surface only | [Quickstart](drivaerml/QUICKSTART.md) · [Participant guide](drivaerml/PARTICIPANT_GUIDE.md) |
+| DrivAerNet++ | Accepting for preview | Pressure at every native surface point of the 1,154 official-test designs | [Quickstart](drivaernetplusplus/QUICKSTART.md) · [Specification](drivaernetplusplus/submission-spec.json) |
+| HiLiftAeroML | Not accepting new submissions | Owner-coordinated evaluation trials only | [Participant guide](hiliftaeroml/PARTICIPANT_GUIDE.md) |
+| BlendedNet | In preparation | Proposed geometry-holdout split | [Specification](blendednet/submission-spec.json) |
+| Rotor37 | In preparation | Evaluation support is being prepared | [Specification](rotor37/submission-spec.json) |
+| VKI-LS59 | In preparation | Evaluation support is being prepared | [Specification](vki-ls59/submission-spec.json) |
 
-For pressure fields, check the [dataset pressure references](../docs/PRESSURE_REFERENCES.md): native units, prescribed offsets,
-coefficient conversions, and remaining source ambiguities. This audit documents the current contracts; it does not change scoring.
+Accepted packages are reviewed before display. Preview results are separate from an official leaderboard release.
+The quickstarts link to the package examples and exact scoring specifications; use those definitions for your evaluation.
 
-| Dataset      | Instructions / specification                                                                                | Candidate package                                          |
-| ------------ | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| AhmedML      | [Quickstart](ahmedml/QUICKSTART.md) · [Evaluator guide](ahmedml/README.md) · [Specification](ahmedml/submission-spec.json)                        | [Example](../examples/ahmedml-v3-candidate/README.md)      |
-| DrivAerML    | [Quickstart](drivaerml/QUICKSTART.md) · [Participant guide](drivaerml/PARTICIPANT_GUIDE.md) · [Specification](drivaerml/submission-spec.json)       | [Example](../examples/drivaerml-v3-candidate/README.md)    |
-| HiLiftAeroML | [Participant guide](hiliftaeroml/PARTICIPANT_GUIDE.md) · [Specification](hiliftaeroml/submission-spec.json) | [Example](../examples/hiliftaeroml-v3-candidate/README.md) |
-| AirfRANS     | [Quickstart](airfrans/QUICKSTART.md) · [Specification](airfrans/submission-spec.json)                                                              | —                                                          |
-| BlendedNet   | [Specification](blendednet/submission-spec.json)                                                            | —                                                          |
-| DrivAerNet++ | [Quickstart](drivaernetplusplus/QUICKSTART.md) · [Specification](drivaernetplusplus/submission-spec.json)   | [Example](../examples/drivaernetplusplus-v3-candidate/README.md) |
-| Rotor37      | [Specification](rotor37/submission-spec.json)                                                               | —                                                          |
-| VKI-LS59     | [Specification](vki-ls59/submission-spec.json)                                                              | —                                                          |
-| WindsorML    | [Quickstart](windsorml/QUICKSTART.md) · [Specification](windsorml/submission-spec.json)                                                             | —                                                          |
-
-## Check status before starting
-
-The `scoring_support` statuses are:
-
-| Status                  | Meaning                                                                |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `official`              | Owner-approved support; intake still requires `submissions_open=true`. |
-| `owner_review_required` | A proposal exists; it is not an activated official release.            |
-| `prototype`             | Format or evaluator development only.                                  |
-| `retired`               | Historical interpretation; closed to new results.                      |
-
-Read `closed_reason` and the dataset guide for its official-release blockers. A pinned `candidate_manifest` permits a
-non-approving dry run; the four development-candidate routes listed above also accept PRs to `dev` using
-`--dev-intake --contributor-stage`. Candidate acceptance and registration do not open the official release.
-Split indexes marked `official` bind ordered evaluation cases; `prototype_generated` indexes are dummy case lists and cannot
-support real submissions.
+For pressure units, offsets and coefficient conversions, see the [pressure reference guide](../docs/PRESSURE_REFERENCES.md).
+Maintainers can find support-release states and activation requirements in the [maintainer guide](../docs/MAINTAINERS.md#activate-a-dataset-support-release).
 
 ## Shared requirements
 

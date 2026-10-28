@@ -1,10 +1,9 @@
-# AirfRANS participant workflow on dev
+# AirfRANS submission guide
 
 Use the current `dev` checkout. Supported splits are **Full** (`full`, 200 test
 cases), **Scarce** (`scarce`, the same 200 test cases but a different training
 regime), and **AoA extrapolation** (`aoa_extrapolation`, 196 test cases).
-Reynolds extrapolation and custom case lists are rejected. All steps below
-target `dev`; maintainer approval and leaderboard publication remain separate.
+Reynolds extrapolation and custom case lists are rejected. Follow [Submitting a result](../../SUBMITTING.md) for validation and review.
 
 ## Environment
 
@@ -68,7 +67,7 @@ Alternatively put the three published files (`support-metadata.tar.gz`,
 `--archive-dir /path/to/archives --offline` for the first installation.
 Archive downloads interrupted before verification are retried automatically.
 Installed files are checksum checked before reuse; a changed cache is rejected.
-The editable dev release policy in [RELEASES.md](RELEASES.md) still applies.
+The support release policy in [RELEASES.md](RELEASES.md) still applies.
 
 ## Supply meshes and native predictions
 
@@ -141,7 +140,7 @@ python scripts/airfrans.py report --evaluation-root work/my-result/evaluation \
 Complete `my-entry/package-config.json` with your actual method, training,
 checkpoint digests and measured inference time. Its submission ID and split
 must match the evaluated entry. Release IDs and hashes are filled in automatically
-from the approved dev contract.
+from the approved evaluation contract.
 
 Provide the actual `training` and `inference` objects in `spatial_discretization`
 and one ordered record per test case in `my-entry/discretization-cases.jsonl`.
@@ -170,27 +169,8 @@ leaves no partial final package. Historical `*-candidate` tools remain available
 for their original records, but new participants should use this command.
 
 Open a PR to **`dev`** containing only the new submission directory. Do not add
-approval records. Maintainers review and approve in a separate dev PR before
-displaying a ranked result. A passing contributor check is not approval.
+approval records. Maintainers review and approve the package before publication. A passing contributor check is not approval.
 
-## Completed participant trials
+<a id="completed-participant-trials"></a>
 
-Emanuele Tamburini completed the container workflow with existing Transolver++
-predictions for **Full (200 cases)** in [PR #68](https://github.com/neilashton/fluidsbench-submission/pull/68)
-and **AoA extrapolation (196 cases)** in [PR #69](https://github.com/neilashton/fluidsbench-submission/pull/69).
-He reported successful support-cache reuse, validation, field/profile extraction,
-interruption and resume after 6 Full cases and 5 AoA cases, packaging with
-`--checkpoint`, and package/contributor validation. The submitted metrics and
-profiles match the retained inference results (overall scores 53.41 and 40.61).
-These trials reused existing inference runs; they did not retrain the model.
-
-The AoA package was separately approved for the dev leaderboard in
-[PR #70](https://github.com/neilashton/fluidsbench-submission/pull/70).
-It replaces the older prototype-contract display entry; the original package
-remains in history. Approval checked submitted data and did not rerun the model
-or independently recompute base metrics from full fields.
-
-Scarce has automated workflow and retained-package validation, but no equivalent
-completed participant trial is recorded here. Reynolds and production intake
-remain closed. Prediction export remains model-specific: supply exactly the
-four native arrays documented above before running the evaluator.
+For the workflow test history, see the [participant trial record](PARTICIPANT_TRIALS.md).

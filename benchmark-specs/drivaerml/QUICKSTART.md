@@ -1,8 +1,9 @@
-# DrivAerML submissions on dev
+# DrivAerML submission guide
 
 Use a current `dev` checkout. The participant command prepares immutable support,
 checks inputs, evaluates the whole official test split with recovery, and produces
-a validated directory for a pull request to `dev`. Official submissions remain closed.
+a validated result directory. See the [dataset index](../README.md) for availability and
+[Submitting a result](../../SUBMITTING.md) for validation and review.
 
 ## Install
 
@@ -96,7 +97,7 @@ directory. Completed results can also be checked with the same `--resume` comman
 
 Dev v2 uses AutoCFD5's normalized trapezoidal arc-length weighting for both Cp and
 velocity, with equal total weight per case/profile and no bridging of unsupported
-gaps. The [dev v2 scoring contract](dev-profile-scoring-v2.json) explicitly replaces
+gaps. The [current profile scoring contract](dev-profile-scoring-v2.json) explicitly replaces
 the historical v10 Cp segment-length reduction for this release. Profile geometry
 and native truth are unchanged. Older dev v1 metrics must be regenerated from the
 predictions; do not relabel their release IDs. Relative profiles remain report-only.
@@ -134,13 +135,13 @@ python scripts/drivaerml.py verify-package submissions/drivaerml/YOUR_SUBMISSION
 
 Repeat `--checkpoint ID=PATH` for every declared checkpoint. `package` checks the
 checkpoint bytes, assembles the result and runs the candidate semantic validator
-plus the dev genuine-inference checks before publishing its output directory.
+plus the genuine-inference checks before publishing its output directory.
 `verify-package` also accepts a package directory outside a Git checkout. It does
 not register or approve it.
 
 Commit only `submissions/drivaerml/YOUR_SUBMISSION_ID/` and open a PR against
 `dev`. The [existing maintainer registration and feed build](PARTICIPANT_GUIDE.md#7-pull-request-and-dev-publication)
-then displays it as a dev reference. The public JSON directory is the submission
+then publishes the reviewed result in the preview. The public JSON directory is the submission
 payload; AutoCFD5 confidential ZIPs are not the FluidsBench intake format.
 
 ## Container

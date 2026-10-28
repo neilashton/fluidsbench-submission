@@ -1,13 +1,11 @@
 <a id="ahmedml-candidate-evaluator"></a>
 
-# AhmedML: prepare a candidate result
+# AhmedML evaluation guide
 
 Start with the [resumable participant quickstart](QUICKSTART.md) for data/support
 preparation, whole-split evaluation, recovery and validated packaging.
 
-AhmedML remains an owner-review candidate with official submissions closed.
-Genuine-inference development candidates can be submitted by PR to `dev`
-without maintainer registration. The benchmark definition is pinned to `neashton/ahmedml` revision
+See the [dataset index](../README.md) for submission availability. The benchmark definition is pinned to `neashton/ahmedml` revision
 `02688c727cdb8dc8678e28abc6bbbb7e93c5fa15` and covers all eight published
 split families using their real `run_N` case IDs.
 

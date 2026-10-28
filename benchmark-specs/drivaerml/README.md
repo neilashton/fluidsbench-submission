@@ -1,14 +1,10 @@
 # DrivAerML submission contract
 
-The reviewed proposal is now the participant-facing candidate contract.
-It uses the exact public DrivAerML release and the eight owner-published splits.
-Neil Ashton, acting as dataset owner, approved the candidate's native-field,
-force, velocity-profile, continuous-Cp, sampling, and tolerance decisions on
-2026-08-28. Development candidate PRs are accepted against `dev`. Official submissions remain closed while the immutable production
-release, multi-model sensitivity study, and independent full-submission dry run
-are completed. Registered genuine-inference dev references and prototype fixtures remain unranked and non-citable.
+Use the public DrivAerML release and eight prescribed splits described below.
+See the [dataset index](../README.md) for submission availability and the
+[activation checklist](ACTIVATION_CHECKLIST.md) for the support-release review record.
 
-## Prepare a candidate
+## Prepare a result
 
 Start with the [resumable quickstart](QUICKSTART.md), then consult the [participant guide](PARTICIPANT_GUIDE.md) and
 [packaging example](../../examples/drivaerml-v3-candidate/README.md). The complete native evaluator requires Linux and the
@@ -73,10 +69,10 @@ For every selected case:
    replay the matching aggregate row.
 5. Use the same evaluator to extract the diagnostics defined in
    [`drivaerml-diagnostics-v10.json`](drivaerml-diagnostics-v10.json), with the
-   [dev v2 scoring override](dev-profile-scoring-v2.json): 16 AutoCFD5
+   [current scoring override](dev-profile-scoring-v2.json): 16 AutoCFD5
    velocity lines on the candidate 10 mm grid and four continuous Cp cuts:
    upperbody centreline (`y=0`), underbody centreline (`y=0`), sidewall
-   (`z=0.15 m`), and front-left wheelhouse (`y=-0.6 m`). The dev v2
+   (`z=0.15 m`), and front-left wheelhouse (`y=-0.6 m`). The current
    velocity metric is global R2 with equal total
    weight for every case and line and normalized trapezoidal arc-length weight
    within each line. Continuous Cp-cut R2 is a separate ranked component with

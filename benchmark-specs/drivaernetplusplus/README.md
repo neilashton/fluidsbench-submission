@@ -1,12 +1,10 @@
-# DrivAerNet++ development submissions
+# DrivAerNet++ evaluation guide
 
 Start with the [resumable participant quickstart](QUICKSTART.md) for data
 verification, support download, whole-split evaluation, recovery and validated
-packaging. DrivAerNet++ accepts complete schema-v3 **development candidate PRs
-targeting `dev`**. The dataset owner's scientific approval and latest confirmations
-are recorded in [OWNER_APPROVAL.md](OWNER_APPROVAL.md); official intake remains
-closed pending the separate formal release activation. Templates are in
-[`examples/drivaernetplusplus-v3-candidate`](../../examples/drivaernetplusplus-v3-candidate/README.md).
+packaging. See the [dataset index](../README.md) for submission availability.
+The [owner approval record](OWNER_APPROVAL.md) describes the scientific definition.
+Templates are in the [package example](../../examples/drivaernetplusplus-v3-candidate/README.md).
 
 ## Data and scoring contract
 
