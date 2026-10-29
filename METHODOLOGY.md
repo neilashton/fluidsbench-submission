@@ -161,7 +161,7 @@ measurements must not be substituted for full campaign time.
 Add `measurement_basis=measured|estimated|unknown` to each submitter training
 compute block. Measured means summed allocation records; a calendar envelope
 multiplied by a device count is an estimate, even if hardware is confirmed.
-Missing basis in old records remains unspecified. The website labels estimates
+A missing measurement basis is shown as unspecified. The website labels estimates
 and unspecified totals and only plots totals explicitly measured for every
 submitter stage. Unknown/missing costs are never zero.
 

@@ -35,9 +35,7 @@ Three report-only Cp profiles per design are read by the evaluator from the
 submitted predictions at frozen native points: `upper_body_centerline`,
 `underbody_centerline` and `rear_body_centerline`. Their extraction rules and
 full-split validation are in
-[`profiles/STATION_DEFINITIONS.md`](profiles/STATION_DEFINITIONS.md). The
-`front_wheelhouse` station is retired (owner-confirmed). Profiles do not enter the
-score.
+[`profiles/STATION_DEFINITIONS.md`](profiles/STATION_DEFINITIONS.md). Profiles do not enter the score.
 
 ## Known properties of the public data
 

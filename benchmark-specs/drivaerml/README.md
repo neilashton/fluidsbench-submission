@@ -113,9 +113,7 @@ omits, interpolates, extrapolates, or bridges across an excluded point. The
 separate from the `1e-6 m` boundary tolerance; intermediate solid-angle results
 fail closed. The published all-case support, explicit unsupported rows and
 segment breaks, 10 mm grid, and those tolerances are scientifically approved.
-The earlier proposed resolution and tolerance campaigns are no longer separate
-activation gates; this is an owner decision and not a claim that those
-superseded experiments ran. Velocity truth is exact zeroth-order native
+Velocity truth is exact zeroth-order native
 `CellData`, so visible stair steps are expected and must not be smoothed or
 interpolated in truth or scoring.
 

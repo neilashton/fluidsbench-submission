@@ -128,7 +128,7 @@ parallel or heterogeneous allocations in `compute.measurement_notes`.
 Use
 [`methodology.example.json`](../../examples/drivaerml-v3-candidate/methodology.example.json)
 as a filled structural example. Its values are illustrative, not a baseline.
-The assembler derives the legacy display field `parameter_count_millions` from
+The assembler derives the display field `parameter_count_millions` from
 `architecture.total_parameter_count`. This is the sum of unique learned scalar
 values loaded across the architecture components: count ensemble copies
 separately, count shared storage once, and assign shared parameters to one
