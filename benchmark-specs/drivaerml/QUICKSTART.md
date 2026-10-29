@@ -98,7 +98,7 @@ directory. Completed results can also be checked with the same `--resume` comman
 Cp and velocity profiles use normalized trapezoidal arc-length weighting, with
 equal total weight per case and profile. Unsupported gaps are never bridged.
 Relative profiles are report-only and do not contribute to the score.
-See the [profile scoring contract](dev-profile-scoring-v2.json) for the exact definitions.
+See the [profile scoring contract](profile-scoring-v2.json) for the exact definitions.
 
 An optional, standalone case report shows truth and predictions:
 

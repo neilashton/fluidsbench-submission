@@ -69,7 +69,7 @@ For every selected case:
    replay the matching aggregate row.
 5. Use the same evaluator to extract the diagnostics defined in
    [`drivaerml-diagnostics-v10.json`](drivaerml-diagnostics-v10.json), with the
-   [profile scoring contract](dev-profile-scoring-v2.json): 16 AutoCFD5
+   [profile scoring contract](profile-scoring-v2.json): 16 AutoCFD5
    velocity lines on the published 10 mm grid and four continuous Cp cuts:
    upperbody centreline (`y=0`), underbody centreline (`y=0`), sidewall
    (`z=0.15 m`), and front-left wheelhouse (`y=-0.6 m`). The current
