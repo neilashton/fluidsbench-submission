@@ -8186,6 +8186,7 @@ def validate_many(
     dev_intake: bool = False,
     profile_support_release: Path | None = None,
     manifest: dict[str, Any] | None = None,
+    allow_empty: bool = False,
 ) -> tuple[list[str], dict[str, int]]:
     if contributor_stage and candidate_dry_run:
         return [
@@ -8201,6 +8202,8 @@ def validate_many(
         ], {"submissions": 0, "cases": 0, "series": 0}
     files = submission_files(paths)
     if not files:
+        if allow_empty and not paths:
+            return [], {"submissions": 0, "cases": 0, "series": 0}
         return ["no submission.json files found"], {"submissions": 0, "cases": 0, "series": 0}
     manifest = manifest_with_benchmark_contract(manifest or load_json(MANIFEST_PATH))
     errors: list[str] = []
@@ -8311,6 +8314,7 @@ def main(argv: list[str] | None = None) -> int:
         candidate_dry_run=args.candidate_dry_run,
         dev_intake=args.dev_intake,
         profile_support_release=args.profile_support_release,
+        allow_empty=not args.paths and not args.contributor_stage and not args.candidate_dry_run,
     )
     if errors:
         for error in errors:

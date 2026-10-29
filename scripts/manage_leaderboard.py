@@ -1176,7 +1176,11 @@ def expected_outputs(
         if latest is not None:
             latest_dates.append(latest)
         all_rows.extend(rows)
-    latest_global = max(latest_dates, default=stable_fallback_date(manifest))
+    fallback_date = (
+        datetime.fromisoformat(generated_at.replace("Z", "+00:00")).date().isoformat()
+        if generated_at else stable_fallback_date(manifest)
+    )
+    latest_global = max(latest_dates, default=fallback_date)
     release = updated_manifest.setdefault("data_release", {})
     if release.get("status") == "official":
         official_generated_at = release.get("generated_at")
@@ -1592,7 +1596,7 @@ def main() -> int:
 
     paths = getattr(args, "paths", None) or None
     manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
-    errors, totals = validate_many(paths, manifest=manifest, dev_intake=args.dev_intake)
+    errors, totals = validate_many(paths, manifest=manifest, dev_intake=args.dev_intake, allow_empty=True)
     if errors:
         return print_errors(errors)
     errors = release_contract_errors(manifest)
