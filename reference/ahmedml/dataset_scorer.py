@@ -229,7 +229,7 @@ def score_candidate_dataset(
     )
     if (
         specification.get("dataset_id") != DATASET_ID
-        or specification.get("status") != "candidate_native_support"
+        or specification.get("status") not in {"candidate_native_support", "official"}
         or specification.get("evaluation_reference_version")
         != "ahmedml-evaluator-v0.1-candidate"
     ):
@@ -237,8 +237,14 @@ def score_candidate_dataset(
     scoring_support = _mapping(
         specification.get("scoring_support"), "scoring_support"
     )
-    if scoring_support.get("submissions_open") is not False:
-        raise AhmedMLDatasetScorerError("candidate AhmedML submissions must remain closed")
+    if not (
+        (specification.get("status") == "official"
+         and scoring_support.get("status") == "official"
+         and scoring_support.get("submissions_open") is True)
+        or (specification.get("status") == "candidate_native_support"
+            and scoring_support.get("submissions_open") is False)
+    ):
+        raise AhmedMLDatasetScorerError("AhmedML support lifecycle is inconsistent")
     source = _mapping(scoring_support.get("dataset_source"), "dataset_source")
     if (
         source.get("revision") != REPOSITORY_REVISION

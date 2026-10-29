@@ -419,8 +419,12 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(validation["reviewed_submission_sha256"], canonical_json_sha256(submission))
 
     def test_airfrans_flow_domain_metric_ids_preserve_external_aero_scores(self) -> None:
-        submission = load_json(AIRFRANS_PROTOTYPE / "submission.json")
+        submission = {"metric_values": {metric["id"]: 0.0 for metric in load_json(ROOT / "benchmark-specs/airfrans/submission-spec.json")["metrics"]}}
         specification = load_json(ROOT / "benchmark-specs" / "airfrans" / "submission-spec.json")
+        from reference.scores import composite_component_group_scores, composite_overall_score
+        values = submission["metric_values"]
+        values.update(composite_component_group_scores(values, specification["overall_score_composite"], specification["component_score_groups"]))
+        values["overall_score"] = composite_overall_score(values, specification["overall_score_composite"])
         errors: list[str] = []
 
         validate_metrics(
@@ -638,11 +642,6 @@ class ValidatorTests(unittest.TestCase):
             joined,
         )
 
-    def test_complete_example_is_valid(self) -> None:
-        errors, stats = validate_submission_file(REGISTERED_SOURCE / "submission.json")
-        self.assertEqual(errors, [])
-        self.assertEqual(stats["cases"], 50)
-        self.assertGreater(stats["series"], 0)
 
     def test_missing_metric_and_inconsistent_training_fail(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

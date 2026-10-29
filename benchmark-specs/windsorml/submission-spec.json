@@ -3,11 +3,10 @@
   "dataset_id": "windsorml",
   "dataset_name": "WindsorML",
   "dataset_version": "windsorml-native-v1-candidate",
-  "status": "candidate_native_support",
+  "status": "official",
   "scoring_support": {
-    "status": "owner_review_required",
-    "submissions_open": false,
-    "closed_reason": "Every contract input is frozen and every support artefact is generated and hash-pinned; opening submissions is a release decision for the dataset owner.",
+    "status": "official",
+    "submissions_open": true,
     "profile_support": {
       "status": "generated_and_hash_pinned",
       "manifest_file": "profile-support/windsorml-profile-support-v3-manifest.json",
@@ -143,15 +142,36 @@
       },
       "rationale": "Identical to AhmedML and HiLiftAeroML component for component, and to DrivAerML apart from its force group, which splits three ways (cd 0.15, cl 0.05, c_pitch 0.05) because it scores pitching moment. WindsorML publishes cmy, so a c_pitch_r2 term is supported by the data, but it would need surface moment integration and a pinned moment reference point that the dataset does not publish. Not adopted."
     },
-    "owner_decisions_required": [
-      "approve_release_and_open_submissions"
-    ],
     "candidate_manifest": {
       "status": "candidate",
       "release_id": "windsorml-native-support-v1-candidate",
       "manifest_file": "scoring-support-candidate/manifest.json",
       "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/windsorml/scoring-support-candidate/manifest.json",
       "manifest_sha256": "0e24e419c158133a7b9c9cc47634d278d2b94f713a2bbeedfd91959d7dce7b5b"
+    },
+    "release_id": "windsorml-native-support-v1",
+    "manifest_file": "scoring-support/windsorml-native-support-v1/manifest.json",
+    "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/windsorml-native-support-v1/manifest.json",
+    "manifest_sha256": "b6b89d956d1ef9ba03ed86c20955a01a8d107095a8c510edbda99cc838b18cf2",
+    "owner_approval": {
+      "approved_by": "Neil Ashton",
+      "approved_at": "2026-10-28",
+      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
+    },
+    "publication_validation": {
+      "case_count": 317,
+      "support_instance_count": 2219,
+      "local_artifact_count": 0,
+      "remote_artifact_count": 2853,
+      "normalized_support_sha256": "8336267512fe4010819922371b7f9bc5585e281c631c6c0575455a538285f055",
+      "manifest_sha256": "b6b89d956d1ef9ba03ed86c20955a01a8d107095a8c510edbda99cc838b18cf2",
+      "validation_scope": "exact_case_metric_and_hash_chain_local_artifact_bytes_remote_hash_pins_not_downloaded",
+      "status": "passed",
+      "validated_by": "FluidsBench automated metadata validation",
+      "validated_at": "2026-10-29T03:40:48+00:00",
+      "validator_file": "publication-validator.py",
+      "validator_sha256": "1ed87a3f0731a5b86631b842fdebbb575c580628b4c15bf0d8426bb07dd87fe8",
+      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
     }
   },
   "evaluation_reference_version": "windsorml-evaluator-v0.1-candidate",

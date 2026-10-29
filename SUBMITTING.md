@@ -112,11 +112,11 @@ source .venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-Use the current `dev` branch and target your pull request at `dev`. Production `main` intake is not open.
+Use the current `dev` branch of the FluidsBench submission repository and target your pull request at `dev`.
 Validate the generated result directory with the current intake flags:
 
 ```bash
-python3 scripts/validate_submission.py --dev-intake --contributor-stage \
+python3 scripts/validate_submission.py --contributor-stage \
   submissions/<dataset-id>/<submission-id>
 ```
 
@@ -124,7 +124,7 @@ Open a pull request containing only that new result directory. This route suppor
 plus AhmedML, WindsorML, DrivAerML and DrivAerNet++. Check the [dataset index](benchmark-specs/README.md) for current availability.
 
 CI validates the package. Maintainers then review it and handle publication separately; merging the initial submission does
-not itself publish a leaderboard row. Preview results are not official release claims. See the
+not itself publish a leaderboard row. See the
 [maintainer guide](docs/MAINTAINERS.md) for approval, registration and feed generation.
 
 The validator checks JSON schemas, exact public split and complete original-support coverage, unweighted and area-, length-, or

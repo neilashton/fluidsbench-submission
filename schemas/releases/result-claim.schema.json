@@ -26,7 +26,7 @@
       "required": ["id", "status", "published_at", "archive_url", "release_view_url"],
       "properties": {
         "id": { "type": "string", "minLength": 1 },
-        "status": { "enum": ["prototype_dummy_data", "official"] },
+        "status": { "enum": ["prototype_dummy_data", "unreleased", "official"] },
         "published_at": { "type": "string", "format": "date-time" },
         "archive_url": { "type": ["string", "null"], "format": "uri" },
         "release_view_url": { "type": ["string", "null"], "format": "uri" }

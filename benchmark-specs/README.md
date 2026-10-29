@@ -18,9 +18,6 @@ For validation commands and the pull-request target, see [Submitting a result](.
 | VKI-LS59 | Coming soon | Evaluation support is being prepared | [Specification](vki-ls59/submission-spec.json) |
 
 Accepted packages are reviewed before publication on the leaderboard.
-During the repository transition, use the validation command and pull-request target in [Submitting a result](../SUBMITTING.md#4-validate-locally).
-The five open datasets have owner approval for intake; final official support publication and the move to the FluidsBench organisation remain under review.
-The existing candidate-support settings and `--dev-intake` workflow remain in use on this branch until that transition is complete.
 The quickstarts link to the package examples and exact scoring specifications; use those definitions for your evaluation.
 
 For pressure units, offsets and coefficient conversions, see the [pressure reference guide](../docs/PRESSURE_REFERENCES.md).

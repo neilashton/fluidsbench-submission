@@ -20,7 +20,7 @@
     "$schema": {"const": "https://fluidsbench.org/schemas/releases/claim-index.schema.json"},
     "schema_version": {"const": "1.0"},
     "release_id": {"type": "string", "minLength": 1},
-    "release_status": {"enum": ["prototype_dummy_data", "official"]},
+    "release_status": {"enum": ["prototype_dummy_data", "unreleased", "official"]},
     "feed_file": {"const": "leaderboard/all.json"},
     "feed_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "ranking_contract": {

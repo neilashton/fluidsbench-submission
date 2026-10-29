@@ -391,10 +391,15 @@ def completed(tmp_path_factory, request):
 def repository(tmp_path, completed, monkeypatch):
     _, package, scope = completed
     shutil.copytree(SPEC.parent, tmp_path / "benchmark-specs/drivaerml")
+    shutil.copy2(ROOT / "tests/fixtures/candidate-contracts/drivaerml.json", tmp_path / "benchmark-specs/drivaerml/submission-spec.json")
     shutil.copytree(ROOT / "schemas", tmp_path / "schemas")
     write(
         tmp_path / "leaderboard/manifest.json", load(ROOT / "leaderboard/manifest.json")
     )
+    manifest_path = tmp_path / "leaderboard/manifest.json"
+    candidate_manifest = load(manifest_path)
+    candidate_manifest["data_release"].update(status="prototype_dummy_data", source_ref="dev")
+    write(manifest_path, candidate_manifest)
     output = tmp_path / "submissions/drivaerml/drivaerml-workflow-test-v1"
     shutil.copytree(package, output)
     for module in (validator, manager, registrar):
@@ -618,9 +623,9 @@ def test_participant_command_packages_and_verifies_both_scopes(completed, tmp_pa
         output,
         {"coordinate-network-checkpoint": root / "test-checkpoint.bin"},
     )
-    assert result["status"] == "validated_dev_package"
+    assert result["status"] == "validated_official_package"
     assert load(output / "submission.json")["prediction_scope"] == scope
-    assert workflow.verify_package(output)["status"] == "valid_dev_package"
+    assert workflow.verify_package(output)["status"] == "valid_official_package"
     document = load(output / "submission.json")
     document["metric_values"]["cp_cut_r2"] -= 0.01
     write(output / "submission.json", document)

@@ -1,3 +1,5 @@
+> **Historical preparation record.** Status and branch references below describe earlier trials and release preparation. For current submission availability, use the [dataset index](../README.md) and the dataset quickstart.
+
 # WindsorML FluidsBench readiness review
 
 Date: 2026-09-17

@@ -125,7 +125,7 @@ def test_derived_cache_contract_keeps_public_dataset_canonical() -> None:
     ]
     binding = specification["scoring_support"]["derived_cache_contract"]
     assert binding == {
-        "status": "candidate",
+        "status": "candidate",  # immutable cache recipe retained by the official release
         "classification": "deterministic_rebuildable_evaluator_cache",
         "contract_file": "derived-cache-contract-v1.json",
         "contract_sha256": sha256_file(contract_path),
@@ -144,7 +144,7 @@ def test_derived_cache_contract_keeps_public_dataset_canonical() -> None:
     )
     assert "publish_the_generated_scoring_support_release" not in specification[
         "scoring_support"
-    ]["owner_decisions_required"]
+    ].get("owner_decisions_required", [])
 
 
 def test_profile_panels_pin_exact_native_sampling_grids() -> None:

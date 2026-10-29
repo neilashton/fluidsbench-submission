@@ -25,6 +25,21 @@ class AirfransOfficialReleaseTests(unittest.TestCase):
         truth_manifest = json.loads((TRUTH / "manifest.json").read_text())
         self.assertFalse(truth_manifest["activation"]["published"])
 
+    def test_main_intake_preserves_the_same_approved_scientific_contract(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            copied = root / "benchmark-specs/airfrans"
+            shutil.copytree(SPEC, copied)
+            path = copied / "submission-spec.json"
+            active = json.loads(path.read_text())
+            active.update(publication_status="official_intake", intake_branch="main")
+            path.write_text(json.dumps(active))
+            self.assertTrue(check(root)["intake_open"])
+            active["metrics"][0]["unit"] = "modified-unit"
+            path.write_text(json.dumps(active))
+            with self.assertRaises(ValueError):
+                check(root)
+
     def test_missing_arrays_cannot_pass_full_truth_validation(self):
         with self.assertRaises((OSError, ProfileTruthError)):
             validate_release(release_root=TRUTH, profile_definition_path=SPEC / "velocity-profiles-v1.json",

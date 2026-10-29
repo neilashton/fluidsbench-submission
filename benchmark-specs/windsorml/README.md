@@ -89,5 +89,5 @@ python scripts/publish_windsorml_candidate_support.py --output /tmp/windsor-supp
 ```
 
 The metadata covers every scored native point/cell, derived force support and
-all four profile families. Official activation remains an owner release
-operation, separate from dev intake and pre-release registration.
+all four profile families. WindsorML is open for submissions. Use the participant quickstart to package
+results and the shared submission workflow to open a pull request.

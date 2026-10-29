@@ -1,3 +1,5 @@
+> **Historical preparation record.** Status and branch references below describe earlier trials and release preparation. For current submission availability, use the [dataset index](../README.md) and the dataset quickstart.
+
 # DrivAerML activation checklist
 
 This checklist records the current state of the DrivAerML FluidsBench
@@ -14,9 +16,10 @@ evidence and decisions on 2026-08-28. The machine-readable approval is
 (SHA-256
 `448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3`).
 
-Submissions nevertheless remain closed. Scientific approval does not supply
-the still-missing immutable production release identities, multi-model
-sensitivity evidence, or independent full-submission dry run.
+Submissions remain closed until the production release is published and its
+participant path is activated. The [owner opening decision](OWNER_OPENING_DECISION.md)
+removes multi-model sensitivity as an opening gate. Daniel's CANTO Full trial
+covers the independent full-submission dry run.
 
 ## Completed and scientifically approved
 
@@ -88,24 +91,17 @@ submissions. See the [participant guide](PARTICIPANT_GUIDE.md).
    immutable support/evaluator/truth bindings and v10 is active for dev packages.
    Review and publish the final production release after the remaining gates;
    dev bindings alone do not authorize official ranking.
-2. **Complete the current scoring-sensitivity gate.** Run at least three
-   genuine trained DrivAerML checkpoints on a common official cohort and the
-   prescribed paired 10,000-replicate bootstrap. This validates ranking
-   stability; it is separate from the now-complete scientific review of native
-   support and profile definitions. Relative profile families stay report-only
-   and their official submission format stays disabled until this gate and their final
-   release-specific approval record are complete.
-3. **Run one independent full schema-v3 submission dry run.** It must exercise
-   a complete official split and the frozen evaluator/release identities. The
-   retained one-case Transolver `run_419` regression does not satisfy this
-   full-split independence gate.
-4. **Publish the official release.** After the preceding checks pass, create
+2. **Bind the completed Full submission trial to the release.** Daniel's CANTO
+   package covers all 50 official Full cases; revalidate its package against
+   the final frozen identities. Historical test submissions stay out of the
+   new repository.
+3. **Publish the official release.** After the preceding checks pass, create
    the final release-bound owner approval, set scoring support to `official`,
    set `submissions_open` to `true`, replace prototype leaderboard status with
    the official release, and promote the reviewed `dev` branches to the
    production branches/site.
 
-Until those four release gates pass, the current implementation is suitable
+Until those release gates pass, the current implementation is suitable
 for internal review and participant dry runs, but not official ranking or
 citation.
 
@@ -113,6 +109,10 @@ citation.
 
 - dataset-owner scientific review of the native fields, force convention,
   velocity support, Cp support, sampling choices, and numerical tolerances;
+- the three-model sensitivity and bootstrap study, removed by the owner's
+  28 October 2026 opening decision;
+- the independent 50-case Full-split submission trial, completed by Daniel's
+  CANTO package;
 - all-case fixed/relative velocity or continuous-Cp support and native truth;
 - the proposed profile-resolution and tolerance campaigns superseded by the
   explicit owner decision above;

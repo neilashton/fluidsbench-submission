@@ -655,7 +655,7 @@ def verify_package(directory):
     )
     if errors:
         raise WorkflowError("package validation failed:\n" + "\n".join(errors))
-    return {"status": "valid_dev_package", "counts": stats, "output": str(directory)}
+    return {"status": "valid_package", "counts": stats, "output": str(directory)}
 
 
 def package(
@@ -688,7 +688,7 @@ def package(
     methods = config["participant"]["methodology"]
     if methods.get("record_kind") != "submitter_reported":
         raise WorkflowError(
-            "a dev submission requires actual submitter_reported methodology"
+            "a submission requires actual submitter_reported methodology"
         )
     declared = {c["id"]: c["sha256"] for c in methods["checkpoints"]}
     for key, path in (checkpoints or {}).items():
@@ -758,9 +758,8 @@ def package(
         verify_package(stage)
         stage.rename(output)
     return {
-        "status": "validated_dev_package",
+        "status": "validated_package",
         "output": str(output),
-        "pull_request_base": "dev",
     }
 
 
@@ -778,7 +777,7 @@ def report(evaluation_root, case_id, output):
     rows = [
         "<!doctype html><meta charset='utf-8'><title>AirfRANS evaluation</title>",
         "<style>body{font:16px system-ui;max-width:1000px;margin:2rem}td,th{padding:.3rem;text-align:left}svg{width:100%;max-width:640px;border:1px solid #ccc}</style>",
-        f"<h1>AirfRANS / {html.escape(case_id)}</h1><p>Development evaluation. Blue: truth. Orange: prediction.</p>",
+        f"<h1>AirfRANS / {html.escape(case_id)}</h1><p>Evaluation. Blue: truth. Orange: prediction.</p>",
         "<h2>Complete-split metrics</h2><table>",
     ]
     for key, value in load_json(root / "metrics-cases.json")["metric_values"].items():

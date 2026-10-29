@@ -51,14 +51,14 @@ class CommittedReleaseChain(unittest.TestCase):
 
     def test_specification_is_closed_candidate_bound_to_manifest(self):
         support = self.spec["scoring_support"]
-        self.assertEqual(self.spec["status"], "candidate_native_support")
-        self.assertEqual(support["status"], "owner_review_required")
-        self.assertIs(support["submissions_open"], False)
+        self.assertEqual(self.spec["status"], "official")
+        self.assertEqual(support["status"], "official")
+        self.assertIs(support["submissions_open"], True)
         self.assertEqual(
             support["candidate_manifest"]["manifest_sha256"], contract.sha256_file(self.manifest_path)
         )
         self.assertEqual([s["id"] for s in self.spec["splits"]], ["official_test"])
-        self.assertNotIn("owner_approval", support)
+        self.assertEqual(support["owner_approval"]["approved_by"], "Neil Ashton")
 
     def test_candidate_manifest_release_validates(self):
         errors = validate_candidate_manifest_release(
@@ -256,7 +256,9 @@ class ResumableWorkflow(unittest.TestCase):
             _write_prediction(workflow.prediction_path(self.entry, case_id), support.arrays["p"] * 1.1)
         split = {"case_ids": self.cases, "case_set_id": "official_test", "split_id": "official_test"}
         retained = lambda case_id: self.records[case_id]  # noqa: E731
+        from concurrent.futures import ThreadPoolExecutor
         self.patches = [
+            mock.patch.object(workflow.concurrent.futures, "ProcessPoolExecutor", ThreadPoolExecutor),
             mock.patch.object(workflow, "official_split", return_value=split),
             mock.patch.object(dataset_scorer, "official_split", return_value=split),
             mock.patch.object(workflow, "retained_record", side_effect=retained),

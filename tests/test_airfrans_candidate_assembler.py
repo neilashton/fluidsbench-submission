@@ -31,8 +31,12 @@ def read(path: Path) -> dict:
 class AirfransCandidateAssemblerTests(unittest.TestCase):
     def setUp(self) -> None:
         self.config = read(ROOT / "examples/airfrans-v3-candidate/transolverpp-full-v1-candidate-config.json")
+        self.config["release_bindings"]["profile_ground_truth"] = read(DEFAULT_SPEC)["profile_definition"]["profile_ground_truth"]
         self.spec = read(DEFAULT_SPEC)
-        self.package = ROOT / "submissions/airfrans/transolverpp-full-v1"
+        from tests.airfrans_fixture import make_fixture
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.package = make_fixture(Path(self.temporary.name) / "input", case_limit=2)
 
     def validate_discretization(self, directory: Path, submission: dict, metrics: dict) -> list[str]:
         case_ids = [case["case_id"] for case in metrics["cases"]]

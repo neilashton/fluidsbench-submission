@@ -59,6 +59,6 @@ material under its declared open licence. Upstream datasets and optional artifac
 | Emanuele Tamburini | Sorbonne University |
 | Tyler Buchanan | TU Delft |
 
-Meet the [scientific and industrial advisory board](https://fluidsbench.org/review-x4n7q9m2vk6p/contributors/#advisory-board).
+Meet the [scientific and industrial advisory board](https://fluidsbench.org/contributors/#advisory-board).
 
 Visit the [FluidsBench website](https://fluidsbench.org/) for dataset information, benchmark news and community links.

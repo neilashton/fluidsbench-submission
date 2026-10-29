@@ -3,12 +3,12 @@
   "dataset_id": "drivaerml",
   "dataset_name": "DrivAerML",
   "dataset_version": "drivaerml-native-v3-candidate",
-  "status": "candidate_scoring_contract",
+  "status": "official",
   "contract_base_path": "benchmark-specs/drivaerml/",
   "contract_base_path_scope": "repository_relative_contract_artifact_fields_only; upstream_dataset_paths_resolve_within_source_release",
   "scoring_support": {
-    "status": "owner_review_required",
-    "submissions_open": false,
+    "status": "official",
+    "submissions_open": true,
     "prediction_scopes": {
       "surface_and_volume": {
         "surface_predictions_required": true,
@@ -27,7 +27,6 @@
         "maximum_overall_score": 60.0
       }
     },
-    "closed_reason": "Development candidate packaging, intake and registration are available on dev. Official ranking remains closed pending the production release, genuine-model sensitivity evidence and independent full-split trial.",
     "scientific_approval": {
       "status": "approved",
       "approved_by": "neilashton",
@@ -409,35 +408,57 @@
       "velocity_profiles": "all_484_fixed_and_relative_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
       "cp_cuts": "all_484_four_cut_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
       "bounded_score_definition": "complete_fixed_field_error_caps_and_bounded_force_profile_R2",
-      "composite_sensitivity_and_bootstrap": "pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
+      "composite_sensitivity_and_bootstrap": "waived_by_dataset_owner_2026_10_28_not_run",
       "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_scientifically_approved_frozen_release_identity_pending",
-      "independent_participant_dry_run": "pending",
+      "independent_participant_dry_run": "complete_canto_full_50_official_test_cases_final_release_revalidation_pending",
       "owner_evaluator_approval": "scientific_method_approved_final_immutable_release_binding_pending"
     },
-    "owner_decisions_required": [
-      "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
-      "review_fixed_field_error_caps_and_bounded_R2_sensitivity_with_genuine_model_predictions_and_publish_bootstrap_indexes",
-      "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions"
-    ],
     "candidate_manifest": {
       "status": "candidate",
       "release_id": "drivaerml-native-dev-v2-candidate",
       "manifest_file": "scoring-support/drivaerml-native-dev-v2-candidate/manifest.json",
       "manifest_url": "https://raw.githubusercontent.com/neilashton/fluidsbench-submission/fa321e6fe6ce05a7bae41bd3961108d11ef467a6/benchmark-specs/drivaerml/scoring-support/drivaerml-native-dev-v2-candidate/manifest.json",
       "manifest_sha256": "7c6648f333e508eff77b14a475106a26671eb99a0d25bf8c6e48e13fe9a527dc"
+    },
+    "release_id": "drivaerml-native-support-v3",
+    "manifest_file": "scoring-support/drivaerml-native-support-v3/manifest.json",
+    "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/drivaerml-native-support-v3/manifest.json",
+    "manifest_sha256": "7d17e28916f48f8391f817a32ef31c3050815af043e6c1b2d58da9becc7a45e9",
+    "owner_approval": {
+      "approved_by": "Neil Ashton",
+      "approved_at": "2026-10-28",
+      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
+    },
+    "publication_validation": {
+      "case_count": 438,
+      "support_instance_count": 1314,
+      "local_artifact_count": 0,
+      "remote_artifact_count": 1752,
+      "normalized_support_sha256": "58f20a920b3d54e3362eb19b1e99b7fb7d30d2cc8d8c649150156d3fe410f247",
+      "manifest_sha256": "7d17e28916f48f8391f817a32ef31c3050815af043e6c1b2d58da9becc7a45e9",
+      "validation_scope": "exact_case_metric_and_hash_chain_local_artifact_bytes_remote_hash_pins_not_downloaded",
+      "status": "passed",
+      "validated_by": "FluidsBench automated metadata validation",
+      "validated_at": "2026-10-29T03:40:48+00:00",
+      "validator_file": "publication-validator.py",
+      "validator_sha256": "b6e25669d44ab150588223dc4aa40d1bda350dda76e9696e1361af1b025a3fe1",
+      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
     }
   },
   "relative_diagnostics": {
-    "status": "support_verified_activation_pending",
-    "profile_format_enabled": false,
-    "closed_reason": "support artifacts and an immutable evaluator revision are bound and the underlying scientific support is owner-approved, but genuine-model sensitivity and the final release-specific approval record remain pending; publication alone is not activation",
+    "status": "owner_approved_report_only",
+    "profile_format_enabled": true,
+    "owner_opening_decision": {
+      "file": "owner-opening-decision-2026-10-28.json",
+      "sha256": "fd150c8a4ffdfcb0df1c62cf6f65e01ab112f8c2d897f15f7ec66d9365035bf3"
+    },
     "contract": {
       "id": "drivaerml-relative-diagnostics-v3-candidate",
       "file": "drivaerml-relative-diagnostics-v3.json",
       "sha256": "a6066fa83a7af0d18b84a18c11079f020023a6aed81292c4251186c14fc0461a"
     },
     "profile_chunk": {
-      "format": "fluidsbench-drivaerml-relative-profile-chunks-v3-candidate",
+      "format": "fluidsbench-drivaerml-relative-profile-chunks-v3-official",
       "schema_file": "schemas/v1/drivaerml-relative-profile-chunk.schema.json",
       "schema_sha256": "ff5c5965bb00633303b9372360879d02535f7946c882b9cfcefe1ee55446a0d2",
       "series_per_case": 40

@@ -1,6 +1,6 @@
 # AirfRANS submission guide
 
-Use the current `dev` checkout. Supported splits are **Full** (`full`, 200 test
+Use the current release checkout. Supported splits are **Full** (`full`, 200 test
 cases), **Scarce** (`scarce`, the same 200 test cases but a different training
 regime), and **AoA extrapolation** (`aoa_extrapolation`, 196 test cases).
 Reynolds extrapolation and custom case lists are rejected. Follow [Submitting a result](../../SUBMITTING.md) for validation and review.
@@ -146,12 +146,9 @@ Provide the actual `training` and `inference` objects in `spatial_discretization
 and one ordered record per test case in `my-entry/discretization-cases.jsonl`.
 These follow [the spatial specification](../../docs/RESULT_FORMAT.md) and
 [case schema](../../schemas/v3/discretization-case.schema.json).
-The [retained Full example](../../submissions/airfrans/transolverpp-full-v1/discretization.json)
-and its [case records](../../submissions/airfrans/transolverpp-full-v1/discretization/cases.jsonl)
-show the format, not values to copy for another model. For the same retained
-inference run, reuse accurate records and update their submission ID. Record
-actual model input/output counts, chunking and mappings: native-order exported
-arrays alone do not establish how the model performed inference.
+The [generic discretization template](../../examples/v3-template/discretization.json)
+and its [case-record layout](../../examples/v3-template/discretization/cases.jsonl)
+show the required fields. Fill them with your model's actual inference and mapping details.
 
 ```bash
 python scripts/airfrans.py package --evaluation-root work/my-result/evaluation \
@@ -165,12 +162,7 @@ Optionally add `--checkpoint CHECKPOINT_ID=/path/to/weights` to `package` to
 verify the recorded raw checkpoint digest locally. This does not copy or upload
 the weights. Packaging verifies retained evaluation files and runs the real
 contributor validator before exposing the output directory; failed validation
-leaves no partial final package. Historical `*-candidate` tools remain available
-for their original records, but new participants should use this command.
+leaves no partial final package. Use this command for new submissions.
 
 Open a PR to **`dev`** containing only the new submission directory. Do not add
 approval records. Maintainers review and approve the package before publication. A passing contributor check is not approval.
-
-<a id="completed-participant-trials"></a>
-
-For the workflow test history, see the [participant trial record](PARTICIPANT_TRIALS.md).

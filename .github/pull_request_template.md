@@ -11,7 +11,7 @@
 
 - [ ] **Dataset and release:** This result PR targets `dev` and follows an
       [accepted submission route](https://github.com/neilashton/fluidsbench-submission/blob/dev/SUBMITTING.md):
-      an open, owner-approved support release, or an AhmedML, WindsorML, DrivAerML or DrivAerNet++ development candidate.
+      an open, owner-approved support release.
       I used the exact dataset/split version and scoring-support binding recorded in `submission.json`.
 - [ ] **Evaluation data:** I used public evaluation fields only for final evaluation, not fitting, selection, tuning, or
       preprocessing statistics. I disclosed any earlier contact below.
@@ -33,7 +33,7 @@
 - [ ] **Publication rights:** I have the right to publish the submitted metadata, profiles, and result material under the
       declared open result-data licence.
 - [ ] **Validation and review:** I successfully ran
-      `python3 scripts/validate_submission.py --dev-intake --contributor-stage <submission-directory>` and retained the
+      `python3 scripts/validate_submission.py --contributor-stage <submission-directory>` and retained the
       calculation evidence that maintainers may request. This command covers AirfRANS dev intake and all four accepted
       development-candidate datasets.
 

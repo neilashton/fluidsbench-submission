@@ -168,10 +168,6 @@ dataset-owned evaluator path intended for future real submissions.
   bytes, and recomputes all evaluator-derived package products.
 - `examples/ahmedml-v3-candidate/`: genuine-inference configuration template
   and complete packaging instructions.
-- `pre-release-reference-registry.json`: initially empty maintainer registry
-  for exact hash-bound, non-citable genuine-inference rows on the dev feed.
-- `scripts/register_ahmedml_pre_release.py`: proposes or atomically appends one
-  validated dev-only registry binding without creating approval.
 - `scripts/assemble_ahmedml_schema_v3_dev_fixture.py`: creates the non-ranked
   schema-v3 development package.
 

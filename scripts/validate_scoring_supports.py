@@ -413,6 +413,13 @@ def validate_metric_contract(
     if len(bound_metric_ids) != len(set(bound_metric_ids)):
         errors.append(f"{label} each metric may be bound only once")
     bound_metric_id_set = set(bound_metric_ids)
+    # Dataset scorers may bind profile supports here or in their separate
+    # profile contract. When present, validate those bindings in full above.
+    required_metric_ids |= {
+        metric_id for metric_id in bound_metric_id_set
+        if dataset_metrics.get(metric_id, {}).get("aggregation")
+        == "flatten_all_required_profile_samples"
+    }
     if bound_metric_id_set != required_metric_ids:
         errors.append(
             f"{label} metric bindings must exactly cover dataset field and "
@@ -566,6 +573,7 @@ def validate_declared_manifest(
             dataset_directory,
             dataset_id,
             split,
+            expected_case_id_status=("official_intersected_with_published" if dataset_id == "windsorml" else "official"),
         )
         if case_set_id is None or case_ids is None:
             continue

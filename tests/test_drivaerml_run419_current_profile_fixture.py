@@ -414,10 +414,10 @@ class DrivAerMLRun419CurrentProfileFixtureTests(unittest.TestCase):
             ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json"
         )
         relative = submission_spec["relative_diagnostics"]
-        self.assertEqual(relative["status"], "support_verified_activation_pending")
-        self.assertFalse(relative["profile_format_enabled"])
+        self.assertEqual(relative["status"], "owner_approved_report_only")
+        self.assertTrue(relative["profile_format_enabled"])
         self.assertEqual(relative["relative_composite_weight"], 0.0)
-        self.assertFalse(submission_spec["scoring_support"]["submissions_open"])
+        self.assertTrue(submission_spec["scoring_support"]["submissions_open"])
 
 
 if __name__ == "__main__":

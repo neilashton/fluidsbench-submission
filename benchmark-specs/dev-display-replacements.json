@@ -1,13 +1,4 @@
 {
   "schema_version": "1.0",
-  "replacements": [
-    {
-      "source_submission_id": "transolverpp-aoa-v1",
-      "source_sha256": "5aa036a48b7424c62dbcd6fa941e5670199d2f69518e5a332aace9187552048a",
-      "replacement_submission_id": "transolverpp-participant-aoa-v1",
-      "replacement_sha256": "a55b26b6eda072e771cf5f5f51bda4dbbae1f1a304c89587d4db3508448b4a2e",
-      "reason": "The same retained Transolver++ AoA inference run was independently re-evaluated and packaged through the participant workflow under airfrans-native-v1. Metrics and profiles are unchanged; this approved package replaces the prototype in the current dev display.",
-      "review_url": "https://github.com/neilashton/fluidsbench-submission/pull/70"
-    }
-  ]
+  "replacements": []
 }

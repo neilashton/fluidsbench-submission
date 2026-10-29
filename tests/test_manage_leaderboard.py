@@ -62,9 +62,7 @@ class ManageLeaderboardTests(unittest.TestCase):
     def test_feed_row_pins_profile_index_bytes(self) -> None:
         path = (
             manage_leaderboard.ROOT
-            / "submissions"
-            / "ahmedml"
-            / "ahmedml-geotransolver-calibrated-dev-fixture-v1"
+            / "tests" / "fixtures" / "validator-ahmedml-v1"
             / "submission.json"
         )
         manifest = {
@@ -217,6 +215,23 @@ class ManageLeaderboardTests(unittest.TestCase):
         self.assertEqual(updated["data_release"]["id"], f"prototype-dev-2026-07-15-{digest[:12]}")
         self.assertEqual(revision_history["record_count"], 1)
         self.assertEqual(revision_history["series_count"], 1)
+
+    def test_empty_feed_build_is_stable_on_the_next_check(self) -> None:
+        manifest = {
+            "ranking_contract": manage_leaderboard.ranking_contract(),
+            "datasets": [{"name": "AhmedML", "file": "leaderboard/datasets/ahmedml.json"}],
+            "all_file": "leaderboard/all.json",
+            "generated_at": "2026-10-28T00:00:00Z",
+            "data_release": {"status": "prototype_dummy_data", "source_ref": "dev"},
+        }
+        with patch.object(manage_leaderboard, "source_rows_by_dataset", return_value={"AhmedML": []}), patch.object(manage_leaderboard, "apply_display_replacements"):
+            built, _, rows, _ = manage_leaderboard.expected_outputs(manifest, generated_at="2026-10-29T00:00:00Z")
+            checked, _, checked_rows, _ = manage_leaderboard.expected_outputs(built)
+        self.assertEqual(rows, [])
+        self.assertEqual(checked_rows, [])
+        self.assertEqual(built["data_release"]["id"], checked["data_release"]["id"])
+        self.assertEqual(built["data_release"]["claims"], checked["data_release"]["claims"])
+        self.assertEqual(built["data_release"]["revision_history"], checked["data_release"]["revision_history"])
 
     def test_population_tracks_published_references_without_granting_eligibility(self) -> None:
         manifest = self.ranking_manifest()

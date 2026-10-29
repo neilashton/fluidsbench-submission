@@ -1,6 +1,6 @@
 # DrivAerML submission guide
 
-Use a current `dev` checkout. The participant command prepares immutable support,
+Use the current release checkout. The participant command prepares immutable support,
 checks inputs, evaluates the whole official test split with recovery, and produces
 a validated result directory. See the [dataset index](../README.md) for availability and
 [Submitting a result](../../SUBMITTING.md) for validation and review.
@@ -134,14 +134,13 @@ python scripts/drivaerml.py verify-package submissions/drivaerml/YOUR_SUBMISSION
 ```
 
 Repeat `--checkpoint ID=PATH` for every declared checkpoint. `package` checks the
-checkpoint bytes, assembles the result and runs the candidate semantic validator
+checkpoint bytes, assembles the result and runs the contributor validator
 plus the genuine-inference checks before publishing its output directory.
 `verify-package` also accepts a package directory outside a Git checkout. It does
 not register or approve it.
 
 Commit only `submissions/drivaerml/YOUR_SUBMISSION_ID/` and open a PR against
-`dev`. The [existing maintainer registration and feed build](PARTICIPANT_GUIDE.md#7-pull-request-and-dev-publication)
-then publishes the reviewed result in the preview. The public JSON directory is the submission
+`dev`. Maintainers review and approve the result before leaderboard publication. The public JSON directory is the submission
 payload; AutoCFD5 confidential ZIPs are not the FluidsBench intake format.
 
 ## Container

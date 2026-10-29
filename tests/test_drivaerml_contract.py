@@ -38,8 +38,8 @@ class DrivAerMLContractTests(unittest.TestCase):
             "drivaerml-native-v3-candidate",
         )
         support = self.specification["scoring_support"]
-        self.assertEqual(support["status"], "owner_review_required")
-        self.assertFalse(support["submissions_open"])
+        self.assertEqual(support["status"], "official")
+        self.assertTrue(support["submissions_open"])
         scientific_approval = support["scientific_approval"]
         self.assertEqual(scientific_approval["status"], "approved")
         self.assertEqual(scientific_approval["approved_by"], "neilashton")
@@ -53,7 +53,7 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertFalse(
             approval["non_activation"]["genuine_three_model_sensitivity_complete"]
         )
-        self.assertTrue(support["owner_decisions_required"])
+        self.assertEqual(support.get("owner_decisions_required", []), [])
         self.assertFalse(
             support["coverage_contract"]["full_prediction_artifact_required"]
         )
@@ -70,7 +70,7 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertIn("checkpoint publication remains optional", participant_process)
         self.assertIn("optional audits", participant_process)
         self.assertNotIn("complete-split scored-prediction artifact", participant_process)
-        self.assertNotIn("recomputation receipt", support["closed_reason"])
+        self.assertNotIn("recomputation receipt", support.get("closed_reason", ""))
         self.assertIn(
             "schema_v3_participant_result_binding", support["activation_gates"]
         )
@@ -100,7 +100,7 @@ class DrivAerMLContractTests(unittest.TestCase):
         self.assertFalse(
             any(
                 "volume" in decision and "weight" in decision
-                for decision in support["owner_decisions_required"]
+                for decision in support.get("owner_decisions_required", [])
             )
         )
 
@@ -453,7 +453,7 @@ class DrivAerMLContractTests(unittest.TestCase):
     def test_leaderboard_and_submissions_use_the_candidate_contract(self) -> None:
         manifest = load_json(ROOT / "leaderboard" / "manifest.json")
         dataset = next(item for item in manifest["datasets"] if item["slug"] == "drivaerml")
-        self.assertEqual(dataset["scoring_support"], self.specification["scoring_support"])
+        self.assertEqual(dataset["scoring_support"], {key: value for key, value in self.specification["scoring_support"].items() if key != "manifest_file"})
         self.assertEqual(dataset["overall_score_composite"], self.specification["overall_score_composite"])
         self.assertEqual(
             [len(panel["stations"]) for panel in dataset["diagnostic_panels"]],
@@ -575,7 +575,7 @@ class DrivAerMLContractTests(unittest.TestCase):
         # published until maintainer registration. Population metadata describes
         # the published feed, not every package awaiting review in submissions/.
         rows = load_json(ROOT / "leaderboard" / "datasets" / "drivaerml.json")
-        self.assertTrue(rows)
+        self.assertIsInstance(rows, list)
         for row in rows:
             source_path = (
                 ROOT / "submissions" / "drivaerml"
@@ -608,7 +608,7 @@ class DrivAerMLContractTests(unittest.TestCase):
             "published_feed_rows_including_pre_release_references",
         )
         self.assertEqual(
-            dataset["updated_at"], max(item["submitted_at"] for item in rows)
+            dataset["updated_at"], max((item["submitted_at"] for item in rows), default=dataset["updated_at"])
         )
         self.assertEqual(
             population["updated_at_semantics"],

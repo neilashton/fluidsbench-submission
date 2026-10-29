@@ -3,11 +3,10 @@
   "dataset_id": "drivaernetplusplus",
   "dataset_name": "DrivAerNet++",
   "dataset_version": "drivaernetplusplus-native-pressure-v1-candidate",
-  "status": "candidate_native_support",
+  "status": "official",
   "scoring_support": {
-    "status": "owner_review_required",
-    "submissions_open": false,
-    "closed_reason": "Official DrivAerNet++ submissions remain closed pending owner review of the candidate support. Genuine-inference candidates may be submitted to dev using --dev-intake.",
+    "status": "official",
+    "submissions_open": true,
     "coverage_contract": {
       "dimensionality": "3D surface pressure (PointData p); other supports pending",
       "rule": "complete_original_public_release_entities",
@@ -78,18 +77,36 @@
       "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
       "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
     },
-    "owner_decisions_required": [
-      "approve_candidate_support_release_and_publication_validation",
-      "confirm_profile_station_set_and_retirement_of_front_wheelhouse",
-      "confirm_or_retire_pending_wall_shear_and_volume_supports",
-      "record_final_owner_approval_with_pull_request"
-    ],
     "candidate_manifest": {
       "status": "candidate",
       "release_id": "drivaernetplusplus-native-pressure-support-v1-candidate",
       "manifest_file": "scoring-support/drivaernetplusplus-native-pressure-support-v1-candidate/manifest.json",
       "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/drivaernetplusplus/scoring-support/drivaernetplusplus-native-pressure-support-v1-candidate/manifest.json",
       "manifest_sha256": "ea04603f238f9fffa65e1d00e69ec15ca19a5a03e1b8b869e756a511d39d280a"
+    },
+    "release_id": "drivaernetplusplus-native-pressure-support-v1",
+    "manifest_file": "scoring-support/drivaernetplusplus-native-pressure-support-v1/manifest.json",
+    "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/drivaernetplusplus-native-pressure-support-v1/manifest.json",
+    "manifest_sha256": "924e171a3ec016cd246a81e4db58c190b112502f3f1e4f27965c1555a1f37ee3",
+    "owner_approval": {
+      "approved_by": "Neil Ashton",
+      "approved_at": "2026-10-28",
+      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
+    },
+    "publication_validation": {
+      "case_count": 1154,
+      "support_instance_count": 1154,
+      "local_artifact_count": 1154,
+      "remote_artifact_count": 1154,
+      "normalized_support_sha256": "744e8f0a2c8843b58b4ee43b4dec1e5d09d535c9e145e7e1dbbe263f823a8850",
+      "manifest_sha256": "924e171a3ec016cd246a81e4db58c190b112502f3f1e4f27965c1555a1f37ee3",
+      "validation_scope": "exact_case_metric_and_hash_chain_local_artifact_bytes_remote_hash_pins_not_downloaded",
+      "status": "passed",
+      "validated_by": "FluidsBench automated metadata validation",
+      "validated_at": "2026-10-29T03:40:48+00:00",
+      "validator_file": "publication-validator.py",
+      "validator_sha256": "bab9b12258631b49fef83dad0051748e7811bb784681a24f62a10e28dc29a6f3",
+      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
     }
   },
   "evaluation_reference_version": "drivaernetplusplus-evaluator-v0.1-candidate",

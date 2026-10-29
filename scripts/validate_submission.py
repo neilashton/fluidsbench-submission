@@ -6749,7 +6749,7 @@ def validate_open_reproducibility(
         split_index = load_json(split_path)
         expected_case_id_status = (
             "official_intersected_with_published"
-            if candidate_dry_run and submission.get("dataset_id") == "windsorml"
+            if submission.get("dataset_id") == "windsorml"
             else "official"
         )
         if split_index.get("case_id_status") != expected_case_id_status:
@@ -6951,7 +6951,9 @@ def validate_profiles(
     profile_format = submission["profile_data"].get(
         "format", "fluidsbench-profile-chunks-v1"
     )
-    relative_profile = profile_format == RELATIVE_PROFILE_FORMAT
+    official_relative_format = "fluidsbench-drivaerml-relative-profile-chunks-v3-official"
+    official_relative_profile = profile_format == official_relative_format
+    relative_profile = profile_format in {RELATIVE_PROFILE_FORMAT, official_relative_format}
     # A retained real-inference reference may expose fully validated relative
     # profiles before the closed candidate release is activated.  This is not
     # an intake path: the v1 schema independently restricts it to an explicit
@@ -6970,6 +6972,7 @@ def validate_profiles(
         "fluidsbench-profile-chunks-v1",
         "fluidsbench-drivaerml-physical-profile-chunks-v1",
         RELATIVE_PROFILE_FORMAT,
+        official_relative_format,
         HILIFT_PROFILE_FORMAT,
     }:
         add(f"unsupported profile_data.format {profile_format!r}")
@@ -6978,11 +6981,49 @@ def validate_profiles(
     declaration = dataset_spec.get("relative_diagnostics")
     release_valid = False
     release_was_checked = False
+    if official_relative_profile:
+        decision = declaration.get("owner_opening_decision") if isinstance(declaration, dict) else None
+        decision_path = (
+            ROOT / "benchmark-specs/drivaerml" / decision.get("file", "")
+            if isinstance(decision, dict)
+            else None
+        )
+        expected_decision = {
+            "schema": "drivaerml-owner-opening-decision-v1",
+            "dataset_id": "drivaerml",
+            "approved_by": "Neil Ashton",
+            "approved_at": "2026-10-28",
+            "sensitivity_study": "waived_as_opening_gate_not_run",
+            "independent_full_split_trial": "drivaerml-canto-full-v1_50_cases_completed",
+            "relative_profile_policy": "report_only_zero_weight_allowed_in_official_packages",
+            "official_profile_format": official_relative_format,
+        }
+        if (
+            dataset_spec.get("status") != "official"
+            or not isinstance(declaration, dict)
+            or declaration.get("status") != "owner_approved_report_only"
+            or declaration.get("profile_format_enabled") is not True
+            or declaration.get("relative_composite_weight") != 0.0
+            or declaration.get("relative_scoring_role") != "report_only"
+            or declaration.get("profile_chunk", {}).get("format") != official_relative_format
+            or not isinstance(decision, dict)
+            or set(decision) != {"file", "sha256"}
+            or decision_path is None
+            or not decision_path.is_file()
+            or not decision_path.resolve().is_relative_to((ROOT / "benchmark-specs/drivaerml").resolve())
+            or sha256_file(decision_path) != decision.get("sha256")
+            or load_json(decision_path) != expected_decision
+        ):
+            add("DrivAerML official relative profiles require the pinned owner decision and zero-weight report-only contract")
+        else:
+            release_valid = True
+            release_was_checked = True
     if (
         submission.get("dataset_id") == "drivaerml"
         and isinstance(declaration, dict)
         and "activation_release" in declaration
         and not pre_release_relative_reference
+        and not official_relative_profile
     ):
         declaration_claims_activation = (
             declaration.get("status") == "activated"
@@ -7014,7 +7055,7 @@ def validate_profiles(
                     declaration,
                     require_active=not candidate_dry_run,
                 )
-            if not candidate_dry_run and not pre_release_relative_reference and (
+            if not candidate_dry_run and not pre_release_relative_reference and not official_relative_profile and (
                 declaration.get("status") != "activated"
                 or declaration.get("profile_format_enabled") is not True
                 or not release_valid
@@ -7158,7 +7199,7 @@ def validate_profiles(
         if index.get(key) != expected:
             add(f"profiles/index.json {key} must equal {expected!r}")
     if relative_profile:
-        if index.get("format") != RELATIVE_PROFILE_FORMAT:
+        if index.get("format") != profile_format:
             add("profiles/index.json format must match profile_data.format")
         if index.get("contract_id") != RELATIVE_PROFILE_CONTRACT_ID:
             add("profiles/index.json contract_id is not the retained relative-v3 contract")
@@ -8186,6 +8227,7 @@ def validate_many(
     dev_intake: bool = False,
     profile_support_release: Path | None = None,
     manifest: dict[str, Any] | None = None,
+    allow_empty: bool = False,
 ) -> tuple[list[str], dict[str, int]]:
     if contributor_stage and candidate_dry_run:
         return [
@@ -8201,6 +8243,8 @@ def validate_many(
         ], {"submissions": 0, "cases": 0, "series": 0}
     files = submission_files(paths)
     if not files:
+        if allow_empty and not paths:
+            return [], {"submissions": 0, "cases": 0, "series": 0}
         return ["no submission.json files found"], {"submissions": 0, "cases": 0, "series": 0}
     manifest = manifest_with_benchmark_contract(manifest or load_json(MANIFEST_PATH))
     errors: list[str] = []
@@ -8311,6 +8355,7 @@ def main(argv: list[str] | None = None) -> int:
         candidate_dry_run=args.candidate_dry_run,
         dev_intake=args.dev_intake,
         profile_support_release=args.profile_support_release,
+        allow_empty=not args.paths and not args.contributor_stage and not args.candidate_dry_run,
     )
     if errors:
         for error in errors:

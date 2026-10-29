@@ -28,27 +28,20 @@ citation eligibility, or promotion eligibility.
 
 ## Review and approve a result
 
-For DrivAerNet++ development candidates, use the separate
-[review and registration procedure below](#receive-and-display-a-drivaernet-development-candidate)
-to publish an unranked dev reference. The approval workflow in this section
-requires an official support release and does not replace candidate registration.
+Use this approval workflow for all five open datasets listed in the [dataset index](../benchmark-specs/README.md).
 
 1. Commit exactly one new submission directory. Do not modify schemas, specifications, validators, workflows, generated feeds, or
    existing submissions in the same pull request. Use a new globally unique `<series-id>-vN` submission ID and the revision rules
    in the [result reference](RESULT_FORMAT.md#result-versions).
-2. For AirfRANS development intake, open the pull request against `dev`. Full, Scarce and AoA are enabled; Reynolds is closed.
-   Production intake remains closed. Future production submissions will target `main` after an explicit production launch.
+2. Target `dev`. AirfRANS accepts Full, Scarce and AoA; Reynolds remains closed. The other open datasets accept the scopes listed in the dataset index.
 3. Complete the pull request checklist and resolve all automated validation failures.
 4. Maintainers review scientific provenance, public-evaluation-use eligibility, metadata, submitted values, result-data licence,
    and any declared artifact metadata, then merge the contributor package while it is still unapproved and absent from public
    feeds.
 5. A maintainer can run the **Maintainer approve and regenerate** workflow with the exact submission path, validator/approver
-   identities, validation timestamp, and approval date. Select `dev` for dev intake: the approval PR targets the dispatched branch. It creates the validation record, binds the resulting draft PR URL,
-   rebuilds and verifies the compact feeds, and opens the protected-branch PR. The final merge remains manual.
-   Approved AirfRANS packages are included in the dev preview alongside retained reference rows. After merging the approval
-   PR, check the new submission ID, scores and full-split profiles on the
-   [dev leaderboard](https://fluidsbench.org/review-x4n7q9m2vk6p/committee-leaderboard/).
-   Dev display does not grant official-release citation or promotion eligibility.
+   identities, validation timestamp, and approval date. Select `dev`; the approval PR targets the dispatched branch.
+   The workflow creates the validation record, binds its PR URL and rebuilds the feeds.
+   After merging the approval PR, check the result ID, scores and profiles on the leaderboard.
 6. Optional prediction checks are descriptive and never change approval or claim eligibility. The separate **Check optional
    prediction artifact metadata** workflow checks declarations only; it cannot award the blue badge. Follow the
    [full-split metric-verification procedure](OPTIONAL_VERIFICATION.md#maintainer-procedure) for an actual recomputation.
@@ -56,6 +49,14 @@ requires an official support release and does not replace candidate registration
 External pull requests are restricted to one entirely new submission directory. Maintainers may deliberately apply the restricted
 `trusted-maintenance` label to allow a reviewed external repository-maintenance contribution; validation/approval changes must still
 come from a maintainer-owned branch.
+
+## Historical development procedures
+
+<details>
+<summary>Earlier trial registration and prototype replacement procedures</summary>
+
+These procedures describe the pre-launch test repositories. New participant results
+use the approval workflow above; the clean launch starts with an empty leaderboard.
 
 ### Replacing a dev prototype across dataset contracts
 
@@ -137,6 +138,8 @@ reads the updated submission `dev` feed. Verify the submission ID, overall score
 is an unranked `pre_release_reference`, without official approval, citation or
 promotion eligibility. Official intake remains closed until the separate
 [formal release activation](../benchmark-specs/drivaernetplusplus/OWNER_APPROVAL.md#release-preparation-and-activation).
+
+</details>
 
 ## Activate a dataset support release
 

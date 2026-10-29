@@ -1,3 +1,5 @@
+> **Historical preparation record.** Status and branch references below describe earlier trials and release preparation. For current submission availability, use the [dataset index](../README.md) and the dataset quickstart.
+
 # DrivAerNet++ dataset-owner approval (interim record)
 
 The dataset owner's scientific approval is recorded here while the scoring support is still

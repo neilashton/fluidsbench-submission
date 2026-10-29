@@ -66,6 +66,7 @@ class _FakeLocator:
         raise AssertionError("the injected mapper owns native polygon lookup")
 
 
+@unittest.skipUnless(__import__("sys").platform.startswith("linux"), "requires Linux retained-file descriptor semantics")
 class DrivAerMLCpSupportAggregateTests(unittest.TestCase):
     def setUp(self) -> None:
         temporary = tempfile.TemporaryDirectory()

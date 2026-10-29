@@ -87,6 +87,7 @@ def _submission_and_evidence() -> tuple[dict, dict]:
         "discretization_sha256": submission["spatial_discretization"]["sha256"],
         "case_metrics_sha256": submission["case_metrics"]["sha256"],
     }
+    evidence["dimensional_unit_conversion"] = validator.hilift_dimensional_export_binding()
     return submission, evidence
 
 

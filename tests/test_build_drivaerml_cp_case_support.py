@@ -130,6 +130,7 @@ def _synthetic_boundary(
     )
 
 
+@unittest.skipUnless(__import__("sys").platform.startswith("linux"), "requires Linux retained-file descriptor semantics")
 class BuildDrivAerMLCpCaseSupportTests(unittest.TestCase):
     def _inputs(self, directory: Path) -> tuple[Path, Path]:
         stl = directory / "drivaer_44.stl"

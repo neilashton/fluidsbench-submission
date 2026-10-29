@@ -237,8 +237,8 @@ def test_complete_campaign_package_and_real_validator(tmp_path, monkeypatch, dat
         package,
         {"coordinate-network-checkpoint": checkpoint},
     )
-    assert outcome["status"] == "validated_dev_package"
-    assert w.verify_package(package)["status"] == "valid_dev_package"
+    assert outcome["status"] == "validated_official_package"
+    assert w.verify_package(package)["status"] == "valid_official_package"
     report = w.report(
         root, w.official_split("full")["case_ids"][0], tmp_path / "report.html"
     )

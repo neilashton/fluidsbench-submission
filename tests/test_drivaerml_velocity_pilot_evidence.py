@@ -111,13 +111,8 @@ def _sha256(path: Path) -> str:
 
 
 def _sha256_git_blob(revision: str, path: str) -> str:
-    payload = subprocess.run(
-        ("git", "show", f"{revision}:{path}"),
-        cwd=ROOT,
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    ).stdout
+    """Verify archived source bytes without requiring the retired Git history."""
+    payload = (ROOT / "tests/fixtures/historical-source" / revision / path).read_bytes()
     return hashlib.sha256(payload).hexdigest()
 
 
@@ -990,10 +985,10 @@ class DrivAerMLVelocityPilotEvidenceTests(unittest.TestCase):
 
     def test_official_submission_remains_closed_with_frozen_dev_evaluator(self) -> None:
         specification = _load(SPEC_PATH)
-        self.assertEqual(specification["status"], "candidate_scoring_contract")
+        self.assertEqual(specification["status"], "official")
         support = specification["scoring_support"]
-        self.assertEqual(support["status"], "owner_review_required")
-        self.assertFalse(support["submissions_open"])
+        self.assertEqual(support["status"], "official")
+        self.assertTrue(support["submissions_open"])
         binding = support["dataset_evaluator_binding"]
         self.assertEqual(binding["status"], "frozen")
         self.assertRegex(binding["evaluator_code_revision"], r"^[0-9a-f]{40}$")
@@ -1003,7 +998,7 @@ class DrivAerMLVelocityPilotEvidenceTests(unittest.TestCase):
         )
         self.assertEqual(
             support["activation_gates"]["independent_participant_dry_run"],
-            "pending",
+            "complete_canto_full_50_official_test_cases_final_release_revalidation_pending",
         )
         self.assertEqual(
             support["activation_gates"]["owner_evaluator_approval"],

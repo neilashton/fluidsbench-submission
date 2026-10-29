@@ -157,7 +157,7 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
 
     def test_promotion_rerun_preserves_verified_pending_release(self) -> None:
         existing = json.loads(
-            (ROOT / DATASET_PREFIX / "submission-spec.json").read_text()
+            (ROOT / "tests/fixtures/candidate-contracts/drivaerml.json").read_text()
         )
         generated = {
             "relative_diagnostics": copy.deepcopy(
@@ -183,9 +183,10 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
             )
 
     def test_checked_in_pending_release_is_verified_and_fail_closed(self) -> None:
-        spec = json.loads(
-            (ROOT / DATASET_PREFIX / "submission-spec.json").read_text()
-        )
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        spec, _ = self.build_release(root, active=False)
         declaration = spec["relative_diagnostics"]
         errors: list[str] = []
         self.assertTrue(
@@ -193,7 +194,7 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
                 errors.append,
                 spec,
                 declaration,
-                repository_root=ROOT,
+                repository_root=root,
                 require_active=False,
             ),
             "\n".join(errors),
@@ -210,7 +211,7 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
                 errors.append,
                 spec,
                 declaration,
-                repository_root=ROOT,
+                repository_root=root,
                 require_active=True,
             )
         )

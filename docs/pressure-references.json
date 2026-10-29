@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "audited_on": "2026-09-23",
-  "audited_submission_revision": "7d39c697ab3b67be631590fd53e1ec47fce71cd5",
+  "audited_on": "2026-10-29",
+  "audited_submission_revision": "97fc86484a2b2510a3588f835edc3654003f4508 plus launch activation; exact file hashes below",
   "scope": "Source-backed documentation of pressure definitions and the separately versioned HiLiftAeroML SI export correction. This file is not evaluator configuration, owner approval, or a scoring-support release.",
   "common": {
     "reference_rule": "Apply the dataset-prescribed reference to truth and prediction in the same units. Undo training normalization first. Do not fit an offset to test truth or independently mean-center the two fields.",
@@ -10,7 +10,8 @@
     "aggregation": "For case-macro relative L1/L2, combine additive chunk sums over the whole case, then average complete-case percentages equally. Keep each metric’s frozen support and weights.",
     "denominators": "A zero truth norm is undefined and must fail evaluation, including when prediction is also zero. The audited reductions do not add an epsilon or floor a small positive norm; tiny finite denominators remain sensitive. Non-finite inputs/results are invalid. Do not skip, impute or pool a failing case.",
     "rotor_rrmse": "Rotor37 benchmark field RRMSE is sqrt(mean_cases(mean_nodes(error²) / max_nodes(|truth|)²)); it is a ratio, not a percentage and not the L2 norm ratio. A zero per-case infinity norm is invalid.",
-    "scaling_note": "Multiplying truth and prediction by the same nonzero factor leaves within-case relative L1/L2 unchanged. Subtracting a constant changes the denominator. MAE/RMSE retain a unit scale; relative-metric invariance does not validate their units."
+    "scaling_note": "Multiplying truth and prediction by the same nonzero factor leaves within-case relative L1/L2 unchanged. Subtracting a constant changes the denominator. MAE/RMSE retain a unit scale; relative-metric invariance does not validate their units.",
+    "availability": "This document records scientific definitions and historical audit findings. For current submission availability, use the [dataset index](../benchmark-specs/README.md)."
   },
   "datasets": {
     "ahmedml": {
@@ -52,8 +53,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/ahmedml/submission-spec.json",
-          "sha256": "7fcab80981005024ec6d1744683e785dd86dab54f26901bf60e5dea82c2b170a",
-          "finding": "The audited dev scoring specification; not modified by this documentation audit. Re-audited 2026-10-11: only the closed-reason text now documents AhmedML development intake; pressure fields, units and scoring definitions are unchanged."
+          "sha256": "7b3f224689c8d81dd5bf8056c37a8b99a66d74a300d68d9812f40e5a42e8e84d",
+          "finding": "The audited dev scoring specification; not modified by this documentation audit. Re-audited 2026-10-11: only the closed-reason text now documents AhmedML development intake; pressure fields, units and scoring definitions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged."
         },
         {
           "path": "reference/ahmedml/evaluator.py",
@@ -160,8 +161,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/drivaerml/submission-spec.json",
-          "sha256": "64cb4c355429f667b6e496d713a77731e08bc3539ebc8ec83d0fc981a3caeb23",
-          "finding": "Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged."
+          "sha256": "c630873358cda13e59c19673b66968159677c8cb0b12498785f5e3650296028a",
+          "finding": "Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged."
         },
         {
           "path": "reference/drivaerml/evaluator.py",
@@ -225,13 +226,13 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/drivaernetplusplus/submission-spec.json",
-          "sha256": "bdc76ca82b6121db4431b38ca179ace6151d60628bd48158ba19bb39aa836e90",
-          "finding": "Candidate dev scoring specification. Re-audited 2026-10-18 after the move to candidate_native_support: the p units note and the pressure convention are unchanged."
+          "sha256": "56f542579f9b62a2dbd1ab989e5f89ccc7800c93e50d2abec998c64e45bd34df",
+          "finding": "Candidate dev scoring specification. Re-audited 2026-10-18 after the move to candidate_native_support: the p units note and the pressure convention are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged."
         },
         {
           "path": "benchmark-specs/drivaernetplusplus/OWNER_APPROVAL.md",
-          "sha256": "7dc5b008bbb75a750fafd53adadaf93a078ab0229e4f64e1f63b7da888e5d7ef",
-          "finding": "Existing scientific approval, unchanged; the 2026-10-18 owner confirmations keep every native p scored as stored and do not change the pressure convention."
+          "sha256": "71a7dd7422d264eb59c7aa64d7e1c2d35e9289a6146fde44185ef2bd3c7740cc",
+          "finding": "Existing scientific approval, unchanged; the 2026-10-18 owner confirmations keep every native p scored as stored and do not change the pressure convention. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged."
         },
         {
           "path": "reference/drivaernetplusplus/evaluator.py",
@@ -359,8 +360,8 @@
         },
         {
           "path": "scripts/validate_submission.py",
-          "sha256": "c601781cb9277c3dd85bb4c0d46642f765cf760f7cab2cd07c6d6a8f71dddb67",
-          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Rechecked for the AirfRANS pre-release registration: the new per-package candidate view is restricted to hash-bound AirfRANS references; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-08: the validator change selects AirfRANS dataset-local truth and its retained historical contract; the HiLiftAeroML pressure, units and evaluation paths remain unchanged. Re-audited 2026-10-11: the new development intake path is restricted to AhmedML candidates in the prototype dev release; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-11 for WindsorML development intake: the added candidate registry, intersected split handling, and native-profile checks leave HiLiftAeroML pressure and SI export validation unchanged. Re-audited 2026-10-11: adds DrivAerML dev intake, native profile score validation, surface-only omission rules and maximum-residual reduction; HiLiftAeroML pressure handling is unchanged. Re-audited 2026-10-12: the only validator change selects the new DrivAerML dev release; other datasets and pressure conversions are unchanged. Re-audited 2026-10-12 for AirfRANS atomic packaging: a Python-only option permits validation in a staging directory; CLI path enforcement, pressure calculations and SI export validation are unchanged. Re-audited 2026-10-18 for DrivAerNet++ development intake: the added candidate registry and dev-intake block are restricted to DrivAerNet++ candidates; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-22 for pre-release result revisions: only predecessor publication recognition and propagation of release context changed; all pressure, SI export, field/force/profile validation functions and equations are unchanged. Re-audited 2026-10-22 for missing DrivAerNet++ candidate timing: a prototype-dev-only gate permits explicit unavailable inference timing; all pressure, SI export, field/force/profile checks and numerical equations remain unchanged."
+          "sha256": "dd5d3ca5b7ef431b82d78268fad9cf90c96139755eb3924721e8258e89ee5d0b",
+          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Rechecked for the AirfRANS pre-release registration: the new per-package candidate view is restricted to hash-bound AirfRANS references; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-08: the validator change selects AirfRANS dataset-local truth and its retained historical contract; the HiLiftAeroML pressure, units and evaluation paths remain unchanged. Re-audited 2026-10-11: the new development intake path is restricted to AhmedML candidates in the prototype dev release; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-11 for WindsorML development intake: the added candidate registry, intersected split handling, and native-profile checks leave HiLiftAeroML pressure and SI export validation unchanged. Re-audited 2026-10-11: adds DrivAerML dev intake, native profile score validation, surface-only omission rules and maximum-residual reduction; HiLiftAeroML pressure handling is unchanged. Re-audited 2026-10-12: the only validator change selects the new DrivAerML dev release; other datasets and pressure conversions are unchanged. Re-audited 2026-10-12 for AirfRANS atomic packaging: a Python-only option permits validation in a staging directory; CLI path enforcement, pressure calculations and SI export validation are unchanged. Re-audited 2026-10-18 for DrivAerNet++ development intake: the added candidate registry and dev-intake block are restricted to DrivAerNet++ candidates; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-22 for pre-release result revisions: only predecessor publication recognition and propagation of release context changed; all pressure, SI export, field/force/profile validation functions and equations are unchanged. Re-audited 2026-10-22 for missing DrivAerNet++ candidate timing: a prototype-dev-only gate permits explicit unavailable inference timing; all pressure, SI export, field/force/profile checks and numerical equations remain unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged."
         },
         {
           "path": "benchmark-specs/hiliftaeroml/dimensional-export-correction-v1/verification.json",
@@ -426,8 +427,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/windsorml/submission-spec.json",
-          "sha256": "aa073a92b35d66b5661759006128208ea66d59e6863cf3406f26b63b6e95d4f9",
-          "finding": "The audited dev scoring specification; not modified by this documentation audit. Re-audited 2026-10-11: adds schema-v3 candidate support and complete fixed/relative profile coverage; pressure fields, reductions, offsets and weights are unchanged."
+          "sha256": "9cf77df2b2e403dcbd81f276f4bfc6f54a1b0b9284462f7bbf1e72897fa94ab6",
+          "finding": "The audited dev scoring specification; not modified by this documentation audit. Re-audited 2026-10-11: adds schema-v3 candidate support and complete fixed/relative profile coverage; pressure fields, reductions, offsets and weights are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged."
         },
         {
           "path": "reference/windsorml/contract.py",

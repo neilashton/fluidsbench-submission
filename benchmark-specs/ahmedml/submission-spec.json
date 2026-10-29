@@ -3,11 +3,10 @@
   "dataset_id": "ahmedml",
   "dataset_name": "AhmedML",
   "dataset_version": "ahmedml-native-v1-candidate",
-  "status": "candidate_native_support",
+  "status": "official",
   "scoring_support": {
-    "status": "owner_review_required",
-    "submissions_open": false,
-    "closed_reason": "Official AhmedML submissions remain closed pending owner review. Genuine-inference candidates may be submitted to dev using --dev-intake.",
+    "status": "official",
+    "submissions_open": true,
     "coverage_contract": {
       "dimensionality": "3D surface and 3D flow domain",
       "rule": "complete_original_public_release_entities",
@@ -74,12 +73,6 @@
       "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
       "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
     },
-    "owner_decisions_required": [
-      "review_and_approve_profile_station_geometry",
-      "review_and_approve_candidate_score_weights_and_caps",
-      "approve_the_hash_bound_cache_derivation_and_production_preinstallation",
-      "approve_evaluator_implementation_and_open_submissions"
-    ],
     "dataset_source": {
       "repository_id": "neashton/ahmedml",
       "revision": "02688c727cdb8dc8678e28abc6bbbb7e93c5fa15",
@@ -110,6 +103,30 @@
       "manifest_file": "scoring-support/ahmedml-native-all-splits-support-v1-candidate/manifest.json",
       "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/ahmedml/scoring-support/ahmedml-native-all-splits-support-v1-candidate/manifest.json",
       "manifest_sha256": "c727bad2ca2566dfed44920cc334af136f2fbe32f3c8886b2fcb130f495fd124"
+    },
+    "release_id": "ahmedml-native-support-v1",
+    "manifest_file": "scoring-support/ahmedml-native-support-v1/manifest.json",
+    "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/ahmedml-native-support-v1/manifest.json",
+    "manifest_sha256": "38d8af2cdbac16ca60ffaa22e54ae9db09e66dd3098ff847a888c59e94d26cdd",
+    "owner_approval": {
+      "approved_by": "Neil Ashton",
+      "approved_at": "2026-10-28",
+      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
+    },
+    "publication_validation": {
+      "case_count": 450,
+      "support_instance_count": 2250,
+      "local_artifact_count": 2250,
+      "remote_artifact_count": 900,
+      "normalized_support_sha256": "382299b8fde342e47aa22c3f34aa314a12efd43a99549f539a4ac8fba3e02937",
+      "manifest_sha256": "38d8af2cdbac16ca60ffaa22e54ae9db09e66dd3098ff847a888c59e94d26cdd",
+      "validation_scope": "exact_case_metric_and_hash_chain_local_artifact_bytes_remote_hash_pins_not_downloaded",
+      "status": "passed",
+      "validated_by": "FluidsBench automated metadata validation",
+      "validated_at": "2026-10-29T03:40:48+00:00",
+      "validator_file": "publication-validator.py",
+      "validator_sha256": "a3c247fe267a23c9c27c5d92b5e38fb5436089807642d89c61db14d91e111a7c",
+      "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
     }
   },
   "evaluation_reference_version": "ahmedml-evaluator-v0.1-candidate",

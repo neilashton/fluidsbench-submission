@@ -1,3 +1,5 @@
+> **Historical preparation record.** Status and branch references below describe earlier trials and release preparation. For current submission availability, use the [dataset index](../README.md) and the dataset quickstart.
+
 # AirfRANS development intake
 
 For new submissions, follow the [participant quickstart](QUICKSTART.md). It

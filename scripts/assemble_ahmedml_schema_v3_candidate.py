@@ -273,13 +273,19 @@ def _release_bindings(
     scoring_support = _mapping(
         specification.get("scoring_support"), "specification.scoring_support"
     )
-    if (
-        specification.get("status") != "candidate_native_support"
-        or scoring_support.get("status") != "owner_review_required"
-        or scoring_support.get("submissions_open") is not False
-    ):
+    candidate_state = (
+        specification.get("status") == "candidate_native_support"
+        and scoring_support.get("status") == "owner_review_required"
+        and scoring_support.get("submissions_open") is False
+    )
+    official_state = (
+        specification.get("status") == "official"
+        and scoring_support.get("status") == "official"
+        and scoring_support.get("submissions_open") is True
+    )
+    if not (candidate_state or official_state):
         raise PackageAssemblyError(
-            "the AhmedML specification is not the expected closed candidate"
+            "the AhmedML specification is neither a closed candidate nor an open official release"
         )
     owner_candidate = _mapping(
         scoring_support.get("candidate_manifest"),
@@ -601,31 +607,11 @@ def assemble_package(
     )
     if support_manifest_sha256 != candidate["manifest_sha256"]:
         raise PackageAssemblyError("candidate support manifest SHA-256 differs")
-    # The generic support validator covers field/case-scalar bindings. AhmedML
-    # additionally declares evaluator-derived profile R2 bindings on profile
-    # supports; those are recomputed and validated by the dataset scorer below.
-    support_validation_manifest = copy.deepcopy(support_manifest)
-    profile_metric_ids = {"cp_cut_r2", "velocity_profile_r2"}
-    support_validation_manifest["supports"] = [
-        support
-        for support in support_validation_manifest.get("supports", [])
-        if not (
-            isinstance(support, dict)
-            and isinstance(support.get("metric_bindings"), list)
-            and support["metric_bindings"]
-            and {
-                binding.get("metric_id")
-                for binding in support["metric_bindings"]
-                if isinstance(binding, dict)
-            }
-            <= profile_metric_ids
-        )
-    ]
     support_errors = validate_candidate_manifest_release(
         specification,
         specification_path.parent,
         support_manifest_path,
-        support_validation_manifest,
+        support_manifest,
     )
     if support_errors:
         raise PackageAssemblyError(
