@@ -33,15 +33,15 @@ Use this approval workflow for all five open datasets listed in the [dataset ind
 1. Commit exactly one new submission directory. Do not modify schemas, specifications, validators, workflows, generated feeds, or
    existing submissions in the same pull request. Use a new globally unique `<series-id>-vN` submission ID and the revision rules
    in the [result reference](RESULT_FORMAT.md#result-versions).
-2. Target `dev`. AirfRANS accepts Full, Scarce and AoA; Reynolds remains closed. The other open datasets accept the scopes listed in the dataset index.
+2. Target the repository’s submission branch. AirfRANS accepts Full, Scarce and AoA; Reynolds remains closed. The other open datasets accept the scopes listed in the dataset index.
 3. Complete the pull request checklist and resolve all automated validation failures.
 4. Maintainers review scientific provenance, public-evaluation-use eligibility, metadata, submitted values, result-data licence,
    and any declared artifact metadata, then merge the contributor package while it is still unapproved and absent from public
    feeds.
 5. A maintainer can run the **Maintainer approve and regenerate** workflow with the exact submission path, validator/approver
-   identities, validation timestamp, and approval date. Select `dev`; the approval PR targets the dispatched branch.
+   identities, validation timestamp, and approval date. Select the submission branch; the approval PR targets the dispatched branch.
    The workflow creates the validation record, binds its PR URL and rebuilds the feeds.
-   After merging the approval PR, check the result ID, scores and profiles on the leaderboard.
+   Approval does not publish a result while the leaderboard release is unreleased. After an official release, check the result ID, scores and profiles on the leaderboard.
 6. Optional prediction checks are descriptive and never change approval or claim eligibility. The separate **Check optional
    prediction artifact metadata** workflow checks declarations only; it cannot award the blue badge. Follow the
    [full-split metric-verification procedure](OPTIONAL_VERIFICATION.md#maintainer-procedure) for an actual recomputation.
@@ -50,102 +50,11 @@ External pull requests are restricted to one entirely new submission directory. 
 `trusted-maintenance` label to allow a reviewed external repository-maintenance contribution; validation/approval changes must still
 come from a maintainer-owned branch.
 
-## Historical development procedures
-
-<details>
-<summary>Earlier trial registration and prototype replacement procedures</summary>
-
-These procedures describe the pre-launch test repositories. New participant results
-use the approval workflow above; the clean launch starts with an empty leaderboard.
-
-### Replacing a dev prototype across dataset contracts
-
-A retained inference run repackaged under a different dataset contract starts a new result series.
-Keep both source packages intact. After approving the new package, add a maintainer-owned record to
-`benchmark-specs/dev-display-replacements.json` with both submission IDs, the SHA-256 of each exact
-`submission.json`, a reason, and the publication PR URL. See the AoA record for the format.
-
-Feed generation validates that the source is a registered pre-release reference, the replacement is
-approved, and their split, model provenance, per-case metrics and profile chunks agree. It rejects
-changed hashes, ambiguous links and cycles. The mapping applies only to the prototype `dev` feed.
-Only the replacement is ranked; both packages remain in `leaderboard/revisions.json` with reciprocal
-`display_replacement` metadata. Later versions of the new series retain the historical link.
-The history is covered by the existing release-manifest hash, and original source packages and
-release snapshots are unchanged. The website links both the original package and the maintainer PR.
-
-This is a display replacement, not `result_revision.supersedes`: do not change dataset versions to
-force a same-series update. Future updates within the new contract use ordinary sequential versions.
-Run `manage_leaderboard.py build --dev-intake` and `check --dev-intake`, then verify there is only one
-current entry for the retained inference run before merging the publication PR.
-
-### Maintainer validation follow-up checklist
-
-Complete this checklist in the separate maintainer-owned validation/approval pull request.
-
-- [ ] Scientific provenance and retained evidence have been reviewed.
-- [ ] The result-data licence and any declared optional artifact access, digests, and licences have been reviewed.
-- [ ] A maintainer validated the submitter-supplied files, hashes, required coverage, and ground-truth comparison basis.
-- [ ] `maintainer-validation.json` records `submitted_data_only`, `model_execution=not_performed`, and
-      `metric_recomputation=not_performed`.
-- [ ] The validation record binds the scoring support, spatial report, per-case metrics, profiles, and evaluation evidence.
-- [ ] A maintainer added the validation checksum, `approval.status`, approver, approval date, and this pull-request URL.
-
-## Receive an AhmedML development candidate
-
-AhmedML candidate PRs target `dev` and add one new submission directory. CI uses
-`--dev-intake` for source validation, contributor validation, and generated-feed checks.
-It verifies the complete candidate contract, checkpoint declarations, inference attestation,
-and artifact hashes without requiring a registry entry. Review and merge the unapproved
-package normally; no package edits, feed regeneration, or activation changes are needed.
-
-Local repository checks and builds on `dev` must include `--dev-intake` when unregistered
-AhmedML candidates are present. They remain absent from feeds. Optional publication of a
-reviewed `pre_release_reference` still uses the existing exact registration procedure in
-the [AhmedML guide](../examples/ahmedml-v3-candidate/README.md#optional-dev-only-pre-release-registration).
-
-## Receive and display a DrivAerNet++ development candidate
-
-Participants follow the [DrivAerNet++ quickstart](../benchmark-specs/drivaernetplusplus/QUICKSTART.md)
-and open a PR targeting `dev` containing exactly one new submission directory.
-CI uses `--dev-intake` to check the complete candidate package without requiring
-registration. Review the scientific provenance, inference attestation,
-methodology, checkpoint declarations and complete test-case/profile coverage,
-then merge the package. It remains unapproved and absent from the feed.
-
-To display the reviewed result, create a maintainer branch from the updated
-`dev` checkout. Substitute the package's actual submission ID below. First
-inspect the proposed exact binding; the first command changes no files. Then
-register that binding and rebuild and check the feeds:
-
-```bash
-python scripts/register_drivaernetplusplus_pre_release.py \
-  submissions/drivaernetplusplus/YOUR_SUBMISSION_ID/submission.json
-python scripts/register_drivaernetplusplus_pre_release.py --register \
-  submissions/drivaernetplusplus/YOUR_SUBMISSION_ID/submission.json
-python scripts/manage_leaderboard.py build --dev-intake
-python scripts/manage_leaderboard.py check --dev-intake
-```
-
-Commit `benchmark-specs/drivaernetplusplus/pre-release-reference-registry.json`
-and the generated feeds in a separate maintainer PR targeting `dev`. Registration
-binds the exact package bytes; changes to the submitted package invalidate that
-binding. No manual edits to the generated participant package are needed.
-
-After the maintainer PR is merged, the
-[dev leaderboard](https://fluidsbench.org/review-x4n7q9m2vk6p/committee-leaderboard/?dataset=drivaernetplusplus)
-reads the updated submission `dev` feed. Verify the submission ID, overall score,
-1,154-case coverage and three native Cp profile comparisons per case. The row
-is an unranked `pre_release_reference`, without official approval, citation or
-promotion eligibility. Official intake remains closed until the separate
-[formal release activation](../benchmark-specs/drivaernetplusplus/OWNER_APPROVAL.md#release-preparation-and-activation).
-
-</details>
-
 ## Activate a dataset support release
 
-Dataset support is approved independently.A dataset collaborator changes only their dataset directory in one pull request:
+Dataset support is approved independently. A dataset collaborator changes only their dataset directory in one pull request:
 
-1. replace prototype split IDs with the ordered official evaluation case IDs, set each `case_id_status` to `official`, and update
+1. supply the ordered official evaluation case IDs, set each `case_id_status` to `official`, and update
    the split counts and SHA-256 values;
 2. confirm and pin the original public file names, immutable revisions and hashes, field-array names, entity associations, required
    patches or masks, and exact entity ordering for every case;
@@ -173,8 +82,7 @@ scientific approval record; FluidsBench's protected-branch maintainer still perf
 
 ## Generated leaderboard feeds
 
-Source submissions are converted into release-specific compact scalar feeds. Prototype releases contain only explicitly marked
-prototype rows; official releases contain only validated and approved submitted-data rows:
+The unreleased leaderboard remains empty. Official releases contain only validated and approved submitted-data rows:
 
 ```text
 leaderboard/
@@ -195,21 +103,14 @@ index path, and the browser fetches only the selected geometry's chunk.
 
 `leaderboard/manifest.json` also publishes the data-release identifier, generation time, source reference, contract version,
 licence scope, archive URL, immutable asset base, SHA-256 digest of the complete scalar feed, and the expected release ID and
-manifest digest for the public profile ground truth. Every feed row carries the SHA-256 digest of its profile index. Prototype
-releases use `archive_url: null`; an official release must provide an immutable HTTPS archive URL plus asset-base and interactive
+manifest digest for the public profile ground truth. Every feed row carries the SHA-256 digest of its profile index. An unreleased
+leaderboard uses `archive_url: null`; an official release must provide an immutable HTTPS archive URL plus asset-base and interactive
 release-view URLs containing the release ID. The separate full `source_commit` records repository provenance without creating a
 self-referential commit hash.
 
-HiLiftAeroML's eleven registered Transolver previews and twelve registered
-GeoTransolver previews use the sole selected compact-v2 prediction contract.
-The historical candidate identifiers remain immutable; the current HiLift
-submission specification records representation selection separately from
-public release approval. Earlier native-v1 participant packages are not accepted. Their public
-Cp and velocity comparison truth lives in
-the website repository as a deduplicated 1,355-case release covering all eight
-official case sets. It is bound as plot-only metadata; the private lossless
-evaluator truth remains the scoring authority and is not copied into this
-repository.
+HiLiftAeroML selects the compact-v2 prediction format and remains closed for
+submissions. Its public comparison truth covers 1,355 unique cases and eight
+case sets; plot truth does not replace the authorized evaluator support.
 
 Official `asset_base_url` and `release_view_url` values are clean HTTPS directory bases: their final path segment is exactly the
 safe lowercase release ID, they end in `/`, and they contain no query or fragment. Official builds preserve the manifest's explicit
@@ -240,8 +141,7 @@ language-dependent JSON number canonicalization while retaining a byte-for-byte 
 The generated-artifact checker also verifies that `record_count` and `eligible_record_count` equal the claim-index contents; these
 cross-field equalities are semantic checks beyond what the portable JSON Schema expresses.
 
-Prototype claim records remain useful for testing the interface, but explicitly set academic-citation and promotion eligibility to
-false and have no immutable permalink. Official records state that validation covered submitted data only. Prediction sharing and
+Official records state that validation covered submitted data only. Prediction sharing and
 optional check status are published as separate descriptive fields and do not change eligibility. The schemas are
 [`schemas/releases/result-claim.schema.json`](../schemas/releases/result-claim.schema.json) and
 [`schemas/releases/claim-index.schema.json`](../schemas/releases/claim-index.schema.json).
@@ -253,22 +153,16 @@ python3 scripts/manage_leaderboard.py build
 python3 scripts/manage_leaderboard.py check
 ```
 
-## Prototype split indexes
+## Official split indexes
 
-Inspect each split's `case_id_status`. An `official` index contains owner-approved ordered case IDs; a `prototype_generated`
-index preserves a dummy fixture's counts and cannot be used for a real submission. Replace prototype IDs, set `official`, and
-review the updated counts and SHA-256 before opening intake. The submission records the exact split digest so later changes
-are detectable. Official split IDs alone do not activate a scoring-support release.
+Each open dataset uses owner-approved ordered case IDs with `case_id_status=official`.
+The submission binds the exact split digest. Review the case order, counts and
+SHA-256 before opening a dataset or publishing a new contract.
 
 ## HiLiftAeroML local support for a coordinated dry run
 
-Twenty-three retained real-surrogate compact packages comprise eleven Transolver
-results and twelve GeoTransolver results. Together they cover Full, Scarce, the
-three fixed-AoA splits, Super scarce, Geometry scarce, Geometry super scarce,
-Geometry, and all three out-of-distribution splits (AoA, deflection, and stall).
-The public plot-only truth separately covers every official case set. A maintainer with the
-authorized native-profile truth and complete native outputs for the target case
-set can materialize an evaluator-owned scoring support release locally:
+HiLiftAeroML is coming soon. A maintainer with authorized native-profile truth
+and complete native outputs for the target case set can materialize an evaluator-owned scoring support release locally:
 
 ```bash
 python scripts/materialize_hiliftaeroml_compact_profile_support.py \
@@ -308,10 +202,7 @@ records how the authority record/payload hashes occupy the support format's
 four legacy source-hash provenance slots. The completed two-build all-case
 evidence is
 [`compact-profile-all-case-support-validation-v1.json`](../benchmark-specs/hiliftaeroml/compact-profile-all-case-support-validation-v1.json).
-It is the selected current local candidate support binding, and its ten-preview
-rebind is recorded in
-[`compact-profile-all-case-support-rebind-v1.json`](../benchmark-specs/hiliftaeroml/compact-profile-all-case-support-rebind-v1.json).
-Both records remain intentionally non-activating.
+It is the selected local support binding. This evidence does not open submissions.
 
 Keep this benchmark/evaluator-owned support outside participant packages. Creating it does not publish support, approve the evaluator, or open submissions.
 

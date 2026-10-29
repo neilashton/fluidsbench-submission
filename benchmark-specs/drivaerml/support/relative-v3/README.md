@@ -1,7 +1,7 @@
 # DrivAerML relative-v3 support release
 
-This directory retains the exact producer manifests used by the inactive
-DrivAerML relative-diagnostics candidate. Ordinary submission validation reads
+This directory retains the exact producer manifests used by the
+DrivAerML report-only relative diagnostics. Ordinary submission validation reads
 only these repository files; it performs no network access and does not depend
 on the producer workspace.
 

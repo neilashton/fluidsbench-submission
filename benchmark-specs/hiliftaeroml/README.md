@@ -11,43 +11,7 @@ Every case requires four fields: surface pressure and wall shear, volume pressur
 Use the evaluator's loads and compact-v2 profiles; regional reports are optional and have zero score weight.
 Check the [activation checklist](CANDIDATE_ACTIVATION_CHECKLIST.md) before treating any candidate as ready for intake.
 
-<details>
-<summary>Current candidate status and the 23 registered real-inference previews</summary>
 
-HiLiftAeroML has a participant-shaped FluidsBench schema-v3 contract, but it is
-not open for submissions. The machine-readable
-[`submission-spec.json`](submission-spec.json) currently has
-`submissions_open: false`. A candidate package may be used for local or
-benchmark-owner-coordinated dry runs only; it is not accepted, citable as an
-official result, or evidence of benchmark approval. Twenty-three exact
-real-inference packages are additionally registered by path and hashes as
-public `pre_release_reference` rows: eleven Transolver results and twelve
-GeoTransolver results covering every represented Table 5 split, including the
-Transolver out-of-distribution deflection and GeoTransolver Scarce results. They allow the evaluator,
-plots, and leaderboard integration to be exercised before intake opens. Their
-citation and promotion eligibility are all false.
-
-No private leaderboard is created or operated by this candidate workflow.
-`--candidate-dry-run` validates files locally and does not register arbitrary
-candidates. Each permitted preview has a `compact-profile-*-validation-v1.json`
-record in this directory and is bound in code to its exact submission and
-deterministic compact-archive identities.
-
-The candidate brings the thoroughly tested DrivAerML packaging pattern to
-HiLiftAeroML while retaining HiLiftAeroML's native scientific definitions:
-
-- complete native-point surface and volume coverage with bounded-memory
-  chunking;
-- area-weighted surface and equal-valid-node volume reductions;
-- exact surface-force and pitching-moment integration;
-- native pressure cuts and velocity profiles; and
-- optional, zero-weight surface and volume regional reports.
-
-The detailed workflow is in [`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md).
-The activation work that remains is tracked separately in
-[`CANDIDATE_ACTIVATION_CHECKLIST.md`](CANDIDATE_ACTIVATION_CHECKLIST.md).
-
-</details>
 
 ## Official evaluation labels and case sets
 
@@ -116,7 +80,7 @@ scale, then converts pressure and wall shear from `slug/(in*s²)` to Pa
 (`× 574.5631077637795`) and velocity from in/s to m/s (`× 0.0254`) before
 equal-case macro aggregation. Supply the frozen evaluator's native outputs;
 do not preconvert them. This SI export is recorded separately in the evidence.
-See the [versioned correction](DIMENSIONAL_EXPORT_CORRECTION.md) for existing previews.
+See the [dimensional export guide](DIMENSIONAL_EXPORT.md) for units and validation.
 
 </details>
 
@@ -309,9 +273,7 @@ bindings, or an existing output directory.
 Validate a resulting directory with `scripts/validate_submission.py` in
 `--candidate-dry-run` mode. A pass means only that the directory implements the
 closed candidate contract. It does not open submissions, grant owner approval,
-or create a leaderboard entry. Only the 23 separately registered, hash-bound
-Transolver and GeoTransolver previews are visible as non-citable pre-release
-references.
+or create a leaderboard entry.
 
 The machine-readable authorities are:
 

@@ -13,6 +13,36 @@ from reference.scores import composite_component_group_scores, composite_overall
 from scripts.assemble_airfrans_schema_v3_candidate import build_discretization, write_json, write_jsonl
 
 
+def synthetic_config():
+    """Build synthetic inputs from current public formats and field requirements."""
+    template = w.load_json(w.ROOT / 'examples/v3-template/submission.json')
+    participant = w.load_json(w.ROOT / 'examples/airfrans-participant/package-config.template.json')['participant']
+    spec = w.load_json(w.SPEC_PATH)
+    method = copy.deepcopy(template['methodology'])
+    method['architecture']['predicted_fields'] = [
+        dict(field, component_ids=['coordinate-network'], production='direct_model_output')
+        for field in w.load_json(w.SPEC_ROOT / 'methodology-contract.json')['required_predicted_fields']
+    ]
+    participant = {key: copy.deepcopy(template[key]) for key in participant}
+    participant.update(model='Synthetic AirfRANS test', submitter_name='Test fixture', institution='Test fixture', methodology=method)
+    support = spec['scoring_support']
+    return {
+        'split_id': 'full', 'case_set_id': 'standard', 'submission_id': 'synthetic-airfrans-v1',
+        'result_revision': dict(series_id='synthetic-airfrans', version=1, supersedes=None, change_summary='Synthetic test data.'),
+        'participant': participant,
+        'reproducibility': dict(contract_version='open-reproducibility-3.0', access='public', public_test_data_use='evaluation_only', result_data_license_spdx='CC-BY-4.0'),
+        'spatial_discretization': {
+            'training': {key: {'used': False} for key in ('domain_input', 'domain_supervision', 'curve_input', 'curve_supervision')},
+            'inference': dict(geometry_dependency='native_cfd_mesh', note='Synthetic native-support fixture.'),
+        },
+        'release_bindings': {
+            'scoring_support': {key: support[key] for key in ('status', 'release_id', 'manifest_url')},
+            'profile_ground_truth': spec['profile_definition']['profile_ground_truth'],
+            'evaluator': dict(reference_version=spec['evaluation_reference_version'], code_revision='a' * 40),
+        },
+    }
+
+
 def make_fixture(destination, split_id='full', case_limit=None):
     destination = Path(destination)
     spec = w.load_json(w.SPEC_PATH)
@@ -22,11 +52,13 @@ def make_fixture(destination, split_id='full', case_limit=None):
     support = spec['scoring_support']
     release = load_support_release(w.SPEC_ROOT / support['manifest_file'], case_set_id=split['case_set_id'])
     template = w.load_json(w.ROOT / 'examples/v3-template/submission.json')
-    config = w.load_json(w.ROOT / 'examples/airfrans-v3-candidate/transolverpp-full-v1-candidate-config.json')
+    config = synthetic_config()
     method = copy.deepcopy(template['methodology'])
     method['record_kind'] = 'submitter_reported'
     method['record_note'] = 'Synthetic test values; no model was trained or executed.'
     fields = copy.deepcopy(config['participant']['methodology']['architecture']['predicted_fields'])
+    for field in fields:
+        field['component_ids'] = ['coordinate-network']
     for field in fields:
         field['component_ids'] = ['coordinate-network']
     method['architecture']['predicted_fields'] = fields

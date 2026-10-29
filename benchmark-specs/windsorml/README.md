@@ -93,3 +93,5 @@ python scripts/publish_windsorml_candidate_support.py --output /tmp/windsor-supp
 The metadata covers every scored native point/cell, derived force support and
 all four profile families. WindsorML is open for submissions. Use the participant quickstart to package
 results and the shared submission workflow to open a pull request.
+
+See [scientific notes](SCIENTIFIC_NOTES.md) for field associations, coordinate conventions, force integration and split construction.

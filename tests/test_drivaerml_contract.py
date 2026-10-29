@@ -140,8 +140,8 @@ class DrivAerMLContractTests(unittest.TestCase):
             self.assertIn("Velocity-assignment generation rejects", text)
             self.assertIn("Force replay records", text)
             self.assertNotIn("generators reject every other", text)
-        self.assertIn("completed candidate numerical evidence", scientific_contract)
-        self.assertIn("completed candidate all-484 native-field", scientific_contract)
+        self.assertIn("normalized", scientific_contract)
+        self.assertIn("all 484 cases", scientific_contract)
         self.assertNotIn(
             "pending all-case native-field replay", scientific_contract
         )

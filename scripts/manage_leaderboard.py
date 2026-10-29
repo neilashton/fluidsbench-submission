@@ -28,7 +28,6 @@ if __package__:
         registered_drivaerml_pre_release_reference,
         registered_drivaernetplusplus_pre_release_reference,
         registered_airfrans_pre_release_reference,
-        registered_hiliftaeroml_preview,
         schema_errors,
         sha256_file,
         submission_files,
@@ -47,7 +46,6 @@ else:
         registered_drivaerml_pre_release_reference,
         registered_drivaernetplusplus_pre_release_reference,
         registered_airfrans_pre_release_reference,
-        registered_hiliftaeroml_preview,
         schema_errors,
         sha256_file,
         submission_files,
@@ -318,12 +316,6 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
         allowed_approval_statuses.add("approved")
     for path in submission_files():
         submission = load_json(path)
-        registered_preview = registered_hiliftaeroml_preview(
-            path,
-            submission,
-            manifest,
-            root=ROOT,
-        )
         ahmedml_pre_release = registered_ahmedml_pre_release_reference(
             path,
             submission,
@@ -347,8 +339,7 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
             root=ROOT,
         )
         if (
-            registered_preview is None
-            and ahmedml_pre_release is None
+            ahmedml_pre_release is None
             and windsorml_pre_release is None
             and drivaerml_pre_release is None
             and drivaernetplusplus_pre_release is None
@@ -359,9 +350,7 @@ def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str,
             continue
         row = deepcopy(submission)
         row.pop("$schema", None)
-        if registered_preview is not None:
-            row["record_type"] = registered_preview["record_type"]
-        elif ahmedml_pre_release is not None:
+        if ahmedml_pre_release is not None:
             row["record_type"] = ahmedml_pre_release["record_type"]
         elif windsorml_pre_release is not None:
             row["record_type"] = windsorml_pre_release["record_type"]

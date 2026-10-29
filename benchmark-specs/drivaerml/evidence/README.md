@@ -1,23 +1,12 @@
-# DrivAerML candidate evidence index
+# DrivAerML scientific evidence
 
-This directory contains implementation evidence, diagnostic pilot records, and
-the dataset-owner scientific approval for the closed DrivAerML candidate
-contract. Presence here does not make an artifact official scoring support or
-an accepted submission. The exception is the explicitly scoped approval record
-indexed below: it approves the cited scientific evidence and decisions but does
-not activate submissions or official ranking. Repository-relative proposal,
-profile, and evidence paths in the machine contract resolve from
-`benchmark-specs/drivaerml/`; upstream dataset paths instead resolve within the
-pinned `neashton/drivaerml` release. Historical evidence keeps the claims it
-made when generated and is not rewritten after approval.
-
-The benchmark owner decided on 2026-08-21 that the 209 discrete Cp probes are
-excluded from the current participant submission and score. Every discrete-
-probe Cp artifact indexed here is retained only as inactive research evidence.
-It is not a participant requirement, evaluator dependency, composite component,
-scoring support, or activation gate; its presence does not authorize probe
-scoring. Four continuous Cp cuts remain in scope, but they require separate
-extraction evidence and support that is not supplied by these probe artifacts.
+DrivAerML is open for submissions. The [quickstart](../QUICKSTART.md) and
+[profile scoring contract](../profile-scoring-v2.json) describe current requirements.
+This index preserves the byte identities of scientific audits and owner approval.
+The immutable receipts state the scope of the checks performed; they are not
+participant instructions or leaderboard submissions. Discrete Cp probe studies
+are unscored research evidence. Native-cell volume weights, continuous Cp cuts
+and fixed velocity profiles follow the current specification.
 
 | Artifact | SHA-256 | Scope and eligibility |
 | --- | --- | --- |
@@ -66,81 +55,10 @@ DrivAerML checkpoints, with predictions over a common multi-case official
 cohort, are still required for the three-model 10,000-replicate paired-bootstrap
 sensitivity gate.
 
-## Current blockers
 
-The dataset-owner scientific review is complete. All-case native field, force,
-fixed/relative velocity, and four-cut continuous-Cp evidence are published and
-approved. The proposed resolution/tolerance campaigns are no longer separate
-activation requirements; the owner accepted the published deterministic 10 mm
-support and its explicit gap/tolerance semantics. Historical artifacts retain
-their original non-approval claims because immutable evidence is not rewritten
-after a later decision.
+## Publication and validation
 
-Only release and ranking-validation work remains:
-
-1. bind the final production evaluator revision, scoring-support manifest and
-   profile-ground-truth release identities in `candidate-release-bindings.json`;
-2. run the three-genuine-model, paired 10,000-replicate sensitivity/bootstrap
-   gate on a common official cohort;
-3. run one independent full-split schema-v3 participant dry run against those
-   frozen identities; and
-4. create the final release-specific approval record, open submissions, replace
-   prototype leaderboard status, and promote `dev` to production.
-
-The final release-specific approval remains pending by design: its schema must
-bind the not-yet-produced sensitivity evidence and the approving release
-commit. That does not undo the scientific approval recorded above.
-
-## Provenance limits
-
-The force aggregate was produced by
-`scripts/audit_drivaerml_force_case.py` and
-`scripts/aggregate_drivaerml_force_replay.py`. Both native-volume aggregates
-were produced by `scripts/audit_drivaerml_native_volume_case.py` and
-`scripts/aggregate_drivaerml_native_volume_audits.py`; the complete aggregate
-strictly revalidated all 484 case receipts and was reproduced byte-for-byte.
-Its companion provenance file binds the exact Git revision, runtime, launcher,
-and the ordered hashes of the external case receipts.
-Those retained artifacts use the earlier v1 receipt vocabulary, in which the
-unit-weight declaration was named `volume_weights`; their bound generating
-revision remains the reproducibility source. The current v2 tools accept only
-the unambiguous `volume_weighting: one_per_native_cell` schema and do not accept
-or generate geometric volume arrays.
-The inactive Cp research files were produced by the candidate Cp builder,
-strict aggregator, and
-`scripts/build_drivaerml_cp_owner_review_atlas.py`; the cell-type files were
-produced by `scripts/audit_drivaerml_volume_cell_types.py`. The superseded
-physical-volume failure diagnostic records an execution of the hash-bound
-`reference/drivaerml/volume_weights.py` snapshot. Its 1,128-byte stderr log is
-external and is bound by SHA-256 in the diagnostic; no generated weight array
-or success receipt exists. The VTK 9.6.0 record similarly binds a compact
-external probe, its script, exact NumPy and VTK wheels, and the upstream VTK
-tag/commit. Neither historical experiment has a role in the current contract.
-
-Current candidate source readers include retained-descriptor identity checks,
-but compact aggregate JSON cannot by itself demonstrate that runtime mechanism.
-The all-484 equal-cell audit now has a companion manifest binding its exact
-generating Git commit, runtime, launcher, and ordered receipt identities; the
-10.7 MB per-case receipt set remains external. Other candidate aggregates have
-only the provenance recorded in their own files. The 20,883,275-byte atlas PDF
-is also external; only its SHA-256, page count, and complete compact review
-manifest are committed. Those limits prevent this directory alone from serving
-as an independently replayable immutable scoring-support release.
-
-The velocity aggregate was produced by
-`scripts/generate_drivaerml_velocity_assignments.py` and
-`scripts/aggregate_drivaerml_velocity_assignments.py`. Its companion provenance
-file binds the exact committed source snapshot, runtime, launchers, scheduler
-jobs, and identities of both external case receipts and all eight mapping
-files. A second process reproduced the `run_1` receipt and four mappings
-byte-for-byte. The external row-level artifacts are not bundled in Git, and the
-repeat does not extend the pilot beyond two cases or provide scientific
-validation of the candidate kernel choices.
-
-The reference-driver receipt is a byte-identical copy of the external campaign
-receipt. Its separate provenance file binds the exact source commit and hashes,
-runtime, launcher, scheduler execution, pathful input-config identity, compact
-identities for every fixed input, and all four external child evidence files.
-The large native sources, fixed arrays, prediction chunks, mappings, and child
-evidence remain external; their hashes do not turn this two-case fixture into a
-standalone or immutable scoring-support release.
+The official support and validation receipt are bound in [submission-spec.json](../submission-spec.json).
+The [opening decision](../OWNER_OPENING_DECISION.md) and [activation status](../ACTIVATION_CHECKLIST.md)
+record the approved intake scope. Approval of an individual result and publication
+of a leaderboard release remain separate maintainer actions.

@@ -10,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from reference.hiliftaeroml import dimensional_units as units
+from tests.hilift_si_fixture import corrected_documents
 from scripts import assemble_hiliftaeroml_schema_v3_candidate as assembler
 from scripts import validate_submission as validator
 
@@ -75,7 +76,7 @@ class HiLiftDimensionalUnitsTests(unittest.TestCase):
             for name, count, value in (("small", 2, 1.0), ("large", 200, 3.0))
         ]}
         originals = copy.deepcopy((submission, evidence, cases))
-        result, proof, corrected = units.corrected_documents(submission, evidence, cases)
+        result, proof, corrected = corrected_documents(submission, evidence, cases)
         self.assertEqual((submission, evidence, cases), originals)
         self.assertEqual(result["metric_values"]["overall_score"], 42.0)
         self.assertEqual(result["metric_values"]["surface_pressure_rel_l2"], 10.0)
@@ -84,10 +85,10 @@ class HiLiftDimensionalUnitsTests(unittest.TestCase):
         for before, after in zip(cases["cases"], corrected["cases"]):
             self.assertEqual(before["supports"][0]["metric_sufficient_statistics"], after["supports"][0]["metric_sufficient_statistics"])
         with self.assertRaisesRegex(ValueError, "already recorded"):
-            units.corrected_documents(result, proof, corrected)
+            corrected_documents(result, proof, corrected)
         cases["cases"][0]["supports"][0]["metric_values"].pop("surface_pressure_mae")
         with self.assertRaisesRegex(ValueError, "incomplete"):
-            units.corrected_documents(submission, evidence, cases)
+            corrected_documents(submission, evidence, cases)
 
 
 
