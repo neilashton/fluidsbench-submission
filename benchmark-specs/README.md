@@ -7,17 +7,20 @@ For validation commands and the pull-request target, see [Submitting a result](.
 
 | Dataset | Submission availability | Supported scope | Start here |
 | --- | --- | --- | --- |
-| AirfRANS | Accepting | Full, Scarce and AoA extrapolation; Reynolds is closed | [Quickstart](airfrans/QUICKSTART.md) · [Specification](airfrans/submission-spec.json) |
-| AhmedML | Accepting for preview | Eight prescribed splits; surface and volume | [Quickstart](ahmedml/QUICKSTART.md) · [Dataset guide](ahmedml/README.md) |
-| WindsorML | Accepting for preview | Eight prescribed splits; surface and volume | [Quickstart](windsorml/QUICKSTART.md) · [Dataset guide](windsorml/README.md) |
-| DrivAerML | Accepting for preview | Eight prescribed splits; surface and volume, or surface only | [Quickstart](drivaerml/QUICKSTART.md) · [Participant guide](drivaerml/PARTICIPANT_GUIDE.md) |
-| DrivAerNet++ | Accepting for preview | Pressure at every native surface point of the 1,154 official-test designs | [Quickstart](drivaernetplusplus/QUICKSTART.md) · [Specification](drivaernetplusplus/submission-spec.json) |
-| HiLiftAeroML | Not accepting new submissions | Owner-coordinated evaluation trials only | [Participant guide](hiliftaeroml/PARTICIPANT_GUIDE.md) |
-| BlendedNet | In preparation | Proposed geometry-holdout split | [Specification](blendednet/submission-spec.json) |
-| Rotor37 | In preparation | Evaluation support is being prepared | [Specification](rotor37/submission-spec.json) |
-| VKI-LS59 | In preparation | Evaluation support is being prepared | [Specification](vki-ls59/submission-spec.json) |
+| AirfRANS | Open for submissions | Full, Scarce and AoA extrapolation; Reynolds is closed | [Quickstart](airfrans/QUICKSTART.md) · [Specification](airfrans/submission-spec.json) |
+| AhmedML | Open for submissions | Eight prescribed splits; surface and volume | [Quickstart](ahmedml/QUICKSTART.md) · [Dataset guide](ahmedml/README.md) |
+| WindsorML | Open for submissions | Eight prescribed splits; surface and volume | [Quickstart](windsorml/QUICKSTART.md) · [Dataset guide](windsorml/README.md) |
+| DrivAerML | Open for submissions | Eight prescribed splits; surface and volume, or surface only | [Quickstart](drivaerml/QUICKSTART.md) · [Participant guide](drivaerml/PARTICIPANT_GUIDE.md) |
+| DrivAerNet++ | Open for submissions | Pressure at every native surface point of the 1,154 official-test designs | [Quickstart](drivaernetplusplus/QUICKSTART.md) · [Specification](drivaernetplusplus/submission-spec.json) |
+| HiLiftAeroML | Coming soon | Owner-coordinated evaluation trials only | [Participant guide](hiliftaeroml/PARTICIPANT_GUIDE.md) |
+| BlendedNet | Coming soon | Proposed geometry-holdout split | [Specification](blendednet/submission-spec.json) |
+| Rotor37 | Coming soon | Evaluation support is being prepared | [Specification](rotor37/submission-spec.json) |
+| VKI-LS59 | Coming soon | Evaluation support is being prepared | [Specification](vki-ls59/submission-spec.json) |
 
-Accepted packages are reviewed before display. Preview results are separate from an official leaderboard release.
+Accepted packages are reviewed before publication on the leaderboard.
+During the repository transition, use the validation command and pull-request target in [Submitting a result](../SUBMITTING.md#4-validate-locally).
+The five open datasets have owner approval for intake; final official support publication and the move to the FluidsBench organisation remain under review.
+The existing candidate-support settings and `--dev-intake` workflow remain in use on this branch until that transition is complete.
 The quickstarts link to the package examples and exact scoring specifications; use those definitions for your evaluation.
 
 For pressure units, offsets and coefficient conversions, see the [pressure reference guide](../docs/PRESSURE_REFERENCES.md).
