@@ -1,6 +1,6 @@
 # Pressure definitions and references
 
-Audited 2026-10-29 against submission revision `122ff713571dffbf7c17fccb3f2519976d429d9d`.
+Audited 2026-10-29 against submission revision `2bfbc82791b61de03c8120d5f15072a8d95efd18`.
 
 Source-backed documentation of pressure definitions and the separately versioned HiLiftAeroML SI export correction. This file is not evaluator configuration, owner approval, or a scoring-support release.
 

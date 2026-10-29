@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "audited_on": "2026-10-29",
-  "audited_submission_revision": "122ff713571dffbf7c17fccb3f2519976d429d9d",
+  "audited_submission_revision": "2bfbc82791b61de03c8120d5f15072a8d95efd18",
   "scope": "Source-backed documentation of pressure definitions and the separately versioned HiLiftAeroML SI export correction. This file is not evaluator configuration, owner approval, or a scoring-support release.",
   "common": {
     "reference_rule": "Apply the dataset-prescribed reference to truth and prediction in the same units. Undo training normalization first. Do not fit an offset to test truth or independently mean-center the two fields.",
