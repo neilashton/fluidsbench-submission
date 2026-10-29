@@ -994,15 +994,15 @@ class DrivAerMLVelocityPilotEvidenceTests(unittest.TestCase):
         self.assertRegex(binding["evaluator_code_revision"], r"^[0-9a-f]{40}$")
         self.assertEqual(
             support["activation_gates"]["velocity_profiles"],
-            "all_484_fixed_and_relative_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
+            "all_484_fixed_and_relative_native_truth_and_support_published_owner_scientifically_approved_official_release_bound",
         )
         self.assertEqual(
             support["activation_gates"]["independent_participant_dry_run"],
-            "complete_canto_full_50_official_test_cases_final_release_revalidation_pending",
+            "complete_canto_full_50_official_test_cases_final_release_validation_passed",
         )
         self.assertEqual(
             support["activation_gates"]["owner_evaluator_approval"],
-            "scientific_method_approved_final_immutable_release_binding_pending",
+            "scientific_method_approved_official_release_bound",
         )
 
 
