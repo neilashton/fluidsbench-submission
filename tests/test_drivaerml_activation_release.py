@@ -160,6 +160,7 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name)
         existing, _ = self.build_release(root, active=False)
+        existing["relative_diagnostics"]["closed_reason"] = "Official activation is pending."
         generated = {
             "relative_diagnostics": copy.deepcopy(
                 existing["relative_diagnostics"]
