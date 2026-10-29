@@ -176,8 +176,8 @@
         },
         {
           "path": "benchmark-specs/drivaerml/proposal/SCIENTIFIC_CONTRACT.md",
-          "sha256": "7253e7b2bdec46e049e5405a9100c3bbe8db99c32d0cdca39e325312986ca2be",
-          "finding": "Documents the native pressure convention and reference speed."
+          "sha256": "a9c8aa112feb731040e54bff399688317080bb29b1819c7b2aa7755870d3c32f",
+          "finding": "Documents the current native associations, pressure/force definitions, weighting and profile rules; authoritative scientific definitions remain in the pinned machine-readable contracts."
         }
       ]
     },
@@ -268,10 +268,10 @@
       ],
       "notes": [
         "The native profile materializer computes Cp from raw pressure and per-case freestream metadata. The per-case ref_values CSV supplies qRef for load normalization; do not substitute it for the field evaluator\u2019s training q\u221e.",
-        "The current ICLR manuscript explicitly states the SI conversions. Its bundled archive exposed a native-unit mismatch in the original FluidsBench dimensional diagnostics. The versioned hiliftaeroml-dimensional-export-si-v1 correction now fixes the assembler and all 23 existing preview records. Original validation receipts are preserved.",
-        "All 184 corrected aggregate MAE/RMSE values match the manuscript across 8,142 case records. Full-split GeoTransolver surface-pressure RMSE is 87.3107201811254 Pa and volume-velocity RMSE is 2.6561332906973014 m/s.",
-        "These checks replay exported sufficient statistics and dimensional metrics; they do not rerun model inference. Relative errors, R\u00b2, coefficients, overall scores, ordering, profiles and nondimensional regional diagnostics are unchanged. The pressure reference, weights and validity masks are unchanged.",
-        "The catalog source snapshot is bbec30b; the field-support archive identity retains 1c266d3. The SI export correction does not repin either support release or open submissions."
+        "The assembler converts native field MAE/RMSE to Pa and m/s using hiliftaeroml-dimensional-export-si-v1. Evaluation evidence records this stage exactly once.",
+        "Synthetic regression tests check conversion factors, equal-case aggregation and unchanged relative sufficient statistics. The tests do not execute a submitted model.",
+        "Relative errors, R\u00b2, coefficients, profiles and composite scores retain their specified definitions. The pressure reference, weights and validity masks are unchanged.",
+        "The catalog source snapshot is bbec30b; the field-support archive identity retains 1c266d3. The SI export contract does not repin support or open submissions."
       ],
       "follow_up": [],
       "sources": [
@@ -344,14 +344,9 @@
           "finding": "Versioned eight-metric SI export contract; relative statistics and scoring are unchanged."
         },
         {
-          "path": "benchmark-specs/hiliftaeroml/dimensional-export-correction-v1.json",
-          "sha256": "19c0cfff3c2a26e099a50639a59f48db89f102c4006abed874fa5b37c6d5979b",
-          "finding": "Pins original and corrected metadata, evidence, case files and deterministic archives for 23 preview packages."
-        },
-        {
           "path": "reference/hiliftaeroml/dimensional_units.py",
-          "sha256": "4826cc142b584e1606ea5b19ae9eea767d96cf3d42d41a3707ebebbc2922ad73",
-          "finding": "Converts only dimensional field errors, rejects repeated conversion and checks the immutable correction registry."
+          "sha256": "3a4f94905c0bcf7a1962852a31a4bfd56b1c48a1540c73967e48d6752643b988",
+          "finding": "Pins and validates the current native-to-SI export contract and factors; converts only finite nonnegative dimensional field errors."
         },
         {
           "path": "scripts/assemble_hiliftaeroml_schema_v3_candidate.py",
@@ -360,13 +355,8 @@
         },
         {
           "path": "scripts/validate_submission.py",
-          "sha256": "dd5d3ca5b7ef431b82d78268fad9cf90c96139755eb3924721e8258e89ee5d0b",
-          "finding": "Requires the SI export evidence and retains the original closed-candidate validation receipts when checking corrected packages. Rechecked after the FluidsBench repository transfer: only repository URL checks changed; HiLiftAeroML validation is unchanged. Rechecked for the AirfRANS pre-release registration: the new per-package candidate view is restricted to hash-bound AirfRANS references; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-08: the validator change selects AirfRANS dataset-local truth and its retained historical contract; the HiLiftAeroML pressure, units and evaluation paths remain unchanged. Re-audited 2026-10-11: the new development intake path is restricted to AhmedML candidates in the prototype dev release; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-11 for WindsorML development intake: the added candidate registry, intersected split handling, and native-profile checks leave HiLiftAeroML pressure and SI export validation unchanged. Re-audited 2026-10-11: adds DrivAerML dev intake, native profile score validation, surface-only omission rules and maximum-residual reduction; HiLiftAeroML pressure handling is unchanged. Re-audited 2026-10-12: the only validator change selects the new DrivAerML dev release; other datasets and pressure conversions are unchanged. Re-audited 2026-10-12 for AirfRANS atomic packaging: a Python-only option permits validation in a staging directory; CLI path enforcement, pressure calculations and SI export validation are unchanged. Re-audited 2026-10-18 for DrivAerNet++ development intake: the added candidate registry and dev-intake block are restricted to DrivAerNet++ candidates; HiLiftAeroML pressure and SI export validation are unchanged. Re-audited 2026-10-22 for pre-release result revisions: only predecessor publication recognition and propagation of release context changed; all pressure, SI export, field/force/profile validation functions and equations are unchanged. Re-audited 2026-10-22 for missing DrivAerNet++ candidate timing: a prototype-dev-only gate permits explicit unavailable inference timing; all pressure, SI export, field/force/profile checks and numerical equations remain unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged."
-        },
-        {
-          "path": "benchmark-specs/hiliftaeroml/dimensional-export-correction-v1/verification.json",
-          "sha256": "a0de1900abc4c12c3b9241ee6b40d81c3523f1c833624dfe9256a24229ae2abd",
-          "finding": "Records the independent manuscript comparison and unchanged scores, ordering, case statistics and non-dimensional artifacts; states test limits."
+          "sha256": "c9fd558a50008de848257e7fd96a36c5c4e49bc622a0df06c4f7fe6a19c3f8f6",
+          "finding": "Validates the dataset-specific pressure, SI export and submitted evidence bindings. The retired HiLiftAeroML trial-registration exception has been removed; numerical pressure conversions, relative-error formulas and current eligibility gates are unchanged."
         }
       ]
     },

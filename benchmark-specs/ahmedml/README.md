@@ -135,8 +135,6 @@ case.
   metadata or full-payload mode and can emit a deployment receipt.
 - `requirements-ahmedml-support-builder.txt`: exact NumPy and VTK versions for
   deterministic cache reconstruction.
-- `scripts/run_ahmedml_cpu_workpool.sbatch`: packs independent support and
-  fixture cases efficiently onto CPU-only Slurm nodes.
 - `scripts/publish_ahmedml_candidate_support.py`: validates all 316 local cases
   and publishes compact hash-bound metadata while keeping large arrays local.
 - `scripts/evaluate_ahmedml_candidate_case.py`: evaluates one complete case.

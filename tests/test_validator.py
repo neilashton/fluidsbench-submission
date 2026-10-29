@@ -39,7 +39,7 @@ REGISTERED_SOURCE = (
 LEGACY_AHMEDML_FULL_SPLIT_SHA256 = (
     "a19dfa9f246a16c7e02c3f1cce8c34ea137e24a32c8f06a2afac3bb91102782c"
 )
-V2_TEMPLATE = ROOT / "examples" / "v2-template"
+V2_TEMPLATE = ROOT / "tests" / "fixtures" / "schema-v2-package"
 V3_TEMPLATE = ROOT / "examples" / "v3-template"
 AIRFRANS_PROTOTYPE = ROOT / "submissions" / "airfrans" / "dummy-airfrans-airfoiloperator-v1"
 

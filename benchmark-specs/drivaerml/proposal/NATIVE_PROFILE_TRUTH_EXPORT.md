@@ -1,16 +1,6 @@
 # DrivAerML native profile truth export
 
-`scripts/export_drivaerml_native_profile_truth.py` publishes the inactive
-website/reference truth for all 484 pinned DrivAerML cases. It verifies the
-retained producer support before reading truth values and emits compact,
-hash-bound JSON. It does not change a scoring weight, enable the relative
-profile format, open submissions, or complete owner approval.
-
-The publication receipt correctly preserves that non-approval state at its
-generation time. Neil Ashton subsequently approved the cited native profile
-evidence and scientific decisions on 2026-08-28 in
-[`../evidence/owner-scientific-approval-2026-08-28.json`](../evidence/owner-scientific-approval-2026-08-28.json).
-That later approval does not rewrite this immutable receipt or open submissions.
+`scripts/export_drivaerml_native_profile_truth.py` exports hash-bound profile truth for the 484 pinned native cases. It verifies producer support and source identities before reading values. Publishing truth is separate from approving a submission or publishing leaderboard results.
 
 ## Inputs
 
@@ -204,9 +194,6 @@ identities, component identities/counts, segment descriptors, and unsupported
 samples. Document identities use the same JSON encoding over the body with the
 identity field removed.
 
-The release receipt deliberately states
-`relative_scoring_activated=false`, `submissions_opened=false`, and
-`owner_approval_complete=false`. Native truth publication is reproducibility
-evidence, not scientific activation. Those fields describe the release receipt
-when generated; the later owner scientific approval is a separate record and
-the production release gates remain closed.
+The release receipt records truth-publication checks. Current submission
+availability and owner approval are declared by `../submission-spec.json`.
+Truth publication does not approve individual model results.

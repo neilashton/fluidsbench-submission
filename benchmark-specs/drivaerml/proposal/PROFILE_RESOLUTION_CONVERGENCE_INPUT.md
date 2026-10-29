@@ -1,16 +1,6 @@
-# DrivAerML profile-resolution convergence input
+# Optional DrivAerML profile-resolution analysis
 
-This is a candidate evidence format. It does not activate scoring or open
-submissions.
-
-> Current-state note (2026-08-28): this checker and the proposed 1/2/5/10 mm
-> campaign are retained as optional research tooling, not as current activation
-> requirements. The dataset owner accepted the published deterministic 10 mm
-> support, explicit gaps, and numerical tolerances without claiming that the
-> superseded campaign ran. See
-> [`../evidence/owner-scientific-approval-2026-08-28.json`](../evidence/owner-scientific-approval-2026-08-28.json)
-> and [`../ACTIVATION_CHECKLIST.md`](../ACTIVATION_CHECKLIST.md). The
-> owner-review language below describes the historical checker contract.
+This research tool does not alter the published 10 mm scoring support and is not a submission requirement. Its study eligibility gates apply only to its own output, not to benchmark availability.
 
 Run the checker with:
 
@@ -41,11 +31,7 @@ thresholds and method-order gate before the retained 10 mm grid is eligible for
 owner review; a passing 10 mm block cannot hide a failed 2 or 5 mm block. It
 returns exit code 0 for an eligible candidate study, 1 for valid but ineligible
 evidence, and 2 for malformed or contract-drifted input. Exit code 0 requires
-the exact ordered 484-case release and a hash-bound owner validity mask. Because
-that mask is not yet published, the present candidate always returns 1 even if
-every numerical gate passes. A future version may return 0 after binding the
-mask, but that result will still be non-activating pending owner approval. A
-reduced case list is a pilot and also returns exit code 1.
+the exact ordered 484-case release and a hash-bound owner validity mask. The research checker requires its own hash-bound validity authority; a missing authority or reduced case list cannot establish a complete convergence study.
 
 Minimal top-level shape:
 
@@ -75,9 +61,7 @@ All four grids must use one owner-published 1 mm master validity mask, with the
 exclusions. An unmapped non-excluded coordinate is an unresolved support
 failure and cannot contribute to an owner-review-eligible convergence result.
 Excluded rows remain explicit, and a loss may use only edges whose two
-endpoints are included and mapped; it must never bridge a gap. The candidate
-mask binding is still pending, so current invalid pilot rows cannot be treated
-as approved exclusions.
+endpoints are included and mapped; it must never bridge a gap. A study must provide the exact validity-mask binding before treating excluded rows as scientifically approved exclusions.
 
 ## Construct losses from native predictions
 

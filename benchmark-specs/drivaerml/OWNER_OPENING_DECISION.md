@@ -13,7 +13,4 @@ package. It supplies the requested complete-split submission trial. Its
 pre-release registration is evidence of the workflow, not an official result
 to carry into the new, empty repository.
 
-The remaining work is mechanical release activation: publish and validate the
-official support and evaluator identities, bind a final approval record to the
-published release, enable official participant packaging and intake, and
-start the new leaderboard without historical test submissions.
+The official support is published, participant packaging and contributor validation are enabled, and the leaderboard starts empty. The scientific approval and support bindings are recorded in `submission-spec.json`.

@@ -97,8 +97,6 @@ from reference.airfrans.pre_release import (
 )
 from reference.methodology import methodology_errors
 from reference.hiliftaeroml.dimensional_units import (
-    CORRECTION_PATH as HILIFT_SI_CORRECTION_PATH,
-    corrected_registration_view as hilift_corrected_registration_view,
     export_binding as hilift_dimensional_export_binding,
     validate_contract as validate_hilift_dimensional_export_contract,
 )
@@ -127,441 +125,6 @@ HILIFT_PROFILE_IMPLEMENTATION_BINDING = {
 }
 
 
-def _hilift_preview_configuration(
-    *,
-    slug: str,
-    model_slug: str = "transolver",
-    validation_slug: str | None = None,
-    split_id: str,
-    case_set_id: str,
-    case_count: int,
-    submission_json_sha256: str,
-    archive_sha256: str,
-    archive_size_bytes: int,
-    archive_member_count: int,
-    regular_file_bytes: int,
-) -> dict[str, Any]:
-    """Build one explicit, code-pinned HiLift pre-release registration."""
-
-    submission_id = f"hiliftaeroml-{model_slug}-{slug}-candidate-v1"
-    validation_name = (
-        f"compact-profile-{validation_slug or slug}-validation-v1"
-    )
-    binding = {
-        "status": "registered_pre_release_reference",
-        "record_type": "pre_release_reference",
-        "submission_id": submission_id,
-        "submission_path": (
-            f"submissions/hiliftaeroml/{submission_id}/submission.json"
-        ),
-        "submission_json_sha256": submission_json_sha256,
-        "deterministic_archive": {
-            "sha256": archive_sha256,
-            "size_bytes": archive_size_bytes,
-            "member_count": archive_member_count,
-        },
-        "ordinary_validation_scope": (
-            "structure_hashes_inventory_and_deterministic_archive_only"
-        ),
-        "truth_dependent_metric_recomputation": (
-            "maintainer_local_candidate_dry_run_only"
-        ),
-        "claim_eligibility": {
-            "academic_citation": False,
-            "promotion": False,
-        },
-    }
-    return {
-        "binding": binding,
-        "validation_record_path": (
-            Path("benchmark-specs")
-            / "hiliftaeroml"
-            / f"{validation_name}.json"
-        ),
-        "validation_record_schema": f"hiliftaeroml-{validation_name}",
-        "split_id": split_id,
-        "case_set_id": case_set_id,
-        "case_count": case_count,
-        "profile_series_count": case_count * 15,
-        "regular_file_bytes_each": regular_file_bytes,
-    }
-
-
-HILIFT_REGISTERED_PREVIEW_CONFIGS = (
-    _hilift_preview_configuration(
-        slug="full360",
-        split_id="full",
-        case_set_id="caseset-ac791749e527",
-        case_count=360,
-        submission_json_sha256=(
-            "43a4d81dfeb159be2b81ac655647420bc1a275784dd9635f2053f2ab4d8b5b2d"
-        ),
-        archive_sha256=(
-            "e270e73e61d2399f4e954b0b13b09d17a637add7e61d8136c20e168647ebdedd"
-        ),
-        archive_size_bytes=8_724_067,
-        archive_member_count=403,
-        regular_file_bytes=11_758_641,
-    ),
-    _hilift_preview_configuration(
-        slug="aoa4",
-        split_id="single_aoa_4",
-        case_set_id="caseset-7a743a20b3bd",
-        case_count=36,
-        submission_json_sha256=(
-            "4f1fd8b465797f89bcb4dac4791d624e26f7761ca6b8ddd0632d36645c1602e0"
-        ),
-        archive_sha256=(
-            "1b86a5aae3ec1f82080536c0214413eecafec66a452b332ca7e1b56f82aeee40"
-        ),
-        archive_size_bytes=842_039,
-        archive_member_count=47,
-        regular_file_bytes=1_258_072,
-    ),
-    _hilift_preview_configuration(
-        slug="aoa12",
-        split_id="single_aoa_12",
-        case_set_id="caseset-02fc12ff3494",
-        case_count=36,
-        submission_json_sha256=(
-            "22ee1e5e8c5b4cac46825bbca8de0c940563b1f052882503dac1ffcf0e9d6221"
-        ),
-        archive_sha256=(
-            "bb7bf8d7d32eb9122f9d9a0f1234e4ae7033a075dc828709e3ac78b0c154f412"
-        ),
-        archive_size_bytes=955_829,
-        archive_member_count=47,
-        regular_file_bytes=1_372_495,
-    ),
-    _hilift_preview_configuration(
-        slug="aoa22",
-        split_id="single_aoa_22",
-        case_set_id="caseset-85ecccd9ccda",
-        case_count=36,
-        submission_json_sha256=(
-            "df6cb95bcd8c22dfd3647cd696a88824000fdd8a17c0dcb6c476b45c4e58d104"
-        ),
-        archive_sha256=(
-            "56d9d893870062ff584b040a2eced5cdbac7b22f91b806a99004e5ae7fed8ce4"
-        ),
-        archive_size_bytes=960_142,
-        archive_member_count=47,
-        regular_file_bytes=1_376_137,
-    ),
-    _hilift_preview_configuration(
-        slug="super-scarce",
-        split_id="super_scarce",
-        case_set_id="caseset-ac791749e527",
-        case_count=360,
-        submission_json_sha256=(
-            "57087ae77adae29f36bfc868e8e86baa373c03e778516aa602b9466c16bce95d"
-        ),
-        archive_sha256=(
-            "bcb6c2bda00150c039f6aef7019c99e855540abe126c4e9bb02a9f6f4e7656a1"
-        ),
-        archive_size_bytes=10_532_488,
-        archive_member_count=403,
-        regular_file_bytes=13_569_255,
-    ),
-    _hilift_preview_configuration(
-        slug="geometry-scarce",
-        split_id="geometry_scarce",
-        case_set_id="caseset-53990ea68fa6",
-        case_count=360,
-        submission_json_sha256=(
-            "5be3278468041bce62b015d45d77c5482f5d79ca061527418aba999b19b8db2b"
-        ),
-        archive_sha256=(
-            "1313d869cd28466ad47e635ac57cc16325d1dd5839fe155ed2d8de5f001c3073"
-        ),
-        archive_size_bytes=9_322_198,
-        archive_member_count=403,
-        regular_file_bytes=12_365_210,
-    ),
-    _hilift_preview_configuration(
-        slug="geometry-super-scarce",
-        split_id="geometry_super_scarce",
-        case_set_id="caseset-53990ea68fa6",
-        case_count=360,
-        submission_json_sha256=(
-            "68a649ea1933078cf4a7082bdd0daba046aafcc149bceb0489943711ba1c767d"
-        ),
-        archive_sha256=(
-            "903d101210b641ac3b56075f1859f0494184a322e2af1fa183bb688557904d6e"
-        ),
-        archive_size_bytes=10_205_122,
-        archive_member_count=403,
-        regular_file_bytes=13_250_900,
-    ),
-    _hilift_preview_configuration(
-        slug="geometry",
-        split_id="geometry",
-        case_set_id="caseset-53990ea68fa6",
-        case_count=360,
-        submission_json_sha256=(
-            "f58c7a9d7ea549799c3f035b5b93ec66be4ae15d4863d8788e0fda81aaea5a35"
-        ),
-        archive_sha256=(
-            "1ad985b42ff6a7654b1f980498212e1cabbad6e54c25e1213ba8e47e546e0bf2"
-        ),
-        archive_size_bytes=8_517_360,
-        archive_member_count=403,
-        regular_file_bytes=11_555_256,
-    ),
-    _hilift_preview_configuration(
-        slug="ood-aoa",
-        split_id="aoa",
-        case_set_id="caseset-29693354ed8a",
-        case_count=900,
-        submission_json_sha256=(
-            "dc3c9ea0ff17bec23785ece90994010da887f7bb898fe14f5152e82e24b5104d"
-        ),
-        archive_sha256=(
-            "4bd33893d4de01f266372753cbd7c6de65a87f0535dedcf055a6d487161a42ec"
-        ),
-        archive_size_bytes=24_720_935,
-        archive_member_count=997,
-        regular_file_bytes=32_105_249,
-    ),
-    _hilift_preview_configuration(
-        slug="ood-deflection",
-        split_id="deflection",
-        case_set_id="caseset-c0ecb14de138",
-        case_count=360,
-        submission_json_sha256=(
-            "c20c3ab1ede7d3a8f6d95c53402e92f840d71298c3ee3ead47e783f6bcd7bbbb"
-        ),
-        archive_sha256=(
-            "518f1472c77d5bd11054e86f90420d2919a5f5e26ab85d38c9e9bd0c3752788e"
-        ),
-        archive_size_bytes=8_844_091,
-        archive_member_count=403,
-        regular_file_bytes=11_886_343,
-    ),
-    _hilift_preview_configuration(
-        slug="ood-stall",
-        split_id="stall",
-        case_set_id="caseset-804491c8956e",
-        case_count=723,
-        submission_json_sha256=(
-            "3d741145a35729e62c4854610e583c0e62d5543baa96f47d2ee5e3d2a3b25c59"
-        ),
-        archive_sha256=(
-            "dc53ddac42242c828afcffd27bd02999173b6938213504d8abd3ebee641b33c5"
-        ),
-        archive_size_bytes=19_015_374,
-        archive_member_count=803,
-        regular_file_bytes=24_979_559,
-    ),
-    _hilift_preview_configuration(
-        slug="full360",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-full360",
-        split_id="full",
-        case_set_id="caseset-ac791749e527",
-        case_count=360,
-        submission_json_sha256=(
-            "da274a509a586ce8dd00705d570e993124c564cd4185d997d47428e6d7a3169e"
-        ),
-        archive_sha256=(
-            "97c7150f958788bb1e662d25688c5b1e7529bfb11800c92a5ec542b99c59f1d8"
-        ),
-        archive_size_bytes=8_964_582,
-        archive_member_count=403,
-        regular_file_bytes=12_002_142,
-    ),
-    _hilift_preview_configuration(
-        slug="scarce",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-scarce",
-        split_id="scarce",
-        case_set_id="caseset-ac791749e527",
-        case_count=360,
-        submission_json_sha256=(
-            "693ad9063ad643abd93be3d306142f0a3d9cfbeec59a34f3389c681232183cf0"
-        ),
-        archive_sha256=(
-            "72864acfe1787eab4c3f70da6b5b4d5b111c4427d5f9b78b156a749d5603af86"
-        ),
-        archive_size_bytes=10_458_737,
-        archive_member_count=403,
-        regular_file_bytes=13_495_213,
-    ),
-    _hilift_preview_configuration(
-        slug="aoa4",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-aoa4",
-        split_id="single_aoa_4",
-        case_set_id="caseset-7a743a20b3bd",
-        case_count=36,
-        submission_json_sha256=(
-            "333e0867424115c5a3675374597d7bcd193ab7ef2aa0cf16e66e1a3333fc7996"
-        ),
-        archive_sha256=(
-            "fa2d77e2fd77e6920b96fe0a40e684d6a5e53da5911f455b6f939a7674c8671b"
-        ),
-        archive_size_bytes=891_073,
-        archive_member_count=47,
-        regular_file_bytes=1_307_990,
-    ),
-    _hilift_preview_configuration(
-        slug="aoa12",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-aoa12",
-        split_id="single_aoa_12",
-        case_set_id="caseset-02fc12ff3494",
-        case_count=36,
-        submission_json_sha256=(
-            "5bf17fa2f42c94aefa925bd45b84a34ef1f791aeb7867e27954b1ac62c40bc03"
-        ),
-        archive_sha256=(
-            "87287a12053304a147a2624039365bad3cccb964df79d1105a31396b26165543"
-        ),
-        archive_size_bytes=968_185,
-        archive_member_count=47,
-        regular_file_bytes=1_385_492,
-    ),
-    _hilift_preview_configuration(
-        slug="aoa22",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-aoa22",
-        split_id="single_aoa_22",
-        case_set_id="caseset-85ecccd9ccda",
-        case_count=36,
-        submission_json_sha256=(
-            "bfcd27cc9ca57e4dac64ce466f7b933451c00be73bc71ca1633217b95514fa52"
-        ),
-        archive_sha256=(
-            "146f28436326fab089afda212b2798033839c2a8c89d5c2a2be37eaf6dd10e8f"
-        ),
-        archive_size_bytes=1_027_593,
-        archive_member_count=47,
-        regular_file_bytes=1_444_217,
-    ),
-    _hilift_preview_configuration(
-        slug="geometry",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-geometry",
-        split_id="geometry",
-        case_set_id="caseset-53990ea68fa6",
-        case_count=360,
-        submission_json_sha256=(
-            "6c174b7117696c22031e42d60cb787ff7d09d294c42a08c29bc28858730917e7"
-        ),
-        archive_sha256=(
-            "a2e4fd58b889e377be1fb8962b53647fbd0c6429042a9e02c612260a12abca45"
-        ),
-        archive_size_bytes=8_653_787,
-        archive_member_count=403,
-        regular_file_bytes=11_694_031,
-    ),
-    _hilift_preview_configuration(
-        slug="geometry-scarce",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-geometry-scarce",
-        split_id="geometry_scarce",
-        case_set_id="caseset-53990ea68fa6",
-        case_count=360,
-        submission_json_sha256=(
-            "4755cf5e41f8582444bd27fe2b672c8abdc4730425a5837325ba15ef7b54b8a1"
-        ),
-        archive_sha256=(
-            "4d70db3198e902870a6b95ea45505552e64f3dae692b8ee2f1ae331920d12651"
-        ),
-        archive_size_bytes=10_114_473,
-        archive_member_count=403,
-        regular_file_bytes=13_158_992,
-    ),
-    _hilift_preview_configuration(
-        slug="geometry-super-scarce",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-geometry-super-scarce",
-        split_id="geometry_super_scarce",
-        case_set_id="caseset-53990ea68fa6",
-        case_count=360,
-        submission_json_sha256=(
-            "dbbe2aab6a43e02e063dff10565f7a1ab059175994074315eb740be2d3f979f7"
-        ),
-        archive_sha256=(
-            "3799fd4bfa747bf35451f84f1562639191aa3e479865e188f19f7a7f1847c36d"
-        ),
-        archive_size_bytes=11_092_082,
-        archive_member_count=403,
-        regular_file_bytes=14_137_677,
-    ),
-    _hilift_preview_configuration(
-        slug="super-scarce",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-super-scarce",
-        split_id="super_scarce",
-        case_set_id="caseset-ac791749e527",
-        case_count=360,
-        submission_json_sha256=(
-            "e23adaef21962b0a7e16d3de0fe3e36b0975fff85cc441138c1efd8e4acc9983"
-        ),
-        archive_sha256=(
-            "30efc9a3468459862477a4734cf330ac1942b594740346dad0f2d214fb36c10b"
-        ),
-        archive_size_bytes=10_934_679,
-        archive_member_count=403,
-        regular_file_bytes=13_971_416,
-    ),
-    _hilift_preview_configuration(
-        slug="ood-aoa",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-ood-aoa",
-        split_id="aoa",
-        case_set_id="caseset-29693354ed8a",
-        case_count=900,
-        submission_json_sha256=(
-            "27fa07b886ee3168016cd5ed1356da90bded93364ba174c92887b5ec709073fd"
-        ),
-        archive_sha256=(
-            "ea2e455de205202bd6cf89139f7e5659e0f5f7ce403e847ea4e19a654d32dc3c"
-        ),
-        archive_size_bytes=26_779_386,
-        archive_member_count=997,
-        regular_file_bytes=34_170_217,
-    ),
-    _hilift_preview_configuration(
-        slug="ood-deflection",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-ood-deflection",
-        split_id="deflection",
-        case_set_id="caseset-c0ecb14de138",
-        case_count=360,
-        submission_json_sha256=(
-            "939072a9c57c3a58563f4a37a41fab96f50ac7d1264bd7a1af7c25aa32161a9c"
-        ),
-        archive_sha256=(
-            "26674828ec6bab1b30a8d34f0491879806eddf79595eb45bbd1630017f7b78bc"
-        ),
-        archive_size_bytes=9_056_573,
-        archive_member_count=403,
-        regular_file_bytes=12_101_235,
-    ),
-    _hilift_preview_configuration(
-        slug="ood-stall",
-        model_slug="geotransolver",
-        validation_slug="geotransolver-ood-stall",
-        split_id="stall",
-        case_set_id="caseset-804491c8956e",
-        case_count=723,
-        submission_json_sha256=(
-            "bfedac34341e08c7b23ef7206c4c87941defcefc6282c70bc36df6da02d1f2bc"
-        ),
-        archive_sha256=(
-            "bfb8478a52c74227ee89997aad83032669386fb0dd7a78f864db26555aa4847a"
-        ),
-        archive_size_bytes=19_833_594,
-        archive_member_count=803,
-        regular_file_bytes=25_800_404,
-    ),
-)
-HILIFT_REGISTERED_PREVIEW = HILIFT_REGISTERED_PREVIEW_CONFIGS[0]["binding"]
-HILIFT_REGISTERED_PREVIEW_RECORD_PATH = HILIFT_REGISTERED_PREVIEW_CONFIGS[0][
-    "validation_record_path"
-]
 AHMEDML_DEVELOPMENT_FIXTURE_ID = (
     "ahmedml-geotransolver-calibrated-dev-fixture-v1"
 )
@@ -879,7 +442,6 @@ def _registered_dev_revision_predecessor(
         "drivaerml": registered_drivaerml_pre_release_reference,
         "drivaernetplusplus": registered_drivaernetplusplus_pre_release_reference,
         "airfrans": registered_airfrans_pre_release_reference,
-        "hiliftaeroml": registered_hiliftaeroml_preview,
     }.get(submission.get("dataset_id"))
     if recognizer is None:
         return False
@@ -973,201 +535,10 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def is_registered_hiliftaeroml_preview_path(
-    path: Path,
-    *,
-    root: Path | None = None,
-) -> bool:
-    """Return whether *path* is a maintainer-configured preview path."""
-
-    return _registered_hiliftaeroml_preview_config(path, root=root) is not None
 
 
-def _registered_hiliftaeroml_preview_config(
-    path: Path,
-    *,
-    root: Path | None = None,
-) -> dict[str, Any] | None:
-    """Resolve one code-pinned preview configuration by repository path."""
-
-    effective_root = (root or ROOT).resolve()
-    try:
-        relative_path = path.resolve().relative_to(effective_root).as_posix()
-    except (OSError, ValueError):
-        return None
-    return next(
-        (
-            configuration
-            for configuration in HILIFT_REGISTERED_PREVIEW_CONFIGS
-            if relative_path == configuration["binding"]["submission_path"]
-        ),
-        None,
-    )
 
 
-def registered_hiliftaeroml_preview(
-    path: Path,
-    submission: dict[str, Any],
-    manifest: dict[str, Any],
-    *,
-    root: Path | None = None,
-) -> dict[str, Any] | None:
-    """Return the maintainer binding for a checked-in HiLift preview.
-
-    This is deliberately not a general candidate acceptance path.  The source
-    path, submission metadata, historical validation receipt, and archive
-    identity of every permitted entry are pinned in code so another closed
-    candidate cannot enter the public feed merely by declaring itself a
-    preview.
-    """
-
-    effective_root = (root or ROOT).resolve()
-    configuration = _registered_hiliftaeroml_preview_config(
-        path, root=effective_root
-    )
-    if configuration is None:
-        return None
-    binding = configuration["binding"]
-    registration_path = path
-    registration_evidence_path = None
-    corrected_binding = None
-    if (effective_root / HILIFT_SI_CORRECTION_PATH).exists():
-        try:
-            registration_path, registration_evidence_path, corrected_binding = (
-                hilift_corrected_registration_view(effective_root, path, submission, binding)
-            )
-            submission = load_json(registration_path)
-        except (OSError, ValueError, KeyError, TypeError):
-            return None
-    if manifest.get("data_release", {}).get("status") != "prototype_dummy_data":
-        return None
-    if (
-        submission.get("submission_id")
-        != binding["submission_id"]
-        or submission.get("dataset_id") != "hiliftaeroml"
-        or submission.get("dataset") != "HiLiftAeroML"
-        or submission.get("split_id") != configuration["split_id"]
-        or submission.get("case_set_id") != configuration["case_set_id"]
-        or submission.get("schema_version") != "3.0"
-        or submission.get("approval") is not None
-        or submission.get("profile_data", {}).get("format")
-        != HILIFT_PROFILE_FORMAT
-    ):
-        return None
-    try:
-        if sha256_file(registration_path) != binding["submission_json_sha256"]:
-            return None
-        receipt = load_json(
-            effective_root / configuration["validation_record_path"]
-        )
-        dataset_spec = load_json(
-            effective_root
-            / "benchmark-specs"
-            / "hiliftaeroml"
-            / "submission-spec.json"
-        )
-    except (OSError, json.JSONDecodeError):
-        return None
-    if not isinstance(receipt, dict) or not isinstance(dataset_spec, dict):
-        return None
-    if (
-        receipt.get("schema")
-        != configuration["validation_record_schema"]
-        or receipt.get("status") != "complete_candidate_not_published"
-        or receipt.get("usage") != "maintainer_local_candidate_dry_run_only"
-        or receipt.get("activation")
-        != {
-            "owner_approval_complete": False,
-            "published": False,
-            "submissions_opened": False,
-            "validation_changes_activation": False,
-        }
-        or receipt.get("registered_preview") != binding
-    ):
-        return None
-    scoring_support = dataset_spec.get("scoring_support", {})
-    profile_definition = dataset_spec.get("profile_definition", {})
-    if (
-        dataset_spec.get("status") != "owner_review_required"
-        or scoring_support.get("status") != "owner_review_required"
-        or scoring_support.get("submissions_open") is not False
-        or profile_definition.get("profile_ground_truth")
-        != {
-            "status": "not_published",
-            "release_id": None,
-            "manifest_sha256": None,
-        }
-        or profile_definition.get("status") != "official"
-        or profile_definition.get("evaluator_support")
-        != {
-            "status": "not_published",
-            "release_id": None,
-            "manifest_sha256": None,
-        }
-    ):
-        return None
-    assembly = receipt.get("assembly", {})
-    archives = receipt.get("deterministic_archives", {})
-    scope = receipt.get("scope", {})
-    representation = receipt.get("representation", {})
-    validation = receipt.get("candidate_validation", {})
-    metric_values = receipt.get("metric_values", {})
-    evaluation = submission.get("evaluation", {})
-    profile_data = submission.get("profile_data", {})
-    evidence_path = registration_evidence_path or path.parent / str(evaluation.get("evidence_file", ""))
-    profile_index_path = path.parent / str(profile_data.get("index_file", ""))
-    try:
-        evidence = load_json(evidence_path)
-        evidence_sha256 = sha256_file(evidence_path)
-        profile_index_sha256 = sha256_file(profile_index_path)
-    except (OSError, json.JSONDecodeError):
-        return None
-    if not isinstance(evidence, dict) or not isinstance(metric_values, dict):
-        return None
-    if (
-        assembly.get("submission_json_sha256")
-        != binding["submission_json_sha256"]
-        or assembly.get("regular_file_bytes_each")
-        != configuration["regular_file_bytes_each"]
-        or evidence.get("status") != "submitted_evaluation"
-        or evidence_sha256 != assembly.get("evaluation_evidence_sha256")
-        or evidence_sha256 != evaluation.get("evidence_sha256")
-        or profile_index_sha256 != assembly.get("profile_index_sha256")
-        or scope.get("split_id") != configuration["split_id"]
-        or scope.get("case_set_id") != configuration["case_set_id"]
-        or scope.get("case_count") != configuration["case_count"]
-        or scope.get("profile_series_count")
-        != configuration["profile_series_count"]
-        or representation.get("participant_artifacts_contain_evaluator_support")
-        is not False
-        or representation.get("participant_artifacts_contain_truth") is not False
-        or metric_values
-        != {
-            metric_id: submission.get("metric_values", {}).get(metric_id)
-            for metric_id in metric_values
-        }
-        or profile_data.get("evaluator_support_release_id")
-        != receipt.get("bindings", {}).get("evaluator_support_release_id")
-        or profile_data.get("evaluator_support_manifest_sha256")
-        != receipt.get("bindings", {}).get("evaluator_support_manifest_sha256")
-        or profile_data.get("profile_ground_truth_release_id")
-        != receipt.get("bindings", {}).get("source_profile_truth_release_id")
-        or profile_data.get("profile_ground_truth_manifest_sha256")
-        != receipt.get("bindings", {}).get("source_profile_truth_manifest_sha256")
-        or archives.get("sha256_each")
-        != binding["deterministic_archive"]["sha256"]
-        or archives.get("size_bytes_each")
-        != binding["deterministic_archive"]["size_bytes"]
-        or archives.get("member_count_each")
-        != binding["deterministic_archive"]["member_count"]
-        or archives.get("byte_identical") is not True
-        or any(
-            validation.get(package, {}).get("valid") is not True
-            for package in ("package_a", "package_b")
-        )
-    ):
-        return None
-    return deepcopy(corrected_binding or binding)
 
 
 def registered_ahmedml_development_fixture(
@@ -1691,35 +1062,6 @@ def registered_drivaerml_pre_release_reference(
     return deepcopy(expected)
 
 
-def validate_registered_hiliftaeroml_preview_archive(
-    add: Any,
-    directory: Path,
-    binding: dict[str, Any],
-) -> None:
-    """Bind every checked-in preview member to the reviewed deterministic ZIP."""
-
-    from scripts.build_hiliftaeroml_submission_zip import (
-        DeterministicZipError,
-        build_deterministic_submission_zip,
-    )
-
-    expected = binding["deterministic_archive"]
-    try:
-        with tempfile.TemporaryDirectory(
-            prefix="fluidsbench-hilift-preview-"
-        ) as temporary:
-            archive_path = Path(temporary) / "submission.zip"
-            receipt = build_deterministic_submission_zip(directory, archive_path)
-            archive_size = archive_path.stat().st_size
-    except (DeterministicZipError, OSError) as error:
-        add(f"registered HiLiftAeroML preview archive build failed: {error}")
-        return
-    if receipt.get("archive_sha256") != expected["sha256"]:
-        add("registered HiLiftAeroML preview deterministic archive SHA-256 differs")
-    if receipt.get("member_count") != expected["member_count"]:
-        add("registered HiLiftAeroML preview deterministic archive member count differs")
-    if archive_size != expected["size_bytes"]:
-        add("registered HiLiftAeroML preview deterministic archive byte size differs")
 
 
 def canonical_json_sha256(value: Any) -> str:
@@ -6942,12 +6284,11 @@ def validate_profiles(
     split_spec_entry: dict[str, Any],
     *,
     candidate_dry_run: bool = False,
-    registered_preview: bool = False,
     profile_support_release: Path | None = None,
     opened_profile_support_release: HiLiftCompactSupportRelease | None = None,
     case_metrics: dict[str, Any] | None = None,
 ) -> dict[str, int]:
-    candidate_contract_validation = candidate_dry_run or registered_preview
+    candidate_contract_validation = candidate_dry_run
     profile_format = submission["profile_data"].get(
         "format", "fluidsbench-profile-chunks-v1"
     )
@@ -7083,7 +6424,6 @@ def validate_profiles(
         if (
             hilift_profile
             and profile_support_release is None
-            and not registered_preview
         ):
             add(
                 "HiLiftAeroML candidate dry-run profiles require an explicit "
@@ -7744,23 +7084,6 @@ def validate_submission_file(
             if (path.parent / filename).exists():
                 add(f"candidate dry-run packages must not contain {filename}")
 
-    configured_preview_path = is_registered_hiliftaeroml_preview_path(path)
-    preview_binding = registered_hiliftaeroml_preview(path, submission, manifest)
-    if configured_preview_path and preview_binding is None and not candidate_dry_run:
-        add(
-            "registered HiLiftAeroML preview does not match its maintainer "
-            "lifecycle, submission, evidence, profile-index, or archive binding"
-        )
-    if contributor_stage and preview_binding is not None:
-        add(
-            "the maintainer-registered HiLiftAeroML preview is unavailable in "
-            "contributor-stage validation"
-        )
-    registered_preview = (
-        preview_binding is not None
-        and not contributor_stage
-        and not candidate_dry_run
-    )
     configured_ahmedml_pre_release_path = (
         is_registered_ahmedml_pre_release_path(path)
     )
@@ -7890,7 +7213,6 @@ def validate_submission_file(
     candidate_contract_validation = (
         candidate_dry_run
         or registered_airfrans
-        or registered_preview
         or registered_ahmedml_pre_release
         or registered_windsorml_pre_release
         or registered_drivaerml_pre_release
@@ -7898,8 +7220,7 @@ def validate_submission_file(
         or registered_development_fixture
     )
     if (
-        registered_preview
-        or registered_ahmedml_pre_release
+        registered_ahmedml_pre_release
         or registered_windsorml_pre_release
         or registered_drivaerml_pre_release
         or registered_drivaernetplusplus_pre_release
@@ -8090,7 +7411,6 @@ def validate_submission_file(
         dataset_spec,
         spec_split,
         candidate_dry_run=candidate_contract_validation,
-        registered_preview=registered_preview,
         profile_support_release=profile_support_release,
         opened_profile_support_release=opened_profile_support_release,
         case_metrics=case_metrics,
@@ -8107,12 +7427,6 @@ def validate_submission_file(
         except (ValueError, OSError, KeyError, TypeError) as error:
             add(f"DrivAerML native dev metric binding failed: {error}")
 
-    if preview_binding is not None and not contributor_stage:
-        validate_registered_hiliftaeroml_preview_archive(
-            add,
-            path.parent,
-            preview_binding,
-        )
     return errors, stats
 
 

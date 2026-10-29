@@ -21,7 +21,7 @@ maintainer-validation.json, prediction-artifact-checks.json).
 Every fact only the submitter can supply (architecture, training regime,
 checkpoint hashes, measured compute, training-time spatial representation)
 comes from a package-config.json copied from
-examples/airfrans-v3-candidate/package-config.template.json. Any remaining
+examples/airfrans-participant/package-config.template.json. Any remaining
 ``__REPLACE_WITH_...__``/``__UNRESOLVED_...__`` token is a blocker:
 
     python scripts/assemble_airfrans_schema_v3_candidate.py --config PATH --list-blockers

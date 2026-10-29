@@ -30,7 +30,8 @@ def read(path: Path) -> dict:
 
 class AirfransCandidateAssemblerTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.config = read(ROOT / "examples/airfrans-v3-candidate/transolverpp-full-v1-candidate-config.json")
+        from tests.airfrans_fixture import synthetic_config
+        self.config = synthetic_config()
         self.config["release_bindings"]["profile_ground_truth"] = read(DEFAULT_SPEC)["profile_definition"]["profile_ground_truth"]
         self.spec = read(DEFAULT_SPEC)
         from tests.airfrans_fixture import make_fixture

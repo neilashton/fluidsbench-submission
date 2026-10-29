@@ -12,7 +12,7 @@ suffix. They are immutable identities, not the current lifecycle state. The
 current [submission specification](../../benchmark-specs/hiliftaeroml/submission-spec.json)
 selects that exact compact contract as official and rejects earlier native-v1
 participant packages. Existing evaluator support, prediction bytes, validation
-receipts, and all 23 registered previews remain unchanged.
+receipts remain the authority for support identities.
 
 <a id="prepare-the-configuration-and-native-products"></a>
 
@@ -94,11 +94,8 @@ success does not open public intake or create a leaderboard entry.
 ## Retained evidence and support
 
 <details>
-<summary>Registered previews, implementation provenance, and maintainer support materialization</summary>
+<summary>Implementation provenance and maintainer support materialization</summary>
 
-Eleven Transolver and twelve GeoTransolver packages are registered as unapproved,
-non-citable preview references. Their unchanged validation receipts are listed
-in the [dataset README](../../benchmark-specs/hiliftaeroml/README.md).
 The [all-case support validation](../../benchmark-specs/hiliftaeroml/compact-profile-all-case-support-validation-v1.json)
 covers all 1,355 unique cases and eight case sets. Its
 [rebind receipt](../../benchmark-specs/hiliftaeroml/compact-profile-all-case-support-rebind-v1.json)
