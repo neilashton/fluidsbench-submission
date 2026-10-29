@@ -148,9 +148,12 @@ def _release_bindings(config: Mapping[str, Any], specification: Mapping[str, Any
         )
     scoring_support = _mapping(specification.get("scoring_support"), "specification.scoring_support")
     if (
-        specification.get("status") != "candidate_native_support"
-        or scoring_support.get("status") != "owner_review_required"
-        or scoring_support.get("submissions_open") is not False
+        not (specification.get("status") == "official"
+             and scoring_support.get("status") == "official"
+             and scoring_support.get("submissions_open") is True)
+        and (specification.get("status") != "candidate_native_support"
+             or scoring_support.get("status") != "owner_review_required"
+             or scoring_support.get("submissions_open") is not False)
     ):
         raise PackageAssemblyError("the DrivAerNet++ specification is not the expected closed candidate")
     owner = _mapping(scoring_support.get("candidate_manifest"), "specification candidate manifest")

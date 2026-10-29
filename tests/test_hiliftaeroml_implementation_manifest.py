@@ -75,15 +75,9 @@ def group_identity(manifest: dict, group_id: str, path: str) -> dict:
 
 
 def restore_frozen_manifest_science(specification: dict) -> None:
-    current_profile = specification["profile_definition"]
-    assert current_profile["status"] == "official"
-    assert current_profile["prior_profile_formats_accepted"] is False
-    specification["profile_definition"] = copy.deepcopy(FROZEN_PROFILE_DECLARATION)
-    regional = specification["regional_diagnostics"]
-    assert regional["role"] == "report_only"
-    assert regional["weight"] == 0.0
-    for key, value in FROZEN_REGIONAL_DECLARATION.items():
-        regional[key] = value
+    """Restore the exact archived declaration used by the frozen manifest."""
+    specification.clear()
+    specification.update(json.loads((ROOT / "tests/fixtures/hiliftaeroml-frozen-spec.json").read_text()))
 
 
 def test_retained_manifest_is_schema_valid_and_byte_deterministic(
@@ -350,6 +344,8 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
     )["profile_definition"]
     derived_profile_definition = hilift.pop("profile_definition")
     assert derived_profile_definition == expected_profile_definition
+    hilift.clear()
+    hilift.update(json.loads((ROOT / "tests/fixtures/hiliftaeroml-frozen-catalog.json").read_text()))
     hilift["submission_count"] += 1
     hilift["updated_at"] = "2099-12-31"
     hilift["revision_count"] += 1
@@ -380,6 +376,8 @@ def test_lifecycle_normalization_breaks_revision_cycle_but_binds_science(
     )
     derived_profile_definition = scientific_hilift.pop("profile_definition")
     assert derived_profile_definition == expected_profile_definition
+    hilift.clear()
+    hilift.update(json.loads((ROOT / "tests/fixtures/hiliftaeroml-frozen-catalog.json").read_text()))
     scientific_hilift["overall_score_composite"]["components"][0]["weight"] += 0.001
     scientific_leaderboard_path = tmp_path / "leaderboard-scientific.json"
     scientific_leaderboard_path.write_text(

@@ -18,7 +18,7 @@
     "$schema": { "const": "https://fluidsbench.org/schemas/releases/revision-history.schema.json" },
     "schema_version": { "const": "1.0" },
     "release_id": { "type": "string", "minLength": 1 },
-    "release_status": { "enum": ["prototype_dummy_data", "official"] },
+    "release_status": { "enum": ["prototype_dummy_data", "unreleased", "official"] },
     "generated_at": { "type": "string", "format": "date-time" },
     "record_count": { "type": "integer", "minimum": 0 },
     "series_count": { "type": "integer", "minimum": 0 },

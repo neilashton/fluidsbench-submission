@@ -527,6 +527,26 @@ def verify_package(directory, truth_root=None):
     )
 
     directory = Path(directory).expanduser().resolve()
+    if load_json(ROOT / "benchmark-specs/drivaerml/submission-spec.json").get("status") == "official":
+        from scripts.validate_submission import validate_submission_file
+
+        prior_truth_root = os.environ.get("FLUIDSBENCH_DRIVAERML_TRUTH_ROOT")
+        try:
+            if truth_root:
+                os.environ["FLUIDSBENCH_DRIVAERML_TRUTH_ROOT"] = str(support_root(truth_root))
+            errors, _ = validate_submission_file(
+                directory / "submission.json",
+                contributor_stage=True,
+                require_registered_path=False,
+            )
+            if errors:
+                raise WorkflowError("; ".join(errors))
+        finally:
+            if prior_truth_root is None:
+                os.environ.pop("FLUIDSBENCH_DRIVAERML_TRUTH_ROOT", None)
+            else:
+                os.environ["FLUIDSBENCH_DRIVAERML_TRUTH_ROOT"] = prior_truth_root
+        return {"status": "valid_official_package", "output": str(directory)}
     # Run the same semantic candidate checks used by dev intake. Independently
     # enforce the genuine-inference/package-tree checks in a conventional
     # temporary layout, allowing verification before copying into a Git fork.
@@ -605,12 +625,19 @@ def package(
             regional_diagnostics_path=evaluation_root / "regional-diagnostics.json",
             checkpoint_paths=checkpoints,
         )
+        if load_json(DEFAULT_SPECIFICATION).get("status") == "official":
+            from scripts.finalize_official_native_package import finalize
+
+            finalize(staging, DEFAULT_SPECIFICATION)
         verify_package(staging, truth_root)
         staging.rename(output)
     return {
-        "status": "validated_dev_package",
+        "status": (
+            "validated_official_package"
+            if load_json(DEFAULT_SPECIFICATION).get("status") == "official"
+            else "validated_dev_package"
+        ),
         "output": str(output),
-        "pull_request_base": "dev",
     }
 
 

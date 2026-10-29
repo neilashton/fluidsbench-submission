@@ -1,22 +1,26 @@
-# DrivAerML activation checklist
+# DrivAerML activation status
 
-This checklist records the current state of the DrivAerML FluidsBench
-submission and leaderboard contract. AutoCFD5 is referenced only as provenance
-for the velocity-line geometry; this is not an AutoCFD activation checklist.
+DrivAerML is open for submissions on all eight prescribed splits. The active
+contract accepts surface-and-volume or surface-only packages through the normal
+contributor validator. Follow the [quickstart](QUICKSTART.md).
 
-## Current status
+## Opening requirements completed
 
-The participant contract, evaluator implementation, all-case native reference
-data, and leaderboard visualization are complete as a closed release candidate.
-Neil Ashton, acting as the DrivAerML dataset owner, approved the scientific
-evidence and decisions on 2026-08-28. The machine-readable approval is
-[`evidence/owner-scientific-approval-2026-08-28.json`](evidence/owner-scientific-approval-2026-08-28.json)
-(SHA-256
-`448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3`).
+- The official `drivaerml-native-support-v3` manifest is published and hash-bound
+  in `submission-spec.json`, together with the owner approval and validation receipt.
+- The native evaluator, package assembler and official contributor validator accept
+  the same approved scientific contract.
+- Daniel's retained CANTO Full package was revalidated against the final release
+  identities: 50 official cases and 2,000 profile series. It remains a historical
+  trial and is absent from the launch source and leaderboard.
+- The [owner opening decision](OWNER_OPENING_DECISION.md) waives the proposed
+  multi-model sensitivity study. This does not claim that the study was run.
+- Geometry-relative diagnostics have zero weight and remain report-only.
+- The leaderboard is empty and unreleased. Receiving or approving submissions
+  does not publish an official ranking; that is a separate release step.
 
-Submissions nevertheless remain closed. Scientific approval does not supply
-the still-missing immutable production release identities, multi-model
-sensitivity evidence, or independent full-submission dry run.
+The repository ownership move and production website deployment await Neil's
+review. Those operational steps do not change the scientific contract below.
 
 ## Completed and scientifically approved
 
@@ -70,53 +74,3 @@ sensitivity evidence, or independent full-submission dry run.
 - Schema-v3 participant packaging, methodology disclosure, profile identity
   checks, fail-closed browser matching, and the bounded nine-component score
   are implemented and tested.
-
-## Dev workflow available
-
-The `dev` branch now binds the native candidate scoring-support release,
-complete evaluator, v10 fixed profiles, and immutable fixed/relative native-v3
-truth. The participant template has resolved benchmark bindings. The case
-command extracts profiles from the same native prediction streams; the split
-reducer computes the full score set. Packaging verifies checkpoint bytes and
-both surface-only and full-field scope. Dev PR validation and exact maintainer
-registration permit non-citable pre-release display without opening official
-submissions. See the [participant guide](PARTICIPANT_GUIDE.md).
-
-## Still required before submissions open
-
-1. **Review the production release identities.** The dev candidate has resolved
-   immutable support/evaluator/truth bindings and v10 is active for dev packages.
-   Review and publish the final production release after the remaining gates;
-   dev bindings alone do not authorize official ranking.
-2. **Complete the current scoring-sensitivity gate.** Run at least three
-   genuine trained DrivAerML checkpoints on a common official cohort and the
-   prescribed paired 10,000-replicate bootstrap. This validates ranking
-   stability; it is separate from the now-complete scientific review of native
-   support and profile definitions. Relative profile families stay report-only
-   and their official submission format stays disabled until this gate and their final
-   release-specific approval record are complete.
-3. **Run one independent full schema-v3 submission dry run.** It must exercise
-   a complete official split and the frozen evaluator/release identities. The
-   retained one-case Transolver `run_419` regression does not satisfy this
-   full-split independence gate.
-4. **Publish the official release.** After the preceding checks pass, create
-   the final release-bound owner approval, set scoring support to `official`,
-   set `submissions_open` to `true`, replace prototype leaderboard status with
-   the official release, and promote the reviewed `dev` branches to the
-   production branches/site.
-
-Until those four release gates pass, the current implementation is suitable
-for internal review and participant dry runs, but not official ranking or
-citation.
-
-## No longer blockers
-
-- dataset-owner scientific review of the native fields, force convention,
-  velocity support, Cp support, sampling choices, and numerical tolerances;
-- all-case fixed/relative velocity or continuous-Cp support and native truth;
-- the proposed profile-resolution and tolerance campaigns superseded by the
-  explicit owner decision above;
-- the inactive 209-probe Cp research atlas or its historical invalid rows;
-- smoothing the native velocity truth for display; and
-- publication of participants' complete native prediction fields or mandatory
-  maintainer recomputation. Those remain optional reproducibility audits.

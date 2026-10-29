@@ -1,4 +1,4 @@
-# DrivAerNet++ candidate package (dev)
+# DrivAerNet++ submission package
 
 Templates for the participant workflow in
 [`benchmark-specs/drivaernetplusplus/QUICKSTART.md`](../../benchmark-specs/drivaernetplusplus/QUICKSTART.md).
@@ -6,7 +6,7 @@ Templates for the participant workflow in
 | File | Use |
 |---|---|
 | `entry.template.json` | Copy to `my-entry/entry.json`; set `submission_id` (lowercase letters, digits, hyphens). |
-| `package-config.template.json` | Copy to `my-entry/package-config.json`; replace every `__REPLACE_` value. Keep `release_bindings` exactly as published: they pin the candidate support, evaluator and profile ground truth, and `package` refuses a mismatch. |
+| `package-config.template.json` | Copy to `my-entry/package-config.json`; replace every `__REPLACE_` value. Keep `release_bindings` exactly as published: they pin the scoring support, evaluator and profile ground truth, and `package` refuses a mismatch. |
 
 `spatial_discretization` follows the schema-v3 discretization contract
 (`schemas/v3/discretization.schema.json`). Volume representations are always
@@ -15,6 +15,4 @@ target `drivaernetplusplus-surface-native-points-v1` with full coverage; use
 `identity` when your model predicts native points directly and declare any
 interpolation (`nearest`, `linear`, ...) otherwise.
 
-A complete filled example is the dev trial package
-`submissions/drivaernetplusplus/drivaernetplusplus-carbench-transolver-dev-v1/`
-(CarBench Transolver, all 1,154 designs, every native point).
+Submit the generated package following the [submission workflow](../../SUBMITTING.md).

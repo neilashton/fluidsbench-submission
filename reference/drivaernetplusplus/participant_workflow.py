@@ -429,9 +429,13 @@ def package(
             checkpoint_paths=checkpoints,
             output_path=staging,
         )
+        specification_path = ROOT / "benchmark-specs/drivaernetplusplus/submission-spec.json"
+        if read_json(specification_path).get("status") == "official":
+            from scripts.finalize_official_native_package import finalize
+            finalize(staging, specification_path)
         verify_package(staging)
         staging.rename(output)
-    result.update({"status": "validated_dev_package", "output": str(output), "pull_request_base": "dev"})
+    result.update({"status": "validated_package", "output": str(output)})
     return result
 
 
@@ -441,6 +445,12 @@ def verify_package(directory: Path) -> dict[str, Any]:
     from .pre_release import build_registry_entry, package_tree_binding
 
     directory = Path(directory).expanduser().resolve()
+    if read_json(ROOT / "benchmark-specs/drivaernetplusplus/submission-spec.json").get("status") == "official":
+        from scripts.validate_submission import validate_submission_file
+        errors, _ = validate_submission_file(directory / "submission.json", contributor_stage=True, require_registered_path=False)
+        if errors:
+            raise WorkflowError("; ".join(errors))
+        return {"status": "valid_official_package", "output": str(directory)}
     package_tree_binding(directory)
     submission_id = read_json(directory / "submission.json").get("submission_id")
     if not isinstance(submission_id, str) or not SUBMISSION_ID_RE.fullmatch(submission_id):

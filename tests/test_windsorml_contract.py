@@ -371,7 +371,7 @@ class WindsorMLScoredCaseSetApprovalTests(unittest.TestCase):
         self.assertEqual(sorted(record["excluded_case_ids"]), ["run_352", "run_354"])
         self.assertNotIn(
             "approve_scored_case_set_reduction_from_235_to_233_test_cases",
-            spec["scoring_support"]["owner_decisions_required"],
+            spec["scoring_support"].get("owner_decisions_required", []),
         )
 
     def test_component_weights_are_recorded_as_owner_approved(self) -> None:
@@ -436,8 +436,8 @@ class WindsorMLScoredCaseSetApprovalTests(unittest.TestCase):
         """
 
         spec = load(SPEC_DIR / "submission-spec.json")
-        decisions = spec["scoring_support"]["owner_decisions_required"]
-        self.assertEqual(decisions, ["approve_release_and_open_submissions"])
+        decisions = spec["scoring_support"].get("owner_decisions_required", [])
+        self.assertEqual(decisions, [])
         for settled in (
             "approve_scored_case_set_reduction_from_235_to_233_test_cases",
             "approve_component_weights_after_profiles_are_scored",

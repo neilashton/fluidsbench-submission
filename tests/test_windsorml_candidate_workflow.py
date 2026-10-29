@@ -255,10 +255,15 @@ def repository(tmp_path, completed, monkeypatch):
     _, package = completed
     (tmp_path / "benchmark-specs").mkdir()
     shutil.copytree(SPEC.parent, tmp_path / "benchmark-specs/windsorml")
+    shutil.copy2(ROOT / "tests/fixtures/candidate-contracts/windsorml.json", tmp_path / "benchmark-specs/windsorml/submission-spec.json")
     (tmp_path / "leaderboard").mkdir()
     shutil.copy2(
         ROOT / "leaderboard/manifest.json", tmp_path / "leaderboard/manifest.json"
     )
+    manifest_path = tmp_path / "leaderboard/manifest.json"
+    candidate_manifest = load(manifest_path)
+    candidate_manifest["data_release"].update(status="prototype_dummy_data", source_ref="dev")
+    write(manifest_path, candidate_manifest)
     output = tmp_path / "submissions/windsorml/windsorml-workflow-test-v1"
     shutil.copytree(package, output)
     for module in (validator, manager, registrar):

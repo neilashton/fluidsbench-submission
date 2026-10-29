@@ -143,8 +143,8 @@ def release_contract_errors(manifest: dict[str, Any]) -> list[str]:
         errors.append("leaderboard/manifest.json schema_version must be 0.6.0")
     if manifest.get("ranking_contract") != ranking_contract():
         errors.append("leaderboard/manifest.json ranking_contract does not match the published ranking policy")
-    if release.get("status") not in {"prototype_dummy_data", "official"}:
-        errors.append("leaderboard/manifest.json data_release.status must be prototype_dummy_data or official")
+    if release.get("status") not in {"prototype_dummy_data", "unreleased", "official"}:
+        errors.append("leaderboard/manifest.json data_release.status must be prototype_dummy_data, unreleased or official")
     if release.get("reproducibility_contract_version") not in {
         "open-reproducibility-2.0",
         "open-reproducibility-3.0",
@@ -306,6 +306,9 @@ def json_bytes(value: Any) -> bytes:
 
 def source_rows_by_dataset(manifest: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     rows = {dataset["name"]: [] for dataset in manifest["datasets"]}
+    # Until the official release, accepted packages remain in PRs only.
+    if manifest.get("data_release", {}).get("status") == "unreleased":
+        return {dataset["name"]: [] for dataset in manifest["datasets"]}
     release_status = manifest.get("data_release", {}).get("status")
     allowed_approval_statuses = {"prototype"} if release_status == "prototype_dummy_data" else {"approved"}
     # Dev previews contain retained fixtures and newly reviewed results. Normal
@@ -629,6 +632,10 @@ def claim_eligibility(release_status: str, row: dict[str, Any]) -> dict[str, Any
             "reason_code": "prototype_dummy_data",
             "reason": "Illustrative prototype data are not eligible for academic leaderboard claims or promotion.",
         }
+    if release_status != "official":
+        return {"academic_citation": False, "promotion": False,
+                "reason_code": "not_approved_and_validated",
+                "reason": "The official leaderboard release has not been published."}
     validation = row.get("maintainer_validation", {})
     eligible = row.get("approval", {}).get("status") == "approved" and validation.get("status") == "validated"
     if eligible:
@@ -1176,7 +1183,11 @@ def expected_outputs(
         if latest is not None:
             latest_dates.append(latest)
         all_rows.extend(rows)
-    latest_global = max(latest_dates, default=stable_fallback_date(manifest))
+    fallback_date = (
+        datetime.fromisoformat(generated_at.replace("Z", "+00:00")).date().isoformat()
+        if generated_at else stable_fallback_date(manifest)
+    )
+    latest_global = max(latest_dates, default=fallback_date)
     release = updated_manifest.setdefault("data_release", {})
     if release.get("status") == "official":
         official_generated_at = release.get("generated_at")
@@ -1592,7 +1603,7 @@ def main() -> int:
 
     paths = getattr(args, "paths", None) or None
     manifest = manifest_with_benchmark_contract(load_json(MANIFEST_PATH))
-    errors, totals = validate_many(paths, manifest=manifest, dev_intake=args.dev_intake)
+    errors, totals = validate_many(paths, manifest=manifest, dev_intake=args.dev_intake, allow_empty=True)
     if errors:
         return print_errors(errors)
     errors = release_contract_errors(manifest)

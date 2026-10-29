@@ -99,6 +99,7 @@ def _projection(
 
 
 class DrivAerMLCpMappingTests(unittest.TestCase):
+    @unittest.skipUnless(__import__("sys").platform.startswith("linux"), "requires Linux retained-file descriptor semantics")
     def test_retained_regular_file_survives_path_replacement_and_detects_mutation(self) -> None:
         payload = b"retained source identity\n"
         with tempfile.TemporaryDirectory() as directory:
@@ -142,6 +143,7 @@ class DrivAerMLCpMappingTests(unittest.TestCase):
                 ):
                     retained.finalize_verification()
 
+    @unittest.skipUnless(__import__("sys").platform.startswith("linux"), "requires Linux retained-file descriptor semantics")
     def test_retained_source_rejects_non_regular_file_and_unfinalized_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             source_directory = Path(directory) / "not-a-file"

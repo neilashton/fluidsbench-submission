@@ -1,6 +1,6 @@
 # DrivAerNet++ submission guide
 
-Use a current `dev` checkout. The participant command checks your copy of the
+Use the current release checkout. The participant command checks your copy of the
 public data, downloads the prepared scoring support, evaluates every native
 surface point of all 1,154 `official_test` designs with recovery, and produces a
 validated result directory. The dataset owner's scientific
@@ -160,10 +160,9 @@ one directory and target `dev`.
 
 ## 6. Review and publication
 
-Maintainers review the package and handle [registration and publication](../../docs/MAINTAINERS.md#receive-and-display-a-drivaernet-development-candidate).
+Maintainers review the package and handle [approval and publication](../../docs/MAINTAINERS.md).
 Your pull request contains only the generated result directory. Merging it does not itself publish a row.
-Reviewed results appear in the [leaderboard preview](https://fluidsbench.org/review-x4n7q9m2vk6p/committee-leaderboard/?dataset=drivaernetplusplus)
-as unranked pre-release references, with scores and three native Cp profile comparisons.
+Approved results are published on the [FluidsBench leaderboard](https://fluidsbench.org/), with scores and three native Cp profile comparisons.
 
 ## Container
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "0.6.0",
-  "generated_at": "2026-10-28T14:46:11Z",
+  "generated_at": "2026-10-29T04:09:46Z",
   "ranking_contract": {
     "version": "1.0",
     "scope": [
@@ -19,18 +19,18 @@
     "rounding": "decimal_half_up"
   },
   "data_release": {
-    "id": "prototype-dev-2026-10-26-c764c61605c3",
-    "status": "prototype_dummy_data",
-    "generated_at": "2026-10-28T14:46:11Z",
+    "id": "fluidsbench-2026-unreleased",
+    "status": "unreleased",
+    "generated_at": "2026-10-29T04:09:46Z",
     "source_repository": "https://github.com/neilashton/fluidsbench-submission",
     "source_ref": "dev",
     "source_commit": null,
-    "feed_sha256": "c764c61605c3af59bcb19d4ab6149886efc19a09b6944d2985f0895792cff2a5",
+    "feed_sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
     "canonical_url": "https://fluidsbench.org/",
     "archive_url": null,
     "release_view_url": null,
     "asset_base_url": "https://raw.githubusercontent.com/neilashton/fluidsbench-submission/dev/",
-    "reproducibility_contract_version": "open-reproducibility-2.0",
+    "reproducibility_contract_version": "open-reproducibility-3.0",
     "profile_ground_truth": {
       "release_id": "prototype-profile-ground-truth-2026-09-04",
       "manifest_url": "https://raw.githubusercontent.com/neilashton/fluidsbench/4ae72e5145ee2cfc58432a86e1496337f2cc615f/assets/data/profile-ground-truth/manifest.json",
@@ -51,16 +51,16 @@
     "claims": {
       "schema_version": "1.0",
       "index_file": "leaderboard/claims/index.json",
-      "index_sha256": "86f5301b919386dd9ce5cfdd0546df84e98c289bc4afc17967437eb8f1654134",
-      "record_count": 50,
+      "index_sha256": "dbb01e12204793cd30289ae99881741e823154df8154344099f33d99596a1df2",
+      "record_count": 0,
       "eligible_record_count": 0
     },
     "revision_history": {
       "schema_version": "1.0",
       "file": "leaderboard/revisions.json",
-      "sha256": "4cc7ce2c3452140e8c3c13081bcb1839d73d3a1b923dcb47411651f96c5a6c57",
-      "record_count": 63,
-      "series_count": 62
+      "sha256": "aaeb1b048875a88255c2c5b0bbe660d470bfaceb194423a272e70b151a3604d6",
+      "record_count": 0,
+      "series_count": 0
     }
   },
   "all_file": "leaderboard/all.json",
@@ -233,8 +233,8 @@
       "name": "AhmedML",
       "slug": "ahmedml",
       "file": "leaderboard/datasets/ahmedml.json",
-      "submission_count": 2,
-      "updated_at": "2026-10-16",
+      "submission_count": 0,
+      "updated_at": null,
       "metrics": {
         "dimensional_fields": [
           "surface_pressure",
@@ -495,9 +495,8 @@
         }
       ],
       "scoring_support": {
-        "status": "owner_review_required",
-        "submissions_open": false,
-        "closed_reason": "Official AhmedML submissions remain closed pending owner review. Genuine-inference candidates may be submitted to dev using --dev-intake.",
+        "status": "official",
+        "submissions_open": true,
         "coverage_contract": {
           "dimensionality": "3D surface and 3D flow domain",
           "rule": "complete_original_public_release_entities",
@@ -564,12 +563,6 @@
           "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
           "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
         },
-        "owner_decisions_required": [
-          "review_and_approve_profile_station_geometry",
-          "review_and_approve_candidate_score_weights_and_caps",
-          "approve_the_hash_bound_cache_derivation_and_production_preinstallation",
-          "approve_evaluator_implementation_and_open_submissions"
-        ],
         "dataset_source": {
           "repository_id": "neashton/ahmedml",
           "revision": "02688c727cdb8dc8678e28abc6bbbb7e93c5fa15",
@@ -600,6 +593,29 @@
           "manifest_file": "scoring-support/ahmedml-native-all-splits-support-v1-candidate/manifest.json",
           "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/ahmedml/scoring-support/ahmedml-native-all-splits-support-v1-candidate/manifest.json",
           "manifest_sha256": "c727bad2ca2566dfed44920cc334af136f2fbe32f3c8886b2fcb130f495fd124"
+        },
+        "release_id": "ahmedml-native-support-v1",
+        "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/ahmedml-native-support-v1/manifest.json",
+        "manifest_sha256": "38d8af2cdbac16ca60ffaa22e54ae9db09e66dd3098ff847a888c59e94d26cdd",
+        "owner_approval": {
+          "approved_by": "Neil Ashton",
+          "approved_at": "2026-10-28",
+          "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
+        },
+        "publication_validation": {
+          "case_count": 450,
+          "support_instance_count": 2250,
+          "local_artifact_count": 2250,
+          "remote_artifact_count": 900,
+          "normalized_support_sha256": "382299b8fde342e47aa22c3f34aa314a12efd43a99549f539a4ac8fba3e02937",
+          "manifest_sha256": "38d8af2cdbac16ca60ffaa22e54ae9db09e66dd3098ff847a888c59e94d26cdd",
+          "validation_scope": "exact_case_metric_and_hash_chain_local_artifact_bytes_remote_hash_pins_not_downloaded",
+          "status": "passed",
+          "validated_by": "FluidsBench automated metadata validation",
+          "validated_at": "2026-10-29T03:40:48+00:00",
+          "validator_file": "publication-validator.py",
+          "validator_sha256": "a3c247fe267a23c9c27c5d92b5e38fb5436089807642d89c61db14d91e111a7c",
+          "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
         }
       },
       "overall_score_composite": {
@@ -682,7 +698,7 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 2,
+      "revision_count": 0,
       "profile_definition": {
         "id": "ahmedml-native-profiles-v1-candidate",
         "file": "profile-definition-v1.json",
@@ -695,8 +711,8 @@
       "name": "AirfRANS",
       "slug": "airfrans",
       "file": "leaderboard/datasets/airfrans.json",
-      "submission_count": 7,
-      "updated_at": "2026-10-25",
+      "submission_count": 0,
+      "updated_at": null,
       "metrics": {
         "dimensional_fields": [
           "surface_pressure",
@@ -1023,7 +1039,7 @@
           "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/airfrans-native-profile-truth-v1/manifest.json"
         }
       },
-      "revision_count": 8
+      "revision_count": 0
     },
     {
       "name": "DrivAerML",
@@ -1031,12 +1047,12 @@
       "file": "leaderboard/datasets/drivaerml.json",
       "contract_base_path": "benchmark-specs/drivaerml/",
       "contract_base_path_scope": "repository_relative_contract_artifact_fields_only; upstream_dataset_paths_resolve_within_source_release",
-      "submission_count": 2,
-      "updated_at": "2026-10-26",
+      "submission_count": 0,
+      "updated_at": null,
       "submission_population": {
-        "feed_row_count": 2,
-        "prototype_ineligible_fixture_count": 1,
-        "pre_release_reference_count": 2,
+        "feed_row_count": 0,
+        "prototype_ineligible_fixture_count": 0,
+        "pre_release_reference_count": 0,
         "eligible_submission_count": 0,
         "scientific_result_count": 0,
         "scientific_result_count_semantics": "official_citable_results_only",
@@ -1415,8 +1431,8 @@
         }
       ],
       "scoring_support": {
-        "status": "owner_review_required",
-        "submissions_open": false,
+        "status": "official",
+        "submissions_open": true,
         "prediction_scopes": {
           "surface_and_volume": {
             "surface_predictions_required": true,
@@ -1435,7 +1451,6 @@
             "maximum_overall_score": 60.0
           }
         },
-        "closed_reason": "Development candidate packaging, intake and registration are available on dev. Official ranking remains closed pending the production release, genuine-model sensitivity evidence and independent full-split trial.",
         "scientific_approval": {
           "status": "approved",
           "approved_by": "neilashton",
@@ -1813,26 +1828,44 @@
           "pinned_native_files": "complete",
           "surface_area_weights": "complete_public_all_484_pinned_order_count_hash_and_value_audit_passed",
           "volume_field_weighting": "complete_equal_native_cell_no_geometric_cell_volume_weights_required",
-          "force_evaluator": "all_484_candidate_replay_passed_owner_scientifically_approved_release_binding_pending",
-          "velocity_profiles": "all_484_fixed_and_relative_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
-          "cp_cuts": "all_484_four_cut_native_truth_and_support_published_owner_scientifically_approved_release_binding_pending",
+          "force_evaluator": "all_484_replay_passed_owner_scientifically_approved_official_release_bound",
+          "velocity_profiles": "all_484_fixed_and_relative_native_truth_and_support_published_owner_scientifically_approved_official_release_bound",
+          "cp_cuts": "all_484_four_cut_native_truth_and_support_published_owner_scientifically_approved_official_release_bound",
           "bounded_score_definition": "complete_fixed_field_error_caps_and_bounded_force_profile_R2",
-          "composite_sensitivity_and_bootstrap": "pending_frozen_evaluator_and_at_least_three_genuine_model_checkpoint_predictions",
+          "composite_sensitivity_and_bootstrap": "waived_by_dataset_owner_2026_10_28_not_run",
           "schema_v3_participant_result_binding": "candidate_fail_closed_participant_authored_reductions_case_metrics_and_profile_hash_bindings_implemented_tests_pass_scientifically_approved_frozen_release_identity_pending",
-          "independent_participant_dry_run": "pending",
-          "owner_evaluator_approval": "scientific_method_approved_final_immutable_release_binding_pending"
+          "independent_participant_dry_run": "complete_canto_full_50_official_test_cases_final_release_validation_passed",
+          "owner_evaluator_approval": "scientific_method_approved_official_release_bound"
         },
-        "owner_decisions_required": [
-          "provide_at_least_three_genuine_trained_model_checkpoint_predictions_for_sensitivity_and_method_ordering",
-          "review_fixed_field_error_caps_and_bounded_R2_sensitivity_with_genuine_model_predictions_and_publish_bootstrap_indexes",
-          "approve_immutable_evaluator_and_scoring_support_release_before_opening_submissions"
-        ],
         "candidate_manifest": {
           "status": "candidate",
           "release_id": "drivaerml-native-dev-v2-candidate",
           "manifest_file": "scoring-support/drivaerml-native-dev-v2-candidate/manifest.json",
           "manifest_url": "https://raw.githubusercontent.com/neilashton/fluidsbench-submission/fa321e6fe6ce05a7bae41bd3961108d11ef467a6/benchmark-specs/drivaerml/scoring-support/drivaerml-native-dev-v2-candidate/manifest.json",
           "manifest_sha256": "7c6648f333e508eff77b14a475106a26671eb99a0d25bf8c6e48e13fe9a527dc"
+        },
+        "release_id": "drivaerml-native-support-v3",
+        "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/drivaerml-native-support-v3/manifest.json",
+        "manifest_sha256": "7d17e28916f48f8391f817a32ef31c3050815af043e6c1b2d58da9becc7a45e9",
+        "owner_approval": {
+          "approved_by": "Neil Ashton",
+          "approved_at": "2026-10-28",
+          "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
+        },
+        "publication_validation": {
+          "case_count": 438,
+          "support_instance_count": 1314,
+          "local_artifact_count": 0,
+          "remote_artifact_count": 1752,
+          "normalized_support_sha256": "58f20a920b3d54e3362eb19b1e99b7fb7d30d2cc8d8c649150156d3fe410f247",
+          "manifest_sha256": "7d17e28916f48f8391f817a32ef31c3050815af043e6c1b2d58da9becc7a45e9",
+          "validation_scope": "exact_case_metric_and_hash_chain_local_artifact_bytes_remote_hash_pins_not_downloaded",
+          "status": "passed",
+          "validated_by": "FluidsBench automated metadata validation",
+          "validated_at": "2026-10-29T03:40:48+00:00",
+          "validator_file": "publication-validator.py",
+          "validator_sha256": "b6e25669d44ab150588223dc4aa40d1bda350dda76e9696e1361af1b025a3fe1",
+          "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
         }
       },
       "overall_score_composite": {
@@ -1943,14 +1976,14 @@
         "status": "frozen_development_candidate",
         "velocity_validity_policy_id": "drivaerml-autocfd5-velocity-validity-v1"
       },
-      "revision_count": 2
+      "revision_count": 0
     },
     {
       "name": "DrivAerNet++",
       "slug": "drivaernetplusplus",
       "file": "leaderboard/datasets/drivaernetplusplus.json",
-      "submission_count": 10,
-      "updated_at": "2026-10-22",
+      "submission_count": 0,
+      "updated_at": null,
       "metrics": {
         "dimensional_fields": [
           "surface_pressure"
@@ -2047,9 +2080,8 @@
         }
       ],
       "scoring_support": {
-        "status": "owner_review_required",
-        "submissions_open": false,
-        "closed_reason": "Official DrivAerNet++ submissions remain closed pending owner review of the candidate support. Genuine-inference candidates may be submitted to dev using --dev-intake.",
+        "status": "official",
+        "submissions_open": true,
         "coverage_contract": {
           "dimensionality": "3D surface pressure (PointData p); other supports pending",
           "rule": "complete_original_public_release_entities",
@@ -2120,18 +2152,35 @@
           "vector_rule": "one_entity_weight_multiplies_the_squared_vector_magnitude",
           "chunk_rule": "sum_numerators_and_denominators_across_chunks_then_take_one_square_root"
         },
-        "owner_decisions_required": [
-          "approve_candidate_support_release_and_publication_validation",
-          "confirm_profile_station_set_and_retirement_of_front_wheelhouse",
-          "confirm_or_retire_pending_wall_shear_and_volume_supports",
-          "record_final_owner_approval_with_pull_request"
-        ],
         "candidate_manifest": {
           "status": "candidate",
           "release_id": "drivaernetplusplus-native-pressure-support-v1-candidate",
           "manifest_file": "scoring-support/drivaernetplusplus-native-pressure-support-v1-candidate/manifest.json",
           "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/drivaernetplusplus/scoring-support/drivaernetplusplus-native-pressure-support-v1-candidate/manifest.json",
           "manifest_sha256": "ea04603f238f9fffa65e1d00e69ec15ca19a5a03e1b8b869e756a511d39d280a"
+        },
+        "release_id": "drivaernetplusplus-native-pressure-support-v1",
+        "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/drivaernetplusplus-native-pressure-support-v1/manifest.json",
+        "manifest_sha256": "924e171a3ec016cd246a81e4db58c190b112502f3f1e4f27965c1555a1f37ee3",
+        "owner_approval": {
+          "approved_by": "Neil Ashton",
+          "approved_at": "2026-10-28",
+          "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
+        },
+        "publication_validation": {
+          "case_count": 1154,
+          "support_instance_count": 1154,
+          "local_artifact_count": 1154,
+          "remote_artifact_count": 1154,
+          "normalized_support_sha256": "744e8f0a2c8843b58b4ee43b4dec1e5d09d535c9e145e7e1dbbe263f823a8850",
+          "manifest_sha256": "924e171a3ec016cd246a81e4db58c190b112502f3f1e4f27965c1555a1f37ee3",
+          "validation_scope": "exact_case_metric_and_hash_chain_local_artifact_bytes_remote_hash_pins_not_downloaded",
+          "status": "passed",
+          "validated_by": "FluidsBench automated metadata validation",
+          "validated_at": "2026-10-29T03:40:48+00:00",
+          "validator_file": "publication-validator.py",
+          "validator_sha256": "bab9b12258631b49fef83dad0051748e7811bb784681a24f62a10e28dc29a6f3",
+          "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
         }
       },
       "overall_score_composite": {
@@ -2147,14 +2196,14 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 11
+      "revision_count": 0
     },
     {
       "name": "HiLiftAeroML",
       "slug": "hiliftaeroml",
       "file": "leaderboard/datasets/hiliftaeroml.json",
-      "submission_count": 23,
-      "updated_at": "2026-09-12",
+      "submission_count": 0,
+      "updated_at": null,
       "metrics": {
         "dimensional_fields": [
           "surface_pressure",
@@ -2793,7 +2842,7 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 23,
+      "revision_count": 0,
       "profile_definition": {
         "status": "official",
         "contract_id": "hiliftaeroml-compact-profile-predictions-v2-candidate",
@@ -3201,9 +3250,8 @@
         }
       ],
       "scoring_support": {
-        "status": "owner_review_required",
-        "submissions_open": false,
-        "closed_reason": "Every contract input is frozen and every support artefact is generated and hash-pinned; opening submissions is a release decision for the dataset owner.",
+        "status": "official",
+        "submissions_open": true,
         "profile_support": {
           "status": "generated_and_hash_pinned",
           "manifest_file": "profile-support/windsorml-profile-support-v3-manifest.json",
@@ -3339,15 +3387,35 @@
           },
           "rationale": "Identical to AhmedML and HiLiftAeroML component for component, and to DrivAerML apart from its force group, which splits three ways (cd 0.15, cl 0.05, c_pitch 0.05) because it scores pitching moment. WindsorML publishes cmy, so a c_pitch_r2 term is supported by the data, but it would need surface moment integration and a pinned moment reference point that the dataset does not publish. Not adopted."
         },
-        "owner_decisions_required": [
-          "approve_release_and_open_submissions"
-        ],
         "candidate_manifest": {
           "status": "candidate",
           "release_id": "windsorml-native-support-v1-candidate",
           "manifest_file": "scoring-support-candidate/manifest.json",
           "manifest_url": "https://github.com/neilashton/fluidsbench-submission/blob/dev/benchmark-specs/windsorml/scoring-support-candidate/manifest.json",
           "manifest_sha256": "0e24e419c158133a7b9c9cc47634d278d2b94f713a2bbeedfd91959d7dce7b5b"
+        },
+        "release_id": "windsorml-native-support-v1",
+        "manifest_url": "https://github.com/neilashton/fluidsbench-submission/releases/download/windsorml-native-support-v1/manifest.json",
+        "manifest_sha256": "b6b89d956d1ef9ba03ed86c20955a01a8d107095a8c510edbda99cc838b18cf2",
+        "owner_approval": {
+          "approved_by": "Neil Ashton",
+          "approved_at": "2026-10-28",
+          "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
+        },
+        "publication_validation": {
+          "case_count": 317,
+          "support_instance_count": 2219,
+          "local_artifact_count": 0,
+          "remote_artifact_count": 2853,
+          "normalized_support_sha256": "8336267512fe4010819922371b7f9bc5585e281c631c6c0575455a538285f055",
+          "manifest_sha256": "b6b89d956d1ef9ba03ed86c20955a01a8d107095a8c510edbda99cc838b18cf2",
+          "validation_scope": "exact_case_metric_and_hash_chain_local_artifact_bytes_remote_hash_pins_not_downloaded",
+          "status": "passed",
+          "validated_by": "FluidsBench automated metadata validation",
+          "validated_at": "2026-10-29T03:40:48+00:00",
+          "validator_file": "publication-validator.py",
+          "validator_sha256": "1ed87a3f0731a5b86631b842fdebbb575c580628b4c15bf0d8426bb07dd87fe8",
+          "pull_request_url": "https://github.com/neilashton/fluidsbench-submission/pull/78"
         }
       },
       "overall_score_composite": {
@@ -3661,8 +3729,8 @@
           ]
         }
       ],
-      "submission_count": 8,
-      "updated_at": "2026-07-15",
+      "submission_count": 0,
+      "updated_at": null,
       "metric_aggregate": {
         "metric_id": "total_error",
         "operation": "mean",
@@ -3797,7 +3865,7 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 8
+      "revision_count": 0
     },
     {
       "name": "Rotor37",
@@ -4053,8 +4121,8 @@
           ]
         }
       ],
-      "submission_count": 8,
-      "updated_at": "2026-07-15",
+      "submission_count": 0,
+      "updated_at": null,
       "metric_aggregate": {
         "metric_id": "total_error",
         "operation": "mean",
@@ -4159,7 +4227,7 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 8
+      "revision_count": 0
     },
     {
       "name": "BlendedNet",
@@ -4361,8 +4429,8 @@
           ]
         }
       ],
-      "submission_count": 1,
-      "updated_at": "2026-07-15",
+      "submission_count": 0,
+      "updated_at": null,
       "metric_aggregate": {
         "metric_id": "blended_surface_rel_l2",
         "source_metric_ids": [
@@ -4453,7 +4521,7 @@
         ],
         "tolerance": 1e-06
       },
-      "revision_count": 1
+      "revision_count": 0
     }
   ],
   "metric_definitions": [
@@ -7072,5 +7140,5 @@
       "column_group_label": "Relative"
     }
   ],
-  "submission_schema_version": "1.0"
+  "submission_schema_version": "3.0"
 }

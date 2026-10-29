@@ -124,7 +124,6 @@ jobs:
             --pull-request-url "$APPROVAL_PR_URL" \
             --update-existing
           intake_args=()
-          if [[ "$TARGET_BRANCH" == "dev" ]]; then intake_args+=(--dev-intake); fi
           python scripts/manage_leaderboard.py check "${intake_args[@]}"
           git diff --check
       - name: Update draft approval pull request

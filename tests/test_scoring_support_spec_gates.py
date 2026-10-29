@@ -185,7 +185,7 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
                 self.assertIsInstance(support, dict)
                 if support["status"] != "official":
                     self.assertIs(support["submissions_open"], False)
-                    self.assertTrue(support["closed_reason"].strip())
+                    self.assertTrue(support.get("closed_reason", "").strip())
                 else:
                     self.assertIsInstance(support["submissions_open"], bool)
                     self.assertTrue(support["release_id"].strip())
@@ -336,9 +336,9 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
             supports["flow-domain-native"]["entities"],
             "all_native_volume_cells",
         )
-        required_decisions = set(support["owner_decisions_required"])
-        self.assertIn(
-            "approve_the_hash_bound_cache_derivation_and_production_preinstallation",
+        required_decisions = set(support.get("owner_decisions_required", []))
+        self.assertNotIn(
+            "bind_the_owner_opening_decision_to_the_published_immutable_support_and_evaluator_release",
             required_decisions,
         )
         self.assertNotIn(
@@ -369,9 +369,9 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
             SPEC_ROOT / "drivaerml" / "submission-spec.json"
         )
         support = specification["scoring_support"]
-        self.assertEqual(support["status"], "owner_review_required")
-        self.assertFalse(support["submissions_open"])
-        self.assertTrue(support["closed_reason"].strip())
+        self.assertEqual(support["status"], "official")
+        self.assertTrue(support["submissions_open"])
+        self.assertFalse(support.get("closed_reason", "").strip())
         self.assertEqual(
             specification["evaluation_reference_version"],
             "drivaerml-evaluator-v3-candidate",
@@ -439,7 +439,7 @@ class ScoringSupportSpecGateTests(unittest.TestCase):
         self.assertFalse(
             any(
                 "volume" in decision and "weight" in decision
-                for decision in support["owner_decisions_required"]
+                for decision in support.get("owner_decisions_required", [])
             )
         )
 

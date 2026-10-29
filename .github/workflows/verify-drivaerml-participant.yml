@@ -31,7 +31,7 @@ jobs:
         run: >-
           docker run --rm --entrypoint sh fluidsbench-drivaerml -c
           'python -m pip install pytest==8.4.2 && python -m pytest -q tests/test_drivaerml_autocfd5_parity.py tests/test_drivaerml_participant_workflow.py tests/test_drivaerml_native_surface.py tests/test_drivaerml_evaluator.py'
-      - name: Verify packaging and dev intake inside the Linux image
+      - name: Verify packaging and official intake inside the Linux image
         run: >-
           docker run --rm -v "$PWD:/work" -w /work --entrypoint sh fluidsbench-drivaerml -c
           'git config --global --add safe.directory /work && python -m pip install pytest==8.4.2 && python -m pytest -q tests/test_drivaerml_dev_workflow.py'

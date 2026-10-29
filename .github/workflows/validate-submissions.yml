@@ -22,29 +22,17 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: python -m pip install -r requirements.txt
-      - run: python -m unittest discover -s tests -v
-      - name: Test WindsorML contributor packaging and dev registration
-        run: python -m pytest -q tests/test_windsorml_candidate_workflow.py
-      - name: Test AhmedML and WindsorML participant recovery and precision
-        run: python -m pytest -q tests/test_native_participant.py tests/test_ahmedml_regional_precision.py tests/test_ahmedml_candidate_package_assembler.py
-      - name: Test AirfRANS participant recovery and dev packaging
-        run: python -m pytest -q tests/test_airfrans_participant*.py
-      - name: Test DrivAerML complete dev workflow in both scopes
-        run: python -m pytest -q tests/test_drivaerml_dev_workflow.py tests/test_drivaerml_autocfd5_parity.py tests/test_drivaerml_participant_workflow.py
-      - name: Test DrivAerNet++ evaluator, recovery, packaging and dev intake
-        run: python -m pytest -q tests/test_drivaernetplusplus_support.py tests/test_drivaernetplusplus_workflow.py
+      - name: Complete test suite
+        run: python -m pytest -q
       - name: Check pressure-reference audit inputs and documentation
         run: python scripts/render_pressure_reference_docs.py --check
       - name: Validate dataset scoring-support publication gates
         run: python scripts/validate_scoring_supports.py
       - name: Validate approved AirfRANS release bindings
         run: python scripts/validate_airfrans_official_release.py
-      - name: Verify prototype methodology fixtures
-        run: python scripts/add_prototype_methodologies.py --check
       - name: Validate source submissions
         run: |
           intake_args=()
-          if [[ "$TARGET_BRANCH" == "dev" ]]; then intake_args+=(--dev-intake); fi
           python scripts/validate_submission.py "${intake_args[@]}"
       - name: Enforce external contributor pull-request scope
         if: >-
@@ -79,10 +67,27 @@ jobs:
             exit 1
           fi
           intake_args=()
-          if [[ "$TARGET_BRANCH" == "dev" ]]; then intake_args+=(--dev-intake); fi
           python scripts/validate_submission.py --contributor-stage "${intake_args[@]}" "$submission_dir"
       - name: Verify generated feeds
         run: |
           intake_args=()
-          if [[ "$TARGET_BRANCH" == "dev" ]]; then intake_args+=(--dev-intake); fi
           python scripts/manage_leaderboard.py check "${intake_args[@]}"
+
+  history-free-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - name: Verify source works without inherited Git history
+        run: |
+          mkdir "$RUNNER_TEMP/fluidsbench-history-free"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/fluidsbench-history-free"
+          cd "$RUNNER_TEMP/fluidsbench-history-free"
+          python -m pytest -q
+          python scripts/validate_scoring_supports.py
+          python scripts/validate_submission.py
+          python scripts/manage_leaderboard.py check

@@ -1,8 +1,8 @@
 # AhmedML and WindsorML submission workflow
 
-Use a current upstream `dev` checkout. Both datasets now have the same commands
+Use the current release checkout. Both datasets now have the same commands
 for preparing inputs, checking a complete entry, evaluating with recovery,
-creating a case report and packaging a submission. Official intake remains closed.
+creating a case report and packaging a submission. Both datasets are open for submissions.
 
 ## Install and describe your entry
 
@@ -126,13 +126,13 @@ python scripts/$dataset.py verify-package submissions/$dataset/YOUR_SUBMISSION_I
 
 Repeat `--checkpoint ID=PATH` for each declared model checkpoint. Packaging checks
 the actual checkpoint bytes, re-reduces the complete case evidence and validates
-the assembled candidate before publishing its output directory. A failed package
+the assembled result package before publishing its output directory. A failed package
 attempt can be repeated without cleaning a partial output. `verify-package` also
 accepts an external package directory. Neither command registers or approves it.
 
 Commit only `submissions/<dataset>/<new-submission-id>/` and open a PR against
-**`dev`**. The normal contributor checks apply. After review, maintainer registration
-and feed generation publish the reviewed result in the preview.
+**`dev`**. The normal contributor checks apply. After review, maintainer approval
+and feed generation publish the result on the leaderboard.
 Those are publication steps; the submitted package needs no manual repairs.
 
 ## Pinned Linux container

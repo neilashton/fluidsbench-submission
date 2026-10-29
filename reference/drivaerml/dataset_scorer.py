@@ -618,14 +618,17 @@ def _load_contract(
     )
     if specification.get("dataset_id") != "drivaerml":
         raise DrivAerDatasetScorerError("submission specification is not DrivAerML")
-    if specification.get("status") != "candidate_scoring_contract":
+    if specification.get("status") not in {"candidate_scoring_contract", "official"}:
         raise DrivAerDatasetScorerError(
             "dataset scorer only accepts the candidate DrivAerML contract"
         )
     scoring = _mapping(specification.get("scoring_support"), "scoring_support")
     if (
-        scoring.get("status") != "owner_review_required"
-        or scoring.get("submissions_open") is not False
+        not (specification.get("status") == "official"
+             and scoring.get("status") == "official"
+             and scoring.get("submissions_open") is True)
+        and (scoring.get("status") != "owner_review_required"
+             or scoring.get("submissions_open") is not False)
     ):
         raise DrivAerDatasetScorerError(
             "candidate dataset scorer requires submissions to remain closed"

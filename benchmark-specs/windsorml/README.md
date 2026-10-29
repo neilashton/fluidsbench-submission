@@ -80,7 +80,9 @@ time. Do not attempt a full VTK mesh load merely to package the result.
 
 ## Maintainer support metadata
 
-The canonical schema-v3 candidate manifest is bound in `submission-spec.json`.
+The official `windsorml-native-support-v1` manifest is bound in `submission-spec.json`.
+The candidate publisher below is a maintainer preparation tool; a new official
+release still requires review and publication.
 Its compact case metadata is reproducible from the checked-in source identity
 and profile support; it does not regenerate quadrature or resample profiles:
 
@@ -89,5 +91,5 @@ python scripts/publish_windsorml_candidate_support.py --output /tmp/windsor-supp
 ```
 
 The metadata covers every scored native point/cell, derived force support and
-all four profile families. Official activation remains an owner release
-operation, separate from dev intake and pre-release registration.
+all four profile families. WindsorML is open for submissions. Use the participant quickstart to package
+results and the shared submission workflow to open a pull request.

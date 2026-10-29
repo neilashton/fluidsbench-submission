@@ -4,8 +4,8 @@ The [participant quickstart](../../benchmark-specs/windsorml/QUICKSTART.md) prov
 the complete resumable command sequence and pinned Linux container. The
 per-case commands below remain available for existing pipelines.
 
-Use the current upstream **`dev`** branch. This workflow packages genuine model
-inference for development review; official intake remains closed. Read the
+Use the current release checkout. This workflow packages genuine model
+inference for submission review. Read the
 [data, split and physics contract](../../benchmark-specs/windsorml/README.md)
 first. Daniel's end-to-end trial is to run this workflow with his own model and
 checkpoint on one complete declared split, then open a PR targeting `dev`.
@@ -92,73 +92,20 @@ python scripts/score_windsorml_candidate_dataset.py \
   --output /path/to/dataset-evidence.json
 ```
 
-## 3. Assemble and validate
+## Package, validate and submit
 
-Create one discretization JSONL record per case, in exact split order, with
-actual inference input, direct-output and mapping counts. Follow
-[`discretization-case.schema.json`](../../schemas/v3/discretization-case.schema.json)
-and the [spatial record reference](../../docs/RESULT_FORMAT.md).
-The package-config `spatial_discretization` contains the corresponding training
-and inference summaries. Include mappings for both native supports, force
-support `windsorml-force-coefficients-v1`, and all four family IDs from
-`profile-definition-v2.json`. Profiles and forces are evaluator-derived mappings
-from the surface or volume output; all support coverage must equal 1.
+Follow the [WindsorML participant quickstart](../../benchmark-specs/windsorml/QUICKSTART.md)
+to evaluate the complete split and run `python scripts/windsorml.py package`.
+That command checks the evaluation outputs, checkpoint identities and release
+bindings and creates the result directory. Use its generated package for submission.
+Keep the template release bindings unchanged.
 
 ```bash
-python scripts/assemble_windsorml_schema_v3_candidate.py \
-  --config /path/to/package-config.json \
-  --case-evidence-directory /path/to/evidence \
-  --discretization-cases /path/to/cases.jsonl \
-  --checkpoint my-model=/path/to/model.pt \
-  --output submissions/windsorml/windsorml-my-model-full-v1
-
-python scripts/validate_submission.py --dev-intake --contributor-stage \
-  submissions/windsorml/windsorml-my-model-full-v1
+python scripts/windsorml.py verify-package submissions/windsorml/YOUR_SUBMISSION_ID
+python scripts/validate_submission.py --contributor-stage submissions/windsorml/YOUR_SUBMISSION_ID
 ```
 
-Use one `--checkpoint ID=PATH` for each actual checkpoint ID in the method
-record. Optional `--dataset-evidence` must equal a fresh reduction. The assembler
-always recomputes the split metrics and binds profiles, sufficient statistics,
-discretization, and evaluation evidence; never hand-edit generated hashes.
-It refuses an existing output directory, leaving earlier results intact.
-
-The assembler automatically downloads and verifies the global profile-truth
-manifest pinned by `leaderboard/manifest.json`. For offline use:
-
-```bash
-python scripts/fetch_profile_ground_truth.py --output /path/to/profile-truth-manifest.json
-```
-
-Transfer those unchanged bytes and pass
-`--profile-ground-truth-manifest /path/to/profile-truth-manifest.json` during
-assembly. The compact prediction package contains 16 series per case, with
-exact native-derived coordinates and 128 predictions per series.
-
-## 4. Open the development PR
-
-Commit only `submissions/windsorml/<new-submission-id>/` and target **`dev`**.
-Do not add approval metadata, edit the registry, or regenerate feeds. CI chooses
-`--dev-intake` for a PR targeting `dev`. Passing intake allows review and merge
-without altering the contributor's package. It does not publish a row.
-
-## 5. Maintainer: show the reviewed result on dev
-
-After reviewing Daniel's real-model package, inspect and register its exact
-binding, then regenerate the feed:
-
-```bash
-python scripts/register_windsorml_pre_release.py \
-  submissions/windsorml/windsorml-my-model-full-v1/submission.json
-python scripts/register_windsorml_pre_release.py --register \
-  submissions/windsorml/windsorml-my-model-full-v1/submission.json
-python scripts/manage_leaderboard.py build --dev-intake
-python scripts/manage_leaderboard.py check --dev-intake
-```
-
-Commit the registry and generated feeds in a maintainer PR to `dev`. The review
-leaderboard reads submission `dev` automatically. The row is a pre-release
-reference, without citation or promotion eligibility. No production release
-or official approval is created. Changed package bytes invalidate registration.
-Confirm the row, six field errors, force metrics, and all fixed/relative profile
-comparisons in the dev viewer. This publication step is normal review, not a
-manual repair of the submitted files.
+Commit only the generated `submissions/windsorml/YOUR_SUBMISSION_ID/` directory
+and open a pull request against `dev`. Follow [Submitting a result](../../SUBMITTING.md).
+Maintainers review, approve and publish the result. Do not add approval records,
+registration files or generated leaderboard feeds to a participant pull request.

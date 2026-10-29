@@ -55,6 +55,7 @@ def _renderer_is_pinned() -> bool:
     return matplotlib.__version__ == MATPLOTLIB_VERSION and numpy.__version__ == NUMPY_VERSION
 
 
+@unittest.skipUnless(__import__("sys").platform.startswith("linux"), "requires Linux retained-file descriptor semantics")
 class DrivAerMLCpOwnerReviewAtlasTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:

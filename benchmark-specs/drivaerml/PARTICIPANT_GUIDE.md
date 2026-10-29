@@ -1,14 +1,13 @@
-# DrivAerML candidate participant guide
+# DrivAerML participant guide
 
 This guide describes the native-mesh workflow for a DrivAerML result submitted
-to `fluidsbench-submission`. The complete candidate workflow is available on
-`dev`, including contributor PR validation, maintainer registration and the dev
-leaderboard. Official submissions remain closed (`submissions_open=false`).
+to `fluidsbench-submission`. DrivAerML is open for submissions across all eight prescribed splits, with
+full surface-and-volume or surface-only predictions.
 
 Start with the [resumable participant quickstart](QUICKSTART.md): prepare data
 and support, validate your entry, evaluate the complete split, then package and
-verify the result. It uses the same native field/force evaluator and dev intake
-checks documented below. Dev v2 profile integration matches AutoCFD5 v1.1.7.
+verify the result. It uses the same native field/force evaluator and validation
+checks documented below. Profile integration matches AutoCFD5 v1.1.7.
 The shared [submission workflow](../../SUBMITTING.md) covers package versions,
 optional artifacts and later PR review.
 
@@ -323,7 +322,7 @@ must bind and reproduce the identical support rather than infer a new mask.
 
 </details>
 
-## 5. Install and run the candidate tools
+## 5. Install and run the evaluator tools
 
 Use the [runtime installed above](#before-you-start). Run these commands from the repository root.
 
@@ -439,122 +438,27 @@ packages contain eight Cp series and no velocity series. Two relative Cp cuts
 are explicit shared-support aliases. Relative families remain report-only at
 zero weight; only fixed families contribute to the composite.
 
-## 6. Assemble and validate a closed candidate
+## 6. Package and submit
 
-Start from
-[`examples/drivaerml-v3-candidate/`](../../examples/drivaerml-v3-candidate/).
-Replace the participant `__REPLACE_...__` values and retain the already-published
-benchmark bindings. Supply the actual checkpoint bytes used for inference.
-List them at any time:
+Use the [participant quickstart](QUICKSTART.md) to run `scripts/drivaerml.py package`
+and `verify-package` against the complete evaluation output. This creates the
+release-bound result package and validates it before submission.
 
 ```bash
-python scripts/assemble_drivaerml_schema_v3_candidate.py \
-  --config /path/to/package-config.json \
-  --list-unresolved
+python scripts/validate_submission.py --contributor-stage submissions/drivaerml/YOUR_SUBMISSION_ID
 ```
 
-Once that command reports no unresolved tokens, run assembly to perform the
-authoritative repository-binding, input, and schema checks. Assemble only
-participant-owned files:
+Open a pull request against `dev` containing only that new result directory.
+Follow the [submission workflow](../../SUBMITTING.md) and
+[result version rules](../../docs/RESULT_FORMAT.md#result-versions).
+Maintainers review and approve the package before leaderboard publication.
+Code, model weights and full prediction artifacts remain optional.
 
-```bash
-python scripts/assemble_drivaerml_schema_v3_candidate.py \
-  --config /path/to/package-config.json \
-  --case-metrics /path/to/work/metrics/cases.json \
-  --profiles /path/to/work/package-profiles \
-  --regional-diagnostics /path/to/work/regional-diagnostics.json \
-  --checkpoint <checkpoint-id>=/path/to/checkpoint.pt \
-  --discretization-cases /path/to/discretization/cases.jsonl \
-  --output submissions/drivaerml/<submission-id>
-```
+## Relative diagnostics
 
-The assembler obtains dataset, split, evaluator, and release identities from
-the checked-in contract, rebuilds the participant hash chain, schema-checks
-the files, and refuses an existing output directory. It intentionally does not
-write `approval`, `maintainer-validation.json`, or
-`prediction-artifact-checks.json`. Candidate validity can then be checked with:
-
-```bash
-python scripts/validate_submission.py --dev-intake --contributor-stage \
-  submissions/drivaerml/<submission-id>
-```
-
-Repeat `--checkpoint ID=PATH` for all declared checkpoints. Assembly verifies
-file hashes and records the participant's genuine-inference attestation. The
-validator independently recomputes force/profile scores against pinned truth,
-checks complete native support and split coverage, and validates the package
-hash chain. A dev pass does not grant official approval or a ranking claim.
-
-## 7. Pull request and dev publication
-
-Open a PR targeting **`dev`**, containing exactly one new
-`submissions/drivaerml/<submission-id>/` directory. Keep contract, evaluator,
-support, schema, workflow, generated-feed, and maintainer metadata changes out
-of a participant PR. Follow the immutable result-series/version rules in the
-[result reference](../../docs/RESULT_FORMAT.md#result-versions).
-
-After review and merge, a maintainer registers the exact package and rebuilds
-the dev feeds:
-
-```bash
-python scripts/register_drivaerml_pre_release.py \
-  submissions/drivaerml/<submission-id>/submission.json --register
-python scripts/manage_leaderboard.py build --dev-intake
-python scripts/manage_leaderboard.py check --dev-intake
-```
-
-Commit the registry and generated feeds on `dev`. The dev leaderboard reads
-the submission repository's `dev` feed and displays registered packages as
-pre-release references. Their scores and profiles can be inspected, but they
-are not official, citable, or promotable results. The registry binds every file;
-changing a registered package invalidates its registration. Main remains closed.
-
-Sharing complete native prediction fields is optional under the repository's
-normal reproducibility policy. If a contributor shares them, the declaration
-must use a revision-pinned artifact and a hash-bound manifest. A maintainer may
-optionally audit or recompute values from that artifact and record the result in
-maintainer-owned metadata. Participants must not create or edit
-`prediction-artifact-checks.json` or `maintainer-validation.json`. Neither a
-shared native-field artifact nor a maintainer recomputation is a participant
-submission requirement or an activation gate; the submitted JSON generated by
-the frozen evaluator remains the required result payload.
-
-Until then, use this workflow for implementation feedback and reproducibility
-review only.
-
-## Relative diagnostics in dev
-
-<details>
-<summary>Report-only fixed/relative profile comparison and remaining official gates</summary>
-
-The dev evaluator derives relative velocity profiles from native `UMeanTrim`
-and relative Cp cuts from native `pMeanTrim`. Participants do not upload new
-landmarks, mappings, or another predicted Cp field. The exact all-484 support
-and truth release supplies those identities. Both relative families carry
-weight zero and can be inspected beside the fixed profiles in the dev viewer.
-
-Official activation remains separate: genuine three-model sensitivity and an
-independent full-split submission trial still need to be completed before the
-final release-specific approval. Dev registration does not satisfy these gates
-or open official submissions.
-
-The retained candidate is
-[`drivaerml-relative-diagnostics-v3.json`](drivaerml-relative-diagnostics-v3.json).
-It binds `drivaerml-velocity-relative-v3` and
-`drivaerml_cp_relative_v1`; the earlier relative-velocity-v1 and v2 families
-are not accepted. Its additive profile format,
-`fluidsbench-drivaerml-relative-profile-chunks-v3-candidate`, is defined by
-[`drivaerml-relative-profile-chunk.schema.json`](../../schemas/v1/drivaerml-relative-profile-chunk.schema.json).
-Each complete case has 40 namespaced logical series: 20 unchanged constant
-series, 16 materialized relative-velocity series, two moved relative Cp cuts,
-and two relative Cp aliases that reference the materialized constant
-centrelines without copying their arrays. The submission specification keeps
-`profile_format_enabled=false` for official activation. Dev intake explicitly
-accepts this format under the published candidate release; ordinary official
-validation continues to reject it.
-The velocity-placement, velocity-mapping, and Cp manifest bytes and SHA-256
-identities are retained under [`support/relative-v3/`](support/relative-v3/),
-but their verified publication does not activate the format. The legacy
-20-series format and its score are unchanged.
-
-</details>
+The evaluator derives fixed and relative profiles from the same native predictions.
+Relative velocity and Cp families remain report-only with zero composite weight.
+The official package preserves their frozen coordinates, support identities and
+native gaps. The owner removed sensitivity studies as an opening requirement;
+no such study is claimed. See the [owner decision](OWNER_OPENING_DECISION.md)
+and [profile contract](drivaerml-relative-diagnostics-v3.json).

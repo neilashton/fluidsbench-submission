@@ -95,18 +95,21 @@ def check(root=ROOT):
             "native table archive differs from the published asset binding")
     require(all(a["url"].startswith("https://github.com/neilashton/fluidsbench-submission/releases/download/" + a["release_id"] + "/")
                 and "?" not in a["url"] and "#" not in a["url"] for a in assets.values()), "asset URL must identify its versioned dev prerelease")
-    if active.get("publication_status") == "dev_intake":
-        require(active.get("intake_branch") == "dev", "AirfRANS intake must target dev")
+    if active.get("publication_status") in {"dev_intake", "official_intake"}:
+        branch = active.get("intake_branch")
+        require(branch in {"dev", "main"}, "AirfRANS intake branch must be dev or main")
+        require(active["publication_status"] != "dev_intake" or branch == "dev",
+                "legacy dev intake must target dev")
         expected = json.loads(json.dumps(contract))
-        expected["publication_status"] = "dev_intake"
-        expected["intake_branch"] = "dev"
+        expected["publication_status"] = active["publication_status"]
+        expected["intake_branch"] = branch
         expected["approved_release"] = declaration
         expected["scoring_support"]["submissions_open"] = True
         expected["scoring_support"].pop("closed_reason", None)
         prefix = "releases/airfrans-evaluation-v1/airfrans/"
         expected["scoring_support"]["manifest_file"] = prefix + expected["scoring_support"]["manifest_file"]
         expected["scoring_support"]["publication_validation"]["validator_file"] = prefix + "publication-validator.py"
-        require(active == expected, "dev intake differs from the approved scoring contract")
+        require(active == expected, "intake differs from the approved scoring contract")
     else:
         require(active["scoring_support"]["submissions_open"] is False, "unknown AirfRANS activation")
     return {"contract_id": binding["contract_id"], "enabled_split_ids": binding["enabled_split_ids"],

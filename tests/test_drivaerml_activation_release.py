@@ -156,9 +156,11 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
             return errors
 
     def test_promotion_rerun_preserves_verified_pending_release(self) -> None:
-        existing = json.loads(
-            (ROOT / DATASET_PREFIX / "submission-spec.json").read_text()
-        )
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        existing, _ = self.build_release(root, active=False)
+        existing["relative_diagnostics"]["closed_reason"] = "Official activation is pending."
         generated = {
             "relative_diagnostics": copy.deepcopy(
                 existing["relative_diagnostics"]
@@ -169,7 +171,8 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
         generated_declaration["status"] = "support_pending"
         generated_declaration.pop("closed_reason")
 
-        preserve_relative_activation_declaration(generated, existing)
+        with mock.patch("scripts.promote_drivaerml_candidate.BENCHMARK_ROOT", root / DATASET_PREFIX):
+            preserve_relative_activation_declaration(generated, existing)
 
         for field in (
             "status",
@@ -183,9 +186,10 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
             )
 
     def test_checked_in_pending_release_is_verified_and_fail_closed(self) -> None:
-        spec = json.loads(
-            (ROOT / DATASET_PREFIX / "submission-spec.json").read_text()
-        )
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        spec, _ = self.build_release(root, active=False)
         declaration = spec["relative_diagnostics"]
         errors: list[str] = []
         self.assertTrue(
@@ -193,7 +197,7 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
                 errors.append,
                 spec,
                 declaration,
-                repository_root=ROOT,
+                repository_root=root,
                 require_active=False,
             ),
             "\n".join(errors),
@@ -210,7 +214,7 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
                 errors.append,
                 spec,
                 declaration,
-                repository_root=ROOT,
+                repository_root=root,
                 require_active=True,
             )
         )

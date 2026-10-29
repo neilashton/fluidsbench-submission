@@ -9,7 +9,7 @@ See the [dataset index](../README.md) for submission availability. The benchmark
 `02688c727cdb8dc8678e28abc6bbbb7e93c5fa15` and covers all eight published
 split families using their real `run_N` case IDs.
 
-The candidate evaluator scores complete native `CellData` fields without
+The evaluator scores complete native `CellData` fields without
 participant-side resampling:
 
 - surface `pMean` and `wallShearStressMean` on every boundary polygon;
@@ -26,7 +26,7 @@ metric, with cell-volume-weighted values reported secondarily. Profiles are
 derived from the same complete fields used for spatial scoring; a submission
 cannot supply its own profile values.
 
-Start with the [candidate packaging instructions](../../examples/ahmedml-v3-candidate/README.md).
+Start with the [packaging instructions](../../examples/ahmedml-v3-candidate/README.md).
 You need the pinned public files, the automatically downloadable prepared cache, complete evaluator outputs for one official split, and actual model
 checkpoint/spatial records. Run commands from the repository root. Shared package, version, and optional-artifact rules are in
 [SUBMITTING.md](../../SUBMITTING.md).
@@ -111,27 +111,6 @@ case.
 
 </details>
 
-## Development fixture
-
-The development fixture perturbs CFD truth; it does not run a surrogate checkpoint and is permanently ineligible for ranking, citation, or promotion. Use the genuine-inference assembler for a model result.
-
-<details>
-<summary>Development fixture provenance and purpose</summary>
-
-`ahmedml-geotransolver-calibrated-dev-fixture-v1` is an explicit non-ranked
-integration fixture. It deterministically perturbs public CFD truth on every
-native cell. A retained legacy GeoTransolver checkpoint supplies only four
-representative error magnitudes and is not executed. The checkpoint is not
-known to correspond to any official AhmedML split.
-
-The fixture exists only to exercise package validation and the development
-leaderboard. It is permanently ineligible for ranking, citation, promotion, or
-interpretation as surrogate inference. Its exact field metrics, forces,
-profiles, and regional diagnostics are nevertheless recomputed by the same
-dataset-owned evaluator path intended for future real submissions.
-
-</details>
-
 ## Relevant files
 
 <details>
@@ -168,17 +147,13 @@ dataset-owned evaluator path intended for future real submissions.
   bytes, and recomputes all evaluator-derived package products.
 - `examples/ahmedml-v3-candidate/`: genuine-inference configuration template
   and complete packaging instructions.
-- `pre-release-reference-registry.json`: initially empty maintainer registry
-  for exact hash-bound, non-citable genuine-inference rows on the dev feed.
-- `scripts/register_ahmedml_pre_release.py`: proposes or atomically appends one
-  validated dev-only registry binding without creating approval.
 - `scripts/assemble_ahmedml_schema_v3_dev_fixture.py`: creates the non-ranked
   schema-v3 development package.
 
-The compact 316-case candidate metadata is already published and hash-bound in
-`submission-spec.json`. If it is deliberately regenerated after a contract
-change, `scripts/publish_ahmedml_candidate_support.py` validates every case
-before atomically recording the new candidate manifest SHA-256. Regeneration
-is not required merely to copy or rebuild an identical production cache.
+The official `ahmedml-native-support-v1` metadata is hash-bound in
+`submission-spec.json`. The older candidate publisher remains a maintainer
+preparation tool. A changed support contract requires a separately reviewed
+release; participants use the existing published support. Regeneration is not
+required to copy or rebuild an identical production cache.
 
 </details>

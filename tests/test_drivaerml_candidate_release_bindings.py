@@ -432,7 +432,7 @@ class DrivAerMLCandidateReleaseBindingTests(unittest.TestCase):
         active = load_json(ROOT / "benchmark-specs" / "drivaerml" / "submission-spec.json")
         self.assertEqual(promoter.unresolved_release_tokens(active), [])
         self.assertEqual(active["scoring_support"]["candidate_manifest"], bindings["candidate_manifest"])
-        self.assertFalse(active["scoring_support"]["submissions_open"])
+        self.assertTrue(active["scoring_support"]["submissions_open"])
         self.assertEqual(active["profile_definition"]["id"], "drivaerml-diagnostics-v10-candidate")
         profile_path = BINDINGS_PATH.parent / bindings["profile_definition_v10"]["file"]
         self.assertEqual(

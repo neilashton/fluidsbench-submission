@@ -9,12 +9,8 @@ from reference.airfrans import participant as w
 
 
 def retained_evaluation(tmp_path, split_id):
-    original_id = (
-        "transolverpp-full-v1"
-        if split_id in ("full", "scarce")
-        else "transolverpp-aoa-v1"
-    )
-    source = w.ROOT / "submissions/airfrans" / original_id
+    from tests.airfrans_fixture import make_fixture
+    source = make_fixture(tmp_path / 'synthetic-input', split_id)
     original = w.load_json(source / "submission.json")
     submission_id = f"participant-test-{split_id.replace('_', '-')}-v1"
     spec = w.load_json(w.SPEC_PATH)
@@ -141,7 +137,7 @@ def test_complete_current_dev_package(tmp_path, split_id):
     root, config, rows = retained_evaluation(tmp_path, split_id)
     target = tmp_path / config["submission_id"]
     result = w.package(root, tmp_path / "config.json", tmp_path / "cases.jsonl", target)
-    assert result["status"] == "validated_dev_package"
+    assert result["status"] == "validated_package"
     submission = w.load_json(target / "submission.json")
     assert submission["scoring_support"]["status"] == "official"
     assert "approval" not in submission

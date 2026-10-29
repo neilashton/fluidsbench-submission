@@ -21,18 +21,6 @@ def load(path):
 
 
 class HiLiftDimensionalUnitsTests(unittest.TestCase):
-    def test_independent_full_geotransolver_known_answers(self):
-        # Current ICLR manuscript's corrected dimensional RMSE table.
-        path = ROOT / "submissions/hiliftaeroml/hiliftaeroml-geotransolver-full360-candidate-v1/submission.json"
-        values = load(path)["metric_values"]
-        for metric, expected in {
-            "surface_pressure_rmse": 87.3107201811254,
-            "surface_wall_shear_rmse": 0.6836418675218421,
-            "volume_pressure_rmse": 165.9088033434961,
-            "volume_velocity_rmse": 2.6561332906973014,
-        }.items():
-            with self.subTest(metric=metric):
-                self.assertAlmostEqual(values[metric], expected, places=10)
 
     def test_invalid_or_unrelated_input_is_rejected(self):
         for value in (-1, True, float("nan"), float("inf"), "1", None, 1e308):
@@ -101,41 +89,7 @@ class HiLiftDimensionalUnitsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "incomplete"):
             units.corrected_documents(submission, evidence, cases)
 
-    def test_all_registered_results_preserve_every_non_dimensional_metric(self):
-        registry = load(ROOT / units.CORRECTION_PATH)
-        self.assertEqual(len(registry["records"]), 23)
-        self.assertEqual(sum(v["corrected"]["case_count"] for v in registry["records"].values()), 8142)
-        original_order, corrected_order = [], []
-        for config in validator.HILIFT_REGISTERED_PREVIEW_CONFIGS:
-            binding = config["binding"]
-            path = ROOT / binding["submission_path"]
-            corrected = load(path)
-            source_path, _, new_binding = units.corrected_registration_view(ROOT, path, corrected, binding)
-            original = load(source_path)
-            self.assertEqual(new_binding["dimensional_export_version"], units.CONTRACT_ID)
-            with self.subTest(submission_id=binding["submission_id"]):
-                for metric, value in original["metric_values"].items():
-                    if metric in units.METRIC_FACTORS:
-                        self.assertTrue(math.isclose(corrected["metric_values"][metric], value * units.METRIC_FACTORS[metric], rel_tol=1e-12, abs_tol=1e-12))
-                    else:
-                        self.assertEqual(corrected["metric_values"][metric], value)
-                original_order.append((original["split_id"], -original["metric_values"]["overall_score"], binding["submission_id"]))
-                corrected_order.append((corrected["split_id"], -corrected["metric_values"]["overall_score"], binding["submission_id"]))
-        self.assertEqual(sorted(original_order), sorted(corrected_order))
 
-    def test_modified_registry_original_or_corrected_bytes_fail_closed(self):
-        binding = validator.HILIFT_REGISTERED_PREVIEW_CONFIGS[0]["binding"]
-        path = ROOT / binding["submission_path"]
-        submission = load(path)
-        source = load(ROOT / units.CORRECTION_PATH)["records"][binding["submission_id"]]["source"]
-        real_digest = units.digest
-        paths = [ROOT / units.CONTRACT_PATH, ROOT / units.CORRECTION_PATH,
-                 ROOT / source["submission_file"], ROOT / source["evidence_file"],
-                 path, path.parent / "evaluation-evidence.json", path.parent / "metrics/cases.json"]
-        for changed in paths:
-            with self.subTest(changed=changed), patch.object(units, "digest", side_effect=lambda value: "0" * 64 if value == changed else real_digest(value)):
-                with self.assertRaises(ValueError):
-                    units.corrected_registration_view(ROOT, path, submission, binding)
 
 
 if __name__ == "__main__":

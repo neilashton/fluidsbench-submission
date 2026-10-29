@@ -634,8 +634,20 @@ class ParticipantWorkflow:
         return receipt
 
     def verify_package(self, directory):
-        pre_release = importlib.import_module(f"reference.{self.dataset}.pre_release")
         directory = Path(directory).expanduser().resolve()
+        specification = load_json(self.spec_path)
+        if specification.get("status") == "official":
+            from scripts.validate_submission import validate_submission_file
+
+            errors, _ = validate_submission_file(
+                directory / "submission.json",
+                contributor_stage=True,
+                require_registered_path=False,
+            )
+            if errors:
+                raise WorkflowError("; ".join(errors))
+            return {"status": "valid_official_package", "output": str(directory)}
+        pre_release = importlib.import_module(f"reference.{self.dataset}.pre_release")
         pre_release.package_tree_binding(directory)
         submission = load_json(directory / "submission.json")
         sid = submission.get("submission_id")
@@ -701,12 +713,19 @@ class ParticipantWorkflow:
                 dataset_evidence_path=root / "dataset-evidence.json",
                 output_path=staged,
             )
+            if load_json(self.spec_path).get("status") == "official":
+                from scripts.finalize_official_native_package import finalize
+
+                finalize(staged, self.spec_path)
             self.verify_package(staged)
             staged.rename(output)
         return {
-            "status": "validated_dev_package",
+            "status": (
+                "validated_official_package"
+                if load_json(self.spec_path).get("status") == "official"
+                else "validated_dev_package"
+            ),
             "output": str(output),
-            "pull_request_base": "dev",
         }
 
     def report(self, evaluation_root, case_id, output):

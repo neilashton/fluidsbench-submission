@@ -1,5 +1,8 @@
 """Retained full-release evidence stays bound to the reviewed closed candidate."""
 import copy
+import hashlib
+import json
+from pathlib import Path
 import importlib.util
 import unittest
 from unittest import mock
@@ -13,6 +16,20 @@ SPEC.loader.exec_module(publication)
 
 
 class PreparedPublication(unittest.TestCase):
+    def setUp(self):
+        # Reproduce the historical receipt against its archived inputs, not the
+        # newer official contract. No historical Git commits are needed.
+        root = Path(__file__).resolve().parent / "fixtures/drivaernetplusplus-publication-inputs"
+        archived = root / "benchmark-specs/drivaernetplusplus/submission-spec.json"
+        candidate = json.loads(archived.read_text())
+        def hashes():
+            return {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                    for p in root.rglob("*") if p.is_file()}
+        for patcher in (mock.patch.object(contract, "load_specification", return_value=candidate),
+                        mock.patch.object(publication, "input_hashes", side_effect=hashes)):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
     def test_committed_full_validation_evidence(self):
         receipt = contract.read_json(publication.PREPARATION / "publication-validation.json")
         publication.check_receipt(receipt)

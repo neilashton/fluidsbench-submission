@@ -324,10 +324,17 @@ def _release_binding(
     support = specification.get("scoring_support")
     if not isinstance(support, dict):
         raise PackageAssemblyError("DrivAerML specification has no scoring_support object")
-    if support.get("status") not in {"candidate", "owner_review_required"}:
-        raise PackageAssemblyError("DrivAerML must remain a closed candidate for this workflow")
-    if support.get("submissions_open") is not False:
-        raise PackageAssemblyError("candidate assembly requires submissions_open=false")
+    candidate_state = (
+        support.get("status") in {"candidate", "owner_review_required"}
+        and support.get("submissions_open") is False
+    )
+    official_state = (
+        specification.get("status") == "official"
+        and support.get("status") == "official"
+        and support.get("submissions_open") is True
+    )
+    if not (candidate_state or official_state):
+        raise PackageAssemblyError("DrivAerML support is neither a closed candidate nor an open official release")
     owner_candidate = support.get("candidate_manifest")
     if not isinstance(owner_candidate, dict):
         raise PackageAssemblyError(

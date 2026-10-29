@@ -38,13 +38,8 @@ def sha256_file(path: Path) -> str:
 
 
 def sha256_git_blob(revision: str, path: str) -> str:
-    payload = subprocess.run(
-        ("git", "show", f"{revision}:{path}"),
-        cwd=ROOT,
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    ).stdout
+    """Verify archived source bytes without requiring the retired Git history."""
+    payload = (ROOT / "tests/fixtures/historical-source" / revision / path).read_bytes()
     return hashlib.sha256(payload).hexdigest()
 
 
@@ -275,9 +270,7 @@ class DrivAerNativeVolumeEvidenceTests(unittest.TestCase):
         self.assertFalse(
             any(
                 "volume" in decision and "weight" in decision
-                for decision in specification["scoring_support"][
-                    "owner_decisions_required"
-                ]
+                for decision in specification["scoring_support"].get("owner_decisions_required", [])
             )
         )
 
