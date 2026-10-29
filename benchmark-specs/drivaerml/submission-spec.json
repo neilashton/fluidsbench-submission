@@ -1176,11 +1176,10 @@
       "sha256": "107865198cb0a9414335cfe0b363bccc38c419e5482a9e7ef5aa675efd391f67"
     }
   ],
-  "dev_profile_scoring": {
-    "file": "dev-profile-scoring-v2.json",
-    "sha256": "0ef98cb4871e6e03c3b76ab558a3074efc1bff6ce1da9b18aee6aa2d3a5db889",
-    "status": "dev_only",
-    "release_id": "drivaerml-native-dev-v2-candidate",
-    "precedence": "For native dev v2 packages, this contract replaces the v10 native intersection-segment-length Cp reduction. The immutable v10/relative-v3 geometry, station identities and native-v3 truth remain unchanged. Historical v1 packages must be reevaluated before dev v2 intake."
+  "profile_scoring": {
+    "file": "profile-scoring-v2.json",
+    "sha256": "c67ba550c661d0925c7e54d2c7ebda217a343dabd4a3d1f23e80618d2cb01449",
+    "status": "official",
+    "release_id": "drivaerml-profile-scoring-v2"
   }
 }

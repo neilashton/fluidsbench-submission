@@ -1,6 +1,6 @@
 # Pressure definitions and references
 
-Audited 2026-10-29 against submission revision `6491120d0ca3cdc0e19e7b7a7dfefa6af543e72d`.
+Audited 2026-10-29 against submission revision `122ff713571dffbf7c17fccb3f2519976d429d9d`.
 
 Source-backed documentation of pressure definitions and the separately versioned HiLiftAeroML SI export correction. This file is not evaluator configuration, owner approval, or a scoring-support release.
 
@@ -125,7 +125,7 @@ CpMeanTrim is static pressure coefficient; CptMeanTrim is total pressure coeffic
 <details>
 <summary>Evaluator and specification trace</summary>
 
-- [benchmark-specs/drivaerml/submission-spec.json](../benchmark-specs/drivaerml/submission-spec.json): Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged. Final release activation flags now record completed support binding and the Full-package validation; no scientific definition changed.
+- [benchmark-specs/drivaerml/submission-spec.json](../benchmark-specs/drivaerml/submission-spec.json): Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged. Final release activation flags now record completed support binding and the Full-package validation; no scientific definition changed. Re-audited for the production profile-contract name: only the contract filename, metadata and binding changed; the scientific weighting, gap handling, pressure conversions and force definitions are unchanged.
 - [reference/drivaerml/evaluator.py](../reference/drivaerml/evaluator.py): Uses pMeanTrim directly for surface and volume relative-L2 statistics.
 - [reference/drivaerml/accumulators.py](../reference/drivaerml/accumulators.py): Complete-case sums; rejects zero truth norm and non-finite reductions.
 - [benchmark-specs/drivaerml/proposal/SCIENTIFIC_CONTRACT.md](../benchmark-specs/drivaerml/proposal/SCIENTIFIC_CONTRACT.md): Documents the native pressure convention and reference speed.

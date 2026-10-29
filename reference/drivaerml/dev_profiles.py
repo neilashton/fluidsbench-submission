@@ -1,4 +1,4 @@
-"""Pinned native profile sampling for development submissions.
+"""Pinned native profile sampling for DrivAerML submissions.
 
 The published native-v3 truth also binds the raw cell selection, supported
 segments and Cp arc lengths. Predictions are gathered independently from the
@@ -24,11 +24,11 @@ from reference.drivaerml.diagnostic_evaluator import gather_mapped_prediction_fi
 TRUTH_COMMIT = "4ae72e5145ee2cfc58432a86e1496337f2cc615f"
 TRUTH_BASE = f"https://raw.githubusercontent.com/neilashton/fluidsbench/{TRUTH_COMMIT}/assets/data/profile-ground-truth/datasets/drivaerml/native-v3/"
 INDEX_SHA256 = "e7cf14f161fc7dbf22794e6f66db4e157329be960d2a4368140e08cf0608a5ae"
-SCHEMA = "drivaerml-native-dev-profile-evidence-v2"
+SCHEMA = "drivaerml-native-profile-evidence-v2"
 WORKFLOW_VERSION = 2
-RELEASE_ID = "drivaerml-native-dev-v2-candidate"
+RELEASE_ID = "drivaerml-profile-scoring-v2"
 SCORING_CONTRACT_SHA256 = (
-    "0ef98cb4871e6e03c3b76ab558a3074efc1bff6ce1da9b18aee6aa2d3a5db889"
+    "c67ba550c661d0925c7e54d2c7ebda217a343dabd4a3d1f23e80618d2cb01449"
 )
 UINF = 38.889
 COMMON = (
@@ -52,17 +52,19 @@ def sha256(path):
 
 
 def validate_scoring_contract(specification):
-    contract = specification.get("dev_profile_scoring", {})
+    contract = specification.get("profile_scoring", {})
     path = (
         Path(__file__).resolve().parents[2]
-        / "benchmark-specs/drivaerml/dev-profile-scoring-v2.json"
+        / "benchmark-specs/drivaerml/profile-scoring-v2.json"
     )
     if (
-        contract.get("sha256") != SCORING_CONTRACT_SHA256
+        contract.get("file") != "profile-scoring-v2.json"
+        or contract.get("status") != "official"
+        or contract.get("sha256") != SCORING_CONTRACT_SHA256
         or contract.get("release_id") != RELEASE_ID
         or sha256(path) != SCORING_CONTRACT_SHA256
     ):
-        raise ValueError("DrivAerML dev profile scoring contract differs")
+        raise ValueError("DrivAerML profile scoring contract differs")
 
 
 def retained_json(relative, digest, *, root=None, offline=None):

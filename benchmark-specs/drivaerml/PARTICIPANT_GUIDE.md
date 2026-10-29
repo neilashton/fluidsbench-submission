@@ -287,7 +287,7 @@ The ranked profile metrics are global R2 values, not macro-averaged RMSE. Each
 case and each required line or cut receives equal total weight. Within a
 velocity line or Cp cut, samples use normalized trapezoidal arc-length weighting
 without bridging unsupported gaps, as defined by the
-[profile scoring contract](dev-profile-scoring-v2.json). A single global weighted
+[profile scoring contract](profile-scoring-v2.json). A single global weighted
 truth mean is used for each profile family. This
 prevents the 651-sample L1 velocity line from outweighing a 31-sample R line.
 The corresponding equal-case/equal-line and equal-case/equal-cut RMSE values
