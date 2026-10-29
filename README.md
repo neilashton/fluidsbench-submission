@@ -23,7 +23,6 @@ Use test data only for final evaluation. Maintainers review the package before p
 - [Metric definitions and reference code](reference/README.md)
 - [Package examples](examples/README.md)
 - [Maintainer guide](docs/MAINTAINERS.md)
-- [FluidsBench website](https://fluidsbench.org/)
 
 <a id="responsibilities"></a>
 <a id="submission-directory"></a>
@@ -42,3 +41,22 @@ The former README sections now live in the [submission workflow](SUBMITTING.md),
 Repository code and leaderboard metadata use [Apache 2.0](LICENSE). Submitters must have the right to publish their result
 material under its declared open licence. Upstream datasets and optional artifacts retain their own licences;
 [allowed SPDX identifiers](OPEN_REPRODUCIBILITY.md) are enforced by the schema.
+
+## Organising committee
+
+| Name | Affiliation |
+| --- | --- |
+| Neil Ashton | Mistral |
+| Paola Cinnella | Sorbonne University |
+| Astrid Walle | Pasteur Labs |
+| Mohamed Elrefaie | MIT |
+| Jean Kossaifi | NVIDIA |
+| Ricardo Vinuesa | University of Michigan |
+| Daniel Leibovici | NVIDIA |
+| Faez Ahmed | MIT |
+| Emanuele Tamburini | Sorbonne University |
+| Tyler Buchanan | TU Delft |
+
+Meet the [scientific and industrial advisory board](https://fluidsbench.org/review-x4n7q9m2vk6p/contributors/#advisory-board).
+
+Visit the [FluidsBench website](https://fluidsbench.org/) for dataset information, benchmark news and community links.
