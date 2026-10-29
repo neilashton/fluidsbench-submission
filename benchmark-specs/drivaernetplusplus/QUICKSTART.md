@@ -1,12 +1,11 @@
-# DrivAerNet++ submissions on dev
+# DrivAerNet++ submission guide
 
 Use a current `dev` checkout. The participant command checks your copy of the
 public data, downloads the prepared scoring support, evaluates every native
 surface point of all 1,154 `official_test` designs with recovery, and produces a
-validated directory for a pull request to `dev`. The dataset owner's scientific
+validated result directory. The dataset owner's scientific
 approval and latest confirmations are recorded in [OWNER_APPROVAL.md](OWNER_APPROVAL.md).
-Development candidate PRs are accepted; official intake remains closed pending
-the separate formal release activation.
+See the [dataset index](../README.md) for availability and [Submitting a result](../../SUBMITTING.md) for validation and review.
 
 The benchmark is **pressure only**: predict the kinematic gauge pressure `p`
 (m²/s², freestream reference zero, so `Cp = p / 450`) at every point of each
@@ -135,7 +134,9 @@ Three report-only Cp profiles (upper-body and underbody centrelines, rear base)
 are read by the evaluator from your predictions at frozen native points; see
 `profiles/STATION_DEFINITIONS.md`. You do not submit profiles.
 
-## 5. Package and open a pull request to dev
+<a id="5-package-and-open-a-pull-request-to-dev"></a>
+
+## 5. Package and submit
 
 ```bash
 python scripts/drivaernetplusplus.py discretization-template --output my-entry/discretization-cases.jsonl
@@ -155,24 +156,14 @@ entry, checkpoint bytes that differ from the methodology SHA-256, and any
 evaluation file changed after reduction. The pull request must add exactly that
 one directory and target `dev`.
 
-## 6. Review and display on the dev leaderboard
+<a id="6-review-and-display-on-the-dev-leaderboard"></a>
 
-CI validates development candidate PRs targeting `dev`. A maintainer reviews
-the package and merges it while it is still unapproved and absent from the
-leaderboard. The participant's PR contains only the generated submission
-directory; registration and feed updates are maintainer responsibilities.
+## 6. Review and publication
 
-To display the reviewed result, a maintainer follows the
-[DrivAerNet++ registration procedure](../../docs/MAINTAINERS.md#receive-and-display-a-drivaernet-development-candidate)
-in a separate PR to `dev`: register the exact package, regenerate the feeds,
-and check them. After that PR is merged, the
-[dev leaderboard](https://fluidsbench.org/review-x4n7q9m2vk6p/committee-leaderboard/?dataset=drivaernetplusplus)
-reads the updated feed. Merging the participant's PR alone does not publish a row.
-
-The displayed result is an **unranked pre-release reference**, without official
-approval, citation or promotion eligibility. The maintainer checks the new row,
-its score and its three native Cp profile comparisons. This publication step
-does not require manual edits to the participant's generated package.
+Maintainers review the package and handle [registration and publication](../../docs/MAINTAINERS.md#receive-and-display-a-drivaernet-development-candidate).
+Your pull request contains only the generated result directory. Merging it does not itself publish a row.
+Reviewed results appear in the [leaderboard preview](https://fluidsbench.org/review-x4n7q9m2vk6p/committee-leaderboard/?dataset=drivaernetplusplus)
+as unranked pre-release references, with scores and three native Cp profile comparisons.
 
 ## Container
 

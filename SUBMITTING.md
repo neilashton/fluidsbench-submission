@@ -1,19 +1,7 @@
 # Submitting a result
 
-**Accepted result PRs currently target `dev`. Production `main` intake remains closed.**
-
-| Dataset | Accepted dev route and participant instructions |
-| --- | --- |
-| AirfRANS | Full, Scarce and AoA extrapolation use the open, owner-approved support: [participant quickstart](benchmark-specs/airfrans/QUICKSTART.md). |
-| AhmedML | Development candidate: [participant quickstart](benchmark-specs/ahmedml/QUICKSTART.md). |
-| WindsorML | Development candidate: [participant quickstart](benchmark-specs/windsorml/QUICKSTART.md). |
-| DrivAerML | Development candidate: [participant quickstart](benchmark-specs/drivaerml/QUICKSTART.md). |
-| DrivAerNet++ | Development candidate: [participant quickstart](benchmark-specs/drivaernetplusplus/QUICKSTART.md). |
-
-AirfRANS Reynolds and new result intake for the remaining datasets, including HiLiftAeroML, remain closed.
-Follow each linked guide's supported splits and scope. The four development-candidate routes accept complete packages on
-`dev` while their official support releases remain closed. Dev display does not grant official-release citation or promotion
-eligibility; candidate, prototype and pre-release reference results do not establish an official leaderboard claim.
+Start with the [dataset index](benchmark-specs/README.md) and your dataset's quickstart.
+The steps below apply to every accepted dataset.
 
 ## 1. Choose the dataset and split
 
@@ -124,24 +112,20 @@ source .venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-Update your fork from upstream `dev`, follow your dataset's guide above, and validate the new package with both
-`--dev-intake` and `--contributor-stage`. This command covers AirfRANS dev intake and all four accepted development-candidate
-datasets. Replace the example path with your own submission directory:
+Use the current `dev` branch and target your pull request at `dev`. Production `main` intake is not open.
+Validate the generated result directory with the current intake flags:
 
 ```bash
 python3 scripts/validate_submission.py --dev-intake --contributor-stage \
-  submissions/drivaernetplusplus/my-model-v1
+  submissions/<dataset-id>/<submission-id>
 ```
 
-Open the PR against `dev`. CI selects `--dev-intake` automatically and accepts a complete, unapproved development candidate
-without maintainer registration. Accepting the package does not publish a leaderboard row. Without `--dev-intake`,
-contributor-stage validation requires an official, open, owner-approved scoring-support release and rejects these candidates.
+Open a pull request containing only that new result directory. This route supports AirfRANS Full, Scarce and AoA extrapolation,
+plus AhmedML, WindsorML, DrivAerML and DrivAerNet++. Check the [dataset index](benchmark-specs/README.md) for current availability.
 
-Validate every source submission and verify that the dev feeds are synchronized:
-
-```bash
-python3 scripts/manage_leaderboard.py check --dev-intake
-```
+CI validates the package. Maintainers then review it and handle publication separately; merging the initial submission does
+not itself publish a leaderboard row. Preview results are not official release claims. See the
+[maintainer guide](docs/MAINTAINERS.md) for approval, registration and feed generation.
 
 The validator checks JSON schemas, exact public split and complete original-support coverage, unweighted and area-, length-, or
 volume-weighted relative-L2 sufficient statistics, case-metric aggregation, spatial counts and domains, declared mappings,
@@ -149,42 +133,15 @@ evaluation-evidence identities and checksums, profile coverage, coordinate order
 hashes, any declared open-artifact metadata, and approval lifecycle rules. It does not execute the model, download optional
 remote predictions, or recompute submitted base metrics.
 
-### Other closed candidates: owner-coordinated dry runs
-
-Dataset owners may exercise other closed schema-v3 candidates before activation
-only when the dataset specification pins an exact
-`scoring_support.candidate_manifest` (status, release ID, repository file,
-public URL, and SHA-256):
-
-```bash
-python3 scripts/validate_submission.py --candidate-dry-run submissions/<dataset-id>/<package-id>
-```
-
-The package declares `scoring_support.status=candidate`; the dataset specification remains closed (for example, `owner_review_required`). This mode requires
-`submissions_open=false` and a candidate support manifest. It rejects approval
-and maintainer-owned metadata and reports only non-approving candidate
-validity. A successful dry run does not authorize a result PR for a dataset outside the accepted routes above.
-`--candidate-dry-run` and `--contributor-stage` are separate modes and cannot be combined.
-
 ## 5. Open a result PR when the dataset is accepting submissions
 
 1. Commit exactly one entirely new submission directory. Do not change specifications, schemas, scripts, workflows, generated
    feeds, existing submissions, or maintainer-owned files in that PR.
-2. For AirfRANS dev intake or AhmedML, WindsorML, DrivAerML or DrivAerNet++ development candidates, target `dev`. Production `main` intake remains closed until an explicit production launch.
+2. Target the `dev` branch using the validation command above.
 3. Complete the [contributor checklist](.github/pull_request_template.md) and resolve all automated failures.
 4. Retain the evaluation evidence: maintainers review scientific provenance, data use, submitted values, licences, and any
    declared artifacts, and may request calculation evidence.
 
-Passing validation does not approve or publish the result. Maintainers first review and merge the unapproved package, then
-publish it through a separate maintainer PR to `dev`:
-
-- AirfRANS uses the [validation and approval workflow](docs/MAINTAINERS.md#review-and-approve-a-result) for its open support.
-- Development candidates use exact registration and feed regeneration, following the
-  [AhmedML](examples/ahmedml-v3-candidate/README.md#optional-dev-only-pre-release-registration),
-  [WindsorML](examples/windsorml-v3-candidate/README.md#5-maintainer-show-the-reviewed-result-on-dev),
-  [DrivAerML](examples/drivaerml-v3-candidate/README.md) or
-  [DrivAerNet++](docs/MAINTAINERS.md#receive-and-display-a-drivaernet-development-candidate) procedure.
-  Their displayed rows remain unranked pre-release references without official approval, citation or promotion eligibility.
-
-Participants leave registration, approval records and generated feeds to maintainers. Required review checks submitted data
-only. Optional prediction audits are descriptive and do not change approval, ranking, citation, or promotion eligibility.
+Maintainers review the submitted package and handle approval, registration and publication through the
+[maintainer workflow](docs/MAINTAINERS.md). Leave maintainer records and generated feeds out of your submission.
+The review checks submitted data; optional prediction audits are recorded separately.

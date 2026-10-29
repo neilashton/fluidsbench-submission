@@ -2,7 +2,7 @@
 
 Follow the [resumable participant workflow](../../docs/NATIVE_PARTICIPANT_WORKFLOW.md)
 with `dataset=ahmedml`. It handles data/support preparation, complete-split
-evaluation, resume, reports and validated packaging for a PR to `dev`.
+evaluation, resume, reports and validated packaging. See [Submitting a result](../../SUBMITTING.md) for validation and review.
 
 - Full, Medium, Scarce and Super-scarce each evaluate the same 50 test cases.
 - The other four prescribed splits evaluate 100 cases each.

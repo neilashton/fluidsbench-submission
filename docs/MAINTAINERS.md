@@ -311,3 +311,20 @@ rebind is recorded in
 Both records remain intentionally non-activating.
 
 Keep this benchmark/evaluator-owned support outside participant packages. Creating it does not publish support, approve the evaluator, or open submissions.
+
+## Other closed candidates: owner-coordinated dry runs
+
+Dataset owners may exercise other closed schema-v3 candidates before activation
+only when the dataset specification pins an exact
+`scoring_support.candidate_manifest` (status, release ID, repository file,
+public URL, and SHA-256):
+
+```bash
+python3 scripts/validate_submission.py --candidate-dry-run submissions/<dataset-id>/<package-id>
+```
+
+The package declares `scoring_support.status=candidate`; the dataset specification remains closed (for example, `owner_review_required`). This mode requires
+`submissions_open=false` and a candidate support manifest. It rejects approval
+and maintainer-owned metadata and reports only non-approving candidate
+validity. A successful dry run does not authorize a result PR for a dataset outside the routes listed in [the dataset index](../benchmark-specs/README.md).
+`--candidate-dry-run` and `--contributor-stage` are separate modes and cannot be combined.

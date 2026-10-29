@@ -1,4 +1,4 @@
-# AhmedML and WindsorML submissions on dev
+# AhmedML and WindsorML submission workflow
 
 Use a current upstream `dev` checkout. Both datasets now have the same commands
 for preparing inputs, checking a complete entry, evaluating with recovery,
@@ -132,7 +132,7 @@ accepts an external package directory. Neither command registers or approves it.
 
 Commit only `submissions/<dataset>/<new-submission-id>/` and open a PR against
 **`dev`**. The normal contributor checks apply. After review, maintainer registration
-and a dev feed build can display the result as a non-citable pre-release reference.
+and feed generation publish the reviewed result in the preview.
 Those are publication steps; the submitted package needs no manual repairs.
 
 ## Pinned Linux container

@@ -1,11 +1,10 @@
-# WindsorML development submissions
+# WindsorML evaluation guide
 
 Start with the [resumable participant quickstart](QUICKSTART.md) for data/support
 preparation, whole-split evaluation, recovery and validated packaging.
 
-WindsorML accepts complete schema-v3 **development candidate PRs targeting `dev`**.
-Official submissions remain closed. Start with the
-[candidate packaging guide](../../examples/windsorml-v3-candidate/README.md).
+See the [dataset index](../README.md) for submission availability and the
+[packaging guide](../../examples/windsorml-v3-candidate/README.md).
 
 ## Data and scoring contract
 
@@ -42,7 +41,7 @@ sets.
 The volume pressure units/reference remain unresolved in the
 [pressure audit](../../docs/PRESSURE_REFERENCES.md#windsorml). Predict the raw
 published `pressureavg` values; do not apply a new offset, density scaling or
-surface Cp conversion. This dev workflow preserves that existing evaluator rule.
+surface Cp conversion. This workflow preserves that existing evaluator rule.
 
 Do not regenerate surface dual areas. Volume cell-volume sidecars are not
 required. Vector relative L2 sums squared component errors and truth before

@@ -2,78 +2,28 @@
 
 # FluidsBench submissions
 
-Evaluate a physics AI surrogate model and share its results on the [FluidsBench leaderboard](https://fluidsbench.org/).
-This repository holds the dataset contracts, evaluators, result packages, and generated data feeds.
-
-**AirfRANS submissions are open on `dev` for Full, Scarce and AoA extrapolation.**
-Use the [participant quickstart](benchmark-specs/airfrans/QUICKSTART.md) for verified support downloads, resumable evaluation and package generation, and target your PR at `dev`.
-The [completed Full and AoA participant trials](benchmark-specs/airfrans/QUICKSTART.md#completed-participant-trials)
-cover real-data extraction, interruption/resume and packaging using existing Transolver++ predictions;
-the AoA package has also completed separate maintainer approval and dev leaderboard publication.
-Reynolds and official intake for the other datasets remain closed. Production is unchanged. Work on `dev` is pre-release: prototype rows are illustrative;
-registered HiLiftAeroML Transolver and GeoTransolver previews retain real inference and CFD comparison truth but remain
-unapproved and non-citable. A local candidate validation pass does not open submissions or create a leaderboard entry.
-
-**AhmedML and WindsorML development candidate PRs are accepted on `dev`.** Start with the
-[AhmedML quickstart](benchmark-specs/ahmedml/QUICKSTART.md) or
-[WindsorML quickstart](benchmark-specs/windsorml/QUICKSTART.md). Both use the
-[resumable participant workflow](docs/NATIVE_PARTICIPANT_WORKFLOW.md) for native data/support preparation,
-complete-split evaluation, reports, checkpoint checks and validated packaging.
-Both require surface and volume predictions. Maintainer registration and feed generation are separate publication steps.
-
-**DrivAerML development candidate PRs are also accepted on `dev`.** Use the
-[DrivAerML quickstart](benchmark-specs/drivaerml/QUICKSTART.md) for either `surface_and_volume`
-or `surface_only`, with native data streaming, prepared support, resumable evaluation and packaging.
-The dev v2 profile contract uses normalized trapezoidal arc-length weighting; surface-only results retain a maximum overall score of 60.
-
-**DrivAerNet++ development candidate PRs are also accepted on `dev`.** Follow the
-[DrivAerNet++ quickstart](benchmark-specs/drivaernetplusplus/QUICKSTART.md): pressure only, every native
-surface point of all 1,154 `official_test` designs, prepared support downloaded with
-`python scripts/drivaernetplusplus.py fetch-support`, resumable evaluation, and a validated package.
-
 ## Start here
 
-1. **Choose a dataset:** check the [dataset index](benchmark-specs/README.md), its exact split, and its current release status.
-2. **Prepare your run:** follow [Submitting a result](SUBMITTING.md) and the dataset's guide. Public evaluation data is for final
-   evaluation only; it must not influence training, tuning, model selection, or preprocessing statistics.
-3. **Evaluate and package:** run the dataset evaluator on every required native entity, then collect its metrics, profiles,
-   evidence, methodology, and spatial records. See the [result format](docs/RESULT_FORMAT.md).
-4. **Validate and submit when open:** pass contributor-stage validation and open a PR containing one new result directory.
-   Maintainers review the submitted data before a separate approval step publishes it.
+Evaluate your model with the published FluidsBench tools and submit its results for review.
 
-For detailed dataset contracts and package formats, use the links below. HiLiftAeroML is limited to owner-coordinated closed-candidate dry runs:
+1. **Choose a dataset:** use the [dataset index](benchmark-specs/README.md) to find its quickstart, supported splits and submission availability.
+2. **Follow the submission process:** [Submitting a result](SUBMITTING.md) explains evaluation, validation and opening a pull request.
+3. **Prepare your result package:** follow the [result format](docs/RESULT_FORMAT.md) and [model and compute reporting guide](METHODOLOGY.md).
+4. **Get help:** ask in [GitHub issues](https://github.com/neilashton/fluidsbench-submission/issues) or the [FluidsBench community](https://discord.gg/zVZsXAeVKp).
 
-| Dataset      | Start with                                                             | Packaging example                                                 |
-| ------------ | ---------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| AhmedML      | [Native evaluator and support](benchmark-specs/ahmedml/README.md)      | [Candidate package](examples/ahmedml-v3-candidate/README.md)      |
-| WindsorML | [Native contract and splits](benchmark-specs/windsorml/README.md) | [Candidate package](examples/windsorml-v3-candidate/README.md) |
-| DrivAerNet++ | [Pressure contract and quickstart](benchmark-specs/drivaernetplusplus/README.md) | [Candidate package](examples/drivaernetplusplus-v3-candidate/README.md) |
-| DrivAerML    | [Participant guide](benchmark-specs/drivaerml/PARTICIPANT_GUIDE.md)    | [Candidate package](examples/drivaerml-v3-candidate/README.md)    |
-| HiLiftAeroML | [Participant guide](benchmark-specs/hiliftaeroml/PARTICIPANT_GUIDE.md) | [Candidate package](examples/hiliftaeroml-v3-candidate/README.md) |
+## What you submit
 
-Other datasets and their machine-readable specifications are in the [dataset index](benchmark-specs/README.md).
-The generic v3 example is a synthetic format demonstration, not a ready-to-submit result.
+Submit the result directory generated by your dataset's evaluator: metrics, profiles, evaluation evidence and model/compute records.
+Code, model weights and full prediction fields are optional. See the [reproducibility requirements](OPEN_REPRODUCIBILITY.md) for details.
 
-## What you need to provide
+Use test data only for final evaluation. Maintainers review the package before publishing the result.
 
-Every new result uses schema v3 and the [`open-reproducibility-3.0` contract](OPEN_REPRODUCIBILITY.md): a public result package
-with an open result-data licence, complete metrics and profiles, evaluation evidence, spatial records, and a
-[methodology record](METHODOLOGY.md). The method record includes exact parameter counts, measured compute, and the SHA-256 of
-every checkpoint file actually loaded by a parameterized method. Publishing the checkpoint bytes is optional.
+## Reference
 
-Source code, model weights, environment files, artifact documentation, and full prediction fields are optional. If supplied,
-their access, version, hash, and licence declarations must satisfy the contract. Their presence does not change ranking,
-approval, citation, or promotion eligibility.
-
-FluidsBench validates submitted files, coverage, identities, and hashes. Required approval does not execute your model,
-regenerate predictions, or recompute base metrics from full fields. Optional prediction checks are recorded separately.
-
-## Reference and help
-
-- [Metric equations and edge cases](reference/README.md)
-- [Examples: candidate configurations, synthetic demonstrations, and historical formats](examples/README.md)
-- [Maintainer approval, dataset activation, and release feeds](docs/MAINTAINERS.md)
-- [Questions and issues](https://github.com/neilashton/fluidsbench-submission/issues)
+- [Metric definitions and reference code](reference/README.md)
+- [Package examples](examples/README.md)
+- [Maintainer guide](docs/MAINTAINERS.md)
+- [FluidsBench website](https://fluidsbench.org/)
 
 <a id="responsibilities"></a>
 <a id="submission-directory"></a>
