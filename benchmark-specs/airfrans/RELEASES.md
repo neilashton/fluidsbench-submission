@@ -1,48 +1,25 @@
-> **Historical preparation record.** Status and branch references below describe earlier trials and release preparation. For current submission availability, use the [dataset index](../README.md) and the dataset quickstart.
+# AirfRANS support downloads
 
-# AirfRANS development intake
+For evaluation and packaging, follow the [participant quickstart](QUICKSTART.md).
+This page describes the support releases and their independent verification.
 
-For new submissions, follow the [participant quickstart](QUICKSTART.md). It
-automates the downloads, checks, extraction, evaluation and packaging described
-below, with recovery after interrupted evaluation. The manual release details
-here remain useful for inspecting or independently installing the artifacts.
+Submissions are open for **Full, Scarce and AoA extrapolation**. Reynolds
+extrapolation is closed. Full and Scarce share the ordered 200-case evaluation
+set; AoA uses 196 cases. The native support and lossless profile truth cover
+355 unique cases.
 
-**Intake is open on `dev` for Full, Scarce and AoA extrapolation.** Submit a new
-schema-v3 result directory through a PR against **`dev`**. Reynolds extrapolation
-is closed: 318 of its 496 evaluation cases are not covered by these supports.
-Production intake remains closed. See the [dataset index](../README.md) for other datasets' development availability.
-
-Full and Scarce share the ordered 200-case evaluation set; AoA uses 196 cases.
-The approved native support and lossless profile truth cover 355 unique cases.
-The score contract was approved by Neil Ashton in [PR #47](https://github.com/neilashton/fluidsbench-submission/pull/47).
-Opening intake does not approve or rank a participant result. The Full and AoA
-[participant trials](QUICKSTART.md#completed-participant-trials) are complete;
-the AoA package received separate dev approval in
-[PR #70](https://github.com/neilashton/fluidsbench-submission/pull/70).
-Its older prototype-contract entry retains its original bytes and identity in
-revision history and is excluded from the current feed to avoid duplicate ranking.
-
-## Editable dev downloads
+## Downloads
 
 - [Native support](https://github.com/neilashton/fluidsbench-submission/releases/tag/airfrans-native-support-v1)
 - [Lossless profile truth](https://github.com/neilashton/fluidsbench-submission/releases/tag/airfrans-native-profile-truth-v1)
 
-These are editable GitHub **prereleases**, tied to the approved `dev` source
-commit. Release locking is disabled. Bug fixes remain possible; changed files
-must have matching new hashes in the dev contract before they are accepted.
-Neither submission `main` nor the production website is changed.
-
-The archives and approval records retain the original preparation snapshot:
-`prepared_dev_only`, with formal publication and intake recorded as closed at
-preparation time. The **current** intake state comes from the canonical
-[`submission-spec.json`](submission-spec.json) on `dev`, which selects that
-approved contract and opens only its three supported splits. The separately
-stored [approval binding](official-release-binding.json) preserves the reviewed
-artifact hashes; it is not the current intake switch.
+The [submission specification](submission-spec.json) selects the release IDs,
+manifest URLs and SHA-256 digests. The [approval binding](official-release-binding.json)
+records the approved artifact hashes. Verify every download before evaluation.
 
 ## Install and verify
 
-Use a source checkout of `dev` and install `requirements.txt`. Keep the two
+Use the checkout specified in [Submitting a result](../../SUBMITTING.md) and install `requirements.txt`. Keep the two
 downloads in separate directories because they contain files with the same names.
 For example, with GitHub CLI:
 
@@ -74,46 +51,36 @@ Native verification loads 1,188 support instances across two ordered case sets
 lossless case arrays and their source-mesh, extractor, runtime and hash bindings.
 CI checks committed metadata and the complete artifact-validation receipt.
 
-## Evaluate and submit on dev
+## Evaluate and submit
 
-Use `airfrans-native-v1` as the dataset version and `airfrans-scoring-v2` as the
-evaluator version. Select the exact split ID from the canonical specification:
-`full`, `scarce`, or `aoa_extrapolation`. Bind `scoring_support` to
-`airfrans-native-support-v1`, its declared manifest URL and SHA-256, with
-`status: official`. Bind profile data to the **dataset-local**
-`airfrans-native-profile-truth-v1` manifest and its declared SHA-256. The global
-prototype leaderboard's truth binding is for historical examples.
+Use dataset version `airfrans-native-v1` and evaluator version
+`airfrans-scoring-v2`. Select `full`, `scarce` or `aoa_extrapolation`.
+The participant workflow binds scoring support to `airfrans-native-support-v1`
+and profile truth to the dataset-local `airfrans-native-profile-truth-v1`
+manifest, using the exact hashes in the specification.
 
-Evaluate complete native coverage with the [reference evaluator](../../reference/README.md),
-extract the required predicted profiles using the [AirfRANS extraction example](../../examples/airfrans-profile-extraction/README.md),
-and finalize the profile and overall metrics with `scripts/finalize_airfrans_metrics.py`.
-Prepare the [schema-v3 package](../../docs/RESULT_FORMAT.md) with its methodology,
-checkpoint digests, compute, discretization, case metrics and evaluation evidence.
-The older `*-candidate` assembly and rescoring scripts are for historical
-candidate workflows; they do not create an approved intake result.
+Follow the [quickstart](QUICKSTART.md) to evaluate complete native coverage,
+extract the required predicted profiles, calculate aggregate metrics and
+create the schema-v3 package. Validate the generated directory:
 
 ```bash
 python scripts/validate_submission.py --contributor-stage submissions/airfrans/<new-submission-id>
 ```
 
-Open a PR against `dev` containing exactly that new directory. Do not add
-approval metadata. Maintainers review the package and create approval in a
-separate PR; the approval workflow dispatched on `dev` targets `dev`.
-Passing contributor validation does not publish or rank a result. Code, model
-weights and complete prediction-field sharing remain optional.
+Follow [Submitting a result](../../SUBMITTING.md) to open a pull request
+containing only the new result directory. Maintainers add approval metadata
+after review. Passing contributor validation does not publish or rank a result.
+Code, model weights and complete prediction-field sharing are optional.
 
-## Approved scoring contract
+## Scoring contract
 
-Dataset version: `airfrans-native-v1`. Evaluator version: `airfrans-scoring-v2`;
-the scientific implementation is pinned to
-`b320575e35d6f61f94ac852fdb084dec080e4ecb`. Native table bytes and profile payloads
-are identical to the verified handover; publication changed only independently
-bound release metadata. No model inference or source-data re-extraction was run.
+The scientific implementation is pinned to
+`b320575e35d6f61f94ac852fdb084dec080e4ecb`.
 
-The score weights are unchanged: curve pressure 15%, curve wall shear 10%,
-domain velocity 15%, domain pressure 10%, drag R2 15%, lift R2 10%, and boundary
-layer profile R2 25%. Field caps remain 15, 20, 12, and 15 respectively. Curve
+The overall weights are curve pressure 15%, curve wall shear 10%, domain
+velocity 15%, domain pressure 10%, drag R² 15%, lift R² 10%, and boundary-layer
+profile R² 25%. Field caps are 15%, 20%, 12%, and 15%, respectively. Curve
 primary errors use native dual lengths; domain primary errors use equal native
-nodes. Alternate equal-entity/physical-weight errors remain diagnostics. The
-four profile stations, two Cartesian quantities, and 1,001 samples per series
-remain bound to `airfrans-boundary-layer-v1`.
+nodes. Alternate equal-entity and physical-weight errors are diagnostics.
+The four profile stations, two Cartesian quantities, and 1,001 samples per
+series are defined by `airfrans-boundary-layer-v1`.

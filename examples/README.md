@@ -9,7 +9,7 @@ HiLiftAeroML and the remaining datasets are coming soon.
 
 | Example                                             | Inputs and limits                                                                                                                                                                                                                                                            |
 | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [AhmedML](ahmedml-v3-candidate/README.md)           | Genuine inference on any of eight official splits; verifies each local checkpoint and re-reduces complete case evidence into metrics, profiles, spatial records, and regional reports. Separate from the synthetic development fixture.                                      |
+| [AhmedML](ahmedml-v3-candidate/README.md)           | Genuine inference on any of eight official splits; verifies each local checkpoint and re-reduces complete case evidence into metrics, profiles, spatial records, and regional reports.                                      |
 | [WindsorML](windsorml-v3-candidate/README.md) | Complete native point/cell inference, all eight split labels, 16 fixed/relative profiles, checkpoint verification and package validation. |
 | [DrivAerML](drivaerml-v3-candidate/README.md)       | Requires matching scoring support, evaluator, profile-v10, and profile-truth bindings. Unresolved release tokens block assembly. Config-v2 describes a schema-v3 package with the common methodology record and scope-specific outputs.                                    |
 | [DrivAerNet++](drivaernetplusplus-v3-candidate/README.md) | Pressure-only predictions at every native surface point of all 1,154 test designs; prepared support and resumable evaluation. |
@@ -18,17 +18,13 @@ HiLiftAeroML and the remaining datasets are coming soon.
 Illustrative values in the DrivAerML [methodology example](drivaerml-v3-candidate/methodology.example.json) show structure only.
 Never substitute example values or invented hashes for actual method records or missing release bindings. Maintainers review and approve packages before leaderboard publication.
 
-## Demonstrations and historical formats
+## Demonstrations
 
 | Example                                             | Use it for                                                                                                                                                                                                                  |
 | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [v3 template](v3-template/)                         | Synthetic demonstration of methodology, support, sufficient statistics, spatial records, profiles, optional artifacts, validation records, and SHA-256 bindings. It is not an official result or a ready-to-submit package. |
 | [Profile chunk](profile-chunk.example.json)         | Abridged Cp, Cf, and velocity JSON series; not a complete benchmark split.                                                                                                                                                  |
 | [AirfRANS extraction](airfrans-profile-extraction/) | Hash-bound official-data fixture and pinned extrados-velocity extractor, including native point-ordered NumPy/PyTorch predictions without a predicted VTU.                                                                  |
-| [v2 template](v2-template/)                         | Interpreting historical approved packages only; new v2 submissions are rejected.                                                                                                                                            |
-
-Removed AhmedML v1 dummy packages predate the native evaluator, moving-geometry profiles, regional diagnostics, and v3 evidence;
-do not use them as templates.
 
 The [result reference](../docs/RESULT_FORMAT.md) explains fixed support, exact coverage, geometry weights, vector reductions,
 chunk accumulation, and dataset-specific exceptions. Submitters provide the evaluated result, profile, and spatial data. Full

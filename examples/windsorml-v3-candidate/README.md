@@ -1,4 +1,4 @@
-# WindsorML schema-v3 candidate workflow
+# WindsorML schema-v3 submission package
 
 The [participant quickstart](../../benchmark-specs/windsorml/QUICKSTART.md) provides
 the complete resumable command sequence and pinned Linux container. The
@@ -61,7 +61,7 @@ Use one prediction manifest per case and domain. Each has this structure
 ```
 
 NPZ chunks contain `raw_cell_id` (int64) and each named scalar prediction field
-(float32 or float64). Despite its historical name, `raw_cell_id` indexes
+(float32 or float64). `raw_cell_id` indexes
 **points for surface** and **cells for volume**. Use consecutive IDs starting
 at zero, contiguous non-overlapping chunks, at most 1,000,000 rows per chunk,
 and complete coverage. For volume use support `windsorml_volume_native_cells`,

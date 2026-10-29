@@ -4,16 +4,13 @@ The [participant quickstart](../../benchmark-specs/ahmedml/QUICKSTART.md) provid
 the complete resumable command sequence and pinned Linux container. The
 per-case commands below remain available for existing pipelines.
 
-This directory is a reusable configuration template, not a submission. The
+This directory is a reusable configuration template, not a submission.
 AhmedML is open for submissions.
 The participant workflow creates an unapproved result package
 for any of the eight official split labels only after all placeholder tokens,
 checkpoint hashes, complete evaluator evidence, and spatial records agree.
 
-The genuine-inference path is separate from
-`assemble_ahmedml_schema_v3_dev_fixture.py`. It does not accept
-`prototype_fixture` methodology and never reads fixture provenance. It requires
-an explicit attestation that every prediction was produced by actual model
+The package requires an explicit attestation that every prediction was produced by actual model
 inference and not generated from evaluation truth, and verifies the local bytes
 of every checkpoint named by the methodology record.
 
@@ -67,7 +64,7 @@ The support download does not download raw CFD or model predictions.
 
 Copy `package-config.template.json` outside the repository and replace every
 `__REPLACE_...__` value with the actual method record. The fixed release
-bindings must continue to equal the repository candidate; do not invent or
+bindings must continue to equal the published specification; do not invent or
 silently update them. Check unresolved values without touching evaluator data:
 
 ```bash
@@ -76,7 +73,7 @@ python scripts/assemble_ahmedml_schema_v3_candidate.py \
   --list-unresolved
 ```
 
-For each case in the selected split, first run the candidate evaluator against
+For each case in the selected split, first run the evaluator against
 the complete surface and volume native-order prediction manifests:
 
 ```bash

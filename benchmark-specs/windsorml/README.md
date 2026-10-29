@@ -81,7 +81,7 @@ time. Do not attempt a full VTK mesh load merely to package the result.
 ## Maintainer support metadata
 
 The official `windsorml-native-support-v1` manifest is bound in `submission-spec.json`.
-The candidate publisher below is a maintainer preparation tool; a new official
+The publisher below is a maintainer preparation tool; a new official
 release still requires review and publication.
 Its compact case metadata is reproducible from the checked-in source identity
 and profile support; it does not regenerate quadrature or resample profiles:

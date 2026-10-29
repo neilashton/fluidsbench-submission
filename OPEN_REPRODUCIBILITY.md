@@ -174,11 +174,9 @@ using the published display precision. It binds the claim to the exact feed row 
 scoring-support, spatial, case-metric, profile, optional prediction-check, and maintainer-validation records. A later release can
 assign a different rank without changing the historical claim.
 
-## Contract changes and historical schemas
+## Contract versions
 
-Schema v3 and `open-reproducibility-3.0` are mandatory for new contributor-stage submissions. Previously approved schema-v2
-packages remain readable and publishable under `open-reproducibility-2.0`; schema-v1 prototype fixtures remain interpretable.
-Neither v1 nor a newly submitted v2 package can become a new official result.
+Schema v3 and `open-reproducibility-3.0` are mandatory for contributor-stage submissions.
 
 Clarifications that do not change eligibility or required fields may retain the identifier. Before a contract version has any
 official record, pre-launch corrections may also retain its identifier. Once an official record exists, any material change to

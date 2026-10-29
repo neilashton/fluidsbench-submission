@@ -28,7 +28,7 @@ Use lowercase letters, numbers, and hyphens for the globally unique `submission-
 
 New submissions use schema v3. The material under [`examples/v3-template/`](../examples/v3-template/) demonstrates the fixed-support
 and prediction-manifest formats; dataset-specific submission templates can be completed only after the dataset owner marks its
-scoring support `official` and opens submissions. Historical v1 prototype fixtures remain under `submissions/`; registered candidate previews retain their separate ineligible status, and [`examples/v2-template/`](../examples/v2-template/) is retained only to interpret historical v2 packages.
+scoring support `official` and opens submissions.
 
 The tree shows the generic JSON profile layout. HiLiftAeroML compact-v2 uses prediction-only per-case NPZ artifacts instead.
 Maintainers alone add `maintainer-validation.json` and, optionally, `prediction-artifact-checks.json` after submission.
@@ -37,8 +37,7 @@ Maintainers alone add `maintainer-validation.json` and, optionally, `prediction-
 
 `submission.json` contains model, submitter, methodology, dataset, split, aggregate metrics, scoring-support, spatial-discretization,
 case-metric, profile-index, evaluation, and optional open-artifact metadata. New submissions must match
-[`schemas/v3/submission.schema.json`](../schemas/v3/submission.schema.json). Historical approved schema-v2 packages remain readable and
-publishable, but the contributor-stage validator rejects new v2 packages because they lack mandatory v3 evidence.
+[`schemas/v3/submission.schema.json`](../schemas/v3/submission.schema.json).
 
 The required `evaluation` object records the FluidsBench reference version, exact command, and SHA-256 checksum of
 `evaluation-evidence.json`; when code metadata is shared, it must also record the matching contributor code revision. The evidence
@@ -57,8 +56,7 @@ identifiers. See [`OPEN_REPRODUCIBILITY.md`](../OPEN_REPRODUCIBILITY.md) for the
 Every schema-v3 package includes the same structured methodology record covering architecture components, exact total and
 submitter-trainable parameter counts, inputs and outputs, data handling, training stages, checkpoint selection, and measured
 compute, including the shared [hardware identity and allocation fields](../METHODOLOGY.md#hardware-and-compute).
-The methodology guide also documents the narrow DrivAerNet++ dev-candidate exception for
-unavailable complete inference timing; partial intervals belong in explanatory notes, not numeric campaign totals.
+Partial timing intervals belong in explanatory notes, not numeric campaign totals.
 Each dataset's `methodology-contract.json` names only that benchmark's existing required outputs; it does not change the
 prediction or scoring process. A SHA-256 digest is required for every checkpoint file actually loaded by a parameterized method so
 the result has an exact model identity; publishing those checkpoint bytes, source code, or a model archive remains optional. See
@@ -83,9 +81,8 @@ those records with the fixed or minimum/median/maximum summary and verifies `fra
 
 Contributors leave `approval` absent and must not add `maintainer-validation.json` or
 `prediction-artifact-checks.json`. After submitted-data validation, maintainers add
-the separately hashed validation record and `approval.status=approved`. Prototype packages use `approval.status=prototype`; the feed
-builder also publishes exact maintainer-registered, hash-bound dataset `pre_release_reference` rows in the prototype `dev`
-release. These remain unapproved and explicitly ineligible for citation or promotion.
+the separately hashed validation record and `approval.status=approved`. An approved result appears
+on the leaderboard only when included in an official release.
 
 Sharing full or example prediction fields is optional. When used, `prediction_artifacts` points to a revision-pinned public Hugging
 Face dataset manifest. A maintainer may add one `prediction-artifact-checks.json` index recording accessibility, format, or explicit
@@ -111,8 +108,7 @@ parallel arrays:
 
 For the generic JSON format, use roughly 20-30 geometries per chunk unless the dataset specifies otherwise. Generic JSON coordinates must be finite, unique, and strictly increasing; dataset-specific native/compact profile formats retain their declared topology, masks, ordering, and gaps instead. Every required case,
 panel, station, quantity, and any exact coordinate/sample-count rule is declared by the dataset specification and its bound
-profile definition. Prototype fixtures may use an explicitly declared abridged profile only while they remain labelled
-`approval.status=prototype`. The profile schemas are:
+profile definition. The profile schemas are:
 
 - [`schemas/v1/profile-index.schema.json`](../schemas/v1/profile-index.schema.json)
 - [`schemas/v1/profile-chunk.schema.json`](../schemas/v1/profile-chunk.schema.json)
@@ -145,16 +141,6 @@ a completely new `<series-id>-vN` directory, replaces every changed prediction, 
 increments the version by exactly one, points to the immediately preceding published submission, and explains the material change.
 Never edit, rename, or delete an earlier published directory.
 
-On the prototype `dev` release, an exact maintainer-registered `pre_release_reference` also counts as a published predecessor.
-The validator rechecks the predecessor's complete registered package binding; an unregistered or modified candidate does not
-qualify. This exception does not apply to production or official releases. Submit and review the new version as a separate
-package, then register it separately to publish it on dev. Until that registration, the previous version remains displayed.
-After registration and feed regeneration, only the latest registered version is displayed, while both remain in revision history.
-
-For a result published before this versioning contract whose ID does not end in `-v1`, keep that package unchanged. Its first update
-uses `<legacy-submission-id>-v2`, retains `<legacy-submission-id>` as the series ID, and sets `supersedes` to the exact legacy ID. For
-example, `drivaerml-ab-upt-v2` supersedes `drivaerml-ab-upt`. The validator treats that immutable legacy package as v1.
-
 A revision remains in the same series only when the exact dataset version, split hash, case set, submitter, and institution are
 unchanged. A genuinely different benchmark contract, model family, or submitting team starts a new series at v1. The validator
 rejects skipped versions, forks, missing or unpublished predecessors, non-chronological dates, and IDs that do not match
@@ -163,8 +149,7 @@ rejects skipped versions, forks, missing or unpublished predecessors, non-chrono
 The current leaderboard ranks only the latest published version in each series, so repeated updates cannot occupy multiple ranking
 positions. Earlier versions, their submitted scores, dates, metadata, and change summaries remain in the hash-bound revision-history
 feed and are available from the result details. An immutable release snapshot continues to preserve the exact version and rank that
-it originally published. Historical schema-v1/v2 packages are exposed as v1-compatible legacy records; all new schema-v3 packages
-must declare `result_revision` explicitly.
+it originally published. Every package must declare `result_revision` explicitly.
 
 ## Metric reductions and ranking
 

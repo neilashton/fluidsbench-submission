@@ -69,7 +69,7 @@ For every selected case:
    replay the matching aggregate row.
 5. Use the same evaluator to extract the diagnostics defined in
    [`drivaerml-diagnostics-v10.json`](drivaerml-diagnostics-v10.json), with the
-   [current scoring override](dev-profile-scoring-v2.json): 16 AutoCFD5
+   [profile scoring contract](dev-profile-scoring-v2.json): 16 AutoCFD5
    velocity lines on the published 10 mm grid and four continuous Cp cuts:
    upperbody centreline (`y=0`), underbody centreline (`y=0`), sidewall
    (`z=0.15 m`), and front-left wheelhouse (`y=-0.6 m`). The current
@@ -78,21 +78,9 @@ For every selected case:
    within each line. Continuous Cp-cut R2 is a separate ranked component with
    equal total weight for every case and cut and normalized trapezoidal
    arc-length weight within each cut. Unsupported gaps are never bridged.
-   Dev v2 replaces the historical v10 Cp segment-length reduction without changing
-   profile geometry or truth; reevaluate historical v1 predictions rather than relabelling their release IDs. The corresponding
-   RMSE values remain report-only diagnostics. Submit the complete
+   The corresponding RMSE values are report-only diagnostics. Submit the complete
    evaluator-produced coordinate and prediction arrays for all 16 velocity
    profiles for `surface_and_volume` and all four Cp cuts in either scope, in the normal FluidsBench profile JSON. `surface_only` supplies no velocity-profile series.
-
-The 209 discrete Cp probes are not part of the DrivAerML submission or scoring
-contract. Participants do not submit probe outputs or probe-mapping support,
-and no discrete-probe metric is calculated. The combined v8 registry and
-existing 209-probe mapping artifacts are retained only as inactive,
-non-normative research evidence. This exclusion does not apply to the four
-continuous Cp cuts, which the participant's local frozen evaluator will derive
-from its native surface `pMeanTrim` prediction. Participants provide no extra
-Cp field in the VTP, but do include the derived continuous-cut series in their
-submitted profile JSON.
 
 The participant runs the frozen reference evaluator locally and submits its
 derived JSON values. Sharing the complete native prediction fields is optional
@@ -121,13 +109,11 @@ Every other coordinate must map deterministically to a native volume cell or
 the affected line, and therefore that case's ranked velocity component, is
 unavailable. Every row remains explicit: the evaluator never snaps, silently
 omits, interpolates, extrapolates, or bridges across an excluded point. The
-candidate `1e-3` steradian polyhedron test is an angular numerical tolerance,
+`1e-3` steradian polyhedron test is an angular numerical tolerance,
 separate from the `1e-6 m` boundary tolerance; intermediate solid-angle results
 fail closed. The published all-case support, explicit unsupported rows and
 segment breaks, 10 mm grid, and those tolerances are scientifically approved.
-The earlier proposed resolution and tolerance campaigns are no longer separate
-activation gates; this is an owner decision and not a claim that those
-superseded experiments ran. Velocity truth is exact zeroth-order native
+Velocity truth is exact zeroth-order native
 `CellData`, so visible stair steps are expected and must not be smoothed or
 interpolated in truth or scoring.
 
@@ -142,8 +128,7 @@ and all RMSE values for the selected scope remain mandatory report-only diagnost
 duplicate composite weight.
 
 The complete machine-readable source of truth is
-[`submission-spec.json`](submission-spec.json). Candidate evidence and its
-eligibility status are indexed in [`evidence/README.md`](evidence/README.md);
+[`submission-spec.json`](submission-spec.json). Implementation evidence is indexed in [`evidence/README.md`](evidence/README.md);
 history and paper-parity definitions remain in [`proposal/`](proposal/). The
 opening requirements and their resolved status are tracked in
 [`ACTIVATION_CHECKLIST.md`](ACTIVATION_CHECKLIST.md).
@@ -156,20 +141,15 @@ DrivAerML is open for all eight prescribed splits. Use the [quickstart](QUICKSTA
 and [participant guide](PARTICIPANT_GUIDE.md) with the official
 `drivaerml-native-support-v3` release bound in `submission-spec.json`.
 
-The [opening decision](OWNER_OPENING_DECISION.md) records the owner-approved
-activation and waiver of model-sensitivity testing. Geometry-relative diagnostics
-remain report-only, with zero scoring weight. The opening does not change the
-fixed profile definitions, metric weights or surface-only score ceiling.
+The [opening decision](OWNER_OPENING_DECISION.md) records the owner approval.
+Geometry-relative diagnostics are report-only, with zero scoring weight.
 
 The [scientific approval record](evidence/owner-scientific-approval-2026-08-28.json)
 binds the dataset, native-array and force evidence, fixed and relative support,
 and real `run_419` validation. Surface arc length remains the Cp scoring
 coordinate; native segment-midpoint streamwise x is for display only.
 
-Historical implementation evidence is indexed in [evidence/README.md](evidence/README.md).
+Implementation evidence is indexed in [evidence/README.md](evidence/README.md).
 It includes the all-484 native-surface force replay and the equal-cell volume
-audit over 978 pinned segments and 68,949,662,110 cells. Earlier proposals and
-pending candidate release records are retained as provenance; the active
-specification and opening decision govern current submissions.
-
-There are no trial model submissions or leaderboard rows in the launch tree.
+audit over 978 pinned segments and 68,949,662,110 cells. The specification and
+opening decision govern submissions.

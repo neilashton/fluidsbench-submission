@@ -35,9 +35,7 @@ Three report-only Cp profiles per design are read by the evaluator from the
 submitted predictions at frozen native points: `upper_body_centerline`,
 `underbody_centerline` and `rear_body_centerline`. Their extraction rules and
 full-split validation are in
-[`profiles/STATION_DEFINITIONS.md`](profiles/STATION_DEFINITIONS.md). The
-`front_wheelhouse` station is retired (owner-confirmed). Profiles do not enter the
-score.
+[`profiles/STATION_DEFINITIONS.md`](profiles/STATION_DEFINITIONS.md). Profiles do not enter the score.
 
 ## Known properties of the public data
 
@@ -48,10 +46,7 @@ which points are scored.
   detailed-underbody) contain 1–58 points, 768 in total, with `p` beyond the
   physical range: above 460 m²/s² (stagnation is 450, up to 5,735) or below
   −4,500 m²/s² (Cp < −10, down to −27,143 in `F_D_WM_WW_1119`). They cover at most
-  0.004 m² per design. In the historical Transolver validation trial they change the split's mean
-  area-weighted relative L2 by 0.26 points (14.77% scored as stored, 14.51% if
-  excluded). In 16 designs, however, they carry more than half of that model's
-  squared error (`F_D_WM_WW_1119`: 60.8% versus 17.6%). The approved definition
+  0.004 m² per design. The approved definition
   scores them as stored, confirmed by the dataset owner on 2026-10-18.
 * **Detached fragment.** `F_D_WM_WW_3850` has a sixth connected component of
   7 points near the roof edge. It is scored like every other point.

@@ -87,8 +87,7 @@ Report the GPU/device model and devices per job separately from peak campaign co
 Use the dataset's assembler where provided; preserve its evidence, required profile format, and hash bindings.
 
 Create one globally unique `submissions/<dataset-id>/<series-id>-vN/` directory. A new series starts at v1; revisions increment
-by one and preserve previous packages. Follow the [complete version rules](docs/RESULT_FORMAT.md#result-versions), including
-legacy IDs. Leave `approval` absent; contributors must not create maintainer validation or optional prediction-check records.
+by one and preserve previous packages. Follow the [complete version rules](docs/RESULT_FORMAT.md#result-versions). Leave `approval` absent; contributors must not create maintainer validation or optional prediction-check records.
 
 You may generate equivalent JSON in Python, MATLAB, Julia, C++, or another language; the schema and values are authoritative.
 Public code, model weights, environments, artifact documentation, and full prediction fields remain optional. When supplied,
