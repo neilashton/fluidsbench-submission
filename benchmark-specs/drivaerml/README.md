@@ -70,7 +70,7 @@ For every selected case:
 5. Use the same evaluator to extract the diagnostics defined in
    [`drivaerml-diagnostics-v10.json`](drivaerml-diagnostics-v10.json), with the
    [current scoring override](dev-profile-scoring-v2.json): 16 AutoCFD5
-   velocity lines on the candidate 10 mm grid and four continuous Cp cuts:
+   velocity lines on the published 10 mm grid and four continuous Cp cuts:
    upperbody centreline (`y=0`), underbody centreline (`y=0`), sidewall
    (`z=0.15 m`), and front-left wheelhouse (`y=-0.6 m`). The current
    velocity metric is global R2 with equal total
@@ -145,131 +145,31 @@ The complete machine-readable source of truth is
 [`submission-spec.json`](submission-spec.json). Candidate evidence and its
 eligibility status are indexed in [`evidence/README.md`](evidence/README.md);
 history and paper-parity definitions remain in [`proposal/`](proposal/). The
-exact work still needed before opening submissions is tracked in
+opening requirements and their resolved status are tracked in
 [`ACTIVATION_CHECKLIST.md`](ACTIVATION_CHECKLIST.md).
 
 </details>
 
-## Dataset-owner scientific approval
+## Scientific approval and published support
 
-<details>
-<summary>Scientific approval record and remaining release-specific approval</summary>
+DrivAerML is open for all eight prescribed splits. Use the [quickstart](QUICKSTART.md)
+and [participant guide](PARTICIPANT_GUIDE.md) with the official
+`drivaerml-native-support-v3` release bound in `submission-spec.json`.
 
-The machine-readable approval record is
-[`evidence/owner-scientific-approval-2026-08-28.json`](evidence/owner-scientific-approval-2026-08-28.json)
-(SHA-256
-`448f2b852df7066fc311eed75ea94caa756ae6f63573d12a50798804c08929b3`).
-It binds the pinned dataset, all-case native array and force evidence, the v10
-profile candidate, all-case fixed/relative support, published native-v3 truth,
-and the real `run_419` validation. It also records that surface arc length is
-the Cp scoring coordinate and native segment-midpoint streamwise x is display
-only.
+The [opening decision](OWNER_OPENING_DECISION.md) records the owner-approved
+activation and waiver of model-sensitivity testing. Geometry-relative diagnostics
+remain report-only, with zero scoring weight. The opening does not change the
+fixed profile definitions, metric weights or surface-only score ceiling.
 
-This scientific approval is deliberately distinct from the final
-release-specific approval. The latter cannot be issued until it can bind the
-frozen evaluator, scoring-support and truth release IDs, three-model
-sensitivity evidence, and approving release commit.
+The [scientific approval record](evidence/owner-scientific-approval-2026-08-28.json)
+binds the dataset, native-array and force evidence, fixed and relative support,
+and real `run_419` validation. Surface arc length remains the Cp scoring
+coordinate; native segment-midpoint streamwise x is for display only.
 
-</details>
+Historical implementation evidence is indexed in [evidence/README.md](evidence/README.md).
+It includes the all-484 native-surface force replay and the equal-cell volume
+audit over 978 pinned segments and 68,949,662,110 cells. Earlier proposals and
+pending candidate release records are retained as provenance; the active
+specification and opening decision govern current submissions.
 
-## Prototype leaderboard fixtures
-
-These rows are analytical fixtures, not trained-model results. Native CFD comparison truth and completed evaluator audits do not make them rankable.
-
-<details>
-<summary>Fixture regeneration, retained audits, inactive diagnostics, and release hand-off</summary>
-
-The ten checked-in DrivAerML leaderboard rows can be regenerated with:
-
-```bash
-python3 scripts/generate_drivaerml_leaderboard_fixtures.py
-python3 scripts/manage_leaderboard.py build
-```
-
-The fixture generator uses every official test case and writes all 16 AutoCFD5
-lines on the exact station-specific 10 mm candidate grids (3,756 velocity
-samples per case) plus four continuous Cp curves. Those checked-in submission
-predictions remain analytical CFD-like prototype data, not trained-model
-predictions. Separately, the leaderboard now loads the published native-v3 CFD
-ground truth for all 484 cases and overlays it only when exact support and
-coordinate identities match. Diagnostic RMSE and R2 metrics for the prototype
-rows are recomputed from their generated curves, the Cp error is dimensionally
-tied to the pressure-field fixture through `Cp = 2 pMeanTrim / 38.889^2`, and
-force R2 is tied to the exact pinned force table through
-[`force-r2-truth-statistics.json`](force-r2-truth-statistics.json). The
-displayed bounded scores are therefore internally consistent, while all rows
-remain labelled non-rankable prototype data.
-
-The candidate evaluator's all-484 native-surface force replay is recorded in
-[`evidence/force-replay-all484.json`](evidence/force-replay-all484.json). This
-passing implementation evidence is included in the 2026-08-28 scientific
-approval. It does not by itself freeze the evaluator or open submissions.
-
-The path-free native-volume evidence now includes both the original two-case
-implementation pilot and the strict
-[`all-484 equal-cell primary audit`](evidence/native-volume-equal-cell-primary-all484.json).
-The latter verifies all 978 pinned segments and 68,949,662,110 native cells,
-including exact field shape/order, finite values, complete coverage, and two
-independent chunk partitions. It is not a model result or scoring baseline.
-This audit supplies the complete volume-field weighting evidence
-because the contract uses equal native cells only.
-
-The earlier all-484 discrete-probe candidate sweep and its review artifacts
-remain indexed in [`evidence/README.md`](evidence/README.md) for research
-provenance only. They are not participant instructions, submission artifacts,
-or scoring support, and their unresolved rows do not block a submission
-contract that otherwise becomes eligible. Exact immutable native extraction
-support and native truth for the four continuous Cp cuts are now complete for
-all 484 cases and scientifically approved. They still need to be bound into the
-final immutable scoring-support and profile-ground-truth release identities.
-
-The earlier proposed 1, 2, 5, and 10 mm profile study is retained in
-[`proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md`](proposal/PROFILE_RESOLUTION_CONVERGENCE_INPUT.md)
-as historical review methodology. The owner has accepted the published
-deterministic 10 mm support without requiring that separate campaign for
-activation. The remaining sensitivity gate is different: it requires genuine
-outputs from at least three distinct trained models on a common official cohort
-and the paired 10,000-replicate bootstrap after the evaluator is frozen.
-Publishing those models' complete native fields is not required.
-
-FluidsBench contributors can follow the bounded-memory native-mesh and closed
-candidate package workflow in
-[`PARTICIPANT_GUIDE.md`](PARTICIPANT_GUIDE.md). AutoCFD5 is used there only as
-the provenance for the 16 velocity-line definitions; it is not a second
-submission target. The candidate release hand-off is recorded in
-[`candidate-release-bindings.json`](candidate-release-bindings.json); its
-unresolved owner-release tokens are blockers and are never copied into the
-active `submission-spec.json`. The hand-off may hash-bind the complete local
-`drivaerml-diagnostics-v10.json` file while those owner fields remain
-unresolved; that partial hand-off is integrity evidence only and neither
-activates v10 nor makes a participant package ready. A one-command synthetic
-two-part/three-part dry run is provided under
-[`examples/drivaerml-candidate-native-chunks/`](../../examples/drivaerml-candidate-native-chunks/);
-it is an ineligible transport and packaging fixture, not an official
-DrivAerML submission. Candidate native-volume support generation uses the exact
-receipt-compatible runtime Python 3.12.13 and NumPy 2.2.6. Surface and velocity
-evidence remains pinned to VTK 9.5.2.
-
-The same hand-off hash-binds the closed report-only
-[`drivaerml-relative-diagnostics-v3.json`](drivaerml-relative-diagnostics-v3.json)
-contract and its DrivAerML-only namespaced profile-chunk schema. The relative
-velocity family is v3, the relative Cp family remains v1, and both have
-composite weight zero. Exact copies of the all-484 velocity-placement,
-velocity-mapping, and relative-Cp manifests are retained under
-[`support/relative-v3/`](support/relative-v3/), byte-verified against their
-producer outputs, and checked against the ordered official 484-case registry.
-The nested `relative_support` hand-off is therefore ready. A separate immutable
-pending release record binds those files, the per-case relative-series identity
-index, and evaluator revision `b9db402a3fa0efbb94fe36be2ba1fe6f7b4bc1e1`.
-The underlying scientific support is covered by the 2026-08-28 owner approval.
-The release record still correctly retains its release-specific approval as
-pending because that schema requires the approval to bind the not-yet-produced
-genuine-model sensitivity evidence and the final approving commit.
-`submission-spec.json` consequently keeps `profile_format_enabled=false`, and
-the validator rejects the format unless every activation gate is complete.
-Support publication is not scientific activation. The nested status is
-independent and does not block promotion of the ranked constant candidate.
-This extension does not alter the active constant velocity weight
-0.15, constant Cp weight 0.10, or legacy profile package shape.
-
-</details>
+There are no trial model submissions or leaderboard rows in the launch tree.

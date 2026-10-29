@@ -48,7 +48,7 @@ which points are scored.
   detailed-underbody) contain 1–58 points, 768 in total, with `p` beyond the
   physical range: above 460 m²/s² (stagnation is 450, up to 5,735) or below
   −4,500 m²/s² (Cp < −10, down to −27,143 in `F_D_WM_WW_1119`). They cover at most
-  0.004 m² per design. For the dev Transolver result they change the split's mean
+  0.004 m² per design. In the historical Transolver validation trial they change the split's mean
   area-weighted relative L2 by 0.26 points (14.77% scored as stored, 14.51% if
   excluded). In 16 designs, however, they carry more than half of that model's
   squared error (`F_D_WM_WW_1119`: 60.8% versus 17.6%). The approved definition
@@ -62,6 +62,10 @@ which points are scored.
 ## Status
 
 See [`OWNER_APPROVAL.md`](OWNER_APPROVAL.md) for the approved scientific
-definition, owner confirmations and remaining formal release-activation steps, and
+definition and owner confirmations, and
 [`REAL_DATA_VALIDATION.md`](REAL_DATA_VALIDATION.md) for the full-split
 publisher run.
+
+The official `drivaernetplusplus-native-pressure-support-v1` metadata is bound in
+`submission-spec.json`; submissions are open. Trial model packages are not part
+of the launch repository or leaderboard.
