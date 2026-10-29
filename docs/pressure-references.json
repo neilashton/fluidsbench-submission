@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "audited_on": "2026-10-29",
-  "audited_submission_revision": "6491120d0ca3cdc0e19e7b7a7dfefa6af543e72d",
+  "audited_submission_revision": "122ff713571dffbf7c17fccb3f2519976d429d9d",
   "scope": "Source-backed documentation of pressure definitions and the separately versioned HiLiftAeroML SI export correction. This file is not evaluator configuration, owner approval, or a scoring-support release.",
   "common": {
     "reference_rule": "Apply the dataset-prescribed reference to truth and prediction in the same units. Undo training normalization first. Do not fit an offset to test truth or independently mean-center the two fields.",
@@ -161,8 +161,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/drivaerml/submission-spec.json",
-          "sha256": "c1c4869d39648de4d6c43def2b0583fb2c5fe537223d1ec2009b07c406949ff6",
-          "finding": "Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged. Final release activation flags now record completed support binding and the Full-package validation; no scientific definition changed."
+          "sha256": "596f6f695c92888a0b4b136e31d7e56d031fff387d2ad11f6702463cbd68d33c",
+          "finding": "Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged. Final release activation flags now record completed support binding and the Full-package validation; no scientific definition changed. Re-audited for the production profile-contract name: only the contract filename, metadata and binding changed; the scientific weighting, gap handling, pressure conversions and force definitions are unchanged."
         },
         {
           "path": "reference/drivaerml/evaluator.py",
