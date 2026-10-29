@@ -1,3 +1,5 @@
+> **FluidsBench has moved.** The maintained repository is [FluidsBench/fluidsbench-submission](https://github.com/FluidsBench/fluidsbench-submission) on `main`. Visit [fluidsbench.org](https://fluidsbench.org/) for the live benchmark and [submission instructions](https://github.com/FluidsBench/fluidsbench-submission#start-here). This repository preserves development history and test submissions; it no longer accepts submissions or publishes the website.
+
 <a id="fluidsbench-submission"></a>
 
 # FluidsBench submissions
