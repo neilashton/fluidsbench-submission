@@ -1,6 +1,6 @@
 # Pressure definitions and references
 
-Audited 2026-10-29 against submission revision `52cd28a5bf696a8a6321293f16e44be22a5ee20c`.
+Audited 2026-10-29 against submission revision `2264309edbfd85a6f03ff8a92e2e00ee80efee64`.
 
 Source-backed documentation of pressure definitions and the separately versioned HiLiftAeroML SI export correction. This file is not evaluator configuration, owner approval, or a scoring-support release.
 
@@ -125,7 +125,7 @@ CpMeanTrim is static pressure coefficient; CptMeanTrim is total pressure coeffic
 <details>
 <summary>Evaluator and specification trace</summary>
 
-- [benchmark-specs/drivaerml/submission-spec.json](../benchmark-specs/drivaerml/submission-spec.json): Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged.
+- [benchmark-specs/drivaerml/submission-spec.json](../benchmark-specs/drivaerml/submission-spec.json): Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged. Final release activation flags now record completed support binding and the Full-package validation; no scientific definition changed.
 - [reference/drivaerml/evaluator.py](../reference/drivaerml/evaluator.py): Uses pMeanTrim directly for surface and volume relative-L2 statistics.
 - [reference/drivaerml/accumulators.py](../reference/drivaerml/accumulators.py): Complete-case sums; rejects zero truth norm and non-finite reductions.
 - [benchmark-specs/drivaerml/proposal/SCIENTIFIC_CONTRACT.md](../benchmark-specs/drivaerml/proposal/SCIENTIFIC_CONTRACT.md): Documents the native pressure convention and reference speed.

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "audited_on": "2026-10-29",
-  "audited_submission_revision": "52cd28a5bf696a8a6321293f16e44be22a5ee20c",
+  "audited_submission_revision": "2264309edbfd85a6f03ff8a92e2e00ee80efee64",
   "scope": "Source-backed documentation of pressure definitions and the separately versioned HiLiftAeroML SI export correction. This file is not evaluator configuration, owner approval, or a scoring-support release.",
   "common": {
     "reference_rule": "Apply the dataset-prescribed reference to truth and prediction in the same units. Undo training normalization first. Do not fit an offset to test truth or independently mean-center the two fields.",
@@ -161,8 +161,8 @@
       "code_evidence": [
         {
           "path": "benchmark-specs/drivaerml/submission-spec.json",
-          "sha256": "c630873358cda13e59c19673b66968159677c8cb0b12498785f5e3650296028a",
-          "finding": "Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged."
+          "sha256": "c1c4869d39648de4d6c43def2b0583fb2c5fe537223d1ec2009b07c406949ff6",
+          "finding": "Re-audited 2026-10-12: dev v2 aligns Cp profile integration with AutoCFD5 trapezoidal weights and versions the support release. Native pMeanTrim units, outlet reference, Cp conversion and field/force reductions are unchanged. Re-audited for the 2026 launch: owner-approved intake, support publication bindings, WindsorML published-case status, and DrivAerML zero-weight relative diagnostics changed; pressure fields, units, reference offsets, force conventions and scoring equations are unchanged. Final release activation flags now record completed support binding and the Full-package validation; no scientific definition changed."
         },
         {
           "path": "reference/drivaerml/evaluator.py",
