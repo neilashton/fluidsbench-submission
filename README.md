@@ -2,6 +2,8 @@
 
 # FluidsBench submissions
 
+FluidsBench is an open benchmark for evaluating machine-learning models on realistic fluid dynamics problems. It brings together public datasets, shared evaluation tools and leaderboards to compare prediction accuracy and computational cost across models. This repository provides the tools and instructions to evaluate your model and submit results for review.
+
 ## Start here
 
 Evaluate your model with the published FluidsBench tools and submit its results for review.
