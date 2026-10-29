@@ -121,8 +121,7 @@ case.
 - `derived-cache-contract-v1.json`: canonical-source, reproducible-derivation,
   and production-cache installation contract.
 - `regional-diagnostics-v2.json`: evaluator-owned surface and volume regional
-  rules. It retains `regional-diagnostics-v1.json` unchanged as the legacy
-  volume partition bound by existing large per-case support.
+  rules.
 - `reference/ahmedml/prediction_chunks.py`: AhmedML-owned interface to the
   shared bounded native-order prediction transport.
 - `public-source-identity/`: pinned public file identities and entity counts.
@@ -147,12 +146,9 @@ case.
   bytes, and recomputes all evaluator-derived package products.
 - `examples/ahmedml-v3-candidate/`: genuine-inference configuration template
   and complete packaging instructions.
-- `scripts/assemble_ahmedml_schema_v3_dev_fixture.py`: creates the non-ranked
-  schema-v3 development package.
 
 The official `ahmedml-native-support-v1` metadata is hash-bound in
-`submission-spec.json`. The older candidate publisher remains a maintainer
-preparation tool. A changed support contract requires a separately reviewed
+`submission-spec.json`. Support publication is a maintainer task. A changed support contract requires a separately reviewed
 release; participants use the existing published support. Regeneration is not
 required to copy or rebuild an identical production cache.
 

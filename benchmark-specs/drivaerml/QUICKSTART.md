@@ -95,12 +95,10 @@ reuse if predictions, evaluator code or scoring contracts changed. An interrupte
 case or reduction is retried automatically. Changed inputs require a new output
 directory. Completed results can also be checked with the same `--resume` command.
 
-Dev v2 uses AutoCFD5's normalized trapezoidal arc-length weighting for both Cp and
-velocity, with equal total weight per case/profile and no bridging of unsupported
-gaps. The [current profile scoring contract](dev-profile-scoring-v2.json) explicitly replaces
-the historical v10 Cp segment-length reduction for this release. Profile geometry
-and native truth are unchanged. Older dev v1 metrics must be regenerated from the
-predictions; do not relabel their release IDs. Relative profiles remain report-only.
+Cp and velocity profiles use normalized trapezoidal arc-length weighting, with
+equal total weight per case and profile. Unsupported gaps are never bridged.
+Relative profiles are report-only and do not contribute to the score.
+See the [profile scoring contract](dev-profile-scoring-v2.json) for the exact definitions.
 
 An optional, standalone case report shows truth and predictions:
 

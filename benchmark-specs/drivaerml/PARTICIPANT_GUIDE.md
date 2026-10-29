@@ -16,7 +16,7 @@ for each training stage and inference campaign, including GPU model and allocati
 
 ## Before you start
 
-The complete native-VTK candidate evaluator is currently supported on Linux
+The complete native-VTK evaluator is currently supported on Linux
 only, including Linux HPC nodes and Linux containers or WSL. Its retained-file
 protections rely on Linux descriptor-filesystem semantics and are not yet
 validated on native macOS or Windows. JSON/schema and profile-package checks
@@ -35,7 +35,7 @@ reject a different Python patch or NumPy version. The bounded XML equal-cell
 volume audit does not invoke VTK or compute cell volumes; it records its
 Python/NumPy runtime for provenance, while the strict aggregate validates the
 v2 schema and source identities. Use the exact recommended stack when
-reproducing the complete candidate evidence workflow.
+reproducing the complete evaluation workflow.
 
 ```bash
 python3.12 --version  # must print: Python 3.12.13
@@ -206,7 +206,7 @@ corresponding fields. Across a case, the intervals must exactly partition
 `[0, native_cell_count)` with no gap, overlap, duplicate, omission, remapping,
 or extrapolation.
 
-The candidate local evaluator accepts one manifest per case and support. Each
+The local evaluator accepts one manifest per case and support. Each
 manifest identifies its count and SHA-256-bound NPZ chunks. Every NPZ contains
 signed-int64 `raw_cell_id` and exactly these Float32 or Float64 arrays:
 
@@ -238,8 +238,7 @@ regenerates, the fixed surface-area inputs.
 
 ## 4. Run the FluidsBench reference evaluator locally
 
-Use the candidate evaluator for implementation feedback now and, after
-activation, run the exact owner-approved frozen evaluator locally. Do not
+Run the owner-approved evaluator locally. Do not
 substitute hand-calculated force conventions or independently defined profile
 extraction. The evaluator integrates the participant's native surface pressure
 and wall shear to produce per-case `Cd`, `Cl`, `CmPitch`, and report-only
@@ -269,7 +268,7 @@ truth while retaining the per-case files for convenient local processing.
 <details>
 <summary>Required profile support, global R2 reductions, score caps, and velocity validity rules</summary>
 
-The dev package binds [`drivaerml-diagnostics-v10.json`](drivaerml-diagnostics-v10.json)
+The package binds [`drivaerml-diagnostics-v10.json`](drivaerml-diagnostics-v10.json)
 and the immutable native-v3 profile truth/support release. It contains
 16 fixed velocity lines and four fixed continuous Cp cuts: upper-body centreline
 (`y=0`), underbody centreline (`y=0`), sidewall (`z=0.15 m`), and front-left
@@ -286,11 +285,10 @@ FluidsBench profile JSON.
 
 The ranked profile metrics are global R2 values, not macro-averaged RMSE. Each
 case and each required line or cut receives equal total weight. Within a
-velocity line, samples use normalized trapezoidal arc-length support; within a
-Cp cut, dev v2 samples also use normalized trapezoidal arc-length support.
-The [dev v2 contract](dev-profile-scoring-v2.json) overrides the historical v10
-Cp reduction without changing its geometry or truth. A
-single global weighted truth mean is then used for each profile family. This
+velocity line or Cp cut, samples use normalized trapezoidal arc-length weighting
+without bridging unsupported gaps, as defined by the
+[profile scoring contract](dev-profile-scoring-v2.json). A single global weighted
+truth mean is used for each profile family. This
 prevents the 651-sample L1 velocity line from outweighing a 31-sample R line.
 The corresponding equal-case/equal-line and equal-case/equal-cut RMSE values
 remain report-only diagnostics.
@@ -342,19 +340,19 @@ full-versus-chunked invariance for the two surface and two volume fields. Its
 dummy schema-v3 package mirrors the current participant shape: area-weighted
 and equal-polygon surface metrics, equal-cell volume metrics, coherent force
 coefficients, all four Cp cuts, all sixteen AutoCFD5 velocity profiles, and all
-32 non-score candidate metrics. Its small transport payloads and support
+32 report-only metrics. Its small transport payloads and support
 tables are JSON, not VTK, and its force/profile values are synthetic; it does
 not claim real DrivAerML extraction, force integration, reconstruction, model
 results, or official scoring support.
 
 The command performs the fixture's schema-v3 checks itself. Its deliberately
 unregistered `synthetic-drivaerml-shaped` namespace is not accepted by the
-repository's official-dataset semantic validator. That validator must remain
-fail-closed for real DrivAerML packages until the owner activates the contract.
+repository's official-dataset semantic validator. Use your model's complete
+predictions for a submission.
 
 </details>
 
-For a real `surface_and_volume` case, first create or obtain candidate surface
+For a real `surface_and_volume` case, first create or obtain surface
 and volume prediction manifests. For `surface_only`, create only the surface
 manifest and pass `--prediction-scope surface_only`; do not provide a volume
 manifest, reconstructed volume file, or `--multipart`. The zero-field generator
@@ -396,13 +394,6 @@ removed and add `--prediction-scope surface_only`. This path validates and
 scores only the native surface; it deliberately does not open a volume VTK or
 prediction stream.
 
-For the real two-case pilot, copy the example configuration and run
-[`real_reference_driver.py`](../../examples/drivaerml-candidate-native-chunks/real_reference_driver.py).
-It admits exactly pinned `run_1` and `run_44`, always uses their two- and
-three-part streams respectively, calls the same core and diagnostic evaluator
-entry points, and writes candidate evidence only. It never downloads data,
-generates scientific support, or creates a submission.
-
 Run the case command for **every** test case in the selected split, with core
 and profile evidence named `run_N.json` in their respective directories. The
 profile stage reads the same complete prediction manifests, verifies chunk
@@ -419,7 +410,7 @@ Then reduce the complete split in one command:
   --split-id full \
   --core-evidence-dir /path/to/work/core \
   --diagnostic-evidence-dir /path/to/work/profiles \
-  --output /path/to/work/candidate-dataset-evidence.json \
+  --output /path/to/work/dataset-evidence.json \
   --regional-diagnostics-output /path/to/work/regional-diagnostics.json \
   --schema-v3-case-metrics-output /path/to/work/metrics/cases.json \
   --schema-v3-profile-output-dir /path/to/work/package-profiles \
@@ -428,7 +419,7 @@ Then reduce the complete split in one command:
 
 Use your selected split ID consistently. `full` has 50 test cases; the OOD
 split has 97. The reducer reads the retained canonical force CSV and published
-candidate bindings automatically. It computes force and profile global R²,
+release bindings automatically. It computes force and profile global R²,
 all field/diagnostic metrics, component scores, and the bounded overall score.
 It refuses missing, extra, duplicated, or reordered evidence where the contract
 requires order. Do not calculate or insert missing scores by hand.

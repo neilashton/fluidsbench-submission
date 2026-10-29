@@ -37,13 +37,6 @@ bytes, and inference compute must be measured. Zero-parameter methods are
 valid: report zero parameters and no checkpoints, while describing their
 fitting or deterministic procedure truthfully.
 
-The checked-in schema-v1 leaderboard rows are dummy fixtures. They use
-`record_kind=prototype_fixture`; nominal parameter counts may be reconstructed
-from the displayed millions value, and unavailable training, checkpoint, and
-timing details are explicitly marked as not recorded. These records exercise
-the interface and must not be cited as descriptions supplied or verified by
-the named method authors.
-
 The complete machine-readable definition is `$defs.fluidsbench_methodology`
 inside [`schemas/v3/submission.schema.json`](schemas/v3/submission.schema.json).
 The filled synthetic
@@ -158,23 +151,12 @@ one device (state allocated/resident measurement method in notes), not total
 cluster memory; unknown remains null. `max_concurrent_jobs` is optional and
 separate from devices per job or maximum concurrent devices.
 
-Existing records may omit `timing_protocol` or use `legacy_reported`. Their
-throughput can be derived from recorded campaign totals, with the original scope
-shown; this never certifies compliance with complete-case-v1. Partial chunk-loop
-measurements must not be substituted for full campaign time. The precise v1
-boundary above is an implementation convention for review, not a claim that the
-committee agreed every measurement detail.
+`timing_protocol` is optional. When omitted or set to `legacy_reported`,
+throughput can be derived from recorded campaign totals with the reported scope
+shown; this does not certify compliance with complete-case-v1. Partial chunk-loop
+measurements must not be substituted for full campaign time.
 
-Closed DrivAerNet++ candidates in the prototype `dev` release may instead
-declare `inference_compute={"status":"not_measured","reason":"..."}` when only
-partial timing is available. Preserve the reported interval and its limitations
-in `reason`; omit numeric campaign/device totals so the website cannot derive
-throughput from incomplete measurements. This applies to candidate dry-runs,
-dev intake and exact registered dev references only. It does not waive timing
-requirements for official results or other datasets, and does not grant approval,
-citation eligibility or promotion.
-
-## Training cost and historical estimates
+## Training cost and estimates
 
 Add `measurement_basis=measured|estimated|unknown` to each submitter training
 compute block. Measured means summed allocation records; a calendar envelope
