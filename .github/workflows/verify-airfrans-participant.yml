@@ -42,5 +42,5 @@ jobs:
           'git config --global --add safe.directory /work &&
           python -m pytest -q tests/test_airfrans_participant*.py tests/test_airfrans_geometry.py
           tests/test_airfrans_profile_scoring.py tests/test_airfrans_contract.py
-          tests/test_airfrans_candidate_assembler.py tests/test_airfrans_dev_intake.py
+          tests/test_airfrans_candidate_assembler.py tests/test_launch_contract.py
           tests/test_finalize_airfrans_metrics.py tests/test_airfrans_official_release.py'

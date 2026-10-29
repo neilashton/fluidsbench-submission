@@ -156,9 +156,10 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
             return errors
 
     def test_promotion_rerun_preserves_verified_pending_release(self) -> None:
-        existing = json.loads(
-            (ROOT / "tests/fixtures/candidate-contracts/drivaerml.json").read_text()
-        )
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        existing, _ = self.build_release(root, active=False)
         generated = {
             "relative_diagnostics": copy.deepcopy(
                 existing["relative_diagnostics"]
@@ -169,7 +170,8 @@ class DrivAerMLActivationReleaseTests(unittest.TestCase):
         generated_declaration["status"] = "support_pending"
         generated_declaration.pop("closed_reason")
 
-        preserve_relative_activation_declaration(generated, existing)
+        with mock.patch("scripts.promote_drivaerml_candidate.BENCHMARK_ROOT", root / DATASET_PREFIX):
+            preserve_relative_activation_declaration(generated, existing)
 
         for field in (
             "status",
